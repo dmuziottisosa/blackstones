@@ -1,6 +1,14 @@
 # Runtime artifacts (calculadora)
-calculadora/dolar_cache.json
-calculadora/.auth_attempts.json
+site/public_html/calculadora/dolar_cache.json
+site/public_html/calculadora/.auth_attempts.json
+
+# Secrets / credentials
+.env
+.env.local
+.env.*.local
+*.env
+deploy.config
+ftp.config
 
 # Build / packaging artifacts
 *.zip
