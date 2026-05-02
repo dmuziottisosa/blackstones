@@ -1,0 +1,26 @@
+# ============================================================
+# robots.txt — BlackStones Marmolería
+# https://blackstones.com.ar/
+# ============================================================
+
+User-agent: *
+Allow: /
+
+# Calculadora interna — no indexar (uso interno del equipo)
+Disallow: /calculadora/
+
+# Archivos técnicos sin valor SEO
+Disallow: /*.php$
+Disallow: /*.json$
+
+# Bots agresivos / scrapers de IA (opcional — lo dejamos abierto por ahora)
+# Si más adelante querés bloquearlos, descomentá las líneas de abajo:
+# User-agent: GPTBot
+# Disallow: /
+# User-agent: CCBot
+# Disallow: /
+# User-agent: anthropic-ai
+# Disallow: /
+
+# Sitemap (lo agregamos cuando esté listo)
+# Sitemap: https://blackstones.com.ar/sitemap.xml
