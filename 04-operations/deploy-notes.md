@@ -1,12 +1,16 @@
 # Deploy notes — sitio público a Hostinger
 
-> Estado: **layer-3 active belief.** Última actualización: 2026-05-02 (post-test FTP).
+> Estado: **layer-3 active belief.** Última actualización: 2026-05-02.
 >
-> Cómo subir cambios de `site/public_html/` al web root del hosting.
+> Cómo subir cambios al web root del hosting.
+>
+> **Arquitectura:** GitHub = fuente de verdad. **Sin clone local.** El deploy en PowerShell baja el archivo de GitHub raw a un `$temp`, lo sube por FTP, borra el temp. Lo único persistente local es `D:\blackstones\.env` con credenciales.
 >
 > **Acompañantes obligatorios:**
 > - [`ftp-map.md`](./ftp-map.md) — cómo está montado el FTP (qué se ve al conectar, dónde está el web root real).
-> - [`deploy-snippets.md`](./deploy-snippets.md) — bloques de PowerShell copy-paste para uso diario.
+> - [`deploy-snippets.md`](./deploy-snippets.md) ⭐ — bloques de PowerShell copy-paste para uso diario (este es el doc que usás 99% de las veces).
+>
+> Este doc (`deploy-notes.md`) cubre los caminos **alternativos**: deploy manual desde panel Hostinger, cliente FTP gráfico (FileZilla / Cyberduck), checklists, rollback. Para el camino default (PowerShell + GitHub raw + FTP) → ir directo a `deploy-snippets.md`.
 
 ---
 
@@ -25,22 +29,36 @@
 
 ## 2. Setup inicial (una sola vez)
 
-### Crear `.env` en la raíz del repo
+### Crear `.env` en `D:\blackstones\.env` (no dentro del repo — el repo no vive en local)
 
 ```bash
-# .env (gitignorado — nunca commitear)
+# D:\blackstones\.env  — único archivo persistente local del proyecto
 FTP_HOST=blackstones.com.ar
 FTP_USER=u144473384
 FTP_PASS=tu_password_aca
 FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html
-FTP_LOCAL_BASE=site/public_html
+GITHUB_REPO=dmuziottisosa/blackstones
+GITHUB_BRANCH=claude/setup-new-repo-tR58e
+GITHUB_TOKEN=ghp_xxx
 ```
 
-⚠️ **Importante:** la password actual del FTP debería rotarse desde el panel de Hostinger antes del primer uso compartido — fue expuesta en chat durante la configuración inicial del repo.
+**Cómo crear `GITHUB_TOKEN` (PAT fine-grained):**
+
+1. GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate.
+2. Repo access: solo `dmuziottisosa/blackstones`.
+3. Permissions: **Contents: Read-only**. Nada más.
+4. Expiration: 90 días.
+5. Copy el token (`ghp_...`) y pegarlo en `.env` con Notepad.
+
+⚠️ **Crear `.env` con Notepad, no por copy-paste de chat.** Los renderers markdown autolinkean dominios y rompen el archivo (te queda `FTP_HOST=[blackstones.com.ar](http://blackstones.com.ar)` literal en el archivo).
+
+⚠️ **La password actual del FTP** fue expuesta durante el bootstrap → rotarla desde el panel Hostinger antes de meterla acá.
 
 ---
 
-## 3. Tres caminos de deploy (de menor a mayor automatización)
+## 3. Caminos alternativos de deploy
+
+> **El camino default está en `deploy-snippets.md` (PowerShell + GitHub raw + FTP).** Lo que sigue son alternativas para cuando ese camino no aplica: deploy manual desde el panel, cliente FTP gráfico, etc.
 
 ### Camino A — Manual desde panel Hostinger
 
@@ -72,7 +90,9 @@ FTP_LOCAL_BASE=site/public_html
 
 ---
 
-### Camino C — PowerShell `deploy.ps1` (recomendado para automatización)
+### Camino C — PowerShell con clone local (DEPRECATED desde 2026-05-02)
+
+> **No usar.** El proyecto adoptó "GitHub-as-source" sin clone. Se conserva esta sección como referencia histórica por si en el futuro se rearma un workflow con clone (ej: para CI/CD desde un runner que sí tiene checkout).
 
 #### Opción C.1 — Con WinSCP (más sólida)
 
@@ -238,14 +258,18 @@ Antes de subir a producción:
 
 ---
 
-## 6. Rollback rápido
+## 6. Rollback rápido (sin clone)
 
 Si algo se rompió en producción:
 
-1. `git checkout <commit_anterior> -- site/public_html/`
-2. Re-ejecutar `deploy.ps1` (o subir manual).
-3. Verificar que volvió bien.
-4. Crear entry en `01-strategy/decision-log/` post-mortem si fue grave.
+1. En GitHub: identificar el commit anterior funcional para el archivo afectado.
+2. Cambiar temporalmente `GITHUB_BRANCH` en `.env` por el SHA del commit bueno (la API de raw acepta SHAs además de branches).
+3. Correr la receta correspondiente de `deploy-snippets.md` para ese archivo. Eso baja la versión vieja y la sube por FTP.
+4. Restaurar `GITHUB_BRANCH` al valor original.
+5. En GitHub: hacer un revert commit de los cambios malos para que la branch quede consistente con producción.
+6. Crear entry en `01-strategy/decision-log/` post-mortem si fue grave.
+
+Ejemplo: si el commit bueno de `index.html` es `abc1234`, en `.env` reemplazar temporalmente `GITHUB_BRANCH=claude/setup-new-repo-tR58e` por `GITHUB_BRANCH=abc1234`, correr Receta 1, y volver a poner la branch original.
 
 ---
 

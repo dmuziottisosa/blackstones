@@ -6,6 +6,7 @@ Lo que vendemos: materiales, servicios, lógica detrás del precio.
 
 | Carpeta | Qué vive ahí |
 |---|---|
+| `calculadora/` ⭐ | Mapa funcional + baseline v1.0 de la app interna de cotización. **Lectura obligatoria antes de modificar `site/public_html/calculadora/`.** |
 | `materials/` | Granito, cuarzo, sinterizado: ficha técnica + ficha comercial + cómo asesorar |
 | `services/` | Qué hacemos / qué no hacemos. Asesoramiento, medición, fabricación, flete, colocación. |
 

@@ -102,19 +102,22 @@ Cada carpeta tiene su `README.md` con detalle. Empezá por el README de la carpe
 
 ### Si vas a desplegar un cambio al sitio (Hostinger)
 
-> **TL;DR:** editás local en `site/public_html/`, copy-paste un bloque de PowerShell, listo.
+> **Arquitectura no negociable:**
+> - **GitHub** = única fuente de verdad del repo. Toda modificación viaja por ahí.
+> - **Local del usuario** = solo `D:\blackstones\.env` con credenciales. **No hay clone, no hay `git pull`, no hay carpeta de repo en local.**
+> - **Deploy** = PowerShell baja el archivo de **GitHub raw** a un `$temp`, lo sube por **FTP** a Hostinger, borra el temp.
 
 Tres docs canónicos en `04-operations/`, leelos en este orden:
 
 1. **`ftp-map.md`** — modelo mental obligatorio. La regla que evita el error #1: el FTP user **NO** aterriza en `public_html/`. Aterriza en `/home/u144473384/`. El web root real está en `domains/blackstones.com.ar/public_html/`. Toda ruta de upload tiene que empezar con eso.
-2. **`deploy-snippets.md`** ⭐ — 6 recetas listas para copy-paste en PowerShell. Cada bloque es autocontenido (carga `.env`, sube, abre el browser para verificar). Las más usadas:
+2. **`deploy-snippets.md`** ⭐ — 8 recetas listas para copy-paste en PowerShell. Cada bloque es autocontenido (carga `.env`, fetcha de GitHub, sube por FTP, borra el temp, abre browser). Las más usadas:
    - Receta 1: cambié `index.html`, deploy.
    - Receta 2: cambié `calc.html`, deploy.
    - Receta 3: cambié otro archivo, deploy.
-   - Receta 4: sync de carpeta entera (vía WinSCP).
-3. **`deploy-notes.md`** — referencia detallada (camino manual, `deploy.ps1` script completo, checklists pre/post deploy, rollback).
+   - Receta 4: subí varios archivos / carpeta entera (vía GitHub API).
+3. **`deploy-notes.md`** — referencia: camino manual desde panel Hostinger, FileZilla/Cyberduck, checklists pre/post deploy, rollback.
 
-**Setup mínimo (1 sola vez):** crear `.env` en raíz del repo con `FTP_HOST` / `FTP_USER` / `FTP_PASS` / `FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html` / `FTP_LOCAL_BASE=site/public_html`. El `.env` está gitignorado.
+**Setup mínimo (1 sola vez):** crear `D:\blackstones\.env` con `FTP_HOST` / `FTP_USER` / `FTP_PASS` / `FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html` / `GITHUB_REPO=dmuziottisosa/blackstones` / `GITHUB_BRANCH=...` / `GITHUB_TOKEN=ghp_...` (PAT con permission "Contents: Read"). El `.env` queda local fuera del repo — es el único archivo persistente local del proyecto.
 
 > ### 🔁 Default operativo no negociable: si tocás `site/`, das el deploy
 >
@@ -124,10 +127,14 @@ Tres docs canónicos en `04-operations/`, leelos en este orden:
 >
 > Cuál bloque elegir:
 > - 1 archivo cambiado → adaptar la **Receta 1, 2 o 3** de `04-operations/deploy-snippets.md` con el path correcto.
-> - >1 archivo o carpeta entera → **Receta 4** (sync incremental con WinSCP).
+> - >1 archivo o carpeta entera → **Receta 4** (vía GitHub API contents endpoint).
 > - Después del deploy, incluir siempre la línea `Start-Process` con cache-bust para que el usuario verifique en browser.
 >
-> Cambios que **NO** disparan esta regla: docs en `00-` a `06-`, `CLAUDE.md`, `README.md`, `.gitignore`, cualquier archivo fuera de `site/`. Esos solo se commitean a git.
+> Cambios que **NO** disparan esta regla: docs en `00-` a `06-`, `CLAUDE.md`, `README.md`, `.gitignore`, cualquier archivo fuera de `site/`. Esos solo se commitean a GitHub.
+
+> ### 🚫 Regla "nada local"
+>
+> **El repo NO se clona en la máquina del usuario.** No hay `git clone`, no hay `git pull`, no hay carpeta del repo en Windows. Si una IA propone "cd al repo" o "git pull" → está violando la regla. La única forma de leer/modificar archivos del repo es vía GitHub (web, API, raw). El único archivo local persistente del proyecto es `D:\blackstones\.env` con credenciales.
 
 ### Si dudás dónde poner algo
 Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-linkea con paths relativos.

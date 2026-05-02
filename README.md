@@ -24,11 +24,11 @@ HTML + CSS + JS plano. PHP para auth de la calculadora. Sin frameworks, sin bund
 
 ## Deploy
 
-El sitio vive en `site/public_html/` y se sube a `domains/blackstones.com.ar/public_html/` en Hostinger.
+**Arquitectura:** GitHub = fuente de verdad. **Sin clone local.** PowerShell baja el archivo de GitHub raw a un `$temp`, lo sube por FTP a `domains/blackstones.com.ar/public_html/`, borra el temp.
 
 - **Para desplegar un cambio rápido en PowerShell:** copy-paste de las recetas en `04-operations/deploy-snippets.md`.
 - **Para entender cómo está montado el FTP:** `04-operations/ftp-map.md`.
-- **Para referencia detallada:** `04-operations/deploy-notes.md`.
+- **Para referencia detallada / caminos alternativos (panel Hostinger, FileZilla):** `04-operations/deploy-notes.md`.
 
 ## Filosofía
 
