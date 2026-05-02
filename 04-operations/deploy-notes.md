@@ -1,8 +1,12 @@
 # Deploy notes — sitio público a Hostinger
 
-> Estado: **layer-3 active belief.** Última actualización: mayo 2026.
+> Estado: **layer-3 active belief.** Última actualización: 2026-05-02 (post-test FTP).
 >
-> Cómo subir cambios de `site/public_html/` a `public_html/` del hosting.
+> Cómo subir cambios de `site/public_html/` al web root del hosting.
+>
+> **Acompañantes obligatorios:**
+> - [`ftp-map.md`](./ftp-map.md) — cómo está montado el FTP (qué se ve al conectar, dónde está el web root real).
+> - [`deploy-snippets.md`](./deploy-snippets.md) — bloques de PowerShell copy-paste para uso diario.
 
 ---
 
@@ -10,9 +14,10 @@
 
 - **Hosting:** Hostinger
 - **Dominio:** `blackstones.com.ar` (registrado en donweb)
-- **FTP host:** `ftp://blackstones.com.ar` (también accesible por IP `147.79.84.44`)
+- **FTP host:** `blackstones.com.ar` (sin prefijo `ftp.` — no resuelve. También accesible por IP `147.79.84.44`)
 - **Usuario FTP:** `u144473384`
-- **Path remoto:** `public_html/`
+- **Puerto:** 21 (FTP plano)
+- **Path remoto del web root:** `domains/blackstones.com.ar/public_html/` (⚠️ **el FTP user aterriza un nivel arriba, en `/home/u144473384/` — el path completo es obligatorio**, ver `ftp-map.md`)
 - **Path local del repo:** `site/public_html/`
 - **Password FTP:** ⚠️ **Ver `.env` (gitignorado).** Nunca commitear acá.
 
@@ -24,11 +29,11 @@
 
 ```bash
 # .env (gitignorado — nunca commitear)
-FTP_HOST=ftp.blackstones.com.ar
+FTP_HOST=blackstones.com.ar
 FTP_USER=u144473384
 FTP_PASS=tu_password_aca
-FTP_REMOTE=/public_html
-FTP_LOCAL=site/public_html
+FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html
+FTP_LOCAL_BASE=site/public_html
 ```
 
 ⚠️ **Importante:** la password actual del FTP debería rotarse desde el panel de Hostinger antes del primer uso compartido — fue expuesta en chat durante la configuración inicial del repo.
@@ -40,8 +45,8 @@ FTP_LOCAL=site/public_html
 ### Camino A — Manual desde panel Hostinger
 
 1. Entrar a `hpanel.hostinger.com` con cuenta del dueño.
-2. Hosting → File Manager.
-3. Navegar a `public_html/`.
+2. Hosting → "Sitios web" → click en `blackstones.com.ar` → "Administrador de Archivos".
+3. Navegar a `public_html/` (ya estás dentro del path correcto, el panel te lleva directo al web root).
 4. Subir / sobrescribir el archivo o carpeta cambiada.
 5. Verificar en `blackstones.com.ar`.
 
@@ -53,13 +58,14 @@ FTP_LOCAL=site/public_html
 ### Camino B — Cliente FTP gráfico (FileZilla / Cyberduck)
 
 1. Configurar conexión:
-   - Host: `ftp.blackstones.com.ar`
+   - Host: `blackstones.com.ar` (sin prefijo `ftp.`)
    - Usuario: `u144473384`
    - Password: la del `.env`
    - Puerto: 21 (FTP) o 22 (SFTP si Hostinger lo expone)
-2. Conectar.
-3. Local: `site/public_html/` ↔ Remoto: `/public_html/`.
-4. Sync por carpeta o drag-and-drop por archivo.
+2. Conectar — aterrizás en `/home/u144473384/`.
+3. Navegar al web root: `domains/blackstones.com.ar/public_html/`.
+4. Local: `site/public_html/` ↔ Remoto: `domains/blackstones.com.ar/public_html/`.
+5. Sync por carpeta o drag-and-drop por archivo.
 
 **Cuándo usarlo:** deploy puntual de varios archivos, querés ver visual el árbol remoto.
 **Pros:** UI clara, sync por carpeta. **Contras:** todavía manual.
@@ -118,8 +124,8 @@ try {
 
     if ($File) {
         # Modo single-file
-        $localPath = Join-Path $env:FTP_LOCAL $File
-        $remotePath = "$($env:FTP_REMOTE)/$File"
+        $localPath = Join-Path $env:FTP_LOCAL_BASE $File
+        $remotePath = "/$($env:FTP_REMOTE_BASE)/$File"
         Write-Host "Subiendo $localPath → $remotePath"
         if (-not $DryRun) {
             $session.PutFiles($localPath, $remotePath, $false).Check()
@@ -129,12 +135,12 @@ try {
         $transferOptions = New-Object WinSCP.TransferOptions
         $transferOptions.TransferMode = [WinSCP.TransferMode]::Binary
 
-        Write-Host "Sync $($env:FTP_LOCAL) → $($env:FTP_REMOTE) (DryRun: $DryRun)"
+        Write-Host "Sync $($env:FTP_LOCAL_BASE) → /$($env:FTP_REMOTE_BASE) (DryRun: $DryRun)"
 
         $synchronizationResult = $session.SynchronizeDirectories(
             [WinSCP.SynchronizationMode]::Remote,
-            $env:FTP_LOCAL,
-            $env:FTP_REMOTE,
+            (Resolve-Path $env:FTP_LOCAL_BASE).Path,
+            "/$($env:FTP_REMOTE_BASE)",
             $false,                                      # No borrar archivos remotos huérfanos
             $DryRun,                                     # Preview mode
             [WinSCP.SynchronizationCriteria]::Time,      # Comparar por fecha de modificación
@@ -181,7 +187,7 @@ Para casos puntuales, PowerShell viene con `WebRequest` que soporta FTP nativo. 
 
 ```powershell
 # Subir un solo archivo via FTP nativo
-$ftpHost = "ftp://ftp.blackstones.com.ar/public_html/index.html"
+$ftpHost = "ftp://blackstones.com.ar/domains/blackstones.com.ar/public_html/index.html"
 $ftpUser = "u144473384"
 $ftpPass = "TU_PASSWORD"
 $localFile = "site\public_html\index.html"
@@ -198,13 +204,15 @@ $rs.Write($content, 0, $content.Length)
 $rs.Close()
 ```
 
-#### Opción C.3 — `curl` (Windows 10+, una línea)
+#### Opción C.3 — `curl.exe` (Windows 10+, una línea)
 
 ```powershell
-curl --user "u144473384:TU_PASSWORD" --upload-file "site\public_html\index.html" "ftp://ftp.blackstones.com.ar/public_html/index.html"
+curl.exe --user "u144473384:TU_PASSWORD" -T "site\public_html\index.html" "ftp://blackstones.com.ar/domains/blackstones.com.ar/public_html/index.html"
 ```
 
-Bueno para deploys puntuales de un solo archivo desde la terminal sin instalar nada.
+⚠️ **`curl.exe` con extensión** (en PowerShell `curl` es alias de `Invoke-WebRequest` y falla).
+
+Bueno para deploys puntuales de un solo archivo desde la terminal sin instalar nada. **Para más recetas one-liner ver [`deploy-snippets.md`](./deploy-snippets.md).**
 
 ---
 
