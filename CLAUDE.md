@@ -100,6 +100,22 @@ Cada carpeta tiene su `README.md` con detalle. Empezá por el README de la carpe
 - Propio (dato, conversación, métrica) → `06-knowledge/layer-0-raw/` con fecha en el nombre.
 - Síntesis tuya → `06-knowledge/layer-1-synthesis/`.
 
+### Si vas a desplegar un cambio al sitio (Hostinger)
+
+> **TL;DR:** editás local en `site/public_html/`, copy-paste un bloque de PowerShell, listo.
+
+Tres docs canónicos en `04-operations/`, leelos en este orden:
+
+1. **`ftp-map.md`** — modelo mental obligatorio. La regla que evita el error #1: el FTP user **NO** aterriza en `public_html/`. Aterriza en `/home/u144473384/`. El web root real está en `domains/blackstones.com.ar/public_html/`. Toda ruta de upload tiene que empezar con eso.
+2. **`deploy-snippets.md`** ⭐ — 6 recetas listas para copy-paste en PowerShell. Cada bloque es autocontenido (carga `.env`, sube, abre el browser para verificar). Las más usadas:
+   - Receta 1: cambié `index.html`, deploy.
+   - Receta 2: cambié `calc.html`, deploy.
+   - Receta 3: cambié otro archivo, deploy.
+   - Receta 4: sync de carpeta entera (vía WinSCP).
+3. **`deploy-notes.md`** — referencia detallada (camino manual, `deploy.ps1` script completo, checklists pre/post deploy, rollback).
+
+**Setup mínimo (1 sola vez):** crear `.env` en raíz del repo con `FTP_HOST` / `FTP_USER` / `FTP_PASS` / `FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html` / `FTP_LOCAL_BASE=site/public_html`. El `.env` está gitignorado.
+
 ### Si dudás dónde poner algo
 Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-linkea con paths relativos.
 
