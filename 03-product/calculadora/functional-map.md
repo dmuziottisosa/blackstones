@@ -209,20 +209,36 @@ Para precios exactos por color → leer `COLORS_DB` en `calc.html` líneas 1283-
 
 ### 8.1 Excel (`generarExcel()`, líneas 3597-3950)
 
+**Orden de bloques en el archivo Excel exportado** (post-fix 2026-05-02):
+
+1. Header BlackStones + datos del cliente.
+2. Items principales por sección (Mesada, Alzada, L, Isla, Baño).
+3. Servicios adicionales (flete, escalera, ángulos).
+4. Zócalos > 5 cm.
+5. Otros conceptos (extras manuales).
+6. Bachas y accesorios.
+7. **Subtotal General principal** (cuando toggle "Total" OFF) ó **Subtotal + IVA + TOTAL** (cuando ON).
+8. SEÑA + SALDO PENDIENTE (si toggles activos).
+9. TOTAL EN ARS (USD convertidos + ARS) — si toggle activo y hay USD + cotización.
+10. **Variantes (Alternativas de color)** — render diferido al final, después del cierre del presupuesto principal. **No suman al total.** Cada variante tiene su "Subtotal Variante N" interno.
+11. Tipo de cambio referencia.
+12. Forma de pago, Alcance, Mediciones, Materiales, Instalación (legal).
+13. Footer.
+
+**Por qué las variantes van al final:** si las variantes se renderizan ENTRE los items principales y los adicionales (orden anterior), el "Subtotal General" del presupuesto principal aparece visualmente DESPUÉS de los "Subtotal Variante N", lo que rompe la jerarquía y confunde al cliente. Renderizándolas al final, el subtotal de lo principal queda contenido en su propia sección. Implementado vía closure `_renderVarsXls()` que se invoca después del bloque "TOTAL EN ARS".
+
 - ExcelJS v4.4.0 vía CDN.
 - 6 columnas: `CANT, DETALLE, L, A, USD, ARS`.
-- **Header**: branding BlackStones (rows 2-3), contacto (Av. Juan B. Alberbi 3575, +54 9 11 2468-5820, contacto@blackstones.com.ar). Rows 8-9: cliente + dir + DNI + cel + fecha.
-- **Tabla de items**: agrupada por sección, sub-agrupada por `tag` si hay 2+ tags distintos.
-- **Subtotales** por tag + por sección.
-- **Adicionales**: una row por concepto.
-- **Totales**: USD, ARS, IVA si corresponde, conversión USD→ARS si corresponde.
+- **Header**: branding BlackStones (rows 2-3), contacto. Rows 8-9: cliente + dir + DNI + cel + fecha.
 - **Toggles**: `incSena` (seña %), `incSaldo` (saldo %), `incTotal`, `incTotalARS`.
 - **Paleta**: dark `#1A1816`, cream `#FAF8F4`, gold `#C4A77D`, green `#25D366`, blue `#0EA5E9` (consistente con el sistema visual).
 
 ### 8.2 PDF (`generarPDF()`, líneas 4277-4700)
 
+**Orden de filas en el PDF exportado** (post-fix 2026-05-02): idéntico al Excel — items principales → adicionales → totales → seña/saldo → TOTAL EN ARS → **variantes al final**.
+
 - **No usa librería externa.** Construye HTML, abre en window nuevo, dispara `window.print()`. El usuario imprime → "Guardar como PDF" en el dialog del browser.
-- Mismo layout que Excel + sección opcional de **alternativas de color** (variantes referenciales, no suman).
+- Implementación del fix: el bloque variantes acumula en `items` como antes, pero inmediatamente después se extrae con `items.substring(_varsBeforeLen)` y se vuelve a inyectar al final, justo antes del `const html = \`...\``.
 - Footer con tipo de cambio referencia: "USD 1 = X ARS · DolarHoy".
 
 ### 8.3 Estado "dirty"

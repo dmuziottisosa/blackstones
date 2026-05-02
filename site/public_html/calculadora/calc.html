@@ -3856,7 +3856,8 @@ async function generarExcel(){
 
   // VARIANTES (Cotizaciones alternativas — no suman al total)
   const validVars=VARS.items.filter(v=>{const r=calcVariantTotal(v);return r.hasItems&&r.total>0});
-  if(validVars.length){
+  const _renderVarsXls=()=>{
+    if(!validVars.length)return;
     addCat(row,incTotal?'Alternativas de color (referenciales — no suman al total)':'Alternativas de color');row++;
     validVars.forEach((v,vIdx)=>{
       const r=calcVariantTotal(v);
@@ -3913,7 +3914,7 @@ async function generarExcel(){
       }
       row+=2;
     });
-  }
+  };
 
   // SERVICIOS — solo mostrar si hay flete o adicionales
   const escE=getAdic('esc');
@@ -4169,6 +4170,10 @@ async function generarExcel(){
     row+=2;
   }
 
+  // VARIANTES (alternativas de color) — render diferido al final del documento
+  // para que el subtotal de lo principal quede en su sección, antes de las alternativas
+  _renderVarsXls();
+
   // Tipo cambio
   fillR(row,fCr);ws.mergeCells(`A${row}:F${row}`);
   const tipoCambioTxt=DOLAR_VENTA>0
@@ -4416,8 +4421,10 @@ function generarPDF(){
   addSec('i','Isla');
   addSec('b','Mesada de baño');
 
-  // VARIANTES (alternativas — no suman al total)
+  // VARIANTES (alternativas — no suman al total) — render diferido al final
+  // para que el subtotal de lo principal quede en su sección, antes de las alternativas
   const validVarsPdf=VARS.items.filter(v=>{const r=calcVariantTotal(v);return r.hasItems&&r.total>0});
+  const _varsBeforeLen=items.length;
   if(validVarsPdf.length){
     items+=`<tr style="background:#1A1816;color:#FAF8F4"><td style="text-align:center;color:#C4A77D">◆</td><td colspan="5" style="font-weight:600;font-style:italic;letter-spacing:.04em;font-family:'Fraunces',serif;padding:6px 10px">${incTotal?'Alternativas de color · referenciales (no suman al total)':'Alternativas de color'}</td></tr>`;
     validVarsPdf.forEach((v,vIdx)=>{
@@ -4498,6 +4505,9 @@ function generarPDF(){
       items+=`<tr style="background:#EDE5D0;border-top:1.5px solid #C4A77D"><td colspan="4" style="text-align:right;font-style:italic;color:#5A4A35;padding:7px 12px;font-weight:700;font-size:10px">Subtotal Variante ${vIdx+1}</td><td style="text-align:center;font-weight:700;color:#5A4A35">${usdSub}</td><td style="text-align:center;font-weight:700;color:#5A4A35">${arsSub}</td></tr>`;
     });
   }
+  // Extraemos el bloque variantes recién acumulado para reposicionarlo al final
+  const _varsHtmlPdf=items.substring(_varsBeforeLen);
+  items=items.substring(0,_varsBeforeLen);
 
   // Servicios adicionales: flete + escalera + ángulos
   const escP=getAdic('esc');
@@ -4615,6 +4625,9 @@ function generarPDF(){
     items+=`<tr><td colspan="6" style="padding:0;height:6px;background:#FAF8F4"></td></tr>`;
     items+=`<tr style="background:#2A2522;color:#FAF8F4"><td colspan="4" style="font-weight:700;padding:10px 12px;font-size:12px">TOTAL EN ARS · al cambio del día<br><span style="font-size:9px;color:#A89580;font-weight:400">USD ${fmtUSD(totU).replace('USD ','')} × ${fmtARS(DOLAR_VENTA)} por dólar</span></td><td colspan="2" style="text-align:center;font-weight:700;color:#0EA5E9;font-size:14px;padding:10px">${fmtARS(totalCombinado)}</td></tr>`;
   }
+
+  // VARIANTES (alternativas de color) — render diferido al final del documento
+  if(_varsHtmlPdf)items+=_varsHtmlPdf;
 
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>BlackStones · Presupuesto N° ${nro}</title>
 <style>

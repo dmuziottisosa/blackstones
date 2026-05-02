@@ -1,6 +1,9 @@
-# Calculadora — Baseline v1.1
+# Calculadora — Baseline v1.2
 
 > **Marca formal: la versión funcional sin errores conocidos al 2026-05-02.**
+>
+> **Cambios desde v1.1 (2026-05-02):**
+> - Layout de exports PDF y Excel reorganizado: el bloque "Alternativas de color" (variantes referenciales) ahora se renderiza al **final** del documento, después del Subtotal General / TOTAL del presupuesto principal. Antes se intercalaba entre los items principales y los adicionales, lo que dejaba el subtotal de lo principal visualmente DEBAJO de los subtotales de las variantes — rompiendo la jerarquía visual cuando el toggle "Total" estaba desactivado. Implementación vía closure `_renderVarsXls()` (Excel) y string buffer `_varsHtmlPdf` (PDF). Lógica de cálculo intacta. Detalle en `functional-map.md` § 8.
 >
 > **Cambios desde v1.0 (2026-05-02):**
 > - Lógica del +0,60 m² en bacha de baño endurecida: ahora se aplica **solo** cuando `tipo === 'Bacha armada'`. Antes se aplicaba a cualquier `tipo` distinto de `'Con Traforo'`, lo que dejaba un bug latente para futuros tipos. Comportamiento preservado para los dos tipos existentes (default sigue siendo Bacha armada con +0,60). Razón documentada en `functional-map.md` § 6.1.
