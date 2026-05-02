@@ -116,6 +116,19 @@ Tres docs canónicos en `04-operations/`, leelos en este orden:
 
 **Setup mínimo (1 sola vez):** crear `.env` en raíz del repo con `FTP_HOST` / `FTP_USER` / `FTP_PASS` / `FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html` / `FTP_LOCAL_BASE=site/public_html`. El `.env` está gitignorado.
 
+> ### 🔁 Default operativo no negociable: si tocás `site/`, das el deploy
+>
+> **Regla para cualquier IA o humano que modifique algo dentro de `site/public_html/` (landing, calculadora, imagen, PHP, CSS, JS, lo que sea):** terminá tu respuesta con el bloque de PowerShell exacto que el usuario tiene que copy-pastear para subir ese cambio a Hostinger.
+>
+> No esperes que te lo pida. **No hay cambio en `site/` que termine sin su bloque de deploy adjunto.**
+>
+> Cuál bloque elegir:
+> - 1 archivo cambiado → adaptar la **Receta 1, 2 o 3** de `04-operations/deploy-snippets.md` con el path correcto.
+> - >1 archivo o carpeta entera → **Receta 4** (sync incremental con WinSCP).
+> - Después del deploy, incluir siempre la línea `Start-Process` con cache-bust para que el usuario verifique en browser.
+>
+> Cambios que **NO** disparan esta regla: docs en `00-` a `06-`, `CLAUDE.md`, `README.md`, `.gitignore`, cualquier archivo fuera de `site/`. Esos solo se commitean a git.
+
 ### Si dudás dónde poner algo
 Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-linkea con paths relativos.
 

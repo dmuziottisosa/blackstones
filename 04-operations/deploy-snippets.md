@@ -8,6 +8,18 @@
 
 ---
 
+## 🔁 Default no negociable para IAs y humanos
+
+**Si modificaste cualquier cosa dentro de `site/public_html/` (landing, calc, imagen, PHP, CSS, JS), tu respuesta TIENE que terminar con el bloque PowerShell de deploy correspondiente.** Sin esperar que el usuario lo pida.
+
+- 1 archivo cambiado → adaptar Receta 1 / 2 / 3 abajo con el path correcto.
+- Múltiples archivos o carpeta → Receta 4 (sync incremental con WinSCP).
+- Siempre incluir el `Start-Process` final con cache-bust para verificación en browser.
+
+Esta regla no aplica a cambios fuera de `site/` (docs, CLAUDE.md, README, etc.) — esos solo se commitean a git.
+
+---
+
 ## ⚡ Receta 1 — Cambié `index.html`, deploy ya
 
 Editaste `site/public_html/index.html` y querés verlo arriba.
