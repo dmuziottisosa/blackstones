@@ -146,9 +146,15 @@ Toda la app vive en `calc.html`. Sin frameworks, sin bundler. Una sola dependenc
 | **Alzada (a)** | `d1 × d2` — sin regrueso |
 | **Mesada en L (l)** | 1 pieza: `(d1 + reg) × (d3 + reg)`. 2 piezas: `(d1 + reg) × (d2 + reg) + (d3 + reg) × (d4 + reg)` |
 | **Isla (i)** | Tapa: `(d1 + 2·reg) × (d2 + 2·reg)` + laterales: `nLat × (altoLat + 2·reg) × d4` + cara interior opcional |
-| **Baño (b)** | Bacha armada: tapa `(d1+regL)·(d2+regA)` + interior `d3·d4` + **0,60 m² fijos**. Con Traforo: solo tapa. |
+| **Baño (b)** | **Bacha armada** (default): tapa `(d1+regL)·(d2+regA)` + interior `d3·d4` + **0,60 m² fijos**. **Cualquier otro tipo** (`Con Traforo` o futuros): solo tapa. |
+
+**Por qué los 0,60 m² fijos en Bacha armada:** la bacha armada **no es un corte** — es una bacha construida con el mismo material de la mesada (granito, cuarzo, sinterizado), que requiere **trabajo manual técnico especializado** del marmolero: cortar las paredes interiores, lijarlas, pegarlas, sellarlas. Ese trabajo se factura como **0,60 m² adicionales fijos** independientemente del tamaño de la bacha. Es histórico — no hay UI para editarlo. Si el material o el tamaño cambian mucho, ese 0,60 fijo deja de reflejar la realidad y hay que revisarlo.
+
+**Por qué solo `Bacha armada`:** la lógica antes tenía un bug latente — cobraba +0,60 a cualquier tipo que NO fuera `'Con Traforo'`. Si en el futuro se agrega un tipo nuevo (ej: "bacha apoyada", "bacha bajomesada simple"), incorrectamente recibiría el +0,60 sin merecerlo. Cambio aplicado el 2026-05-02: la condición se invirtió a "solo `Bacha armada` paga el +0,60". Default behavior preservado para los dos tipos existentes; defensivo frente a futuros.
 
 `reg` viene en cm (`rv`), se convierte a metros (`/100`) en el cálculo.
+
+**Nota sobre la nomenclatura de regrueso en Baño:** las primeras 4 secciones (Mesada, Alzada, L, Isla) usan los modos `Sin / L / A / L+A` (siglas geométricas). La sección Baño usa `Sin / Solo frente / Frente + 1 lat / Frente + 2 lat` — naming **del dominio de la marmolería** (mesadas de baño se describen con frente y laterales en taller). Es **intencional, no inconsistencia**. NO unificar al refactorizar.
 
 ### 6.2 Costo de agujeros (`agCost()`, línea 2126)
 
@@ -247,7 +253,7 @@ Si después de exportar el usuario modifica algo, los botones de export se marca
 |---|---|---|
 | 1 | Hardcoded de materiales — agregar uno toca al menos `MATS`, `MAT_LABELS`, `SINT`, `COLORS_DB`, y la rama de `isSint()`. | líneas 1264-1280 + scattered |
 | 2 | Magic numbers en agujeros (USD 80, ARS 100.000). Sin tabla de lookup. | línea 2134 |
-| 3 | Constante 0,60 m² fija en bacha. Sin UI para editar. | línea 2320 |
+| 3 | Constante 0,60 m² fija en bacha (representa trabajo manual técnico especializado). Sin UI para editar. | línea ~2321 |
 | 4 | Color autocomplete es substring. "Blanco" matchea "Blanco Fiesta" pero no "Fiesta Blanco". | líneas 1901-1921 |
 | 5 | Zócalos >5 cm: precio manual. No hay lookup en `COLORS_DB`. | línea 2523 |
 | 6 | Lógica de regrueso esparcida en `getR()`, `updMat()`, `applyVariantToItem()`. Cambiar una regla puede dejar inconsistencias. | 2273, 2597, 2692 |

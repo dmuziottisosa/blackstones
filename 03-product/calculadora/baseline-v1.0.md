@@ -1,6 +1,9 @@
-# Calculadora — Baseline v1.0
+# Calculadora — Baseline v1.1
 
 > **Marca formal: la versión funcional sin errores conocidos al 2026-05-02.**
+>
+> **Cambios desde v1.0 (2026-05-02):**
+> - Lógica del +0,60 m² en bacha de baño endurecida: ahora se aplica **solo** cuando `tipo === 'Bacha armada'`. Antes se aplicaba a cualquier `tipo` distinto de `'Con Traforo'`, lo que dejaba un bug latente para futuros tipos. Comportamiento preservado para los dos tipos existentes (default sigue siendo Bacha armada con +0,60). Razón documentada en `functional-map.md` § 6.1.
 
 ---
 

@@ -2312,8 +2312,9 @@ function calcM2(s,it){
     else if(it.reg==='Frente + 1 lat'){bL=reg;bA=reg}
     else if(it.reg==='Frente + 2 lat'){bL=reg;bA=reg*2}
     const tapa=(it.d1+bL)*(it.d2+bA);
-    if(tipo==='Con Traforo'){
-      // Con Traforo: solo la mesada, sin bacha interior, sin +0.60
+    // Solo Bacha armada cobra +0.60 m² (trabajo manual técnico especializado)
+    // Cualquier otro tipo (Con Traforo o futuros): solo la mesada, sin bacha interior, sin +0.60
+    if(tipo!=='Bacha armada'){
       return tapa;
     }
     // Bacha armada: tapa + bacha interior + 0.60 fijo
