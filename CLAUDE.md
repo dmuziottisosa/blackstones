@@ -104,37 +104,35 @@ Cada carpeta tiene su `README.md` con detalle. Empezá por el README de la carpe
 
 > **Arquitectura no negociable:**
 > - **GitHub** = única fuente de verdad del repo. Toda modificación viaja por ahí.
-> - **Local del usuario** = solo `D:\blackstones\.env` con credenciales. **No hay clone, no hay `git pull`, no hay carpeta de repo en local.**
-> - **Deploy** = PowerShell baja el archivo de **GitHub raw** a un `$temp`, lo sube por **FTP** a Hostinger, borra el temp.
+> - **Local del usuario** = solo `D:\blackstones\.env` con credenciales FTP. **No hay clone, no hay `git pull`, no hay GitHub token.**
+> - **Deploy** = la IA emite, en la misma respuesta, un bloque PowerShell con el archivo entero codificado en **Base64**. El usuario pega el bloque, PowerShell decodifica → temp → curl FTP upload → borra temp → abre browser.
+> - Para cambios chicos (≤3 reemplazos puntuales) en archivos grandes (`index.html`, `calc.html`) → patch quirúrgico (Receta 2 de `deploy-snippets.md`) en vez de re-enviar el archivo entero.
 
 Tres docs canónicos en `04-operations/`, leelos en este orden:
 
 1. **`ftp-map.md`** — modelo mental obligatorio. La regla que evita el error #1: el FTP user **NO** aterriza en `public_html/`. Aterriza en `/home/u144473384/`. El web root real está en `domains/blackstones.com.ar/public_html/`. Toda ruta de upload tiene que empezar con eso.
-2. **`deploy-snippets.md`** ⭐ — 8 recetas listas para copy-paste en PowerShell. Cada bloque es autocontenido (carga `.env`, fetcha de GitHub, sube por FTP, borra el temp, abre browser). Las más usadas:
-   - Receta 1: cambié `index.html`, deploy.
-   - Receta 2: cambié `calc.html`, deploy.
-   - Receta 3: cambié otro archivo, deploy.
-   - Receta 4: subí varios archivos / carpeta entera (vía GitHub API).
+2. **`deploy-snippets.md`** ⭐ — recetas listas para copy-paste. La canónica es la **Receta 1 (Base64 inline)**. Hay también receta de patch quirúrgico, listar remoto, borrar archivo, backup, y verificación de salud del sitio.
 3. **`deploy-notes.md`** — referencia: camino manual desde panel Hostinger, FileZilla/Cyberduck, checklists pre/post deploy, rollback.
 
-**Setup mínimo (1 sola vez):** crear `D:\blackstones\.env` con `FTP_HOST` / `FTP_USER` / `FTP_PASS` / `FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html` / `GITHUB_REPO=dmuziottisosa/blackstones` / `GITHUB_BRANCH=...` / `GITHUB_TOKEN=ghp_...` (PAT con permission "Contents: Read"). El `.env` queda local fuera del repo — es el único archivo persistente local del proyecto.
+**Setup mínimo (1 sola vez):** crear `D:\blackstones\.env` con 4 líneas: `FTP_HOST` / `FTP_USER` / `FTP_PASS` / `FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html`. El `.env` queda local fuera del repo — es el único archivo persistente local del proyecto.
 
 > ### 🔁 Default operativo no negociable: si tocás `site/`, das el deploy
 >
-> **Regla para cualquier IA o humano que modifique algo dentro de `site/public_html/` (landing, calculadora, imagen, PHP, CSS, JS, lo que sea):** terminá tu respuesta con el bloque de PowerShell exacto que el usuario tiene que copy-pastear para subir ese cambio a Hostinger.
+> **Regla para cualquier IA o humano que modifique algo dentro de `site/public_html/` (landing, calculadora, imagen, PHP, CSS, JS, lo que sea):** terminá tu respuesta con el bloque PowerShell de deploy listo para pegar — Base64 inline (Receta 1) o patch quirúrgico (Receta 2). El bloque tiene que ser autocontenido (carga `.env`, escribe temp, sube por FTP, borra temp, abre browser).
 >
 > No esperes que te lo pida. **No hay cambio en `site/` que termine sin su bloque de deploy adjunto.**
 >
 > Cuál bloque elegir:
-> - 1 archivo cambiado → adaptar la **Receta 1, 2 o 3** de `04-operations/deploy-snippets.md` con el path correcto.
-> - >1 archivo o carpeta entera → **Receta 4** (vía GitHub API contents endpoint).
-> - Después del deploy, incluir siempre la línea `Start-Process` con cache-bust para que el usuario verifique en browser.
+> - Archivo nuevo, o cambio mediano-grande en archivo chico → **Receta 1** (Base64 inline, archivo entero).
+> - Cambio chico en archivo chico → **Receta 1**.
+> - Cambio chico (≤3 reemplazos literales) en archivo grande (>100 KB) → **Receta 2** (patch quirúrgico, baja del FTP, replace, sube de vuelta — más rápido que enviar 273 KB en Base64).
+> - Cambio grande en archivo grande → **Receta 1** (Base64, aunque el bloque sea visualmente largo).
 >
 > Cambios que **NO** disparan esta regla: docs en `00-` a `06-`, `CLAUDE.md`, `README.md`, `.gitignore`, cualquier archivo fuera de `site/`. Esos solo se commitean a GitHub.
 
 > ### 🚫 Regla "nada local"
 >
-> **El repo NO se clona en la máquina del usuario.** No hay `git clone`, no hay `git pull`, no hay carpeta del repo en Windows. Si una IA propone "cd al repo" o "git pull" → está violando la regla. La única forma de leer/modificar archivos del repo es vía GitHub (web, API, raw). El único archivo local persistente del proyecto es `D:\blackstones\.env` con credenciales.
+> **El repo NO se clona en la máquina del usuario.** No hay `git clone`, no hay `git pull`, no hay carpeta del repo en Windows, no hay GitHub token. Si una IA propone "cd al repo" o "git pull" o "agregá `GITHUB_TOKEN` al `.env`" → está violando la regla. El único archivo local persistente del proyecto es `D:\blackstones\.env` con credenciales FTP.
 
 ### Si dudás dónde poner algo
 Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-linkea con paths relativos.

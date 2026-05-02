@@ -4,13 +4,13 @@
 >
 > Cómo subir cambios al web root del hosting.
 >
-> **Arquitectura:** GitHub = fuente de verdad. **Sin clone local.** El deploy en PowerShell baja el archivo de GitHub raw a un `$temp`, lo sube por FTP, borra el temp. Lo único persistente local es `D:\blackstones\.env` con credenciales.
+> **Arquitectura:** GitHub = fuente de verdad. **Sin clone local. Sin GitHub token.** El deploy lo emite la IA directo en su respuesta como un bloque PowerShell con el archivo en **Base64 inline**. El usuario pega el bloque, PowerShell decodifica → temp → curl FTP upload → borra temp → abre browser. Lo único persistente local es `D:\blackstones\.env` con credenciales FTP (4 líneas).
 >
 > **Acompañantes obligatorios:**
 > - [`ftp-map.md`](./ftp-map.md) — cómo está montado el FTP (qué se ve al conectar, dónde está el web root real).
-> - [`deploy-snippets.md`](./deploy-snippets.md) ⭐ — bloques de PowerShell copy-paste para uso diario (este es el doc que usás 99% de las veces).
+> - [`deploy-snippets.md`](./deploy-snippets.md) ⭐ — patrón canónico: Receta 1 (Base64 inline) + Receta 2 (patch quirúrgico). Este es el doc que usás 99% de las veces.
 >
-> Este doc (`deploy-notes.md`) cubre los caminos **alternativos**: deploy manual desde panel Hostinger, cliente FTP gráfico (FileZilla / Cyberduck), checklists, rollback. Para el camino default (PowerShell + GitHub raw + FTP) → ir directo a `deploy-snippets.md`.
+> Este doc (`deploy-notes.md`) cubre los caminos **alternativos**: deploy manual desde panel Hostinger, cliente FTP gráfico (FileZilla / Cyberduck), checklists, rollback. Para el camino default (Base64 inline) → ir directo a `deploy-snippets.md`.
 
 ---
 
@@ -37,22 +37,15 @@ FTP_HOST=blackstones.com.ar
 FTP_USER=u144473384
 FTP_PASS=tu_password_aca
 FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html
-GITHUB_REPO=dmuziottisosa/blackstones
-GITHUB_BRANCH=claude/setup-new-repo-tR58e
-GITHUB_TOKEN=ghp_xxx
 ```
 
-**Cómo crear `GITHUB_TOKEN` (PAT fine-grained):**
-
-1. GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate.
-2. Repo access: solo `dmuziottisosa/blackstones`.
-3. Permissions: **Contents: Read-only**. Nada más.
-4. Expiration: 90 días.
-5. Copy el token (`ghp_...`) y pegarlo en `.env` con Notepad.
+**Cuatro líneas. Nada más.** No hay GitHub token (el deploy va por Base64 inline desde el chat — ver `deploy-snippets.md`).
 
 ⚠️ **Crear `.env` con Notepad, no por copy-paste de chat.** Los renderers markdown autolinkean dominios y rompen el archivo (te queda `FTP_HOST=[blackstones.com.ar](http://blackstones.com.ar)` literal en el archivo).
 
 ⚠️ **La password actual del FTP** fue expuesta durante el bootstrap → rotarla desde el panel Hostinger antes de meterla acá.
+
+**Si tenías `GITHUB_TOKEN`, `GITHUB_REPO`, `GITHUB_BRANCH` en `.env` de iteraciones previas** → eliminalas (ya no se usan) y revocá el PAT en GitHub Settings.
 
 ---
 

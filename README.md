@@ -24,11 +24,11 @@ HTML + CSS + JS plano. PHP para auth de la calculadora. Sin frameworks, sin bund
 
 ## Deploy
 
-**Arquitectura:** GitHub = fuente de verdad. **Sin clone local.** PowerShell baja el archivo de GitHub raw a un `$temp`, lo sube por FTP a `domains/blackstones.com.ar/public_html/`, borra el temp.
+**Arquitectura:** GitHub = fuente de verdad. **Sin clone local. Sin GitHub token.** La IA emite, en la misma respuesta, un bloque PowerShell con el archivo entero en **Base64 inline**. El usuario pega el bloque, PowerShell decodifica → temp → curl FTP upload a `domains/blackstones.com.ar/public_html/` → borra temp → abre browser.
 
-- **Para desplegar un cambio rápido en PowerShell:** copy-paste de las recetas en `04-operations/deploy-snippets.md`.
-- **Para entender cómo está montado el FTP:** `04-operations/ftp-map.md`.
-- **Para referencia detallada / caminos alternativos (panel Hostinger, FileZilla):** `04-operations/deploy-notes.md`.
+- **Patrón canónico:** `04-operations/deploy-snippets.md` (Receta 1 Base64 inline + Receta 2 patch quirúrgico para cambios chicos en archivos grandes).
+- **Cómo está montado el FTP:** `04-operations/ftp-map.md`.
+- **Caminos alternativos (panel Hostinger, FileZilla):** `04-operations/deploy-notes.md`.
 
 ## Filosofía
 

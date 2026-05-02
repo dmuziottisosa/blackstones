@@ -1,131 +1,128 @@
-# Deploy snippets — PowerShell · GitHub → FTP · sin clone
+# Deploy snippets — PowerShell · Base64-inline · infalible
 
-> Estado: **layer-3 active belief.** Última actualización: 2026-05-02.
+> Estado: **layer-3 active belief.** Adoptado el 2026-05-02 después de descartar GitHub raw fetch (PAT fricción) y clone local (acoplamiento al filesystem del usuario).
 >
-> **Arquitectura:**
-> - **GitHub** = única fuente de verdad del repo. Todo cambio viaja por ahí.
-> - **Local del usuario** = solo `D:\blackstones\.env` (credenciales). **No hay repo clonado, no hay `git pull`.**
-> - **Deploy** = PowerShell baja el archivo de **GitHub raw** a un `$temp`, lo sube por **FTP** a Hostinger, borra el temp.
+> **Patrón canónico:**
+> 1. La IA modifica el archivo en el repo + commit a GitHub (source of truth).
+> 2. La IA emite, en la misma respuesta, un bloque PowerShell autocontenido con el archivo entero codificado en **Base64**.
+> 3. Vos copy-pasteás el bloque. PowerShell decodifica → escribe temp → curl FTP upload → borra temp → abre browser.
 >
-> Cada bloque de abajo es autocontenido: 2 acciones (copiar + pegar en PowerShell). Lee `.env`, fetcha de GitHub, sube por FTP, borra temp, abre browser.
+> **Por qué es infalible:**
+> - Sin auth externa (no GitHub token, no `gh` CLI, no clone).
+> - Base64 es ASCII puro — sin quoting, sin escape, sin encoding traps.
+> - `FromBase64String` valida byte-por-byte. Si algo falla, falla con error visible.
+> - Reproducible: bytes en GitHub = bytes en producción, garantizado.
+> - El usuario ve cada paso en consola.
 
 ---
 
 ## 🔁 Default no negociable
 
-**Si modificás cualquier cosa dentro de `site/public_html/` (landing, calc, imagen, PHP, CSS, JS), tu respuesta TIENE que terminar con el bloque PowerShell de deploy correspondiente.** No esperar que el usuario lo pida.
+**Si modificás cualquier cosa dentro de `site/public_html/` (landing, calc, imagen, PHP, CSS, JS), tu respuesta TIENE que terminar con un bloque de deploy Base64 listo para pegar.** No esperar que el usuario lo pida.
 
-- 1 archivo cambiado → adaptar Receta 1 / 2 / 3 con el path correcto.
-- Múltiples archivos o carpeta entera → Receta 4.
-- Siempre incluir `Start-Process` final con cache-bust para verificación en browser.
+- 1 archivo cambiado → emitir el bloque de la § Receta 1 con el archivo Base64'd inline.
+- Múltiples archivos → emitir varios bloques, uno por archivo.
+- **Para cambios chicos en archivos grandes** (ej: cambiar un teléfono en `calc.html` de 273 KB) → si el cambio es ≤3 reemplazos puntuales, podés usar la § Receta 2 (patch quirúrgico via `-replace`) en vez de re-enviar el archivo entero.
 
-Esta regla NO aplica a cambios fuera de `site/` (docs, CLAUDE.md, READMEs, etc.) — esos solo se commitean a GitHub.
+Esta regla NO aplica a cambios fuera de `site/` — esos solo se commitean a GitHub.
 
 ---
 
-## 🔑 Setup `.env` (1 sola vez en la vida del usuario)
+## 🔑 `.env` minimalista (1 sola vez)
 
-Ubicación recomendada: `D:\blackstones\.env`. Crearlo con Notepad (no copy-paste de chat — los renderers markdown autolinkean dominios y rompen el archivo).
+Ubicación: `D:\blackstones\.env`. Crearlo con Notepad, tipearlo a mano (no copy-paste de chat — el markdown autolinkea dominios y rompe el archivo).
 
 ```
 FTP_HOST=blackstones.com.ar
 FTP_USER=u144473384
 FTP_PASS=xxx
 FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html
-GITHUB_REPO=dmuziottisosa/blackstones
-GITHUB_BRANCH=claude/setup-new-repo-tR58e
-GITHUB_TOKEN=ghp_xxx
 ```
 
-**Cómo obtener `GITHUB_TOKEN`:**
-
-1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token.
-2. Repository access: solo `dmuziottisosa/blackstones`.
-3. Permissions: **Contents: Read-only**. Nada más.
-4. Expiration: 90 días (rotás cada 90).
-5. Copiar el token (`ghp_...`) y pegarlo en `.env` con Notepad.
-
-⚠️ **El token reemplaza la necesidad de tener el repo local.** Con el token, PowerShell baja archivos individuales de GitHub directamente.
+Cuatro líneas. Nada más. **Si tenés `GITHUB_TOKEN`, `GITHUB_REPO`, `GITHUB_BRANCH` ahí adentro de versiones anteriores de este sistema → eliminalas. Ya no se usan.** Y revocá el PAT en GitHub Settings.
 
 ---
 
-## ⚡ Receta 1 — Cambié `index.html` (la landing), deploy
+## ⚡ Receta 1 — Deploy de un archivo (Base64-inline)
+
+**Forma del bloque que la IA emite:**
 
 ```powershell
 Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
-$tmp = Join-Path $env:TEMP ("bs_" + [guid]::NewGuid().ToString().Substring(0,8) + ".html")
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($env:GITHUB_REPO)/$($env:GITHUB_BRANCH)/site/public_html/index.html" -Headers @{ Authorization = "token $($env:GITHUB_TOKEN)" } -OutFile $tmp
-curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -T $tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/index.html"
-Remove-Item $tmp
-Start-Process "https://blackstones.com.ar/?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"
-```
-
----
-
-## ⚡ Receta 2 — Cambié `calc.html`, deploy
-
-```powershell
-Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
-$tmp = Join-Path $env:TEMP ("bs_calc_" + [guid]::NewGuid().ToString().Substring(0,8) + ".html")
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($env:GITHUB_REPO)/$($env:GITHUB_BRANCH)/site/public_html/calculadora/calc.html" -Headers @{ Authorization = "token $($env:GITHUB_TOKEN)" } -OutFile $tmp
-curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -T $tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/calculadora/calc.html"
-Remove-Item $tmp
-Start-Process "https://blackstones.com.ar/calculadora/?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"
-```
-
----
-
-## ⚡ Receta 3 — Cambié otro archivo (genérico)
-
-Editá las dos primeras líneas con la ruta del archivo en el repo y la ruta destino en el server. Todo lo demás corre igual.
-
-```powershell
-$repoPath   = "site/public_html/calculadora/dolar.php"   # ← path del archivo en el repo
-$serverPath = "calculadora/dolar.php"                    # ← path relativo al web root del server
-Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
-$tmp = Join-Path $env:TEMP ("bs_" + [guid]::NewGuid().ToString().Substring(0,8) + [System.IO.Path]::GetExtension($repoPath))
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($env:GITHUB_REPO)/$($env:GITHUB_BRANCH)/$repoPath" -Headers @{ Authorization = "token $($env:GITHUB_TOKEN)" } -OutFile $tmp
+$serverPath = "RUTA/RELATIVA/AL/WEB_ROOT.html"   # ← lo escribe la IA
+$tmp = Join-Path $env:TEMP ("bs_" + [guid]::NewGuid().ToString().Substring(0,8) + [System.IO.Path]::GetExtension($serverPath))
+$b64 = @'
+BASE64_DEL_ARCHIVO_AQUI
+'@
+[System.IO.File]::WriteAllBytes($tmp, [System.Convert]::FromBase64String(($b64 -replace '\s','')))
 curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -T $tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverPath"
 Remove-Item $tmp
-Write-Host "OK → https://blackstones.com.ar/$serverPath" -ForegroundColor Green
+Start-Process "https://blackstones.com.ar/$serverPath`?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"
 ```
+
+**Notas técnicas:**
+
+- `-replace '\s',''` quita whitespace antes de decodificar — te salva si tu chat client wrappea o agrega newlines en lugares raros.
+- `[System.IO.File]::WriteAllBytes` escribe **bytes crudos**, sin BOM, sin encoding intermedio. Lo que está en el Base64 es lo que llega al server.
+- `[System.IO.Path]::GetExtension($serverPath)` saca la extensión correcta para el temp (importante para que algunos clientes FTP infieran content-type bien).
+- `Start-Process ... ?v=timestamp` rompe cache del browser para que veas el cambio inmediato.
+
+**Si algo falla, vas a ver:**
+- `Invalid length for a Base-64 char array` → el Base64 está corrupto o cortado al copiar.
+- `curl: (...)` → problema de FTP (revisar `.env`, la red, el path remoto).
+- 404 en el browser → el `$serverPath` no es lo que esperabas.
 
 ---
 
-## ⚡ Receta 4 — Subí varios archivos / carpeta entera
+## ⚡ Receta 2 — Patch quirúrgico (cambios chicos en archivos grandes)
 
-Lista los archivos de una carpeta del repo vía GitHub API, baja cada uno a un staging temporal, los sube al server, borra el staging.
+Para cambios ≤3 reemplazos puntuales en `index.html` o `calc.html` (cambiar un teléfono, una dirección, un precio). Más rápido que re-enviar 273 KB en Base64.
 
-Editá la primera línea con la carpeta a deployar.
+**Forma del bloque que la IA emite:**
 
 ```powershell
-$repoFolder   = "site/public_html/calculadora"           # ← carpeta del repo
-$serverFolder = "calculadora"                            # ← carpeta destino en el server
 Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
-$staging = Join-Path $env:TEMP ("bs_stage_" + [guid]::NewGuid().ToString().Substring(0,8))
-New-Item -ItemType Directory -Path $staging | Out-Null
-$headers = @{ Authorization = "token $($env:GITHUB_TOKEN)"; 'User-Agent' = 'bs-deploy' }
-$apiUrl  = "https://api.github.com/repos/$($env:GITHUB_REPO)/contents/$repoFolder`?ref=$($env:GITHUB_BRANCH)"
-$items   = Invoke-RestMethod -Uri $apiUrl -Headers $headers
-foreach ($item in $items) {
-    if ($item.type -ne 'file') { continue }
-    if ($item.name -like '.*') { continue }   # skip dotfiles (.htaccess se sube aparte si querés)
-    $localPath = Join-Path $staging $item.name
-    Invoke-WebRequest -Uri $item.download_url -Headers $headers -OutFile $localPath
-    curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -T $localPath "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverFolder/$($item.name)"
-    Write-Host "  ✓ $($item.name)" -ForegroundColor Green
+$serverPath = "calculadora/calc.html"
+$tmp = Join-Path $env:TEMP ("bs_patch_" + [guid]::NewGuid().ToString().Substring(0,8) + ".tmp")
+
+# 1. Bajar el archivo del server
+curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -s -o $tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverPath"
+$pre = (Get-Item $tmp).Length
+
+# 2. Hacer el reemplazo (con verificación: el patrón TIENE que existir)
+$content = [System.IO.File]::ReadAllText($tmp)
+$old = "PATRON_VIEJO_EXACTO"
+$new = "PATRON_NUEVO"
+if (-not $content.Contains($old)) {
+    Remove-Item $tmp
+    throw "El patrón '$old' no está en el archivo. Aborto. Nada se subió."
 }
-Remove-Item -Recurse -Force $staging
-Write-Host "Deploy de $repoFolder completo." -ForegroundColor Green
+$content = $content.Replace($old, $new)
+[System.IO.File]::WriteAllText($tmp, $content)
+
+# 3. Subir
+curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -T $tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverPath"
+$post = (Get-Item $tmp).Length
+Remove-Item $tmp
+
+Write-Host "OK. Bytes: $pre → $post (diff $($post - $pre))" -ForegroundColor Green
+Start-Process "https://blackstones.com.ar/$serverPath`?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"
 ```
 
-⚠️ Esta receta **no recursea sub-carpetas**. Si tenés sub-folders, repetí el bloque con el `$repoFolder` apuntando a cada uno.
+**Por qué este patch es "infalible-ish":**
+
+- Usa `.Contains()` antes de `.Replace()` — si el patrón no está, **aborta sin tocar nada**. Cero corrupción silenciosa.
+- Usa `String.Replace` (no regex) — match literal, sin sorpresas.
+- Imprime diff de bytes — vos chequeás que el cambio sea del tamaño esperado.
+
+**Cuándo NO usar este patrón:**
+
+- Si el reemplazo aparece más de 1 vez y solo querés cambiar uno → mejor Base64 inline (Receta 1) para evitar ambigüedad.
+- Si el cambio es más complejo que 3 strings literales → Receta 1.
 
 ---
 
-## ⚡ Receta 5 — Verificar que el sitio está vivo
-
-Pinguea las 3 URLs críticas. Si alguna devuelve 404 / 500, hay drift.
+## ⚡ Receta 3 — Verificar que el sitio está vivo
 
 ```powershell
 "https://blackstones.com.ar/", "https://blackstones.com.ar/calculadora/", "https://blackstones.com.ar/robots.txt" | ForEach-Object {
@@ -140,7 +137,7 @@ Pinguea las 3 URLs críticas. Si alguna devuelve 404 / 500, hay drift.
 
 ---
 
-## ⚡ Receta 6 — Listar el FTP remoto (para diagnosticar)
+## ⚡ Receta 4 — Listar el FTP remoto (diagnóstico)
 
 ```powershell
 Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
@@ -154,25 +151,23 @@ curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" "ftp://${env:FTP_HOST}/${env:F
 
 ---
 
-## ⚡ Receta 7 — Borrar un archivo del server
+## ⚡ Receta 5 — Borrar un archivo del server
 
 ```powershell
 Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
-$serverPath = "_test_archivo_que_no_va.txt"   # ← path relativo al web root
+$serverPath = "_test_archivo_que_no_va.txt"
 curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -Q "DELE ${env:FTP_REMOTE_BASE}/$serverPath" "ftp://${env:FTP_HOST}/"
 ```
 
-⚠️ Antes de borrar: confirmá que el archivo no está referenciado en un ad activo, embed de Instagram, o landing pega-link.
-
 ---
 
-## ⚡ Receta 8 — Bajar (backup) un archivo del server
+## ⚡ Receta 6 — Bajar (backup) un archivo del server
 
-Útil cuando alguien editó algo en el File Manager de Hostinger sin pasar por GitHub y querés ver qué hay en producción antes de pisarlo.
+Útil para auditar producción antes de pisar algo.
 
 ```powershell
 Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
-$serverPath = "calculadora/calc.html"        # ← path relativo al web root
+$serverPath = "calculadora/calc.html"
 $dest = "$env:USERPROFILE\Desktop\bs_backup_$($serverPath -replace '/', '_')"
 curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -o $dest "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverPath"
 Write-Host "Bajado a $dest" -ForegroundColor Green
@@ -180,32 +175,23 @@ Write-Host "Bajado a $dest" -ForegroundColor Green
 
 ---
 
-## Cleanup: si tenés el repo clonado en local, borralo
-
-Decisión arquitectónica: el repo NO vive local. Solo `.env`. Si tenés `D:\blackstones\git\` u otro clone, eliminalo:
-
-```powershell
-Remove-Item -Recurse -Force D:\blackstones\git
-```
-
----
-
-## Gotchas conocidas (errores ya cometidos)
+## Gotchas conocidas
 
 | Error | Causa | Fix |
 |---|---|---|
-| `Invoke-WebRequest: No se encuentra ningún parámetro de posición que acepte el argumento 'u144473384'` | En PowerShell, `curl` es alias de `Invoke-WebRequest` | Usar `curl.exe` con extensión |
-| `Could not resolve host: ftp.blackstones.com.ar` | El subdominio `ftp.` no existe en el DNS | Usar `blackstones.com.ar` directo |
-| `curl: (67) Access denied: 530` | Password mal tipeada | Pasar `--user "user:pass"` desde clipboard |
-| `curl: (9) Server denied you to change to the given directory` | Path empezó con `/public_html/` que no existe en el home del FTP user | Usar `domains/blackstones.com.ar/public_html/` |
-| Upload "exitoso" pero browser devuelve 404 | Se subió a `/home/u144473384/`, no al web root | Ídem arriba |
-| `.env` quedó con `[blackstones.com.ar](http://blackstones.com.ar)` | Chat client autolinkea dominios al copy-paste | Crear `.env` con Notepad, tipearlo a mano |
-| `Invoke-WebRequest: 401 Unauthorized` al fetchar GitHub raw | El repo es privado, sin token válido | Generar PAT con permission "Contents: Read" y meterlo en `.env` |
+| `Invalid length for a Base-64 char array` | Base64 corrupto al copiar (truncado, espacios raros, BOM) | Volver a copiar el bloque entero |
+| `Invoke-WebRequest: ... 'u144473384'` | En PowerShell, `curl` es alias de `Invoke-WebRequest` | Usar `curl.exe` con extensión |
+| `Could not resolve host: ftp.blackstones.com.ar` | Subdominio `ftp.` no existe | Usar `blackstones.com.ar` directo |
+| `curl: (67) Access denied: 530` | Password mal | `--user "user:pass"` desde clipboard |
+| `curl: (9) Server denied you to change to the given directory` | Path sin `domains/blackstones.com.ar/public_html/` | Usar `FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html` |
+| Upload "OK" pero browser 404 | Archivo en home, no en web root | Ídem arriba |
+| `.env` con `[blackstones.com.ar](http://...)` | Markdown autolink en chat | Notepad + tipeo manual |
 
 ---
 
 ## Checklist mental antes de cualquier deploy
 
-1. ¿El cambio está pusheado a la branch en GitHub? (Si no está allá, no se puede deployar.)
-2. ¿`GITHUB_BRANCH` en `.env` apunta a la branch correcta?
-3. ¿Es viernes 18:00? Si sí, **no.**
+1. ¿La IA me commiteó el cambio en GitHub? (Mirar el último commit en la branch.)
+2. ¿El `$serverPath` en el bloque corresponde al archivo que edité?
+3. ¿El `.env` tiene los 4 valores y el `FTP_HOST` está limpio?
+4. ¿Es viernes 18:00? Si sí, **no.**
