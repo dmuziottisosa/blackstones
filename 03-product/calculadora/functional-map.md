@@ -241,6 +241,26 @@ Para precios exactos por color → leer `COLORS_DB` en `calc.html` líneas 1283-
 - Implementación del fix: el bloque variantes acumula en `items` como antes, pero inmediatamente después se extrae con `items.substring(_varsBeforeLen)` y se vuelve a inyectar al final, justo antes del `const html = \`...\``.
 - Footer con tipo de cambio referencia: "USD 1 = X ARS · DolarHoy".
 
+### 8.2.1 Regla del "Subtotal General" (cuándo se muestra)
+
+**Cuando toggle "Total" está OFF:**
+- Si hay **2 o más** "Subtotal de sección" visibles → **se muestra** "Subtotal General" (suma de todos los subtotales).
+- Si hay **0 o 1** "Subtotal de sección" → **NO se muestra** (sería redundante con el único subtotal existente, o sin información que sumar).
+
+Cuentan como "Subtotal de sección":
+- Subtotal de Mesada / Alzada / Mesada en L / Isla / Mesada de baño (cuando la sección tiene items).
+- Subtotal Zócalos.
+- Subtotal Otros conceptos.
+- Subtotal Bachas.
+
+NO cuentan: subtotales de tag dentro de sección (ej: "Subtotal · Cocina"), subtotales internos de variantes, items individuales sin subtotal (flete, escalera, ángulos).
+
+Implementación:
+- **Excel**: contador `_subtotalCount` declarado en `generarExcel()` antes de `addSectionSubtotal()`. La función incrementa el contador cada vez que se llama. La condición del Subtotal General agrega `&& _subtotalCount >= 2`.
+- **PDF**: regex inline sobre `items` (la string HTML) en el momento de evaluar la condición — `(items.match(/Subtotal de secci[oó]n|Subtotal Z[oó]calos|Subtotal Otros conceptos|Subtotal Bachas/g) || []).length >= 2`. Funciona porque al momento del check, `items` ya contiene todos los subtotales del cuerpo principal (las variantes ya fueron extraídas a `_varsHtmlPdf` para reposicionarse al final).
+
+Cuando toggle "Total" está ON: siempre se muestra Subtotal + IVA + TOTAL, regla anterior no aplica.
+
 ### 8.3 Estado "dirty"
 
 Si después de exportar el usuario modifica algo, los botones de export se marcan **dirty** (visualmente: alguna indicación que el archivo bajado ya no refleja el presupuesto actual). Tiene que volver a exportar.

@@ -185,7 +185,109 @@ Write-Host "Bajado a $dest" -ForegroundColor Green
 | `curl: (67) Access denied: 530` | Password mal | `--user "user:pass"` desde clipboard |
 | `curl: (9) Server denied you to change to the given directory` | Path sin `domains/blackstones.com.ar/public_html/` | Usar `FTP_REMOTE_BASE=domains/blackstones.com.ar/public_html` |
 | Upload "OK" pero browser 404 | Archivo en home, no en web root | Ídem arriba |
-| `.env` con `[blackstones.com.ar](http://...)` | Markdown autolink en chat | Notepad + tipeo manual |
+| `.env` con `[blackstones.com.ar](http://...)` | Markdown autolink en chat | Notepad + tipeo manual; o reconstruir con `[char]46` para los puntos del dominio |
+| `[[System.IO](http://System.IO).File]::...` o `[r.total](http://r.total)>0` en el script pegado | El chat autolinkea cualquier cadena con forma `palabra.palabra` que parezca dominio o namespace, **incluso dentro de bloques de código** | Ver § "Reglas para que el chat no rompa el script" abajo |
+| `curl: (67) Access denied: 500` después de un download silencioso | El download falló (`-s` lo ocultó) → `$tmp` no existe → upload sube archivo de 0 bytes | Sacar el `-s` del `curl` de download; agregar `if (-not (Test-Path $tmp))` guard |
+| Variables del `.env` aparecen vacías en `Write-Host` pero curl funciona OK | Es display-only: el chat autolinkea valores que parecen dominio en el output del terminal cuando se copia de vuelta al chat. El valor real está OK | Ignorar el display, confiar en que curl funcione |
+
+---
+
+## Reglas para que el chat no rompa el script (anti-autolink)
+
+El chat autolinkea cualquier patrón `palabra.palabra` o `palabra.palabra.palabra` que parezca dominio/TLD/namespace, convirtiéndolo en `[texto](http://texto)`. Esto pasa **dentro de bloques de código** y **al copiar el output del terminal de vuelta al chat**. Si tu script tiene esos patrones, el paste rompe la sintaxis de PowerShell.
+
+**Patrones tóxicos a evitar en el script:**
+
+| Tóxico (autolinkea) | Reemplazo seguro |
+|---|---|
+| `[System.IO.File]::...` | `[IO.File]::...` (PowerShell auto-resuelve `System.*`) |
+| `[System.Text.Encoding]::...` | `[Text.Encoding]::...` |
+| `[System.Text.UTF8Encoding]::new(...)` | `[Text.UTF8Encoding]::new(...)` |
+| `[System.Convert]::...` | `[Convert]::...` |
+| `[System.IO.Path]::...` | `[IO.Path]::...` |
+| Strings con `r.total`, `data.json`, `config.ini`, etc. dentro de patrones literales | Truncar el marcador antes del patrón tóxico (usar parte ÚNICA pero sin la palabra-con-punto) |
+| `blackstones.com.ar` en el `.env` o como literal | Construir por concatenación: `"blackstones" + [char]46 + "com" + [char]46 + "ar"` |
+| `FTP_HOST=valor` con valor = dominio puro en .env | El valor literal en .env es OK (PowerShell lo lee correctamente). Solo evitar imprimirlo en chat con `Write-Host` |
+
+**Patrones seguros que igual hay que cuidar:**
+
+- `—` (em-dash, U+2014): la mayoría de chats lo preservan en UTF-8, pero si el clipboard mangle → usar `[char]8212`.
+- `ó / á / í` (acentos): generalmente OK en UTF-8, pero para máxima seguridad usar `[char]243` (ó), `[char]225` (á), etc.
+- `·` (middle dot, U+00B7): `[char]183`.
+- `°` (degree sign, U+00B0): `[char]176`.
+- Backticks `` ` ``: `[char]96` o escapar con `` `` ``.
+
+**Antes de emitir un deploy block:**
+
+1. Re-leer el script en busca de `[System.X.Y]` → reemplazar por `[X.Y]`.
+2. Re-leer los marcadores de patches en busca de strings con punto-tipo-dominio → truncar o usar otro marcador único.
+3. Si hay caracteres no-ASCII en marcadores críticos (los que `.Contains()` necesita matchear) → considerar `[char]X` para los más sensibles.
+
+---
+
+## Patrón validado: download + multi-patch + upload (Receta 2 evolucionada)
+
+Estructura base que ya funcionó end-to-end (cambios en `calc.html` el 2026-05-02):
+
+```powershell
+# Cargar .env y validar
+Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
+if (-not $env:FTP_HOST -or -not $env:FTP_USER) { throw ".env no cargo bien, aborto" }
+
+$serverPath = "RUTA_AL_ARCHIVO"
+$tmp = Join-Path $env:TEMP ("bs_" + [guid]::NewGuid().ToString().Substring(0,8) + ".html")
+
+# Download SIN -s para ver errores reales
+curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -o $tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverPath"
+if (-not (Test-Path $tmp)) { throw "Download fallo, no se creo el temp" }
+$pre = (Get-Item $tmp).Length
+Write-Host "Bajados $pre bytes" -ForegroundColor Cyan
+
+# Leer + normalizar line endings (CRLF -> LF para que los patches matcheen)
+$content = [IO.File]::ReadAllText($tmp, [Text.Encoding]::UTF8)
+$origCRLF = $content.Contains("`r`n")
+$content = $content -replace "`r`n", "`n"
+
+# Char codes para no-ASCII / autolink-trampa
+$LF = [char]10
+$BT = [char]96
+$EM = [char]8212
+
+# === Patches con .Contains() guard cada uno ===
+$o1 = '...'
+$n1 = '...'
+if (-not $content.Contains($o1)) { Remove-Item $tmp; throw "P1 marcador no encontrado" }
+$content = $content.Replace($o1, $n1)
+
+# ... más patches ...
+
+# Restaurar line endings originales (si era CRLF)
+if ($origCRLF) { $content = $content -replace "`n", "`r`n" }
+
+# Guardar UTF-8 sin BOM
+[IO.File]::WriteAllText($tmp, $content, [Text.UTF8Encoding]::new($false))
+
+# Upload
+curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -T $tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverPath"
+$post = (Get-Item $tmp).Length
+Remove-Item $tmp
+
+Write-Host "OK. Bytes: $pre -> $post (diff $($post - $pre))" -ForegroundColor Green
+Start-Process "https://blackstones.com.ar/$serverPath`?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"
+```
+
+**Por qué esta estructura es robusta:**
+
+1. **`if (-not $env:FTP_HOST...)` early abort:** detecta `.env` corrupto antes de tocar nada.
+2. **`-o $tmp` sin `-s`:** errores de download se ven inmediatos.
+3. **`Test-Path $tmp` guard:** atrapa download silencioso fallido.
+4. **Cyan banner del tamaño bajado:** confirma que el archivo llegó.
+5. **Normalización de line endings:** los patches multi-line matchean independientemente de si el FTP devuelve LF o CRLF.
+6. **Cada patch con `.Contains()` guard:** si un marcador no está, aborta antes de tocar el server. La live queda intacta.
+7. **`[IO.File]` y `[Text.Encoding]` (sin `System.`):** evita el chat-autolink trap.
+8. **UTF-8 sin BOM al escribir:** preserva encoding del archivo original sin agregar bytes.
+9. **`$post - $pre` final:** muestra el diff de bytes para verificación visual rápida.
+10. **`Start-Process` con cache-bust:** abre el browser con `?v=timestamp` para evitar caché.
 
 ---
 
@@ -194,4 +296,5 @@ Write-Host "Bajado a $dest" -ForegroundColor Green
 1. ¿La IA me commiteó el cambio en GitHub? (Mirar el último commit en la branch.)
 2. ¿El `$serverPath` en el bloque corresponde al archivo que edité?
 3. ¿El `.env` tiene los 4 valores y el `FTP_HOST` está limpio?
-4. ¿Es viernes 18:00? Si sí, **no.**
+4. ¿El bloque PowerShell pasó por la "anti-autolink check" (sin `[System.X]`, sin `r.total` en marcadores)?
+5. ¿Es viernes 18:00? Si sí, **no.**

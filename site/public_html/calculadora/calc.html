@@ -3779,7 +3779,11 @@ async function generarExcel(){
   }
 
   // Helper: imprime subtotal de sección
+  // Contador de subtotales de seccion mostrados — usado abajo para decidir
+  // si "Subtotal General" aporta o es redundante (1 solo subtotal = no mostrar)
+  let _subtotalCount=0;
   function addSectionSubtotal(r,secUSD,secARS){
+    _subtotalCount++;
     fillR(r,fSt);topBorderR(r);ws.mergeCells(`A${r}:D${r}`);
     setC(r,1,'  Subtotal de sección',{name:'Arial',size:10,bold:true,italic:true,color:{argb:'FF7A6649'}},fSt,{horizontal:'right',vertical:'middle'});
     if(secUSD>0){
@@ -4086,8 +4090,8 @@ async function generarExcel(){
       if(sumARS>0){setC(row,6,sumARS*0.21,{name:'Arial',size:10,bold:true,color:{argb:DK}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(6).numFmt='$ #,##0'}
       row++;
     }
-  }else if(sumUSD>0||sumARS>0){
-    // Total OFF — Subtotal General sutil
+  }else if((sumUSD>0||sumARS>0)&&_subtotalCount>=2){
+    // Total OFF — Subtotal General sutil (solo si hay 2+ subtotales de seccion, sino redundante)
     row++;fillR(row,fAl);ws.mergeCells(`A${row}:D${row}`);
     setC(row,1,'  Subtotal General',{name:'Arial',size:11,bold:true,italic:true,color:{argb:'FF7A6649'}},fAl,{horizontal:'right',vertical:'middle'});
     if(sumUSD>0){setC(row,5,sumUSD,{name:'Arial',size:11,bold:true,color:{argb:'FF7A6649'}},fAl,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00'}
@@ -4609,8 +4613,8 @@ function generarPDF(){
     items+=`<tr style="background:#F2EDE3"><td colspan="4" style="font-weight:700;padding-left:12px">Subtotal</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumU>0?fmtUSD(sumU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumA>0?fmtARS(sumA):''}</td></tr>`;
     if(conFact)items+=`<tr><td colspan="4" style="padding-left:12px">I.V.A. (21%)</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaU>0?fmtUSD(ivaU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaA>0?fmtARS(ivaA):''}</td></tr>`;
     items+=`<tr style="background:#1A1816;color:#FAF8F4"><td colspan="4" style="font-weight:700;font-size:13px;padding-left:12px">TOTAL</td><td style="text-align:center;font-weight:700;color:#25D366;font-size:13px">${totU>0?fmtUSD(totU):''}</td><td style="text-align:center;font-weight:700;color:#0EA5E9;font-size:13px">${totA>0?fmtARS(totA):''}</td></tr>`;
-  }else if(sumU>0||sumA>0){
-    // Total OFF — mostramos Subtotal General sutil
+  }else if((sumU>0||sumA>0)&&((items.match(/Subtotal de secci[oó]n|Subtotal Z[oó]calos|Subtotal Otros conceptos|Subtotal Bachas/g)||[]).length>=2)){
+    // Total OFF — mostramos Subtotal General sutil (solo si hay 2+ subtotales de seccion)
     items+=`<tr style="background:#F2EDE3"><td colspan="4" style="text-align:right;font-style:italic;color:#7A6649;padding-right:12px;font-weight:600">Subtotal General</td><td style="text-align:center;font-weight:700;color:#7A6649;font-size:11px">${sumU>0?fmtUSD(sumU):''}</td><td style="text-align:center;font-weight:700;color:#7A6649;font-size:11px">${sumA>0?fmtARS(sumA):''}</td></tr>`;
   }
   if(incSena)items+=`<tr style="background:#1A1816;color:#FAF8F4"><td colspan="4" style="font-weight:700;padding-left:12px">SEÑA</td><td style="text-align:center;font-weight:700;color:#C4A77D">${senaU>0?fmtUSD(senaU):''}</td><td style="text-align:center;font-weight:700;color:#C4A77D">${senaA>0?fmtARS(senaA):''}</td></tr>`;

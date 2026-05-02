@@ -1,6 +1,9 @@
-# Calculadora — Baseline v1.2
+# Calculadora — Baseline v1.3
 
 > **Marca formal: la versión funcional sin errores conocidos al 2026-05-02.**
+>
+> **Cambios desde v1.2 (2026-05-02):**
+> - "Subtotal General" en exports PDF y Excel ahora se **oculta cuando hay 0 o 1 "Subtotal de sección"** visible (porque sería redundante con el único subtotal). Aplica solo cuando toggle "Total" está OFF. Se sigue mostrando cuando hay 2+ subtotales de sección (mesada, alzada, l, isla, baño, zócalos, otros conceptos, bachas). Implementación: contador `_subtotalCount` en `addSectionSubtotal()` para Excel; regex inline sobre `items` HTML para PDF. Detalle en `functional-map.md` § 8.
 >
 > **Cambios desde v1.1 (2026-05-02):**
 > - Layout de exports PDF y Excel reorganizado: el bloque "Alternativas de color" (variantes referenciales) ahora se renderiza al **final** del documento, después del Subtotal General / TOTAL del presupuesto principal. Antes se intercalaba entre los items principales y los adicionales, lo que dejaba el subtotal de lo principal visualmente DEBAJO de los subtotales de las variantes — rompiendo la jerarquía visual cuando el toggle "Total" estaba desactivado. Implementación vía closure `_renderVarsXls()` (Excel) y string buffer `_varsHtmlPdf` (PDF). Lógica de cálculo intacta. Detalle en `functional-map.md` § 8.
