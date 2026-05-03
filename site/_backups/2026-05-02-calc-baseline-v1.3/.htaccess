@@ -1,0 +1,24 @@
+# ============================================================
+# .htaccess — Calculadora BlackStones
+# ============================================================
+
+# Prioridad de archivos: index.php (con auth) antes que cualquier index.html
+DirectoryIndex index.php index.html
+
+# Bloquear acceso directo a archivos sensibles
+<FilesMatch "^(auth_config\.php|auth_check\.php|calc\.html|\.auth_attempts\.json)$">
+    Require all denied
+</FilesMatch>
+
+# Bloquear acceso a archivos ocultos (.env, .git, etc.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Si Apache versión vieja, fallback (Hostinger es 2.4+ pero por las dudas)
+<IfModule !mod_authz_core.c>
+    <FilesMatch "^(auth_config\.php|auth_check\.php|calc\.html|\.auth_attempts\.json)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
