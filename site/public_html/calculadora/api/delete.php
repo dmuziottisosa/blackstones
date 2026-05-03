@@ -73,6 +73,14 @@ try {
         // Cliente queda vacío → borrar archivo entero
         @unlink($cliente_path);
         $cliente_borrado = true;
+        // Preservar el nro en clientes-index.json para no reciclarlo
+        $idx = bs_read_json(BS_CLIENTES_INDEX);
+        if (!is_array($idx)) $idx = [];
+        $idx[$cliente_nro] = [
+            'deleted_at' => date('c'),
+            'reason'     => 'manual',
+        ];
+        bs_write_json_atomic(BS_CLIENTES_INDEX, $idx);
     } else {
         $cliente_obj['cotizaciones'] = $kept;
         $cliente_obj['ultima_actualizacion'] = date('c');
