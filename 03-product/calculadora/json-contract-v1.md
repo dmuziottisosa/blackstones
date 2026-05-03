@@ -296,29 +296,59 @@ Hostinger Premium da 100+ GB. Storage **matemáticamente nunca es un problema**.
 
 ---
 
-## 6. Reportes mensuales
+## 6. Registro: dashboard histórico de entregados
 
-### 6.1 Auto-generación
+> **Tab dentro de `/presupuestos/`. NO es una página separada.** La página `/presupuestos/` tiene 2 vistas:
+> - **Activos:** cotizaciones vivas (borrador / enviado / aprobado / perdido pendiente).
+> - **Registro:** dashboard histórico de entregados.
 
-**Cron `monthly-report.php` corre día 1 de cada mes a las 02:00 ART:**
+### 6.1 Filosofía: archivo canónico cuando existe, live scan cuando no
 
 ```
-1. Detectar mes anterior (ej: si corre 2026-06-01, mes objetivo es 2026-05).
-2. Scan de bs-data/clientes/*.json
-3. Para cada cotización con estado=entregado y entregado_at en el mes objetivo:
-   - Sumar a totales: monto USD, monto ARS, m²
-   - Acumular materiales únicos
-   - Contar clientes únicos
-4. Guardar bs-data/reportes/{YYYY-MM}.json
-5. Generar bs-data/reportes/{YYYY-MM}.xlsx (Excel descargable)
-6. NO crear el .viewed flag (queda pendiente para el equipo)
+Para cada mes que el dashboard solicita:
+  Si bs-data/registro/by-month/{YYYY-MM}.json existe:
+    Usar ese archivo (canónico, generado por el cron al cierre del mes).
+  Sino:
+    Scan en vivo de bs-data/clientes/*.json
+    Filtrar cotizaciones con estado=entregado y entregado_at en el mes objetivo
+    Calcular totales sobre la marcha.
 ```
 
-**Por qué automático y no manual:** si el equipo no clickea o está de vacaciones, los entregados podrían empezar a borrarse por retención antes de aparecer en un reporte. Con cron nightly, **nunca se pierde data** aunque nadie revise el aviso.
+**Casos posibles:**
+
+| Caso | Comportamiento |
+|---|---|
+| Mes actual (en curso) | Siempre live scan (cron aún no corrió, archivo no existe) |
+| Mes pasado, cron OK | Usa archivo (lectura instantánea) |
+| Mes pasado, cron falló pero entregados aún en retención (<60 días) | Live scan funciona. Botón manual "Regenerar reporte" persiste. |
+| Mes pasado >60 días + cron falló + entregados borrados | **Data perdida.** Único caso problemático.
+
+### 6.2 Cron idempotente del registro mensual
+
+`monthly-report.php` corre **diariamente a las 02:00 ART** (no solo día 1):
+
+```
+1. Para cada mes en los últimos 3 meses cerrados:
+   Si bs-data/registro/by-month/{YYYY-MM}.json NO existe:
+     Detectar entregados con entregado_at en ese mes desde bs-data/clientes/
+     Si hay datos:
+       - Sumar totales (USD, ARS, m²)
+       - Top materiales del mes
+       - Lista de entregados con concepto + cliente
+       - Guardar by-month/{YYYY-MM}.json
+       - Generar by-month/{YYYY-MM}.xlsx
+     Si no hay datos (entregados ya fueron borrados por retención):
+       - Loggear en _cron-log.txt: "mes {YYYY-MM}: no hay datos, no se generó reporte"
+2. Append a _cron-log.txt con timestamp + resumen de la corrida.
+```
+
+**Idempotencia:** la corrida diaria se autocorrige. Si el día 1 falla por algo, el día 2 detecta el reporte faltante y lo genera.
+
+**Margen de seguridad:** ~25 días (60 días de retención menos los 5 días ya pasados desde fin de mes en el peor caso) para que el cron logre auto-corregirse antes de perder datos.
 
 ### 6.2 Estructura del JSON del reporte
 
-`bs-data/reportes/2026-05.json`:
+`bs-data/registro/2026-05.json`:
 
 ```json
 {
