@@ -1250,6 +1250,10 @@ table select{cursor:pointer}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
     Generar PDF
   </button>
+  <button class="btn btn-p" onclick="bsGuardarPresupuesto()" id="btn-guardar" title="Guardar el presupuesto en el registry">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    Guardar presupuesto
+  </button>
   <span class="spacer"></span>
   <button class="btn btn-link" onclick="limpiar()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
@@ -4715,6 +4719,139 @@ function toggleTheme(){
 (function(){
   const saved=localStorage.getItem('bs-theme');
   if(saved==='dark')document.documentElement.setAttribute('data-theme','dark');
+})();
+
+// ============================================================
+// BS REGISTRY — Fetch outbound (next-nro + save)
+// ============================================================
+//
+// 100% try/catch defensivo. Si los endpoints no existen o fallan,
+// la calc sigue idéntica al baseline v1.3. Sin acoplamiento.
+//
+// 2 puntos de contacto:
+//   1. Al cargar: GET api/next-nro.php → autocompletar input "N°"
+//   2. Click "Guardar": POST api/save.php con el snapshot del state
+// ============================================================
+
+(function bsRegistryInit(){
+  function bsAutoIncrementNro(){
+    var nroInput = document.getElementById('nro');
+    if (!nroInput) return;
+    if (nroInput.value && nroInput.value !== '0000') return;
+    fetch('api/next-nro.php', { credentials: 'same-origin' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if (d && d.ok && d.next && (!nroInput.value || nroInput.value === '0000')) {
+          nroInput.value = d.next;
+          nroInput.dataset.bsAuto = '1';
+        }
+      })
+      .catch(function(){ /* silencioso */ });
+  }
+
+  function _safe(fn, def){ try { return fn(); } catch(e){ return def; } }
+
+  function bsCollectState(){
+    return {
+      cliente: {
+        nombre:    _safe(function(){ return document.getElementById('cli').value || ''; }, ''),
+        dni:       _safe(function(){ return document.getElementById('dni').value || ''; }, ''),
+        celular:   _safe(function(){ return document.getElementById('cel').value || ''; }, ''),
+        direccion: _safe(function(){ return document.getElementById('dir').value || ''; }, ''),
+        email:     ''
+      },
+      fecha: _safe(function(){ return document.getElementById('fecha').value || ''; }, ''),
+      presupuesto: {
+        secciones: _safe(function(){ return D; }, {}),
+        zocalos:   _safe(function(){ return ZOCALOS; }, { items: [] }),
+        extras:    _safe(function(){ return EXTRAS; }, []),
+        variantes: _safe(function(){ return VARS; }, { items: [] }),
+        bachas:    _safe(function(){ return BACHAS; }, { items: [] }),
+        adicionales: _safe(function(){
+          var fz = document.getElementById('fleteZona');
+          var esc = (typeof getAdic === 'function') ? getAdic('esc') : { cant: 0, monto: 0, total: 0, mon: 'USD' };
+          var ang = (typeof getAdic === 'function') ? getAdic('ang') : { cant: 0, monto: 0, total: 0, mon: 'USD' };
+          var fleteVal = (typeof getFleteVal === 'function') ? getFleteVal() : 0;
+          var fleteZona = (typeof getFleteZonaLabel === 'function') ? getFleteZonaLabel() : (fz ? fz.value : '');
+          return {
+            flete:    { zona: fleteZona, monto: fleteVal },
+            escalera: esc,
+            angulos:  ang
+          };
+        }, { flete: {}, escalera: {}, angulos: {} }),
+        factura:    _safe(function(){ return document.getElementById('factura').value === '1'; }, false),
+        dolar_venta: _safe(function(){ return DOLAR_VENTA || 0; }, 0),
+        totales:    _safe(function(){
+          var gusd = parseFloat((document.getElementById('gusd')||{}).innerText) || 0;
+          var gars = parseFloat((document.getElementById('gars')||{}).innerText) || 0;
+          var gm   = parseFloat((document.getElementById('gm')||{}).innerText) || 0;
+          return { usd: gusd, ars: gars, m2_total: gm };
+        }, {})
+      },
+      exports_options: {
+        incTotal:    _safe(function(){ return document.getElementById('optTotal').checked; }, true),
+        incSena:     _safe(function(){ return document.getElementById('optSena').checked; }, false),
+        incSaldo:    _safe(function(){ return document.getElementById('optSaldo').checked; }, false),
+        incTotalARS: _safe(function(){ return document.getElementById('optTotalARS').checked; }, false)
+      },
+      concepto: ''
+    };
+  }
+
+  window.bsGuardarPresupuesto = function(){
+    var btn = document.getElementById('btn-guardar');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+
+    function reset(){ if (btn) { btn.disabled = false; btn.style.opacity = ''; } }
+
+    try {
+      var state = bsCollectState();
+      if (!state.cliente.nombre.trim()) {
+        alert('Falta el nombre del cliente.');
+        reset();
+        return;
+      }
+
+      var nroInput = document.getElementById('nro');
+      var nroTipeado = nroInput ? nroInput.value.trim() : '';
+      var fueAuto = nroInput && nroInput.dataset.bsAuto === '1';
+
+      var payload = fueAuto
+        ? { mode: 'new_client',  cliente_nro_proposed: nroTipeado, cliente: state.cliente, concepto: state.concepto, presupuesto: state.presupuesto }
+        : { mode: 'append_to',   cliente_nro_target:   nroTipeado, cliente: state.cliente, concepto: state.concepto, presupuesto: state.presupuesto };
+
+      fetch('api/save.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        reset();
+        if (!d || !d.ok) {
+          alert('Error al guardar: ' + ((d && d.error) || 'desconocido'));
+          return;
+        }
+        if (nroInput && d.cliente_nro) {
+          nroInput.value = d.cliente_nro;
+          nroInput.dataset.bsAuto = '';
+        }
+        var msg = 'Presupuesto guardado: ' + d.cliente_nro + '-' + d.sub;
+        if (d.warning) msg += '\n\n' + d.warning;
+        alert(msg);
+      })
+      .catch(function(){
+        reset();
+        alert('No se pudo guardar (registry no disponible). La calc sigue funcionando — podés exportar Excel/PDF.');
+      });
+    } catch (e) {
+      reset();
+      alert('Error inesperado al preparar el guardado: ' + e.message);
+    }
+  };
+
+  bsAutoIncrementNro();
 })();
 </script>
 </body>
