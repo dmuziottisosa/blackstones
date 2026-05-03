@@ -4939,12 +4939,25 @@ function toggleTheme(){
       if (!load) return;
       var m = load.match(/^(\d{4,})-(\d+)$/);
       if (!m) return;
+      if (autopdf){
+        try {
+          var st = document.createElement('style');
+          st.textContent = 'html{background:#FAF8F4!important}body{visibility:hidden!important}html::after{content:"Generando PDF…";position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font:14px -apple-system,sans-serif;color:#7A6649;letter-spacing:.04em}';
+          document.head.appendChild(st);
+        } catch(e){}
+      }
       fetch('api/get-state.php?nro=' + encodeURIComponent(m[1]) + '&sub=' + encodeURIComponent(m[2]), { credentials: 'same-origin' })
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(d){
           if (!d || !d.ok){ alert('No se pudo cargar ' + load + ': ' + ((d && d.error) || 'error')); return; }
           bsApplyState(d);
-          if (autopdf){ setTimeout(function(){ var btn = document.getElementById('btn-pdf'); if (btn) btn.click(); }, 700); }
+          if (autopdf){
+            setTimeout(function(){
+              var btn = document.getElementById('btn-pdf');
+              if (btn) btn.click();
+              setTimeout(function(){ try { window.close(); } catch(e){} }, 600);
+            }, 700);
+          }
         })
         .catch(function(){ /* silencioso */ });
     } catch(e){ /* silencioso */ }
