@@ -1,0 +1,16 @@
+# ============================================================
+# .htaccess — API del registry de presupuestos
+# ============================================================
+
+# Bloquear acceso directo a archivos de configuración (los que arrancan con _)
+<FilesMatch "^_">
+    Require all denied
+</FilesMatch>
+
+# Fallback Apache vieja
+<IfModule !mod_authz_core.c>
+    <FilesMatch "^_">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
