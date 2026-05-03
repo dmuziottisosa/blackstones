@@ -209,7 +209,7 @@ async function cargarActivos() {
       const transitions = (TRANSICIONES[r.estado] || []).map(t =>
         `<button onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${t}')">→ ${ESTADOS_LABELS[t]}</button>`
       ).join('');
-      const verPdf = `<a class="btn-link" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&autopdf=1" target="_blank">Ver PDF</a>`;
+      const verPdf = `<a class="btn-link" href="/calculadora/api/render-pdf.php?nro=${r.cliente_nro}&sub=${r.sub}" target="_blank">Ver PDF</a>`;
       const cargar = `<a class="btn-link" href="/calculadora/?load=${r.cliente_nro}-${r.sub}" target="_blank">Cargar</a>`;
       const zip = r.estado === 'entregado'
         ? `<a href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
