@@ -56,57 +56,26 @@ La calc **propone** un N° (auto-incremento). El server, con flock, **asigna** e
       "fecha": "2026-03-15T10:00:00-03:00",
       "concepto": "cocina principal",
       "estado": "entregado",
+      "entregado_at": "2026-04-10T16:00:00-03:00",
       "transiciones": [
         { "estado": "borrador", "at": "2026-03-15T10:00:00-03:00" },
         { "estado": "enviado", "at": "2026-03-15T11:30:00-03:00" },
         { "estado": "aprobado", "at": "2026-03-18T09:00:00-03:00" },
         { "estado": "entregado", "at": "2026-04-10T16:00:00-03:00" }
       ],
-      "presupuesto": null,
-      "summary": {
-        "monto_usd": 2100,
-        "monto_ars": 0,
-        "m2_total": 5.6,
-        "materiales": ["Granito Importado · Blanco Dallas"],
-        "secciones_count": 1,
-        "archivado_at": "2026-04-17T03:00:00-03:00"
-      }
+      "presupuesto": { "...": "full data — persiste 60 días desde entregado_at" },
+      "zip_path": "bs-data/zips/0042-1.zip"
     },
     {
-      "sub": 2,
-      "fecha": "2026-04-15T15:20:00-03:00",
-      "concepto": "cocina depto hijo",
-      "estado": "perdido",
-      "transiciones": [
-        { "estado": "borrador", "at": "2026-04-15T15:20:00-03:00" },
-        { "estado": "enviado", "at": "2026-04-15T17:00:00-03:00" },
-        { "estado": "perdido", "at": "2026-04-22T10:00:00-03:00" }
-      ],
-      "presupuesto": { "...": "full data ver § 3" },
-      "summary": null
-    },
-    {
-      "sub": 3,
-      "fecha": "2026-05-01T11:00:00-03:00",
-      "concepto": "baño",
-      "estado": "enviado",
-      "transiciones": [
-        { "estado": "borrador", "at": "2026-05-01T11:00:00-03:00" },
-        { "estado": "enviado", "at": "2026-05-01T13:45:00-03:00" }
-      ],
-      "presupuesto": { "...": "full data" },
-      "summary": null
-    },
-    {
-      "sub": 4,
+      "sub": 5,
       "fecha": "2026-05-02T14:30:00-03:00",
-      "concepto": "baño v2 (cambió bacha)",
+      "concepto": "baño nuevo",
       "estado": "borrador",
       "transiciones": [
         { "estado": "borrador", "at": "2026-05-02T14:30:00-03:00" }
       ],
       "presupuesto": { "...": "full data" },
-      "summary": null
+      "zip_path": null
     }
   ]
 }
@@ -116,7 +85,7 @@ La calc **propone** un N° (auto-incremento). El server, con flock, **asigna** e
 
 ## 3. Estructura del campo `presupuesto`
 
-Cuando `estado != "entregado-archivado"`, este campo contiene **todo lo necesario para rehidratar el estado completo de la calc**:
+Mientras la cotización vive (no fue borrada por retención), este campo contiene **todo lo necesario para rehidratar el estado completo de la calc**:
 
 ```json
 {
@@ -216,8 +185,9 @@ Campos específicos:
            │
            ▼
      ┌────────────┐
-     │ entregado  │ → +10 días → archivado (presupuesto = null + summary)
-     └────────────┘
+     │ entregado  │ ─► dispara borrado de hermanas (no entregadas) +
+     └────────────┘    persiste 60 días desde entregado_at +
+                       a los 60 días → BORRADO COMPLETO del archivo
 ```
 
 ### 4.2 Transiciones permitidas
@@ -228,8 +198,8 @@ Campos específicos:
 | borrador | perdido | **Manual**. |
 | enviado | aprobado | **Manual**. |
 | enviado | perdido | **Manual**. |
-| aprobado | entregado | **Manual**. Dispara aviso UI (ver § 4.4). |
-| entregado | (archivado) | Automático por cron, +10 días después de `entregado_at`. |
+| aprobado | entregado | **Manual**. Dispara aviso UI + **borrado inmediato de hermanas no entregadas** (ver § 4.4). |
+| entregado | (borrado) | Automático por cron, +60 días después de `entregado_at`. NO hay light-archive intermedio — eliminación completa. |
 
 **Todas las transiciones de estado son manuales.** Sin auto-transiciones por exportación ni por otros disparadores. El equipo decide explícitamente cada cambio desde la página de presupuestos.
 
@@ -243,72 +213,179 @@ Array append-only que registra cada cambio de estado con timestamp. Permite anal
 
 Cuando el equipo cambia el estado de una cotización a `entregado` desde la página de presupuestos, el frontend muestra un modal/toast informativo:
 
-> **"Si querés guardar este presupuesto para tus records, descargalo ahora.**
-> **En 10 días, el detalle se elimina (queda solo el resumen: monto, m², materiales)."**
+> **"Si marcás como entregado:**
+> **• Las otras sub-versiones del cliente (borradores, enviados, aprobados, perdidos) se eliminan ahora.**
+> **• Esta cotización entregada se va a guardar 60 días y después se borra automáticamente.**
+> **• Si querés guardarla más tiempo, descargá el ZIP ahora."**
 >
-> `[⬇ Descargar Excel]` `[⬇ Descargar PDF]` `[Cerrar]`
+> `[⬇ Descargar ZIP]` `[Confirmar entrega]` `[Cancelar]`
 
 **Comportamiento:**
-- El aviso es **informativo, no bloqueante**. El estado YA pasó a entregado al momento del aviso. El timer del archive empieza a correr.
-- Los botones de descarga llaman a las mismas funciones que la calc (`generarExcel`/`generarPDF`) usando el JSON cargado.
-- El aviso aparece **una sola vez por transición** — si el equipo vuelve a editar y re-entregar, no spamea.
-- **Cero acción server-side**: no se genera ni guarda Excel automático en server. La descarga es opcional y manual.
-
-**Por qué este aviso existe:** anticipar el archive del detalle en ENTREGADO+10. El equipo tiene el momento ENTREGADO como punto natural para "asegurar el archivo si lo necesitan" — sin aviso, el ciclo de retención lo borraría 10 días después y solo quedaría el summary.
+- El aviso es **bloqueante** (modal, requiere confirmación) porque el cleanup de hermanas es destructivo.
+- Si confirma → server marca como entregado + borra hermanas + genera ZIP + arranca contador de retención.
+- Si descarga ZIP antes → el blob se construye en cliente con `generarExcel`/`generarPDF` + datos del cliente y se baja directo. No requiere ir al server.
 
 **No se gestiona contabilidad en v1.** El equipo decide qué hacer con el Excel descargado (mandarlo a la contadora, guardarlo en Drive, archivarlo local). La carpeta `bs-data/contabilidad/` **no existe** en este modelo.
 
 ---
 
-## 5. Light-archive (post-entregado +10 días)
+## 5. Política de retención y cleanup
 
-### 5.1 Qué hace el cron
-
-Script `archive-delivered.php` corre nightly (cron de Hostinger). Para cada cliente.json:
+### 5.1 Estructura del filesystem
 
 ```
-Para cada cotización en cotizaciones:
-  Si cotización.estado == "entregado":
-    fecha_entregado = ultima transicion a "entregado" (.at)
-    Si (now - fecha_entregado) > 10 días:
-      cotización.summary = generarSummary(cotización.presupuesto)
-      cotización.presupuesto = null
-      cotización.summary.archivado_at = now
+bs-data/
+├── clientes/
+│   └── {nro}.json                ← ephemeral · 60 días
+├── zips/
+│   └── {nro}-{sub}.zip           ← ephemeral · 60 días desde creación
+└── reportes/
+    ├── 2026-05.json              ← permanente · data estructurada
+    ├── 2026-05.xlsx              ← permanente · Excel descargable
+    ├── 2026-05.viewed            ← flag (touch file, vacío)
+    └── ...
 ```
 
-### 5.2 Estructura del summary
+### 5.2 Reglas de cleanup
 
-Contiene lo mínimo para responder "qué hizo este cliente con nosotros":
+**Trigger inmediato — al marcar ENTREGADO sobre una cotización:**
 
-```json
-{
-  "monto_usd": 2100,
-  "monto_ars": 0,
-  "m2_total": 5.6,
-  "materiales": ["Granito Importado · Blanco Dallas", "Silestone · Calacatta Gold"],
-  "secciones_count": 2,
-  "archivado_at": "2026-04-17T03:00:00-03:00"
-}
+- Todas las otras sub-versiones del mismo cliente.json en estados `borrador`, `enviado`, `aprobado`, `perdido` → **borradas inmediatamente del array**.
+- La cotización marcada como entregado:
+  - Persiste con full detail durante 60 días desde `entregado_at`.
+  - Server genera automáticamente el ZIP (`bs-data/zips/{nro}-{sub}.zip`) con Excel + PDF + datos del cliente.
+- **Múltiples entregados conviven**: marcar un nuevo entregado NO borra entregados previos del mismo cliente.
+
+**Trigger periódico — cron `cleanup-retention.php` (nightly, 03:00 ART):**
+
+```
+Para cada bs-data/clientes/{nro}.json:
+  Para cada cotización del array:
+    Si estado == "entregado" Y (now - entregado_at) > 60 días:
+      Borrar la cotización del array
+    Si estado != "entregado" Y NO existe ningún entregado activo en este cliente
+       Y (now - última_modificación) > 60 días:
+      Borrar la cotización del array
+  Si quedaron 0 cotizaciones en el array:
+    Borrar el cliente.json entero del filesystem
+
+Para cada bs-data/zips/{archivo}.zip:
+  Si (now - file_mtime) > 60 días:
+    Borrar el archivo
 ```
 
-Campos:
-- `monto_usd` y `monto_ars`: totales antes de IVA.
-- `m2_total`: suma de m² de todas las secciones + zócalos.
-- `materiales`: lista deduplicada de "Material · Color" usados.
-- `secciones_count`: cuántas secciones tuvieron items (mesada, alzada, etc.).
-- `archivado_at`: ISO timestamp del momento del archivado.
+**Importante:** sin un entregado activo, los borradores/enviados/aprobados/perdidos se cuentan desde su última modificación, no desde el momento del primer entregado. Es decir: un cliente que solo tuvo perdidos se borra completamente a los 60 días desde la última actividad.
 
-### 5.3 Recuperabilidad
+**Manual — botón "Eliminar presupuesto":**
 
-**No hay recuperación automática del detalle archivado.** Si el equipo necesita el detalle dentro de la ventana de 10 días, tiene que descargar el Excel/PDF antes. Después de archivar = solo summary.
+- Disponible en la página de presupuestos por cada cotización individual.
+- Borra esa cotización del array sin esperar retención.
+- Si queda el cliente.json vacío, también se borra el archivo entero.
+- Acción confirmada con modal.
 
-Mitigación opcional: si dolió → ampliar la ventana a 14 o 30 días con cambio en `archive-delivered.php`.
+### 5.3 Storage proyectado
+
+| Componente | Crecimiento real |
+|---|---|
+| `clientes/` (rolling, ~50 cotizaciones activas en pico) | ~3 MB constante |
+| `zips/` (rolling, ~50 zips activos) | ~2.5 MB constante |
+| `reportes/` (5 años acumulados) | ~2 MB total |
+| **Total disco usado en cualquier momento** | **<10 MB** |
+
+Hostinger Premium da 100+ GB. Storage **matemáticamente nunca es un problema**.
 
 ---
 
-## 6. Generación del N° de cliente
+## 6. Reportes mensuales
 
-### 6.1 Algoritmo `next-nro.php`
+### 6.1 Auto-generación
+
+**Cron `monthly-report.php` corre día 1 de cada mes a las 02:00 ART:**
+
+```
+1. Detectar mes anterior (ej: si corre 2026-06-01, mes objetivo es 2026-05).
+2. Scan de bs-data/clientes/*.json
+3. Para cada cotización con estado=entregado y entregado_at en el mes objetivo:
+   - Sumar a totales: monto USD, monto ARS, m²
+   - Acumular materiales únicos
+   - Contar clientes únicos
+4. Guardar bs-data/reportes/{YYYY-MM}.json
+5. Generar bs-data/reportes/{YYYY-MM}.xlsx (Excel descargable)
+6. NO crear el .viewed flag (queda pendiente para el equipo)
+```
+
+**Por qué automático y no manual:** si el equipo no clickea o está de vacaciones, los entregados podrían empezar a borrarse por retención antes de aparecer en un reporte. Con cron nightly, **nunca se pierde data** aunque nadie revise el aviso.
+
+### 6.2 Estructura del JSON del reporte
+
+`bs-data/reportes/2026-05.json`:
+
+```json
+{
+  "version": "1.0",
+  "mes": "2026-05",
+  "generado_at": "2026-06-01T02:00:00-03:00",
+  "generado_por": "cron-auto",
+  "totales": {
+    "entregados_count": 23,
+    "clientes_unicos": 19,
+    "monto_usd": 47300.00,
+    "monto_ars": 0,
+    "m2_total": 145.6,
+    "ticket_promedio_usd": 2056.52,
+    "ticket_promedio_m2": 6.33
+  },
+  "materiales": [
+    { "material": "Granito Importado", "color": "Blanco Dallas", "count": 4, "m2": 22.3, "monto_usd": 9800 },
+    { "material": "Silestone", "color": "Calacatta Gold", "count": 3, "m2": 18.5, "monto_usd": 12200 },
+    ...
+  ],
+  "entregados": [
+    {
+      "cliente_nro": "0042",
+      "sub": 1,
+      "cliente_nombre": "Carolina Perez",
+      "fecha_entregado": "2026-05-15",
+      "concepto": "cocina principal",
+      "monto_usd": 2100,
+      "m2": 5.6,
+      "materiales": ["Granito Importado · Blanco Dallas"]
+    },
+    ...
+  ]
+}
+```
+
+### 6.3 UI: Página `/presupuestos/reportes/`
+
+**Vista principal:**
+
+- Banner discreto arriba si hay reporte sin "ver" (`{mes}.viewed` no existe): *"📊 Reporte de {mes} listo · [Ver] [Descargar Excel]"*
+- Al click en Ver / Descargar: server crea `{mes}.viewed` (touch file vacío). Banner desaparece para siempre en ese mes.
+- Tabla de meses con totales (USD, ARS, m², count entregados). Click en una fila → expande inline detalle:
+  - Lista de entregados del mes
+  - Materiales únicos con subtotales
+  - Stats agregados (ticket promedio, top materiales)
+- Cada fila tiene botón `[↓ Excel]` para descargar el `.xlsx` permanente.
+- Botón "Marcar como no visto" → borra `{mes}.viewed`, banner vuelve a aparecer.
+
+**Sección manual:**
+
+- Selector de mes + botón "Generar reporte manual".
+- Sobreescribe el JSON+XLSX existente (con confirm si ya había uno).
+- Útil para: regenerar tras corrección manual, recuperar tras fallo del cron, generar meses históricos antes de la implementación.
+
+### 6.4 Permanencia
+
+**Los reportes mensuales no tienen retención.** Se mantienen permanentes. Cada uno es ~35 KB (JSON + Excel). 5 años = ~2 MB total.
+
+Son la **memoria contable del negocio** independiente del cleanup de cotizaciones individuales.
+
+---
+
+## 7. Generación del N° de cliente
+
+### 7.1 Algoritmo `next-nro.php`
 
 ```
 locked_directory_scan(bs-data/clientes/):
@@ -321,7 +398,7 @@ locked_directory_scan(bs-data/clientes/):
   return zero_pad(max(numbers) + 1, 4)
 ```
 
-### 6.2 Modos de save
+### 7.2 Modos de save
 
 El payload del POST a `save.php` incluye:
 
@@ -335,7 +412,7 @@ El payload del POST a `save.php` incluye:
 }
 ```
 
-### 6.3 Resolución de modos en el server
+### 7.3 Resolución de modos en el server
 
 **Si `mode = "new_client"`:**
 ```
@@ -363,7 +440,7 @@ locked_release()
 return { cliente_nro: cliente_nro_target, sub: sub }
 ```
 
-### 6.4 Cómo la calc determina el `mode`
+### 7.4 Cómo la calc determina el `mode`
 
 | Situación frontend | Mode enviado |
 |---|---|
@@ -379,9 +456,9 @@ Tracking interno en la calc:
 
 ---
 
-## 7. Endpoints
+## 8. Endpoints
 
-### 7.1 `GET /api/next-nro.php`
+### 8.1 `GET /api/next-nro.php`
 
 **Auth:** HMAC cookie de la calc.
 **Response:**
@@ -389,7 +466,7 @@ Tracking interno en la calc:
 { "next": "0044" }
 ```
 
-### 7.2 `POST /api/save.php`
+### 8.2 `POST /api/save.php`
 
 **Auth:** HMAC cookie.
 **Body:** estructura de § 6.2.
@@ -420,7 +497,7 @@ Si hubo conflict de N°:
 { "ok": false, "error": "mensaje legible" }
 ```
 
-### 7.3 `GET /api/load.php?nro={X}[&sub={Y}]`
+### 8.3 `GET /api/load.php?nro={X}[&sub={Y}]`
 
 **Auth:** HMAC cookie.
 **Comportamiento:**
@@ -435,7 +512,7 @@ Si hubo conflict de N°:
 }
 ```
 
-### 7.4 `GET /api/list.php?[query=string]&[estado=X]&[fecha_desde=YYYY-MM-DD]&[fecha_hasta=...]&[page=1]&[per_page=50]`
+### 8.4 `GET /api/list.php?[query=string]&[estado=X]&[fecha_desde=YYYY-MM-DD]&[fecha_hasta=...]&[page=1]&[per_page=50]`
 
 **Auth:** HMAC cookie.
 **Comportamiento:** lista de clientes + cotizaciones con filtros.
@@ -460,7 +537,7 @@ Si hubo conflict de N°:
 }
 ```
 
-### 7.5 `POST /api/state.php`
+### 8.5 `POST /api/state.php`
 
 **Auth:** HMAC cookie.
 **Body:**
@@ -481,7 +558,7 @@ Server:
 
 ---
 
-## 8. Versionado del contract
+## 9. Versionado del contract
 
 `version: "1.0"` está hardcoded en cada archivo. Si en el futuro se cambian campos:
 
@@ -493,34 +570,34 @@ Política: cada cambio de versión documentado en `01-strategy/decision-log/` co
 
 ---
 
-## 9. Edge cases documentados
+## 10. Edge cases documentados
 
-### 9.1 DNI faltante
+### 10.1 DNI faltante
 Cliente sin DNI se acepta. El campo queda `""` en el JSON. La búsqueda en `list.php` por DNI lo ignora.
 
-### 9.2 Cliente con un solo presupuesto perdido y desaparece
+### 10.2 Cliente con un solo presupuesto perdido y desaparece
 El archivo del cliente queda en disco con su único presupuesto perdido. No se borra. La página de presupuestos lo muestra normalmente.
 
-### 9.3 Borrar manualmente un presupuesto
+### 10.3 Borrar manualmente un presupuesto
 **No implementado en MVP.** Si hay que borrar, el equipo edita el JSON a mano (o usa una utility CLI futura). Razón: forzar trazabilidad, no perder data por accidente.
 
-### 9.4 Calc carga `?load=0042-99` (sub que no existe)
+### 10.4 Calc carga `?load=0042-99` (sub que no existe)
 Server `load.php` devuelve error. Calc fallback: ignora el query param, arranca limpia con next nro auto-asignado.
 
-### 9.5 Concurrencia en append_to
+### 10.5 Concurrencia en append_to
 Dos equipos agregan sub-versiones al mismo cliente al mismo segundo. Flock serializa. Ambos quedan registrados, sub crecientes consecutivos.
 
-### 9.6 El cron de archive-delivered falla
+### 10.6 El cron de archive-delivered falla
 Idempotente: corre nightly, si una corrida falla, la siguiente toma los pendientes. Sin pérdida de datos.
 
-### 9.7 El registry está abajo (endpoints no responden)
+### 10.7 El registry está abajo (endpoints no responden)
 La calc detecta y muestra mensaje "Registry no disponible, podés seguir trabajando localmente y guardar después". El estado en la calc se sigue persistiendo en localStorage como hoy.
 
 ---
 
-## 10. Compatibilidad con la calc actual
+## 11. Compatibilidad con la calc actual
 
-### 10.1 Lo que se agrega a la calc
+### 11.1 Lo que se agrega a la calc
 
 Solo dos cosas, sin tocar nada más:
 
@@ -529,7 +606,7 @@ Solo dos cosas, sin tocar nada más:
    - Si query param `?cliente=X` o `?load=X-Y` → fetch + autocompletar inputs.
    - Si no hay query param → fetch `next-nro.php` y autocompletar input N° (try/catch fallback: input vacío como hoy).
 
-### 10.2 Lo que NO se toca
+### 11.2 Lo que NO se toca
 
 - El layout de la calc.
 - El flow de exports (Excel/PDF) más allá del refactor a `exports.js`.
@@ -538,7 +615,7 @@ Solo dos cosas, sin tocar nada más:
 - El cálculo de m² y totales.
 - Las variantes y adicionales.
 
-### 10.3 Reverse-compatibility
+### 11.3 Reverse-compatibility
 
 Si mañana el dueño dice "saquemos el registry":
 1. Borrar carpeta `calculadora/api/`.
@@ -550,7 +627,7 @@ El botón "Guardar presupuesto" en la calc queda inerte (siempre falla) — se b
 
 ---
 
-## 11. Test cases para validar el contract
+## 12. Test cases para validar el contract
 
 Casos que el sistema tiene que manejar correctamente:
 
@@ -569,7 +646,7 @@ Casos que el sistema tiene que manejar correctamente:
 
 ---
 
-## 12. Cuándo se actualiza este doc
+## 13. Cuándo se actualiza este doc
 
 - Cambia algún campo del JSON (bump version).
 - Cambia el algoritmo de generación de N°.
