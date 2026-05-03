@@ -46,7 +46,7 @@ function auth_login(): void {
 
     setcookie(AUTH_COOKIE_NAME, $value, [
         'expires'  => $expiresAt,
-        'path'     => '/calculadora/',
+        'path'     => '/',
         'domain'   => '',           // dominio actual
         'secure'   => true,         // solo HTTPS
         'httponly' => true,         // no accesible desde JS
@@ -56,15 +56,18 @@ function auth_login(): void {
 
 /**
  * Borra la cookie (logout).
+ * Borra cookies de path=/ (nueva) y path=/calculadora/ (legacy) por compat.
  */
 function auth_logout(): void {
-    setcookie(AUTH_COOKIE_NAME, '', [
-        'expires'  => time() - 3600,
-        'path'     => '/calculadora/',
-        'secure'   => true,
-        'httponly' => true,
-        'samesite' => 'Lax',
-    ]);
+    foreach (['/', '/calculadora/'] as $p) {
+        setcookie(AUTH_COOKIE_NAME, '', [
+            'expires'  => time() - 3600,
+            'path'     => $p,
+            'secure'   => true,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
 }
 
 /**
