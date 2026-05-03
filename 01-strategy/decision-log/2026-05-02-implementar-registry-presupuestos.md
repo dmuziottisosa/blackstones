@@ -90,7 +90,7 @@ El JSON contract canónico está en `03-product/calculadora/json-contract-v1.md`
 
 | Componente | Tecnología | Justificación |
 |---|---|---|
-| Storage | Filesystem JSON files en `data-blackstones/` (fuera de `public_html/`) | Simplicidad, no-DB, debuggeable, backup = `cp -r` |
+| Storage | Filesystem JSON files en `bs-data/` (fuera de `public_html/`) | Simplicidad, no-DB, debuggeable, backup = `cp -r` |
 | API | PHP 8.x con endpoints en `calculadora/api/` | Reusa stack existente |
 | Auth | HMAC cookie (mismo patrón que `auth_check.php`) | Cero cambios de UX para el equipo |
 | Concurrencia | `flock()` per-archivo | Suficiente para <5 escrituras simultáneas |
@@ -103,7 +103,7 @@ El JSON contract canónico está en `03-product/calculadora/json-contract-v1.md`
 Si mañana el dueño quiere remover el registry:
 1. Borrar `calculadora/api/`.
 2. Borrar `presupuestos/`.
-3. Borrar `data-blackstones/` (con backup previo si querés).
+3. Borrar `bs-data/` (con backup previo si querés).
 4. **La calc sigue idéntica al baseline v1.3.**
 
 Esto es ley de diseño no negociable.
@@ -145,7 +145,7 @@ Esto es ley de diseño no negociable.
 - [ ] `calculadora/api/load.php` — GET por `nro` o `nro+sub`.
 - [ ] `calculadora/api/list.php` — GET paginado/filtrable.
 - [ ] `calculadora/api/state.php` — POST cambio de estado, valida transición.
-- [ ] Crear directorio `data-blackstones/clientes/` en Hostinger via FTP MKD.
+- [ ] Crear directorio `bs-data/clientes/` en Hostinger via FTP MKD.
 - [ ] `.htaccess` que bloquee acceso público a `api/` excepto via auth.
 - [ ] Test cases (§ 11 del contract): smoke manual con 12 escenarios.
 
@@ -191,7 +191,7 @@ Esto es ley de diseño no negociable.
 | Cron de Hostinger no corre como esperado | Media | Bajo | Plan B: trigger lazy archiving en `load.php` cuando un cliente está siendo abierto. |
 | Página de presupuestos carga lento con muchos clientes | Baja-Media (a futuro) | Medio | Pre-computar `_index.json` con metadata cuando crezcamos a >500 clientes. |
 | El equipo no adopta el registry y vuelve a WhatsApp | Media | Alto | UX simple, sin fricciones. Botón "Guardar" único click. Onboarding de 5 min al equipo. |
-| Datos sensibles (DNI, presupuestos) expuestos por bug de auth | Baja | Crítico | `data-blackstones/` fuera de `public_html/`. `.htaccess` defensivo. Auth check en cada endpoint. Pen test manual antes de "ir vivo". |
+| Datos sensibles (DNI, presupuestos) expuestos por bug de auth | Baja | Crítico | `bs-data/` fuera de `public_html/`. `.htaccess` defensivo. Auth check en cada endpoint. Pen test manual antes de "ir vivo". |
 | Hostinger cambia política de storage/cron | Baja | Medio | Migración a otro hosting documentada (no urgente, plan futuro). |
 
 ---

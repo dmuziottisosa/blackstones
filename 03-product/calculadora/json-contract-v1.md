@@ -33,7 +33,7 @@ La calc **propone** un N° (auto-incremento). El server, con flock, **asigna** e
 
 ## 2. Estructura del archivo cliente
 
-**Path:** `data-blackstones/clientes/{cliente_nro}.json` (fuera de `public_html/`).
+**Path:** `bs-data/clientes/{cliente_nro}.json` (fuera de `public_html/`).
 
 **Ejemplo completo:**
 
@@ -224,18 +224,39 @@ Campos específicos:
 
 | Desde | A | Trigger |
 |---|---|---|
-| borrador | enviado | Manual desde página de presupuestos. Auto al exportar Excel/PDF (futuro). |
-| borrador | perdido | Manual. |
-| enviado | aprobado | Manual. |
-| enviado | perdido | Manual. |
-| aprobado | instalado | Manual. |
+| borrador | enviado | **Manual** desde página de presupuestos. |
+| borrador | perdido | **Manual**. |
+| enviado | aprobado | **Manual**. Dispara aviso UI (ver § 4.4). |
+| enviado | perdido | **Manual**. |
+| aprobado | instalado | **Manual**. |
 | instalado | (archivado) | Automático por cron, +7 días después de `instalado_at`. |
+
+**Todas las transiciones de estado son manuales.** Sin auto-transiciones por exportación ni por otros disparadores. El equipo decide explícitamente cada cambio desde la página de presupuestos.
 
 **Sin transiciones inversas.** Si el cliente "vuelve" después de perder, se crea sub-versión nueva con estado `borrador`, no se reabre la perdida.
 
 ### 4.3 Campo `transiciones[]`
 
 Array append-only que registra cada cambio de estado con timestamp. Permite analytics futuros (ej: tiempo medio enviado→aprobado).
+
+### 4.4 Aviso UI al pasar a APROBADO
+
+Cuando el equipo cambia el estado de una cotización a `aprobado` desde la página de presupuestos, el frontend muestra un modal/toast informativo:
+
+> **"Si querés guardar este presupuesto para tus records, descargalo ahora.**
+> **Cuando pase a INSTALADO + 7 días, el detalle se archiva (queda solo el resumen)."**
+>
+> `[⬇ Descargar Excel]` `[⬇ Descargar PDF]` `[Cerrar]`
+
+**Comportamiento:**
+- El aviso es **informativo, no bloqueante**. El estado YA pasó a aprobado al momento del aviso.
+- Los botones de descarga llaman a las mismas funciones que la calc (`generarExcel`/`generarPDF`) usando el JSON cargado.
+- El aviso aparece **una sola vez por transición** — si el equipo vuelve a editar y re-aprobar, no spamea.
+- **Cero acción server-side**: no se genera ni guarda Excel automático en server. La descarga es opcional y manual.
+
+**Por qué este aviso existe:** anticipar el archive del detalle en INSTALADO+7. El equipo tiene el momento APROBADO como punto natural para "asegurar el archivo si lo necesitan" — antes el ciclo de instalación + retención lo borraría sin aviso.
+
+**No se gestiona contabilidad en v1.** El equipo decide qué hacer con el Excel descargado (mandarlo a la contadora, guardarlo en Drive, archivarlo local). La carpeta `bs-data/contabilidad/` **no existe** en este modelo.
 
 ---
 
@@ -290,7 +311,7 @@ Mitigación opcional: si dolió → ampliar la ventana a 14 o 30 días con cambi
 ### 6.1 Algoritmo `next-nro.php`
 
 ```
-locked_directory_scan(data-blackstones/clientes/):
+locked_directory_scan(bs-data/clientes/):
   numbers = []
   for archivo in dir:
     si archivo coincide con /^(\d{4,})\.json$/:
@@ -318,7 +339,7 @@ El payload del POST a `save.php` incluye:
 
 **Si `mode = "new_client"`:**
 ```
-locked_acquire(data-blackstones/clientes/)
+locked_acquire(bs-data/clientes/)
   si existe clientes/{cliente_nro_proposed}.json:
     asignar nuevo nro = next-nro
   sino:
@@ -330,7 +351,7 @@ return { cliente_nro: nro_asignado, sub: 1 }
 
 **Si `mode = "append_to"`:**
 ```
-locked_acquire(data-blackstones/clientes/{cliente_nro_target}.json)
+locked_acquire(bs-data/clientes/{cliente_nro_target}.json)
   si NO existe:
     crear archivo nuevo con ese nro y cotizacion sub=1
   sino:
@@ -522,7 +543,7 @@ Solo dos cosas, sin tocar nada más:
 Si mañana el dueño dice "saquemos el registry":
 1. Borrar carpeta `calculadora/api/`.
 2. Borrar página `presupuestos/`.
-3. Borrar carpeta `data-blackstones/` (después de exportar a un zip si querés data).
+3. Borrar carpeta `bs-data/` (después de exportar a un zip si querés data).
 4. La calc sigue funcionando idéntica al baseline v1.3.
 
 El botón "Guardar presupuesto" en la calc queda inerte (siempre falla) — se borra cuando se quiera con un patch single-line.
