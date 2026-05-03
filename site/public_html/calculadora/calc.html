@@ -4697,7 +4697,16 @@ td,th{padding:5px 8px}
 <div style="text-align:center;font-size:8px;color:#6B6560;margin-top:12px;padding-top:8px;border-top:1px solid #F2EDE3">BlackStones Marmolería  ·  Cel: 11 2468-5820  ·  Of: 5611-5919  ·  contacto@blackstones.com.ar  ·  Av. J.B. Alberdi 3575, CABA  ·  blackstones.com.ar</div>
 </body></html>`;
 
-  // Open in new window so user can print/save as PDF
+  // Si window.bsPdfInline === true → reemplazar la pestaña actual con el preview
+  // (usado por el flujo "Ver PDF" del hub para no mostrar la UI de la calc)
+  if (window.bsPdfInline) {
+    document.open();
+    document.write(html);
+    document.close();
+    return;
+  }
+
+  // Modo normal: nueva ventana
   const w=window.open('','_blank','width=900,height=700');
   if(!w){
     alert('El navegador bloqueó la ventana. Habilitá popups para esta página.');
@@ -4953,9 +4962,13 @@ function toggleTheme(){
           bsApplyState(d);
           if (autopdf){
             setTimeout(function(){
-              var btn = document.getElementById('btn-pdf');
-              if (btn) btn.click();
-              setTimeout(function(){ try { window.close(); } catch(e){} }, 600);
+              try {
+                window.bsPdfInline = true;
+                if (typeof generarPDF === 'function') generarPDF();
+              } catch(e){
+                var btn = document.getElementById('btn-pdf');
+                if (btn) btn.click();
+              }
             }, 700);
           }
         })
