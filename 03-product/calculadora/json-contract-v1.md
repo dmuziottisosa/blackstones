@@ -216,7 +216,7 @@ Campos específicos:
            │
            ▼
      ┌────────────┐
-     │ instalado  │ → +10 días → archivado (presupuesto = null + summary)
+     │ instalado  │ → +7 días → archivado (presupuesto = null + summary)
      └────────────┘
 ```
 
@@ -229,7 +229,7 @@ Campos específicos:
 | enviado | aprobado | Manual. |
 | enviado | perdido | Manual. |
 | aprobado | instalado | Manual. |
-| instalado | (archivado) | Automático por cron, +10 días después de `instalado_at`. |
+| instalado | (archivado) | Automático por cron, +7 días después de `instalado_at`. |
 
 **Sin transiciones inversas.** Si el cliente "vuelve" después de perder, se crea sub-versión nueva con estado `borrador`, no se reabre la perdida.
 
@@ -239,7 +239,7 @@ Array append-only que registra cada cambio de estado con timestamp. Permite anal
 
 ---
 
-## 5. Light-archive (post-instalado +10 días)
+## 5. Light-archive (post-instalado +7 días)
 
 ### 5.1 Qué hace el cron
 
@@ -249,7 +249,7 @@ Script `archive-installed.php` corre nightly (cron de Hostinger). Para cada clie
 Para cada cotización en cotizaciones:
   Si cotización.estado == "instalado":
     fecha_instalado = ultima transicion a "instalado" (.at)
-    Si (now - fecha_instalado) > 10 días:
+    Si (now - fecha_instalado) > 7 días:
       cotización.summary = generarSummary(cotización.presupuesto)
       cotización.presupuesto = null
       cotización.summary.archivado_at = now
@@ -279,7 +279,7 @@ Campos:
 
 ### 5.3 Recuperabilidad
 
-**No hay recuperación automática del detalle archivado.** Si el equipo necesita el detalle dentro de la ventana de 10 días, tiene que descargar el Excel/PDF antes. Después de archivar = solo summary.
+**No hay recuperación automática del detalle archivado.** Si el equipo necesita el detalle dentro de la ventana de 7 días, tiene que descargar el Excel/PDF antes. Después de archivar = solo summary.
 
 Mitigación opcional: si dolió → ampliar la ventana a 14 o 30 días con cambio en `archive-installed.php`.
 
@@ -456,7 +456,7 @@ Server:
 - Valida transición permitida (§ 4.2). Si inválida, rechaza.
 - Appendea a `transiciones[]`.
 - Actualiza `cotizacion.estado`.
-- Si `nuevo_estado == "instalado"`, NO archiva inmediatamente. El cron lo hace +10 días.
+- Si `nuevo_estado == "instalado"`, NO archiva inmediatamente. El cron lo hace +7 días.
 
 ---
 
@@ -540,7 +540,7 @@ Casos que el sistema tiene que manejar correctamente:
 5. **Tipear N° NO existente.** onBlur fetch → no encuentra → mode pasa a `new_client`.
 6. **Concurrencia "new_client" simultánea.** A y B con same proposed. A wins, B baja a next.
 7. **Concurrencia "append_to" simultánea.** A agrega sub 5, B sub 6.
-8. **Estado: borrador → enviado → aprobado → instalado.** Cron archiva +10 días.
+8. **Estado: borrador → enviado → aprobado → instalado.** Cron archiva +7 días.
 9. **Estado: borrador → perdido.** Sin archivado.
 10. **Estado: invalid transition** (ej: instalado → borrador). Server rechaza.
 11. **Endpoint down al cargar calc.** Calc arranca limpia, input N° vacío.
@@ -553,7 +553,7 @@ Casos que el sistema tiene que manejar correctamente:
 - Cambia algún campo del JSON (bump version).
 - Cambia el algoritmo de generación de N°.
 - Cambian las transiciones de estados.
-- Cambia la política de retención (ej: 10 días → 30 días).
+- Cambia la política de retención (ej: 7 días → 30 días).
 - Default: revisión cada 90 días.
 
 ---
