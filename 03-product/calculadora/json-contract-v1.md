@@ -12,14 +12,27 @@
 
 ### 1.1 Decoupling absoluto entre calc y registry
 
-La calc **no depende** del registry para funcionar. Si los endpoints `/api/save.php`, `/api/next-nro.php`, `/api/load.php`, `/api/list.php` no responden o no existen:
+La calc tiene **2 puntos de contacto** con el registry, ambos outbound:
 
-- ❌ El botón "Guardar presupuesto" muestra error toast pero NO rompe nada del estado de la calc.
-- ❌ El auto-incremento del N° al cargar **falla en silencio** y deja el input vacío (comportamiento actual).
-- ❌ La detección de cliente existente onBlur **falla en silencio**, equipo tipea manualmente.
-- ❌ Los query params `?cliente=X` y `?load=X-Y` se ignoran si los endpoints no responden — la calc arranca limpia.
+1. **`fetch /api/next-nro.php` al cargar** — sugiere el N° siguiente para autocompletar el input.
+2. **`fetch /api/save.php` al click "Guardar"** — persiste la cotización.
 
-Implementación: cada fetch del registry envuelto en `try/catch` con fallback al comportamiento legacy. Cero excepciones que rompan UX.
+**Si el registry está caído o desactivado:**
+
+- ❌ Auto-incremento del N° **falla en silencio** → input N° queda vacío (comportamiento del baseline v1.3).
+- ❌ Botón "Guardar" muestra error toast → la calc NO rompe nada de su estado.
+
+**Lo que la calc NO hace nunca:**
+
+- ❌ NO carga datos desde un presupuesto guardado (`?load=` no existe).
+- ❌ NO autocompleta cliente (no hay onBlur que detecte cliente existente).
+- ❌ NO recibe query params de ningún tipo desde el registry.
+
+**Filosofía:** la calc es **input → output, ida sola**. El registry escucha lo que la calc emite, pero la calc nunca escucha lo que el registry sabe (excepto el N° siguiente, que es solo numeración, no memoria).
+
+**Si mañana se borran las carpetas `api/` y `bs-data/`** → la calc cotiza idéntica al baseline v1.3, sin perder ninguna funcionalidad. **Prueba operativa de decoupling absoluto.**
+
+Implementación: los 2 fetches outbound envueltos en `try/catch` con fallback al comportamiento legacy. Cero excepciones que rompan UX.
 
 ### 1.2 Edición = nueva sub-versión, nunca pisar
 
