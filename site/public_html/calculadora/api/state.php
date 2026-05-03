@@ -26,6 +26,7 @@
 
 require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
+require_once __DIR__ . '/_zip-gen.php';
 
 bs_require_auth();
 bs_ensure_dirs();
@@ -104,16 +105,28 @@ try {
         bs_error('Sub-versión no encontrada', 404);
     }
 
-    // Cleanup de hermanas si pasamos a entregado
+    // Cleanup de hermanas si pasamos a entregado + generar ZIP
+    $zip_generated_path = null;
     if ($nuevo_estado === 'entregado') {
         $kept = [];
         foreach ($cliente_obj['cotizaciones'] as $cot) {
             if (intval($cot['sub']) === $sub) {
+                // Generar ZIP para esta cotización entregada
+                $zip_rel = bs_generate_zip($cliente_obj, $cot);
+                if ($zip_rel !== false) {
+                    $cot['zip_path'] = $zip_rel;
+                    $zip_generated_path = $zip_rel;
+                }
                 $kept[] = $cot; // mantener la entregada
             } elseif ($cot['estado'] === 'entregado') {
                 $kept[] = $cot; // mantener otras entregadas (no se pisan)
             } else {
                 $siblings_eliminadas++;
+                // Borrar ZIP huérfano si la hermana tenía uno
+                if (!empty($cot['zip_path'])) {
+                    $orphan_zip = BS_DATA_DIR . '/' . $cot['zip_path'];
+                    if (file_exists($orphan_zip)) @unlink($orphan_zip);
+                }
             }
         }
         $cliente_obj['cotizaciones'] = $kept;
@@ -131,6 +144,7 @@ try {
         'estado_anterior'      => $estado_anterior,
         'estado_nuevo'         => $nuevo_estado,
         'siblings_eliminadas'  => $siblings_eliminadas,
+        'zip_path'             => $zip_generated_path,
     ]);
 
 } catch (Throwable $e) {
