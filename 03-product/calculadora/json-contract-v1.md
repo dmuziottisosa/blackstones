@@ -55,12 +55,12 @@ La calc **propone** un N° (auto-incremento). El server, con flock, **asigna** e
       "sub": 1,
       "fecha": "2026-03-15T10:00:00-03:00",
       "concepto": "cocina principal",
-      "estado": "instalado",
+      "estado": "entregado",
       "transiciones": [
         { "estado": "borrador", "at": "2026-03-15T10:00:00-03:00" },
         { "estado": "enviado", "at": "2026-03-15T11:30:00-03:00" },
         { "estado": "aprobado", "at": "2026-03-18T09:00:00-03:00" },
-        { "estado": "instalado", "at": "2026-04-10T16:00:00-03:00" }
+        { "estado": "entregado", "at": "2026-04-10T16:00:00-03:00" }
       ],
       "presupuesto": null,
       "summary": {
@@ -116,7 +116,7 @@ La calc **propone** un N° (auto-incremento). El server, con flock, **asigna** e
 
 ## 3. Estructura del campo `presupuesto`
 
-Cuando `estado != "instalado-archivado"`, este campo contiene **todo lo necesario para rehidratar el estado completo de la calc**:
+Cuando `estado != "entregado-archivado"`, este campo contiene **todo lo necesario para rehidratar el estado completo de la calc**:
 
 ```json
 {
@@ -216,7 +216,7 @@ Campos específicos:
            │
            ▼
      ┌────────────┐
-     │ instalado  │ → +7 días → archivado (presupuesto = null + summary)
+     │ entregado  │ → +10 días → archivado (presupuesto = null + summary)
      └────────────┘
 ```
 
@@ -226,10 +226,10 @@ Campos específicos:
 |---|---|---|
 | borrador | enviado | **Manual** desde página de presupuestos. |
 | borrador | perdido | **Manual**. |
-| enviado | aprobado | **Manual**. Dispara aviso UI (ver § 4.4). |
+| enviado | aprobado | **Manual**. |
 | enviado | perdido | **Manual**. |
-| aprobado | instalado | **Manual**. |
-| instalado | (archivado) | Automático por cron, +7 días después de `instalado_at`. |
+| aprobado | entregado | **Manual**. Dispara aviso UI (ver § 4.4). |
+| entregado | (archivado) | Automático por cron, +10 días después de `entregado_at`. |
 
 **Todas las transiciones de estado son manuales.** Sin auto-transiciones por exportación ni por otros disparadores. El equipo decide explícitamente cada cambio desde la página de presupuestos.
 
@@ -244,7 +244,7 @@ Array append-only que registra cada cambio de estado con timestamp. Permite anal
 Cuando el equipo cambia el estado de una cotización a `aprobado` desde la página de presupuestos, el frontend muestra un modal/toast informativo:
 
 > **"Si querés guardar este presupuesto para tus records, descargalo ahora.**
-> **Cuando pase a INSTALADO + 7 días, el detalle se archiva (queda solo el resumen)."**
+> **Cuando pase a ENTREGADO + 10 días, el detalle se archiva (queda solo el resumen)."**
 >
 > `[⬇ Descargar Excel]` `[⬇ Descargar PDF]` `[Cerrar]`
 
@@ -254,23 +254,23 @@ Cuando el equipo cambia el estado de una cotización a `aprobado` desde la pági
 - El aviso aparece **una sola vez por transición** — si el equipo vuelve a editar y re-aprobar, no spamea.
 - **Cero acción server-side**: no se genera ni guarda Excel automático en server. La descarga es opcional y manual.
 
-**Por qué este aviso existe:** anticipar el archive del detalle en INSTALADO+7. El equipo tiene el momento APROBADO como punto natural para "asegurar el archivo si lo necesitan" — antes el ciclo de instalación + retención lo borraría sin aviso.
+**Por qué este aviso existe:** anticipar el archive del detalle en ENTREGADO+7. El equipo tiene el momento APROBADO como punto natural para "asegurar el archivo si lo necesitan" — antes el ciclo de entrega + retención lo borraría sin aviso.
 
 **No se gestiona contabilidad en v1.** El equipo decide qué hacer con el Excel descargado (mandarlo a la contadora, guardarlo en Drive, archivarlo local). La carpeta `bs-data/contabilidad/` **no existe** en este modelo.
 
 ---
 
-## 5. Light-archive (post-instalado +7 días)
+## 5. Light-archive (post-entregado +10 días)
 
 ### 5.1 Qué hace el cron
 
-Script `archive-installed.php` corre nightly (cron de Hostinger). Para cada cliente.json:
+Script `archive-delivered.php` corre nightly (cron de Hostinger). Para cada cliente.json:
 
 ```
 Para cada cotización en cotizaciones:
-  Si cotización.estado == "instalado":
-    fecha_instalado = ultima transicion a "instalado" (.at)
-    Si (now - fecha_instalado) > 7 días:
+  Si cotización.estado == "entregado":
+    fecha_entregado = ultima transicion a "entregado" (.at)
+    Si (now - fecha_entregado) > 10 días:
       cotización.summary = generarSummary(cotización.presupuesto)
       cotización.presupuesto = null
       cotización.summary.archivado_at = now
@@ -300,9 +300,9 @@ Campos:
 
 ### 5.3 Recuperabilidad
 
-**No hay recuperación automática del detalle archivado.** Si el equipo necesita el detalle dentro de la ventana de 7 días, tiene que descargar el Excel/PDF antes. Después de archivar = solo summary.
+**No hay recuperación automática del detalle archivado.** Si el equipo necesita el detalle dentro de la ventana de 10 días, tiene que descargar el Excel/PDF antes. Después de archivar = solo summary.
 
-Mitigación opcional: si dolió → ampliar la ventana a 14 o 30 días con cambio en `archive-installed.php`.
+Mitigación opcional: si dolió → ampliar la ventana a 14 o 30 días con cambio en `archive-delivered.php`.
 
 ---
 
@@ -454,7 +454,7 @@ Si hubo conflict de N°:
       "cliente_celular": "+5491123456789",
       "cotizaciones_count": 4,
       "ultima_cotizacion": "2026-05-02T14:30:00-03:00",
-      "estados_resumen": { "instalado": 1, "perdido": 1, "enviado": 1, "borrador": 1 }
+      "estados_resumen": { "entregado": 1, "perdido": 1, "enviado": 1, "borrador": 1 }
     }
   ]
 }
@@ -477,7 +477,7 @@ Server:
 - Valida transición permitida (§ 4.2). Si inválida, rechaza.
 - Appendea a `transiciones[]`.
 - Actualiza `cotizacion.estado`.
-- Si `nuevo_estado == "instalado"`, NO archiva inmediatamente. El cron lo hace +7 días.
+- Si `nuevo_estado == "entregado"`, NO archiva inmediatamente. El cron lo hace +10 días.
 
 ---
 
@@ -510,7 +510,7 @@ Server `load.php` devuelve error. Calc fallback: ignora el query param, arranca 
 ### 9.5 Concurrencia en append_to
 Dos equipos agregan sub-versiones al mismo cliente al mismo segundo. Flock serializa. Ambos quedan registrados, sub crecientes consecutivos.
 
-### 9.6 El cron de archive-installed falla
+### 9.6 El cron de archive-delivered falla
 Idempotente: corre nightly, si una corrida falla, la siguiente toma los pendientes. Sin pérdida de datos.
 
 ### 9.7 El registry está abajo (endpoints no responden)
@@ -561,9 +561,9 @@ Casos que el sistema tiene que manejar correctamente:
 5. **Tipear N° NO existente.** onBlur fetch → no encuentra → mode pasa a `new_client`.
 6. **Concurrencia "new_client" simultánea.** A y B con same proposed. A wins, B baja a next.
 7. **Concurrencia "append_to" simultánea.** A agrega sub 5, B sub 6.
-8. **Estado: borrador → enviado → aprobado → instalado.** Cron archiva +7 días.
+8. **Estado: borrador → enviado → aprobado → entregado.** Cron archiva +10 días.
 9. **Estado: borrador → perdido.** Sin archivado.
-10. **Estado: invalid transition** (ej: instalado → borrador). Server rechaza.
+10. **Estado: invalid transition** (ej: entregado → borrador). Server rechaza.
 11. **Endpoint down al cargar calc.** Calc arranca limpia, input N° vacío.
 12. **`?load=X-Y` con Y inválido.** Calc ignora, arranca limpia.
 
@@ -574,7 +574,7 @@ Casos que el sistema tiene que manejar correctamente:
 - Cambia algún campo del JSON (bump version).
 - Cambia el algoritmo de generación de N°.
 - Cambian las transiciones de estados.
-- Cambia la política de retención (ej: 7 días → 30 días).
+- Cambia la política de retención (ej: 10 días → 30 días).
 - Default: revisión cada 90 días.
 
 ---

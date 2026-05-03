@@ -84,7 +84,7 @@ El JSON contract canónico está en `03-product/calculadora/json-contract-v1.md`
 
 ## 5. Decisión
 
-> **Implementar el registry según la spec de `json-contract-v1.md`. Stack: PHP + filesystem JSON files. Hostinger shared. Sin DB. Cron para light-archive post-instalado +7 días.**
+> **Implementar el registry según la spec de `json-contract-v1.md`. Stack: PHP + filesystem JSON files. Hostinger shared. Sin DB. Cron para light-archive post-entregado +10 días.**
 
 ### Stack tecnológico
 
@@ -173,7 +173,7 @@ Esto es ley de diseño no negociable.
 - [ ] Filtros por estado, fecha desde/hasta, material.
 
 ### Fase 5 — Cron + Test + Deploy
-- [ ] `cron/archive-installed.php` con lógica del § 5.1 del contract.
+- [ ] `cron/archive-delivered.php` con lógica del § 5.1 del contract.
 - [ ] Configurar cron en Hostinger panel (nightly 03:00).
 - [ ] Test cases completos (§ 11 del contract: 12 escenarios).
 - [ ] Deploy via Receta 2 (multi-patch en calc.html) + Receta 1 (Base64 inline para nuevos archivos PHP/JS).
@@ -240,9 +240,9 @@ Spread real estimado: 4-6 días calendario laburando concentrado, o 2-3 semanas 
 
 Una vez que el registry esté vivo, abren puertas para:
 
-- **Analytics de conversión**: tasa borrador → enviado → aprobado → instalado. Tiempo medio entre estados. Cuáles materiales convierten más.
-- **Cliente recurrente flag**: si un cliente tiene >=2 instalados, mostrar `★` en la página y priorizar respuestas.
-- **Predicción de recompra**: clientes instalados hace 6-12 meses son target de "¿qué tal el baño?".
+- **Analytics de conversión**: tasa borrador → enviado → aprobado → entregado. Tiempo medio entre estados. Cuáles materiales convierten más.
+- **Cliente recurrente flag**: si un cliente tiene >=2 entregados, mostrar `★` en la página y priorizar respuestas.
+- **Predicción de recompra**: clientes entregados hace 6-12 meses son target de "¿qué tal el baño?".
 - **Pre-cotización con datos del cliente histórico**: la calc autocompleta el material/precio "que el cliente prefirió la última vez".
 - **Versión pública (read-only) del registry para arquitectos partners**: que vean sus propias obras.
 
