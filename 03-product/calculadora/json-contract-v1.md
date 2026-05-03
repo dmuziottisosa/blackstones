@@ -239,22 +239,22 @@ Campos específicos:
 
 Array append-only que registra cada cambio de estado con timestamp. Permite analytics futuros (ej: tiempo medio enviado→aprobado).
 
-### 4.4 Aviso UI al pasar a APROBADO
+### 4.4 Aviso UI al pasar a ENTREGADO
 
-Cuando el equipo cambia el estado de una cotización a `aprobado` desde la página de presupuestos, el frontend muestra un modal/toast informativo:
+Cuando el equipo cambia el estado de una cotización a `entregado` desde la página de presupuestos, el frontend muestra un modal/toast informativo:
 
 > **"Si querés guardar este presupuesto para tus records, descargalo ahora.**
-> **Cuando pase a ENTREGADO + 10 días, el detalle se archiva (queda solo el resumen)."**
+> **En 10 días, el detalle se elimina (queda solo el resumen: monto, m², materiales)."**
 >
 > `[⬇ Descargar Excel]` `[⬇ Descargar PDF]` `[Cerrar]`
 
 **Comportamiento:**
-- El aviso es **informativo, no bloqueante**. El estado YA pasó a aprobado al momento del aviso.
+- El aviso es **informativo, no bloqueante**. El estado YA pasó a entregado al momento del aviso. El timer del archive empieza a correr.
 - Los botones de descarga llaman a las mismas funciones que la calc (`generarExcel`/`generarPDF`) usando el JSON cargado.
-- El aviso aparece **una sola vez por transición** — si el equipo vuelve a editar y re-aprobar, no spamea.
+- El aviso aparece **una sola vez por transición** — si el equipo vuelve a editar y re-entregar, no spamea.
 - **Cero acción server-side**: no se genera ni guarda Excel automático en server. La descarga es opcional y manual.
 
-**Por qué este aviso existe:** anticipar el archive del detalle en ENTREGADO+7. El equipo tiene el momento APROBADO como punto natural para "asegurar el archivo si lo necesitan" — antes el ciclo de entrega + retención lo borraría sin aviso.
+**Por qué este aviso existe:** anticipar el archive del detalle en ENTREGADO+10. El equipo tiene el momento ENTREGADO como punto natural para "asegurar el archivo si lo necesitan" — sin aviso, el ciclo de retención lo borraría 10 días después y solo quedaría el summary.
 
 **No se gestiona contabilidad en v1.** El equipo decide qué hacer con el Excel descargado (mandarlo a la contadora, guardarlo en Drive, archivarlo local). La carpeta `bs-data/contabilidad/` **no existe** en este modelo.
 
