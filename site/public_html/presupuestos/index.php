@@ -209,7 +209,8 @@ async function cargarActivos() {
       const transitions = (TRANSICIONES[r.estado] || []).map(t =>
         `<button onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${t}')">→ ${ESTADOS_LABELS[t]}</button>`
       ).join('');
-      const verPdf = `<a href="/calculadora/api/render-pdf.php?nro=${r.cliente_nro}&sub=${r.sub}" target="_blank">Ver PDF</a>`;
+      const verPdf = `<a class="btn-link" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&autopdf=1" target="_blank">Ver PDF</a>`;
+      const cargar = `<a class="btn-link" href="/calculadora/?load=${r.cliente_nro}-${r.sub}" target="_blank">Cargar</a>`;
       const zip = r.estado === 'entregado'
         ? `<a href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
         : '';
@@ -224,7 +225,7 @@ async function cargarActivos() {
           <td class="num">${fmtUSD(r.monto_usd)}</td>
           <td class="num">${fmtARS(r.monto_ars)}</td>
           <td>${escapeHtml((r.fecha || '').substring(0, 10))}</td>
-          <td class="actions-cell">${verPdf} ${zip} ${transitions} ${del}</td>
+          <td class="actions-cell">${verPdf} ${cargar} ${zip} ${transitions} ${del}</td>
         </tr>
       `;
     }).join('');
