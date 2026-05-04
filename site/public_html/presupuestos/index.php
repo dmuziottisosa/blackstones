@@ -144,11 +144,13 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 [data-theme="dark"] .est-perdido{background:#2A1414;color:#E26666}
 
 /* === ACTION BUTTONS — agrupados por jerarquía === */
-.actions-cell{display:flex;gap:5px;flex-wrap:wrap;align-items:center;min-width:340px}
-.actions-cell button,.actions-cell a{font-size:11.5px;padding:6px 11px;border-radius:5px;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;line-height:1.2;letter-spacing:.005em}
-/* Primary: + Nueva (filled gold, prominente) */
-.actions-cell .act-primary{background:var(--gd);color:#1A1816;border-color:var(--gd)}
-.actions-cell .act-primary:hover{background:var(--gdd);border-color:var(--gdd);color:var(--cr);transform:translateY(-1px);box-shadow:0 2px 8px var(--gd-glow)}
+.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-width:300px}
+.actions-cell button,.actions-cell a{font-size:11.5px;padding:6px 10px;border-radius:5px;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;line-height:1.2;letter-spacing:.005em}
+/* Primary: + Nueva (outline gold sutil, no domina la fila) */
+.actions-cell .act-primary{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
+.actions-cell .act-primary:hover{background:var(--gd);color:#1A1816;border-color:var(--gd);transform:translateY(-1px);box-shadow:0 2px 8px var(--gd-glow)}
+[data-theme="dark"] .actions-cell .act-primary{color:var(--gd)}
+[data-theme="dark"] .actions-cell .act-primary:hover{background:var(--gd);color:#1A1816}
 /* Utility: Ver PDF, Cargar (outline subtle) */
 .actions-cell .act-util{background:transparent;color:var(--text2);border-color:var(--border)}
 .actions-cell .act-util:hover{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
@@ -168,10 +170,10 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .actions-cell .act-zip:hover{background:#DDF2DD;border-color:#1F8F47;transform:translateY(-1px)}
 [data-theme="dark"] .actions-cell .act-zip{color:#34D670;border-color:#1A4525}
 [data-theme="dark"] .actions-cell .act-zip:hover{background:#0E2A18;border-color:#34D670}
-/* Danger: Eliminar */
-.actions-cell .act-danger{background:transparent;color:#A53C3C;border-color:#F0C8C8;margin-left:auto}
-.actions-cell .act-danger:hover{background:#A53C3C;color:#fff;border-color:#A53C3C}
-[data-theme="dark"] .actions-cell .act-danger{color:#E26666;border-color:#4A1E1E}
+/* Danger: Eliminar (icon-only trash, compacto, fluye al final naturalmente) */
+.actions-cell .act-danger{background:transparent;color:var(--text3);border-color:var(--border);padding:6px 8px;opacity:.6}
+.actions-cell .act-danger svg{width:14px;height:14px}
+.actions-cell .act-danger:hover{background:#A53C3C;color:#fff;border-color:#A53C3C;opacity:1}
 [data-theme="dark"] .actions-cell .act-danger:hover{background:#A53C3C;color:#fff;border-color:#A53C3C}
 /* Separador visual entre grupos */
 .actions-cell .sep{display:inline-block;width:1px;height:18px;background:var(--border-soft);margin:0 2px}
@@ -238,7 +240,6 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 
 @media(max-width:1100px){
   .actions-cell{min-width:auto}
-  .actions-cell .act-danger{margin-left:0}
 }
 @media(max-width:768px){
   .header{padding:10px 14px}
@@ -415,11 +416,11 @@ async function cargarActivos() {
       ).join('');
       const verPdf = `<a class="act-util" href="/calculadora/api/render-pdf.php?nro=${r.cliente_nro}&sub=${r.sub}" target="_blank">Ver PDF</a>`;
       const cargar = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}" target="_blank">Cargar</a>`;
-      const nueva = `<a class="act-primary" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&blank=1" target="_blank" title="Cotizar otra cosa para este mismo cliente">+ Nueva cotización</a>`;
+      const nueva = `<a class="act-primary" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&blank=1" target="_blank" title="Cotizar otra cosa para este mismo cliente">+ Nueva</a>`;
       const zip = r.estado === 'entregado'
         ? `<a class="act-zip" href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
         : '';
-      const del = `<button class="act-danger" onclick="confirmarBorrar('${r.cliente_nro}', ${r.sub}, '${(r.cliente_nombre || '').replace(/'/g, "\\'")}')">Eliminar</button>`;
+      const del = `<button class="act-danger" onclick="confirmarBorrar('${r.cliente_nro}', ${r.sub}, '${(r.cliente_nombre || '').replace(/'/g, "\\'")}')" title="Eliminar presupuesto" aria-label="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>`;
       return `
         <tr>
           <td><b>${r.cliente_nro}-${r.sub}</b></td>
