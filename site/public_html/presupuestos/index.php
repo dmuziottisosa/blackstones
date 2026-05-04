@@ -135,6 +135,13 @@ tr:hover td{background:var(--hover)}
 .top-mat-item:last-child{border-bottom:none}
 .top-mat-item .count{color:var(--text2);font-size:11px;margin-left:auto;padding:0 12px}
 
+.concepto-cell{display:inline-block;min-width:80px;padding:3px 6px;border-radius:4px;border:1px dashed transparent;cursor:text;transition:border-color .15s,background .15s;font-size:13px;color:var(--text)}
+.concepto-cell:hover{border-color:var(--gd);background:rgba(196,167,125,.05)}
+.concepto-cell:focus{outline:none;border-color:var(--gd);border-style:solid;background:var(--card-alt)}
+.concepto-cell.saving{opacity:.5}
+.concepto-cell.saved{border-color:#25A036;background:rgba(37,160,54,.08)}
+.concepto-cell.error{border-color:#C44747;background:rgba(196,71,71,.08)}
+
 @media(max-width:768px){
   .header{padding:10px 14px}
   .header h1{font-size:1.1rem}
@@ -307,7 +314,7 @@ async function cargarActivos() {
           <td><b>${r.cliente_nro}-${r.sub}</b></td>
           <td>${escapeHtml(r.cliente_nombre || '—')}<br><small style="color:var(--text2)">${escapeHtml(r.cliente_dni || '')}</small></td>
           <td>${escapeHtml(r.cliente_celular || '—')}</td>
-          <td>${escapeHtml(r.concepto || '—')}</td>
+          <td><span class="concepto-cell" contenteditable="true" data-nro="${r.cliente_nro}" data-sub="${r.sub}" data-orig="${escapeHtml(r.concepto || '')}" onblur="onConceptoBlur(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el concepto">${escapeHtml(r.concepto || '—')}</span></td>
           <td><span class="estado est-${r.estado}">${ESTADOS_LABELS[r.estado] || r.estado}</span></td>
           <td class="num">${fmtUSD(r.monto_usd)}</td>
           <td class="num">${fmtARS(r.monto_ars)}</td>
@@ -397,6 +404,46 @@ function confirmarBorrar(nro, sub, nombre) {
     },
     'btn-danger'
   );
+}
+
+async function onConceptoBlur(el) {
+  const nro = el.dataset.nro;
+  const sub = parseInt(el.dataset.sub);
+  const orig = el.dataset.orig || '';
+  let nuevo = el.innerText.trim();
+  if (nuevo === '—') nuevo = '';
+  if (nuevo === orig) {
+    el.innerText = nuevo || '—';
+    return;
+  }
+  el.classList.add('saving');
+  try {
+    const r = await fetch('/calculadora/api/edit-concepto.php', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cliente_nro: nro, sub: sub, concepto: nuevo })
+    });
+    const d = await r.json();
+    el.classList.remove('saving');
+    if (!d.ok) {
+      el.classList.add('error');
+      el.innerText = orig || '—';
+      setTimeout(() => el.classList.remove('error'), 2000);
+      alert('Error guardando concepto: ' + d.error);
+      return;
+    }
+    el.dataset.orig = nuevo;
+    el.innerText = nuevo || '—';
+    el.classList.add('saved');
+    setTimeout(() => el.classList.remove('saved'), 1500);
+  } catch (e) {
+    el.classList.remove('saving');
+    el.classList.add('error');
+    el.innerText = orig || '—';
+    setTimeout(() => el.classList.remove('error'), 2000);
+    alert('Error: ' + e.message);
+  }
 }
 
 function abrirModal(title, body, onConfirm, btnClass) {
