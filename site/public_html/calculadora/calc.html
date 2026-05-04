@@ -4987,6 +4987,7 @@ function toggleTheme(){
       var qs = new URLSearchParams(window.location.search);
       var load = qs.get('load');
       var autopdf = qs.get('autopdf') === '1';
+      var autoxlsx = qs.get('autoxlsx') === '1';
       var blank = qs.get('blank') === '1';
       if (!load) return;
       var m = load.match(/^(\d{4,})-(\d+)$/);
@@ -4995,6 +4996,13 @@ function toggleTheme(){
         try {
           var st = document.createElement('style');
           st.textContent = 'html{background:#FAF8F4!important}body{visibility:hidden!important}html::after{content:"Generando PDF…";position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font:14px -apple-system,sans-serif;color:#7A6649;letter-spacing:.04em}';
+          document.head.appendChild(st);
+        } catch(e){}
+      }
+      if (autoxlsx){
+        try {
+          var st = document.createElement('style');
+          st.textContent = 'html{background:#FAF8F4!important}body{visibility:hidden!important}html::after{content:"Generando Excel…";position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font:14px -apple-system,sans-serif;color:#7A6649;letter-spacing:.04em}';
           document.head.appendChild(st);
         } catch(e){}
       }
@@ -5010,6 +5018,20 @@ function toggleTheme(){
                 if (typeof generarPDF === 'function') generarPDF();
               } catch(e){
                 var btn = document.getElementById('btn-pdf');
+                if (btn) btn.click();
+              }
+            }, 700);
+          }
+          if (autoxlsx){
+            setTimeout(function(){
+              try {
+                if (typeof generarExcel === 'function') {
+                  generarExcel().then(function(){
+                    setTimeout(function(){ try { window.close(); } catch(e){} }, 800);
+                  });
+                }
+              } catch(e){
+                var btn = document.getElementById('btn-excel');
                 if (btn) btn.click();
               }
             }, 700);

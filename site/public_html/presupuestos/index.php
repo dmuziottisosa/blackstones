@@ -182,7 +182,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 [data-theme="dark"] .est-perdido{background:#2A1414;color:#E26666}
 
 /* === ACTION BUTTONS — agrupados por jerarquía === */
-.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-width:480px}
+.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-width:520px}
 .actions-cell button,.actions-cell a{font-size:11px;padding:5px 9px;border-radius:5px;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;line-height:1.2;letter-spacing:.005em}
 /* Primary: + Nueva (outline gold sutil, no domina la fila) */
 .actions-cell .act-primary{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
@@ -351,9 +351,9 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       <option value="perdido">Perdido</option>
     </select>
     <button class="btn-search" onclick="cargarActivos()">Buscar</button>
-    <button class="btn-excel" onclick="exportarExcel()" title="Descargar tabla actual como CSV (abre en Excel)">
+    <button class="btn-excel" onclick="exportarExcel()" title="Descargar resumen de la tabla como CSV (abre en Excel)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Excel
+      CSV resumen
     </button>
   </div>
 
@@ -548,7 +548,8 @@ async function cargarActivos() {
       const transitions = (TRANSICIONES[r.estado] || []).map(t =>
         `<button class="act-trans act-trans-${t}" onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${t}')">→ ${ESTADOS_LABELS[t]}</button>`
       ).join('');
-      const verPdf = `<a class="act-util" href="/calculadora/api/render-pdf.php?nro=${r.cliente_nro}&sub=${r.sub}" target="_blank">Ver PDF</a>`;
+      const verPdf = `<a class="act-util" href="/calculadora/api/render-pdf.php?nro=${r.cliente_nro}&sub=${r.sub}" target="_blank">PDF</a>`;
+      const xlsx = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&autoxlsx=1" target="_blank" title="Descargar Excel detallado de este presupuesto">Excel</a>`;
       const cargar = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}" target="_blank">Cargar</a>`;
       const nueva = `<a class="act-primary" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&blank=1" target="_blank" title="Cotizar otra cosa para este mismo cliente">+ Nueva</a>`;
       const zip = r.estado === 'entregado'
@@ -570,7 +571,7 @@ async function cargarActivos() {
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
           <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
-          <td class="actions-cell">${cargar} ${verPdf} ${transitions} ${zip} ${nueva} ${del}</td>
+          <td class="actions-cell">${cargar} ${verPdf} ${xlsx} ${transitions} ${zip} ${nueva} ${del}</td>
         </tr>
       `;
     }).join('');
