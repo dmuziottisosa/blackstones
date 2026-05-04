@@ -192,12 +192,24 @@ if (is_dir(BS_CLIENTES_DIR)) {
             }
             if ($ya_indexado) continue;
 
+            // Extraer materiales únicos de esta cotización
+            $mats_in_cot = [];
+            foreach (['m', 'a', 'l', 'i', 'b'] as $sec) {
+                foreach ($cot['presupuesto']['secciones'][$sec]['items'] ?? [] as $item) {
+                    $key = ($item['mat'] ?? '') . ' · ' . ($item['color'] ?? '');
+                    if ($key !== ' · ') {
+                        $mats_in_cot[$key] = true;
+                    }
+                }
+            }
+
             $index[$cliente_nro]['entregas'][] = [
                 'sub' => $cot['sub'] ?? 0,
                 'mes' => substr($entregado_at, 0, 7),
                 'fecha_entregado' => substr($entregado_at, 0, 10),
                 'concepto' => $cot['concepto'] ?? '',
                 'monto_usd' => $monto_usd,
+                'materiales' => array_keys($mats_in_cot),
             ];
             $index[$cliente_nro]['total_entregas']++;
             $index[$cliente_nro]['total_usd_acumulado'] += $monto_usd;
