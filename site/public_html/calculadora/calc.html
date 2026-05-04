@@ -4841,14 +4841,28 @@ function toggleTheme(){
 
     try {
       var state = bsCollectState();
-      if (!state.cliente.nombre.trim()) {
-        alert('Falta el nombre del cliente.');
-        reset();
-        return;
-      }
 
       var nroInput = document.getElementById('nro');
       var nroTipeado = nroInput ? nroInput.value.trim() : '';
+      if (!nroTipeado || nroTipeado === '0000') {
+        alert('Falta el N° de presupuesto.');
+        reset();
+        if (nroInput) nroInput.focus();
+        return;
+      }
+      if (!state.cliente.nombre.trim()) {
+        alert('Falta el nombre del cliente.');
+        reset();
+        var cliEl = document.getElementById('cli'); if (cliEl) cliEl.focus();
+        return;
+      }
+      if (!state.cliente.celular.trim()) {
+        alert('Falta el celular del cliente.');
+        reset();
+        var celEl = document.getElementById('cel'); if (celEl) celEl.focus();
+        return;
+      }
+
       var fueAuto = nroInput && nroInput.dataset.bsAuto === '1';
 
       var payload = fueAuto
@@ -4886,8 +4900,9 @@ function toggleTheme(){
     }
   };
 
-  function bsApplyState(s){
-    if (!s || !s.presupuesto) return;
+  function bsApplyState(s, opts){
+    if (!s) return;
+    opts = opts || {};
     var setVal = function(id, v){ var el = document.getElementById(id); if (el) el.value = (v == null ? '' : String(v)); };
     var setChk = function(id, v){ var el = document.getElementById(id); if (el) el.checked = !!v; };
     var c = s.cliente || {};
@@ -4895,9 +4910,20 @@ function toggleTheme(){
     setVal('dni', c.dni);
     setVal('cel', c.celular);
     setVal('dir', c.direccion);
-    if (s.fecha) setVal('fecha', String(s.fecha).substr(0, 10));
     var nroEl = document.getElementById('nro');
     if (nroEl && s.cliente_nro){ nroEl.value = s.cliente_nro; nroEl.dataset.bsAuto = ''; }
+    // Modo blank: solo cliente (nueva cotización del mismo cliente, presupuesto en blanco)
+    if (opts.blank) {
+      try { if (typeof renderAll === 'function')      renderAll(); } catch(e){}
+      try { if (typeof renderZocalos === 'function')  renderZocalos(); } catch(e){}
+      try { if (typeof renderExtras === 'function')   renderExtras(); } catch(e){}
+      try { if (typeof renderVariants === 'function') renderVariants(); } catch(e){}
+      try { if (typeof renderBachas === 'function')   renderBachas(); } catch(e){}
+      try { if (typeof calc === 'function')           calc(); } catch(e){}
+      return;
+    }
+    if (s.fecha) setVal('fecha', String(s.fecha).substr(0, 10));
+    if (!s.presupuesto) return;
     var p = s.presupuesto;
     if (p.secciones && typeof p.secciones === 'object'){
       Object.keys(p.secciones).forEach(function(k){
@@ -4959,6 +4985,7 @@ function toggleTheme(){
       var qs = new URLSearchParams(window.location.search);
       var load = qs.get('load');
       var autopdf = qs.get('autopdf') === '1';
+      var blank = qs.get('blank') === '1';
       if (!load) return;
       var m = load.match(/^(\d{4,})-(\d+)$/);
       if (!m) return;
@@ -4973,7 +5000,7 @@ function toggleTheme(){
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(d){
           if (!d || !d.ok){ alert('No se pudo cargar ' + load + ': ' + ((d && d.error) || 'error')); return; }
-          bsApplyState(d);
+          bsApplyState(d, { blank: blank });
           if (autopdf){
             setTimeout(function(){
               try {

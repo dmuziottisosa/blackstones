@@ -297,6 +297,7 @@ async function cargarActivos() {
       ).join('');
       const verPdf = `<a href="/calculadora/api/render-pdf.php?nro=${r.cliente_nro}&sub=${r.sub}" target="_blank">Ver PDF</a>`;
       const cargar = `<a href="/calculadora/?load=${r.cliente_nro}-${r.sub}" target="_blank">Cargar</a>`;
+      const nueva = `<a href="/calculadora/?load=${r.cliente_nro}-${r.sub}&blank=1" target="_blank" title="Cotizar otra cosa para este mismo cliente">+ Nueva cotización</a>`;
       const zip = r.estado === 'entregado'
         ? `<a href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
         : '';
@@ -311,7 +312,7 @@ async function cargarActivos() {
           <td class="num">${fmtUSD(r.monto_usd)}</td>
           <td class="num">${fmtARS(r.monto_ars)}</td>
           <td>${escapeHtml((r.fecha || '').substring(0, 10))}</td>
-          <td class="actions-cell">${verPdf} ${cargar} ${zip} ${transitions} ${del}</td>
+          <td class="actions-cell">${nueva} ${verPdf} ${cargar} ${zip} ${transitions} ${del}</td>
         </tr>
       `;
     }).join('');
