@@ -113,6 +113,34 @@ h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px
 .filters input::placeholder{color:var(--text3)}
 .btn-search{padding:9px 18px;background:var(--dk);color:var(--cr);border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.01em}
 .btn-search:hover{background:var(--dk2);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.btn-excel{padding:9px 14px;background:transparent;color:#1F8F47;border:1px solid #9DD9B0;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-excel svg{width:14px;height:14px}
+.btn-excel:hover{background:#DDF2DD;border-color:#1F8F47;transform:translateY(-1px)}
+[data-theme="dark"] .btn-excel{color:#34D670;border-color:#1A4525}
+[data-theme="dark"] .btn-excel:hover{background:#0E2A18;border-color:#34D670}
+
+/* === TOASTS — notificaciones modernas no bloqueantes === */
+.toast-container{position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none;max-width:380px}
+.toast{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gd);border-radius:var(--radius-sm);padding:12px 16px;box-shadow:var(--shadow-lg);font-size:13px;color:var(--text);display:flex;align-items:flex-start;gap:10px;pointer-events:auto;opacity:0;transform:translateX(20px);transition:opacity .25s ease,transform .25s ease;min-width:280px}
+.toast.show{opacity:1;transform:translateX(0)}
+.toast.exit{opacity:0;transform:translateX(20px)}
+.toast-icon{flex-shrink:0;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11px;font-weight:700;color:#fff}
+.toast-content{flex:1;line-height:1.45}
+.toast-title{font-weight:700;color:var(--text);margin-bottom:2px;font-size:13px}
+.toast-msg{color:var(--text2);font-size:12.5px;white-space:pre-line}
+.toast-close{flex-shrink:0;background:none;border:none;color:var(--text3);cursor:pointer;padding:0;font-size:16px;line-height:1;opacity:.6;transition:opacity .15s}
+.toast-close:hover{opacity:1;color:var(--text)}
+.toast.success{border-left-color:#1F8F47}
+.toast.success .toast-icon{background:#1F8F47}
+.toast.error{border-left-color:#A53C3C}
+.toast.error .toast-icon{background:#A53C3C}
+.toast.info{border-left-color:#0782B8}
+.toast.info .toast-icon{background:#0782B8}
+[data-theme="dark"] .toast.success{border-left-color:#34D670}
+[data-theme="dark"] .toast.success .toast-icon{background:#34D670}
+[data-theme="dark"] .toast.info{border-left-color:#3CB8E8}
+[data-theme="dark"] .toast.info .toast-icon{background:#3CB8E8}
+@media(max-width:768px){.toast-container{top:10px;right:10px;left:10px;max-width:none}.toast{min-width:auto}}
 
 /* === TABLE — moderna, zebra sutil, hover de fila completa === */
 table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
@@ -144,8 +172,8 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 [data-theme="dark"] .est-perdido{background:#2A1414;color:#E26666}
 
 /* === ACTION BUTTONS — agrupados por jerarquía === */
-.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-width:300px}
-.actions-cell button,.actions-cell a{font-size:11.5px;padding:6px 10px;border-radius:5px;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;line-height:1.2;letter-spacing:.005em}
+.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-width:480px}
+.actions-cell button,.actions-cell a{font-size:11px;padding:5px 9px;border-radius:5px;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;line-height:1.2;letter-spacing:.005em}
 /* Primary: + Nueva (outline gold sutil, no domina la fila) */
 .actions-cell .act-primary{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
 .actions-cell .act-primary:hover{background:var(--gd);color:#1A1816;border-color:var(--gd);transform:translateY(-1px);box-shadow:0 2px 8px var(--gd-glow)}
@@ -263,8 +291,8 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
   table{font-size:12.5px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
   th,td{padding:10px 8px;white-space:nowrap}
   th:first-child,td:first-child{padding-left:12px}
-  .actions-cell{min-width:280px}
-  .actions-cell button,.actions-cell a{font-size:11px;padding:5px 9px}
+  .actions-cell{min-width:380px}
+  .actions-cell button,.actions-cell a{font-size:10.5px;padding:4px 8px}
 }
 </style>
 </head>
@@ -309,6 +337,10 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       <option value="perdido">Perdido</option>
     </select>
     <button class="btn-search" onclick="cargarActivos()">Buscar</button>
+    <button class="btn-excel" onclick="exportarExcel()" title="Descargar tabla actual como CSV (abre en Excel)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Excel
+    </button>
   </div>
 
   <table id="activos-tabla">
@@ -392,6 +424,76 @@ const TRANSICIONES = {
 function fmtUSD(n) { return n > 0 ? 'USD ' + n.toLocaleString('es-AR', {minimumFractionDigits: 2}) : '—'; }
 function fmtARS(n) { return n > 0 ? '$ ' + n.toLocaleString('es-AR') : '—'; }
 
+// === TOAST: notificaciones modernas no bloqueantes ===
+function ensureToastContainer() {
+  let c = document.getElementById('toast-container');
+  if (!c) {
+    c = document.createElement('div');
+    c.id = 'toast-container';
+    c.className = 'toast-container';
+    document.body.appendChild(c);
+  }
+  return c;
+}
+function toast(message, type = 'info', opts = {}) {
+  const { title = null, duration = type === 'error' ? 5500 : 3500 } = opts;
+  const c = ensureToastContainer();
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const ico = type === 'success' ? '✓' : type === 'error' ? '!' : 'i';
+  const titleHtml = title ? `<div class="toast-title">${escapeHtml(title)}</div>` : '';
+  el.innerHTML = `
+    <div class="toast-icon">${ico}</div>
+    <div class="toast-content">${titleHtml}<div class="toast-msg">${escapeHtml(message)}</div></div>
+    <button class="toast-close" aria-label="Cerrar">×</button>
+  `;
+  c.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  const close = () => {
+    el.classList.add('exit'); el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
+  };
+  el.querySelector('.toast-close').onclick = close;
+  if (duration > 0) setTimeout(close, duration);
+}
+
+// === EXCEL EXPORT (CSV con BOM UTF-8, Excel lo abre nativo) ===
+let _activosCache = []; // último listing crudo, para export
+
+function exportarExcel() {
+  if (!_activosCache.length) {
+    toast('No hay resultados para exportar.', 'info');
+    return;
+  }
+  const headers = ['N°', 'Cliente', 'DNI', 'Celular', 'Concepto', 'Estado', 'USD', 'ARS', 'Fecha'];
+  const rows = _activosCache.map(r => [
+    `${r.cliente_nro}-${r.sub}`,
+    r.cliente_nombre || '',
+    r.cliente_dni || '',
+    r.cliente_celular || '',
+    r.concepto || '',
+    ESTADOS_LABELS[r.estado] || r.estado || '',
+    r.monto_usd || 0,
+    r.monto_ars || 0,
+    (r.fecha || '').substring(0, 10)
+  ]);
+  const csvEscape = v => {
+    const s = String(v ?? '');
+    return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const csv = [headers, ...rows].map(r => r.map(csvEscape).join(';')).join('\r\n');
+  const bom = '﻿';
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date().toISOString().substring(0, 10);
+  a.href = url;
+  a.download = `presupuestos_activos_${today}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+  toast(`${rows.length} fila(s) exportadas.`, 'success', { title: 'Excel descargado' });
+}
+
 async function cargarActivos() {
   const q = document.getElementById('filter-q').value.trim();
   const estado = document.getElementById('filter-estado').value;
@@ -403,13 +505,16 @@ async function cargarActivos() {
     const d = await r.json();
     if (!d.ok) {
       document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">Error: ${d.error}</td></tr>`;
+      _activosCache = [];
       return;
     }
     if (d.results.length === 0) {
       document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">Sin resultados</td></tr>`;
       document.getElementById('activos-pagination').innerHTML = '';
+      _activosCache = [];
       return;
     }
+    _activosCache = d.results;
     const rows = d.results.map(r => {
       const transitions = (TRANSICIONES[r.estado] || []).map(t =>
         `<button class="act-trans act-trans-${t}" onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${t}')">→ ${ESTADOS_LABELS[t]}</button>`
@@ -431,7 +536,7 @@ async function cargarActivos() {
           <td class="num">${fmtUSD(r.monto_usd)}</td>
           <td class="num">${fmtARS(r.monto_ars)}</td>
           <td>${escapeHtml((r.fecha || '').substring(0, 10))}</td>
-          <td class="actions-cell">${nueva} ${verPdf} ${cargar} ${zip} ${transitions} ${del}</td>
+          <td class="actions-cell">${cargar} ${verPdf} ${transitions} ${zip} ${nueva} ${del}</td>
         </tr>
       `;
     }).join('');
@@ -481,16 +586,21 @@ async function ejecutarCambioEstado(nro, sub, nuevo) {
     });
     const d = await r.json();
     if (!d.ok) {
-      alert('Error: ' + d.error);
+      toast(d.error, 'error', { title: 'Error al cambiar estado' });
       return;
     }
-    let msg = `Estado: ${d.estado_anterior} → ${d.estado_nuevo}`;
-    if (d.siblings_eliminadas > 0) msg += `\n${d.siblings_eliminadas} hermana(s) eliminada(s).`;
-    if (d.zip_path) msg += `\nZIP generado y disponible para descarga.`;
-    alert(msg);
+    let extras = [];
+    if (d.siblings_eliminadas > 0) extras.push(`${d.siblings_eliminadas} hermana(s) eliminada(s)`);
+    if (d.zip_path) extras.push('ZIP generado, disponible para descarga');
+    const detail = extras.length ? '\n' + extras.join(' · ') : '';
+    toast(
+      `${ESTADOS_LABELS[d.estado_anterior] || d.estado_anterior} → ${ESTADOS_LABELS[d.estado_nuevo] || d.estado_nuevo}${detail}`,
+      'success',
+      { title: 'Estado actualizado' }
+    );
     cargarActivos();
   } catch (e) {
-    alert('Error: ' + e.message);
+    toast(e.message, 'error', { title: 'Error de red' });
   }
 }
 
@@ -508,10 +618,11 @@ function confirmarBorrar(nro, sub, nombre) {
           body: JSON.stringify({ cliente_nro: nro, sub: sub })
         });
         const d = await r.json();
-        if (!d.ok) { alert('Error: ' + d.error); return; }
+        if (!d.ok) { toast(d.error, 'error', { title: 'Error al eliminar' }); return; }
+        toast('Presupuesto eliminado.', 'success');
         cargarActivos();
       } catch (e) {
-        alert('Error: ' + e.message);
+        toast(e.message, 'error', { title: 'Error de red' });
       }
     },
     'btn-danger'
@@ -542,7 +653,7 @@ async function onConceptoBlur(el) {
       el.classList.add('error');
       el.innerText = orig || '—';
       setTimeout(() => el.classList.remove('error'), 2000);
-      alert('Error guardando concepto: ' + d.error);
+      toast(d.error, 'error', { title: 'No se guardó el concepto' });
       return;
     }
     el.dataset.orig = nuevo;
@@ -554,7 +665,7 @@ async function onConceptoBlur(el) {
     el.classList.add('error');
     el.innerText = orig || '—';
     setTimeout(() => el.classList.remove('error'), 2000);
-    alert('Error: ' + e.message);
+    toast(e.message, 'error', { title: 'Error de red' });
   }
 }
 
