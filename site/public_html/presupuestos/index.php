@@ -157,9 +157,19 @@ tbody tr:last-child td{border-bottom:none}
 td b{font-weight:700;color:var(--text)}
 td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 
-/* === ESTADO BADGES — más prominentes con dot === */
-.estado{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;line-height:1}
-.estado::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+/* === CELL TYPES — refinamiento tipográfico === */
+.cell-id{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700;color:var(--text);letter-spacing:.01em}
+.cell-fecha{white-space:nowrap;font-size:12.5px;color:var(--text2);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.cell-num{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600;text-align:right}
+.muted{color:var(--text3);opacity:.45;font-size:13px}
+.placeholder-hint{color:var(--text3);opacity:.55;font-style:italic;font-size:12.5px}
+.cliente-nombre{font-weight:600;color:var(--text);text-transform:capitalize;letter-spacing:.005em}
+.cliente-dni{color:var(--text3);font-size:11px;display:block;margin-top:1px;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.cell-tel{font-variant-numeric:tabular-nums;color:var(--text2);font-size:13px;letter-spacing:.01em}
+
+/* === ESTADO BADGES === */
+.estado{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:11px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;line-height:1}
+.estado::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
 .est-borrador{background:#F2EDE3;color:#7A6649}
 .est-enviado{background:#E1EEF8;color:#0782B8}
 .est-aprobado{background:#DDF2DD;color:#1F8F47}
@@ -258,8 +268,12 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .concepto-cell{display:inline-block;min-width:90px;padding:4px 8px;border-radius:5px;border:1px dashed transparent;cursor:text;transition:all .15s;font-size:13px;color:var(--text);outline:none}
 .concepto-cell:hover{border-color:var(--gd);background:var(--gd-soft)}
 .concepto-cell:focus{border-color:var(--gd);border-style:solid;background:var(--card-alt);box-shadow:0 0 0 3px var(--gd-soft)}
+.concepto-cell.empty{color:var(--text3);font-style:italic;font-size:12.5px;opacity:.55}
+.concepto-cell.empty:hover{opacity:.8;color:var(--gdd)}
+.concepto-cell.empty:focus{font-style:normal;opacity:1;color:var(--text)}
 .concepto-cell.saving{opacity:.5}
 .concepto-cell.saved{border-color:#1F8F47;background:rgba(31,143,71,.08)}
+.concepto-cell.saved::after{content:' ✓';color:#1F8F47;font-weight:700;font-style:normal}
 .concepto-cell.error{border-color:#A53C3C;background:rgba(165,60,60,.08)}
 
 /* === SECTION HEADERS for stats === */
@@ -421,8 +435,23 @@ const TRANSICIONES = {
   perdido: []
 };
 
-function fmtUSD(n) { return n > 0 ? 'USD ' + n.toLocaleString('es-AR', {minimumFractionDigits: 2}) : '—'; }
-function fmtARS(n) { return n > 0 ? '$ ' + n.toLocaleString('es-AR') : '—'; }
+// === FORMATEO ===
+const MESES_ABBR = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function fmtFecha(s) {
+  if (!s) return '<span class="muted">—</span>';
+  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return escapeHtml(s);
+  const dia = parseInt(m[3], 10);
+  const mes = MESES_ABBR[parseInt(m[2], 10) - 1] || '';
+  const anio = m[1].slice(2);
+  return `${dia} - ${mes} - ${anio}`;
+}
+function fmtUSD(n) { return n > 0 ? n.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '<span class="muted">—</span>'; }
+function fmtARS(n) { return n > 0 ? n.toLocaleString('es-AR', {maximumFractionDigits: 0}) : '<span class="muted">—</span>'; }
+function fmtMaybe(s) {
+  const v = String(s ?? '').trim();
+  return v ? escapeHtml(v) : '<span class="muted">—</span>';
+}
 
 // === TOAST: notificaciones modernas no bloqueantes ===
 function ensureToastContainer() {
@@ -526,16 +555,21 @@ async function cargarActivos() {
         ? `<a class="act-zip" href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
         : '';
       const del = `<button class="act-danger" onclick="confirmarBorrar('${r.cliente_nro}', ${r.sub}, '${(r.cliente_nombre || '').replace(/'/g, "\\'")}')" title="Eliminar presupuesto" aria-label="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>`;
+      const conceptoVal = (r.concepto || '').trim();
+      const conceptoEmpty = !conceptoVal;
+      const conceptoDisplay = conceptoEmpty ? 'Agregar...' : escapeHtml(conceptoVal);
+      const conceptoCls = conceptoEmpty ? 'concepto-cell empty' : 'concepto-cell';
+      const cliNombre = (r.cliente_nombre || '').toLowerCase();
       return `
         <tr>
-          <td><b>${r.cliente_nro}-${r.sub}</b></td>
-          <td>${escapeHtml(r.cliente_nombre || '—')}<br><small style="color:var(--text2)">${escapeHtml(r.cliente_dni || '')}</small></td>
-          <td>${escapeHtml(r.cliente_celular || '—')}</td>
-          <td><span class="concepto-cell" contenteditable="true" data-nro="${r.cliente_nro}" data-sub="${r.sub}" data-orig="${escapeHtml(r.concepto || '')}" onblur="onConceptoBlur(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el concepto">${escapeHtml(r.concepto || '—')}</span></td>
+          <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
+          <td>${cliNombre ? `<span class="cliente-nombre">${escapeHtml(cliNombre)}</span>` : '<span class="muted">—</span>'}${r.cliente_dni ? `<span class="cliente-dni">DNI ${escapeHtml(r.cliente_dni)}</span>` : ''}</td>
+          <td>${r.cliente_celular ? `<span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : '<span class="muted">—</span>'}</td>
+          <td><span class="${conceptoCls}" contenteditable="true" data-nro="${r.cliente_nro}" data-sub="${r.sub}" data-orig="${escapeHtml(conceptoVal)}" onblur="onConceptoBlur(this)" onfocus="onConceptoFocus(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el concepto">${conceptoDisplay}</span></td>
           <td><span class="estado est-${r.estado}">${ESTADOS_LABELS[r.estado] || r.estado}</span></td>
-          <td class="num">${fmtUSD(r.monto_usd)}</td>
-          <td class="num">${fmtARS(r.monto_ars)}</td>
-          <td>${escapeHtml((r.fecha || '').substring(0, 10))}</td>
+          <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
+          <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
+          <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
           <td class="actions-cell">${cargar} ${verPdf} ${transitions} ${zip} ${nueva} ${del}</td>
         </tr>
       `;
@@ -629,14 +663,28 @@ function confirmarBorrar(nro, sub, nombre) {
   );
 }
 
+function onConceptoFocus(el) {
+  // Si está mostrando el placeholder "Agregar...", lo limpiamos al focus
+  if (el.classList.contains('empty')) {
+    el.innerText = '';
+    el.classList.remove('empty');
+  }
+}
+
+function setConceptoEmpty(el) {
+  el.classList.add('empty');
+  el.innerText = 'Agregar...';
+}
+
 async function onConceptoBlur(el) {
   const nro = el.dataset.nro;
   const sub = parseInt(el.dataset.sub);
   const orig = el.dataset.orig || '';
   let nuevo = el.innerText.trim();
-  if (nuevo === '—') nuevo = '';
+  if (nuevo === 'Agregar...' || nuevo === '—') nuevo = '';
   if (nuevo === orig) {
-    el.innerText = nuevo || '—';
+    if (nuevo) { el.innerText = nuevo; el.classList.remove('empty'); }
+    else { setConceptoEmpty(el); }
     return;
   }
   el.classList.add('saving');
@@ -651,19 +699,19 @@ async function onConceptoBlur(el) {
     el.classList.remove('saving');
     if (!d.ok) {
       el.classList.add('error');
-      el.innerText = orig || '—';
+      if (orig) { el.innerText = orig; el.classList.remove('empty'); } else { setConceptoEmpty(el); }
       setTimeout(() => el.classList.remove('error'), 2000);
       toast(d.error, 'error', { title: 'No se guardó el concepto' });
       return;
     }
     el.dataset.orig = nuevo;
-    el.innerText = nuevo || '—';
+    if (nuevo) { el.innerText = nuevo; el.classList.remove('empty'); } else { setConceptoEmpty(el); }
     el.classList.add('saved');
     setTimeout(() => el.classList.remove('saved'), 1500);
   } catch (e) {
     el.classList.remove('saving');
     el.classList.add('error');
-    el.innerText = orig || '—';
+    if (orig) { el.innerText = orig; el.classList.remove('empty'); } else { setConceptoEmpty(el); }
     setTimeout(() => el.classList.remove('error'), 2000);
     toast(e.message, 'error', { title: 'Error de red' });
   }
