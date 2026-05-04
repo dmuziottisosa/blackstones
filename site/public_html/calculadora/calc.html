@@ -41,6 +41,15 @@ html{overflow-x:hidden}
 .header .h-right{display:flex;align-items:center;gap:16px}
 .gold-line{height:3px;background:var(--gd)}
 
+/* === TAB NAV (cross-surface) === */
+.h-tabs{background:var(--dk);display:flex;align-items:center;padding:0 24px;border-top:1px solid rgba(196,167,125,.12);overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--gd) transparent}
+.h-tabs::-webkit-scrollbar{height:3px}
+.h-tabs::-webkit-scrollbar-thumb{background:var(--gd)}
+.h-tabs a{color:var(--gd);opacity:.55;text-decoration:none;font-family:'Manrope',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:11px 18px;transition:opacity .15s,color .15s,background .15s;white-space:nowrap;border-bottom:2px solid transparent}
+.h-tabs a:hover{opacity:1;color:var(--cr);background:rgba(196,167,125,.05)}
+.h-tabs a.active{opacity:1;color:var(--gd);border-bottom-color:var(--gd)}
+@media(max-width:768px){.h-tabs{padding:0 8px}.h-tabs a{padding:9px 12px;font-size:.62rem;letter-spacing:.06em}}
+
 /* === THEME TOGGLE === */
 .toggle{width:50px;height:28px;background:var(--dk2);border-radius:14px;cursor:pointer;position:relative;border:1px solid var(--gd);transition:background .3s,box-shadow .25s;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .toggle:hover{box-shadow:0 2px 8px rgba(196,167,125,.25)}
@@ -821,6 +830,11 @@ table select{cursor:pointer}
     </a>
   </div>
 </div>
+<nav class="h-tabs">
+  <a href="/calculadora/" class="active">Calculadora</a>
+  <a href="/presupuestos/?tab=activos">Presupuestos · Activos</a>
+  <a href="/presupuestos/?tab=reporte">Presupuestos · Reporte</a>
+</nav>
 <div class="gold-line"></div>
 <div class="main">
 
