@@ -7,12 +7,12 @@
 
 ## 🔴 Crítico — chequear antes de producción real
 
-- [ ] **Cron jobs activos en panel Hostinger**
+- [ ] **Verificar AMBOS crons** activos en panel Hostinger (al menos uno está corriendo según `health.php` `cron_recent: true`):
   - `cleanup-retention.php` → 03:00 ART diario
   - `monthly-report.php` → 02:00 ART diario
-  - Sin esto: nada se limpia y los reportes mensuales nunca se generan
+  - Validación: `cat bs-data/registro/_cron-log.txt` → ver entradas con `cleanup:` Y `monthly-report:`
 - [ ] **Backup automático nocturno** de `bs-data/` → Google Drive / Dropbox / S3. Sin esto, un problema de Hostinger = todo perdido
-- [ ] **Health check + uptime monitoring** (`api/health.php` + UptimeRobot)
+- [x] ~~Health check endpoint (`api/health.php`)~~ — deployado 2026-05-06, falta solo conectar UptimeRobot (ping cada 5 min)
 
 ## 🟡 Mejoras de operación / conversión
 
