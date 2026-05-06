@@ -43,6 +43,27 @@
 
 ---
 
+## 🛡️ Hardening / Code review (deep review 2026-05-06)
+
+### Seguridad
+- [ ] **🔴 IP spoofing en rate limiting** — `auth_check.php:100-103` confía ciegamente en `X-Forwarded-For`. Atacante puede enviar header diferente cada intento → bypass del bloqueo después de N fallidos. Verificar si Hostinger setea proxy confiable; si no → usar solo `REMOTE_ADDR`. **Severidad alta** (afecta el único mecanismo de defensa contra brute-force del password)
+- [ ] **🟡 CSRF tokens en POST endpoints** — `save.php`, `state.php`, `delete.php`, `edit-concepto.php` aceptan POSTs sin validar token. SameSite=Lax mitiga 90% pero no es defense-in-depth. Generar token al login, validar en cada mutación
+- [ ] **🟡 Timestamp malleability en transiciones** — `state.php:73,86,90` usa `date('c')` server-side ✓ (verificado OK), pero asegurarse que ningún endpoint acepta `at` del body para historial
+- [ ] **🟢 Content-Disposition con filenames acentuados** — `download-zip.php:34` trunca nombres latinos (regex `[a-zA-Z0-9_-]`). Usar RFC 5987 `filename*=UTF-8''...` para preservar tildes/ñ
+
+### Data integrity
+- [ ] **🟡 JSON corrupto = pérdida silenciosa** — `_config.php:44` `bs_read_json()` retorna `null` tanto si el archivo no existe como si está corrupto. Si el server falla mid-write y se trunca el JSON, la próxima lectura retorna null y el siguiente write lo sobreescribe con datos parciales → pérdida total del cliente. **Fix**: distinguir error vs not-found, escribir `.bak` antes de cada write atómico
+- [ ] **🟡 Integer overflow al cliente 9999** — `next-nro.php:37` no tiene cap. Cliente 10000 rompe el regex `^\d{4}\.json$` y la lógica de listado. Probable que tarde años en pasar pero un guard de 1 línea lo previene: `if ($next > 9999) bs_error('Límite alcanzado')`
+
+### Performance
+- [ ] **🟡 N+1 en `list.php`** — recorre TODOS los clientes y TODAS sus cotizaciones cada request. Con 500 clientes × 100 cot c/u = 50k items en RAM por request del hub. Pre-indexar entradas activas en `bs-data/registro/activos-index.json` (sincronizado en `save.php` y cron) para search lineal rápido
+
+### Code smell / mantenimiento
+- [ ] **🟢 TODO: ZIP automático en `state.php:21`** — comentario dice "TODO Fase 2" pero `_zip-gen.php` ya existe y se invoca. Limpiar el TODO obsoleto
+- [ ] **🟢 TODO: Excel descargable en `monthly-report.php:18`** — Fase 2 mencionada nunca implementada. Decidir: ¿se necesita? Si no, eliminar el comment
+
+---
+
 ## Done
 
 - 2026-05-04 ~~Reset de contador de presupuestos a 0001~~ (`reset-once.php` one-shot)
