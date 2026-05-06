@@ -43,6 +43,12 @@ $results = [];
 
 if (is_dir(BS_CLIENTES_DIR)) {
     $files = scandir(BS_CLIENTES_DIR);
+    // Optimización: orden DESC por nombre (= por nro = aprox por fecha de creación)
+    // así los más recientes se procesan primero. No cambia el resultado final
+    // (hay un usort por fecha al final), pero ordena el cache de FS warming
+    // para que las páginas iniciales (las más usadas) tengan locality.
+    usort($files, function($a, $b) { return strcmp($b, $a); });
+
     foreach ($files as $f) {
         if (!preg_match('/^(\d{4,})\.json$/', $f)) continue;
         $cliente_obj = bs_read_json(BS_CLIENTES_DIR . '/' . $f);

@@ -27,11 +27,21 @@ if (!file_exists($zip_path)) {
 
 $cli_obj = bs_read_json(BS_CLIENTES_DIR . '/' . $cliente_nro . '.json');
 $cli_nombre = $cli_obj['cliente']['nombre'] ?? 'cliente';
-$cli_nombre_safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $cli_nombre);
-$download_name = "BlackStones_{$cliente_nro}-{$sub}_{$cli_nombre_safe}.zip";
+
+// Filename ASCII-safe (fallback navegadores viejos): solo a-z, 0-9, _ y -
+$cli_nombre_ascii = preg_replace('/[^a-zA-Z0-9_-]/', '_', $cli_nombre);
+$download_name_ascii = "BlackStones_{$cliente_nro}-{$sub}_{$cli_nombre_ascii}.zip";
+
+// Filename UTF-8 con tildes/ñ (navegadores modernos via RFC 5987)
+$cli_nombre_utf8 = preg_replace('/[\\\\\/:*?"<>|\x00-\x1F]/', '_', $cli_nombre); // sólo chars ilegales en filenames
+$download_name_utf8 = "BlackStones_{$cliente_nro}-{$sub}_{$cli_nombre_utf8}.zip";
 
 header('Content-Type: application/zip');
-header('Content-Disposition: attachment; filename="' . $download_name . '"');
+header(
+    'Content-Disposition: attachment; ' .
+    'filename="' . $download_name_ascii . '"; ' .
+    "filename*=UTF-8''" . rawurlencode($download_name_utf8)
+);
 header('Content-Length: ' . filesize($zip_path));
 header('Cache-Control: no-cache, no-store, must-revalidate');
 readfile($zip_path);

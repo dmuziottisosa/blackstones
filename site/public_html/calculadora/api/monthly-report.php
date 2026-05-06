@@ -15,8 +15,9 @@
 //   Actualizar bs-data/registro/clientes-index.json con los entregados
 //   activos (de modo incremental — agrega entregados nuevos).
 //
-//   La generación del Excel descargable queda como TODO Fase 2 (depende
-//   de exports.js extraído de calc.html).
+//   El Excel del reporte mensual NO se persiste (es regenerable on-demand
+//   desde el frontend: tab Reporte ya consume `report-summary.php`, y el
+//   hub/Activos tiene CSV resumen + Excel per-presupuesto).
 // ============================================================
 
 require_once __DIR__ . '/_config.php';

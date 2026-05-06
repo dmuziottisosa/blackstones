@@ -36,17 +36,42 @@ define('BS_CONTRACT_VERSION', '1.0');
 
 /**
  * Lee un JSON, devuelve array asociativo o null si no existe / inválido.
+ *
+ * Si el archivo existe pero está corrupto (truncado por un crash mid-write,
+ * por ejemplo), intenta restaurar desde el .bak antes de devolver null.
  */
 function bs_read_json($path) {
     if (!file_exists($path)) return null;
     $content = @file_get_contents($path);
     if ($content === false) return null;
     $data = json_decode($content, true);
-    return is_array($data) ? $data : null;
+    if (is_array($data)) return $data;
+
+    // JSON corrupto: intentar fallback al .bak (si existe y es válido)
+    $bak = $path . '.bak';
+    if (file_exists($bak)) {
+        $bak_content = @file_get_contents($bak);
+        if ($bak_content !== false) {
+            $bak_data = json_decode($bak_content, true);
+            if (is_array($bak_data)) {
+                // Log + restaurar el archivo principal desde el .bak
+                @error_log("bs_read_json: $path corrupto, restaurado desde .bak");
+                @file_put_contents($path, $bak_content);
+                return $bak_data;
+            }
+        }
+    }
+    @error_log("bs_read_json: $path corrupto y sin .bak válido");
+    return null;
 }
 
 /**
- * Escribe un JSON atómicamente (write to .tmp + rename).
+ * Escribe un JSON atómicamente:
+ *   1. Si existe el archivo target, copia a .bak (rotación simple)
+ *   2. Escribe a .tmp con datos nuevos
+ *   3. Rename atómico .tmp → target
+ * Si pasa 1+2 pero falla 3, el .bak conserva el estado previo válido.
+ *
  * Crea el directorio padre si no existe.
  * Retorna true si OK, false si falló.
  */
@@ -55,9 +80,15 @@ function bs_write_json_atomic($path, $data) {
     if (!is_dir($dir)) {
         if (!@mkdir($dir, 0755, true)) return false;
     }
-    $tmp = $path . '.tmp.' . getmypid() . '.' . bin2hex(random_bytes(4));
     $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     if ($json === false) return false;
+
+    // Backup del estado válido actual antes de pisar
+    if (file_exists($path)) {
+        @copy($path, $path . '.bak');
+    }
+
+    $tmp = $path . '.tmp.' . getmypid() . '.' . bin2hex(random_bytes(4));
     if (@file_put_contents($tmp, $json) === false) return false;
     if (!@rename($tmp, $path)) {
         @unlink($tmp);

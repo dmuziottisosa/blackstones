@@ -18,7 +18,7 @@
 //   - Al pasar a "entregado":
 //     * Borrar todas las hermanas no-entregado del mismo cliente.
 //     * Marcar `entregado_at` en la cotización.
-//     * (TODO Fase 2: generar ZIP automático.)
+//     * Generar ZIP automático (delegado a _zip-gen.php).
 //
 // Response: { "ok": true, "estado_anterior": "...", "estado_nuevo": "...",
 //             "siblings_eliminadas": N }
@@ -29,6 +29,7 @@ require_once __DIR__ . '/_auth.php';
 require_once __DIR__ . '/_zip-gen.php';
 
 bs_require_auth();
+bs_check_csrf();
 bs_ensure_dirs();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

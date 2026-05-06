@@ -37,6 +37,9 @@ if (is_array($idx)) {
 }
 
 $next = $max + 1;
+if ($next > 9999) {
+    bs_error('Límite de 9999 clientes alcanzado. Hay que migrar el formato a 5 dígitos antes de seguir.', 507);
+}
 $next_str = str_pad((string)$next, 4, '0', STR_PAD_LEFT);
 
 bs_ok(['next' => $next_str]);

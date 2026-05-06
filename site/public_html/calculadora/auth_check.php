@@ -98,9 +98,10 @@ function auth_save_attempts(array $data): void {
 }
 
 function auth_get_ip(): string {
-    return $_SERVER['HTTP_X_FORWARDED_FOR']
-        ?? $_SERVER['REMOTE_ADDR']
-        ?? 'unknown';
+    // Solo REMOTE_ADDR — X-Forwarded-For es spoofeable por el cliente.
+    // En Hostinger shared hosting el cliente llega directo sin proxy nuestro,
+    // así que confiar en headers HTTP de la request rompe el rate limiting.
+    return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 }
 
 /**

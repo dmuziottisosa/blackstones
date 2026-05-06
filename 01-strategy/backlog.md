@@ -45,27 +45,23 @@
 
 ## 🛡️ Hardening / Code review (deep review 2026-05-06)
 
-### Seguridad
-- [ ] **🔴 IP spoofing en rate limiting** — `auth_check.php:100-103` confía ciegamente en `X-Forwarded-For`. Atacante puede enviar header diferente cada intento → bypass del bloqueo después de N fallidos. Verificar si Hostinger setea proxy confiable; si no → usar solo `REMOTE_ADDR`. **Severidad alta** (afecta el único mecanismo de defensa contra brute-force del password)
-- [ ] **🟡 CSRF tokens en POST endpoints** — `save.php`, `state.php`, `delete.php`, `edit-concepto.php` aceptan POSTs sin validar token. SameSite=Lax mitiga 90% pero no es defense-in-depth. Generar token al login, validar en cada mutación
-- [ ] **🟡 Timestamp malleability en transiciones** — `state.php:73,86,90` usa `date('c')` server-side ✓ (verificado OK), pero asegurarse que ningún endpoint acepta `at` del body para historial
-- [ ] **🟢 Content-Disposition con filenames acentuados** — `download-zip.php:34` trunca nombres latinos (regex `[a-zA-Z0-9_-]`). Usar RFC 5987 `filename*=UTF-8''...` para preservar tildes/ñ
+Todos los hallazgos del review fueron resueltos en commit `<commit-hash>` del 2026-05-06.
+Ver sección Done abajo. Pendiente solo:
 
-### Data integrity
-- [ ] **🟡 JSON corrupto = pérdida silenciosa** — `_config.php:44` `bs_read_json()` retorna `null` tanto si el archivo no existe como si está corrupto. Si el server falla mid-write y se trunca el JSON, la próxima lectura retorna null y el siguiente write lo sobreescribe con datos parciales → pérdida total del cliente. **Fix**: distinguir error vs not-found, escribir `.bak` antes de cada write atómico
-- [ ] **🟡 Integer overflow al cliente 9999** — `next-nro.php:37` no tiene cap. Cliente 10000 rompe el regex `^\d{4}\.json$` y la lógica de listado. Probable que tarde años en pasar pero un guard de 1 línea lo previene: `if ($next > 9999) bs_error('Límite alcanzado')`
-
-### Performance
-- [ ] **🟡 N+1 en `list.php`** — recorre TODOS los clientes y TODAS sus cotizaciones cada request. Con 500 clientes × 100 cot c/u = 50k items en RAM por request del hub. Pre-indexar entradas activas en `bs-data/registro/activos-index.json` (sincronizado en `save.php` y cron) para search lineal rápido
-
-### Code smell / mantenimiento
-- [ ] **🟢 TODO: ZIP automático en `state.php:21`** — comentario dice "TODO Fase 2" pero `_zip-gen.php` ya existe y se invoca. Limpiar el TODO obsoleto
-- [ ] **🟢 TODO: Excel descargable en `monthly-report.php:18`** — Fase 2 mencionada nunca implementada. Decidir: ¿se necesita? Si no, eliminar el comment
+- [ ] **🟡 N+1 en `list.php`** (mitigado parcialmente con file-sort DESC, falta el index real) — pre-indexar entradas activas en `bs-data/registro/activos-index.json` sincronizado en `save.php` + cron. Esfuerzo medio, postpone hasta tener >100 cotizaciones activas reales
 
 ---
 
 ## Done
 
+- 2026-05-06 ~~🔴 Fix IP spoofing rate limiting~~ — `auth_get_ip()` solo usa `REMOTE_ADDR`
+- 2026-05-06 ~~🟡 CSRF protection via Origin/Referer check~~ — `bs_check_csrf()` agregado a save / state / delete / edit-concepto / mark-viewed
+- 2026-05-06 ~~🟡 JSON corruption protection~~ — `bs_write_json_atomic` ahora hace `.bak` antes de pisar; `bs_read_json` falla con auto-restore desde `.bak` si JSON corrupto
+- 2026-05-06 ~~🟡 Integer overflow guard~~ — `next-nro.php` aborta con 507 si `> 9999`
+- 2026-05-06 ~~🟢 Content-Disposition UTF-8 (RFC 5987)~~ — `download-zip.php` con `filename*=UTF-8''...` preserva tildes/ñ
+- 2026-05-06 ~~🟢 TODOs obsoletos limpiados~~ — `state.php` (ZIP ya implementado) y `monthly-report.php` (Excel descartado)
+- 2026-05-06 ~~Health check endpoint~~ — `api/health.php` público (sin auth) para UptimeRobot. Verifica fs writable, cron reciente, espacio disco
+- 2026-05-06 ~~list.php sort optimization~~ — files DESC para FS cache locality (full N+1 fix postpuesto, ver pendientes arriba)
 - 2026-05-04 ~~Reset de contador de presupuestos a 0001~~ (`reset-once.php` one-shot)
 - 2026-05-04 ~~Saneamiento visual hub nivel excelencia: fechas `4 - may - 26`, currency tabular, capitalize nombres, muted empties~~
 - 2026-05-04 ~~Botón Excel per-presupuesto + autoxlsx en calc~~

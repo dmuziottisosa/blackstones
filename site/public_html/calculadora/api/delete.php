@@ -20,6 +20,7 @@ require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
 
 bs_require_auth();
+bs_check_csrf();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     bs_error('Solo POST', 405);
