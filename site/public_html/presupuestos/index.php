@@ -163,7 +163,13 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .cell-num{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600;text-align:right}
 .muted{color:var(--text3);opacity:.45;font-size:13px}
 .placeholder-hint{color:var(--text3);opacity:.55;font-style:italic;font-size:12.5px}
-.cliente-nombre{font-weight:600;color:var(--text);text-transform:capitalize;letter-spacing:.005em}
+.cliente-nombre{font-weight:600;color:var(--text);text-transform:capitalize;letter-spacing:.005em;display:inline-block;padding:2px 6px;border-radius:5px;border:1px dashed transparent;cursor:text;transition:all .15s;outline:none;min-width:60px}
+.cliente-nombre:hover{border-color:var(--gd);background:var(--gd-soft)}
+.cliente-nombre:focus{border-color:var(--gd);border-style:solid;background:var(--card-alt);box-shadow:0 0 0 3px var(--gd-soft);text-transform:none}
+.cliente-nombre.saving{opacity:.5}
+.cliente-nombre.saved{border-color:#1F8F47;background:rgba(31,143,71,.08)}
+.cliente-nombre.saved::after{content:' ✓';color:#1F8F47;font-weight:700;font-style:normal}
+.cliente-nombre.error{border-color:#A53C3C;background:rgba(165,60,60,.08)}
 .cliente-dni{color:var(--text3);font-size:11px;display:block;margin-top:1px;letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .cell-tel{font-variant-numeric:tabular-nums;color:var(--text2);font-size:13px;letter-spacing:.01em}
 
@@ -564,7 +570,7 @@ async function cargarActivos() {
       return `
         <tr>
           <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
-          <td>${cliNombre ? `<span class="cliente-nombre">${escapeHtml(cliNombre)}</span>` : '<span class="muted">—</span>'}${r.cliente_dni ? `<span class="cliente-dni">DNI ${escapeHtml(r.cliente_dni)}</span>` : ''}</td>
+          <td><span class="cliente-nombre" contenteditable="true" data-nro="${r.cliente_nro}" data-orig="${escapeHtml(cliNombre)}" onblur="onClienteNombreBlur(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el nombre">${cliNombre ? escapeHtml(cliNombre) : '—'}</span>${r.cliente_dni ? `<span class="cliente-dni">DNI ${escapeHtml(r.cliente_dni)}</span>` : ''}</td>
           <td>${r.cliente_celular ? `<span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : '<span class="muted">—</span>'}</td>
           <td><span class="${conceptoCls}" contenteditable="true" data-nro="${r.cliente_nro}" data-sub="${r.sub}" data-orig="${escapeHtml(conceptoVal)}" onblur="onConceptoBlur(this)" onfocus="onConceptoFocus(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el concepto">${conceptoDisplay}</span></td>
           <td><span class="estado est-${r.estado}">${ESTADOS_LABELS[r.estado] || r.estado}</span></td>
@@ -675,6 +681,54 @@ function onConceptoFocus(el) {
 function setConceptoEmpty(el) {
   el.classList.add('empty');
   el.innerText = 'Agregar...';
+}
+
+// === Edit cliente.nombre inline (afecta a TODAS las sub-versiones del mismo cliente_nro) ===
+async function onClienteNombreBlur(el) {
+  const nro = el.dataset.nro;
+  const orig = (el.dataset.orig || '').trim();
+  let nuevo = el.innerText.trim();
+  // Si no hubo cambio real (case-insensitive porque mostramos capitalize)
+  if (nuevo.toLowerCase() === orig.toLowerCase()) {
+    el.innerText = orig ? orig.toLowerCase() : '—';
+    return;
+  }
+  if (!nuevo) {
+    // No permitir nombre vacío (es campo crítico)
+    el.innerText = orig ? orig.toLowerCase() : '—';
+    toast('El nombre no puede quedar vacío.', 'error');
+    return;
+  }
+  el.classList.add('saving');
+  try {
+    const r = await fetch('/calculadora/api/edit-cliente.php', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cliente_nro: nro, nombre: nuevo })
+    });
+    const d = await r.json();
+    el.classList.remove('saving');
+    if (!d.ok) {
+      el.classList.add('error');
+      el.innerText = orig ? orig.toLowerCase() : '—';
+      setTimeout(() => el.classList.remove('error'), 2000);
+      toast(d.error, 'error', { title: 'No se guardó el nombre' });
+      return;
+    }
+    el.dataset.orig = nuevo;
+    el.innerText = nuevo.toLowerCase();
+    el.classList.add('saved');
+    setTimeout(() => el.classList.remove('saved'), 1500);
+    // Re-fetch table porque otras filas del mismo cliente_nro tienen el nombre viejo
+    setTimeout(() => cargarActivos(), 1600);
+  } catch (e) {
+    el.classList.remove('saving');
+    el.classList.add('error');
+    el.innerText = orig ? orig.toLowerCase() : '—';
+    setTimeout(() => el.classList.remove('error'), 2000);
+    toast(e.message, 'error', { title: 'Error de red' });
+  }
 }
 
 async function onConceptoBlur(el) {
