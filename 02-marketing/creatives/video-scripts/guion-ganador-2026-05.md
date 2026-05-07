@@ -3,6 +3,7 @@
 > **Status:** `ganador` — corriendo en campaña activa desde mayo 2026 con buen CPA desde día 1.
 > **Avatar:** Carolina.
 > **Ángulo:** mecanismo + problem-aware (muebles puestos sin mesada).
+> **Formato:** ElevenLabs — **este archivo es solo el audio**. Para el output de video completo (escenas, texto en pantalla, descripción visual) ver [`capcut-output-format.md`](./capcut-output-format.md).
 
 ---
 
