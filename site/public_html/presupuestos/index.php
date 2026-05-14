@@ -145,12 +145,13 @@ h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px
 /* === TABLE — moderna, zebra sutil, hover de fila completa === */
 table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
 thead{background:var(--dk)}
-th{background:var(--dk);color:var(--cr);text-align:left;padding:13px 14px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--dk2)}
+th{background:var(--dk);color:var(--cr);text-align:left;padding:11px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--dk2);white-space:nowrap}
 th:first-child{padding-left:18px}
 th:last-child{padding-right:18px}
-td{padding:14px;border-bottom:1px solid var(--row-border);font-size:13.5px;vertical-align:middle;color:var(--text);transition:background .12s}
+td{padding:10px 12px;border-bottom:1px solid var(--row-border);font-size:13.5px;vertical-align:middle;color:var(--text);transition:background .12s;height:48px;box-sizing:border-box}
 td:first-child{padding-left:18px}
 td:last-child{padding-right:18px}
+tbody tr{height:48px}
 tbody tr:nth-child(even) td{background:var(--row-alt)}
 tbody tr:hover td{background:var(--hover)}
 tbody tr:last-child td{border-bottom:none}
@@ -163,15 +164,15 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .cell-num{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600;text-align:right}
 .muted{color:var(--text3);opacity:.45;font-size:13px}
 .placeholder-hint{color:var(--text3);opacity:.55;font-style:italic;font-size:12.5px}
-.cliente-nombre{font-weight:600;color:var(--text);text-transform:capitalize;letter-spacing:.005em;display:inline-block;padding:2px 6px;border-radius:5px;border:1px dashed transparent;cursor:text;transition:all .15s;outline:none;min-width:60px}
-.cliente-nombre:hover{border-color:var(--gd);background:var(--gd-soft)}
-.cliente-nombre:focus{border-color:var(--gd);border-style:solid;background:var(--card-alt);box-shadow:0 0 0 3px var(--gd-soft);text-transform:none}
+.cliente-nombre{font-weight:600;color:var(--text);text-transform:capitalize;letter-spacing:.005em;display:inline-block;padding:2px 6px;border-radius:5px;border:1px dashed transparent;cursor:text;transition:all .15s;outline:none;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+.cliente-nombre:hover{border-color:var(--gd);background:var(--gd-soft);white-space:normal;max-width:none}
+.cliente-nombre:focus{border-color:var(--gd);border-style:solid;background:var(--card-alt);box-shadow:0 0 0 3px var(--gd-soft);text-transform:none;white-space:normal;max-width:none}
 .cliente-nombre.saving{opacity:.5}
 .cliente-nombre.saved{border-color:#1F8F47;background:rgba(31,143,71,.08)}
 .cliente-nombre.saved::after{content:' ✓';color:#1F8F47;font-weight:700;font-style:normal}
 .cliente-nombre.error{border-color:#A53C3C;background:rgba(165,60,60,.08)}
 .cliente-dni{color:var(--text3);font-size:11px;display:block;margin-top:1px;letter-spacing:.02em;font-variant-numeric:tabular-nums}
-.cell-tel{font-variant-numeric:tabular-nums;color:var(--text2);font-size:13px;letter-spacing:.01em}
+.cell-tel{font-variant-numeric:tabular-nums;color:var(--text2);font-size:13px;letter-spacing:.01em;white-space:nowrap}
 
 /* === ESTADO BADGES === */
 .estado{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:11px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;line-height:1}
@@ -271,11 +272,11 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .top-mat-item .count{color:var(--text3);font-size:11.5px;margin-left:auto;padding:0 12px;font-style:italic}
 
 /* === CONCEPTO INLINE EDIT === */
-.concepto-cell{display:inline-block;min-width:90px;padding:4px 8px;border-radius:5px;border:1px dashed transparent;cursor:text;transition:all .15s;font-size:13px;color:var(--text);outline:none}
-.concepto-cell:hover{border-color:var(--gd);background:var(--gd-soft)}
-.concepto-cell:focus{border-color:var(--gd);border-style:solid;background:var(--card-alt);box-shadow:0 0 0 3px var(--gd-soft)}
-.concepto-cell.empty{color:var(--text3);font-style:italic;font-size:12.5px;opacity:.55}
-.concepto-cell.empty:hover{opacity:.8;color:var(--gdd)}
+.concepto-cell{display:inline-block;min-width:80px;max-width:200px;padding:3px 7px;border-radius:5px;border:1px dashed transparent;cursor:text;transition:all .15s;font-size:13px;color:var(--text);outline:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+.concepto-cell:hover{border-color:var(--gd);background:var(--gd-soft);white-space:normal;max-width:none}
+.concepto-cell:focus{border-color:var(--gd);border-style:solid;background:var(--card-alt);box-shadow:0 0 0 3px var(--gd-soft);white-space:normal;max-width:none}
+.concepto-cell.empty{color:var(--text3);font-style:italic;font-size:12px;opacity:.4;min-width:60px}
+.concepto-cell.empty:hover{opacity:.75;color:var(--gdd)}
 .concepto-cell.empty:focus{font-style:normal;opacity:1;color:var(--text)}
 .concepto-cell.saving{opacity:.5}
 .concepto-cell.saved{border-color:#1F8F47;background:rgba(31,143,71,.08)}
