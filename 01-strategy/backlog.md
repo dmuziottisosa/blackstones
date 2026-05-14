@@ -7,6 +7,13 @@
 
 ## 🔴 Crítico — chequear antes de producción real
 
+- [ ] **🗓️ 2026-05-15 · Pedir lista oficial de precios COMPLETA a BlackStones**
+  - **Materiales** ya están en `COLORS_DB` (`calc.html`), pero hay que validar precios actualizados (USD/m² y ARS/m²)
+  - **Trasforos** — bacha (varias medidas), anafe, horno empotrado, conexión de canilla, escurridor integrado
+  - **Flete** — por zona (CABA / GBA Norte / GBA Sur / GBA Oeste) y por tipo (transporte simple, con escalera, sin acceso)
+  - **Colocación** — por m² y/o por trabajo, con y sin escalera, con angulos especiales
+  - **Otros**: pulido especial, biselado, leather/brushed, perforaciones extra, terminaciones (chamfered, ojiva, etc.), zócalos
+  - **Por qué importa**: la calc hoy estima estos costos en `COSTOS_FIJOS` y constantes hardcodeadas — sin lista oficial actualizada, el "presupuesto cerrado por escrito en 24hs" (disparador #1 de Carolina) puede tener desviaciones reales, generando el dolor #4 ("extras al colocar")
 - [ ] **Verificar AMBOS crons** activos en panel Hostinger (al menos uno está corriendo según `health.php` `cron_recent: true`):
   - `cleanup-retention.php` → 03:00 ART diario
   - `monthly-report.php` → 02:00 ART diario
