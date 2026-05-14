@@ -29,6 +29,12 @@
 - `belief-economia-argentina-decisiones.md` — cómo el dólar y la inflación afectan compra de mesada.
 - `belief-funnel-real-de-venta.md` — el funnel completo desde awareness hasta recompra (que cruza muchas funcionales).
 
+## Beliefs adoptados (índice)
+
+| Archivo | Status | Última actualización |
+|---|---|---|
+| [`anti-genericness.md`](./anti-genericness.md) | `high-confidence` | 2026-05-15 |
+
 ## Reglas
 
 - **Cualquier afirmación debe poder rastrearse a layer-1, layer-2 o layer-0.** Si no, es opinión sin base.
