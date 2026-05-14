@@ -188,7 +188,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 [data-theme="dark"] .est-perdido{background:#2A1414;color:#E26666}
 
 /* === ACTION BUTTONS — agrupados por jerarquía === */
-.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-width:520px}
+.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-width:560px}
 .actions-cell button,.actions-cell a{font-size:11px;padding:5px 9px;border-radius:5px;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;line-height:1.2;letter-spacing:.005em}
 /* Primary: + Nueva (outline gold sutil, no domina la fila) */
 .actions-cell .act-primary{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
@@ -281,6 +281,35 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .concepto-cell.saved{border-color:#1F8F47;background:rgba(31,143,71,.08)}
 .concepto-cell.saved::after{content:' ✓';color:#1F8F47;font-weight:700;font-style:normal}
 .concepto-cell.error{border-color:#A53C3C;background:rgba(165,60,60,.08)}
+
+/* === MODAL EDIT (edición rápida desde hub) === */
+.modal-edit{max-width:560px;text-align:left}
+.modal-edit .modal-title-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px}
+.modal-edit h3{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--text);margin:0}
+.modal-edit .modal-sub{color:var(--text2);font-size:12.5px;margin-bottom:18px}
+.modal-edit .me-id{font-variant-numeric:tabular-nums;font-weight:700;color:var(--gd);font-size:13px;letter-spacing:.02em}
+.modal-edit .sep-h{position:relative;border-top:1px solid var(--border-soft);margin:18px 0 14px;padding-top:14px}
+.modal-edit .sep-h::before{content:attr(data-label);position:absolute;top:-7px;left:0;background:var(--card);padding:0 8px 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
+.modal-edit .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-edit .field-full{grid-column:1/-1}
+.modal-edit label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:5px}
+.modal-edit input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;background:var(--card);color:var(--text);transition:all .15s;outline:none;font-variant-numeric:tabular-nums}
+.modal-edit input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
+.modal-edit input:hover:not(:focus){border-color:var(--gd-soft)}
+.modal-edit .field-note{font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;line-height:1.4}
+.modal-edit .calc-link{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-soft);text-align:center;font-size:12px;color:var(--text3)}
+.modal-edit .calc-link a{color:var(--gd);text-decoration:none;font-weight:600;margin-left:4px}
+.modal-edit .calc-link a:hover{text-decoration:underline}
+@media(max-width:600px){.modal-edit .field-grid{grid-template-columns:1fr}.modal-edit{max-width:none;width:100%}}
+
+/* Edit button — ícono lápiz */
+.actions-cell .act-edit{background:transparent;color:var(--text2);border-color:var(--border);padding:5px 7px}
+.actions-cell .act-edit svg{width:13px;height:13px}
+.actions-cell .act-edit:hover{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
+
+/* Badge "ajuste manual" */
+.badge-manual{display:inline-block;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#A55E00;background:#FBF1DA;padding:2px 6px;border-radius:8px;margin-left:6px;vertical-align:middle}
+[data-theme="dark"] .badge-manual{color:#E8B95C;background:#3A2A14}
 
 /* === SECTION HEADERS for stats === */
 .sec-h{margin:28px 0 12px;font-family:'Fraunces',serif;font-weight:600;color:var(--text);font-size:18px;letter-spacing:-.005em;display:flex;align-items:center;gap:10px}
@@ -402,6 +431,71 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
     <div class="modal-actions">
       <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
       <button class="btn-confirm" id="modal-confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de edición rápida -->
+<div class="modal-overlay" id="modal-edit-overlay" onclick="if(event.target===this)cerrarModalEditar()">
+  <div class="modal modal-edit">
+    <div class="modal-title-row">
+      <h3>Edición rápida</h3>
+      <span class="me-id" id="me-id-label">—</span>
+    </div>
+    <div class="modal-sub" id="me-state-sub">—</div>
+
+    <div class="sep-h" data-label="Cliente"></div>
+    <div class="field-grid">
+      <div class="field-full">
+        <label>Nombre</label>
+        <input type="text" id="me-nombre" maxlength="120" autocomplete="off">
+      </div>
+      <div>
+        <label>Celular</label>
+        <input type="text" id="me-celular" maxlength="30" autocomplete="off">
+      </div>
+      <div>
+        <label>DNI</label>
+        <input type="text" id="me-dni" maxlength="20" autocomplete="off">
+      </div>
+      <div class="field-full">
+        <label>Email</label>
+        <input type="email" id="me-email" maxlength="100" autocomplete="off">
+      </div>
+      <div class="field-full">
+        <label>Dirección</label>
+        <input type="text" id="me-direccion" maxlength="200" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="sep-h" data-label="Presupuesto"></div>
+    <div class="field-grid">
+      <div class="field-full">
+        <label>Concepto</label>
+        <input type="text" id="me-concepto" maxlength="200" placeholder="Ej: Cocina principal, Baño 1" autocomplete="off">
+      </div>
+      <div>
+        <label>Monto USD</label>
+        <input type="number" id="me-usd" step="0.01" min="0">
+      </div>
+      <div>
+        <label>Monto ARS</label>
+        <input type="number" id="me-ars" step="1" min="0">
+      </div>
+      <div class="field-full">
+        <label>Fecha</label>
+        <input type="date" id="me-fecha">
+        <div class="field-note">Editar los montos sin recalcular items deja la cotización marcada como "ajuste manual".</div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cerrarModalEditar()">Cancelar</button>
+      <button class="btn-confirm" onclick="guardarEdicion()" id="me-save-btn">Guardar cambios</button>
+    </div>
+
+    <div class="calc-link">
+      ¿Cambiar items, materiales o m²? <a id="me-calc-link" href="#" target="_blank">Abrir en calculadora →</a>
     </div>
   </div>
 </div>
@@ -554,6 +648,7 @@ async function cargarActivos() {
       const transitions = (TRANSICIONES[r.estado] || []).map(t =>
         `<button class="act-trans act-trans-${t}" onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${t}')">→ ${ESTADOS_LABELS[t]}</button>`
       ).join('');
+      const editar = `<button class="act-util act-edit" onclick="abrirModalEditar('${r.cliente_nro}', ${r.sub})" title="Edición rápida (cliente, concepto, montos, fecha)" aria-label="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`;
       const verPdf = `<a class="act-util" href="/calculadora/api/render-pdf.php?nro=${r.cliente_nro}&sub=${r.sub}" target="_blank">PDF</a>`;
       const xlsx = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&autoxlsx=1" target="_blank" title="Descargar Excel detallado de este presupuesto">Excel</a>`;
       const cargar = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}" target="_blank">Cargar</a>`;
@@ -577,7 +672,7 @@ async function cargarActivos() {
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
           <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
-          <td class="actions-cell">${cargar} ${verPdf} ${xlsx} ${transitions} ${zip} ${nueva} ${del}</td>
+          <td class="actions-cell">${editar} ${cargar} ${verPdf} ${xlsx} ${transitions} ${zip} ${nueva} ${del}</td>
         </tr>
       `;
     }).join('');
@@ -782,6 +877,99 @@ function abrirModal(title, body, onConfirm, btnClass) {
 }
 function cerrarModal() {
   document.getElementById('modal').classList.remove('show');
+}
+
+// === Modal de edición rápida ===
+let _editingCotizacion = null;
+
+function abrirModalEditar(nro, sub) {
+  const r = _activosCache.find(x => x.cliente_nro === nro && parseInt(x.sub) === parseInt(sub));
+  if (!r) {
+    toast('No se encontró la cotización en el listado actual. Recargá la tabla.', 'error');
+    return;
+  }
+  _editingCotizacion = { nro: r.cliente_nro, sub: parseInt(r.sub) };
+
+  document.getElementById('me-id-label').innerText = `${r.cliente_nro}-${r.sub}`;
+  document.getElementById('me-state-sub').innerHTML =
+    `Estado: <b>${ESTADOS_LABELS[r.estado] || r.estado}</b>` +
+    (r.ajuste_manual ? ' <span class="badge-manual">Ajuste manual</span>' : '');
+
+  document.getElementById('me-nombre').value    = r.cliente_nombre || '';
+  document.getElementById('me-celular').value   = r.cliente_celular || '';
+  document.getElementById('me-dni').value       = r.cliente_dni || '';
+  document.getElementById('me-email').value     = r.cliente_email || '';
+  document.getElementById('me-direccion').value = r.cliente_direccion || '';
+  document.getElementById('me-concepto').value  = r.concepto || '';
+  document.getElementById('me-usd').value       = r.monto_usd || 0;
+  document.getElementById('me-ars').value       = r.monto_ars || 0;
+  document.getElementById('me-fecha').value     = (r.fecha || '').substring(0, 10);
+  document.getElementById('me-calc-link').href  = `/calculadora/?load=${r.cliente_nro}-${r.sub}`;
+
+  document.getElementById('modal-edit-overlay').classList.add('show');
+  setTimeout(() => { try { document.getElementById('me-nombre').focus(); } catch(e){} }, 100);
+}
+
+function cerrarModalEditar() {
+  document.getElementById('modal-edit-overlay').classList.remove('show');
+  _editingCotizacion = null;
+}
+
+async function guardarEdicion() {
+  if (!_editingCotizacion) return;
+  const { nro, sub } = _editingCotizacion;
+  const btn = document.getElementById('me-save-btn');
+
+  const payload = {
+    cliente_nro: nro,
+    sub: sub,
+    cliente: {
+      nombre:    document.getElementById('me-nombre').value.trim(),
+      celular:   document.getElementById('me-celular').value.trim(),
+      dni:       document.getElementById('me-dni').value.trim(),
+      email:     document.getElementById('me-email').value.trim(),
+      direccion: document.getElementById('me-direccion').value.trim(),
+    },
+    concepto:  document.getElementById('me-concepto').value.trim(),
+    monto_usd: parseFloat(document.getElementById('me-usd').value) || 0,
+    monto_ars: parseFloat(document.getElementById('me-ars').value) || 0,
+    fecha:     document.getElementById('me-fecha').value,
+  };
+
+  if (!payload.cliente.nombre) {
+    toast('El nombre del cliente no puede quedar vacío.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  const oldText = btn.innerText;
+  btn.innerText = 'Guardando…';
+
+  try {
+    const r = await fetch('/calculadora/api/edit-cotizacion.php', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const d = await r.json();
+    btn.disabled = false;
+    btn.innerText = oldText;
+    if (!d.ok) {
+      toast(d.error, 'error', { title: 'Error al guardar' });
+      return;
+    }
+    cerrarModalEditar();
+    const extras = [];
+    if (d.cliente_updated && d.cliente_updated.length) extras.push(`Cliente: ${d.cliente_updated.join(', ')}`);
+    if (d.cotizacion_updated && d.cotizacion_updated.length) extras.push(`Cotización: ${d.cotizacion_updated.join(', ')}`);
+    toast(extras.join(' · ') || 'Cambios guardados.', 'success', { title: 'Edición guardada' });
+    cargarActivos();
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerText = oldText;
+    toast(e.message, 'error', { title: 'Error de red' });
+  }
 }
 
 // ============================================================

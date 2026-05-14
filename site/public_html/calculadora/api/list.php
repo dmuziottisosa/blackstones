@@ -90,17 +90,20 @@ if (is_dir(BS_CLIENTES_DIR)) {
             }
 
             $results[] = [
-                'cliente_nro'     => $cliente_nro,
-                'cliente_nombre'  => $cli['nombre'] ?? '',
-                'cliente_celular' => $cli['celular'] ?? '',
-                'cliente_dni'     => $cli['dni'] ?? '',
-                'sub'             => $cot['sub'] ?? 0,
-                'fecha'           => $fecha,
-                'concepto'        => $cot['concepto'] ?? '',
-                'estado'          => $cot['estado'] ?? '',
-                'monto_usd'       => $monto_usd,
-                'monto_ars'       => $monto_ars,
-                'm2'              => $m2,
+                'cliente_nro'       => $cliente_nro,
+                'cliente_nombre'    => $cli['nombre'] ?? '',
+                'cliente_celular'   => $cli['celular'] ?? '',
+                'cliente_dni'       => $cli['dni'] ?? '',
+                'cliente_email'     => $cli['email'] ?? '',
+                'cliente_direccion' => $cli['direccion'] ?? '',
+                'sub'               => $cot['sub'] ?? 0,
+                'fecha'             => $fecha,
+                'concepto'          => $cot['concepto'] ?? '',
+                'estado'            => $cot['estado'] ?? '',
+                'monto_usd'         => $monto_usd,
+                'monto_ars'         => $monto_ars,
+                'm2'                => $m2,
+                'ajuste_manual'     => isset($cot['ajuste_manual']) ? true : false,
             ];
         }
     }
