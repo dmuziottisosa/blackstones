@@ -2025,17 +2025,38 @@ const COLOR_ALIASES={
   'white storm':'white storm', // ya existe, ejemplo de mantener tal cual
 };
 
+// Defaults de espesor por marca (estándar industrial).
+// Si el nombre del material no especifica mm, se aplica este default.
+// Si el nombre SÍ trae mm explícito (ej: "Calacatta Antico 12mm"), gana ese.
+const MM_DEFAULTS_POR_MARCA={
+  'Guidoni':    '20mm',  // cuarzo Guidoni — espesor estándar 2cm
+  'Marmol':     '30mm',  // mármol natural — corte estándar 3cm
+  'Granito_i':  '30mm',  // granito importado — 3cm estándar
+  'Granito_n':  '30mm',  // granito nacional — 3cm estándar
+  'Silestone':  '20mm',  // cuarzo Silestone — 2cm (también hay 12mm)
+  'Xtone':      '12mm',  // sinterizado Xtone — 12mm
+  'Neolith':    '12mm',  // sinterizado Neolith — 12mm
+  'Dekton':     '12mm',  // sinterizado Dekton — 12mm
+  'Suprastone': '12mm',  // sinterizado Suprastone — 12mm
+  'Prima':      '12mm',  // sinterizado Prima — 12mm
+  'Pura':       '12mm',  // Purastone — 12mm
+};
+
 // Extrae mm del nombre de un color y devuelve {display, mm}.
+// Si el nombre tiene mm explícito -> lo usa.
+// Si no -> usa default según marca (segundo parámetro).
 // Ej: "Calacatta Antico 12mm" -> {display:"Calacatta Antico", mm:"12mm"}
-// Ej: "Negro Brasil" -> {display:"Negro Brasil", mm:null}
-function extractMm(name){
+// Ej: "Blanco Suggar" + Guidoni -> {display:"Blanco Suggar", mm:"20mm"}
+function extractMm(name,marca){
   if(!name)return{display:'',mm:null};
   const m=String(name).match(/^(.+?)\s*\(?(\d{1,2})\s*mm\)?\s*$/i);
   if(m)return{display:m[1].trim(),mm:m[2]+'mm'};
   // También captura mm en medio del nombre (raro pero pasa)
   const m2=String(name).match(/^(.+?)\s+(\d{1,2})\s*mm\b(.*)$/i);
   if(m2)return{display:(m2[1]+' '+m2[3]).replace(/\s+/g,' ').trim(),mm:m2[2]+'mm'};
-  return{display:String(name).trim(),mm:null};
+  // Fallback: default por marca
+  const def=MM_DEFAULTS_POR_MARCA[marca]||null;
+  return{display:String(name).trim(),mm:def};
 }
 
 function searchColors(query){
@@ -3139,7 +3160,7 @@ function renderVariantSuggest(idx,query){
   box.innerHTML=matches.map(c=>{
     const safeName=c.n.replace(/'/g,"\\'").replace(/"/g,'&quot;');
     const priceTxt=c.c==='USD'?('USD '+c.p.toLocaleString('es-AR')):('$ '+c.p.toLocaleString('es-AR'));
-    const mm=extractMm(c.n);
+    const mm=extractMm(c.n,c.m);
     const mmTag=mm.mm?`<span class="cs-mm">${mm.mm}</span>`:'';
     return `<div class="color-suggest-item" onmousedown="pickVariantColor(${idx},'${safeName}','${c.m}',${c.p},'${c.c}')">
       <div class="cs-name">${mm.display}${mmTag}</div>
@@ -3544,7 +3565,7 @@ function renderColorSuggest(s,i,query){
   box.innerHTML=matches.map(c=>{
     const safeName=c.n.replace(/'/g,"\\'").replace(/"/g,'&quot;');
     const priceTxt=c.c==='USD'?('USD '+c.p.toLocaleString('es-AR')):('$ '+c.p.toLocaleString('es-AR'));
-    const mm=extractMm(c.n);
+    const mm=extractMm(c.n,c.m);
     const mmTag=mm.mm?`<span class="cs-mm">${mm.mm}</span>`:'';
     return `<div class="color-suggest-item" onmousedown="pickColor('${s}',${i},'${safeName}','${c.m}',${c.p},'${c.c}')">
       <div class="cs-name">${mm.display}${mmTag}</div>
