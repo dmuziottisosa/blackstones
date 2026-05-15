@@ -294,9 +294,10 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .modal-edit .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modal-edit .field-full{grid-column:1/-1}
 .modal-edit label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:5px}
-.modal-edit input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;background:var(--card);color:var(--text);transition:all .15s;outline:none;font-variant-numeric:tabular-nums}
-.modal-edit input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
-.modal-edit input:hover:not(:focus){border-color:var(--gd-soft)}
+.modal-edit input,.modal-edit textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;background:var(--card);color:var(--text);transition:all .15s;outline:none;font-variant-numeric:tabular-nums}
+.modal-edit textarea{resize:vertical;min-height:64px;line-height:1.4;font-variant-numeric:normal}
+.modal-edit input:focus,.modal-edit textarea:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
+.modal-edit input:hover:not(:focus),.modal-edit textarea:hover:not(:focus){border-color:var(--gd-soft)}
 .modal-edit .field-note{font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;line-height:1.4}
 .modal-edit .calc-link{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-soft);text-align:center;font-size:12px;color:var(--text3)}
 .modal-edit .calc-link a{color:var(--gd);text-decoration:none;font-weight:600;margin-left:4px}
@@ -460,8 +461,8 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
         <input type="text" id="me-dni" maxlength="20" autocomplete="off">
       </div>
       <div class="field-full">
-        <label>Email</label>
-        <input type="email" id="me-email" maxlength="100" autocomplete="off">
+        <label>Concepto</label>
+        <input type="text" id="me-concepto" maxlength="200" placeholder="Ej: Cocina principal, Baño 1" autocomplete="off">
       </div>
       <div class="field-full">
         <label>Dirección</label>
@@ -472,8 +473,8 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
     <div class="sep-h" data-label="Presupuesto"></div>
     <div class="field-grid">
       <div class="field-full">
-        <label>Concepto</label>
-        <input type="text" id="me-concepto" maxlength="200" placeholder="Ej: Cocina principal, Baño 1" autocomplete="off">
+        <label>Notas de este presupuesto</label>
+        <textarea id="me-notas" maxlength="2000" rows="3" placeholder="Detalles internos del presupuesto (no se muestran al cliente)" autocomplete="off"></textarea>
       </div>
       <div>
         <label>Monto USD</label>
@@ -899,9 +900,9 @@ function abrirModalEditar(nro, sub) {
   document.getElementById('me-nombre').value    = r.cliente_nombre || '';
   document.getElementById('me-celular').value   = r.cliente_celular || '';
   document.getElementById('me-dni').value       = r.cliente_dni || '';
-  document.getElementById('me-email').value     = r.cliente_email || '';
   document.getElementById('me-direccion').value = r.cliente_direccion || '';
   document.getElementById('me-concepto').value  = r.concepto || '';
+  document.getElementById('me-notas').value     = r.notas || '';
   document.getElementById('me-usd').value       = r.monto_usd || 0;
   document.getElementById('me-ars').value       = r.monto_ars || 0;
   document.getElementById('me-fecha').value     = (r.fecha || '').substring(0, 10);
@@ -928,10 +929,10 @@ async function guardarEdicion() {
       nombre:    document.getElementById('me-nombre').value.trim(),
       celular:   document.getElementById('me-celular').value.trim(),
       dni:       document.getElementById('me-dni').value.trim(),
-      email:     document.getElementById('me-email').value.trim(),
       direccion: document.getElementById('me-direccion').value.trim(),
     },
     concepto:  document.getElementById('me-concepto').value.trim(),
+    notas:     document.getElementById('me-notas').value.trim(),
     monto_usd: parseFloat(document.getElementById('me-usd').value) || 0,
     monto_ars: parseFloat(document.getElementById('me-ars').value) || 0,
     fecha:     document.getElementById('me-fecha').value,

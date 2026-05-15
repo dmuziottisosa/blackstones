@@ -73,6 +73,12 @@ if (array_key_exists('concepto', $body)) {
     $cot_updates['concepto'] = $c;
 }
 
+if (array_key_exists('notas', $body)) {
+    $n = trim((string)$body['notas']);
+    if (strlen($n) > 2000) bs_error('notas demasiado largas (max 2000 chars)');
+    $cot_updates['notas'] = $n;
+}
+
 if (array_key_exists('monto_usd', $body)) {
     $cot_updates['monto_usd'] = floatval($body['monto_usd']);
     $marca_ajuste = true;
@@ -125,6 +131,9 @@ try {
             if (intval($cot['sub']) === $sub) {
                 if (isset($cot_updates['concepto'])) {
                     $cot['concepto'] = $cot_updates['concepto'];
+                }
+                if (isset($cot_updates['notas'])) {
+                    $cot['notas'] = $cot_updates['notas'];
                 }
                 if (isset($cot_updates['fecha'])) {
                     $cot['fecha'] = $cot_updates['fecha'];

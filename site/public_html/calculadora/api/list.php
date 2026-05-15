@@ -99,6 +99,7 @@ if (is_dir(BS_CLIENTES_DIR)) {
                 'sub'               => $cot['sub'] ?? 0,
                 'fecha'             => $fecha,
                 'concepto'          => $cot['concepto'] ?? '',
+                'notas'             => $cot['notas'] ?? '',
                 'estado'            => $cot['estado'] ?? '',
                 'monto_usd'         => $monto_usd,
                 'monto_ars'         => $monto_ars,
