@@ -133,7 +133,7 @@ table select{cursor:pointer}
 /* === COLOR AUTOCOMPLETE === */
 .color-cell{position:relative;display:inline-block}
 .color-cell input{font-family:'Manrope',sans-serif}
-.color-suggest{position:fixed;min-width:240px;max-width:320px;background:var(--card);border:1px solid var(--border);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:1000;display:none;max-height:280px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--gd) transparent}
+.color-suggest{position:fixed;min-width:240px;max-width:320px;background:var(--card);border:1px solid var(--border);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:1000;display:none;max-height:60vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--gd) transparent}
 .color-suggest.active{display:block}
 .color-suggest::-webkit-scrollbar{width:5px}
 .color-suggest::-webkit-scrollbar-thumb{background:var(--gd);border-radius:3px}
@@ -2052,7 +2052,7 @@ function searchBachas(query){
     }
   }
   results.sort((a,b)=>a._score-b._score||a.k.localeCompare(b.k));
-  return results.slice(0,8);
+  return results;
 }
 
 // Estado de las bachas seleccionadas
@@ -2137,7 +2137,7 @@ function searchColors(query){
     }
   }
   results.sort((a,b)=>a._score-b._score||a.n.localeCompare(b.n));
-  return results.slice(0,8);
+  return results;
 }
 
 function isSint(m){return SINT.includes(m)}
