@@ -102,6 +102,214 @@ Las 3 anteriores + **mármol** porque el baño no tiene cocción ácida intensa.
 
 ---
 
+## 6.5 Diferencias entre materiales — qué le decís al cliente
+
+**Esta es una de las preguntas más frecuentes.** El cliente quiere entender en qué se diferencian. Acá va la comparación técnica + honestidad operativa que tenés que dominar perfectamente.
+
+---
+
+### 🪨 GRANITO (piedra natural)
+
+| Atributo | Valor |
+|---|---|
+| **Origen** | Piedra natural |
+| **Composición** | Cuarzo, feldespato y mica |
+| **Resistencia al calor** | Alta — tolera olla caliente directa |
+| **Resistencia a rayaduras** | Muy buena |
+| **Porosidad** | Media — puede absorber líquidos si no está sellado |
+| **Apariencia** | Vetas y colores naturales, únicos en cada placa |
+| **Mantenimiento** | Requiere sellado periódico (cada 1-2 años) |
+| **Uso típico** | Cocinas, baños, exteriores |
+
+**Honestidad técnica obligatoria para el cliente:**
+
+> "El granito es piedra natural pura. Tolera prácticamente todo: olla caliente directa, cuchillos, manchas. Con un sellado cada 1-2 años queda perfecto."
+
+⚠️ **Excepción importante — granitos blancos:**
+
+> "**Los granitos blancos sí se manchan.** Por la composición de la piedra blanca, los líquidos como aceite, vino o café penetran y dejan marca. **No recomendamos granitos blancos en cocina a menos que el cliente acepte que va a manchar** y esté dispuesto a convivir con eso. Los granitos en tonos medios y oscuros (negro, gris, marrón) son a prueba de cocina pesada."
+
+**Cuándo recomendar granito:**
+- Cliente cocina mucho y apoya ollas calientes
+- Cliente valora natural sobre uniforme
+- Presupuesto medio o ajustado
+- Cliente NO va a elegir blanco (o lo elige aceptando que mancha)
+
+---
+
+### ✨ CUARZO (industrial)
+
+| Atributo | Valor |
+|---|---|
+| **Origen** | Superficie de ingeniería (cuarzo natural + resinas) |
+| **Composición** | 90-95% cuarzo + resinas y pigmentos |
+| **Resistencia al calor** | Moderada — puede dañarse con calor directo |
+| **Resistencia a rayaduras** | Muy buena |
+| **Porosidad** | Nula — no requiere sellado |
+| **Apariencia** | Colores uniformes o con vetas diseñadas |
+| **Mantenimiento** | Bajo — fácil limpieza |
+| **Uso típico** | Cocinas, baños, interiores |
+
+**Honestidad técnica obligatoria para el cliente:**
+
+> "El cuarzo es 90% cuarzo natural y 10% resina, lo que lo hace muy duro y resistente a manchas. Pero **tiene una limitación importante: no soporta altas temperaturas directas.** Si apoyás una olla recién sacada del fuego directa sobre el cuarzo, la resina se puede dañar y queda una marca permanente. Siempre se usa apoyaplato."
+
+⚠️ **Aclaración sobre mantenimiento:**
+
+> "El cuarzo es de bajo mantenimiento (no necesita sellado), pero **requiere limpieza regular como cualquier mesada**. Si dejás restos de café o vino sin limpiar varias horas, puede dejar mancha leve. No es 'pasale un trapo y listo' — es práctico, no autosuficiente."
+
+**Cuándo recomendar cuarzo:**
+- Cliente valora estética uniforme y predictible
+- Cocina familiar donde SÍ se usa apoyaplato
+- Cliente no quiere preocuparse por manchas
+- Cliente quiere blanco puro (sin riesgo de mancha como granito blanco)
+
+**Cuándo NO recomendar:**
+- Cliente confiesa que apoya ollas calientes directo → derivar a sinterizado o granito
+
+---
+
+### 🔥 SINTERIZADO (piedra ultra compacta)
+
+| Atributo | Valor |
+|---|---|
+| **Origen** | Industrial · tecnología de sinterización (alta presión y calor) |
+| **Composición** | Minerales naturales compactados sin resinas |
+| **Resistencia al calor** | Muy alta |
+| **Resistencia a rayaduras** | Excelente |
+| **Porosidad** | Cero — completamente impermeable |
+| **Apariencia** | Variedad de colores, texturas y acabados (imita mármol, madera, cemento) |
+| **Mantenimiento** | Muy bajo |
+| **Uso típico** | Cocinas, baños, fachadas, muebles, exteriores |
+
+**Marcas que trabajamos:** Xtone · Neolith · Dekton · Suprastone · Prima · Pura (Purastone)
+
+**Honestidad técnica para el cliente:**
+
+> "El sinterizado es la opción tank de la marmolería. **Aguanta rayones, manchas y altas temperaturas** sin daño. Podés apoyar una olla a 300°C directo en la mesada y no le pasa nada. El cuchillo no la raya. El vino, el café, el limón no la manchan. Es el material más resistente que hay en el mercado de mesadas. La contra es el precio — sale más caro que granito y cuarzo. Pero a 10 años, es el que menos te va a costar en mantenimiento."
+
+⚠️ **Aclaración sobre espesor:**
+
+> "El sinterizado viene de fábrica en 12 mm. Para que se vea premium estéticamente, le hacemos regrueso a 3-5 cm — eso se calcula como m² adicional en la cotización (siempre desglosado por escrito)."
+
+**Cuándo recomendar sinterizado:**
+- Cocina de uso intenso (cocina mucho, apoya ollas, usa cuchillos directo)
+- Cliente valora "tranquilidad de 30 años" sobre "alma natural"
+- Presupuesto medio-alto
+- Familia con niños, mascotas, vida cargada
+
+---
+
+### ✨ CUARCITA (piedra natural)
+
+| Atributo | Valor |
+|---|---|
+| **Origen** | Formación natural — areniscas sometidas a alta presión y temperatura en la Tierra |
+| **Composición** | Cuarzo recristalizado (>90%), con minerales naturales |
+| **Resistencia al calor** | Muy alta |
+| **Resistencia a rayaduras** | Muy buena (solo minerales como diamante pueden marcarla) |
+| **Porosidad** | Baja — requiere sellado para mayor protección |
+| **Apariencia** | Tonalidades únicas, veteados naturales, colores exóticos y elegantes |
+| **Mantenimiento** | Medio — limpieza con productos neutros |
+| **Uso típico** | Mesadas de cocina, baños, barras, paredes decorativas, muebles de lujo |
+
+**Honestidad técnica para el cliente:**
+
+> "La cuarcita es piedra natural, similar al granito pero con vetas más espectaculares y exóticas — colores que no encontrás en ningún otro material. **Es tan resistente como el granito** (al calor, a los cuchillos), pero la cuarcita tiene un look mucho más editorial. Se sella como el granito y se limpia con productos neutros."
+
+⚠️ **Diferencia importante con el cuarzo (que el cliente puede confundir):**
+
+> "Ojo: **cuarcita y cuarzo NO son lo mismo.** Cuarcita es piedra 100% natural (como el granito), formada en la Tierra. Cuarzo es un material industrial (90% cuarzo natural + 10% resinas). La cuarcita aguanta calor; el cuarzo no. Ambas son hermosas, pero son materiales completamente distintos en composición y comportamiento."
+
+**Cuándo recomendar cuarcita:**
+- Cliente busca look natural premium pero NO quiere mármol (por etching)
+- Cliente quiere algo único, exclusivo, exótico
+- Presupuesto alto, busca diferenciación
+- Tolera mantenimiento (limpieza neutra + sellado)
+
+---
+
+### 🤍 MÁRMOL (piedra natural)
+
+| Atributo | Valor |
+|---|---|
+| **Origen** | Piedra natural |
+| **Composición** | Carbonato de calcio cristalizado |
+| **Resistencia al calor** | Alta |
+| **Resistencia a rayaduras** | Media — más blando que granito |
+| **Porosidad** | Alta — requiere sellado |
+| **Apariencia** | Vetas naturales únicas, alma irrepetible, look editorial |
+| **Mantenimiento** | Sellado + cuidado con ácidos |
+| **Uso típico** | **Baños, vanitorys, mesadas auxiliares.** NO recomendado para cocina principal |
+
+**Honestidad técnica para el cliente:**
+
+> "El mármol es piedra natural con un alma única e irrepetible. Las vetas son su firma. **El detalle clave a saber: el mármol se etcha con ácidos.** Cítricos (limón, naranja), vinagre, productos de cal directos sin diluir → dejan una marca permanente en la superficie pulida (es un cambio químico, no se va con limpieza). Por eso **no lo recomendamos para cocina principal con uso intenso** — un chorro de limón mal limpiado y la mesada queda marcada."
+
+**Cuándo recomendar mármol:**
+- Baños (suite principal, baño de visitas)
+- Vanitorys
+- Cliente que ama lo natural y entiende los cuidados
+- Mesadas auxiliares de bar/decoración
+
+**Cuándo NO recomendar:**
+- Cocina principal de uso intenso → derivar a sinterizado o granito
+- Cliente prepara mucho con limón/vinagre
+
+---
+
+### Tabla comparativa de cocina (resumen visual)
+
+| | **Granito** | **Cuarzo** | **Sinterizado** | **Cuarcita** |
+|---|---|---|---|---|
+| Resiste calor (olla directa) | ✓✓ | ❌ | ✓✓ | ✓✓ |
+| Resiste rayones | ✓ | ✓ | ✓✓ | ✓ |
+| Resiste manchas | ✓ (oscuros) ❌ blancos | ✓ | ✓✓ | ✓ |
+| Necesita sellado | Sí (1-2 años) | No | No | Sí |
+| Look natural | ✓✓ | ❌ | ❌ (imita) | ✓✓✓ |
+| Precio relativo | $-$$ | $$-$$$ | $$$-$$$$ | $$$-$$$$ |
+
+✓ = cumple bien · ✓✓ = excelente · ✓✓✓ = el mejor · ❌ = limitación
+
+---
+
+### El cuadro mental simple — recomendación rápida
+
+Si el cliente pregunta "¿cuál me conviene?" sin más contexto:
+
+| Si el cliente prioriza... | Recomendá |
+|---|---|
+| **"Quiero tranquilidad total, que aguante todo"** | Sinterizado |
+| **"Cocino mucho, apoyo ollas calientes"** | Sinterizado o Granito (no cuarzo) |
+| **"Quiero look natural y alma única"** | Cuarcita o Granito |
+| **"Quiero look premium pero NO mármol"** | Cuarcita |
+| **"Quiero baño que se vea editorial"** | Mármol |
+| **"Quiero economía, pero que aguante"** | Granito (no blanco) |
+| **"Quiero look uniforme, sin sorpresas"** | Cuarzo o Sinterizado |
+| **"Quiero blanco puro sin que se manche"** | Cuarzo o Sinterizado blanco (mármol/granito blanco se mancha) |
+| **"No sé, decime vos"** | Sinterizado (la opción que menos riesgo de queja tiene a futuro) |
+
+---
+
+### Plantilla de respuesta cuando preguntan "¿qué diferencia hay entre los materiales?"
+
+> "Te paso comparación honesta:
+>
+> **Granito** — piedra natural, tolera prácticamente todo (incluso olla caliente directa). Sale más económico. Detalle clave: **los granitos blancos sí se manchan** — los oscuros y medios son a prueba de cocina pesada.
+>
+> **Cuarzo** — 90% cuarzo + 10% resina. Resiste manchas y rayones muy bien, pero **no tolera olla caliente directa** (la resina se daña). Siempre con apoyaplato.
+>
+> **Sinterizado** — la opción más resistente. Aguanta rayones, manchas y altas temperaturas sin daño. Lo más caro de los tres, pero el que menos problemas te va a dar a 10 años.
+>
+> **Cuarcita** — piedra natural premium (ojo: no es lo mismo que cuarzo). Look editorial, vetas exóticas, aguanta calor como el granito. Se sella periódicamente.
+>
+> Y para **baño** suma el **mármol** — natural premium, pero se etcha con cítricos así que no va en cocina principal.
+>
+> ¿Cómo usás la cocina? Si cocinás mucho y apoyás ollas calientes, te tira más a sinterizado, granito o cuarcita. Si valorás look uniforme sin sorpresas, cuarzo o sinterizado. Pasame las medidas y por zona y te armo cotización en 2-3 materiales distintos así comparás."
+
+---
+
+
 ## 7. Precios fijos (servicios y adicionales)
 
 ### Traforos (perforaciones)
