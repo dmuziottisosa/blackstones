@@ -9,6 +9,9 @@ Allow: /
 # Calculadora interna — no indexar (uso interno del equipo)
 Disallow: /calculadora/
 
+# Hub de presupuestos — interno, auth requerida
+Disallow: /presupuestos/
+
 # Archivos técnicos sin valor SEO
 Disallow: /*.php$
 Disallow: /*.json$
@@ -22,5 +25,5 @@ Disallow: /*.json$
 # User-agent: anthropic-ai
 # Disallow: /
 
-# Sitemap (lo agregamos cuando esté listo)
-# Sitemap: https://blackstones.com.ar/sitemap.xml
+# Sitemap
+Sitemap: https://blackstones.com.ar/sitemap.xml

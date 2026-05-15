@@ -1,0 +1,146 @@
+/* ===========================================================================
+   BlackStones · SEO pages shared stylesheet
+   Compartido entre /guias/, /materiales/ y todas las paginas dedicadas SEO.
+   Mantiene el design system del index.html (Fraunces + Manrope, paleta tierra).
+   ============================================================================ */
+
+:root{
+  --bg:#FAF8F4;--bg-alt:#F2EDE3;--bg-dark:#1A1816;
+  --text:#1A1816;--text-soft:#4A453E;--text-mute:#6B6760;
+  --accent:#A89580;--accent-dark:#7A6649;
+  --gold-soft:#C4A77D;--border:#E8E2D6;
+  --font-display:'Fraunces',Georgia,serif;
+  --font-body:'Manrope',-apple-system,sans-serif;
+  --container-narrow:780px;
+  --container-wide:1080px;
+  --gutter:clamp(1.25rem,4vw,2rem);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--font-body);font-size:17px;line-height:1.7;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+a{color:var(--accent-dark);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
+a:hover{border-bottom-color:var(--accent-dark)}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:500;line-height:1.2;margin:0;color:var(--text)}
+p{margin:0 0 1.1em 0}
+ul,ol{padding-left:1.3em;margin:0 0 1.1em 0}
+li{margin-bottom:.4em}
+strong{font-weight:600;color:var(--text)}
+img{max-width:100%;display:block}
+
+/* ==== HEADER ==== */
+header.site{background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.site-nav{max-width:1280px;margin:0 auto;padding:14px var(--gutter);display:flex;align-items:center;gap:24px}
+.site-nav .logo{display:flex;align-items:center;gap:10px;color:var(--text)}
+.site-nav .logo img{height:34px;width:auto}
+.site-nav .logo-text{display:flex;flex-direction:column;line-height:1}
+.site-nav .logo-text strong{font-family:'Montserrat',sans-serif;font-weight:800;letter-spacing:.04em;font-size:14.5px}
+.site-nav .logo-text span{font-family:'Montserrat',sans-serif;font-weight:300;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-mute);margin-top:2px}
+.site-nav-links{display:flex;gap:22px;margin-left:auto;font-size:14px}
+.site-nav-links a{color:var(--text-soft);border-bottom:none}
+.site-nav-links a:hover{color:var(--accent-dark)}
+.site-nav-cta{background:var(--text);color:var(--bg);padding:8px 16px;border-radius:4px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;border-bottom:none}
+.site-nav-cta:hover{background:#000;border-bottom:none}
+@media(max-width:720px){.site-nav-links{display:none}}
+
+/* ==== BREADCRUMB ==== */
+.breadcrumb{max-width:var(--container-wide);margin:0 auto;padding:18px var(--gutter) 0;font-size:13px;color:var(--text-mute);letter-spacing:.02em}
+.breadcrumb a{color:var(--text-mute);border-bottom:none}
+.breadcrumb a:hover{color:var(--accent-dark)}
+.breadcrumb-sep{margin:0 8px;color:var(--accent)}
+
+/* ==== ARTICLE (guias) ==== */
+main.article{max-width:var(--container-narrow);margin:0 auto;padding:32px var(--gutter) 64px}
+.article-eyebrow{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:16px}
+.article h1{font-size:clamp(2rem,5vw,3.1rem);margin-bottom:22px;letter-spacing:-.01em}
+.article .lede{font-size:1.18rem;color:var(--text-soft);line-height:1.55;margin-bottom:40px;font-family:var(--font-display);font-weight:400}
+.article h2{font-size:1.7rem;margin:48px 0 18px;letter-spacing:-.005em}
+.article h3{font-size:1.2rem;font-weight:600;margin:30px 0 12px;font-family:var(--font-body)}
+
+/* ==== HERO (categorias materiales / index pages) ==== */
+.hero{max-width:var(--container-wide);margin:0 auto;padding:32px var(--gutter) 28px}
+.hero .eyebrow{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:16px}
+.hero h1{font-size:clamp(2.1rem,5.5vw,3.4rem);margin-bottom:20px;letter-spacing:-.01em;max-width:780px}
+.hero .lede{font-size:1.2rem;color:var(--text-soft);line-height:1.55;max-width:720px;font-family:var(--font-display);font-weight:400}
+
+/* ==== SECTION BLOCKS ==== */
+section.block{max-width:var(--container-wide);margin:0 auto;padding:32px var(--gutter)}
+section.block h2{font-size:1.8rem;margin-bottom:18px;letter-spacing:-.005em;max-width:720px}
+section.block h3{font-size:1.2rem;font-weight:600;margin:24px 0 10px;font-family:var(--font-body)}
+section.block p{max-width:720px}
+
+/* ==== CALLOUT ==== */
+.callout{background:var(--bg-alt);border-left:3px solid var(--gold-soft);padding:18px 22px;margin:24px 0;border-radius:0 6px 6px 0}
+.callout strong{color:var(--accent-dark)}
+.callout p:last-child{margin-bottom:0}
+
+/* ==== TABLE ==== */
+.tabla-wrap{overflow-x:auto;margin:22px 0;border:1px solid var(--border);border-radius:8px;max-width:720px}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+th{background:var(--bg-alt);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--accent-dark)}
+tr:last-child td{border-bottom:none}
+td:first-child{font-weight:600}
+td small,th small{font-weight:400;color:var(--text-mute);display:block;margin-top:2px}
+
+/* ==== MARCAS GRID ==== */
+.marcas-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin:24px 0}
+.marca-card{background:#FFF;border:1px solid var(--border);border-radius:10px;padding:24px 22px;transition:transform .2s,box-shadow .2s}
+.marca-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.marca-card h3{font-family:var(--font-display);font-weight:500;font-size:1.35rem;margin:0 0 8px;color:var(--text)}
+.marca-card .marca-origen{font-size:11.5px;color:var(--accent-dark);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:block}
+.marca-card p{font-size:14.5px;color:var(--text-soft);line-height:1.55;margin:0}
+
+/* ==== PROS / CONTRAS ==== */
+.pros-contras{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:24px 0;max-width:840px}
+.pros-contras > div{background:var(--bg-alt);border-radius:10px;padding:22px 24px}
+.pros-contras h3{font-family:var(--font-body);font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.pros-contras .pros h3{color:#2D6B3F}
+.pros-contras .contras h3{color:#9B5430}
+.pros-contras ul{padding-left:18px;margin:0}
+.pros-contras li{font-size:14.5px;color:var(--text-soft);margin-bottom:6px}
+@media(max-width:640px){.pros-contras{grid-template-columns:1fr}}
+
+/* ==== FAQ ==== */
+.faq-item{border-bottom:1px solid var(--border);padding:18px 0;max-width:720px}
+.faq-item:last-child{border-bottom:none}
+.faq-item h3{font-family:var(--font-body);font-size:1.02rem;font-weight:600;margin-bottom:8px;color:var(--text)}
+.faq-item p{font-size:15px;color:var(--text-soft);margin:0}
+
+/* ==== CTA BLOCK ==== */
+.cta-block{background:var(--bg-dark);color:var(--bg);padding:42px 32px;border-radius:12px;margin:56px auto 32px;text-align:center;max-width:var(--container-wide)}
+.cta-block h3{font-size:1.7rem;color:var(--bg);font-family:var(--font-display);font-weight:500;margin-bottom:10px}
+.cta-block p{color:#C8C0B0;margin-bottom:24px;max-width:520px;margin-left:auto;margin-right:auto}
+.cta-button{display:inline-flex;align-items:center;gap:10px;background:#25D366;color:#FFF;padding:14px 28px;border-radius:6px;font-weight:600;font-size:15px;border-bottom:none}
+.cta-button:hover{background:#1da851;border-bottom:none}
+.cta-button svg{width:18px;height:18px;fill:currentColor}
+
+/* ==== RELATED ==== */
+.related{border-top:1px solid var(--border);padding-top:32px;margin-top:48px;max-width:var(--container-narrow);margin-left:auto;margin-right:auto;padding-left:var(--gutter);padding-right:var(--gutter)}
+.related h3{font-family:var(--font-body);font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.85rem;margin-bottom:14px}
+.related-list{display:grid;gap:12px}
+.related-list a{display:block;padding:14px 18px;background:var(--bg-alt);border-radius:6px;color:var(--text);font-weight:500;border-bottom:none;transition:transform .15s}
+.related-list a:hover{transform:translateX(3px);border-bottom:none}
+.related-list a small{display:block;color:var(--text-mute);font-weight:400;font-size:13px;margin-top:3px}
+
+/* Related grid (categorias) */
+section.related{max-width:var(--container-wide)}
+section.related h2{font-size:1.45rem;margin-bottom:18px;font-family:var(--font-display);font-weight:500;color:var(--text);text-transform:none;letter-spacing:normal}
+.related-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.related-grid a{display:block;padding:18px 22px;background:var(--bg-alt);border-radius:8px;color:var(--text);font-weight:500;border-bottom:none;transition:transform .15s}
+.related-grid a:hover{transform:translateY(-2px);border-bottom:none}
+.related-grid a small{display:block;color:var(--text-mute);font-weight:400;font-size:13px;margin-top:4px}
+
+/* ==== INDEX LISTING (para /guias/ y /materiales/ pages) ==== */
+.listing{max-width:var(--container-wide);margin:0 auto;padding:32px var(--gutter) 48px}
+.listing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:24px}
+.listing-card{background:#FFF;border:1px solid var(--border);border-radius:10px;padding:28px 24px;transition:transform .2s,box-shadow .2s,border-color .2s;border-bottom:1px solid var(--border);color:var(--text)}
+.listing-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.07);border-color:var(--gold-soft);border-bottom:1px solid var(--gold-soft)}
+.listing-card h3{font-family:var(--font-display);font-weight:500;font-size:1.3rem;margin:0 0 10px;color:var(--text)}
+.listing-card p{font-size:14.5px;color:var(--text-soft);line-height:1.55;margin:0 0 10px}
+.listing-card .listing-link-arrow{display:inline-block;color:var(--accent-dark);font-size:13.5px;font-weight:600}
+
+/* ==== FOOTER ==== */
+footer.site-foot{background:var(--bg-dark);color:#A89580;padding:36px var(--gutter);font-size:13.5px;text-align:center;margin-top:48px;line-height:1.7}
+footer.site-foot a{color:var(--gold-soft);border-bottom:none}
+footer.site-foot a:hover{color:#FFF;border-bottom:none}
+footer.site-foot p{max-width:720px;margin-left:auto;margin-right:auto}
