@@ -23,6 +23,23 @@
 
 ## 🟡 Mejoras de operación / conversión
 
+- [ ] **🗓️ 2026-05-15 · Catálogo público SEO — páginas dedicadas por material**
+  - Estructura `/materiales/{familia}/{material}/` con páginas estáticas optimizadas para Google
+  - **Pre-requisito: completar colores faltantes en `COLORS_DB`** (`calc.html`) antes de generar páginas:
+    - **Guidoni** — completar colores faltantes del catálogo oficial
+    - **Dekton** — los 43 del XLSX ya están cargados; validar contra catálogo Cosentino completo por si faltan
+    - **Neolith** — completar colores faltantes del catálogo oficial
+    - **Cuarcita** — crear categoría propia (hoy están mal clasificadas como `Marmol`) + cargar variantes faltantes
+  - **Una vez cargados los colores**, generar páginas SEO:
+    - Por familia: `/materiales/sinterizado/`, `/materiales/granito/`, `/materiales/cuarzo/`, `/materiales/cuarcita/`, `/materiales/marmol/`
+    - Por material individual (solo top 30-50 con búsqueda real): `/materiales/sinterizado/dekton-kelya/`, `/materiales/cuarzo/silestone-calacatta-gold/`, etc.
+    - Cada página: H1 SEO + descripción técnica + foto + propiedades (resistencia calor / rayones / porosidad) + cuándo usarlo / cuándo no + CTA WhatsApp
+    - **Sin precios públicos** (siguen siendo internos)
+    - `/calculadora/` y `/presupuestos/` **permanecen bloqueados** en robots.txt — la calc nunca se expone
+  - **Generator script** (Python): lee `COLORS_DB` + plantilla HTML → emite páginas estáticas. Cuando cambia el catálogo, regenera todo. Sitemap.xml se autogenera
+  - **Bonus paralelo**: `/guias/` con contenido informativo (regrueso, bacha armada, diferencias materiales) — contenido ya escrito en `06-knowledge/`, solo hay que renderizar
+  - **Por qué importa**: hoy el sitio tiene 1 página indexable (`index.html`) compitiendo por "marmolería caba". Con páginas dedicadas captás long-tail ("calacatta gold caba precio", "dekton vs xtone", "regrueso mesada qué es") — leads más calientes, más específicos, intención de compra alta
+
 - [ ] **Origen del presupuesto: switch publicidad / local** *(2026-05-06)*
   - Campo nuevo en estado del presupuesto que distinga si el lead vino de Meta Ads / orgánico vs walk-in / referido
   - UI: switch o dropdown en la calc al crear, persistido en `clientes/{nro}.json`
