@@ -140,7 +140,8 @@ table select{cursor:pointer}
 .color-suggest-item{padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s}
 .color-suggest-item:last-child{border-bottom:none}
 .color-suggest-item:hover{background:var(--card-alt)}
-.cs-name{font-size:.78rem;font-weight:600;color:var(--text);line-height:1.2;margin-bottom:2px}
+.cs-name{font-size:.78rem;font-weight:600;color:var(--text);line-height:1.2;margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cs-mm{display:inline-block;font-size:.6rem;font-weight:700;color:var(--gd);background:rgba(196,167,125,.12);border:1px solid rgba(196,167,125,.35);padding:1px 5px;border-radius:3px;letter-spacing:.04em;font-family:'Fraunces',serif;line-height:1;flex-shrink:0}
 .cs-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.66rem}
 .cs-mat{color:var(--gd);font-weight:600;letter-spacing:.02em}
 .cs-price{color:var(--text2);font-family:'Fraunces',serif;font-weight:600}
@@ -1822,6 +1823,7 @@ const COLORS_DB=[
   {n:'Silver Wane - Black Wood',m:'Marmol',p:1875,c:'USD'},
   {n:'St Laurent Doree',m:'Marmol',p:1875,c:'USD'},
   {n:'Verde Arcadia',m:'Marmol',p:1875,c:'USD'},
+  {n:'Piedra Caliza Patagonica',m:'Marmol',p:55000,c:'ARS'},
 ];
 
 
@@ -2022,6 +2024,19 @@ const COLOR_ALIASES={
   'pure gray':'gris puro',
   'white storm':'white storm', // ya existe, ejemplo de mantener tal cual
 };
+
+// Extrae mm del nombre de un color y devuelve {display, mm}.
+// Ej: "Calacatta Antico 12mm" -> {display:"Calacatta Antico", mm:"12mm"}
+// Ej: "Negro Brasil" -> {display:"Negro Brasil", mm:null}
+function extractMm(name){
+  if(!name)return{display:'',mm:null};
+  const m=String(name).match(/^(.+?)\s*\(?(\d{1,2})\s*mm\)?\s*$/i);
+  if(m)return{display:m[1].trim(),mm:m[2]+'mm'};
+  // También captura mm en medio del nombre (raro pero pasa)
+  const m2=String(name).match(/^(.+?)\s+(\d{1,2})\s*mm\b(.*)$/i);
+  if(m2)return{display:(m2[1]+' '+m2[3]).replace(/\s+/g,' ').trim(),mm:m2[2]+'mm'};
+  return{display:String(name).trim(),mm:null};
+}
 
 function searchColors(query){
   if(!query||query.length<1)return [];
@@ -3124,8 +3139,10 @@ function renderVariantSuggest(idx,query){
   box.innerHTML=matches.map(c=>{
     const safeName=c.n.replace(/'/g,"\\'").replace(/"/g,'&quot;');
     const priceTxt=c.c==='USD'?('USD '+c.p.toLocaleString('es-AR')):('$ '+c.p.toLocaleString('es-AR'));
+    const mm=extractMm(c.n);
+    const mmTag=mm.mm?`<span class="cs-mm">${mm.mm}</span>`:'';
     return `<div class="color-suggest-item" onmousedown="pickVariantColor(${idx},'${safeName}','${c.m}',${c.p},'${c.c}')">
-      <div class="cs-name">${c.n}</div>
+      <div class="cs-name">${mm.display}${mmTag}</div>
       <div class="cs-meta"><span class="cs-mat">${c.m}</span><span class="cs-price">${priceTxt}</span></div>
     </div>`;
   }).join('');
@@ -3527,8 +3544,10 @@ function renderColorSuggest(s,i,query){
   box.innerHTML=matches.map(c=>{
     const safeName=c.n.replace(/'/g,"\\'").replace(/"/g,'&quot;');
     const priceTxt=c.c==='USD'?('USD '+c.p.toLocaleString('es-AR')):('$ '+c.p.toLocaleString('es-AR'));
+    const mm=extractMm(c.n);
+    const mmTag=mm.mm?`<span class="cs-mm">${mm.mm}</span>`:'';
     return `<div class="color-suggest-item" onmousedown="pickColor('${s}',${i},'${safeName}','${c.m}',${c.p},'${c.c}')">
-      <div class="cs-name">${c.n}</div>
+      <div class="cs-name">${mm.display}${mmTag}</div>
       <div class="cs-meta"><span class="cs-mat">${c.m}</span><span class="cs-price">${priceTxt}</span></div>
     </div>`;
   }).join('');
