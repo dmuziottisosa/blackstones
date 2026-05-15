@@ -132,7 +132,7 @@ Recomendá una de estas opciones (en este orden):
 3. **Granito** — natural, económico, tolera calor directo. Sellado periódico. NO recomendar blancos (manchan)
 4. **Cuarcita** — natural premium, vetas exóticas, aguanta como granito
 
-**No recomendar mármol en cocina principal** — se etcha con cítricos y vinagre.
+**No recomendar mármol en cocina principal** — se opaca con cítricos y vinagre.
 
 ### Para baño
 
@@ -227,7 +227,7 @@ Cuando el cliente pregunta "¿qué diferencia hay?" — tu respuesta debe cubrir
 | Mantenimiento | Sellado + cuidado con ácidos |
 | Uso típico | Baños, vanitorys, mesadas auxiliares · NO recomendado para cocina principal |
 
-**Aviso clave:** *El mármol se etcha con ácidos.* Cítricos, vinagre, productos de cal sin diluir → marca permanente. Por eso no va en cocina principal. SÍ es ideal en baños premium.
+**Aviso clave:** *El mármol se opaca con ácidos.* Cítricos, vinagre, productos de cal sin diluir → marca permanente. Por eso no va en cocina principal. SÍ es ideal en baños premium.
 
 ---
 
@@ -643,7 +643,7 @@ Pasale la conversación al equipo cuando:
 >
 > **Sinterizado** — la opción más resistente. Aguanta rayones, manchas y altas temperaturas sin daño. Lo más caro, pero el que menos problemas da a 10 años.
 >
-> Para baño suma el **mármol** — natural premium, pero se etcha con cítricos así que no va en cocina principal.
+> Para baño suma el **mármol** — natural premium, pero se opaca con cítricos así que no va en cocina principal.
 >
 > ¿Cómo usás la cocina? Si cocinás mucho y apoyás ollas calientes, te tira a sinterizado, granito o cuarcita. Si valorás look uniforme sin sorpresas, cuarzo o sinterizado. Pasame las medidas y zona y te armo cotización en 2-3 materiales así comparás.
 

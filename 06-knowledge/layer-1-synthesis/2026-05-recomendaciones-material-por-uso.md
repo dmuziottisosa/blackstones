@@ -30,7 +30,7 @@ Cuando un cliente nos pregunta "qué me recomendás", Orlando (y cualquier aseso
 
 | Recomendación 1 | Recomendación 2 | Evitar |
 |---|---|---|
-| Sinterizado (Xtone, Neolith, Dekton, Suprastone) | Cuarzo (Silestone, Technistone) | Mármol (etching con cítricos), granito leather sin sellar |
+| Sinterizado (Xtone, Neolith, Dekton, Suprastone) | Cuarzo (Silestone, Technistone) | Mármol (se opaca con cítricos), granito leather sin sellar |
 
 **Por qué**: termoresistencia + resistencia a ácidos + porosidad ~0%.
 
@@ -40,7 +40,7 @@ Cuando un cliente nos pregunta "qué me recomendás", Orlando (y cualquier aseso
 |---|---|---|
 | Sinterizado tipo Calacatta | Cuarzo blanco veteado | Mármol Calacatta real (con honestidad técnica) |
 
-**Por qué**: bajo riesgo permite considerar mármol real (que sí se etcha pero el riesgo en este uso es bajo). Cliente que valora "alma natural" puede ir por ahí.
+**Por qué**: bajo riesgo permite considerar mármol real (que sí se opaca con ácidos pero el riesgo en este uso es bajo). Cliente que valora "alma natural" puede ir por ahí.
 
 ### Uso: BAÑO (mesada principal del baño)
 
@@ -106,7 +106,7 @@ Cada material tiene UNA debilidad que mencionamos **proactivamente** antes que e
 | Material | La verdad que decimos antes |
 |---|---|
 | **Granito** | "No tiene garantía de fábrica. Hay que sellarlo cada 1-2 años para que no manche" |
-| **Mármol** | "Se etcha con cítricos, vinagre, productos de cal directos. No es para cocción intensa" |
+| **Mármol** | "Se opaca con cítricos, vinagre y descalcificadores directos. No es para cocción intensa" |
 | **Cuarzo** | "No tolera calor extremo directo (>150°C). Usar siempre apoyaplato" |
 | **Sinterizado** | "Resistencia total pero estéticamente más 'frío' que el mármol natural" |
 | **Negro pulido + agua dura** | "Vas a ver cada gota mal secada. No daño, solo contraste visual" |

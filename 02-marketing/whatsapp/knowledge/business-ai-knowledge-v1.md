@@ -87,7 +87,7 @@ Recomendar siempre alguna de estas 3 opciones:
 | **Cuarzo** (Silestone, Guidoni, Pura/Purastone) | Cliente quiere look uniforme, sin manchas, fácil mantenimiento. Espesor 12-20mm. |
 | **Granito** | Cliente quiere natural + economía. Importado o nacional según presupuesto. Espesor 30mm. Necesita sellado periódico. |
 
-**No recomendamos mármol para cocina principal** porque el mármol se etcha con cítricos, vinagre, productos de cal directos. En cocina con uso intenso eso es un problema.
+**No recomendamos mármol para cocina principal** porque el mármol se opaca con cítricos, vinagre, productos de cal directos. En cocina con uso intenso eso es un problema.
 
 ### Para baño
 
@@ -228,7 +228,7 @@ Las 3 anteriores + **mármol** porque el baño no tiene cocción ácida intensa.
 > "Ojo: **cuarcita y cuarzo NO son lo mismo.** Cuarcita es piedra 100% natural (como el granito), formada en la Tierra. Cuarzo es un material industrial (90% cuarzo natural + 10% resinas). La cuarcita aguanta calor; el cuarzo no. Ambas son hermosas, pero son materiales completamente distintos en composición y comportamiento."
 
 **Cuándo recomendar cuarcita:**
-- Cliente busca look natural premium pero NO quiere mármol (por etching)
+- Cliente busca look natural premium pero NO quiere mármol (por sensibilidad a ácidos)
 - Cliente quiere algo único, exclusivo, exótico
 - Presupuesto alto, busca diferenciación
 - Tolera mantenimiento (limpieza neutra + sellado)
@@ -250,7 +250,7 @@ Las 3 anteriores + **mármol** porque el baño no tiene cocción ácida intensa.
 
 **Honestidad técnica para el cliente:**
 
-> "El mármol es piedra natural con un alma única e irrepetible. Las vetas son su firma. **El detalle clave a saber: el mármol se etcha con ácidos.** Cítricos (limón, naranja), vinagre, productos de cal directos sin diluir → dejan una marca permanente en la superficie pulida (es un cambio químico, no se va con limpieza). Por eso **no lo recomendamos para cocina principal con uso intenso** — un chorro de limón mal limpiado y la mesada queda marcada."
+> "El mármol es piedra natural con un alma única e irrepetible. Las vetas son su firma. **El detalle clave a saber: el mármol se opaca con ácidos.** Cítricos (limón, naranja), vinagre, productos de cal directos sin diluir → dejan una marca permanente en la superficie pulida (es un cambio químico, no se va con limpieza). Por eso **no lo recomendamos para cocina principal con uso intenso** — un chorro de limón mal limpiado y la mesada queda marcada."
 
 **Cuándo recomendar mármol:**
 - Baños (suite principal, baño de visitas)
@@ -309,7 +309,7 @@ Si el cliente pregunta "¿cuál me conviene?" sin más contexto:
 >
 > **Cuarcita** — piedra natural premium (ojo: no es lo mismo que cuarzo). Look editorial, vetas exóticas, aguanta calor como el granito. Se sella periódicamente.
 >
-> Y para **baño** suma el **mármol** — natural premium, pero se etcha con cítricos así que no va en cocina principal.
+> Y para **baño** suma el **mármol** — natural premium, pero se opaca con cítricos así que no va en cocina principal.
 >
 > ¿Cómo usás la cocina? Si cocinás mucho y apoyás ollas calientes, te tira más a sinterizado, granito o cuarcita. Si valorás look uniforme sin sorpresas, cuarzo o sinterizado. Pasame las medidas y por zona y te armo cotización en 2-3 materiales distintos así comparás."
 
@@ -836,7 +836,7 @@ Estas son **reglas duras del negocio**. Pilar nunca debe contradecirlas:
 > - **Granito**: sin garantía de fábrica. Es piedra natural — la calidad la avalamos con +500 mesadas colocadas pero no firmamos garantía explícita.
 > - **Cuarzo**: garantía del fabricante (Silestone tiene 25 años contra defectos).
 > - **Sinterizado**: garantía del fabricante (Neolith, Dekton tienen 25 años).
-> - **Mármol**: piedra natural, sin garantía contra etching (manchas por cítricos).
+> - **Mármol**: piedra natural, sin garantía contra el opacado por ácidos (cítricos, vinagre dejan marca permanente).
 >
 > En todos los casos, nuestro trabajo (cortes, juntas, colocación) lo respaldamos: si hay algo mal hecho por nosotros, lo resolvemos.
 

@@ -80,7 +80,7 @@ resiste cítricos.
 
 Si te tira más el alma natural, tenés mármol Calacatta real
 (Pura Versalles, Pura Borghini) — vetas únicas irrepetibles,
-queda hermoso. Aviso honesto: el mármol se etcha con cítricos
+queda hermoso. Aviso honesto: el mármol se opaca con cítricos
 y vinagre. En tu uso (prep + desayuno, sin cocción) el riesgo
 es bajo, pero quería decírtelo.
 
