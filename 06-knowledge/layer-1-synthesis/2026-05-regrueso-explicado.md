@@ -20,16 +20,18 @@ Algunos materiales vienen de fábrica con espesor **fino**:
 
 | Material | Espesor real (de fábrica) | Espesor visible deseable |
 |---|---|---|
-| Sinterizado (Xtone, Neolith, Dekton, Suprastone, Prima, Pura) | **12 mm** | 3-5 cm |
+| Sinterizado (Xtone, Neolith, Dekton, Suprastone, Prima) | **12 mm** | 3-5 cm |
 | Cuarzo Silestone | 20 mm | 3-5 cm (opcional) |
 | Cuarzo Guidoni | 20 mm | 3-5 cm (opcional) |
+| Cuarzo Pura (Purastone) | 20 mm | 3-5 cm (opcional) |
+| Granito (nacional e importado) | 20 mm | 3-5 cm (opcional) |
 | Mármol natural | 30 mm | OK tal cual o 5 cm (opcional) |
-| Granito | 30 mm | OK tal cual o 5 cm (opcional) |
+| Cuarcita | 30 mm | OK tal cual o 5 cm (opcional) |
 
 **Conclusión simple:**
 - Sinterizado → **casi siempre lleva regrueso** (por estética + estabilidad estructural)
-- Cuarzo → lleva regrueso si el cliente quiere estética premium
-- Mármol/Granito 30mm → solo si el cliente quiere un look extra-grueso (4-5 cm)
+- Cuarzo y Granito (20mm) → lleva regrueso si el cliente quiere estética premium / look macizo
+- Mármol y Cuarcita (30mm) → solo si el cliente quiere un look extra-grueso (4-5 cm)
 
 ---
 

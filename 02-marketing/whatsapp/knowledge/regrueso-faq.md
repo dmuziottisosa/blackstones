@@ -8,7 +8,7 @@
 
 ## ¿Qué es el regrueso?
 
-El regrueso es **el grosor visible del borde de tu mesada**. Como las mesadas vienen de fábrica en espesores finos (12 mm en sinterizado, 20 mm en cuarzo, 30 mm en mármol/granito), se pega una tira del mismo material debajo del borde frontal para que **se vea de 3, 4 o 5 cm**. Visualmente queda como una pieza maciza más gruesa.
+El regrueso es **el grosor visible del borde de tu mesada**. Como las mesadas vienen de fábrica en espesores finos (12 mm en sinterizado, 20 mm en cuarzo y granito, 30 mm en mármol y cuarcita), se pega una tira del mismo material debajo del borde frontal para que **se vea de 3, 4 o 5 cm**. Visualmente queda como una pieza maciza más gruesa.
 
 ---
 
@@ -17,8 +17,9 @@ El regrueso es **el grosor visible del borde de tu mesada**. Como las mesadas vi
 Depende del material:
 
 - **Sinterizado** (Xtone, Neolith, Dekton, Suprastone, Prima): **casi obligatorio**. Sale muy fino sin regrueso (12 mm) y se ve débil estéticamente.
-- **Cuarzo** (Silestone, Guidoni): opcional. Va sin regrueso si no lo querés.
-- **Mármol natural y Granito**: opcional. Vienen de fábrica con 30 mm que ya se ve robusto. Si querés look extra grueso (5 cm), va con regrueso.
+- **Cuarzo** (Silestone, Guidoni, Pura): opcional. Viene de 20 mm. Queda más premium con regrueso, pero va sin si el cliente lo prefiere.
+- **Granito**: opcional. Viene de 20 mm. Para look macizo de 3-5 cm va con regrueso.
+- **Mármol natural y Cuarcita**: opcional. Vienen de fábrica con 30 mm que ya se ve robusto. Si querés look extra grueso (5 cm), va con regrueso.
 
 ---
 
@@ -100,9 +101,10 @@ explico simple:
 
 · Sinterizado (Xtone, Neolith, Dekton, etc.) viene en 12 mm de
   fábrica. Lo regrosamos a 3-5 cm para que se vea premium.
-· Granito o mármol natural ya viene en 30 mm. Va sin regrueso o
-  con uno opcional para verse más imponente.
-· Cuarzo (Silestone) viene en 20 mm. Igual, regrueso opcional.
+· Granito y cuarzo (Silestone, Guidoni, Pura) vienen en 20 mm.
+  Regrueso opcional para look más macizo.
+· Mármol natural y cuarcita ya vienen en 30 mm. Se ve robusto
+  tal cual, con regrueso opcional para look extra-imponente.
 
 5 cm es lo más pedido. Va en el frente, y en los laterales si
 están expuestos (ej: isla, mesada con costado a la vista).

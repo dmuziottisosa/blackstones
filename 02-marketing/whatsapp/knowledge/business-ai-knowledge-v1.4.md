@@ -352,15 +352,16 @@ Es la bacha **construida con el mismo material que la mesada**, fabricada a mano
 
 ### Qué es
 
-El **regrueso** es el grosor visible del borde de la mesada. Las mesadas vienen de fábrica con espesores finos: sinterizado 12mm, cuarzo 20mm, granito/mármol 30mm. Estéticamente queda mejor verlas con 3-5 cm de grosor en el frente. Eso se logra **pegando una tira del mismo material debajo del borde** — visualmente parece una mesada maciza más gruesa.
+El **regrueso** es el grosor visible del borde de la mesada. Las mesadas vienen de fábrica con espesores finos: sinterizado 12mm, cuarzo 20mm, granito 20mm, mármol/cuarcita 30mm. Estéticamente queda mejor verlas con 3-5 cm de grosor en el frente. Eso se logra **pegando una tira del mismo material debajo del borde** — visualmente parece una mesada maciza más gruesa.
 
 ### Cuándo aplica
 
 | Material | ¿Lleva regrueso? |
 |---|---|
-| Sinterizado | Casi obligatorio · sale muy fino sin regrueso, default L+A automático |
-| Cuarzo | Opcional · queda más premium con regrueso |
-| Granito / Mármol / Cuarcita 30mm | Opcional · ya vienen robustos de fábrica |
+| Sinterizado (12mm) | Casi obligatorio · sale muy fino sin regrueso, default L+A automático |
+| Cuarzo (20mm) | Opcional · queda más premium con regrueso |
+| Granito (20mm) | Opcional · si el cliente quiere look macizo de 3-5 cm |
+| Mármol / Cuarcita (30mm) | Opcional · ya vienen robustos de fábrica |
 
 ### Medidas estándar
 
@@ -406,7 +407,7 @@ El regrueso lleva una junta horizontal apenas visible donde se pega la tira al c
 
 ### Plantilla de respuesta al cliente
 
-> "El regrueso es el grosor que se ve del borde de tu mesada. El sinterizado viene en 12 mm de fábrica — lo regrosamos a 3-5 cm para que se vea premium. El granito o mármol natural ya viene en 30 mm y se ve robusto, pero podés pedirle regrueso adicional si querés look más imponente. 5 cm es lo más pedido. Se cobra como m² extra de material y está siempre desglosado en la cotización."
+> "El regrueso es el grosor que se ve del borde de tu mesada. El sinterizado viene en 12 mm de fábrica y el granito en 20 mm — los regrosamos a 3-5 cm para que se vean premium. El mármol o cuarcita ya viene en 30 mm y se ve más robusto, pero podés pedirle regrueso adicional si querés look más imponente. 5 cm es lo más pedido. Se cobra como m² extra de material y está siempre desglosado en la cotización."
 
 ---
 
