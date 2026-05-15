@@ -18,7 +18,7 @@
 
 - Marmolería sofisticada en CABA. Más de **500 mesadas colocadas** en cocinas y baños de CABA y GBA.
 - Vendemos mesadas premium en: **granito, cuarzo, sinterizado y mármol**.
-- Marcas con las que trabajamos: Guidoni, Purastone, Pura Prima, Xtone, Dekton, Neolith, Silestone, Suprastone.
+- Marcas con las que trabajamos: Guidoni, Purastone (línea Pura), Prima, Xtone, Dekton, Neolith, Silestone, Suprastone.
 - **Nuestro mecanismo diferenciador**: cotización cerrada por escrito en menos de 24 hs. Con medición, fabricación y colocación. Todo adentro.
 - **No coordinamos gremios** (plomeros, electricistas, carpinteros). El cliente ya los tiene.
 - **Medimos cuando los muebles ya están puestos.** No antes.
@@ -83,8 +83,8 @@ Recomendar siempre alguna de estas 3 opciones:
 
 | Material | Cuándo |
 |---|---|
-| **Sinterizado** (Xtone, Neolith, Dekton, Suprastone, Prima, Pura) | Cliente quiere durabilidad total: no se mancha, no se raya, resiste calor, resiste ácidos. Espesor de fábrica 12mm, se regrosa a 3-5 cm para look premium. |
-| **Cuarzo** (Silestone, Guidoni) | Cliente quiere look uniforme, sin manchas, fácil mantenimiento. Espesor 20mm. |
+| **Sinterizado** (Xtone, Neolith, Dekton, Suprastone, Prima) | Cliente quiere durabilidad total: no se mancha, no se raya, resiste calor, resiste ácidos. Espesor de fábrica 12mm, se regrosa a 3-5 cm para look premium. |
+| **Cuarzo** (Silestone, Guidoni, Pura/Purastone) | Cliente quiere look uniforme, sin manchas, fácil mantenimiento. Espesor 12-20mm. |
 | **Granito** | Cliente quiere natural + economía. Importado o nacional según presupuesto. Espesor 30mm. Necesita sellado periódico. |
 
 **No recomendamos mármol para cocina principal** porque el mármol se etcha con cítricos, vinagre, productos de cal directos. En cocina con uso intenso eso es un problema.
@@ -150,6 +150,12 @@ Las 3 anteriores + **mármol** porque el baño no tiene cocción ácida intensa.
 | **Mantenimiento** | Bajo — fácil limpieza |
 | **Uso típico** | Cocinas, baños, interiores |
 
+**Marcas de cuarzo que trabajamos:** Silestone · Guidoni · Pura (Purastone)
+
+⚠️ **Aclaración importante sobre Pura/Purastone:**
+
+> "Pura (de la marca Purastone) es cuarzo, no sinterizado. La gente a veces lo confunde porque Purastone también vende líneas de otros materiales, pero la línea Pura específicamente es cuarzo. Comparte las propiedades del cuarzo: resiste manchas y rayones muy bien, pero **NO tolera olla caliente directa**."
+
 **Honestidad técnica obligatoria para el cliente:**
 
 > "El cuarzo es 90% cuarzo natural y 10% resina, lo que lo hace muy duro y resistente a manchas. Pero **tiene una limitación importante: no soporta altas temperaturas directas.** Si apoyás una olla recién sacada del fuego directa sobre el cuarzo, la resina se puede dañar y queda una marca permanente. Siempre se usa apoyaplato."
@@ -182,7 +188,7 @@ Las 3 anteriores + **mármol** porque el baño no tiene cocción ácida intensa.
 | **Mantenimiento** | Muy bajo |
 | **Uso típico** | Cocinas, baños, fachadas, muebles, exteriores |
 
-**Marcas que trabajamos:** Xtone · Neolith · Dekton · Suprastone · Prima · Pura (Purastone)
+**Marcas que trabajamos:** Xtone · Neolith · Dekton · Suprastone · Prima
 
 **Honestidad técnica para el cliente:**
 
@@ -430,8 +436,8 @@ El regrueso es **el grosor visible del borde de tu mesada**. Las mesadas vienen 
 
 | Material | ¿Lleva regrueso? |
 |---|---|
-| **Sinterizado** (Xtone, Neolith, Dekton, Suprastone, Prima, Pura) | **Casi obligatorio**. Sale demasiado fino sin regrueso (12 mm) y se ve débil. Default L+A automático en el calc. |
-| **Cuarzo** (Silestone, Guidoni) | Opcional. Queda más premium con regrueso. |
+| **Sinterizado** (Xtone, Neolith, Dekton, Suprastone, Prima) | **Casi obligatorio**. Sale demasiado fino sin regrueso (12 mm) y se ve débil. Default L+A automático en el calc. |
+| **Cuarzo** (Silestone, Guidoni, Pura/Purastone) | Opcional. Queda más premium con regrueso. |
 | **Granito / Mármol natural** (30mm) | Opcional. Ya viene de fábrica con espesor robusto. Se aplica solo si el cliente quiere look extra-macizo (5 cm). |
 
 ### Medidas estándar
