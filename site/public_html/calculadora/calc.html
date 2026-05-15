@@ -1474,7 +1474,7 @@ const COLORS_DB=[
   {n:'Patagonia Wow',m:'Marmol',p:3400,c:'USD'},
   {n:'Blanco Paloma 1.2 cm (N)',m:'Pura',p:550,c:'USD'},
   {n:'Blanco Nube 1.2 cm (N)',m:'Pura',p:550,c:'USD'},
-  {n:'Blanco Cana 24 (N y J)',m:'Pura',p:550,c:'USD'},
+  {n:'Blanco Cana 24mm (N y J)',m:'Pura',p:550,c:'USD'},
   {n:'Blanco Paloma (N y J)',m:'Pura',p:550,c:'USD'},
   {n:'Blanco Glitter ( N)',m:'Pura',p:637.5,c:'USD'},
   {n:'Blanco Nube ( N y J)',m:'Pura',p:637.5,c:'USD'},
@@ -1495,7 +1495,7 @@ const COLORS_DB=[
   {n:'Concrete Dark (J)',m:'Pura',p:937.5,c:'USD'},
   {n:'Concrrete Sand (J)',m:'Pura',p:937.5,c:'USD'},
   {n:'Negro Betun',m:'Pura',p:937.5,c:'USD'},
-  {n:'Pura Statuarietto 24 (J)',m:'Pura',p:937.5,c:'USD'},
+  {n:'Pura Statuarietto 24mm (J)',m:'Pura',p:937.5,c:'USD'},
   {n:'Pura Statuario (J)',m:'Pura',p:937.5,c:'USD'},
   {n:'TAJ (J)',m:'Pura',p:937.5,c:'USD'},
   {n:'Calacatta D´or (J)',m:'Pura',p:937.5,c:'USD'},
@@ -2043,18 +2043,33 @@ const MM_DEFAULTS_POR_MARCA={
 };
 
 // Extrae mm del nombre de un color y devuelve {display, mm}.
-// Si el nombre tiene mm explícito -> lo usa.
-// Si no -> usa default según marca (segundo parámetro).
-// Ej: "Calacatta Antico 12mm" -> {display:"Calacatta Antico", mm:"12mm"}
-// Ej: "Blanco Suggar" + Guidoni -> {display:"Blanco Suggar", mm:"20mm"}
+// Reglas (en orden de precedencia):
+//   1. Si el nombre tiene 'X mm' o 'Xmm' explícito -> usa ese (ej: "Calacatta Antico 12mm")
+//   2. Si tiene 'X cm' o 'X.Y cm' -> convierte a mm (ej: "Blanco Paloma 1.2 cm" -> 12mm)
+//   3. Si no -> usa el default por marca
 function extractMm(name,marca){
   if(!name)return{display:'',mm:null};
+  // 1a. 'X mm' al final
   const m=String(name).match(/^(.+?)\s*\(?(\d{1,2})\s*mm\)?\s*$/i);
   if(m)return{display:m[1].trim(),mm:m[2]+'mm'};
-  // También captura mm en medio del nombre (raro pero pasa)
+  // 1b. 'X mm' en medio
   const m2=String(name).match(/^(.+?)\s+(\d{1,2})\s*mm\b(.*)$/i);
   if(m2)return{display:(m2[1]+' '+m2[3]).replace(/\s+/g,' ').trim(),mm:m2[2]+'mm'};
-  // Fallback: default por marca
+  // 2a. 'X.Y cm' o 'X cm' al final (1.2cm, 2cm, etc.)
+  const c1=String(name).match(/^(.+?)\s*\(?(\d{1,2}(?:[.,]\d)?)\s*cm\)?\s*$/i);
+  if(c1){
+    const cm=parseFloat(c1[2].replace(',','.'));
+    const mm=Math.round(cm*10);
+    if(mm>=6&&mm<=40)return{display:c1[1].trim(),mm:mm+'mm'};
+  }
+  // 2b. 'X.Y cm' o 'X cm' en medio
+  const c2=String(name).match(/^(.+?)\s+(\d{1,2}(?:[.,]\d)?)\s*cm\b(.*)$/i);
+  if(c2){
+    const cm=parseFloat(c2[2].replace(',','.'));
+    const mm=Math.round(cm*10);
+    if(mm>=6&&mm<=40)return{display:(c2[1]+' '+c2[3]).replace(/\s+/g,' ').trim(),mm:mm+'mm'};
+  }
+  // 3. Fallback: default por marca
   const def=MM_DEFAULTS_POR_MARCA[marca]||null;
   return{display:String(name).trim(),mm:def};
 }
