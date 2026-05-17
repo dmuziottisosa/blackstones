@@ -493,11 +493,11 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       </div>
       <div>
         <label>Monto USD</label>
-        <input type="number" id="me-usd" step="0.01" min="0">
+        <input type="text" inputmode="decimal" id="me-usd" autocomplete="off" placeholder="0,00">
       </div>
       <div>
         <label>Monto ARS</label>
-        <input type="number" id="me-ars" step="1" min="0">
+        <input type="text" inputmode="decimal" id="me-ars" autocomplete="off" placeholder="0">
       </div>
       <div class="field-full">
         <label>Fecha</label>
@@ -904,6 +904,37 @@ function cerrarModal() {
 // === Modal de edición rápida ===
 let _editingCotizacion = null;
 
+// Parser AR robusto: acepta "347000", "347.000", "347.000,50", "347000.5".
+// Reemplazo del bug donde parseFloat("347.000") devolvia 347. Mismo
+// algoritmo que bsParseAR en calc.html.
+function _parseMontoAR(text) {
+  if (text == null || text === '') return 0;
+  let s = String(text).replace(/[^\d,.\-]/g, '');
+  if (!s) return 0;
+  if (s.indexOf(',') > -1) {
+    // Coma presente: coma=decimal, puntos=miles
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else if (s.indexOf('.') > -1) {
+    // Solo puntos: heuristica AR
+    const parts = s.split('.');
+    const lastPart = parts[parts.length - 1];
+    if (parts.length > 2 || (parts.length === 2 && lastPart.length === 3)) {
+      s = s.replace(/\./g, '');
+    }
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// Formateador AR para display en el input de edicion (sin "USD"/"$" prefix)
+function _fmtMontoEdit(n, withDecimals) {
+  n = +n || 0;
+  return new Intl.NumberFormat('es-AR', {
+    minimumFractionDigits: withDecimals ? 2 : 0,
+    maximumFractionDigits: withDecimals ? 2 : 0
+  }).format(n);
+}
+
 function abrirModalEditar(nro, sub) {
   const r = _activosCache.find(x => x.cliente_nro === nro && parseInt(x.sub) === parseInt(sub));
   if (!r) {
@@ -923,8 +954,10 @@ function abrirModalEditar(nro, sub) {
   document.getElementById('me-direccion').value = r.cliente_direccion || '';
   document.getElementById('me-concepto').value  = r.concepto || '';
   document.getElementById('me-notas').value     = r.notas || '';
-  document.getElementById('me-usd').value       = r.monto_usd || 0;
-  document.getElementById('me-ars').value       = r.monto_ars || 0;
+  // Formato AR para display (los inputs son text para evitar el bug del calc
+  // donde "347.000" se parseaba como 347 por parseFloat — ver bsParseAR en calc.html).
+  document.getElementById('me-usd').value       = (+r.monto_usd || 0) > 0 ? _fmtMontoEdit(r.monto_usd, true) : '';
+  document.getElementById('me-ars').value       = (+r.monto_ars || 0) > 0 ? _fmtMontoEdit(r.monto_ars, false) : '';
   document.getElementById('me-fecha').value     = (r.fecha || '').substring(0, 10);
   document.getElementById('me-calc-link').href  = `/calculadora/?load=${r.cliente_nro}-${r.sub}`;
 
@@ -1151,8 +1184,8 @@ async function guardarEdicion() {
     },
     concepto:  document.getElementById('me-concepto').value.trim(),
     notas:     document.getElementById('me-notas').value.trim(),
-    monto_usd: parseFloat(document.getElementById('me-usd').value) || 0,
-    monto_ars: parseFloat(document.getElementById('me-ars').value) || 0,
+    monto_usd: _parseMontoAR(document.getElementById('me-usd').value),
+    monto_ars: _parseMontoAR(document.getElementById('me-ars').value),
     fecha:     document.getElementById('me-fecha').value,
   };
 

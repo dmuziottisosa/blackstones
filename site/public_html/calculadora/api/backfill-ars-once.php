@@ -80,36 +80,37 @@ foreach (scandir(BS_CLIENTES_DIR) as $f) {
         $ars_esperado = null;
         $metodo = null;
 
-        // Heuristica A: recomputar desde USD × dolar_venta
-        if ($usd > 0 && $dolar_venta > 0) {
-            $ars_calc = round($usd * $dolar_venta);
-            $ratio = $ars_actual > 0 ? ($ars_actual / $ars_calc) : 0;
-            if ($ratio < 0.5 || $ratio > 2.0) {
-                $ars_esperado = $ars_calc;
-                $metodo = 'usd_x_dolar';
+        // Heuristica A: ars actual es 0 PERO hay base USD -> recomputar
+        // (caso donde se perdio totalmente el ars al guardar)
+        if ($usd > 0 && $dolar_venta > 0 && $ars_actual == 0) {
+            $ars_esperado = round($usd * $dolar_venta);
+            $metodo = 'usd_x_dolar_ars_cero';
+        }
+
+        // Heuristica B: factor 1000 con USD presente. Requiere que
+        // ars_actual * 1000 sea coherente con usd * dolar_venta
+        // (smoking gun del bug parseo "658.000" -> 658). Si no matchea,
+        // asumimos que ars es legitimo (ej: flete en ARS sumado al USD).
+        if ($ars_esperado === null && $usd > 0 && $dolar_venta > 0 && $ars_actual > 0) {
+            $candidato = $ars_actual * 1000;
+            $esperado_usd = $usd * $dolar_venta;
+            if ($candidato >= $esperado_usd * 0.5 && $candidato <= $esperado_usd * 2) {
+                $ars_esperado = $candidato;
+                $metodo = 'factor_1000_con_usd';
             }
         }
 
-        // Heuristica B: factor 1000 (bug parseo DOM "658.000" -> 658).
-        // Aplica si ars > 0 pero implausiblemente bajo (<10000) y NO hay
-        // base USD que justifique un ARS menor.
-        if ($ars_esperado === null && $ars_actual > 0 && $ars_actual < 10000) {
-            // Si tiene USD, validar que ars*1000 sea coherente con usd*dv
-            if ($usd > 0 && $dolar_venta > 0) {
-                $candidato = $ars_actual * 1000;
-                $esperado_usd = $usd * $dolar_venta;
-                // Si el ars*1000 esta dentro de [0.5x, 2x] del esperado_usd,
-                // es muy probable que sea el bug factor-1000
-                if ($candidato >= $esperado_usd * 0.5 && $candidato <= $esperado_usd * 2) {
-                    $ars_esperado = $candidato;
-                    $metodo = 'factor_1000_con_usd';
-                }
-            } else {
-                // Sin USD: aplicar factor 1000 directo (heuristica del marmolero —
-                // no existen presupuestos reales < 10000 ARS).
-                $ars_esperado = $ars_actual * 1000;
-                $metodo = 'factor_1000_ars_puro';
-            }
+        // Heuristica C: factor 1000 puro (cotizacion sin USD).
+        // ars implausiblemente bajo (<10000) y sin USD -> bug claro,
+        // no existen presupuestos reales <10k ARS en marmoleria.
+        if ($ars_esperado === null && $usd == 0 && $ars_actual > 0 && $ars_actual < 10000) {
+            $ars_esperado = $ars_actual * 1000;
+            $metodo = 'factor_1000_ars_puro';
+        }
+
+        if ($ars_esperado === null) {
+            $stats['cotizaciones_skipped']++;
+            continue;
         }
 
         if ($ars_esperado === null) {
