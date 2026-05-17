@@ -304,6 +304,20 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .modal-edit .calc-link a:hover{text-decoration:underline}
 @media(max-width:600px){.modal-edit .field-grid{grid-template-columns:1fr}.modal-edit{max-width:none;width:100%}}
 
+/* Desglose dentro del modal edit */
+.me-desglose{font-size:12.5px;line-height:1.5;max-height:260px;overflow-y:auto;padding-right:6px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:10px 12px;background:var(--bg)}
+.me-desglose-loading,.me-desglose-empty{color:var(--text3);font-style:italic;padding:4px 0}
+.me-desglose-section{margin-bottom:10px}
+.me-desglose-section:last-child{margin-bottom:0}
+.me-desglose-section-title{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--gd);font-weight:700;margin-bottom:4px}
+.me-desglose-item{display:flex;justify-content:space-between;gap:12px;padding:3px 0;border-bottom:1px dashed var(--border-soft)}
+.me-desglose-item:last-child{border-bottom:none}
+.me-desglose-item-desc{flex:1;color:var(--text);min-width:0}
+.me-desglose-item-meta{color:var(--text3);font-size:11.5px}
+.me-desglose-item-amount{color:var(--text2);white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12px}
+.me-desglose-totales{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.me-desglose-totales span:last-child{color:var(--gd)}
+
 /* Edit button — ícono lápiz */
 .actions-cell .act-edit{background:transparent;color:var(--text2);border-color:var(--border);padding:5px 7px}
 .actions-cell .act-edit svg{width:13px;height:13px}
@@ -489,6 +503,11 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
         <input type="date" id="me-fecha">
         <div class="field-note">Editar los montos sin recalcular items deja la cotización marcada como "ajuste manual".</div>
       </div>
+    </div>
+
+    <div class="sep-h" data-label="Desglose"></div>
+    <div id="me-desglose" class="me-desglose">
+      <div class="me-desglose-loading">Cargando desglose…</div>
     </div>
 
     <div class="modal-actions">
@@ -910,6 +929,122 @@ function abrirModalEditar(nro, sub) {
 
   document.getElementById('modal-edit-overlay').classList.add('show');
   setTimeout(() => { try { document.getElementById('me-nombre').focus(); } catch(e){} }, 100);
+
+  // Desglose lazy
+  cargarDesglose(r.cliente_nro, parseInt(r.sub));
+}
+
+// === Desglose del presupuesto (lazy fetch desde get-state.php) ===
+async function cargarDesglose(nro, sub) {
+  const cont = document.getElementById('me-desglose');
+  cont.innerHTML = '<div class="me-desglose-loading">Cargando desglose…</div>';
+  try {
+    const r = await fetch(`/calculadora/api/get-state.php?nro=${encodeURIComponent(nro)}&sub=${sub}`, { credentials: 'same-origin' });
+    const d = await r.json();
+    if (!d.ok) {
+      cont.innerHTML = `<div class="me-desglose-empty">Sin desglose (${d.error || 'error'})</div>`;
+      return;
+    }
+    cont.innerHTML = renderDesglose(d.presupuesto || {});
+  } catch (e) {
+    cont.innerHTML = `<div class="me-desglose-empty">No se pudo cargar el desglose.</div>`;
+  }
+}
+
+function _esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function _fmtNum(n) { if (!n) return '0'; return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(Math.round(n)); }
+function _fmtMoney(amount, mon) { if (!amount) return '—'; return `${mon || 'USD'} ${_fmtNum(amount)}`; }
+function _fmtMed(it) {
+  const d1 = it.d1 || 0, d2 = it.d2 || 0, d3 = it.d3 || 0, d4 = it.d4 || 0;
+  if (d3 || d4) return `${d1}×${d2} + ${d3}×${d4} m`;
+  return `${d1}×${d2} m`;
+}
+function _fmtItemMeta(it) {
+  const parts = [];
+  if (it.reg && it.reg !== 'Sin') parts.push(`reg ${it.reg}${it.rv ? ` ${it.rv}cm` : ''}`);
+  if (it.tipo) parts.push(it.tipo);
+  if (it.tag) parts.push(it.tag);
+  return parts.length ? ' · ' + parts.join(' · ') : '';
+}
+
+function renderDesglose(p) {
+  const html = [];
+  const sec_labels = { m: 'Mesada', a: 'Alzada', l: 'L', i: 'Isla', b: 'Baño' };
+
+  for (const [key, label] of Object.entries(sec_labels)) {
+    const s = (p.secciones || {})[key];
+    if (!s || !s.items || !s.items.length) continue;
+    const qty = s.qty || 1;
+    const title = qty > 1 ? `${label} (×${qty})` : label;
+    html.push(`<div class="me-desglose-section">`);
+    html.push(`<div class="me-desglose-section-title">${_esc(title)}</div>`);
+    for (const it of s.items) {
+      const desc = `<strong>${_esc(it.color || it.mat || '—')}</strong><span class="me-desglose-item-meta"> · ${_esc(_fmtMed(it))}${_esc(_fmtItemMeta(it))}</span>`;
+      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(it.price, it.mon))}</div></div>`);
+    }
+    html.push(`</div>`);
+  }
+
+  const z = p.zocalos;
+  if (z && z.items && z.items.length) {
+    const ztitle = (z.qty || 1) > 1 ? `Zócalos (×${z.qty})` : 'Zócalos';
+    html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">${_esc(ztitle)}</div>`);
+    for (const it of z.items) {
+      const desc = `<strong>${_esc(it.color || it.mat || '—')}</strong><span class="me-desglose-item-meta"> · ${_esc(_fmtMed(it))}</span>`;
+      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(it.price, it.mon))}</div></div>`);
+    }
+    html.push(`</div>`);
+  }
+
+  if (p.bachas && p.bachas.length) {
+    html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Bachas / Piletas</div>`);
+    for (const b of p.bachas) {
+      const qty = b.qty || 1;
+      const desc = `${b.code ? `<strong>[${_esc(b.code)}]</strong> ` : ''}${_esc(b.desc || '—')}${qty > 1 ? ` <span class="me-desglose-item-meta">(×${qty})</span>` : ''}`;
+      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(b.price, 'ARS'))}</div></div>`);
+    }
+    html.push(`</div>`);
+  }
+
+  if (p.extras && p.extras.length) {
+    html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Extras</div>`);
+    for (const e of p.extras) {
+      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${_esc(e.name || '—')}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(e.amount, e.mon))}</div></div>`);
+    }
+    html.push(`</div>`);
+  }
+
+  if (p.variantes && p.variantes.length) {
+    html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Variantes</div>`);
+    for (const v of p.variantes) {
+      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc"><strong>${_esc(v.color || v.mat || '—')}</strong></div><div class="me-desglose-item-amount">${_esc(_fmtMoney(v.price, v.mon))}</div></div>`);
+    }
+    html.push(`</div>`);
+  }
+
+  const ad = p.adicionales || {};
+  const ad_items = [];
+  if (ad.flete && ad.flete.monto) ad_items.push([`Flete ${ad.flete.zona || ''}`.trim(), ad.flete.monto, 'ARS']);
+  if (ad.escalera && ad.escalera.cant) ad_items.push([`Escalera (×${ad.escalera.cant})`, ad.escalera.monto, ad.escalera.mon || 'USD']);
+  if (ad.angulos && ad.angulos.cant) ad_items.push([`Ángulos especiales (×${ad.angulos.cant})`, ad.angulos.monto, ad.angulos.mon || 'USD']);
+  if (ad_items.length) {
+    html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Adicionales</div>`);
+    for (const [name, amount, mon] of ad_items) {
+      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${_esc(name)}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(amount, mon))}</div></div>`);
+    }
+    html.push(`</div>`);
+  }
+
+  const t = p.totales || {};
+  if (t.usd || t.ars) {
+    html.push(`<div class="me-desglose-totales"><span>Total</span><span>USD ${_fmtNum(t.usd)} · ARS ${_fmtNum(t.ars)}</span></div>`);
+  }
+
+  if (!html.length) {
+    return `<div class="me-desglose-empty">Sin items cargados (cotización vacía o solo metadata).</div>`;
+  }
+
+  return html.join('');
 }
 
 function cerrarModalEditar() {
