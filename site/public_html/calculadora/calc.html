@@ -3837,8 +3837,15 @@ function clearDirty(){
 setTimeout(clearDirty,50);
 document.getElementById('fecha').value=new Date().toISOString().split('T')[0];
 
-// Cerrar autocomplete de color al hacer scroll en cualquier parte
-function _closeAllColorSuggests(){
+// Cerrar autocomplete de color al hacer scroll de la pagina o resize.
+// Ignora scrolls dentro del propio dropdown (cuando tiene muchas
+// sugerencias scrolleables internamente — antes cerraba molestosamente
+// al intentar ver sugerencias mas abajo) y scrolls dentro del input.
+function _closeAllColorSuggests(e){
+  if(e&&e.target&&e.target.nodeType===1&&typeof e.target.closest==='function'){
+    if(e.target.closest('.color-suggest'))return;
+    if(e.target.matches&&e.target.matches('input'))return;
+  }
   document.querySelectorAll('.color-suggest.active').forEach(d=>{d.classList.remove('active');d.innerHTML=''});
 }
 window.addEventListener('scroll',_closeAllColorSuggests,true);
