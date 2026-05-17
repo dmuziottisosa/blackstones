@@ -60,31 +60,71 @@ foreach (scandir(BS_CLIENTES_DIR) as $f) {
         $usd         = $totales ? floatval($totales['usd'] ?? 0) : 0;
         $ars_actual  = $totales ? floatval($totales['ars'] ?? 0) : 0;
 
-        // Necesitamos USD > 0 y dolar_venta > 0 para recalcular
-        if ($usd <= 0 || $dolar_venta <= 0) {
+        // Si ya tiene _subtotal_* en algun item (data post-fix de la calc),
+        // significa que el presupuesto fue re-guardado con la calc arreglada
+        // y los totales ya son correctos. Skip.
+        $hasSubtotals = false;
+        foreach (($cot['presupuesto']['secciones'] ?? []) as $sec) {
+            foreach (($sec['items'] ?? []) as $it) {
+                if (isset($it['_subtotal_ars']) || isset($it['_subtotal_usd'])) {
+                    $hasSubtotals = true;
+                    break 2;
+                }
+            }
+        }
+        if ($hasSubtotals) {
             $stats['cotizaciones_skipped']++;
             continue;
         }
 
-        $ars_esperado = round($usd * $dolar_venta);
+        $ars_esperado = null;
+        $metodo = null;
 
-        // Heurística: el ARS está mal si es <1% del esperado (bug típico: /1000)
-        $ratio = $ars_actual > 0 ? ($ars_actual / $ars_esperado) : 0;
-        if ($ratio >= 0.5 && $ratio <= 2.0) {
-            // Está dentro del margen razonable, no tocar
+        // Heuristica A: recomputar desde USD × dolar_venta
+        if ($usd > 0 && $dolar_venta > 0) {
+            $ars_calc = round($usd * $dolar_venta);
+            $ratio = $ars_actual > 0 ? ($ars_actual / $ars_calc) : 0;
+            if ($ratio < 0.5 || $ratio > 2.0) {
+                $ars_esperado = $ars_calc;
+                $metodo = 'usd_x_dolar';
+            }
+        }
+
+        // Heuristica B: factor 1000 (bug parseo DOM "658.000" -> 658).
+        // Aplica si ars > 0 pero implausiblemente bajo (<10000) y NO hay
+        // base USD que justifique un ARS menor.
+        if ($ars_esperado === null && $ars_actual > 0 && $ars_actual < 10000) {
+            // Si tiene USD, validar que ars*1000 sea coherente con usd*dv
+            if ($usd > 0 && $dolar_venta > 0) {
+                $candidato = $ars_actual * 1000;
+                $esperado_usd = $usd * $dolar_venta;
+                // Si el ars*1000 esta dentro de [0.5x, 2x] del esperado_usd,
+                // es muy probable que sea el bug factor-1000
+                if ($candidato >= $esperado_usd * 0.5 && $candidato <= $esperado_usd * 2) {
+                    $ars_esperado = $candidato;
+                    $metodo = 'factor_1000_con_usd';
+                }
+            } else {
+                // Sin USD: aplicar factor 1000 directo (heuristica del marmolero —
+                // no existen presupuestos reales < 10000 ARS).
+                $ars_esperado = $ars_actual * 1000;
+                $metodo = 'factor_1000_ars_puro';
+            }
+        }
+
+        if ($ars_esperado === null) {
             $stats['cotizaciones_skipped']++;
             continue;
         }
 
-        // Bug detectado: ars mal. Recalcular.
         $fixes[] = [
             'cliente_nro'   => $obj['cliente_nro'] ?? '?',
             'sub'           => $cot['sub'] ?? '?',
+            'metodo'        => $metodo,
             'usd'           => $usd,
             'dolar_venta'   => $dolar_venta,
             'ars_actual'    => $ars_actual,
             'ars_esperado'  => $ars_esperado,
-            'ratio_actual'  => round($ratio, 4),
         ];
 
         if (!$dry) {
