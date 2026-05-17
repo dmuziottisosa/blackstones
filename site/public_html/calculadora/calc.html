@@ -2074,7 +2074,8 @@ const COLOR_ALIASES={
 // Si el nombre SÍ trae mm explícito (ej: "Calacatta Antico 12mm"), gana ese.
 const MM_DEFAULTS_POR_MARCA={
   'Guidoni':    '20mm',  // cuarzo Guidoni — espesor estándar 2cm
-  'Marmol':     '30mm',  // mármol natural — corte estándar 3cm
+  'Marmol':     '20mm',  // mármol natural — corte estándar 2cm en BlackStones
+  'Cuarcita':   '20mm',  // cuarcita natural — corte estándar 2cm
   'Granito_i':  '20mm',  // granito importado — 2cm estándar en AR
   'Granito_n':  '20mm',  // granito nacional — 2cm estándar en AR
   'Silestone':  '20mm',  // cuarzo Silestone — 2cm (también hay 12mm)
@@ -3129,6 +3130,14 @@ function removeVariant(idx){
 function updVariant(idx,field,value){
   if(!VARS.items[idx])return;
   VARS.items[idx][field]=value;
+  // Campos de texto/numero (typing en vivo): NO re-render del card o el
+  // input pierde foco en cada tecla. Solo recompute. Otros campos
+  // (regMode, etc.) son botones que SI requieren re-render para reflejar
+  // el estado visual.
+  if(field==='regManualVal'){
+    calc();
+    return;
+  }
   renderVariants();
   calc();
 }
@@ -3318,7 +3327,15 @@ function updBachaQty(idx,v){
   const b=BACHAS.items[idx];
   if(!b)return;
   b.qty=Math.max(1,parseInt(v)||1);
-  renderBachas();
+  // No re-render — el input pierde foco al tipear. Actualizamos solo
+  // el subtotal visible de la fila + recalc global.
+  const list=document.getElementById('bachas-list');
+  const row=list?list.children[idx]:null;
+  const subEl=row?row.querySelector('.bacha-total'):null;
+  if(subEl){
+    const tot=(b.price||0)*b.qty;
+    subEl.textContent=fmtARS(tot);
+  }
   calc();
 }
 function renderBachas(){
