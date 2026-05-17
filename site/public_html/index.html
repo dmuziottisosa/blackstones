@@ -1182,13 +1182,12 @@
       background: var(--bg);
       padding-top: clamp(2.5rem, 5vw, 3.5rem);
     }
-    /* === Buscador del catálogo (sutil, entre tabs y filtros tipo) === */
+    /* === Buscador del catálogo (integrado al filter cluster, left-aligned) === */
     .catalog-search {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      margin: 0.9rem 0 0.4rem;
-      padding: 0 1rem;
+      margin: 0.9rem 0 0;
+      padding: 0;
     }
     .catalog-search-inner {
       display: inline-flex;
@@ -1200,7 +1199,7 @@
       background: transparent;
       transition: border-color .15s, background .15s;
       max-width: 100%;
-      width: 280px;
+      width: 240px;
     }
     .catalog-search-inner:hover { border-color: var(--accent-dark); }
     .catalog-search-inner:focus-within {
@@ -1217,7 +1216,7 @@
       border: 0;
       background: transparent;
       font: inherit;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: var(--text);
       outline: none;
       min-width: 0;
@@ -1248,11 +1247,10 @@
     }
     .catalog-search.has-query .catalog-search-inner { border-color: var(--accent-dark); }
     .catalog-search-status {
+      width: 100%;
       margin-top: 0.5rem;
       font-size: 0.78rem;
       color: var(--text-soft);
-      text-align: center;
-      max-width: 480px;
     }
     .catalog-search-status:empty { display: none; }
     .catalog-search-status a {
@@ -1262,6 +1260,15 @@
       font-weight: 600;
     }
     .catalog-search-status a:hover { color: var(--accent-dark); }
+    /* Cuando search + tipo filters se renderizan, el divisor entre ellos */
+    .catalog-search-divider {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      margin: 0 0.85rem;
+      align-self: center;
+      flex-shrink: 0;
+    }
     .color-tile[data-search-hide] { display: none !important; }
     .catalog-tab-count {
       opacity: .55;
@@ -1270,10 +1277,11 @@
       font-variant-numeric: tabular-nums;
     }
     @media (max-width: 600px) {
-      .catalog-search { margin: 0.7rem 0 0.3rem; padding: 0 0.75rem; }
-      .catalog-search-inner { width: 100%; max-width: 320px; padding: 0.45rem 0.85rem; }
+      .catalog-search { margin: 0.6rem 0 0; }
+      .catalog-search-inner { width: 100%; max-width: 100%; padding: 0.5rem 0.9rem; }
       .catalog-search-inner input { font-size: 0.85rem; }
-      .catalog-search-status { font-size: 0.75rem; padding: 0 0.5rem; }
+      .catalog-search-status { font-size: 0.75rem; }
+      .catalog-search-divider { display: none; }
     }
 
     .catalog-tabs {
