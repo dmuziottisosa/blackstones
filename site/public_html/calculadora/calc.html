@@ -5068,10 +5068,14 @@ function toggleTheme(){
         factura:    _safe(function(){ return document.getElementById('factura').value === '1'; }, false),
         dolar_venta: _safe(function(){ return DOLAR_VENTA || 0; }, 0),
         totales:    _safe(function(){
-          // Forzar recalc para garantizar valores frescos antes de leer.
-          if (typeof calc === 'function') { try { calc(); } catch(e) {} }
           // Leer del objeto interno (no del DOM) — el parseo del DOM
           // "658.000" -> 658 era el bug raiz que afecto cotizaciones viejas.
+          // NO forzar calc() aca: bsSaveDraft corre cada 2s y un calc()
+          // forzado dispara renderVariants() (linea 2824 al final de calc),
+          // que wipea cards de variantes y cierra el predictor de color
+          // mientras el usuario tipea. calc() ya corre en cada cambio del
+          // usuario via los handlers de input, asi que bsLastTotals esta
+          // siempre fresco.
           var lt = window.bsLastTotals || {};
           return {
             usd:      +lt.totalUsd || 0,
