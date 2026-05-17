@@ -2558,6 +2558,11 @@ function calc(){
       const supportsAg=(s==='m'||s==='a'||s==='l'||s==='i'||(s==='b'&&tipoB==='Con Traforo'));
       const ag=supportsAg?agCost(it,s):0;
       const total=matTotal+ag;
+      // Persistir subtotal computado en el item (para que consumidores
+      // del JSON guardado lean el total real, sin recomputar la formula).
+      it._subtotal_usd = it.mon==='USD' ? total : 0;
+      it._subtotal_ars = it.mon==='ARS' ? total : 0;
+      it._subtotal_m2  = m2;
 
       const eM=document.getElementById(`m2-${s}-${i}`),eT=document.getElementById(`tot-${s}-${i}`);
       if(eM)eM.textContent=m2.toFixed(2);
@@ -2782,6 +2787,10 @@ function calc(){
   const newArsTxt=fmtARS(totalArs);
   if(gpUsdEl.textContent!==newUsdTxt){gpUsdEl.classList.remove('pulse');void gpUsdEl.offsetWidth;gpUsdEl.classList.add('pulse');gpUsdEl.textContent=newUsdTxt;markDirty()}
   if(gpArsEl.textContent!==newArsTxt){gpArsEl.classList.remove('pulse');void gpArsEl.offsetWidth;gpArsEl.classList.add('pulse');gpArsEl.textContent=newArsTxt;markDirty()}
+
+  // Persistir totales reales en window para que bsCollectState los lea sin
+  // pasar por el DOM (el parseo del DOM "658.000" -> 658 era el bug raiz).
+  window.bsLastTotals = { gusd:gusd, gars:gars, gm:gm, totalUsd:totalUsd, totalArs:totalArs, ivaUsd:ivaUsd, ivaArs:ivaArs, conFactura:conFactura };
   document.getElementById('iva-usd').innerHTML=conFactura?`Subtotal ${fmtUSD(gusd)}<br>IVA 21% ${fmtUSD(ivaUsd)}`:'';
   document.getElementById('iva-ars').innerHTML=conFactura&&gars>0?`Subtotal ${fmtARS(gars)}<br>IVA 21% ${fmtARS(ivaArs)}`:'';
 
@@ -5011,33 +5020,15 @@ function toggleTheme(){
         factura:    _safe(function(){ return document.getElementById('factura').value === '1'; }, false),
         dolar_venta: _safe(function(){ return DOLAR_VENTA || 0; }, 0),
         totales:    _safe(function(){
-          function bsParseAR(text){
-            if(!text) return 0;
-            var s = String(text).replace(/[^\d,.\-]/g, '');
-            if(!s) return 0;
-            if(s.indexOf(',') > -1){
-              // Coma presente: coma = decimal, puntos = miles
-              s = s.replace(/\./g, '').replace(',', '.');
-            } else if(s.indexOf('.') > -1){
-              // Solo puntos (formato AR): si hay multiples puntos, o el
-              // ultimo grupo tiene exactamente 3 digitos, son separadores
-              // de miles. parseFloat("658.000") sin esto daria 658.
-              var parts = s.split('.');
-              var lastPart = parts[parts.length - 1];
-              if(parts.length > 2 || (parts.length === 2 && lastPart.length === 3)){
-                s = s.replace(/\./g, '');
-              }
-            }
-            var n = parseFloat(s);
-            return isNaN(n) ? 0 : n;
-          }
-          var elU = document.getElementById('gp-usd');
-          var elA = document.getElementById('gp-ars');
-          var elM = document.getElementById('gm');
+          // Forzar recalc para garantizar valores frescos antes de leer.
+          if (typeof calc === 'function') { try { calc(); } catch(e) {} }
+          // Leer del objeto interno (no del DOM) — el parseo del DOM
+          // "658.000" -> 658 era el bug raiz que afecto cotizaciones viejas.
+          var lt = window.bsLastTotals || {};
           return {
-            usd: elU ? bsParseAR(elU.innerText || elU.textContent) : 0,
-            ars: elA ? bsParseAR(elA.innerText || elA.textContent) : 0,
-            m2_total: elM ? bsParseAR(elM.innerText || elM.textContent) : 0
+            usd:      +lt.totalUsd || 0,
+            ars:      +lt.totalArs || 0,
+            m2_total: +lt.gm || 0
           };
         }, {})
       },

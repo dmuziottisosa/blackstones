@@ -980,12 +980,35 @@ function renderDesglose(p) {
   const sec_labels = { m: 'Mesada', a: 'Alzada', l: 'L', i: 'Isla', b: 'Baño' };
   // Acumuladores live para recomputar total desde componentes
   let sumUSD = 0, sumARS = 0;
+  let hasSubtotals = false;  // true si al menos un item trae _subtotal_* (data nueva)
+  let hasLegacyItems = false; // true si algun item es viejo (sin _subtotal_*)
   const addAmount = (amount, mon) => {
     const v = +amount || 0;
     if (!v) return;
     if ((mon || 'USD').toUpperCase() === 'ARS') sumARS += v;
     else sumUSD += v;
   };
+  // Devuelve {label, hasSubtotal, addedToTotal} para el monto a mostrar de un item.
+  // Si el item tiene _subtotal_usd/_subtotal_ars, ese es el total real del item
+  // (calculado por la calc con m² + regrueso + bacha + agujeros). Si no, es data
+  // vieja y mostramos it.price con etiqueta "por m²" sin sumar al total agregado.
+  function itemAmountLabel(it) {
+    const subUSD = +it._subtotal_usd || 0;
+    const subARS = +it._subtotal_ars || 0;
+    if (subUSD > 0 || subARS > 0) {
+      hasSubtotals = true;
+      addAmount(subUSD, 'USD');
+      addAmount(subARS, 'ARS');
+      const v = subARS > 0 ? _fmtMoney(subARS, 'ARS') : _fmtMoney(subUSD, 'USD');
+      return v;
+    }
+    // Legacy: it.price es precio por m², no total. No sumar al agregado.
+    if ((+it.price || 0) > 0) {
+      hasLegacyItems = true;
+      return `${_fmtMoney(it.price, it.mon)}<span class="me-desglose-item-meta"> /m²</span>`;
+    }
+    return '—';
+  }
 
   for (const [key, label] of Object.entries(sec_labels)) {
     const s = (p.secciones || {})[key];
@@ -998,8 +1021,7 @@ function renderDesglose(p) {
     html.push(`<div class="me-desglose-section-title">${_esc(title)}</div>`);
     for (const it of items) {
       const desc = `<strong>${_esc(it.color || it.mat || '—')}</strong><span class="me-desglose-item-meta"> · ${_esc(_fmtMed(it))}${_esc(_fmtItemMeta(it))}</span>`;
-      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(it.price, it.mon))}</div></div>`);
-      addAmount(it.price, it.mon);
+      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${itemAmountLabel(it)}</div></div>`);
     }
     html.push(`</div>`);
   }
@@ -1012,8 +1034,7 @@ function renderDesglose(p) {
       html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">${_esc(ztitle)}</div>`);
       for (const it of zItems) {
         const desc = `<strong>${_esc(it.color || it.mat || '—')}</strong><span class="me-desglose-item-meta"> · ${_esc(_fmtMed(it))}</span>`;
-        html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(it.price, it.mon))}</div></div>`);
-        addAmount(it.price, it.mon);
+        html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${itemAmountLabel(it)}</div></div>`);
       }
       html.push(`</div>`);
     }
@@ -1071,13 +1092,24 @@ function renderDesglose(p) {
     html.push(`</div>`);
   }
 
-  // Total: recomputado en vivo desde componentes (no confía en totales.ars
-  // por bug viejo donde se guardaba 658 en vez de 658.000).
-  // Si totales.ars/.usd existen Y difieren en más de 1% del computado,
-  // mostramos discrepancia (= ajuste manual o data corrupta).
+  // Total:
+  // - Si hay items con _subtotal_* (data nueva post-fix calc): sumamos esos
+  //   subtotales + bachas + extras + variantes + adicionales → total preciso.
+  // - Si TODOS los items son legacy (sin _subtotal_*): no podemos recomputar
+  //   sin replicar la formula del calc, así que mostramos el total guardado
+  //   con nota indicando que el desglose por item está incompleto.
+  // - Si es mixto (raro), se muestra el computado con nota.
   const t = p.totales || {};
   const storedUSD = +t.usd || 0, storedARS = +t.ars || 0;
-  if (sumUSD > 0 || sumARS > 0 || storedUSD > 0 || storedARS > 0) {
+  if (hasLegacyItems && !hasSubtotals) {
+    // 100% legacy: usar total guardado, items no aportan subtotal sumable
+    if (storedUSD > 0 || storedARS > 0) {
+      let totalLine = `<span>Total</span><span>USD ${_fmtNum(storedUSD)} · ARS ${_fmtNum(storedARS)}</span>`;
+      totalLine += `<div class="me-desglose-totales-note">Presupuesto antiguo: los precios por item son /m², el desglose detallado está en la calculadora.</div>`;
+      html.push(`<div class="me-desglose-totales">${totalLine}</div>`);
+    }
+  } else if (sumUSD > 0 || sumARS > 0) {
+    // Data nueva (o mixta): sumar componentes computados
     const diffUSD = storedUSD > 0 ? Math.abs(storedUSD - sumUSD) / storedUSD : 0;
     const diffARS = storedARS > 0 ? Math.abs(storedARS - sumARS) / Math.max(storedARS, sumARS) : 0;
     const ajusteManual = (diffUSD > 0.01 && storedUSD > 0) || (diffARS > 0.01 && storedARS > 0);
@@ -1086,6 +1118,9 @@ function renderDesglose(p) {
       totalLine += `<div class="me-desglose-totales-note">Guardado: USD ${_fmtNum(storedUSD)} · ARS ${_fmtNum(storedARS)} (ajuste manual o data desactualizada)</div>`;
     }
     html.push(`<div class="me-desglose-totales">${totalLine}</div>`);
+  } else if (storedUSD > 0 || storedARS > 0) {
+    // Sin items pero hay total guardado (raro): mostrar guardado
+    html.push(`<div class="me-desglose-totales"><span>Total</span><span>USD ${_fmtNum(storedUSD)} · ARS ${_fmtNum(storedARS)}</span></div>`);
   }
 
   if (!html.length) {
