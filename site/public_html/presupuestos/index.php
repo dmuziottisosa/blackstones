@@ -315,8 +315,9 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .me-desglose-item-desc{flex:1;color:var(--text);min-width:0}
 .me-desglose-item-meta{color:var(--text3);font-size:11.5px}
 .me-desglose-item-amount{color:var(--text2);white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12px}
-.me-desglose-totales{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
-.me-desglose-totales span:last-child{color:var(--gd)}
+.me-desglose-totales{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.me-desglose-totales span:nth-child(2){color:var(--gd)}
+.me-desglose-totales-note{flex-basis:100%;font-size:11px;font-weight:500;color:var(--text3);font-style:italic;font-variant-numeric:normal;margin-top:2px}
 
 /* Edit button — ícono lápiz */
 .actions-cell .act-edit{background:transparent;color:var(--text2);border-color:var(--border);padding:5px 7px}
@@ -977,6 +978,14 @@ function _isEmptyItem(it) {
 function renderDesglose(p) {
   const html = [];
   const sec_labels = { m: 'Mesada', a: 'Alzada', l: 'L', i: 'Isla', b: 'Baño' };
+  // Acumuladores live para recomputar total desde componentes
+  let sumUSD = 0, sumARS = 0;
+  const addAmount = (amount, mon) => {
+    const v = +amount || 0;
+    if (!v) return;
+    if ((mon || 'USD').toUpperCase() === 'ARS') sumARS += v;
+    else sumUSD += v;
+  };
 
   for (const [key, label] of Object.entries(sec_labels)) {
     const s = (p.secciones || {})[key];
@@ -990,6 +999,7 @@ function renderDesglose(p) {
     for (const it of items) {
       const desc = `<strong>${_esc(it.color || it.mat || '—')}</strong><span class="me-desglose-item-meta"> · ${_esc(_fmtMed(it))}${_esc(_fmtItemMeta(it))}</span>`;
       html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(it.price, it.mon))}</div></div>`);
+      addAmount(it.price, it.mon);
     }
     html.push(`</div>`);
   }
@@ -1003,6 +1013,7 @@ function renderDesglose(p) {
       for (const it of zItems) {
         const desc = `<strong>${_esc(it.color || it.mat || '—')}</strong><span class="me-desglose-item-meta"> · ${_esc(_fmtMed(it))}</span>`;
         html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(it.price, it.mon))}</div></div>`);
+        addAmount(it.price, it.mon);
       }
       html.push(`</div>`);
     }
@@ -1016,6 +1027,7 @@ function renderDesglose(p) {
         const qty = b.qty || 1;
         const desc = `${b.code ? `<strong>[${_esc(b.code)}]</strong> ` : ''}${_esc(b.desc || '—')}${qty > 1 ? ` <span class="me-desglose-item-meta">(×${qty})</span>` : ''}`;
         html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(b.price, 'ARS'))}</div></div>`);
+        addAmount(b.price, 'ARS');
       }
       html.push(`</div>`);
     }
@@ -1027,6 +1039,7 @@ function renderDesglose(p) {
       html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Extras</div>`);
       for (const e of extras) {
         html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${_esc(e.name || '—')}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(e.amount, e.mon))}</div></div>`);
+        addAmount(e.amount, e.mon);
       }
       html.push(`</div>`);
     }
@@ -1038,6 +1051,7 @@ function renderDesglose(p) {
       html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Variantes</div>`);
       for (const v of variantes) {
         html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc"><strong>${_esc(v.color || v.mat || '—')}</strong></div><div class="me-desglose-item-amount">${_esc(_fmtMoney(v.price, v.mon))}</div></div>`);
+        addAmount(v.price, v.mon);
       }
       html.push(`</div>`);
     }
@@ -1052,13 +1066,26 @@ function renderDesglose(p) {
     html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Adicionales</div>`);
     for (const [name, amount, mon] of ad_items) {
       html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${_esc(name)}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(amount, mon))}</div></div>`);
+      addAmount(amount, mon);
     }
     html.push(`</div>`);
   }
 
+  // Total: recomputado en vivo desde componentes (no confía en totales.ars
+  // por bug viejo donde se guardaba 658 en vez de 658.000).
+  // Si totales.ars/.usd existen Y difieren en más de 1% del computado,
+  // mostramos discrepancia (= ajuste manual o data corrupta).
   const t = p.totales || {};
-  if (t.usd || t.ars) {
-    html.push(`<div class="me-desglose-totales"><span>Total</span><span>USD ${_fmtNum(t.usd)} · ARS ${_fmtNum(t.ars)}</span></div>`);
+  const storedUSD = +t.usd || 0, storedARS = +t.ars || 0;
+  if (sumUSD > 0 || sumARS > 0 || storedUSD > 0 || storedARS > 0) {
+    const diffUSD = storedUSD > 0 ? Math.abs(storedUSD - sumUSD) / storedUSD : 0;
+    const diffARS = storedARS > 0 ? Math.abs(storedARS - sumARS) / Math.max(storedARS, sumARS) : 0;
+    const ajusteManual = (diffUSD > 0.01 && storedUSD > 0) || (diffARS > 0.01 && storedARS > 0);
+    let totalLine = `<span>Total</span><span>USD ${_fmtNum(sumUSD)} · ARS ${_fmtNum(sumARS)}</span>`;
+    if (ajusteManual) {
+      totalLine += `<div class="me-desglose-totales-note">Guardado: USD ${_fmtNum(storedUSD)} · ARS ${_fmtNum(storedARS)} (ajuste manual o data desactualizada)</div>`;
+    }
+    html.push(`<div class="me-desglose-totales">${totalLine}</div>`);
   }
 
   if (!html.length) {
