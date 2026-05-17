@@ -5166,12 +5166,23 @@ function toggleTheme(){
       var ad = p.adicionales;
       if (ad.flete){
         var fz = document.getElementById('fleteZona');
+        var matched = false;
         if (fz && ad.flete.zona){
-          var matched = false;
           for (var i = 0; i < fz.options.length; i++){
-            if (fz.options[i].text === ad.flete.zona || fz.options[i].value === ad.flete.zona){
+            var optText = fz.options[i].text || '';
+            // El text es tipo "CABA — $ 200.000" pero el save guarda solo
+            // el prefix ("CABA"). Matcheamos contra text completo, prefix
+            // antes del "—", y value crudo.
+            var optPrefix = optText.split('—')[0].trim();
+            if (optText === ad.flete.zona || optPrefix === ad.flete.zona || fz.options[i].value === ad.flete.zona){
               fz.value = fz.options[i].value; matched = true; break;
             }
+          }
+          // Zona no conocida (ej: "GBA Norte" cuando solo existe "GBA")
+          // pero hay monto guardado -> usar manual con ese monto.
+          if (!matched && (+ad.flete.monto || 0) > 0){
+            fz.value = 'manual';
+            matched = true;
           }
           if (matched && typeof onFleteZonaChange === 'function'){ try { onFleteZonaChange(); } catch(e){} }
         }
