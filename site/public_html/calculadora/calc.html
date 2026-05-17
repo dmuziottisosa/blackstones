@@ -2992,31 +2992,6 @@ function buildItemDesc(s,it){
 function renderVariants(){
   const list=document.getElementById('vars-list');
   if(!list)return;
-  // Preserve focus + caret antes del re-render. Si el user esta tipeando
-  // en el input de color o el de regManualVal de una variante, el
-  // innerHTML='..' destruye el input y se pierde el foco. Lo restauramos
-  // despues. Restore solo aplica si el render se hace por algun otro
-  // calc() que se dispara en paralelo — los inputs de la variante misma
-  // no llaman renderVariants en su oninput.
-  const _active=document.activeElement;
-  let _restore=null;
-  if(_active&&list.contains(_active)&&_active.tagName==='INPUT'){
-    const card=_active.closest('.var-card');
-    if(card){
-      const idx=Array.from(list.children).indexOf(card);
-      const isColor=!!_active.closest('.var-color-cell');
-      const isRegMan=_active.classList.contains('var-reg-input');
-      if(isColor||isRegMan){
-        _restore={
-          idx,
-          selector:isColor?'.var-color-cell input':'input.var-reg-input',
-          selStart:_active.selectionStart,
-          selEnd:_active.selectionEnd,
-          value:_active.value
-        };
-      }
-    }
-  }
   const sections=getActiveSections();
   const addBtn=document.querySelector('.vars-add-btn');
   if(addBtn){
@@ -3045,22 +3020,6 @@ function renderVariants(){
     return;
   }
   list.innerHTML=VARS.items.map((v,idx)=>renderVariantCard(v,idx,sections)).join('');
-
-  // Restaurar foco + caret si el user estaba tipeando en un input de variante
-  if(_restore){
-    const newCard=list.children[_restore.idx];
-    if(newCard){
-      const newEl=newCard.querySelector(_restore.selector);
-      if(newEl){
-        // El value del re-render viene del state (VARS.items[idx].color/regManualVal),
-        // que ya fue actualizado por el handler oninput. No pisamos el value.
-        try{
-          newEl.focus({preventScroll:true});
-          if(_restore.selStart!=null)newEl.setSelectionRange(_restore.selStart,_restore.selEnd);
-        }catch(e){}
-      }
-    }
-  }
 }
 
 function renderVariantCard(v,idx,sections){
@@ -3775,7 +3734,9 @@ function limpiar(){
     const mn=document.getElementById(p+'Mon');if(mn)mn.value='ARS';
   });
   ['cli','dir','cel','dni'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('nro').value='';
+  // El N° de presupuesto NO se borra al limpiar — sigue siendo valido
+  // para guardar este nuevo intento. Si el usuario quiere otro nro,
+  // lo edita manualmente o re-carga la pagina.
   document.getElementById('fecha').value=new Date().toISOString().split('T')[0];
   document.querySelectorAll('.sh-ct select').forEach(s=>{if(s.id!=='pzL')s.value='1'});
   Object.keys(D).forEach(s=>{D[s].qty=1});
