@@ -1383,16 +1383,6 @@
       border-top: 1px dashed rgba(168, 149, 128, 0.18);
       align-items: center;
     }
-    .catalog-subfilters-types-label {
-      font-family: var(--font-body);
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--text-soft);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-right: 0.4rem;
-      opacity: 0.75;
-    }
     .typefilter-chip {
       display: inline-flex;
       align-items: center;
@@ -1442,13 +1432,7 @@
     .typefilter-chip.is-hidden-chip {
       display: none;
     }
-    /* Mobile: label de tipo va arriba en línea propia */
     @media (max-width: 640px) {
-      .catalog-subfilters-types-label {
-        flex-basis: 100%;
-        margin-bottom: 0.25rem;
-        margin-right: 0;
-      }
       .typefilter-chip {
         padding: 0.35rem 0.7rem;
         font-size: 0.72rem;
@@ -4911,7 +4895,6 @@
       <div class="catalog-panel active" id="panel-granito">
         <!-- Sub-filtros por TIPO (claros/oscuros/vetas) -->
         <div class="catalog-subfilters-types" role="tablist" aria-label="Filtrar granitos por tipo">
-          <span class="catalog-subfilters-types-label">Tipo</span>
           <button type="button" class="typefilter-chip active" data-tipo="all">Todos <span class="typefilter-count">0</span></button>
           <button type="button" class="typefilter-chip" data-tipo="claro">Claros <span class="typefilter-count">0</span></button>
           <button type="button" class="typefilter-chip" data-tipo="oscuro">Oscuros <span class="typefilter-count">0</span></button>
@@ -5035,7 +5018,6 @@
       <div class="catalog-panel" id="panel-cuarzo">
         <!-- Sub-filtros por TIPO (claros/oscuros/vetas) -->
         <div class="catalog-subfilters-types" role="tablist" aria-label="Filtrar cuarzos por tipo">
-          <span class="catalog-subfilters-types-label">Tipo</span>
           <button type="button" class="typefilter-chip active" data-tipo="all">Todos <span class="typefilter-count">0</span></button>
           <button type="button" class="typefilter-chip" data-tipo="claro">Claros <span class="typefilter-count">0</span></button>
           <button type="button" class="typefilter-chip" data-tipo="oscuro">Oscuros <span class="typefilter-count">0</span></button>
@@ -5310,7 +5292,6 @@
         </div>
         <!-- Sub-filtros por TIPO (claros/oscuros/vetas) — se combinan con la marca -->
         <div class="catalog-subfilters-types" role="tablist" aria-label="Filtrar sinterizados por tipo">
-          <span class="catalog-subfilters-types-label">Tipo</span>
           <button type="button" class="typefilter-chip active" data-tipo="all">Todos <span class="typefilter-count">0</span></button>
           <button type="button" class="typefilter-chip" data-tipo="claro">Claros <span class="typefilter-count">0</span></button>
           <button type="button" class="typefilter-chip" data-tipo="oscuro">Oscuros <span class="typefilter-count">0</span></button>
