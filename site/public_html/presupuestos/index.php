@@ -966,6 +966,13 @@ function _fmtItemMeta(it) {
   if (it.tag) parts.push(it.tag);
   return parts.length ? ' · ' + parts.join(' · ') : '';
 }
+// Item placeholder vacio: sin medidas, sin precio, sin color/material identificable
+function _isEmptyItem(it) {
+  const d1 = +it.d1 || 0, d2 = +it.d2 || 0, d3 = +it.d3 || 0, d4 = +it.d4 || 0;
+  const price = +it.price || 0;
+  const hasNombre = (it.color && it.color.trim()) || (it.mat && it.mat.trim());
+  return !price && !d1 && !d2 && !d3 && !d4 && !hasNombre;
+}
 
 function renderDesglose(p) {
   const html = [];
@@ -974,11 +981,13 @@ function renderDesglose(p) {
   for (const [key, label] of Object.entries(sec_labels)) {
     const s = (p.secciones || {})[key];
     if (!s || !s.items || !s.items.length) continue;
+    const items = s.items.filter(it => !_isEmptyItem(it));
+    if (!items.length) continue;
     const qty = s.qty || 1;
     const title = qty > 1 ? `${label} (×${qty})` : label;
     html.push(`<div class="me-desglose-section">`);
     html.push(`<div class="me-desglose-section-title">${_esc(title)}</div>`);
-    for (const it of s.items) {
+    for (const it of items) {
       const desc = `<strong>${_esc(it.color || it.mat || '—')}</strong><span class="me-desglose-item-meta"> · ${_esc(_fmtMed(it))}${_esc(_fmtItemMeta(it))}</span>`;
       html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(it.price, it.mon))}</div></div>`);
     }
@@ -987,39 +996,51 @@ function renderDesglose(p) {
 
   const z = p.zocalos;
   if (z && z.items && z.items.length) {
-    const ztitle = (z.qty || 1) > 1 ? `Zócalos (×${z.qty})` : 'Zócalos';
-    html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">${_esc(ztitle)}</div>`);
-    for (const it of z.items) {
-      const desc = `<strong>${_esc(it.color || it.mat || '—')}</strong><span class="me-desglose-item-meta"> · ${_esc(_fmtMed(it))}</span>`;
-      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(it.price, it.mon))}</div></div>`);
+    const zItems = z.items.filter(it => !_isEmptyItem(it));
+    if (zItems.length) {
+      const ztitle = (z.qty || 1) > 1 ? `Zócalos (×${z.qty})` : 'Zócalos';
+      html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">${_esc(ztitle)}</div>`);
+      for (const it of zItems) {
+        const desc = `<strong>${_esc(it.color || it.mat || '—')}</strong><span class="me-desglose-item-meta"> · ${_esc(_fmtMed(it))}</span>`;
+        html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(it.price, it.mon))}</div></div>`);
+      }
+      html.push(`</div>`);
     }
-    html.push(`</div>`);
   }
 
   if (p.bachas && p.bachas.length) {
-    html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Bachas / Piletas</div>`);
-    for (const b of p.bachas) {
-      const qty = b.qty || 1;
-      const desc = `${b.code ? `<strong>[${_esc(b.code)}]</strong> ` : ''}${_esc(b.desc || '—')}${qty > 1 ? ` <span class="me-desglose-item-meta">(×${qty})</span>` : ''}`;
-      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(b.price, 'ARS'))}</div></div>`);
+    const bachas = p.bachas.filter(b => (+b.price || 0) > 0 || (b.code && b.code.trim()) || (b.desc && b.desc.trim()));
+    if (bachas.length) {
+      html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Bachas / Piletas</div>`);
+      for (const b of bachas) {
+        const qty = b.qty || 1;
+        const desc = `${b.code ? `<strong>[${_esc(b.code)}]</strong> ` : ''}${_esc(b.desc || '—')}${qty > 1 ? ` <span class="me-desglose-item-meta">(×${qty})</span>` : ''}`;
+        html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${desc}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(b.price, 'ARS'))}</div></div>`);
+      }
+      html.push(`</div>`);
     }
-    html.push(`</div>`);
   }
 
   if (p.extras && p.extras.length) {
-    html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Extras</div>`);
-    for (const e of p.extras) {
-      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${_esc(e.name || '—')}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(e.amount, e.mon))}</div></div>`);
+    const extras = p.extras.filter(e => (+e.amount || 0) > 0 || (e.name && e.name.trim()));
+    if (extras.length) {
+      html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Extras</div>`);
+      for (const e of extras) {
+        html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc">${_esc(e.name || '—')}</div><div class="me-desglose-item-amount">${_esc(_fmtMoney(e.amount, e.mon))}</div></div>`);
+      }
+      html.push(`</div>`);
     }
-    html.push(`</div>`);
   }
 
   if (p.variantes && p.variantes.length) {
-    html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Variantes</div>`);
-    for (const v of p.variantes) {
-      html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc"><strong>${_esc(v.color || v.mat || '—')}</strong></div><div class="me-desglose-item-amount">${_esc(_fmtMoney(v.price, v.mon))}</div></div>`);
+    const variantes = p.variantes.filter(v => !_isEmptyItem(v));
+    if (variantes.length) {
+      html.push(`<div class="me-desglose-section"><div class="me-desglose-section-title">Variantes</div>`);
+      for (const v of variantes) {
+        html.push(`<div class="me-desglose-item"><div class="me-desglose-item-desc"><strong>${_esc(v.color || v.mat || '—')}</strong></div><div class="me-desglose-item-amount">${_esc(_fmtMoney(v.price, v.mon))}</div></div>`);
+      }
+      html.push(`</div>`);
     }
-    html.push(`</div>`);
   }
 
   const ad = p.adicionales || {};
