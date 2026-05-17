@@ -94,25 +94,14 @@ foreach (scandir(BS_CLIENTES_DIR) as $f) {
             $metodo = 'usd_x_dolar_ars_cero';
         }
 
-        // Heuristica B: factor 1000 con USD presente. Requiere que
-        // ars_actual * 1000 sea coherente con usd * dolar_venta
-        // (smoking gun del bug parseo "658.000" -> 658). Si no matchea,
-        // asumimos que ars es legitimo (ej: flete en ARS sumado al USD).
-        if ($ars_esperado === null && $usd > 0 && $dolar_venta > 0 && $ars_actual > 0) {
-            $candidato = $ars_actual * 1000;
-            $esperado_usd = $usd * $dolar_venta;
-            if ($candidato >= $esperado_usd * 0.5 && $candidato <= $esperado_usd * 2) {
-                $ars_esperado = $candidato;
-                $metodo = 'factor_1000_con_usd';
-            }
-        }
-
-        // Heuristica C: factor 1000 puro (cotizacion sin USD).
-        // ars implausiblemente bajo (<10000) y sin USD -> bug claro,
-        // no existen presupuestos reales <10k ARS en marmoleria.
-        if ($ars_esperado === null && $usd == 0 && $ars_actual > 0 && $ars_actual < 10000) {
+        // Heuristica B: factor 1000 universal. Cualquier ars_actual <10000
+        // es bug seguro (ningun importe legitimo de marmoleria es tan bajo,
+        // ni siquiera un flete chico). Aplica con o sin USD presente.
+        // Casos cubiertos: Agustin (348->348000), Mouhamad (540->540000),
+        // Camilo flete (200->200000).
+        if ($ars_esperado === null && $ars_actual > 0 && $ars_actual < 10000) {
             $ars_esperado = $ars_actual * 1000;
-            $metodo = 'factor_1000_ars_puro';
+            $metodo = ($usd > 0) ? 'factor_1000_con_usd' : 'factor_1000_ars_puro';
         }
 
         if ($ars_esperado === null) {
