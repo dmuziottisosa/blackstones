@@ -1182,6 +1182,75 @@
       background: var(--bg);
       padding-top: clamp(2.5rem, 5vw, 3.5rem);
     }
+    /* === Buscador del catálogo === */
+    .catalog-search {
+      max-width: 560px;
+      margin: 1.5rem auto 1.75rem;
+    }
+    .catalog-search-inner {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--card);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .catalog-search-inner:focus-within {
+      border-color: var(--gd);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--gd) 18%, transparent);
+    }
+    .catalog-search-icon {
+      color: var(--text2);
+      flex-shrink: 0;
+    }
+    .catalog-search-inner input {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      font-size: 0.95rem;
+      color: var(--text);
+      outline: none;
+      min-width: 0;
+      padding: 2px 0;
+    }
+    .catalog-search-inner input::placeholder { color: var(--text3); }
+    .catalog-search-clear {
+      border: 0;
+      background: transparent;
+      color: var(--text2);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0 6px;
+      display: none;
+      flex-shrink: 0;
+    }
+    .catalog-search-clear:hover { color: var(--text); }
+    .catalog-search.has-query .catalog-search-clear { display: inline-flex; align-items: center; }
+    .catalog-search-status {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text2);
+      text-align: center;
+      min-height: 1.2em;
+    }
+    .catalog-search-status a {
+      color: var(--gd);
+      cursor: pointer;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    .color-tile[data-search-hide] { display: none !important; }
+    .catalog-tab-count {
+      opacity: .55;
+      font-size: 0.82em;
+      margin-left: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
     .catalog-tabs {
       display: flex;
       gap: 0.5rem;
@@ -4776,6 +4845,19 @@
         <p class="lead">Tocá las pestañas para ver los colores disponibles en cada material. Cada uno cambia el carácter completo de tu cocina — si dudás, te asesoramos sin compromiso.</p>
       </div>
 
+      <!-- BUSCADOR del catálogo (search por nombre del color, cross-tabs) -->
+      <div class="catalog-search">
+        <div class="catalog-search-inner">
+          <svg class="catalog-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="catalog-search-input" placeholder="Buscá un color (ej: Calacatta, Negro Brasil, Aura…)" autocomplete="off" spellcheck="false" />
+          <button type="button" class="catalog-search-clear" id="catalog-search-clear" aria-label="Limpiar búsqueda">×</button>
+        </div>
+        <div class="catalog-search-status" id="catalog-search-status"></div>
+      </div>
+
       <!-- TABS -->
       <div class="catalog-tabs" role="tablist">
         <button class="catalog-tab active" data-target="panel-granito" role="tab">Granito</button>
@@ -6626,7 +6708,10 @@
       panel.querySelectorAll('.color-tile').forEach(tile => {
         const matchesMarca = marcaFilter === 'all' || tile.dataset.marca === marcaFilter;
         const matchesTipo = tipoFilter === 'all' || tile.dataset.tipo === tipoFilter;
-        if (matchesMarca && matchesTipo) {
+        // data-search-hide es propiedad seteada por el buscador del catalogo.
+        // Lo respetamos para no mostrar tiles que no matchean el query.
+        const matchesSearch = !tile.hasAttribute('data-search-hide');
+        if (matchesMarca && matchesTipo && matchesSearch) {
           tile.classList.remove('is-hidden');
         } else {
           tile.classList.add('is-hidden');
@@ -6746,6 +6831,132 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(initShowMore, 200);
     });
+
+    // ============================================================
+    // Buscador del catalogo (search por nombre del color)
+    // Mantiene texto consistente con filtros de tipo + marca:
+    // un tile es visible solo si pasa los 3 filtros (marca + tipo + search).
+    // El status muestra hint si el panel activo tiene 0 matches pero
+    // otro panel si — invita a saltar a ese tab.
+    // ============================================================
+    (function setupCatalogSearch(){
+      const wrapper = document.querySelector('.catalog-search');
+      const input = document.getElementById('catalog-search-input');
+      const clear = document.getElementById('catalog-search-clear');
+      const status = document.getElementById('catalog-search-status');
+      if (!wrapper || !input || !clear || !status) return;
+
+      // Normaliza string para match insensible a mayúsculas y a acentos.
+      const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+      const PANEL_LABELS = { 'panel-granito':'Granito', 'panel-cuarzo':'Cuarzo', 'panel-sinterizado':'Sinterizado' };
+
+      // Update labels de los tabs con (N) cuando hay query activa.
+      // Cuando query vacia, restaura el texto original.
+      const updateTabCounts = (counts) => {
+        document.querySelectorAll('.catalog-tab').forEach(tab => {
+          if (!tab.dataset.origText) tab.dataset.origText = tab.textContent.trim();
+          const orig = tab.dataset.origText;
+          const panelId = tab.dataset.target;
+          if (counts && counts[panelId] != null) {
+            tab.innerHTML = `${escapeHtml(orig)}<span class="catalog-tab-count">(${counts[panelId]})</span>`;
+          } else {
+            tab.innerHTML = escapeHtml(orig);
+          }
+        });
+      };
+
+      const applySearch = () => {
+        const raw = input.value.trim();
+        const q = norm(raw);
+        wrapper.classList.toggle('has-query', !!raw);
+
+        // Sin query -> resetear todo
+        if (!q) {
+          document.querySelectorAll('.catalog .color-tile').forEach(t => t.removeAttribute('data-search-hide'));
+          status.textContent = '';
+          document.querySelectorAll('.catalog-panel').forEach(p => applyPanelFilters(p));
+          updateTabCounts(null);
+          return;
+        }
+
+        // Con query -> marcar tiles no-match con data-search-hide
+        let totalMatches = 0;
+        const panelCounts = {};
+        document.querySelectorAll('.catalog-panel').forEach(p => {
+          let c = 0;
+          p.querySelectorAll('.color-tile').forEach(t => {
+            const label = norm(t.getAttribute('aria-label') || '');
+            // Tambien busca en el contenido del strong/span por si el aria-label difiere
+            const inner = norm(t.querySelector('.color-tile-label')?.textContent || '');
+            const matches = label.includes(q) || inner.includes(q);
+            if (matches) { t.removeAttribute('data-search-hide'); c++; }
+            else { t.setAttribute('data-search-hide','1'); }
+          });
+          panelCounts[p.id] = c;
+          totalMatches += c;
+        });
+
+        // Re-aplicar filtros de marca/tipo (que ahora respetan data-search-hide).
+        // Plus: si el panel tiene matches, lo expandimos automaticamente para
+        // que el usuario vea los resultados sin tener que clickear "Ver mas".
+        document.querySelectorAll('.catalog-panel').forEach(p => {
+          applyPanelFilters(p);
+          const w = p.querySelector('.colors-wrapper');
+          if (w && panelCounts[p.id] > 0) w.classList.add('is-expanded');
+        });
+
+        updateTabCounts(panelCounts);
+
+        // Status / hint contextual
+        if (totalMatches === 0) {
+          status.innerHTML = `Sin resultados para "<strong>${escapeHtml(raw)}</strong>". Probá con otro nombre o pedinos asesoramiento por WhatsApp.`;
+        } else {
+          const activeTab = document.querySelector('.catalog-tab.active');
+          const activePanelId = activeTab && activeTab.dataset.target;
+          const activeCount = activePanelId ? (panelCounts[activePanelId] || 0) : 0;
+          if (activeCount === 0) {
+            // Sugerir saltar al primer panel con matches
+            const otherPanel = Object.keys(panelCounts).find(k => panelCounts[k] > 0);
+            const otherLabel = PANEL_LABELS[otherPanel] || 'otro material';
+            status.innerHTML = `Sin resultados en este material. <a data-jump="${otherPanel}">Ver ${panelCounts[otherPanel]} match${panelCounts[otherPanel]===1?'':'es'} en ${otherLabel}</a>.`;
+            const jumpLink = status.querySelector('[data-jump]');
+            if (jumpLink) jumpLink.addEventListener('click', () => {
+              const tab = document.querySelector(`.catalog-tab[data-target="${otherPanel}"]`);
+              if (tab) tab.click();
+              setTimeout(applySearch, 50);
+            });
+          } else {
+            const word = totalMatches === 1 ? 'coincidencia' : 'coincidencias';
+            status.innerHTML = `<strong>${totalMatches}</strong> ${word} para "<strong>${escapeHtml(raw)}</strong>".`;
+          }
+        }
+      };
+
+      let _debounce;
+      input.addEventListener('input', () => {
+        clearTimeout(_debounce);
+        _debounce = setTimeout(applySearch, 80);
+      });
+
+      clear.addEventListener('click', () => {
+        input.value = '';
+        applySearch();
+        input.focus();
+      });
+
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          if (input.value) {
+            input.value = '';
+            applySearch();
+          } else {
+            input.blur();
+          }
+        }
+      });
+    })();
 
     // Inicializar al cargar
     initShowMore();
