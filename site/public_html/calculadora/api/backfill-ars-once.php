@@ -51,8 +51,15 @@ foreach (scandir(BS_CLIENTES_DIR) as $f) {
     if (!$obj) { $errors[] = "No se pudo leer $f"; continue; }
     $stats['clientes_revisados']++;
 
+    if (!isset($obj['cotizaciones']) || !is_array($obj['cotizaciones'])) {
+        continue;
+    }
     $changed = false;
-    foreach ($obj['cotizaciones'] ?? [] as &$cot) {
+    // CRITICO: iterar sobre $obj['cotizaciones'] directamente, NO via "?? []".
+    // El "?? []" crea una expresion temporal y las mutaciones a &$cot no
+    // propagan al $obj original. Bug subtil que reportaba "X corregidas"
+    // pero escribia el archivo sin cambios.
+    foreach ($obj['cotizaciones'] as &$cot) {
         $stats['cotizaciones_revisadas']++;
 
         $totales     = $cot['presupuesto']['totales'] ?? null;
@@ -140,6 +147,27 @@ foreach (scandir(BS_CLIENTES_DIR) as $f) {
         $obj['ultima_actualizacion'] = date('c');
         if (!bs_write_json_atomic($path, $obj)) {
             $errors[] = "No se pudo escribir $f";
+        } else {
+            // Sanity readback: leer el archivo recien escrito y verificar
+            // que los valores hayan persistido. Detecta el bug de iteracion
+            // por valor (ver comentario arriba) y problemas de permisos
+            // silenciosos.
+            clearstatcache(true, $path);
+            $verif = bs_read_json($path);
+            if (!$verif) {
+                $errors[] = "Write reportado OK pero no se pudo releer $f";
+            } else {
+                foreach ($verif['cotizaciones'] ?? [] as $vcot) {
+                    $vt = $vcot['presupuesto']['totales']['ars'] ?? null;
+                    foreach ($fixes as $fix) {
+                        if ($fix['cliente_nro'] === ($verif['cliente_nro'] ?? '') && $fix['sub'] == ($vcot['sub'] ?? '')) {
+                            if (abs(($vt ?? 0) - $fix['ars_esperado']) > 1) {
+                                $errors[] = "Write NO persistio en {$fix['cliente_nro']}-{$fix['sub']}: disk={$vt}, esperado={$fix['ars_esperado']}";
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
