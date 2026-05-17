@@ -1261,7 +1261,7 @@
 
     /* Status mensaje: vive fuera del row de filtros, debajo del cluster */
     .catalog-search-status {
-      margin: 0.5rem 0 -0.5rem;
+      margin: 0.6rem 0 1rem;
       font-size: 0.78rem;
       color: var(--text-soft);
     }
@@ -6727,11 +6727,20 @@
       const marcaFilter = activeMarcaChip ? activeMarcaChip.dataset.filter : 'all';
       const tipoFilter = activeTipoChip ? activeTipoChip.dataset.tipo : 'all';
       panel.querySelectorAll('.color-tile').forEach(tile => {
-        const matchesMarca = marcaFilter === 'all' || tile.dataset.marca === marcaFilter;
-        const matchesTipo = tipoFilter === 'all' || tile.dataset.tipo === tipoFilter;
         // data-search-hide es propiedad seteada por el buscador del catalogo.
-        // Lo respetamos para no mostrar tiles que no matchean el query.
         const matchesSearch = !tile.hasAttribute('data-search-hide');
+        // Cuando hay query activa, el buscador es GLOBAL — ignora marca y
+        // tipo, muestra todos los matches. Los chips quedan inactivos
+        // visualmente pero no condicionan el resultado.
+        const searchActive = document.querySelector('.catalog-search.has-query') != null;
+        let matchesMarca, matchesTipo;
+        if (searchActive) {
+          matchesMarca = true;
+          matchesTipo = true;
+        } else {
+          matchesMarca = marcaFilter === 'all' || tile.dataset.marca === marcaFilter;
+          matchesTipo = tipoFilter === 'all' || tile.dataset.tipo === tipoFilter;
+        }
         if (matchesMarca && matchesTipo && matchesSearch) {
           tile.classList.remove('is-hidden');
         } else {
@@ -6750,6 +6759,9 @@
     const updateTypeFilterCounts = (panel) => {
       const activeMarcaChip = panel.querySelector('.subfilter-chip.active');
       const marcaFilter = activeMarcaChip ? activeMarcaChip.dataset.filter : 'all';
+      // Cuando hay query activa, search es global: el conteo de tipo
+      // ignora marca tambien para coincidir con lo visible.
+      const searchActive = document.querySelector('.catalog-search.has-query') != null;
       let activeChipHidden = false;
       panel.querySelectorAll('.typefilter-chip').forEach(chip => {
         const tipo = chip.dataset.tipo;
@@ -6757,9 +6769,8 @@
         if (!countSpan) return;
         let count = 0;
         panel.querySelectorAll('.color-tile').forEach(tile => {
-          const matchesMarca = marcaFilter === 'all' || tile.dataset.marca === marcaFilter;
+          const matchesMarca = searchActive ? true : (marcaFilter === 'all' || tile.dataset.marca === marcaFilter);
           const matchesTipo = tipo === 'all' || tile.dataset.tipo === tipo;
-          // Respetar search: tiles ocultos por el buscador no cuentan
           const matchesSearch = !tile.hasAttribute('data-search-hide');
           if (matchesMarca && matchesTipo && matchesSearch) count++;
         });
@@ -6809,6 +6820,11 @@
     // Función: actualizar contadores de los chips de MARCA contando tiles reales del panel.
     // Esto evita que los números hardcodeados queden obsoletos cuando se agregan/quitan tiles.
     const updateMarcaFilterCounts = (panel) => {
+      // Cuando hay query activa, search es global: el conteo de marca
+      // ignora tipo (que tampoco condiciona la visibilidad).
+      const activeTipoChip = panel.querySelector('.typefilter-chip.active');
+      const tipoFilter = activeTipoChip ? activeTipoChip.dataset.tipo : 'all';
+      const searchActive = document.querySelector('.catalog-search.has-query') != null;
       panel.querySelectorAll('.subfilter-chip').forEach(chip => {
         const filter = chip.dataset.filter;
         const countSpan = chip.querySelector('.subfilter-count');
@@ -6816,9 +6832,9 @@
         let count = 0;
         panel.querySelectorAll('.color-tile').forEach(tile => {
           const matchesMarca = filter === 'all' || tile.dataset.marca === filter;
-          // Respetar search: tiles ocultos por el buscador no cuentan
+          const matchesTipo = searchActive ? true : (tipoFilter === 'all' || tile.dataset.tipo === tipoFilter);
           const matchesSearch = !tile.hasAttribute('data-search-hide');
-          if (matchesMarca && matchesSearch) count++;
+          if (matchesMarca && matchesTipo && matchesSearch) count++;
         });
         countSpan.textContent = count;
       });
