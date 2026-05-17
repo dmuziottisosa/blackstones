@@ -3210,11 +3210,7 @@ function onVariantColorFocus(idx,el){
   if(el.value)renderVariantSuggest(idx,el.value);
 }
 
-function onVariantColorBlur(el){
-  setTimeout(()=>{
-    document.querySelectorAll('.color-suggest').forEach(d=>{d.classList.remove('active');d.innerHTML=''});
-  },180);
-}
+function onVariantColorBlur(el){ /* no-op — cierre via click outside / Esc */ }
 
 function renderVariantSuggest(idx,query){
   const box=document.getElementById('vcs-'+idx);
@@ -3245,6 +3241,7 @@ function renderVariantSuggest(idx,query){
     </div>`;
   }).join('');
   box.classList.add('active');
+  bsAutocompleteOpen(box,box.previousElementSibling);
 }
 
 function pickVariantColor(idx,name,material,price,currency){
@@ -3254,8 +3251,7 @@ function pickVariantColor(idx,name,material,price,currency){
   v.mat=material;
   v.price=price;
   v.mon=currency;
-  const box=document.getElementById('vcs-'+idx);
-  if(box){box.innerHTML='';box.classList.remove('active')}
+  bsAutocompleteClose();
   renderVariants();
 }
 
@@ -3271,12 +3267,7 @@ function onBachaSearchFocus(el){
   if(_bachaBlurTimer){clearTimeout(_bachaBlurTimer);_bachaBlurTimer=null}
   if(el.value)renderBachaSuggest(el.value);
 }
-function onBachaSearchBlur(el){
-  _bachaBlurTimer=setTimeout(()=>{
-    const box=document.getElementById('bacha-suggest');
-    if(box){box.innerHTML='';box.classList.remove('active')}
-  },180);
-}
+function onBachaSearchBlur(el){ /* no-op — cierre via click outside / Esc */ }
 function renderBachaSuggest(query){
   const box=document.getElementById('bacha-suggest');
   if(!box)return;
@@ -3305,16 +3296,15 @@ function renderBachaSuggest(query){
     </div>`;
   }).join('');
   box.classList.add('active');
+  bsAutocompleteOpen(box,document.getElementById('bacha-search'));
 }
 function pickBacha(code,desc,cat,price){
   const b=mkBacha();
   b.code=code;b.desc=desc;b.cat=cat;b.price=price;b.qty=1;
   BACHAS.items.push(b);
-  // Limpiar input + dropdown
   const input=document.getElementById('bacha-search');
   if(input)input.value='';
-  const box=document.getElementById('bacha-suggest');
-  if(box){box.innerHTML='';box.classList.remove('active')}
+  bsAutocompleteClose();
   renderBachas();
   calc();
 }
@@ -3570,11 +3560,7 @@ function onZocColorFocus(i,el){
   if(_zocColorBlurTimer){clearTimeout(_zocColorBlurTimer);_zocColorBlurTimer=null}
   if(el.value)renderZocColorSuggest(i,el.value);
 }
-function onZocColorBlur(el){
-  _zocColorBlurTimer=setTimeout(()=>{
-    document.querySelectorAll('[id^="zcs-"]').forEach(b=>{b.innerHTML='';b.classList.remove('active')});
-  },180);
-}
+function onZocColorBlur(el){ /* no-op — cierre via click outside / Esc */ }
 function renderZocColorSuggest(i,query){
   const box=document.getElementById('zcs-'+i);
   if(!box)return;
@@ -3598,12 +3584,12 @@ function renderZocColorSuggest(i,query){
     </div>`;
   }).join('');
   box.classList.add('active');
+  bsAutocompleteOpen(box,box.previousElementSibling);
 }
 function pickZocColor(i,name,material,price,currency){
   const it=ZOCALOS.items[i];
   it.color=name;it.mat=material;it.price=price;it.mon=currency;
-  const box=document.getElementById('zcs-'+i);
-  if(box){box.innerHTML='';box.classList.remove('active')}
+  bsAutocompleteClose();
   renderZocalos();calc();
 }
 
@@ -3620,12 +3606,7 @@ function onColorFocus(s,i,el){
   if(_colorBlurTimer){clearTimeout(_colorBlurTimer);_colorBlurTimer=null}
   if(el.value)renderColorSuggest(s,i,el.value);
 }
-function onColorBlur(el){
-  // Pequeño delay para que el click en una sugerencia llegue antes que el blur
-  _colorBlurTimer=setTimeout(()=>{
-    document.querySelectorAll('.color-suggest').forEach(d=>{d.innerHTML='';d.classList.remove('active')});
-  },180);
-}
+function onColorBlur(el){ /* no-op — cierre via click outside / Esc */ }
 function renderColorSuggest(s,i,query){
   const box=document.getElementById('cs-'+s+'-'+i);
   if(!box)return;
@@ -3658,6 +3639,7 @@ function renderColorSuggest(s,i,query){
     </div>`;
   }).join('');
   box.classList.add('active');
+  bsAutocompleteOpen(box,box.previousElementSibling);
 }
 function pickColor(s,i,name,material,price,currency){
   const it=D[s].items[i];
@@ -3674,9 +3656,7 @@ function pickColor(s,i,name,material,price,currency){
     if(s==='i'){it.reg='No'}
     else if(s!=='b'){it.reg='Sin';it.rv=0}
   }
-  // Limpiar dropdown
-  const box=document.getElementById('cs-'+s+'-'+i);
-  if(box){box.innerHTML='';box.classList.remove('active')}
+  bsAutocompleteClose();
   ensureSecOpen(s);
   renderSec(s);
   calc();
@@ -3837,19 +3817,61 @@ function clearDirty(){
 setTimeout(clearDirty,50);
 document.getElementById('fecha').value=new Date().toISOString().split('T')[0];
 
-// Cerrar autocomplete de color al hacer scroll de la pagina o resize.
-// Ignora scrolls dentro del propio dropdown (cuando tiene muchas
-// sugerencias scrolleables internamente — antes cerraba molestosamente
-// al intentar ver sugerencias mas abajo) y scrolls dentro del input.
-function _closeAllColorSuggests(e){
+// ================================================================
+// CONTROLADOR CENTRAL DE AUTOCOMPLETE (predictores)
+// ================================================================
+// Reemplaza el sistema viejo basado en blur-timeout + close-on-scroll
+// (fragil — cerraba el dropdown al scrollear adentro, al tipear si
+// habia layout shift, al perder foco momentaneo, etc.).
+//
+// Patron nuevo:
+//  - Click fuera del dropdown y del input -> cerrar
+//  - Esc -> cerrar
+//  - Scroll pagina -> reposicionar (no cerrar) salvo que el input salga
+//    completamente del viewport
+//  - Blur del input -> NO cierra. Cierre solo via click outside / Esc /
+//    seleccion via pickXxx (que llama bsAutocompleteClose explicito).
+//
+// Aplica a TODOS los autocompletes: .color-suggest + #bacha-suggest
+let _bsAutocompleteOpen=null;  // { dropdownEl, inputEl } cuando hay activo
+function bsAutocompleteOpen(dropdownEl,inputEl){
+  _bsAutocompleteOpen={dropdownEl:dropdownEl,inputEl:inputEl};
+}
+function bsAutocompleteClose(){
+  document.querySelectorAll('.color-suggest.active').forEach(d=>{d.classList.remove('active');d.innerHTML=''});
+  _bsAutocompleteOpen=null;
+}
+// mousedown capture -> llega antes de blur del input
+document.addEventListener('mousedown',function(e){
+  if(!_bsAutocompleteOpen)return;
+  const t=e.target;if(!t)return;
+  const o=_bsAutocompleteOpen;
+  if(o.dropdownEl&&o.dropdownEl.contains(t))return;
+  if(o.inputEl===t)return;
+  if(o.inputEl&&o.inputEl.contains&&o.inputEl.contains(t))return;
+  bsAutocompleteClose();
+},true);
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&_bsAutocompleteOpen)bsAutocompleteClose();
+});
+function _bsRepositionAutocomplete(e){
+  if(!_bsAutocompleteOpen)return;
   if(e&&e.target&&e.target.nodeType===1&&typeof e.target.closest==='function'){
     if(e.target.closest('.color-suggest'))return;
-    if(e.target.matches&&e.target.matches('input'))return;
   }
-  document.querySelectorAll('.color-suggest.active').forEach(d=>{d.classList.remove('active');d.innerHTML=''});
+  const o=_bsAutocompleteOpen;
+  if(!o.dropdownEl||!o.inputEl)return;
+  if(!o.dropdownEl.classList.contains('active'))return;
+  const r=o.inputEl.getBoundingClientRect();
+  if(r.bottom<0||r.top>window.innerHeight){bsAutocompleteClose();return}
+  o.dropdownEl.style.left=r.left+'px';
+  o.dropdownEl.style.top=(r.bottom+4)+'px';
+  o.dropdownEl.style.width=Math.max(280,r.width)+'px';
+  const dropH=o.dropdownEl.offsetHeight;
+  if(r.bottom+dropH>window.innerHeight-10)o.dropdownEl.style.top=(r.top-dropH-4)+'px';
 }
-window.addEventListener('scroll',_closeAllColorSuggests,true);
-window.addEventListener('resize',_closeAllColorSuggests);
+window.addEventListener('scroll',_bsRepositionAutocomplete,true);
+window.addEventListener('resize',_bsRepositionAutocomplete);
 
 // ================================================================
 // GENERAR EXCEL
