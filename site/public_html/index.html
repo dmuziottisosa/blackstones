@@ -1182,12 +1182,14 @@
       background: var(--bg);
       padding-top: clamp(2.5rem, 5vw, 3.5rem);
     }
-    /* === Buscador del catálogo (integrado al filter cluster, left-aligned) === */
+    /* === Buscador del catálogo (integrado al row TIPO, left-aligned) === */
+    /* La pill se inyecta via JS dentro del .catalog-subfilters-types del
+       panel activo, como primer hijo. Comparten la dashed border-top de
+       arriba y el flex layout horizontal. */
     .catalog-search {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      margin: 0.9rem 0 0;
-      padding: 0;
+      flex-shrink: 0;
     }
     .catalog-search-inner {
       display: inline-flex;
@@ -1198,8 +1200,8 @@
       border-radius: 999px;
       background: transparent;
       transition: border-color .15s, background .15s;
+      width: 200px;
       max-width: 100%;
-      width: 240px;
     }
     .catalog-search-inner:hover { border-color: var(--accent-dark); }
     .catalog-search-inner:focus-within {
@@ -1216,7 +1218,7 @@
       border: 0;
       background: transparent;
       font: inherit;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--text);
       outline: none;
       min-width: 0;
@@ -1232,13 +1234,12 @@
       border: 0;
       background: transparent;
       color: var(--text-soft);
-      font-size: 18px;
+      font-size: 16px;
       line-height: 1;
       cursor: pointer;
       padding: 0 2px;
       display: none;
       flex-shrink: 0;
-      transition: color .12s;
     }
     .catalog-search-clear:hover { color: var(--text); }
     .catalog-search.has-query .catalog-search-clear {
@@ -1246,9 +1247,21 @@
       align-items: center;
     }
     .catalog-search.has-query .catalog-search-inner { border-color: var(--accent-dark); }
+
+    /* Divisor sutil entre search y el resto de chips TIPO */
+    .catalog-search::after {
+      content: '';
+      display: block;
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: 0 0.25rem 0 0.75rem;
+      flex-shrink: 0;
+    }
+
+    /* Status mensaje: vive fuera del row de filtros, debajo del cluster */
     .catalog-search-status {
-      width: 100%;
-      margin-top: 0.5rem;
+      margin: 0.5rem 0 -0.5rem;
       font-size: 0.78rem;
       color: var(--text-soft);
     }
@@ -1260,15 +1273,6 @@
       font-weight: 600;
     }
     .catalog-search-status a:hover { color: var(--accent-dark); }
-    /* Cuando search + tipo filters se renderizan, el divisor entre ellos */
-    .catalog-search-divider {
-      width: 1px;
-      height: 22px;
-      background: var(--border);
-      margin: 0 0.85rem;
-      align-self: center;
-      flex-shrink: 0;
-    }
     .color-tile[data-search-hide] { display: none !important; }
     .catalog-tab-count {
       opacity: .55;
@@ -1277,11 +1281,11 @@
       font-variant-numeric: tabular-nums;
     }
     @media (max-width: 600px) {
-      .catalog-search { margin: 0.6rem 0 0; }
-      .catalog-search-inner { width: 100%; max-width: 100%; padding: 0.5rem 0.9rem; }
+      .catalog-search { width: 100%; margin-bottom: 0.5rem; }
+      .catalog-search::after { display: none; }
+      .catalog-search-inner { width: 100%; padding: 0.5rem 0.9rem; }
       .catalog-search-inner input { font-size: 0.85rem; }
-      .catalog-search-status { font-size: 0.75rem; }
-      .catalog-search-divider { display: none; }
+      .catalog-search-status { font-size: 0.75rem; margin: 0.5rem 0 0; }
     }
 
     .catalog-tabs {
@@ -6878,6 +6882,40 @@
       const clear = document.getElementById('catalog-search-clear');
       const status = document.getElementById('catalog-search-status');
       if (!wrapper || !input || !clear || !status) return;
+
+      // Mover el search al row TIPO del panel activo. Mantiene una unica
+      // instancia (sin sync de estado) y queda integrada visualmente con
+      // los chips de tipo como una sola fila de filtros.
+      function moveSearchToActivePanel(){
+        const activeTab = document.querySelector('.catalog-tab.active');
+        if (!activeTab) return;
+        const panelId = activeTab.dataset.target;
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
+        const tipoRow = panel.querySelector('.catalog-subfilters-types');
+        if (!tipoRow) return;
+        // Insertar como primer hijo del row TIPO
+        if (wrapper.parentElement !== tipoRow || tipoRow.firstChild !== wrapper) {
+          tipoRow.insertBefore(wrapper, tipoRow.firstChild);
+        }
+        // El status va inmediatamente despues del row TIPO (fuera del flex)
+        const statusEl = document.getElementById('catalog-search-status');
+        if (statusEl && statusEl.parentElement !== tipoRow.parentElement) {
+          tipoRow.parentElement.insertBefore(statusEl, tipoRow.nextSibling);
+        }
+      }
+      // Inicial
+      moveSearchToActivePanel();
+      // Al cambiar de tab: mover search + re-aplicar query si hay para
+      // que el status refleje el contexto del panel nuevo.
+      document.querySelectorAll('.catalog-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          setTimeout(() => {
+            moveSearchToActivePanel();
+            if (input.value.trim()) applySearch();
+          }, 0);
+        });
+      });
 
       // Normaliza string para match insensible a mayúsculas y a acentos.
       const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
