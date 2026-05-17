@@ -6718,6 +6718,9 @@
       // PRIMERO actualizamos contadores (que puede hacer fallback del chip activo
       // de tipo si quedó con 0 resultados al cambiar la marca).
       updateTypeFilterCounts(panel);
+      // Tambien refrescar contadores de marca (Sinterizado) si los hay,
+      // asi reflejan la busqueda activa.
+      if (panel.querySelector('.subfilter-chip')) updateMarcaFilterCounts(panel);
       // RECIÉN AHORA leemos los chips activos (ya con el fallback aplicado)
       const activeMarcaChip = panel.querySelector('.subfilter-chip.active');
       const activeTipoChip = panel.querySelector('.typefilter-chip.active');
@@ -6756,7 +6759,9 @@
         panel.querySelectorAll('.color-tile').forEach(tile => {
           const matchesMarca = marcaFilter === 'all' || tile.dataset.marca === marcaFilter;
           const matchesTipo = tipo === 'all' || tile.dataset.tipo === tipo;
-          if (matchesMarca && matchesTipo) count++;
+          // Respetar search: tiles ocultos por el buscador no cuentan
+          const matchesSearch = !tile.hasAttribute('data-search-hide');
+          if (matchesMarca && matchesTipo && matchesSearch) count++;
         });
         countSpan.textContent = count;
         // Ocultar chips con 0 resultados (excepto "Todos" que siempre se muestra)
@@ -6810,7 +6815,10 @@
         if (!countSpan) return;
         let count = 0;
         panel.querySelectorAll('.color-tile').forEach(tile => {
-          if (filter === 'all' || tile.dataset.marca === filter) count++;
+          const matchesMarca = filter === 'all' || tile.dataset.marca === filter;
+          // Respetar search: tiles ocultos por el buscador no cuentan
+          const matchesSearch = !tile.hasAttribute('data-search-hide');
+          if (matchesMarca && matchesSearch) count++;
         });
         countSpan.textContent = count;
       });
