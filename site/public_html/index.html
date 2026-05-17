@@ -1182,73 +1182,98 @@
       background: var(--bg);
       padding-top: clamp(2.5rem, 5vw, 3.5rem);
     }
-    /* === Buscador del catálogo === */
+    /* === Buscador del catálogo (sutil, entre tabs y filtros tipo) === */
     .catalog-search {
-      max-width: 560px;
-      margin: 1.5rem auto 1.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0.9rem 0 0.4rem;
+      padding: 0 1rem;
     }
     .catalog-search-inner {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
-      padding: 0.75rem 1rem;
+      gap: 0.45rem;
+      padding: 0.4rem 0.85rem;
       border: 1px solid var(--border);
       border-radius: 999px;
-      background: var(--card);
-      transition: border-color .15s, box-shadow .15s;
+      background: transparent;
+      transition: border-color .15s, background .15s;
+      max-width: 100%;
+      width: 280px;
     }
+    .catalog-search-inner:hover { border-color: var(--accent-dark); }
     .catalog-search-inner:focus-within {
-      border-color: var(--gd);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--gd) 18%, transparent);
+      border-color: var(--text);
+      background: var(--bg);
     }
     .catalog-search-icon {
-      color: var(--text2);
+      color: var(--text-soft);
       flex-shrink: 0;
+      opacity: 0.7;
     }
     .catalog-search-inner input {
       flex: 1;
       border: 0;
       background: transparent;
       font: inherit;
-      font-size: 0.95rem;
+      font-size: 0.82rem;
       color: var(--text);
       outline: none;
       min-width: 0;
-      padding: 2px 0;
+      padding: 0;
+      letter-spacing: 0.01em;
     }
-    .catalog-search-inner input::placeholder { color: var(--text3); }
+    .catalog-search-inner input::placeholder {
+      color: var(--text-soft);
+      opacity: 0.65;
+      font-weight: 500;
+    }
     .catalog-search-clear {
       border: 0;
       background: transparent;
-      color: var(--text2);
-      font-size: 22px;
+      color: var(--text-soft);
+      font-size: 18px;
       line-height: 1;
       cursor: pointer;
-      padding: 0 6px;
+      padding: 0 2px;
       display: none;
       flex-shrink: 0;
+      transition: color .12s;
     }
     .catalog-search-clear:hover { color: var(--text); }
-    .catalog-search.has-query .catalog-search-clear { display: inline-flex; align-items: center; }
-    .catalog-search-status {
-      margin-top: 0.75rem;
-      font-size: 0.85rem;
-      color: var(--text2);
-      text-align: center;
-      min-height: 1.2em;
+    .catalog-search.has-query .catalog-search-clear {
+      display: inline-flex;
+      align-items: center;
     }
+    .catalog-search.has-query .catalog-search-inner { border-color: var(--accent-dark); }
+    .catalog-search-status {
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      text-align: center;
+      max-width: 480px;
+    }
+    .catalog-search-status:empty { display: none; }
     .catalog-search-status a {
-      color: var(--gd);
+      color: var(--text);
       cursor: pointer;
       text-decoration: underline;
       font-weight: 600;
     }
+    .catalog-search-status a:hover { color: var(--accent-dark); }
     .color-tile[data-search-hide] { display: none !important; }
     .catalog-tab-count {
       opacity: .55;
       font-size: 0.82em;
       margin-left: 4px;
       font-variant-numeric: tabular-nums;
+    }
+    @media (max-width: 600px) {
+      .catalog-search { margin: 0.7rem 0 0.3rem; padding: 0 0.75rem; }
+      .catalog-search-inner { width: 100%; max-width: 320px; padding: 0.45rem 0.85rem; }
+      .catalog-search-inner input { font-size: 0.85rem; }
+      .catalog-search-status { font-size: 0.75rem; padding: 0 0.5rem; }
     }
 
     .catalog-tabs {
@@ -4845,24 +4870,24 @@
         <p class="lead">Tocá las pestañas para ver los colores disponibles en cada material. Cada uno cambia el carácter completo de tu cocina — si dudás, te asesoramos sin compromiso.</p>
       </div>
 
-      <!-- BUSCADOR del catálogo (search por nombre del color, cross-tabs) -->
-      <div class="catalog-search">
-        <div class="catalog-search-inner">
-          <svg class="catalog-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-          </svg>
-          <input type="text" id="catalog-search-input" placeholder="Buscá un color (ej: Calacatta, Negro Brasil, Aura…)" autocomplete="off" spellcheck="false" />
-          <button type="button" class="catalog-search-clear" id="catalog-search-clear" aria-label="Limpiar búsqueda">×</button>
-        </div>
-        <div class="catalog-search-status" id="catalog-search-status"></div>
-      </div>
-
       <!-- TABS -->
       <div class="catalog-tabs" role="tablist">
         <button class="catalog-tab active" data-target="panel-granito" role="tab">Granito</button>
         <button class="catalog-tab" data-target="panel-cuarzo" role="tab">Cuarzo</button>
         <button class="catalog-tab" data-target="panel-sinterizado" role="tab">Sinterizado</button>
+      </div>
+
+      <!-- BUSCADOR del catálogo — sutil, entre material y tipo, cross-tabs -->
+      <div class="catalog-search">
+        <div class="catalog-search-inner">
+          <svg class="catalog-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="catalog-search-input" placeholder="Buscar color…" autocomplete="off" spellcheck="false" />
+          <button type="button" class="catalog-search-clear" id="catalog-search-clear" aria-label="Limpiar búsqueda">×</button>
+        </div>
+        <div class="catalog-search-status" id="catalog-search-status"></div>
       </div>
 
       <!-- PANEL: GRANITO -->
