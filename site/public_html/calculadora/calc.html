@@ -3738,6 +3738,22 @@ function limpiar(){
   setSecOpen('m',true);setSecOpen('a',false);setSecOpen('l',false);setSecOpen('i',false);setSecOpen('b',false);
   saveSecState();
   renderAll();refreshTagsDatalist();calc();
+  // Refrescar N° de presupuesto: si el nro actual ya fue guardado,
+  // pasa al siguiente libre. Si no existe en disco/index, queda igual.
+  // Evita el bug de tener varias cotizaciones de distintos clientes con
+  // el mismo nro porque el usuario clickeo Limpiar despues de guardar.
+  fetch('api/next-nro.php', { credentials: 'same-origin' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if (d && d.ok && d.next) {
+        var nroInput = document.getElementById('nro');
+        if (nroInput) {
+          nroInput.value = d.next;
+          nroInput.dataset.bsAuto = '1';
+        }
+      }
+    })
+    .catch(function(){ /* silencioso — si el registry no responde, dejamos el nro como esta */ });
 }
 // === DÓLAR OFICIAL ===
 let DOLAR_VENTA=0;
