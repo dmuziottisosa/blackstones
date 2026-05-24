@@ -229,6 +229,13 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 
 /* === STAT CARDS — modernos, hover lift === */
 .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.origen-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.stat-card-ads{border-left:3px solid #22c55e}
+.stat-card-org{border-left:3px solid var(--gd)}
+.origen-dot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle;margin-right:5px}
+.origen-dot-pub{background:#22c55e}
+.origen-dot-org{background:var(--gd)}
+.stat-card .stat-sub{font-size:11.5px;color:var(--text3);margin-top:4px;font-variant-numeric:tabular-nums}
 .stat-card{background:var(--card);padding:20px 22px;border-radius:var(--radius);border:1px solid var(--border);position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .18s ease,box-shadow .18s ease,border-color .18s}
 .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--gd)}
 .stat-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--gd) 0%,var(--gdd) 100%);opacity:.7}
@@ -302,7 +309,17 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .modal-edit .calc-link{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-soft);text-align:center;font-size:12px;color:var(--text3)}
 .modal-edit .calc-link a{color:var(--gd);text-decoration:none;font-weight:600;margin-left:4px}
 .modal-edit .calc-link a:hover{text-decoration:underline}
-@media(max-width:600px){.modal-edit .field-grid{grid-template-columns:1fr}.modal-edit{max-width:none;width:100%}}
+
+/* Toggle "Origen del presupuesto" — publicidad vs organico */
+.me-origen-toggle{display:inline-flex;gap:6px;border:1px solid var(--border);border-radius:999px;padding:3px;background:var(--bg);width:fit-content}
+.me-origen-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:0;background:transparent;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--text2);border-radius:999px;cursor:pointer;transition:all .15s;letter-spacing:.01em}
+.me-origen-btn .dot{width:7px;height:7px;border-radius:50%;background:var(--text3);transition:background .15s}
+.me-origen-btn:hover{color:var(--text)}
+.me-origen-btn.active{background:var(--text);color:var(--bg)}
+.me-origen-btn.active .dot{background:var(--gd)}
+.me-origen-btn[data-origen=publicidad].active .dot{background:#22c55e}
+
+@media(max-width:600px){.modal-edit .field-grid{grid-template-columns:1fr}.modal-edit{max-width:none;width:100%}.me-origen-toggle{width:100%;justify-content:center}}
 
 /* Desglose dentro del modal edit */
 .me-desglose{font-size:12.5px;line-height:1.5;max-height:260px;overflow-y:auto;padding-right:6px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:10px 12px;background:var(--bg)}
@@ -482,6 +499,18 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       <div class="field-full">
         <label>Dirección</label>
         <input type="text" id="me-direccion" maxlength="200" autocomplete="off">
+      </div>
+      <div class="field-full">
+        <label>Origen del presupuesto</label>
+        <div class="me-origen-toggle" role="radiogroup" aria-label="Origen del presupuesto">
+          <button type="button" class="me-origen-btn" data-origen="publicidad" onclick="setOrigen('publicidad')">
+            <span class="dot"></span> Publicidad
+          </button>
+          <button type="button" class="me-origen-btn active" data-origen="organico" onclick="setOrigen('organico')">
+            <span class="dot"></span> Sin publicidad
+          </button>
+        </div>
+        <input type="hidden" id="me-origen" value="organico">
       </div>
     </div>
 
@@ -904,6 +933,16 @@ function cerrarModal() {
 // === Modal de edición rápida ===
 let _editingCotizacion = null;
 
+// Toggle visual del switch Publicidad / Sin publicidad
+function setOrigen(val) {
+  const valid = (val === 'publicidad') ? 'publicidad' : 'organico';
+  const hidden = document.getElementById('me-origen');
+  if (hidden) hidden.value = valid;
+  document.querySelectorAll('.me-origen-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.origen === valid);
+  });
+}
+
 // Parser AR robusto: acepta "347000", "347.000", "347.000,50", "347000.5".
 // Reemplazo del bug donde parseFloat("347.000") devolvia 347. Mismo
 // algoritmo que bsParseAR en calc.html.
@@ -960,6 +999,9 @@ function abrirModalEditar(nro, sub) {
   document.getElementById('me-ars').value       = (+r.monto_ars || 0) > 0 ? _fmtMontoEdit(r.monto_ars, false) : '';
   document.getElementById('me-fecha').value     = (r.fecha || '').substring(0, 10);
   document.getElementById('me-calc-link').href  = `/calculadora/?load=${r.cliente_nro}-${r.sub}`;
+  // Origen del presupuesto (publicidad / organico). Default organico
+  // si el presupuesto es viejo y no tiene el campo.
+  setOrigen(r.origen === 'publicidad' ? 'publicidad' : 'organico');
 
   document.getElementById('modal-edit-overlay').classList.add('show');
   setTimeout(() => { try { document.getElementById('me-nombre').focus(); } catch(e){} }, 100);
@@ -1187,6 +1229,7 @@ async function guardarEdicion() {
     monto_usd: _parseMontoAR(document.getElementById('me-usd').value),
     monto_ars: _parseMontoAR(document.getElementById('me-ars').value),
     fecha:     document.getElementById('me-fecha').value,
+    origen:    document.getElementById('me-origen').value,
   };
 
   if (!payload.cliente.nombre) {
@@ -1249,6 +1292,26 @@ async function cargarReporte() {
         <div class="stat-card"><div class="stat-label">Clientes únicos</div><div class="stat-value">${totals.clientes_unicos || 0}</div></div>
       </div>
     `;
+
+    // Breakdown por origen (publicidad vs organico)
+    const orig = totals.by_origen || {};
+    const pub = orig.publicidad || { count: 0, monto_usd: 0, monto_ars: 0 };
+    const org = orig.organico   || { count: 0, monto_usd: 0, monto_ars: 0 };
+    const origenSection = (pub.count + org.count > 0) ? `
+      <h3 class="sec-h">Por origen del presupuesto</h3>
+      <div class="stat-cards origen-grid">
+        <div class="stat-card stat-card-ads">
+          <div class="stat-label"><span class="origen-dot origen-dot-pub"></span> Publicidad</div>
+          <div class="stat-value">${pub.count}</div>
+          <div class="stat-sub">${fmtUSD(pub.monto_usd || 0)} · ${fmtARS(pub.monto_ars || 0)}</div>
+        </div>
+        <div class="stat-card stat-card-org">
+          <div class="stat-label"><span class="origen-dot origen-dot-org"></span> Sin publicidad</div>
+          <div class="stat-value">${org.count}</div>
+          <div class="stat-sub">${fmtUSD(org.monto_usd || 0)} · ${fmtARS(org.monto_ars || 0)}</div>
+        </div>
+      </div>
+    ` : '';
     const topMat = tops.length ? `
       <h3 class="sec-h">Lo más entregado</h3>
       <div class="top-mat-list">
@@ -1278,7 +1341,7 @@ async function cargarReporte() {
       </table>
     ` : '<div class="empty">Sin entregados todavía.</div>';
 
-    cont.innerHTML = banner + statCards + topMat + mesesTable;
+    cont.innerHTML = banner + statCards + origenSection + topMat + mesesTable;
   } catch (e) {
     cont.innerHTML = `<div class="empty">No se pudo cargar el reporte (${e.message})</div>`;
   }

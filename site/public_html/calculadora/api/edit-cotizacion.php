@@ -97,6 +97,16 @@ if (array_key_exists('fecha', $body)) {
     }
 }
 
+if (array_key_exists('origen', $body)) {
+    // Whitelist: solo 'publicidad' u 'organico' (presupuestos viejos sin
+    // el campo se asumen organicos al renderear).
+    $o = trim((string)$body['origen']);
+    if (!in_array($o, ['publicidad', 'organico'], true)) {
+        bs_error("origen debe ser 'publicidad' u 'organico'");
+    }
+    $cot_updates['origen'] = $o;
+}
+
 if (empty($cliente_updates) && empty($cot_updates)) {
     bs_error('No hay campos para actualizar');
 }
@@ -137,6 +147,9 @@ try {
                 }
                 if (isset($cot_updates['fecha'])) {
                     $cot['fecha'] = $cot_updates['fecha'];
+                }
+                if (isset($cot_updates['origen'])) {
+                    $cot['origen'] = $cot_updates['origen'];
                 }
                 if (isset($cot_updates['monto_usd']) || isset($cot_updates['monto_ars'])) {
                     if (!isset($cot['presupuesto']) || !is_array($cot['presupuesto'])) {
