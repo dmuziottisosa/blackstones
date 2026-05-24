@@ -310,16 +310,18 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .modal-edit .calc-link a{color:var(--gd);text-decoration:none;font-weight:600;margin-left:4px}
 .modal-edit .calc-link a:hover{text-decoration:underline}
 
-/* Toggle "Origen del presupuesto" — publicidad vs organico */
-.me-origen-toggle{display:inline-flex;gap:6px;border:1px solid var(--border);border-radius:999px;padding:3px;background:var(--bg);width:fit-content}
-.me-origen-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:0;background:transparent;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--text2);border-radius:999px;cursor:pointer;transition:all .15s;letter-spacing:.01em}
-.me-origen-btn .dot{width:7px;height:7px;border-radius:50%;background:var(--text3);transition:background .15s}
-.me-origen-btn:hover{color:var(--text)}
-.me-origen-btn.active{background:var(--text);color:var(--bg)}
-.me-origen-btn.active .dot{background:var(--gd)}
-.me-origen-btn[data-origen=publicidad].active .dot{background:#22c55e}
+/* Origen cell en la tabla activos — pill compacta clickable */
+.origen-cell{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid var(--border);border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:var(--text2);letter-spacing:.02em;white-space:nowrap;font-family:inherit}
+.origen-cell:hover{border-color:var(--gd);color:var(--text)}
+.origen-cell .od{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .15s}
+.origen-cell.pub{border-color:#22c55e;color:#15803d}
+.origen-cell.pub .od{background:#22c55e}
+.origen-cell.org .od{background:var(--text3)}
+.origen-cell.saving{opacity:.5;pointer-events:none}
+.origen-cell.saved{border-color:#1F8F47;background:rgba(31,143,71,.08)}
+.origen-cell.error{border-color:#A53C3C;background:rgba(165,60,60,.08)}
 
-@media(max-width:600px){.modal-edit .field-grid{grid-template-columns:1fr}.modal-edit{max-width:none;width:100%}.me-origen-toggle{width:100%;justify-content:center}}
+@media(max-width:600px){.modal-edit .field-grid{grid-template-columns:1fr}.modal-edit{max-width:none;width:100%}}
 
 /* Desglose dentro del modal edit */
 .me-desglose{font-size:12.5px;line-height:1.5;max-height:260px;overflow-y:auto;padding-right:6px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:10px 12px;background:var(--bg)}
@@ -434,6 +436,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
         <th>Celular</th>
         <th>Concepto</th>
         <th>Estado</th>
+        <th>Origen</th>
         <th class="num">USD</th>
         <th class="num">ARS</th>
         <th>Fecha</th>
@@ -441,7 +444,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       </tr>
     </thead>
     <tbody id="activos-body">
-      <tr><td colspan="9" class="loading">Cargando...</td></tr>
+      <tr><td colspan="10" class="loading">Cargando...</td></tr>
     </tbody>
   </table>
 
@@ -499,18 +502,6 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       <div class="field-full">
         <label>Dirección</label>
         <input type="text" id="me-direccion" maxlength="200" autocomplete="off">
-      </div>
-      <div class="field-full">
-        <label>Origen del presupuesto</label>
-        <div class="me-origen-toggle" role="radiogroup" aria-label="Origen del presupuesto">
-          <button type="button" class="me-origen-btn" data-origen="publicidad" onclick="setOrigen('publicidad')">
-            <span class="dot"></span> Publicidad
-          </button>
-          <button type="button" class="me-origen-btn active" data-origen="organico" onclick="setOrigen('organico')">
-            <span class="dot"></span> Sin publicidad
-          </button>
-        </div>
-        <input type="hidden" id="me-origen" value="organico">
       </div>
     </div>
 
@@ -684,12 +675,12 @@ async function cargarActivos() {
     const r = await fetch(url, { credentials: 'same-origin' });
     const d = await r.json();
     if (!d.ok) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">Error: ${d.error}</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Error: ${d.error}</td></tr>`;
       _activosCache = [];
       return;
     }
     if (d.results.length === 0) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">Sin resultados</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Sin resultados</td></tr>`;
       document.getElementById('activos-pagination').innerHTML = '';
       _activosCache = [];
       return;
@@ -713,6 +704,9 @@ async function cargarActivos() {
       const conceptoDisplay = conceptoEmpty ? 'Agregar...' : escapeHtml(conceptoVal);
       const conceptoCls = conceptoEmpty ? 'concepto-cell empty' : 'concepto-cell';
       const cliNombre = (r.cliente_nombre || '').toLowerCase();
+      const origenVal = (r.origen === 'publicidad') ? 'publicidad' : 'organico';
+      const origenLabel = (origenVal === 'publicidad') ? 'Publicidad' : 'Sin pub';
+      const origenCls = (origenVal === 'publicidad') ? 'pub' : 'org';
       return `
         <tr>
           <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
@@ -720,6 +714,7 @@ async function cargarActivos() {
           <td>${r.cliente_celular ? `<span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : '<span class="muted">—</span>'}</td>
           <td><span class="${conceptoCls}" contenteditable="true" data-nro="${r.cliente_nro}" data-sub="${r.sub}" data-orig="${escapeHtml(conceptoVal)}" onblur="onConceptoBlur(this)" onfocus="onConceptoFocus(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el concepto">${conceptoDisplay}</span></td>
           <td><span class="estado est-${r.estado}">${ESTADOS_LABELS[r.estado] || r.estado}</span></td>
+          <td><button type="button" class="origen-cell ${origenCls}" data-origen="${origenVal}" onclick="toggleOrigen(this, '${r.cliente_nro}', ${r.sub})" title="Click para alternar Publicidad / Sin publicidad"><span class="od"></span>${origenLabel}</button></td>
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
           <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
@@ -734,7 +729,7 @@ async function cargarActivos() {
       ? `<button onclick="_activosPage=Math.max(1,_activosPage-1);cargarActivos()" ${_activosPage<=1?'disabled':''}>← Anterior</button> Página ${d.page} de ${totalPages} · ${d.total} resultados <button onclick="_activosPage=Math.min(${totalPages},_activosPage+1);cargarActivos()" ${_activosPage>=totalPages?'disabled':''}>Siguiente →</button>`
       : `${d.total} resultados`;
   } catch (e) {
-    document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">No se pudo cargar (${e.message})</td></tr>`;
+    document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">No se pudo cargar (${e.message})</td></tr>`;
   }
 }
 
@@ -933,14 +928,48 @@ function cerrarModal() {
 // === Modal de edición rápida ===
 let _editingCotizacion = null;
 
-// Toggle visual del switch Publicidad / Sin publicidad
-function setOrigen(val) {
-  const valid = (val === 'publicidad') ? 'publicidad' : 'organico';
-  const hidden = document.getElementById('me-origen');
-  if (hidden) hidden.value = valid;
-  document.querySelectorAll('.me-origen-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.origen === valid);
-  });
+// Toggle inline en la tabla activos — alterna publicidad/organico y
+// guarda via edit-cotizacion.php sin abrir el modal.
+async function toggleOrigen(el, nro, sub) {
+  if (el.classList.contains('saving')) return;
+  const current = el.dataset.origen || 'organico';
+  const next = (current === 'publicidad') ? 'organico' : 'publicidad';
+  el.classList.remove('saved','error');
+  el.classList.add('saving');
+  const origText = el.innerHTML;
+  try {
+    const r = await fetch('/calculadora/api/edit-cotizacion.php', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cliente_nro: nro, sub: sub, origen: next })
+    });
+    const d = await r.json();
+    el.classList.remove('saving');
+    if (!d.ok) {
+      el.classList.add('error');
+      setTimeout(() => el.classList.remove('error'), 1500);
+      return;
+    }
+    // Update visual state
+    el.dataset.origen = next;
+    el.classList.remove('pub','org');
+    el.classList.add(next === 'publicidad' ? 'pub' : 'org');
+    el.innerHTML = (next === 'publicidad')
+      ? '<span class="od"></span>Publicidad'
+      : '<span class="od"></span>Sin pub';
+    el.classList.add('saved');
+    setTimeout(() => el.classList.remove('saved'), 1200);
+    // Update cache para que próximas cargas tengan el dato fresco sin
+    // refetch completo.
+    const cached = _activosCache.find(x => x.cliente_nro === nro && parseInt(x.sub) === parseInt(sub));
+    if (cached) cached.origen = next;
+  } catch (e) {
+    el.classList.remove('saving');
+    el.classList.add('error');
+    el.innerHTML = origText;
+    setTimeout(() => el.classList.remove('error'), 1500);
+  }
 }
 
 // Parser AR robusto: acepta "347000", "347.000", "347.000,50", "347000.5".
@@ -999,9 +1028,6 @@ function abrirModalEditar(nro, sub) {
   document.getElementById('me-ars').value       = (+r.monto_ars || 0) > 0 ? _fmtMontoEdit(r.monto_ars, false) : '';
   document.getElementById('me-fecha').value     = (r.fecha || '').substring(0, 10);
   document.getElementById('me-calc-link').href  = `/calculadora/?load=${r.cliente_nro}-${r.sub}`;
-  // Origen del presupuesto (publicidad / organico). Default organico
-  // si el presupuesto es viejo y no tiene el campo.
-  setOrigen(r.origen === 'publicidad' ? 'publicidad' : 'organico');
 
   document.getElementById('modal-edit-overlay').classList.add('show');
   setTimeout(() => { try { document.getElementById('me-nombre').focus(); } catch(e){} }, 100);
@@ -1229,7 +1255,6 @@ async function guardarEdicion() {
     monto_usd: _parseMontoAR(document.getElementById('me-usd').value),
     monto_ars: _parseMontoAR(document.getElementById('me-ars').value),
     fecha:     document.getElementById('me-fecha').value,
-    origen:    document.getElementById('me-origen').value,
   };
 
   if (!payload.cliente.nombre) {
