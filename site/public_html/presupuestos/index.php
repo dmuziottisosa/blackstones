@@ -704,8 +704,9 @@ async function cargarActivos() {
       const conceptoDisplay = conceptoEmpty ? 'Agregar...' : escapeHtml(conceptoVal);
       const conceptoCls = conceptoEmpty ? 'concepto-cell empty' : 'concepto-cell';
       const cliNombre = (r.cliente_nombre || '').toLowerCase();
-      const origenVal = (r.origen === 'publicidad') ? 'publicidad' : 'organico';
-      const origenLabel = (origenVal === 'publicidad') ? 'Publicidad' : 'Sin pub';
+      // 'organico' es alias historico de 'local'
+      const origenVal = (r.origen === 'publicidad') ? 'publicidad' : 'local';
+      const origenLabel = (origenVal === 'publicidad') ? 'Publicidad' : 'Local';
       const origenCls = (origenVal === 'publicidad') ? 'pub' : 'org';
       return `
         <tr>
@@ -928,12 +929,12 @@ function cerrarModal() {
 // === Modal de edición rápida ===
 let _editingCotizacion = null;
 
-// Toggle inline en la tabla activos — alterna publicidad/organico y
+// Toggle inline en la tabla activos — alterna publicidad/local y
 // guarda via edit-cotizacion.php sin abrir el modal.
 async function toggleOrigen(el, nro, sub) {
   if (el.classList.contains('saving')) return;
-  const current = el.dataset.origen || 'organico';
-  const next = (current === 'publicidad') ? 'organico' : 'publicidad';
+  const current = el.dataset.origen || 'local';
+  const next = (current === 'publicidad') ? 'local' : 'publicidad';
   el.classList.remove('saved','error');
   el.classList.add('saving');
   const origText = el.innerHTML;
@@ -951,17 +952,14 @@ async function toggleOrigen(el, nro, sub) {
       setTimeout(() => el.classList.remove('error'), 1500);
       return;
     }
-    // Update visual state
     el.dataset.origen = next;
     el.classList.remove('pub','org');
     el.classList.add(next === 'publicidad' ? 'pub' : 'org');
     el.innerHTML = (next === 'publicidad')
       ? '<span class="od"></span>Publicidad'
-      : '<span class="od"></span>Sin pub';
+      : '<span class="od"></span>Local';
     el.classList.add('saved');
     setTimeout(() => el.classList.remove('saved'), 1200);
-    // Update cache para que próximas cargas tengan el dato fresco sin
-    // refetch completo.
     const cached = _activosCache.find(x => x.cliente_nro === nro && parseInt(x.sub) === parseInt(sub));
     if (cached) cached.origen = next;
   } catch (e) {
@@ -1318,11 +1316,18 @@ async function cargarReporte() {
       </div>
     `;
 
-    // Breakdown por origen (publicidad vs organico)
+    // Breakdown por origen (publicidad vs local)
     const orig = totals.by_origen || {};
     const pub = orig.publicidad || { count: 0, monto_usd: 0, monto_ars: 0 };
-    const org = orig.organico   || { count: 0, monto_usd: 0, monto_ars: 0 };
-    const origenSection = (pub.count + org.count > 0) ? `
+    // 'local' es el nombre nuevo, 'organico' alias historico — sumamos ambos
+    const local = orig.local || { count: 0, monto_usd: 0, monto_ars: 0 };
+    const legacyOrg = orig.organico || { count: 0, monto_usd: 0, monto_ars: 0 };
+    const loc = {
+      count: (local.count || 0) + (legacyOrg.count || 0),
+      monto_usd: (local.monto_usd || 0) + (legacyOrg.monto_usd || 0),
+      monto_ars: (local.monto_ars || 0) + (legacyOrg.monto_ars || 0),
+    };
+    const origenSection = (pub.count + loc.count > 0) ? `
       <h3 class="sec-h">Por origen del presupuesto</h3>
       <div class="stat-cards origen-grid">
         <div class="stat-card stat-card-ads">
@@ -1331,9 +1336,9 @@ async function cargarReporte() {
           <div class="stat-sub">${fmtUSD(pub.monto_usd || 0)} · ${fmtARS(pub.monto_ars || 0)}</div>
         </div>
         <div class="stat-card stat-card-org">
-          <div class="stat-label"><span class="origen-dot origen-dot-org"></span> Sin publicidad</div>
-          <div class="stat-value">${org.count}</div>
-          <div class="stat-sub">${fmtUSD(org.monto_usd || 0)} · ${fmtARS(org.monto_ars || 0)}</div>
+          <div class="stat-label"><span class="origen-dot origen-dot-org"></span> Local</div>
+          <div class="stat-value">${loc.count}</div>
+          <div class="stat-sub">${fmtUSD(loc.monto_usd || 0)} · ${fmtARS(loc.monto_ars || 0)}</div>
         </div>
       </div>
     ` : '';

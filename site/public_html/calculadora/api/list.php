@@ -105,9 +105,10 @@ if (is_dir(BS_CLIENTES_DIR)) {
                 'monto_ars'         => $monto_ars,
                 'm2'                => $m2,
                 'ajuste_manual'     => isset($cot['ajuste_manual']) ? true : false,
-                // Origen del presupuesto: 'publicidad' u 'organico'. Si el
-                // campo no existe (presupuestos viejos), default 'organico'.
-                'origen'            => ($cot['origen'] ?? 'organico'),
+                // Origen del presupuesto: 'publicidad' o 'local'. Default
+                // 'local' si no existe el campo. 'organico' es alias
+                // historico que mapeamos a 'local'.
+                'origen'            => (($cot['origen'] ?? 'local') === 'organico' ? 'local' : ($cot['origen'] ?? 'local')),
             ];
         }
     }

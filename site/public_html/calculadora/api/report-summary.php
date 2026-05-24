@@ -31,11 +31,12 @@ $meses = [];
 $total_usd = 0; $total_ars = 0; $total_count = 0;
 $clientes_unicos = [];
 $materiales_map = []; // material_color → ['count' => N, 'monto_usd' => M]
-// Breakdown por origen del presupuesto (publicidad / organico).
-// Si el campo no existe en la cotizacion, se asume 'organico'.
+// Breakdown por origen del presupuesto (publicidad / local).
+// Si el campo no existe en la cotizacion, se asume 'local'.
+// 'organico' es alias historico que mapeamos a 'local'.
 $by_origen = [
     'publicidad' => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
-    'organico'   => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
+    'local'      => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
 ];
 
 for ($i = 0; $i < $months_back; $i++) {
@@ -51,14 +52,26 @@ for ($i = 0; $i < $months_back; $i++) {
         $count = intval($totales_mes['entregados_count'] ?? 0);
         if ($count === 0 && empty($data['entregados'])) continue;
 
-        // Breakdown por origen del archivo (default organico si no esta)
+        // Breakdown por origen del archivo (default local si no esta)
         $mes_by_origen = $totales_mes['by_origen'] ?? null;
         if (!is_array($mes_by_origen)) {
-            // Archivos historicos sin breakdown — todo va a 'organico'
+            // Archivos historicos sin breakdown — todo va a 'local'
             $mes_by_origen = [
-                'organico'   => ['count' => $count, 'monto_usd' => floatval($totales_mes['monto_usd'] ?? 0), 'monto_ars' => floatval($totales_mes['monto_ars'] ?? 0)],
+                'local'      => ['count' => $count, 'monto_usd' => floatval($totales_mes['monto_usd'] ?? 0), 'monto_ars' => floatval($totales_mes['monto_ars'] ?? 0)],
                 'publicidad' => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
             ];
+        } else {
+            // Normalizar: si el archivo tenia el bucket 'organico' (alias
+            // historico), mover el contenido a 'local'.
+            if (isset($mes_by_origen['organico'])) {
+                if (!isset($mes_by_origen['local'])) {
+                    $mes_by_origen['local'] = ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0];
+                }
+                $mes_by_origen['local']['count']     += intval($mes_by_origen['organico']['count'] ?? 0);
+                $mes_by_origen['local']['monto_usd'] += floatval($mes_by_origen['organico']['monto_usd'] ?? 0);
+                $mes_by_origen['local']['monto_ars'] += floatval($mes_by_origen['organico']['monto_ars'] ?? 0);
+                unset($mes_by_origen['organico']);
+            }
         }
 
         $meses[] = [
@@ -72,7 +85,7 @@ for ($i = 0; $i < $months_back; $i++) {
         $total_count += $count;
         $total_usd += floatval($totales_mes['monto_usd'] ?? 0);
         $total_ars += floatval($totales_mes['monto_ars'] ?? 0);
-        foreach (['publicidad', 'organico'] as $ori) {
+        foreach (['publicidad', 'local'] as $ori) {
             $by_origen[$ori]['count']     += intval($mes_by_origen[$ori]['count'] ?? 0);
             $by_origen[$ori]['monto_usd'] += floatval($mes_by_origen[$ori]['monto_usd'] ?? 0);
             $by_origen[$ori]['monto_ars'] += floatval($mes_by_origen[$ori]['monto_ars'] ?? 0);
@@ -111,7 +124,7 @@ for ($i = 0; $i < $months_back; $i++) {
         $total_count += $live['count'];
         $total_usd += $live['monto_usd'];
         $total_ars += $live['monto_ars'];
-        foreach (['publicidad', 'organico'] as $ori) {
+        foreach (['publicidad', 'local'] as $ori) {
             $by_origen[$ori]['count']     += intval($live['by_origen'][$ori]['count'] ?? 0);
             $by_origen[$ori]['monto_usd'] += floatval($live['by_origen'][$ori]['monto_usd'] ?? 0);
             $by_origen[$ori]['monto_ars'] += floatval($live['by_origen'][$ori]['monto_ars'] ?? 0);
@@ -171,7 +184,7 @@ function _live_scan_month($month_start, $month_end) {
         'clientes_unicos' => [], 'materiales' => [],
         'by_origen' => [
             'publicidad' => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
-            'organico'   => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
+            'local'      => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
         ],
     ];
     if (!is_dir(BS_CLIENTES_DIR)) return $result;
@@ -194,9 +207,10 @@ function _live_scan_month($month_start, $month_end) {
             $result['monto_usd'] += $monto_usd;
             $result['monto_ars'] += $monto_ars;
             $result['clientes_unicos'][] = $cliente['cliente_nro'] ?? '';
-            // Breakdown por origen. Default 'organico' si no hay campo.
-            $ori = ($cot['origen'] ?? 'organico');
-            if ($ori !== 'publicidad') $ori = 'organico';
+            // Breakdown por origen. Default 'local' si no hay campo.
+            // 'organico' (alias historico) se normaliza a 'local'.
+            $ori = ($cot['origen'] ?? 'local');
+            if ($ori !== 'publicidad') $ori = 'local';
             $result['by_origen'][$ori]['count']++;
             $result['by_origen'][$ori]['monto_usd'] += $monto_usd;
             $result['by_origen'][$ori]['monto_ars'] += $monto_ars;

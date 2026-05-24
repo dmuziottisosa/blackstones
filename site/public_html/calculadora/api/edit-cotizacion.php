@@ -98,11 +98,14 @@ if (array_key_exists('fecha', $body)) {
 }
 
 if (array_key_exists('origen', $body)) {
-    // Whitelist: solo 'publicidad' u 'organico' (presupuestos viejos sin
-    // el campo se asumen organicos al renderear).
+    // Whitelist: solo 'publicidad' o 'local'. Aceptamos 'organico' como
+    // alias historico del periodo 1ed8c6f-7c33dd4 y lo normalizamos a
+    // 'local' al persistir. Presupuestos viejos sin el campo se asumen
+    // 'local' al renderear.
     $o = trim((string)$body['origen']);
-    if (!in_array($o, ['publicidad', 'organico'], true)) {
-        bs_error("origen debe ser 'publicidad' u 'organico'");
+    if ($o === 'organico') $o = 'local';
+    if (!in_array($o, ['publicidad', 'local'], true)) {
+        bs_error("origen debe ser 'publicidad' o 'local'");
     }
     $cot_updates['origen'] = $o;
 }
