@@ -230,11 +230,12 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 /* === STAT CARDS — modernos, hover lift === */
 .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px}
 .origen-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-.stat-card-ads{border-left:3px solid #22c55e}
-.stat-card-org{border-left:3px solid var(--gd)}
-.origen-dot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle;margin-right:5px}
-.origen-dot-pub{background:#22c55e}
-.origen-dot-org{background:var(--gd)}
+/* Cards 'Por origen' — tint sutil sobre acento de marca, peers visuales */
+.stat-card-ads{border-left:3px solid var(--gd)}
+.stat-card-org{border-left:3px solid var(--border)}
+.origen-dot{display:inline-block;width:7px;height:7px;border-radius:50%;vertical-align:middle;margin-right:6px}
+.origen-dot-pub{background:var(--gd)}
+.origen-dot-org{background:var(--text3)}
 .stat-card .stat-sub{font-size:11.5px;color:var(--text3);margin-top:4px;font-variant-numeric:tabular-nums}
 .stat-card{background:var(--card);padding:20px 22px;border-radius:var(--radius);border:1px solid var(--border);position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .18s ease,box-shadow .18s ease,border-color .18s}
 .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--gd)}
@@ -310,16 +311,19 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .modal-edit .calc-link a{color:var(--gd);text-decoration:none;font-weight:600;margin-left:4px}
 .modal-edit .calc-link a:hover{text-decoration:underline}
 
-/* Origen cell en la tabla activos — pill compacta clickable */
-.origen-cell{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid var(--border);border-radius:999px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:var(--text2);letter-spacing:.02em;white-space:nowrap;font-family:inherit}
-.origen-cell:hover{border-color:var(--gd);color:var(--text)}
-.origen-cell .od{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .15s}
-.origen-cell.pub{border-color:#22c55e;color:#15803d}
-.origen-cell.pub .od{background:#22c55e}
-.origen-cell.org .od{background:var(--text3)}
-.origen-cell.saving{opacity:.5;pointer-events:none}
-.origen-cell.saved{border-color:#1F8F47;background:rgba(31,143,71,.08)}
-.origen-cell.error{border-color:#A53C3C;background:rgba(165,60,60,.08)}
+/* Origen cell — pill clickable, peers visuales, distincion por tint sutil */
+.origen-cell{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:var(--text2);letter-spacing:.03em;white-space:nowrap;font-family:inherit;line-height:1.2}
+.origen-cell:hover{border-color:var(--gd-soft, rgba(196,167,125,.5));color:var(--text)}
+.origen-cell .od{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .15s;background:var(--text3)}
+/* Publicidad: tint dorado de marca, sin gritar */
+.origen-cell.pub{background:rgba(196,167,125,.1);border-color:rgba(196,167,125,.4);color:var(--gdd, var(--text))}
+.origen-cell.pub .od{background:var(--gd)}
+/* Local: outline limpio (estado por defecto, mayoria) */
+.origen-cell.org{background:transparent}
+/* Estados transitorios — minimales */
+.origen-cell.saving{opacity:.55;pointer-events:none}
+.origen-cell.saved{border-color:rgba(34,197,94,.45);background:rgba(34,197,94,.06)}
+.origen-cell.error{border-color:rgba(220,38,38,.45);background:rgba(220,38,38,.06)}
 
 @media(max-width:600px){.modal-edit .field-grid{grid-template-columns:1fr}.modal-edit{max-width:none;width:100%}}
 
