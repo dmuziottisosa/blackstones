@@ -2249,6 +2249,14 @@ function getFleteZonaLabel(){
   if(sel.value==='manual')return 'Otra zona';
   return sel.selectedOptions[0].text.split('—')[0].trim();
 }
+// True cuando el dropdown está explícitamente en "Sin flete" (value=0).
+// En ese caso el desglose (calc + PDF + Excel) muestra "Sin flete cotizado"
+// para que al cliente le quede claro que el flete/colocación NO está incluido.
+function isFleteSinCotizar(){
+  const sel=document.getElementById('fleteZona');
+  if(!sel)return false;
+  return sel.value==='0';
+}
 
 // === ADICIONALES (escalera + ángulos/ménsulas) ===
 function onAdicMontoBlur(el){
@@ -2726,6 +2734,8 @@ function calc(){
   if(fleteVal>0){
     const zona=getFleteZonaLabel();
     dh+=`<tr class="svc"><td colspan="2">Flete y colocación — ${zona}</td><td></td><td>—</td><td ${arsC}>${fmtARS(fleteVal)}</td></tr>`;
+  }else if(isFleteSinCotizar()){
+    dh+=`<tr class="svc"><td colspan="2">Flete y colocación</td><td></td><td>—</td><td>Sin flete cotizado</td></tr>`;
   }
   if(esc.total>0){
     const escUsd=esc.mon==='USD'?esc.total:0,escArs=esc.mon==='ARS'?esc.total:0;
@@ -4211,7 +4221,8 @@ async function generarExcel(){
   // SERVICIOS — solo mostrar si hay flete o adicionales
   const escE=getAdic('esc');
   const angE=getAdic('ang');
-  const hasServ=fleteVal>0||escE.total>0||angE.total>0;
+  const fleteSinCotizar=isFleteSinCotizar();
+  const hasServ=fleteVal>0||escE.total>0||angE.total>0||fleteSinCotizar;
   if(hasServ){
   addCat(row,'Servicios adicionales');row++;
   if(fleteVal>0){
@@ -4224,6 +4235,14 @@ async function generarExcel(){
     setC(row,6,fleteVal,{name:'Arial',size:10,bold:true,color:{argb:DK}},fWh,{horizontal:'center',vertical:'middle'});
     ws.getRow(row).getCell(6).numFmt='$ #,##0';
     sumARS+=fleteVal;row++;
+  }else if(fleteSinCotizar){
+    fillR(row,fWh);
+    ws.mergeCells(`B${row}:D${row}`);
+    setC(row,1,'',{name:'Arial',size:10},fWh,{horizontal:'center',vertical:'middle'});
+    setC(row,2,'Flete y colocación',{name:'Arial',size:10,bold:true,color:{argb:DK}},fWh);
+    setC(row,5,'—',{name:'Arial',size:10,color:{argb:'FFA89580'}},fWh,{horizontal:'center',vertical:'middle'});
+    setC(row,6,'Sin flete cotizado',{name:'Arial',size:10,italic:true,color:{argb:'FFA89580'}},fWh,{horizontal:'center',vertical:'middle'});
+    row++;
   }
   if(escE.total>0){
     fillR(row,fWh);
@@ -4804,13 +4823,16 @@ function generarPDF(){
   // Servicios adicionales: flete + escalera + ángulos
   const escP=getAdic('esc');
   const angP=getAdic('ang');
-  const hasServPdf=fleteVal>0||escP.total>0||angP.total>0;
+  const fleteSinCotizarPdf=isFleteSinCotizar();
+  const hasServPdf=fleteVal>0||escP.total>0||angP.total>0||fleteSinCotizarPdf;
   if(hasServPdf){
     items+=`<tr style="background:#F2EDE3"><td style="text-align:center;color:#7A6649">●</td><td colspan="5" style="font-weight:700;padding:6px 10px">Servicios adicionales</td></tr>`;
     if(fleteVal>0){
       const zona=getFleteZonaLabel();
       items+=`<tr style="border-bottom:1px solid #F0ECE6"><td style="text-align:center;vertical-align:top;padding:9px 6px">1</td><td colspan="3" style="vertical-align:top;padding:9px 10px;font-weight:600;color:#1A1816">Flete y colocación: ${zona}</td><td style="text-align:center;vertical-align:top;padding:9px 6px"><span style="color:#A89580">—</span></td><td style="text-align:center;vertical-align:top;padding:9px 6px;font-weight:700;color:#1A1816">${fmtARS(fleteVal)}</td></tr>`;
       sumA+=fleteVal;
+    }else if(fleteSinCotizarPdf){
+      items+=`<tr style="border-bottom:1px solid #F0ECE6"><td style="text-align:center;vertical-align:top;padding:9px 6px"></td><td colspan="3" style="vertical-align:top;padding:9px 10px;font-weight:600;color:#1A1816">Flete y colocación</td><td style="text-align:center;vertical-align:top;padding:9px 6px"><span style="color:#A89580">—</span></td><td style="text-align:center;vertical-align:top;padding:9px 6px;font-style:italic;color:#A89580">Sin flete cotizado</td></tr>`;
     }
     if(escP.total>0){
       const desc=`Subidas a escalera (${escP.cant} × ${escP.mon==='USD'?fmtUSD(escP.monto):fmtARS(escP.monto)})`;

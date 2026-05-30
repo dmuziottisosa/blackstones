@@ -306,9 +306,13 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     $fleteVal = floatval($adic['flete']['monto'] ?? 0);
     $escP = $adic['escalera'] ?? null;
     $angP = $adic['angulos']  ?? null;
+    // "Sin flete cotizado": flete en 0 con zona explícita "Sin flete"
+    // (refleja la opción "Sin flete" del dropdown de la calc).
+    $fleteSinCotizar = ($fleteVal == 0 && strtolower(trim($adic['flete']['zona'] ?? '')) === 'sin flete');
     $hasServ = $fleteVal > 0
         || (!empty($escP['total']) && floatval($escP['total']) > 0)
-        || (!empty($angP['total']) && floatval($angP['total']) > 0);
+        || (!empty($angP['total']) && floatval($angP['total']) > 0)
+        || $fleteSinCotizar;
     if ($hasServ) {
         echo '<tr style="background:#F2EDE3"><td style="text-align:center;color:#7A6649">●</td>';
         echo '<td colspan="5" style="font-weight:700;padding:6px 10px">Servicios adicionales</td></tr>';
@@ -319,6 +323,11 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
             echo $td('<span style="color:#A89580">—</span>') . $td('<span style="color:#1A1816;font-weight:700">' . $fARS($fleteVal) . '</span>');
             echo '</tr>';
             $sumA += $fleteVal;
+        } elseif ($fleteSinCotizar) {
+            echo '<tr style="border-bottom:1px solid #F0ECE6">';
+            echo $td('') . '<td colspan="3" style="vertical-align:top;padding:9px 10px;font-weight:600;color:#1A1816">Flete y colocación</td>';
+            echo $td('<span style="color:#A89580">—</span>') . $td('<span style="color:#A89580;font-style:italic">Sin flete cotizado</span>');
+            echo '</tr>';
         }
         if (!empty($escP['total']) && floatval($escP['total']) > 0) {
             $cant = intval($escP['cant'] ?? 0);
