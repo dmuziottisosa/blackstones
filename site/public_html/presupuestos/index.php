@@ -403,7 +403,8 @@ tbody tr.row-selected td{background:var(--gd-soft)!important}
   .stat-cards{grid-template-columns:repeat(2,1fr);gap:10px}
   .stat-card{padding:14px 16px}
   .stat-value{font-size:22px}
-  table{font-size:12.5px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{font-size:12.5px}
+  .table-scroll table{min-width:980px}
   th,td{padding:10px 8px;white-space:nowrap}
   th:first-child,td:first-child{padding-left:12px}
   .actions-cell{min-width:380px}
