@@ -189,7 +189,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 [data-theme="dark"] .est-perdido{background:#2A1414;color:#E26666}
 
 /* === ACTION BUTTONS — agrupados por jerarquía === */
-.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-width:560px}
 .actions-cell button,.actions-cell a{font-size:11px;padding:5px 9px;border-radius:5px;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;line-height:1.2;letter-spacing:.005em}
 /* Primary: + Nueva (outline gold sutil, no domina la fila) */
 .actions-cell .act-primary{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
@@ -259,9 +259,9 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
 
 /* === MODAL === */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px;overflow-y:auto}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal-overlay.show{display:flex}
-.modal{background:var(--card);border-radius:var(--radius);padding:26px;max-width:480px;width:90%;box-shadow:var(--shadow-lg);border:1px solid var(--border);max-height:calc(100vh - 40px);overflow-y:auto}
+.modal{background:var(--card);border-radius:var(--radius);padding:26px;max-width:480px;width:90%;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
 .modal h3{font-family:'Fraunces',serif;font-size:19px;margin-bottom:10px;color:var(--text)}
 .modal p{font-size:13.5px;color:var(--text);margin-bottom:18px;line-height:1.55}
 .modal .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
@@ -310,9 +310,6 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .modal-edit .calc-link{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-soft);text-align:center;font-size:12px;color:var(--text3)}
 .modal-edit .calc-link a{color:var(--gd);text-decoration:none;font-weight:600;margin-left:4px}
 .modal-edit .calc-link a:hover{text-decoration:underline}
-/* Acciones pegadas al fondo del modal: siempre visibles aunque el
-   contenido sea largo y el modal scrollee internamente. */
-.modal-edit .modal-actions{position:sticky;bottom:-26px;background:var(--card);padding:14px 0 4px;margin-top:18px;z-index:2;border-top:1px solid var(--border-soft)}
 
 /* Origen cell — pill clickable, peers visuales, distincion por tint sutil */
 .origen-cell{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:var(--text2);letter-spacing:.03em;white-space:nowrap;font-family:inherit;line-height:1.2}
@@ -468,7 +465,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 </div>
 
 <!-- Modal de confirmación genérico -->
-<div class="modal-overlay" id="modal" onmousedown="modalOverlayDown(event)" onclick="modalOverlayClick(event, cerrarModal)">
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)cerrarModal()">
   <div class="modal">
     <h3 id="modal-title">Confirmación</h3>
     <p id="modal-body"></p>
@@ -480,7 +477,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 </div>
 
 <!-- Modal de edición rápida -->
-<div class="modal-overlay" id="modal-edit-overlay" onmousedown="modalOverlayDown(event)" onclick="modalOverlayClick(event, cerrarModalEditar)">
+<div class="modal-overlay" id="modal-edit-overlay" onclick="if(event.target===this)cerrarModalEditar()">
   <div class="modal modal-edit">
     <div class="modal-title-row">
       <h3>Edición rápida</h3>
@@ -932,26 +929,6 @@ function abrirModal(title, body, onConfirm, btnClass) {
 function cerrarModal() {
   document.getElementById('modal').classList.remove('show');
 }
-
-// Cierre robusto de modales: solo cierra si el gesto (mousedown Y click)
-// ocurrió enteramente sobre el overlay, no adentro del modal. Evita
-// cierres accidentales por drag de seleccion de texto que termina sobre
-// el backdrop, o por misclicks cerca del borde que arrancan adentro.
-let _modalDownTarget = null;
-function modalOverlayDown(event){ _modalDownTarget = event.target; }
-function modalOverlayClick(event, closeFn){
-  const onBackdrop = (event.target === event.currentTarget) && (_modalDownTarget === event.currentTarget);
-  _modalDownTarget = null;
-  if(onBackdrop) closeFn();
-}
-// Esc cierra el modal abierto (affordance estable, no depende del click)
-document.addEventListener('keydown', function(e){
-  if(e.key !== 'Escape') return;
-  const edit = document.getElementById('modal-edit-overlay');
-  const base = document.getElementById('modal');
-  if(edit && edit.classList.contains('show')) { cerrarModalEditar(); return; }
-  if(base && base.classList.contains('show')) { cerrarModal(); }
-});
 
 // === Modal de edición rápida ===
 let _editingCotizacion = null;
