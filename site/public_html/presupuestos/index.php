@@ -97,10 +97,6 @@ html{overflow-x:hidden}
 
 /* === CONTAINER === */
 .container{max-width:1320px;margin:0 auto;padding:28px 24px}
-/* La vista de Activos tiene una tabla ancha (11 columnas + acciones).
-   Le damos un contenedor mas amplio para que entre todo sin scroll en
-   pantallas grandes; el .table-scroll sigue como fallback en angostas. */
-.container.container-wide{max-width:1680px}
 h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px;color:var(--text);letter-spacing:-.005em}
 .sub{color:var(--text2);font-size:13.5px;margin-bottom:22px;line-height:1.55;max-width:720px}
 
@@ -147,11 +143,6 @@ h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px
 @media(max-width:768px){.toast-container{top:10px;right:10px;left:10px;max-width:none}.toast{min-width:auto}}
 
 /* === TABLE — moderna, zebra sutil, hover de fila completa === */
-/* Wrapper con scroll horizontal: la tabla tiene muchas columnas
-   (checkbox + 9 datos + acciones con varios botones). Si no entra en
-   el contenedor, scrollea adentro en vez de desbordar el layout. */
-.table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
-.table-scroll table{box-shadow:none;border:0;border-radius:0;min-width:1100px}
 table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
 thead{background:var(--dk)}
 th{background:var(--dk);color:var(--cr);text-align:left;padding:11px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--dk2);white-space:nowrap}
@@ -172,24 +163,6 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .cell-fecha{white-space:nowrap;font-size:12.5px;color:var(--text2);font-variant-numeric:tabular-nums;letter-spacing:.01em}
 .cell-num{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600;text-align:right}
 .muted{color:var(--text3);opacity:.45;font-size:13px}
-
-/* === SELECCION MULTIPLE === */
-.col-check{width:38px;text-align:center;padding-left:14px!important;padding-right:6px!important}
-.col-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--gd);vertical-align:middle;margin:0}
-tbody tr.row-selected td{background:var(--gd-soft)!important}
-.bulk-bar{display:none;align-items:center;justify-content:space-between;gap:16px;background:var(--dk);color:var(--cr);border-radius:var(--radius);padding:12px 18px;margin-bottom:14px;box-shadow:var(--shadow);animation:bulkIn .18s ease}
-.bulk-bar.show{display:flex}
-@keyframes bulkIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-.bulk-count{font-size:13.5px;letter-spacing:.01em}
-.bulk-count b{color:var(--gd);font-variant-numeric:tabular-nums}
-.bulk-actions{display:flex;gap:8px}
-.bulk-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s}
-.bulk-resumen{background:var(--gd);color:var(--dk);border-color:var(--gd)}
-.bulk-resumen:hover{background:var(--gd-soft);color:var(--cr)}
-.bulk-del{background:transparent;color:#E26666;border-color:rgba(226,102,102,.5)}
-.bulk-del:hover{background:#A53C3C;color:#fff;border-color:#A53C3C}
-.bulk-cancel{background:transparent;color:var(--cr);border-color:rgba(255,255,255,.25)}
-.bulk-cancel:hover{background:rgba(255,255,255,.1)}
 .placeholder-hint{color:var(--text3);opacity:.55;font-style:italic;font-size:12.5px}
 .cliente-nombre{font-weight:600;color:var(--text);text-transform:capitalize;letter-spacing:.005em;display:inline-block;padding:2px 6px;border-radius:5px;border:1px dashed transparent;cursor:text;transition:all .15s;outline:none;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
 .cliente-nombre:hover{border-color:var(--gd);background:var(--gd-soft);white-space:normal;max-width:none}
@@ -407,8 +380,7 @@ tbody tr.row-selected td{background:var(--gd-soft)!important}
   .stat-cards{grid-template-columns:repeat(2,1fr);gap:10px}
   .stat-card{padding:14px 16px}
   .stat-value{font-size:22px}
-  table{font-size:12.5px}
-  .table-scroll table{min-width:980px}
+  table{font-size:12.5px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
   th,td{padding:10px 8px;white-space:nowrap}
   th:first-child,td:first-child{padding-left:12px}
   .actions-cell{min-width:380px}
@@ -438,7 +410,7 @@ tbody tr.row-selected td{background:var(--gd-soft)!important}
 </nav>
 <div class="gold-line"></div>
 
-<div class="container<?= $tab === 'activos' ? ' container-wide' : '' ?>">
+<div class="container">
 <?php if ($tab === 'activos'): ?>
   <h1>Presupuestos activos</h1>
   <div class="sub">Cotizaciones en proceso. Se eliminan automáticamente a los 60 días si no llegan a entregado.</div>
@@ -463,27 +435,9 @@ tbody tr.row-selected td{background:var(--gd-soft)!important}
     </button>
   </div>
 
-  <!-- Barra de acciones en lote (aparece al seleccionar filas) -->
-  <div id="bulk-bar" class="bulk-bar">
-    <span class="bulk-count"><b id="bulk-n">0</b> seleccionados</span>
-    <div class="bulk-actions">
-      <button type="button" class="bulk-btn bulk-resumen" onclick="bulkResumen()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Ver resumen
-      </button>
-      <button type="button" class="bulk-btn bulk-del" onclick="bulkEliminar()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-        Eliminar
-      </button>
-      <button type="button" class="bulk-btn bulk-cancel" onclick="bulkClear()">Cancelar</button>
-    </div>
-  </div>
-
-  <div class="table-scroll">
   <table id="activos-tabla">
     <thead>
       <tr>
-        <th class="col-check"><input type="checkbox" id="check-all" onchange="toggleAllRows(this)" title="Seleccionar todo" aria-label="Seleccionar todo"></th>
         <th>N°</th>
         <th>Cliente</th>
         <th>Celular</th>
@@ -497,10 +451,9 @@ tbody tr.row-selected td{background:var(--gd-soft)!important}
       </tr>
     </thead>
     <tbody id="activos-body">
-      <tr><td colspan="11" class="loading">Cargando...</td></tr>
+      <tr><td colspan="10" class="loading">Cargando...</td></tr>
     </tbody>
   </table>
-  </div>
 
   <div class="pagination" id="activos-pagination"></div>
 
@@ -729,12 +682,12 @@ async function cargarActivos() {
     const r = await fetch(url, { credentials: 'same-origin' });
     const d = await r.json();
     if (!d.ok) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="11" class="empty">Error: ${d.error}</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Error: ${d.error}</td></tr>`;
       _activosCache = [];
       return;
     }
     if (d.results.length === 0) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="11" class="empty">Sin resultados</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Sin resultados</td></tr>`;
       document.getElementById('activos-pagination').innerHTML = '';
       _activosCache = [];
       return;
@@ -763,8 +716,7 @@ async function cargarActivos() {
       const origenLabel = (origenVal === 'publicidad') ? 'Publicidad' : 'Local';
       const origenCls = (origenVal === 'publicidad') ? 'pub' : 'org';
       return `
-        <tr data-nro="${r.cliente_nro}" data-sub="${r.sub}">
-          <td class="col-check"><input type="checkbox" class="row-check" value="${r.cliente_nro}-${r.sub}" onchange="onRowCheck()" aria-label="Seleccionar ${r.cliente_nro}-${r.sub}"></td>
+        <tr>
           <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
           <td><span class="cliente-nombre" contenteditable="true" data-nro="${r.cliente_nro}" data-orig="${escapeHtml(cliNombre)}" onblur="onClienteNombreBlur(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el nombre">${cliNombre ? escapeHtml(cliNombre) : '—'}</span>${r.cliente_dni ? `<span class="cliente-dni">DNI ${escapeHtml(r.cliente_dni)}</span>` : ''}</td>
           <td>${r.cliente_celular ? `<span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : '<span class="muted">—</span>'}</td>
@@ -780,88 +732,17 @@ async function cargarActivos() {
     }).join('');
     document.getElementById('activos-body').innerHTML = rows;
 
-    // Reset seleccion al recargar (los ids pueden cambiar)
-    if (typeof bulkClear === 'function') bulkClear();
-
     const totalPages = Math.ceil(d.total / d.per_page);
     document.getElementById('activos-pagination').innerHTML = totalPages > 1
       ? `<button onclick="_activosPage=Math.max(1,_activosPage-1);cargarActivos()" ${_activosPage<=1?'disabled':''}>← Anterior</button> Página ${d.page} de ${totalPages} · ${d.total} resultados <button onclick="_activosPage=Math.min(${totalPages},_activosPage+1);cargarActivos()" ${_activosPage>=totalPages?'disabled':''}>Siguiente →</button>`
       : `${d.total} resultados`;
   } catch (e) {
-    document.getElementById('activos-body').innerHTML = `<tr><td colspan="11" class="empty">No se pudo cargar (${e.message})</td></tr>`;
+    document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">No se pudo cargar (${e.message})</td></tr>`;
   }
 }
 
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-// ============================================================
-// Seleccion multiple de filas (resumen PDF + eliminar en lote)
-// ============================================================
-function _selectedRows() {
-  return Array.from(document.querySelectorAll('.row-check:checked')).map(c => {
-    const [nro, sub] = c.value.split('-');
-    return { nro, sub: parseInt(sub) };
-  });
-}
-function onRowCheck() {
-  const checks = Array.from(document.querySelectorAll('.row-check'));
-  const sel = checks.filter(c => c.checked);
-  checks.forEach(c => { const tr = c.closest('tr'); if (tr) tr.classList.toggle('row-selected', c.checked); });
-  const all = document.getElementById('check-all');
-  if (all) {
-    all.checked = sel.length > 0 && sel.length === checks.length;
-    all.indeterminate = sel.length > 0 && sel.length < checks.length;
-  }
-  const bar = document.getElementById('bulk-bar');
-  const n = document.getElementById('bulk-n');
-  if (n) n.textContent = sel.length;
-  if (bar) bar.classList.toggle('show', sel.length > 0);
-}
-function toggleAllRows(el) {
-  document.querySelectorAll('.row-check').forEach(c => { c.checked = el.checked; });
-  onRowCheck();
-}
-function bulkClear() {
-  document.querySelectorAll('.row-check').forEach(c => { c.checked = false; });
-  const all = document.getElementById('check-all');
-  if (all) { all.checked = false; all.indeterminate = false; }
-  onRowCheck();
-}
-function bulkResumen() {
-  const sel = _selectedRows();
-  if (!sel.length) return;
-  const ids = sel.map(s => `${s.nro}-${s.sub}`).join(',');
-  window.open(`/calculadora/api/render-resumen.php?ids=${encodeURIComponent(ids)}`, '_blank');
-}
-async function bulkEliminar() {
-  const sel = _selectedRows();
-  if (!sel.length) return;
-  abrirModal(
-    'Eliminar en lote',
-    `¿Eliminar <b>${sel.length}</b> ${sel.length === 1 ? 'presupuesto' : 'presupuestos'}? Esta acción no se puede deshacer.`,
-    async () => {
-      cerrarModal();
-      let ok = 0, fail = 0;
-      for (const s of sel) {
-        try {
-          const r = await fetch('/calculadora/api/delete.php', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cliente_nro: s.nro, sub: s.sub })
-          });
-          const d = await r.json();
-          if (d.ok) ok++; else fail++;
-        } catch (e) { fail++; }
-      }
-      toast(`${ok} eliminado${ok === 1 ? '' : 's'}${fail ? ` · ${fail} con error` : ''}`,
-            fail ? 'error' : 'success', { title: 'Eliminación en lote' });
-      cargarActivos();
-    },
-    'btn-danger'
-  );
 }
 
 async function cambiarEstado(nro, sub, nuevo) {
