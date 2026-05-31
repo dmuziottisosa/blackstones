@@ -189,7 +189,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 [data-theme="dark"] .est-perdido{background:#2A1414;color:#E26666}
 
 /* === ACTION BUTTONS — agrupados por jerarquía === */
-.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center;min-width:560px}
+.actions-cell{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
 .actions-cell button,.actions-cell a{font-size:11px;padding:5px 9px;border-radius:5px;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;line-height:1.2;letter-spacing:.005em}
 /* Primary: + Nueva (outline gold sutil, no domina la fila) */
 .actions-cell .act-primary{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
