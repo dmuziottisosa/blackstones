@@ -768,6 +768,9 @@ async function cargarActivos() {
     }).join('');
     document.getElementById('activos-body').innerHTML = rows;
 
+    // Reset seleccion al recargar (los ids pueden cambiar)
+    if (typeof bulkClear === 'function') bulkClear();
+
     const totalPages = Math.ceil(d.total / d.per_page);
     document.getElementById('activos-pagination').innerHTML = totalPages > 1
       ? `<button onclick="_activosPage=Math.max(1,_activosPage-1);cargarActivos()" ${_activosPage<=1?'disabled':''}>← Anterior</button> Página ${d.page} de ${totalPages} · ${d.total} resultados <button onclick="_activosPage=Math.min(${totalPages},_activosPage+1);cargarActivos()" ${_activosPage>=totalPages?'disabled':''}>Siguiente →</button>`
@@ -779,6 +782,74 @@ async function cargarActivos() {
 
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ============================================================
+// Seleccion multiple de filas (resumen PDF + eliminar en lote)
+// ============================================================
+function _selectedRows() {
+  return Array.from(document.querySelectorAll('.row-check:checked')).map(c => {
+    const [nro, sub] = c.value.split('-');
+    return { nro, sub: parseInt(sub) };
+  });
+}
+function onRowCheck() {
+  const checks = Array.from(document.querySelectorAll('.row-check'));
+  const sel = checks.filter(c => c.checked);
+  checks.forEach(c => { const tr = c.closest('tr'); if (tr) tr.classList.toggle('row-selected', c.checked); });
+  const all = document.getElementById('check-all');
+  if (all) {
+    all.checked = sel.length > 0 && sel.length === checks.length;
+    all.indeterminate = sel.length > 0 && sel.length < checks.length;
+  }
+  const bar = document.getElementById('bulk-bar');
+  const n = document.getElementById('bulk-n');
+  if (n) n.textContent = sel.length;
+  if (bar) bar.classList.toggle('show', sel.length > 0);
+}
+function toggleAllRows(el) {
+  document.querySelectorAll('.row-check').forEach(c => { c.checked = el.checked; });
+  onRowCheck();
+}
+function bulkClear() {
+  document.querySelectorAll('.row-check').forEach(c => { c.checked = false; });
+  const all = document.getElementById('check-all');
+  if (all) { all.checked = false; all.indeterminate = false; }
+  onRowCheck();
+}
+function bulkResumen() {
+  const sel = _selectedRows();
+  if (!sel.length) return;
+  const ids = sel.map(s => `${s.nro}-${s.sub}`).join(',');
+  window.open(`/calculadora/api/render-resumen.php?ids=${encodeURIComponent(ids)}`, '_blank');
+}
+async function bulkEliminar() {
+  const sel = _selectedRows();
+  if (!sel.length) return;
+  abrirModal(
+    'Eliminar en lote',
+    `¿Eliminar <b>${sel.length}</b> ${sel.length === 1 ? 'presupuesto' : 'presupuestos'}? Esta acción no se puede deshacer.`,
+    async () => {
+      cerrarModal();
+      let ok = 0, fail = 0;
+      for (const s of sel) {
+        try {
+          const r = await fetch('/calculadora/api/delete.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cliente_nro: s.nro, sub: s.sub })
+          });
+          const d = await r.json();
+          if (d.ok) ok++; else fail++;
+        } catch (e) { fail++; }
+      }
+      toast(`${ok} eliminado${ok === 1 ? '' : 's'}${fail ? ` · ${fail} con error` : ''}`,
+            fail ? 'error' : 'success', { title: 'Eliminación en lote' });
+      cargarActivos();
+    },
+    'btn-danger'
+  );
 }
 
 async function cambiarEstado(nro, sub, nuevo) {
