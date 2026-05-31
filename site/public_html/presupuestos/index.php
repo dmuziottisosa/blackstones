@@ -163,6 +163,24 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .cell-fecha{white-space:nowrap;font-size:12.5px;color:var(--text2);font-variant-numeric:tabular-nums;letter-spacing:.01em}
 .cell-num{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600;text-align:right}
 .muted{color:var(--text3);opacity:.45;font-size:13px}
+
+/* === SELECCION MULTIPLE === */
+.col-check{width:38px;text-align:center;padding-left:14px!important;padding-right:6px!important}
+.col-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--gd);vertical-align:middle;margin:0}
+tbody tr.row-selected td{background:var(--gd-soft)!important}
+.bulk-bar{display:none;align-items:center;justify-content:space-between;gap:16px;background:var(--dk);color:var(--cr);border-radius:var(--radius);padding:12px 18px;margin-bottom:14px;box-shadow:var(--shadow);animation:bulkIn .18s ease}
+.bulk-bar.show{display:flex}
+@keyframes bulkIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.bulk-count{font-size:13.5px;letter-spacing:.01em}
+.bulk-count b{color:var(--gd);font-variant-numeric:tabular-nums}
+.bulk-actions{display:flex;gap:8px}
+.bulk-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.bulk-resumen{background:var(--gd);color:var(--dk);border-color:var(--gd)}
+.bulk-resumen:hover{background:var(--gd-soft);color:var(--cr)}
+.bulk-del{background:transparent;color:#E26666;border-color:rgba(226,102,102,.5)}
+.bulk-del:hover{background:#A53C3C;color:#fff;border-color:#A53C3C}
+.bulk-cancel{background:transparent;color:var(--cr);border-color:rgba(255,255,255,.25)}
+.bulk-cancel:hover{background:rgba(255,255,255,.1)}
 .placeholder-hint{color:var(--text3);opacity:.55;font-style:italic;font-size:12.5px}
 .cliente-nombre{font-weight:600;color:var(--text);text-transform:capitalize;letter-spacing:.005em;display:inline-block;padding:2px 6px;border-radius:5px;border:1px dashed transparent;cursor:text;transition:all .15s;outline:none;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
 .cliente-nombre:hover{border-color:var(--gd);background:var(--gd-soft);white-space:normal;max-width:none}
@@ -435,9 +453,26 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
     </button>
   </div>
 
+  <!-- Barra de acciones en lote (aparece al seleccionar filas) -->
+  <div id="bulk-bar" class="bulk-bar">
+    <span class="bulk-count"><b id="bulk-n">0</b> seleccionados</span>
+    <div class="bulk-actions">
+      <button type="button" class="bulk-btn bulk-resumen" onclick="bulkResumen()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Ver resumen
+      </button>
+      <button type="button" class="bulk-btn bulk-del" onclick="bulkEliminar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        Eliminar
+      </button>
+      <button type="button" class="bulk-btn bulk-cancel" onclick="bulkClear()">Cancelar</button>
+    </div>
+  </div>
+
   <table id="activos-tabla">
     <thead>
       <tr>
+        <th class="col-check"><input type="checkbox" id="check-all" onchange="toggleAllRows(this)" title="Seleccionar todo" aria-label="Seleccionar todo"></th>
         <th>N°</th>
         <th>Cliente</th>
         <th>Celular</th>
@@ -451,7 +486,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       </tr>
     </thead>
     <tbody id="activos-body">
-      <tr><td colspan="10" class="loading">Cargando...</td></tr>
+      <tr><td colspan="11" class="loading">Cargando...</td></tr>
     </tbody>
   </table>
 
@@ -682,12 +717,12 @@ async function cargarActivos() {
     const r = await fetch(url, { credentials: 'same-origin' });
     const d = await r.json();
     if (!d.ok) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Error: ${d.error}</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="11" class="empty">Error: ${d.error}</td></tr>`;
       _activosCache = [];
       return;
     }
     if (d.results.length === 0) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Sin resultados</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="11" class="empty">Sin resultados</td></tr>`;
       document.getElementById('activos-pagination').innerHTML = '';
       _activosCache = [];
       return;
@@ -716,7 +751,8 @@ async function cargarActivos() {
       const origenLabel = (origenVal === 'publicidad') ? 'Publicidad' : 'Local';
       const origenCls = (origenVal === 'publicidad') ? 'pub' : 'org';
       return `
-        <tr>
+        <tr data-nro="${r.cliente_nro}" data-sub="${r.sub}">
+          <td class="col-check"><input type="checkbox" class="row-check" value="${r.cliente_nro}-${r.sub}" onchange="onRowCheck()" aria-label="Seleccionar ${r.cliente_nro}-${r.sub}"></td>
           <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
           <td><span class="cliente-nombre" contenteditable="true" data-nro="${r.cliente_nro}" data-orig="${escapeHtml(cliNombre)}" onblur="onClienteNombreBlur(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el nombre">${cliNombre ? escapeHtml(cliNombre) : '—'}</span>${r.cliente_dni ? `<span class="cliente-dni">DNI ${escapeHtml(r.cliente_dni)}</span>` : ''}</td>
           <td>${r.cliente_celular ? `<span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : '<span class="muted">—</span>'}</td>
@@ -737,7 +773,7 @@ async function cargarActivos() {
       ? `<button onclick="_activosPage=Math.max(1,_activosPage-1);cargarActivos()" ${_activosPage<=1?'disabled':''}>← Anterior</button> Página ${d.page} de ${totalPages} · ${d.total} resultados <button onclick="_activosPage=Math.min(${totalPages},_activosPage+1);cargarActivos()" ${_activosPage>=totalPages?'disabled':''}>Siguiente →</button>`
       : `${d.total} resultados`;
   } catch (e) {
-    document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">No se pudo cargar (${e.message})</td></tr>`;
+    document.getElementById('activos-body').innerHTML = `<tr><td colspan="11" class="empty">No se pudo cargar (${e.message})</td></tr>`;
   }
 }
 
