@@ -97,6 +97,10 @@ html{overflow-x:hidden}
 
 /* === CONTAINER === */
 .container{max-width:1320px;margin:0 auto;padding:28px 24px}
+/* La vista de Activos tiene una tabla ancha (11 columnas + acciones).
+   Le damos un contenedor mas amplio para que entre todo sin scroll en
+   pantallas grandes; el .table-scroll sigue como fallback en angostas. */
+.container.container-wide{max-width:1680px}
 h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px;color:var(--text);letter-spacing:-.005em}
 .sub{color:var(--text2);font-size:13.5px;margin-bottom:22px;line-height:1.55;max-width:720px}
 
@@ -434,7 +438,7 @@ tbody tr.row-selected td{background:var(--gd-soft)!important}
 </nav>
 <div class="gold-line"></div>
 
-<div class="container">
+<div class="container<?= $tab === 'activos' ? ' container-wide' : '' ?>">
 <?php if ($tab === 'activos'): ?>
   <h1>Presupuestos activos</h1>
   <div class="sub">Cotizaciones en proceso. Se eliminan automáticamente a los 60 días si no llegan a entregado.</div>
