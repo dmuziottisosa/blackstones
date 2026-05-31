@@ -143,6 +143,11 @@ h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px
 @media(max-width:768px){.toast-container{top:10px;right:10px;left:10px;max-width:none}.toast{min-width:auto}}
 
 /* === TABLE — moderna, zebra sutil, hover de fila completa === */
+/* Wrapper: mantiene la tabla DENTRO del container centrado. Si la tabla
+   es mas ancha que el container (muchas columnas + acciones), scrollea
+   adentro del wrapper en vez de desbordar y descentrar el layout. */
+.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
+.table-wrap table{box-shadow:none;border:0;border-radius:0}
 table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
 thead{background:var(--dk)}
 th{background:var(--dk);color:var(--cr);text-align:left;padding:11px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--dk2);white-space:nowrap}
@@ -432,6 +437,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
     </button>
   </div>
 
+  <div class="table-wrap">
   <table id="activos-tabla">
     <thead>
       <tr>
@@ -451,6 +457,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       <tr><td colspan="10" class="loading">Cargando...</td></tr>
     </tbody>
   </table>
+  </div>
 
   <div class="pagination" id="activos-pagination"></div>
 
