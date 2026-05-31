@@ -143,6 +143,11 @@ h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px
 @media(max-width:768px){.toast-container{top:10px;right:10px;left:10px;max-width:none}.toast{min-width:auto}}
 
 /* === TABLE — moderna, zebra sutil, hover de fila completa === */
+/* Wrapper con scroll horizontal: la tabla tiene muchas columnas
+   (checkbox + 9 datos + acciones con varios botones). Si no entra en
+   el contenedor, scrollea adentro en vez de desbordar el layout. */
+.table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
+.table-scroll table{box-shadow:none;border:0;border-radius:0;min-width:1100px}
 table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
 thead{background:var(--dk)}
 th{background:var(--dk);color:var(--cr);text-align:left;padding:11px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--dk2);white-space:nowrap}
@@ -469,6 +474,7 @@ tbody tr.row-selected td{background:var(--gd-soft)!important}
     </div>
   </div>
 
+  <div class="table-scroll">
   <table id="activos-tabla">
     <thead>
       <tr>
@@ -489,6 +495,7 @@ tbody tr.row-selected td{background:var(--gd-soft)!important}
       <tr><td colspan="11" class="loading">Cargando...</td></tr>
     </tbody>
   </table>
+  </div>
 
   <div class="pagination" id="activos-pagination"></div>
 
