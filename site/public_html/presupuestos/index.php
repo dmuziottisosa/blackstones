@@ -447,7 +447,6 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
         <th>N°</th>
         <th>Cliente</th>
         <th>Celular</th>
-        <th>Concepto</th>
         <th>Estado</th>
         <th>Origen</th>
         <th class="num">USD</th>
@@ -457,7 +456,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       </tr>
     </thead>
     <tbody id="activos-body">
-      <tr><td colspan="10" class="loading">Cargando...</td></tr>
+      <tr><td colspan="9" class="loading">Cargando...</td></tr>
     </tbody>
   </table>
   </div>
@@ -689,12 +688,12 @@ async function cargarActivos() {
     const r = await fetch(url, { credentials: 'same-origin' });
     const d = await r.json();
     if (!d.ok) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Error: ${d.error}</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">Error: ${d.error}</td></tr>`;
       _activosCache = [];
       return;
     }
     if (d.results.length === 0) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Sin resultados</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">Sin resultados</td></tr>`;
       document.getElementById('activos-pagination').innerHTML = '';
       _activosCache = [];
       return;
@@ -713,10 +712,6 @@ async function cargarActivos() {
         ? `<a class="act-zip" href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
         : '';
       const del = `<button class="act-danger" onclick="confirmarBorrar('${r.cliente_nro}', ${r.sub}, '${(r.cliente_nombre || '').replace(/'/g, "\\'")}')" title="Eliminar presupuesto" aria-label="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>`;
-      const conceptoVal = (r.concepto || '').trim();
-      const conceptoEmpty = !conceptoVal;
-      const conceptoDisplay = conceptoEmpty ? 'Agregar...' : escapeHtml(conceptoVal);
-      const conceptoCls = conceptoEmpty ? 'concepto-cell empty' : 'concepto-cell';
       const cliNombre = (r.cliente_nombre || '').toLowerCase();
       // 'organico' es alias historico de 'local'
       const origenVal = (r.origen === 'publicidad') ? 'publicidad' : 'local';
@@ -727,7 +722,6 @@ async function cargarActivos() {
           <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
           <td><span class="cliente-nombre" contenteditable="true" data-nro="${r.cliente_nro}" data-orig="${escapeHtml(cliNombre)}" onblur="onClienteNombreBlur(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el nombre">${cliNombre ? escapeHtml(cliNombre) : '—'}</span>${r.cliente_dni ? `<span class="cliente-dni">DNI ${escapeHtml(r.cliente_dni)}</span>` : ''}</td>
           <td>${r.cliente_celular ? `<span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : '<span class="muted">—</span>'}</td>
-          <td><span class="${conceptoCls}" contenteditable="true" data-nro="${r.cliente_nro}" data-sub="${r.sub}" data-orig="${escapeHtml(conceptoVal)}" onblur="onConceptoBlur(this)" onfocus="onConceptoFocus(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el concepto">${conceptoDisplay}</span></td>
           <td><span class="estado est-${r.estado}">${ESTADOS_LABELS[r.estado] || r.estado}</span></td>
           <td><button type="button" class="origen-cell ${origenCls}" data-origen="${origenVal}" onclick="toggleOrigen(this, '${r.cliente_nro}', ${r.sub})" title="Click para alternar Publicidad / Sin publicidad"><span class="od"></span>${origenLabel}</button></td>
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
@@ -744,7 +738,7 @@ async function cargarActivos() {
       ? `<button onclick="_activosPage=Math.max(1,_activosPage-1);cargarActivos()" ${_activosPage<=1?'disabled':''}>← Anterior</button> Página ${d.page} de ${totalPages} · ${d.total} resultados <button onclick="_activosPage=Math.min(${totalPages},_activosPage+1);cargarActivos()" ${_activosPage>=totalPages?'disabled':''}>Siguiente →</button>`
       : `${d.total} resultados`;
   } catch (e) {
-    document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">No se pudo cargar (${e.message})</td></tr>`;
+    document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">No se pudo cargar (${e.message})</td></tr>`;
   }
 }
 
