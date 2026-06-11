@@ -9,15 +9,15 @@
 // Lógica:
 //   Para cada bs-data/clientes/{nro}.json:
 //     Para cada cotización:
-//       Si estado == "entregado" Y (now - entregado_at) > 60 días:
+//       Si estado == "entregado" Y (now - entregado_at) > 90 días:
 //         Borrar la cotización del array.
 //       Si estado != "entregado" Y NO existe ningún entregado en este cliente
-//          Y (now - última_modificación) > 60 días:
+//          Y (now - última_modificación) > 90 días:
 //         Borrar la cotización del array.
 //     Si quedaron 0 cotizaciones:
 //       Borrar el cliente.json entero.
 //
-//   Para cada bs-data/zips/*.zip con mtime > 60 días:
+//   Para cada bs-data/zips/*.zip con mtime > 90 días:
 //     Borrar el archivo.
 //
 // Idempotente: corridas duplicadas no rompen nada.
@@ -88,7 +88,7 @@ if (is_dir(BS_CLIENTES_DIR)) {
                 }
                 $kept[] = $cot;
             } else {
-                // No-entregado: si no hay entregado activo Y no se modificó hace >60 días → borrar
+                // No-entregado: si no hay entregado activo Y no se modificó hace >90 días → borrar
                 if (!$tiene_entregado_activo) {
                     $last_mod = strtotime($cot['fecha'] ?? '');
                     // Tomar la última transición como mejor indicador de "última modificación"

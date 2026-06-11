@@ -22,7 +22,7 @@ if ($sub <= 0) bs_error('sub inválido');
 $zip_path = BS_ZIPS_DIR . '/' . $cliente_nro . '-' . $sub . '.zip';
 
 if (!file_exists($zip_path)) {
-    bs_error('ZIP no encontrado (puede haber expirado por retención de 60 días o la cotización no está entregada)', 404);
+    bs_error('ZIP no encontrado (puede haber expirado por retención de 90 días o la cotización no está entregada)', 404);
 }
 
 $cli_obj = bs_read_json(BS_CLIENTES_DIR . '/' . $cliente_nro . '.json');

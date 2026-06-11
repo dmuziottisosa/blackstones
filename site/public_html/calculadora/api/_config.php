@@ -25,7 +25,7 @@ define('BS_REGISTRO_CRON_LOG',       $BS_BASE . '/registro/_cron-log.txt');
 define('BS_CLIENTES_INDEX',          $BS_BASE . '/registro/clientes-index.json');
 
 // Política de retención (días)
-define('BS_RETENTION_DAYS', 60);
+define('BS_RETENTION_DAYS', 90);
 
 // Versión del JSON contract
 define('BS_CONTRACT_VERSION', '1.0');
