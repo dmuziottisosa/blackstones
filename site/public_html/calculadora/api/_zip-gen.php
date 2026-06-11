@@ -9,7 +9,7 @@
 //   - presupuesto.html (vista imprimible — el equipo abre y print-to-PDF)
 //   - README.txt (instrucciones)
 //
-// El ZIP queda en bs-data/zips/{nro}-{sub}.zip durante 90 días.
+// El ZIP queda en bs-data/zips/{nro}-{sub}.zip durante 180 días.
 // El path relativo se guarda en cot.zip_path para referencia.
 // ============================================================
 
@@ -80,7 +80,7 @@ Archivos en este ZIP:
   presupuesto.json  → Datos crudos (backup canónico)
 
 Política de retención:
-  Este ZIP se elimina automáticamente 90 días después de la entrega.
+  Este ZIP se elimina automáticamente 180 días después de la entrega.
   Si necesitás guardarlo más tiempo, descargá los archivos antes.
 
 —

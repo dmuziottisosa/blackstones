@@ -418,7 +418,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 <div class="container">
 <?php if ($tab === 'activos'): ?>
   <h1>Presupuestos activos</h1>
-  <div class="sub">Cotizaciones en proceso. Se eliminan automáticamente a los 90 días si no llegan a entregado.</div>
+  <div class="sub">Cotizaciones en proceso. Se eliminan automáticamente a los 180 días si no llegan a entregado.</div>
 
   <div class="filters">
     <div class="search-wrap">
@@ -752,8 +752,8 @@ async function cambiarEstado(nro, sub, nuevo) {
       'Confirmar entrega',
       `Al marcar como ENTREGADO:<br>
        • Las otras sub-versiones del cliente (borradores, enviados, aprobados, perdidos) se eliminarán inmediatamente.<br>
-       • Esta cotización se conserva 90 días — después se borra automáticamente.<br>
-       • Se generará automáticamente un ZIP descargable durante esos 90 días.<br>
+       • Esta cotización se conserva 180 días — después se borra automáticamente.<br>
+       • Se generará automáticamente un ZIP descargable durante esos 180 días.<br>
        <br>
        ¿Confirmar entrega?`,
       async () => {
