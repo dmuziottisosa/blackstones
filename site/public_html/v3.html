@@ -80,6 +80,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
+html,body{overflow-x:clip}
 body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 img{max-width:100%;display:block}
 a{color:inherit}
@@ -227,6 +228,8 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .social h2{color:var(--cream)}
 .social h2 em{color:var(--gold)}
 .social-grid{display:grid;gap:2.6rem}
+.social-grid>*{min-width:0}
+.rev-scroll{max-width:100%}
 @media(min-width:900px){.social-grid{grid-template-columns:1.12fr .88fr;gap:4rem;align-items:start}}
 /* --- Panel Instagram --- */
 .ig-head{margin-bottom:1.4rem}
