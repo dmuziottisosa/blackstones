@@ -171,23 +171,43 @@ h2{font-family:var(--font-display);font-weight:500;font-size:clamp(1.7rem,4vw,2.
 h2 em{font-style:italic;color:var(--accent-dark)}
 .lead{color:var(--text-2);max-width:560px;font-size:1.02rem}
 
-/* ===== NAV ===== */
+/* ============================================================
+   NAV — reestructurado de 0.
+   Mobile  (<900px): [isotipo + BlackStones] ............ [Cotizar]
+   Desktop (>=900px): [isotipo + BlackStones] [links] [Catalogo][Cotizar]
+   Reglas:
+   - El wordmark NUNCA se oculta (decision del usuario).
+   - Catalogo es un atajo desktop-only; en mobile el catalogo se
+     alcanza scrolleando (y el espacio del nav es sagrado).
+   - white-space:nowrap + flex-shrink en todos los hijos: nada se
+     parte en dos lineas ni se pisa, a ningun ancho.
+   ============================================================ */
 .nav{position:sticky;top:0;z-index:50;background:rgba(26,24,22,.96);backdrop-filter:blur(8px);border-bottom:1px solid rgba(196,167,125,.18)}
-.nav-inner{display:flex;align-items:center;justify-content:space-between;padding:.7rem clamp(1.25rem,4vw,2.5rem);max-width:1120px;margin:0 auto}
-.nav-logo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
-.nav-logo img{height:34px}
-.nav-logo span{font-family:var(--font-display);color:#F0E9DD;font-size:1.05rem;letter-spacing:.02em}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.7rem 1.1rem;max-width:1120px;margin:0 auto}
+.nav-logo{display:flex;align-items:center;gap:.55rem;text-decoration:none;flex-shrink:0}
+.nav-logo img{height:34px;flex-shrink:0}
+.nav-logo span{font-family:var(--font-display);color:#F0E9DD;font-size:1.02rem;letter-spacing:.02em;white-space:nowrap}
 .nav-logo b{font-weight:600}
-.nav-links{display:none;gap:1.6rem;list-style:none}
-.nav-links a{color:rgba(240,233,221,.75);text-decoration:none;font-size:.82rem;font-weight:600;letter-spacing:.04em;transition:color .15s}
+.nav-links{display:none;gap:1.5rem;list-style:none;margin:0 auto}
+.nav-links a{color:rgba(240,233,221,.75);text-decoration:none;font-size:.82rem;font-weight:600;letter-spacing:.04em;transition:color .15s;white-space:nowrap}
 .nav-links a:hover{color:var(--gold)}
-.nav-actions{display:flex;align-items:center;gap:.55rem}
-.nav-catalog{display:inline-flex;align-items:center;gap:.4rem;color:var(--gold);border:1px solid rgba(196,167,125,.45);border-radius:999px;padding:.5rem 1rem;font-size:.82rem;font-weight:700;text-decoration:none;transition:background .15s,color .15s}
+.nav-actions{display:flex;align-items:center;gap:.55rem;flex-shrink:0}
+.nav-catalog{display:none;align-items:center;gap:.4rem;color:var(--gold);border:1px solid rgba(196,167,125,.45);border-radius:999px;padding:.5rem 1rem;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s}
 .nav-catalog:hover{background:rgba(196,167,125,.14);color:#F0E9DD}
-.nav-cta{display:inline-flex;align-items:center;gap:.45rem;background:var(--wa);color:#fff;text-decoration:none;font-weight:800;font-size:.85rem;padding:.55rem 1.1rem;border-radius:999px;transition:background .15s,transform .15s}
+.nav-cta{display:inline-flex;align-items:center;gap:.45rem;background:var(--wa);color:#fff;text-decoration:none;font-weight:800;font-size:.84rem;padding:.55rem 1.05rem;border-radius:999px;white-space:nowrap;transition:background .15s,transform .15s}
 .nav-cta:hover{background:var(--wa-dark);transform:translateY(-1px)}
 .nav-cta svg{width:16px;height:16px;flex-shrink:0}
-@media(min-width:900px){.nav-links{display:flex}}
+@media(min-width:900px){
+  .nav-inner{padding:.7rem 2.5rem}
+  .nav-links{display:flex}
+  .nav-catalog{display:inline-flex}
+}
+/* Telefonos muy angostos (<=380px): solo se achica tipografia, nada se oculta */
+@media(max-width:380px){
+  .nav-logo img{height:30px}
+  .nav-logo span{font-size:.92rem}
+  .nav-cta{padding:.5rem .85rem;font-size:.78rem}
+}
 
 /* ===== HERO ===== */
 .hero{padding:clamp(3rem,7vw,5.5rem) 0 0;position:relative;overflow:hidden}
@@ -1084,17 +1104,6 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 @media(max-width:899px){
   .hero{padding-bottom:2.2rem}
   .hero-trust{margin-bottom:.4rem}
-}
-/* Nav en pantallas chicas: queda el isotipo (la montaña), se oculta
-   el wordmark — los botones Catalogo + Cotizar entran sin overlap.
-   Mismo patron que usan las marcas con isotipo fuerte. */
-@media(max-width:600px){
-  .nav-inner{padding:.65rem 1rem;gap:.5rem}
-  .nav-logo span{display:none}
-  .nav-logo img{height:36px}
-  .nav-actions{gap:.45rem}
-  .nav-catalog{padding:.45rem .85rem;font-size:.78rem}
-  .nav-cta{padding:.5rem .95rem;font-size:.8rem}
 }
 </style>
 </head>
