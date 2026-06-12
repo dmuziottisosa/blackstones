@@ -258,12 +258,21 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .rev-scroll{max-width:100%}
 @media(min-width:900px){
   .social-grid{grid-template-columns:1.12fr .88fr;gap:0;align-items:stretch}
-  .social-grid>div:first-child{padding-right:3rem;display:flex;flex-direction:column}
-  .social-grid>div:first-child .ig-grid{flex:1}
-  .social-grid>div:first-child .ig-handle{margin-top:1.2rem}
-  .rev-col{border-left:1px solid rgba(168,149,128,.3);padding-left:3rem;display:flex;flex-direction:column}
-  .rev-col .rev-scroll{flex:1;justify-content:space-between}
-  .rev-col .rev-more{margin-top:1.2rem}
+  .social-grid>div:first-child{padding-right:3rem;display:flex;flex-direction:column;align-items:flex-start}
+  .social-grid>div:first-child .ig-grid{flex:1;align-self:stretch}
+  .social-grid>div:first-child .ig-handle{margin-top:1.3rem}
+  .rev-col{border-left:1px solid rgba(168,149,128,.3);padding-left:3rem;display:flex;flex-direction:column;align-items:flex-start}
+  .rev-col .rev-scroll{flex:1;justify-content:space-between;align-self:stretch}
+  .rev-col .rev-more{margin-top:1.3rem}
+  /* los subrayados abrazan el texto (el stretch del flex los estiraba
+     a todo el ancho de la columna) */
+  .ig-handle,.rev-more{align-self:flex-start}
+  /* micro-interacciones: el mosaico responde, las quotes marcan foco */
+  .ig-t:hover{transform:translateY(-4px) scale(1.012);opacity:1;box-shadow:0 14px 30px rgba(26,24,22,.16)}
+  .rev-q{transition:padding-left .2s,border-color .2s}
+  .rev-q:hover{padding-left:.55rem}
+  /* la primera quote sin filete arriba: el rating ya marca el techo */
+  .rev-q:first-child{border-top:none;padding-top:.4rem}
   /* mosaico: el primer post manda */
   .ig-grid{grid-auto-rows:1fr}
   .ig-t:first-child{grid-column:span 2;grid-row:span 2}
@@ -1241,7 +1250,7 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 <section id="materiales">
   <div class="container">
     <div class="eyebrow">Materiales</div>
-    <h2>Tres familias de piedra. <em>Sin verso.</em></h2>
+    <h2>Tres familias de piedra. <em>Tres formas de durar.</em></h2>
     <p class="lead">Ninguna piedra es perfecta para todo. Acá va lo bueno y lo no tan bueno de cada una — antes de que elijas.</p>
 
     <div class="mat-row">
