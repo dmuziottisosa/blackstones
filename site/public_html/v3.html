@@ -324,48 +324,6 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .sticky-wa svg{width:28px;height:28px;fill:#fff}
 @media(min-width:900px){.sticky-wa{display:none}}
 
-/* ===== CATALOGO: skin claro sobre pagina oscura ===== */
-/* (reset de buttons del catalogo — la v1 tenia el suyo) */
-.catalog-tab,.typefilter-chip,.subfilter-chip,.colors-show-more-btn,.color-tile,.catalog-search-clear{appearance:none;-webkit-appearance:none;font-family:inherit}
-.catalog-tab{border:none}
-.catalog{background:var(--bg-alt);padding-top:clamp(2.5rem,5vw,4rem)}
-.catalog .eyebrow{color:var(--accent-dark)}
-.catalog h2,.catalog .section-title{color:var(--text)}
-.catalog h2 em,.catalog .section-title em{color:var(--accent-dark)}
-.catalog .lead{color:var(--text-soft)}
-.catalog-tabs{display:inline-flex;flex-wrap:nowrap;gap:.2rem;background:var(--bg-dark);border:none;border-bottom:none;border-radius:999px;padding:.35rem;margin:1.7rem 0 2.6rem;max-width:100%;overflow-x:auto;scrollbar-width:none;box-shadow:0 12px 32px rgba(26,24,22,.18)}
-.catalog-tabs::-webkit-scrollbar{display:none}
-.catalog-tab{padding:.7rem 1.5rem;border-radius:999px;margin:0;font-weight:700;font-size:.92rem;color:rgba(240,233,221,.6);background:transparent;white-space:nowrap;flex-shrink:0;cursor:pointer;transition:color .2s,background .2s}
-.catalog-tab:hover{color:#F0E9DD;background:rgba(240,233,221,.08);border-bottom:none}
-.catalog-tab.active{background:#F0E9DD;color:var(--bg-dark);border-bottom:none}
-.catalog-tab.active .catalog-tab-count{color:var(--accent-dark);opacity:1}
-.catalog-tab .catalog-tab-count{color:var(--gold-soft)}
-.catalog-subfilters-types{border-top:none;padding-top:0;margin-top:0;margin-bottom:1.9rem;gap:.55rem}
-.catalog-subfilters{border:none}
-.catalog-search::after{display:none}
-.catalog-search{margin-right:.4rem}
-.catalog-search-inner{background:#FFFFFF;border:1px solid rgba(168,149,128,.35);border-radius:999px;min-height:44px;padding:.55rem 1.1rem}
-.catalog-search-inner:focus-within{border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(168,149,128,.15)}
-.typefilter-chip,.subfilter-chip{background:transparent;border:1px solid rgba(168,149,128,.45);border-radius:999px;min-height:44px;padding:.5rem 1.1rem;font-size:.84rem;color:var(--text-mute);cursor:pointer;transition:all .18s}
-.typefilter-chip:hover,.subfilter-chip:hover{background:#FFFFFF;border-color:var(--accent-dark);color:var(--text)}
-.typefilter-chip.active,.subfilter-chip.active{background:var(--bg-dark);border-color:var(--bg-dark);color:#F0E9DD;font-weight:700}
-.typefilter-count,.subfilter-count{background:rgba(168,149,128,.18);color:var(--text-mute);border-radius:999px}
-.typefilter-chip.active .typefilter-count,.subfilter-chip.active .subfilter-count{background:rgba(196,167,125,.25);color:var(--gold-soft)}
-.colors-grid{gap:1rem}
-.color-tile{border-radius:12px;border:1px solid rgba(168,149,128,.28);cursor:pointer}
-.color-tile:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(26,24,22,.16)}
-.color-tile-portada,.color-tile-muestra{border-radius:11px}
-.colors-show-more-btn{background:transparent;border:1px solid var(--accent);border-radius:999px;font-weight:700;cursor:pointer}
-.colors-show-more-btn:hover{background:var(--bg-dark);color:#F0E9DD;border-color:var(--bg-dark)}
-.catalog-hint{font-style:italic;font-size:.85rem;color:var(--text-mute)}
-/* salida del catalogo: vuelta a la noche */
-.catalog::after{content:'';display:block;height:clamp(1.5rem,4vw,2.5rem);margin-top:clamp(2rem,4vw,3rem);background:linear-gradient(to bottom,var(--bg-alt),var(--night));margin-bottom:calc(var(--section-y) * -1)}
-@media(max-width:768px){
-  .catalog-tabs{margin-left:0;margin-right:0;padding:.3rem;width:100%;justify-content:flex-start}
-  .catalog-tab{padding:.62rem 1.15rem;font-size:.86rem}
-  .catalog-search{width:100%;margin-right:0}
-  .catalog-search-inner{width:100%}
-}
 /* ===== CATALOGO COMPLETO (portado de v1) ===== */
        CATÁLOGO DE COLORES
        ========================================================= */
@@ -1026,6 +984,51 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 .work-dark .work-head p{color:var(--cream-dim)}
 .work-dark .work-more{color:var(--gold);border-bottom-color:var(--gold-deep)}
 .work-dark .work-card{background-color:var(--night-3)}
+
+/* ===== SKIN DEL CATALOGO (va ULTIMO: gana la cascada sobre el CSS portado) ===== */
+/* ===== CATALOGO: skin claro sobre pagina oscura ===== */
+/* (reset de buttons del catalogo — la v1 tenia el suyo) */
+.catalog-tab,.typefilter-chip,.subfilter-chip,.colors-show-more-btn,.color-tile,.catalog-search-clear{appearance:none;-webkit-appearance:none;font-family:inherit}
+.catalog-tab{border:none}
+.catalog{background:var(--bg-alt);padding-top:clamp(2.5rem,5vw,4rem)}
+.catalog .eyebrow{color:var(--accent-dark)}
+.catalog h2,.catalog .section-title{color:var(--text)}
+.catalog h2 em,.catalog .section-title em{color:var(--accent-dark)}
+.catalog .lead{color:var(--text-soft)}
+.catalog-tabs{display:inline-flex;flex-wrap:nowrap;gap:.2rem;background:var(--bg-dark);border:none;border-bottom:none;border-radius:999px;padding:.35rem;margin:1.7rem 0 2.6rem;max-width:100%;overflow-x:auto;scrollbar-width:none;box-shadow:0 12px 32px rgba(26,24,22,.18)}
+.catalog-tabs::-webkit-scrollbar{display:none}
+.catalog-tab{padding:.7rem 1.5rem;border-radius:999px;margin:0;font-weight:700;font-size:.92rem;color:rgba(240,233,221,.6);background:transparent;white-space:nowrap;flex-shrink:0;cursor:pointer;transition:color .2s,background .2s}
+.catalog-tab:hover{color:#F0E9DD;background:rgba(240,233,221,.08);border-bottom:none}
+.catalog-tab.active{background:#F0E9DD;color:var(--bg-dark);border-bottom:none}
+.catalog-tab.active .catalog-tab-count{color:var(--accent-dark);opacity:1}
+.catalog-tab .catalog-tab-count{color:var(--gold-soft)}
+.catalog-subfilters-types{border-top:none;padding-top:0;margin-top:0;margin-bottom:1.9rem;gap:.55rem}
+.catalog-subfilters{border:none}
+.catalog-search::after{display:none}
+.catalog-search{margin-right:.4rem}
+.catalog-search-inner{background:#FFFFFF;border:1px solid rgba(168,149,128,.35);border-radius:999px;min-height:44px;padding:.55rem 1.1rem}
+.catalog-search-inner:focus-within{border-color:var(--accent-dark);box-shadow:0 0 0 3px rgba(168,149,128,.15)}
+.typefilter-chip,.subfilter-chip{background:transparent;border:1px solid rgba(168,149,128,.45);border-radius:999px;min-height:44px;padding:.5rem 1.1rem;font-size:.84rem;color:var(--text-mute);cursor:pointer;transition:all .18s}
+.typefilter-chip:hover,.subfilter-chip:hover{background:#FFFFFF;border-color:var(--accent-dark);color:var(--text)}
+.typefilter-chip.active,.subfilter-chip.active{background:var(--bg-dark);border-color:var(--bg-dark);color:#F0E9DD;font-weight:700}
+.typefilter-count,.subfilter-count{background:rgba(168,149,128,.18);color:var(--text-mute);border-radius:999px}
+.typefilter-chip.active .typefilter-count,.subfilter-chip.active .subfilter-count{background:rgba(196,167,125,.25);color:var(--gold-soft)}
+.colors-grid{gap:1rem}
+.color-tile{border-radius:12px;border:1px solid rgba(168,149,128,.28);cursor:pointer}
+.color-tile:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(26,24,22,.16)}
+.color-tile-portada,.color-tile-muestra{border-radius:11px}
+.colors-show-more-btn{background:transparent;border:1px solid var(--accent);border-radius:999px;font-weight:700;cursor:pointer}
+.colors-show-more-btn:hover{background:var(--bg-dark);color:#F0E9DD;border-color:var(--bg-dark)}
+.catalog-hint{font-style:italic;font-size:.85rem;color:var(--text-mute)}
+/* salida del catalogo: vuelta a la noche */
+.catalog::after{content:'';display:block;height:clamp(1.5rem,4vw,2.5rem);margin-top:clamp(2rem,4vw,3rem);background:linear-gradient(to bottom,var(--bg-alt),var(--night));margin-bottom:calc(var(--section-y) * -1)}
+@media(max-width:768px){
+  .catalog-tabs{margin-left:0;margin-right:0;padding:.3rem;width:100%;justify-content:flex-start}
+  .catalog-tab{padding:.62rem 1.15rem;font-size:.86rem}
+  .catalog-search{width:100%;margin-right:0}
+  .catalog-search-inner{width:100%}
+}
+
 </style>
 </head>
 <body>
