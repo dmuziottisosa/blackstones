@@ -1043,6 +1043,20 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   .catalog-search-inner{width:100%}
 }
 
+
+/* ===== Entrada suave: stats + pasos (progressive enhancement) =====
+   JS agrega .pre (estado oculto) y el observer suelta .in con stagger.
+   Sin JS no hay .pre -> todo visible. reduced-motion: sin movimiento. */
+@media(prefers-reduced-motion:no-preference){
+  .num-item,.step{transition:opacity .65s ease,transform .65s ease}
+  .num-item.pre,.step.pre{opacity:0;transform:translateY(16px)}
+  .num-item.in,.step.in{opacity:1;transform:none}
+  .num-item:nth-child(2){transition-delay:.14s}
+  .num-item:nth-child(3){transition-delay:.28s}
+  .step:nth-child(2){transition-delay:.12s}
+  .step:nth-child(3){transition-delay:.24s}
+  .step:nth-child(4){transition-delay:.36s}
+}
 </style>
 </head>
 <body>
@@ -1109,8 +1123,8 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 <!-- ============ NUMEROS ============ -->
 <div class="numbers">
   <div class="container numbers-row">
-    <div class="num-item"><strong>4,9<span class="star">★</span></strong><span>89 opiniones<br>en Google</span></div>
-    <div class="num-item"><strong>+1.000</strong><span>mesadas colocadas<br>CABA y GBA</span></div>
+    <div class="num-item"><strong><span data-countup="4.9" data-dec="1">4,9</span><span class="star">★</span></strong><span>89 opiniones<br>en Google</span></div>
+    <div class="num-item"><strong>+<span data-countup="1000">1.000</span></strong><span>mesadas colocadas<br>CABA y GBA</span></div>
     <div class="num-item"><strong>15–20</strong><span>días desde<br>la medición</span></div>
   </div>
 </div>
@@ -3008,6 +3022,42 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
     }
 
     
+</script>
+<script>
+// Entrada suave de stats y pasos + count-up de numeros
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const els = document.querySelectorAll('.num-item,.step');
+  els.forEach(el => el.classList.add('pre'));
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    });
+  }, {threshold:.35, rootMargin:'0px 0px -8% 0px'});
+  els.forEach(el => io.observe(el));
+
+  const fmt = (v, dec) => dec ? v.toFixed(1).replace('.', ',') : Math.round(v).toLocaleString('es-AR');
+  const io2 = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      io2.unobserve(e.target);
+      const el = e.target;
+      const target = parseFloat(el.dataset.countup);
+      const dec = el.dataset.dec === '1';
+      const dur = 1200, t0 = performance.now();
+      (function frame(t){
+        const p = Math.min(1, (t - t0) / dur);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(target * ease, dec);
+        if(p < 1) requestAnimationFrame(frame);
+      })(t0);
+    });
+  }, {threshold:.6});
+  document.querySelectorAll('[data-countup]').forEach(el => io2.observe(el));
+})();
 </script>
 </body>
 </html>
