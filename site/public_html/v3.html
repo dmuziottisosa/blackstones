@@ -114,9 +114,16 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .nav-cta:hover{background:var(--wa-dark);transform:translateY(-1px)}
 .nav-cta svg{width:16px;height:16px;flex-shrink:0}
 @media(min-width:900px){
-  .nav-inner{padding:.7rem 2.5rem}
-  .nav-links{display:flex}
-  .nav-catalog{display:inline-flex}
+  .nav-inner{max-width:1280px;padding:.85rem 2.5rem;gap:1.2rem}
+  .nav-logo img{height:40px}
+  .nav-logo span{font-size:1.14rem}
+  .nav-links{display:flex;gap:1.8rem}
+  .nav-links a{font-size:.86rem}
+  .nav-catalog{display:inline-flex;padding:.55rem 1.15rem;font-size:.85rem}
+  .nav-cta{padding:.6rem 1.2rem;font-size:.88rem}
+}
+@media(min-width:1200px){
+  .container{max-width:1200px}
 }
 @media(max-width:380px){
   .nav-logo img{height:30px}
@@ -127,7 +134,7 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 /* ===== HERO — full-bleed cinematografico con carousel ===== */
 .hero{min-height:88vh;display:flex;align-items:flex-end;padding:0;position:relative;overflow:hidden}
 .hero-bg{position:absolute;inset:0}
-.hero-layer{position:absolute;inset:0;background:center 72%/cover no-repeat;opacity:0;transition:opacity 1.2s ease;transform:scale(1.02)}
+.hero-layer{position:absolute;inset:0;background:center/cover no-repeat;opacity:0;transition:opacity 1.2s ease;transform:scale(1.02)}
 .hero-layer.on{opacity:1}
 .hero-shade{position:absolute;inset:0;background:
   linear-gradient(to top,rgba(21,19,15,.97) 0%,rgba(21,19,15,.82) 45%,rgba(21,19,15,.7) 100%),
@@ -152,6 +159,8 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .hero-place .hp-hours{font-size:.76rem;color:var(--cream-faint);white-space:nowrap}
 @media(min-width:900px){
   .hero{align-items:center;min-height:92vh}
+  .hero h1{font-size:clamp(3rem,4.4vw,4.4rem)}
+  .hero-sub{font-size:1.18rem;max-width:560px}
   .hero-content{padding:clamp(4rem,8vw,6rem) 0}
   .hero-shade{background:
     linear-gradient(to top,rgba(21,19,15,.94) 0%,rgba(21,19,15,.8) 50%,rgba(21,19,15,.62) 100%),
@@ -1061,8 +1070,13 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 
 <!-- ============ HERO ============ -->
 <header class="hero">
-  <div class="hero-bg">
-    <div class="hero-layer on" style="background-image:url('foto_bloque_1/locale_interno.jpeg')"></div>
+  <div class="hero-bg" id="hero-carousel">
+    <div class="hero-layer on" style="background-image:url('foto_bloque_1/locale_interno.jpeg');background-position:center 72%"></div>
+    <div class="hero-layer" style="background-image:url('foto_proyectos/Viel.webp')"></div>
+    <div class="hero-layer" style="background-image:url('foto_proyectos/SKY_4.webp')"></div>
+    <div class="hero-layer" style="background-image:url('foto_bloque_1/mesada_bloque1.webp')"></div>
+    <div class="hero-layer" style="background-image:url('foto_proyectos/Once.webp')"></div>
+    <div class="hero-layer" style="background-image:url('foto_proyectos/Alcorta.webp')"></div>
   </div>
   </div>
   <div class="hero-shade"></div>
@@ -2381,7 +2395,17 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 </a>
 
 <script>
-// (carousel removido: el hero usa una sola foto fija del showroom)
+// Hero carousel — el showroom abre, los trabajos rotan cada 5s
+(function(){
+  const layers = document.querySelectorAll('#hero-carousel .hero-layer');
+  if(layers.length < 2) return;
+  let cur = 0;
+  setInterval(() => {
+    layers[cur].classList.remove('on');
+    cur = (cur + 1) % layers.length;
+    layers[cur].classList.add('on');
+  }, 5000);
+})();
 // Sticky WA: solo visible cuando el CTA del hero salio de pantalla
 (function(){
   const sticky = document.querySelector('.sticky-wa');
