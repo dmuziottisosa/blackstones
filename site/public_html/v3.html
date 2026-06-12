@@ -18,7 +18,8 @@
        Empieza a descargar mientras Carolina lee el bloque 1,
        así cuando llega al catálogo los primeros tiles aparecen instant.
        ============================================================ -->
-  <link rel="preload" as="image" href="foto_bloque_1/locale_interno.jpeg" fetchpriority="high">
+  <link rel="preload" as="image" href="foto_bloque_1/mesada_bloque1.webp" fetchpriority="high" media="(min-width:900px)">
+  <link rel="preload" as="image" href="foto_bloque_1/locale_interno.jpeg" fetchpriority="high" media="(max-width:899px)">
   <!-- Granito: panel activo por default, prioridad alta -->
   <link rel="preload" as="image" href="granitos/black-cosmic.webp" fetchpriority="high">
   <link rel="preload" as="image" href="granitos/crema-julia.webp" fetchpriority="high">
@@ -136,6 +137,8 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .hero-bg{position:absolute;inset:0}
 .hero-layer{position:absolute;inset:0;background:center/cover no-repeat;opacity:0;transition:opacity 1.2s ease;transform:scale(1.02)}
 .hero-layer.on{opacity:1}
+@media(min-width:900px){.hero-img-mb{display:none}}
+@media(max-width:899px){.hero-img-pc{display:none}}
 .hero-shade{position:absolute;inset:0;background:
   linear-gradient(to top,rgba(21,19,15,.97) 0%,rgba(21,19,15,.82) 45%,rgba(21,19,15,.7) 100%),
   radial-gradient(ellipse at 25% 75%,rgba(21,19,15,.45) 0%,transparent 60%)}
@@ -1070,13 +1073,11 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 
 <!-- ============ HERO ============ -->
 <header class="hero">
-  <div class="hero-bg" id="hero-carousel">
-    <div class="hero-layer on" style="background-image:url('foto_bloque_1/locale_interno.jpeg');background-position:center 72%"></div>
-    <div class="hero-layer" style="background-image:url('foto_proyectos/Viel.webp')"></div>
-    <div class="hero-layer" style="background-image:url('foto_proyectos/SKY_4.webp')"></div>
-    <div class="hero-layer" style="background-image:url('foto_bloque_1/mesada_bloque1.webp')"></div>
-    <div class="hero-layer" style="background-image:url('foto_proyectos/Once.webp')"></div>
-    <div class="hero-layer" style="background-image:url('foto_proyectos/Alcorta.webp')"></div>
+  <div class="hero-bg">
+    <!-- Foto fija por dispositivo: PC = mesada del showroom; mobile = local por dentro -->
+    <div class="hero-layer on hero-img-pc" style="background-image:url('foto_bloque_1/mesada_bloque1.webp')"></div>
+    <div class="hero-layer on hero-img-mb" style="background-image:url('foto_bloque_1/locale_interno.jpeg');background-position:center 72%"></div>
+  </div>
   </div>
   </div>
   <div class="hero-shade"></div>
@@ -2395,17 +2396,7 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 </a>
 
 <script>
-// Hero carousel — el showroom abre, los trabajos rotan cada 5s
-(function(){
-  const layers = document.querySelectorAll('#hero-carousel .hero-layer');
-  if(layers.length < 2) return;
-  let cur = 0;
-  setInterval(() => {
-    layers[cur].classList.remove('on');
-    cur = (cur + 1) % layers.length;
-    layers[cur].classList.add('on');
-  }, 5000);
-})();
+// (hero con foto fija por dispositivo — sin carousel)
 // Sticky WA: solo visible cuando el CTA del hero salio de pantalla
 (function(){
   const sticky = document.querySelector('.sticky-wa');
