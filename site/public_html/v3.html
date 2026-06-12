@@ -231,7 +231,14 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .social-grid{display:grid;gap:2.6rem}
 .social-grid>*{min-width:0}
 .rev-scroll{max-width:100%}
-@media(min-width:900px){.social-grid{grid-template-columns:1.12fr .88fr;gap:4rem;align-items:start}}
+@media(min-width:900px){
+  .social-grid{grid-template-columns:1.12fr .88fr;gap:0;align-items:start}
+  .social-grid>div:first-child{padding-right:3rem}
+  .rev-col{border-left:1px solid rgba(168,149,128,.3);padding-left:3rem}
+  /* mosaico: el primer post manda */
+  .ig-grid{grid-auto-rows:1fr}
+  .ig-t:first-child{grid-column:span 2;grid-row:span 2}
+}
 /* --- Panel Instagram --- */
 .ig-head{margin-bottom:1.4rem}
 .ig-head h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:.4rem}
@@ -257,7 +264,7 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 @media(min-width:900px){
   .rev-scroll{flex-direction:column;overflow:visible;gap:0;padding:0}
   .rev-q{flex:none;background:transparent;border:none;border-top:1px solid rgba(168,149,128,.3);border-radius:0;padding:1rem 0}
-  .rev-q:nth-child(n+4){display:none}
+  .rev-q:nth-child(n+5){display:none}
 }
 .rev-more{display:inline-flex;margin-top:.9rem;color:var(--text-soft);font-size:.82rem;font-weight:700;text-decoration:none;border-bottom:1px solid var(--accent)}
 .rev-more:hover{color:var(--accent-dark)}
@@ -1089,7 +1096,7 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
       <div>
         <div class="ig-head">
           <div class="eyebrow">Instagram</div>
-          <h2>Trabajos frescos, <em>todas las semanas.</em></h2>
+          <h2>Lo último que salió <em>del taller.</em></h2>
         </div>
         <div class="ig-grid">
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1.webp')" aria-label="Post de Instagram"></a>
