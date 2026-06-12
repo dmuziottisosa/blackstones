@@ -257,9 +257,13 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .social-grid>*{min-width:0}
 .rev-scroll{max-width:100%}
 @media(min-width:900px){
-  .social-grid{grid-template-columns:1.12fr .88fr;gap:0;align-items:start}
-  .social-grid>div:first-child{padding-right:3rem}
-  .rev-col{border-left:1px solid rgba(168,149,128,.3);padding-left:3rem}
+  .social-grid{grid-template-columns:1.12fr .88fr;gap:0;align-items:stretch}
+  .social-grid>div:first-child{padding-right:3rem;display:flex;flex-direction:column}
+  .social-grid>div:first-child .ig-grid{flex:1}
+  .social-grid>div:first-child .ig-handle{margin-top:1.2rem}
+  .rev-col{border-left:1px solid rgba(168,149,128,.3);padding-left:3rem;display:flex;flex-direction:column}
+  .rev-col .rev-scroll{flex:1;justify-content:space-between}
+  .rev-col .rev-more{margin-top:1.2rem}
   /* mosaico: el primer post manda */
   .ig-grid{grid-auto-rows:1fr}
   .ig-t:first-child{grid-column:span 2;grid-row:span 2}
