@@ -185,7 +185,8 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .num-item + .num-item{border-left:1px solid var(--line)}
 .num-item strong{font-family:var(--font-display);font-weight:500;font-size:clamp(1.9rem,5.5vw,2.7rem);color:var(--cream);line-height:1;font-variant-numeric:tabular-nums}
 .num-item strong .star{color:var(--gold);font-size:.55em;vertical-align:.35em;margin-left:.18rem}
-.num-item span{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-faint);line-height:1.6}
+.num-item > span{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-faint);line-height:1.6}
+.num-item strong span:not(.star){font:inherit;color:inherit;letter-spacing:inherit;text-transform:none}
 
 /* ===== TRABAJOS — film strip horizontal con scroll-snap ===== */
 .work-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:2rem}
