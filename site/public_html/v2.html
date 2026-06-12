@@ -1079,6 +1079,23 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 .quote-feature figcaption{margin-top:1.4rem;font-size:.88rem;font-weight:800;letter-spacing:.05em;color:var(--accent-dark);display:flex;flex-direction:column;align-items:center;gap:.45rem}
 .quote-feature figcaption::before{content:'';width:32px;height:1px;background:var(--accent);opacity:.5}
 .quote-feature .qf-src{font-size:.72rem;font-weight:600;color:var(--text-2);letter-spacing:.04em}
+
+/* ===== Fixes mobile: aire post-hero + nav sin overlap ===== */
+@media(max-width:899px){
+  .hero{padding-bottom:2.2rem}
+  .hero-trust{margin-bottom:.4rem}
+}
+/* Nav en pantallas chicas: queda el isotipo (la montaña), se oculta
+   el wordmark — los botones Catalogo + Cotizar entran sin overlap.
+   Mismo patron que usan las marcas con isotipo fuerte. */
+@media(max-width:600px){
+  .nav-inner{padding:.65rem 1rem;gap:.5rem}
+  .nav-logo span{display:none}
+  .nav-logo img{height:36px}
+  .nav-actions{gap:.45rem}
+  .nav-catalog{padding:.45rem .85rem;font-size:.78rem}
+  .nav-cta{padding:.5rem .95rem;font-size:.8rem}
+}
 </style>
 </head>
 <body>
