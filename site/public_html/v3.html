@@ -167,7 +167,13 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .work-strip{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 clamp(1.25rem,4vw,2.5rem) 1rem;scrollbar-width:thin;scrollbar-color:var(--accent) transparent}
 .work-strip::-webkit-scrollbar{height:4px}
 .work-strip::-webkit-scrollbar-thumb{background:var(--gold-deep);border-radius:2px}
-.work-card{flex:0 0 min(78vw,420px);scroll-snap-align:start;border-radius:var(--radius);overflow:hidden;position:relative;aspect-ratio:4/4.6;background:center/cover no-repeat var(--night-3)}
+.work-card{flex:0 0 min(78vw,420px);scroll-snap-align:start;border-radius:var(--radius);overflow:hidden;position:relative;aspect-ratio:4/4.6;background:center/cover no-repeat var(--bg-alt)}
+/* Desktop: grilla fija (el wheel-scroll horizontal era demasiado rapido);
+   el strip deslizable queda solo en mobile, donde el gesto es natural */
+@media(min-width:900px){
+  .work-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;overflow:visible;scroll-snap-type:none;max-width:1120px;margin:0 auto;padding:0 clamp(1.25rem,4vw,2.5rem)}
+  .work-card{aspect-ratio:4/4.2}
+}
 .work-card::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(21,19,15,.75) 0%,transparent 45%)}
 .work-card figcaption{position:absolute;left:1.1rem;bottom:1rem;z-index:2;font-family:var(--font-display);font-size:1.05rem;color:var(--cream)}
 .work-card figcaption small{display:block;font-family:var(--font-body);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-top:.15rem}
@@ -181,14 +187,13 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .process .lead{color:var(--cream-dim)}
 .process-grid{display:grid;gap:2.5rem}
 @media(min-width:900px){.process-grid{grid-template-columns:.9fr 1.1fr;gap:4.5rem;align-items:start}}
-.steps{position:relative;padding-left:2rem}
-.steps::before{content:'';position:absolute;left:6px;top:14px;bottom:14px;width:1px;background:linear-gradient(to bottom,var(--gold),rgba(196,167,125,.15))}
-.step{position:relative;padding:0 0 2rem}
-.step:last-child{padding-bottom:0}
-.step::before{content:'';position:absolute;left:-2rem;top:8px;width:13px;height:13px;border-radius:50%;background:var(--night-2);border:2px solid var(--gold)}
-.step h3{font-family:var(--font-display);font-weight:500;font-size:1.15rem;margin-bottom:.3rem;color:var(--cream)}
-.step h3 span{color:var(--gold);font-style:italic;margin-right:.45rem}
-.step p{font-size:.9rem;color:var(--cream-dim);line-height:1.6;max-width:46ch}
+.steps{display:flex;flex-direction:column}
+.step{display:flex;gap:1.2rem;padding:1.3rem 0;border-bottom:1px solid rgba(196,167,125,.16)}
+.step:first-child{padding-top:0}
+.step:last-child{border-bottom:none;padding-bottom:0}
+.step-n{font-family:var(--font-display);font-size:1.5rem;color:var(--gold);font-style:italic;min-width:2.2rem;line-height:1.2}
+.step h3{font-family:var(--font-display);font-weight:500;font-size:1.12rem;margin-bottom:.3rem;color:var(--cream)}
+.step p{font-size:.9rem;color:var(--cream-dim);line-height:1.55;max-width:46ch}
 .step p strong{color:var(--cream)}
 
 /* ===== MATERIALES — filas editoriales alternadas ===== */
@@ -1066,20 +1071,32 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
     </div>
     <div class="steps">
       <div class="step">
-        <h3><span>01</span>Nos escribís por WhatsApp</h3>
+        <div class="step-n">01</div>
+        <div>
+        <h3>Nos escribís por WhatsApp</h3>
         <p>Medidas aproximadas, una foto o el plano. Si no sabés qué material te conviene, te asesoramos primero.</p>
       </div>
+      </div>
       <div class="step">
-        <h3><span>02</span>Recibís la cotización en 24 hs</h3>
+        <div class="step-n">02</div>
+        <div>
+        <h3>Recibís la cotización en 24 hs</h3>
         <p><strong>Por escrito y con todo incluido</strong> — material, fabricación, flete e instalación.</p>
       </div>
-      <div class="step">
-        <h3><span>03</span>Medimos en tu casa</h3>
-        <p>Con el 50% reservás material y fecha. Rectificamos las medidas sin cargo y fabricamos con corte CNC.</p>
       </div>
       <div class="step">
-        <h3><span>04</span>Instalamos en 15–20 días</h3>
+        <div class="step-n">03</div>
+        <div>
+        <h3>Medimos en tu casa</h3>
+        <p>Con el 50% reservás material y fecha. Rectificamos las medidas sin cargo y fabricamos con corte CNC.</p>
+      </div>
+      </div>
+      <div class="step">
+        <div class="step-n">04</div>
+        <div>
+        <h3>Instalamos en 15–20 días</h3>
         <p>Corridos desde la medición. Bacha y anafe colocados, todo prolijo, cocina lista.</p>
+      </div>
       </div>
     </div>
   </div>
