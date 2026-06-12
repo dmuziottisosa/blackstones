@@ -155,7 +155,7 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ## 6. Estado actual del negocio (snapshot mayo 2026)
 
-- **+500 mesadas colocadas** en CABA y GBA.
+- **+1.000 mesadas colocadas** en CABA y GBA. *(Actualizado jun 2026 — dato directo del dueño; el snapshot de mayo decía +500.)*
 - **Zona de operación:** CABA + GBA, sale de Lanús para mediciones.
 - **Meta Ads:** $1.000 USD/mes (2 campañas de $14/día — 1 video + 1 static, ambas 1-1-1).
 - **Leads de hoy:** ~25 buenos por WhatsApp.
