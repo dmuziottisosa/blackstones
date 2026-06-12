@@ -230,9 +230,15 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .rev-feature figcaption{margin-top:1.5rem;font-size:.9rem;font-weight:800;letter-spacing:.05em;color:var(--gold);display:flex;flex-direction:column;align-items:center;gap:.45rem}
 .rev-feature figcaption::before{content:'';width:32px;height:1px;background:var(--gold-deep)}
 .rev-feature .src{font-size:.72rem;font-weight:600;color:var(--cream-faint);letter-spacing:.04em}
-.rev-grid{display:grid;gap:2.2rem 3rem;max-width:920px;margin:0 auto}
-@media(min-width:760px){.rev-grid{grid-template-columns:1fr 1fr}}
-.rev-q{border-top:1px solid var(--line);padding-top:1.3rem}
+/* Mobile: carrusel horizontal (ahorra altura); desktop: 1 fila de 4 */
+.rev-grid{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x proximity;padding:0 clamp(1.25rem,4vw,2.5rem) 1rem;margin:0 calc(clamp(1.25rem,4vw,2.5rem) * -1);scrollbar-width:thin;scrollbar-color:var(--gold-deep) transparent}
+.rev-grid::-webkit-scrollbar{height:4px}
+.rev-grid::-webkit-scrollbar-thumb{background:var(--gold-deep);border-radius:2px}
+.rev-q{flex:0 0 min(80vw,300px);scroll-snap-align:start;border-top:1px solid var(--line);padding-top:1.3rem}
+@media(min-width:900px){
+  .rev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;overflow:visible;margin:0;padding:0}
+  .rev-q{flex:none}
+}
 .rev-q .stars{color:var(--gold);font-size:.74rem;letter-spacing:.18em;margin-bottom:.6rem}
 .rev-q p{font-size:.92rem;color:var(--cream-dim);line-height:1.65}
 .rev-q footer{margin-top:.7rem;font-size:.8rem;font-weight:700;color:var(--gold)}
@@ -968,6 +974,15 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
         font-size: 0.8rem;
         padding: 1rem;
       }
+}
+
+/* Que incluye — mobile: tarjetitas 2 col (la lista 1-col era muy larga) */
+@media(max-width:699px){
+  .includes-list{grid-template-columns:1fr 1fr;gap:.6rem;margin-top:1.6rem}
+  .inc{flex-direction:column;gap:.15rem;align-items:flex-start;border:1px solid rgba(168,149,128,.3);border-radius:10px;padding:.75rem .85rem}
+  .inc::before{display:none}
+  .inc strong{font-size:.82rem;line-height:1.35}
+  .inc span{font-size:.73rem;line-height:1.4}
 }
 </style>
 </head>
