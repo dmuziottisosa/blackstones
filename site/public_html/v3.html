@@ -36,9 +36,9 @@
   <link rel="preload" as="image" href="xtone/AstanaGrey.webp" fetchpriority="low">
 <style>
 /* ============================================================
-   BLACKSTONES V3 — "SHOWROOM NOCTURNO"
-   Pagina oscura premium. El catalogo es la unica seccion clara:
-   la sala de luz donde se inspecciona la piedra.
+   BLACKSTONES V3
+   Base clara con bloques oscuros de acento: hero + numeros (apertura),
+   proceso, social (IG + reseñas) y CTA final (cierre).
    Tokens v3 con nombres propios; las vars --bg/--text/--border/etc.
    quedan reservadas con los valores CLAROS de la v1 para que el
    catalogo portado funcione intacto.
@@ -216,36 +216,30 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .mats-also .lbl{font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text-mute);margin-right:.4rem}
 .chip{font-size:.78rem;font-weight:700;color:var(--text-mute);border:1px solid rgba(168,149,128,.4);padding:.32rem .9rem;border-radius:999px}
 
-/* ===== TRANSICION A LA SALA DE LUZ ===== */
-.lightroom-intro{text-align:center;padding:clamp(3rem,7vw,5rem) 0 0;background:linear-gradient(to bottom,var(--bg),var(--bg-alt))}
-.lightroom-intro .eyebrow{margin-bottom:.9rem}
-.lightroom-intro h2{margin-bottom:1.2rem}
-.lightroom-intro .divider{margin-bottom:0}
-
-/* ===== RESEÑAS — editorial, sin cards ===== */
-.reviews-v3{background:var(--night);padding:clamp(2.8rem,6vw,4.5rem) 0}
-.rev-feature{max-width:640px;margin:0 auto 2.2rem;text-align:center;display:flex;flex-direction:column;align-items:center}
-.rev-feature .stars{color:var(--gold);letter-spacing:.3em;font-size:.9rem;margin:1.2rem 0 1rem}
-.rev-feature blockquote p{font-family:var(--font-display);font-weight:400;font-size:clamp(1.1rem,2.4vw,1.4rem);line-height:1.45;color:var(--cream);letter-spacing:-.005em}
-.rev-feature figcaption{margin-top:1rem;font-size:.85rem;font-weight:800;letter-spacing:.05em;color:var(--gold);display:flex;flex-direction:column;align-items:center;gap:.35rem}
-.rev-feature figcaption::before{content:'';width:32px;height:1px;background:var(--gold-deep)}
-.rev-feature .src{font-size:.72rem;font-weight:600;color:var(--cream-faint);letter-spacing:.04em}
-/* Mobile: carrusel horizontal (ahorra altura); desktop: 1 fila de 4 */
-.rev-grid{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x proximity;padding:0 0 .5rem;scrollbar-width:thin;scrollbar-color:var(--gold-deep) transparent}
-.rev-grid::-webkit-scrollbar{height:4px}
-.rev-grid::-webkit-scrollbar-thumb{background:var(--gold-deep);border-radius:2px}
-.rev-q{flex:0 0 min(80vw,300px);scroll-snap-align:start;border-top:1px solid var(--line);padding-top:1.3rem}
-@media(min-width:900px){
-  .rev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;overflow:visible;margin:0;padding:0}
-  .rev-q{flex:none}
-}
-.rev-q .stars{color:var(--gold);font-size:.74rem;letter-spacing:.18em;margin-bottom:.6rem}
-.rev-q p{font-size:.88rem;color:var(--cream-dim);line-height:1.6}
-.rev-q footer{margin-top:.55rem;font-size:.78rem;font-weight:700;color:var(--gold)}
-.rev-foot{text-align:center;margin-top:1.1rem;display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:.3rem 1.1rem;padding:0 3.5rem}
-.rev-foot .rev-rating{font-family:var(--font-display);font-size:1rem;color:var(--cream);margin-bottom:0}
-.rev-foot .rev-rating b{color:var(--gold);font-size:1.25rem;font-weight:600}
-.rev-foot a{color:var(--cream-dim);font-size:.85rem;font-weight:700;text-decoration:none;border-bottom:1px solid var(--gold-deep)}
+/* ===== SOCIAL — Instagram + reseñas en un solo bloque dark ===== */
+.social{background:var(--night);padding:clamp(2.8rem,6vw,4.5rem) 0}
+.social .eyebrow{color:var(--gold)}
+.social h2{color:var(--cream)}
+.social h2 em{color:var(--gold)}
+.social-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:1.8rem}
+.ig-handle{color:var(--gold);font-weight:700;font-size:.9rem;text-decoration:none;border-bottom:1px solid var(--gold-deep);white-space:nowrap}
+.ig-handle:hover{color:var(--cream)}
+.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+@media(min-width:760px){.ig-grid{grid-template-columns:repeat(6,1fr)}}
+.ig-t{aspect-ratio:1;border-radius:10px;background:center/cover no-repeat var(--night-3);display:block;transition:transform .2s,opacity .2s}
+.ig-t:hover{transform:translateY(-3px);opacity:.92}
+/* reseñas: secundarias, scroll horizontal prolijo */
+.rev-scroll{display:flex;gap:.9rem;overflow-x:auto;scroll-snap-type:x proximity;padding:0 0 .5rem;margin-top:2.2rem;scrollbar-width:thin;scrollbar-color:var(--gold-deep) transparent}
+.rev-scroll::-webkit-scrollbar{height:4px}
+.rev-scroll::-webkit-scrollbar-thumb{background:var(--gold-deep);border-radius:2px}
+.rev-q{flex:0 0 min(75vw,280px);scroll-snap-align:start;background:var(--night-2);border:1px solid var(--line);border-radius:12px;padding:1.05rem 1.15rem;display:flex;flex-direction:column}
+.rev-q .stars{color:var(--gold);font-size:.68rem;letter-spacing:.18em;margin-bottom:.5rem}
+.rev-q p{font-size:.84rem;color:var(--cream-dim);line-height:1.55}
+.rev-q footer{margin-top:auto;padding-top:.6rem;font-size:.76rem;font-weight:700;color:var(--gold)}
+.rev-foot{display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:.3rem 1.1rem;text-align:center;margin-top:1rem;padding:0 3.5rem}
+.rev-foot .rev-rating{font-family:var(--font-display);font-size:.95rem;color:var(--cream)}
+.rev-foot .rev-rating b{color:var(--gold);font-size:1.2rem;font-weight:600}
+.rev-foot a{color:var(--cream-dim);font-size:.82rem;font-weight:700;text-decoration:none;border-bottom:1px solid var(--gold-deep)}
 .rev-foot a:hover{color:var(--gold)}
 
 /* ===== QUE INCLUYE ===== */
@@ -984,6 +978,7 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   .inc strong{font-size:.82rem;line-height:1.35}
   .inc span{font-size:.73rem;line-height:1.4}
 }
+#materiales{padding-bottom:clamp(2rem,4vw,3rem)}
 </style>
 </head>
 <body>
@@ -1159,14 +1154,7 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   </div>
 </section>
 
-<!-- ============ TRANSICION: LA SALA DE LUZ ============ -->
-<div class="lightroom-intro">
-  <div class="container">
-    <div class="eyebrow">Catálogo de colores</div>
-    <h2>Ahora sí: <em>elegí tu piedra.</em></h2>
-    <div class="divider" aria-hidden="true"></div>
-  </div>
-</div>
+
 
 <section class="catalog" id="colores">
     <div class="container">
@@ -2193,37 +2181,49 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
     </div>
   </section>
 
-<!-- ============ RESEÑAS ============ -->
-<section class="reviews-v3" id="resenas">
+<!-- ============ INSTAGRAM + RESEÑAS ============ -->
+<section class="social" id="resenas">
   <div class="container">
-    <figure class="rev-feature">
-      <div class="divider" aria-hidden="true"></div>
-      <div class="stars" aria-label="5 estrellas">★★★★★</div>
-      <blockquote>
-        <p>La verdad que pocas veces en mi vida pagué algo y quedé tan conforme. Esta gente sabe lo que hace — han trabajado con una paciencia y dedicación única. Un trabajo brillante.</p>
-      </blockquote>
-      <figcaption>— Pablo Pelossi <span class="src">Reseña verificada en Google</span></figcaption>
-    </figure>
+    <div class="social-head">
+      <div>
+        <div class="eyebrow">Instagram</div>
+        <h2>Más trabajos, <em>más cocinas reales.</em></h2>
+      </div>
+      <a class="ig-handle" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">@blackstones.ar →</a>
+    </div>
+    <div class="ig-grid">
+      <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1.webp')" aria-label="Post de Instagram"></a>
+      <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2.webp')" aria-label="Post de Instagram"></a>
+      <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/3.webp')" aria-label="Post de Instagram"></a>
+      <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/4.webp')" aria-label="Post de Instagram"></a>
+      <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/5.webp')" aria-label="Post de Instagram"></a>
+      <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/6.webp')" aria-label="Post de Instagram"></a>
+    </div>
 
-    <div class="rev-grid">
+    <div class="rev-scroll" role="region" aria-label="Reseñas de clientes">
       <article class="rev-q">
         <div class="stars">★★★★★</div>
-        <p>Desde el momento que entré supe que compraría. La atención de Laura es maravillosa, explica todos los detalles, buen precio y excelente producto. El instalador prolijo y puntual.</p>
+        <p>Pocas veces en mi vida pagué algo y quedé tan conforme. Esta gente sabe lo que hace — un trabajo brillante.</p>
+        <footer>— Pablo Pelossi</footer>
+      </article>
+      <article class="rev-q">
+        <div class="stars">★★★★★</div>
+        <p>Desde el momento que entré supe que compraría. La atención de Laura es maravillosa, buen precio y excelente producto. El instalador prolijo y puntual.</p>
         <footer>— Ana</footer>
       </article>
       <article class="rev-q">
         <div class="stars">★★★★★</div>
-        <p>Es la 3ra mesada que les pido. Siempre trabajos a tiempo, muy buena atención y precios. Los trabajos quedaron impecables.</p>
+        <p>Es la 3ra mesada que les pido. Siempre trabajos a tiempo, muy buena atención y precios. Quedaron impecables.</p>
         <footer>— Sofía</footer>
       </article>
       <article class="rev-q">
         <div class="stars">★★★★★</div>
-        <p>5 estrellas es poco. Atención, prolijidad, buenos precios, detallistas. Tuve que esperar 8 meses por un problema con mi mueble, y los chicos me esperaron.</p>
+        <p>5 estrellas es poco. Atención, prolijidad, buenos precios, detallistas. Tuve que esperar 8 meses y los chicos me esperaron.</p>
         <footer>— Gloria</footer>
       </article>
       <article class="rev-q">
         <div class="stars">★★★★★</div>
-        <p>Mi mesada no era común, tenía muchos ángulos y diagonales, y la verdad quedó muy bien. Súper conforme. Los recomiendo.</p>
+        <p>Mi mesada tenía muchos ángulos y diagonales, y la verdad quedó muy bien. Súper conforme. Los recomiendo.</p>
         <footer>— Marcela</footer>
       </article>
     </div>
