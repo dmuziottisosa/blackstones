@@ -150,6 +150,13 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .hero-place svg{width:15px;height:15px;color:var(--gold);flex-shrink:0}
 .hero-place .hp-addr{font-size:.85rem;font-weight:700;color:var(--cream);white-space:nowrap}
 .hero-place .hp-hours{font-size:.76rem;color:var(--cream-faint);white-space:nowrap}
+@media(min-width:900px){
+  .hero{align-items:center;min-height:92vh}
+  .hero-content{padding:clamp(4rem,8vw,6rem) 0}
+  .hero-shade{background:
+    linear-gradient(to top,rgba(21,19,15,.94) 0%,rgba(21,19,15,.8) 50%,rgba(21,19,15,.62) 100%),
+    radial-gradient(ellipse at 28% 52%,rgba(21,19,15,.5) 0%,transparent 62%)}
+}
 @media(max-width:899px){
   .hero{min-height:78vh}
   .hero-content{padding-top:clamp(5rem,18vw,7rem)}
