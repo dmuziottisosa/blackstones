@@ -224,10 +224,10 @@ h2 em{font-style:italic;color:var(--accent-dark)}
    Mobile: IG arriba, reseñas en carrusel horizontal abajo.
    Las reseñas tienen ancla propia (label + 4,9) — no flotan.
    ============================================================ */
-.social{background:var(--night);padding:clamp(2.8rem,6vw,4.5rem) 0}
-.social .eyebrow{color:var(--gold)}
-.social h2{color:var(--cream)}
-.social h2 em{color:var(--gold)}
+.social{background:var(--bg);padding:clamp(2.8rem,6vw,4.5rem) 0}
+.social .eyebrow{color:var(--accent-dark)}
+.social h2{color:var(--text)}
+.social h2 em{color:var(--accent-dark)}
 .social-grid{display:grid;gap:2.6rem}
 .social-grid>*{min-width:0}
 .rev-scroll{max-width:100%}
@@ -236,31 +236,31 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .ig-head{margin-bottom:1.4rem}
 .ig-head h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:.4rem}
 .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
-.ig-t{aspect-ratio:1;border-radius:10px;background:center/cover no-repeat var(--night-3);display:block;transition:transform .2s,opacity .2s}
+.ig-t{aspect-ratio:1;border-radius:10px;background:center/cover no-repeat var(--bg-alt);display:block;transition:transform .2s,opacity .2s;box-shadow:0 6px 18px rgba(26,24,22,.08)}
 .ig-t:hover{transform:translateY(-3px);opacity:.92}
-.ig-handle{display:inline-flex;margin-top:1rem;color:var(--gold);font-weight:700;font-size:.88rem;text-decoration:none;border-bottom:1px solid var(--gold-deep);white-space:nowrap}
-.ig-handle:hover{color:var(--cream)}
+.ig-handle{display:inline-flex;margin-top:1rem;color:var(--accent-dark);font-weight:700;font-size:.88rem;text-decoration:none;border-bottom:1px solid var(--accent);white-space:nowrap}
+.ig-handle:hover{color:var(--text)}
 /* --- Panel Reseñas --- */
-.rev-col .rev-label{font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem}
+.rev-col .rev-label{font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:.8rem}
 .rev-rating{display:flex;align-items:baseline;gap:.55rem;margin-bottom:1.2rem}
-.rev-rating b{font-family:var(--font-display);font-weight:600;font-size:2rem;color:var(--gold);line-height:1}
+.rev-rating b{font-family:var(--font-display);font-weight:600;font-size:2rem;color:var(--accent-dark);line-height:1}
 .rev-rating .rr-stars{color:var(--gold);letter-spacing:.14em;font-size:.82rem}
-.rev-rating .rr-meta{font-size:.76rem;color:var(--cream-faint)}
-.rev-scroll{display:flex;gap:.9rem;overflow-x:auto;scroll-snap-type:x proximity;padding:0 0 .5rem;scrollbar-width:thin;scrollbar-color:var(--gold-deep) transparent}
+.rev-rating .rr-meta{font-size:.76rem;color:var(--text-mute)}
+.rev-scroll{display:flex;gap:.9rem;overflow-x:auto;scroll-snap-type:x proximity;padding:0 0 .5rem;scrollbar-width:thin;scrollbar-color:var(--accent) transparent}
 .rev-scroll::-webkit-scrollbar{height:4px}
-.rev-scroll::-webkit-scrollbar-thumb{background:var(--gold-deep);border-radius:2px}
-.rev-q{flex:0 0 min(75vw,280px);scroll-snap-align:start;background:var(--night-2);border:1px solid var(--line);border-radius:12px;padding:1.05rem 1.15rem;display:flex;flex-direction:column}
+.rev-scroll::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+.rev-q{flex:0 0 min(75vw,280px);scroll-snap-align:start;background:#FBF8F2;border:1px solid rgba(168,149,128,.3);border-radius:12px;padding:1.05rem 1.15rem;display:flex;flex-direction:column}
 .rev-q .stars{color:var(--gold);font-size:.68rem;letter-spacing:.18em;margin-bottom:.5rem}
-.rev-q p{font-size:.84rem;color:var(--cream-dim);line-height:1.55}
-.rev-q footer{margin-top:auto;padding-top:.6rem;font-size:.76rem;font-weight:700;color:var(--gold)}
+.rev-q p{font-size:.84rem;color:var(--text-soft);line-height:1.55}
+.rev-q footer{margin-top:auto;padding-top:.6rem;font-size:.76rem;font-weight:700;color:var(--accent-dark)}
 /* Desktop: apiladas editoriales (sin scroll), solo las 3 primeras */
 @media(min-width:900px){
   .rev-scroll{flex-direction:column;overflow:visible;gap:0;padding:0}
-  .rev-q{flex:none;background:transparent;border:none;border-top:1px solid var(--line);border-radius:0;padding:1rem 0}
+  .rev-q{flex:none;background:transparent;border:none;border-top:1px solid rgba(168,149,128,.3);border-radius:0;padding:1rem 0}
   .rev-q:nth-child(n+4){display:none}
 }
-.rev-more{display:inline-flex;margin-top:.9rem;color:var(--cream-dim);font-size:.82rem;font-weight:700;text-decoration:none;border-bottom:1px solid var(--gold-deep)}
-.rev-more:hover{color:var(--gold)}
+.rev-more{display:inline-flex;margin-top:.9rem;color:var(--text-soft);font-size:.82rem;font-weight:700;text-decoration:none;border-bottom:1px solid var(--accent)}
+.rev-more:hover{color:var(--accent-dark)}
 
 /* ===== QUE INCLUYE ===== */
 .includes-v3{background:var(--bg)}
@@ -341,7 +341,7 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .colors-show-more-btn:hover{background:var(--bg-dark);color:#F0E9DD;border-color:var(--bg-dark)}
 .catalog-hint{font-style:italic;font-size:.85rem;color:var(--text-mute)}
 /* salida del catalogo: vuelta a la noche */
-.catalog::after{content:'';display:block;height:clamp(1.5rem,4vw,2.5rem);margin-top:clamp(2rem,4vw,3rem);background:linear-gradient(to bottom,var(--bg-alt),var(--bg));margin-bottom:calc(var(--section-y) * -1)}
+.catalog::after{content:'';display:block;height:clamp(1.5rem,4vw,2.5rem);margin-top:clamp(2rem,4vw,3rem);background:linear-gradient(to bottom,var(--bg-alt),var(--night));margin-bottom:calc(var(--section-y) * -1)}
 @media(max-width:768px){
   .catalog-tabs{margin-left:0;margin-right:0;padding:.3rem;width:100%;justify-content:flex-start}
   .catalog-tab{padding:.62rem 1.15rem;font-size:.86rem}
@@ -999,6 +999,15 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   .inc span{font-size:.73rem;line-height:1.4}
 }
 #materiales{padding-bottom:clamp(2rem,4vw,3rem)}
+
+/* Trabajos en posicion post-catalogo: bloque oscuro (mantiene el bg del slot) */
+.work-dark{background:var(--night)}
+.work-dark .eyebrow{color:var(--gold)}
+.work-dark h2{color:var(--cream)}
+.work-dark h2 em{color:var(--gold)}
+.work-dark .work-head p{color:var(--cream-dim)}
+.work-dark .work-more{color:var(--gold);border-bottom-color:var(--gold-deep)}
+.work-dark .work-card{background-color:var(--night-3)}
 </style>
 </head>
 <body>
@@ -1011,10 +1020,10 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
       <span><b>Black</b>Stones</span>
     </a>
     <ul class="nav-links">
-      <li><a href="#trabajos">Trabajos</a></li>
+      <li><a href="#resenas">Reseñas</a></li>
       <li><a href="#proceso">Cómo trabajamos</a></li>
       <li><a href="#materiales">Materiales</a></li>
-      <li><a href="#resenas">Reseñas</a></li>
+      <li><a href="#trabajos">Trabajos</a></li>
       <li><a href="#faq">Preguntas</a></li>
     </ul>
     <div class="nav-actions">
@@ -1072,22 +1081,65 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   </div>
 </div>
 
-<!-- ============ TRABAJOS ============ -->
-<section id="trabajos">
-  <div class="container work-head">
-    <div>
-      <div class="eyebrow">Trabajos reales</div>
-      <h2>Cocinas que ya <em>se usan todos los días.</em></h2>
+<!-- ============ INSTAGRAM + RESEÑAS (dos paneles) ============ -->
+<section class="social" id="resenas">
+  <div class="container">
+    <div class="social-grid">
+
+      <div>
+        <div class="ig-head">
+          <div class="eyebrow">Instagram</div>
+          <h2>Trabajos frescos, <em>todas las semanas.</em></h2>
+        </div>
+        <div class="ig-grid">
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/3.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/4.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/5.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/6.webp')" aria-label="Post de Instagram"></a>
+        </div>
+        <a class="ig-handle" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Seguinos · @blackstones.ar →</a>
+      </div>
+
+      <div class="rev-col">
+        <div class="rev-label">Lo que dicen los clientes</div>
+        <div class="rev-rating">
+          <b>4,9</b>
+          <span class="rr-stars">★★★★★</span>
+          <span class="rr-meta">89 opiniones en Google</span>
+        </div>
+        <div class="rev-scroll" role="region" aria-label="Reseñas de clientes">
+          <article class="rev-q">
+            <div class="stars">★★★★★</div>
+            <p>Pocas veces en mi vida pagué algo y quedé tan conforme. Esta gente sabe lo que hace — un trabajo brillante.</p>
+            <footer>— Pablo Pelossi</footer>
+          </article>
+          <article class="rev-q">
+            <div class="stars">★★★★★</div>
+            <p>Desde el momento que entré supe que compraría. La atención de Laura es maravillosa, buen precio y excelente producto.</p>
+            <footer>— Ana</footer>
+          </article>
+          <article class="rev-q">
+            <div class="stars">★★★★★</div>
+            <p>Es la 3ra mesada que les pido. Siempre trabajos a tiempo, muy buena atención y precios. Quedaron impecables.</p>
+            <footer>— Sofía</footer>
+          </article>
+          <article class="rev-q">
+            <div class="stars">★★★★★</div>
+            <p>5 estrellas es poco. Atención, prolijidad, buenos precios, detallistas. Tuve que esperar 8 meses y los chicos me esperaron.</p>
+            <footer>— Gloria</footer>
+          </article>
+          <article class="rev-q">
+            <div class="stars">★★★★★</div>
+            <p>Mi mesada tenía muchos ángulos y diagonales, y la verdad quedó muy bien. Súper conforme. Los recomiendo.</p>
+            <footer>— Marcela</footer>
+          </article>
+        </div>
+        <a class="rev-more" href="https://share.google/674RKVdI1dnTyTZBY" target="_blank" rel="noopener">Ver todas en Google →</a>
+      </div>
+
     </div>
-    <a class="work-more" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Más en Instagram →</a>
-  </div>
-  <div class="work-strip">
-    <figure class="work-card" style="background-image:url('foto_proyectos/Alcorta.webp')"><figcaption>Alcorta<small>Entregado</small></figcaption></figure>
-    <figure class="work-card" style="background-image:url('foto_proyectos/Larrea.webp')"><figcaption>Larrea<small>Entregado</small></figcaption></figure>
-    <figure class="work-card" style="background-image:url('foto_proyectos/Once.webp')"><figcaption>Once<small>Entregado</small></figcaption></figure>
-    <figure class="work-card" style="background-image:url('foto_proyectos/Viel.webp')"><figcaption>Viel<small>Entregado</small></figcaption></figure>
-    <figure class="work-card" style="background-image:url('foto_proyectos/SKY_4.webp')"><figcaption>Sky<small>Entregado</small></figcaption></figure>
-    <figure class="work-card" style="background-image:url('foto_proyectos/SKY_10.webp')"><figcaption>Sky II<small>Entregado</small></figcaption></figure>
   </div>
 </section>
 
@@ -2201,65 +2253,22 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
     </div>
   </section>
 
-<!-- ============ INSTAGRAM + RESEÑAS (dos paneles) ============ -->
-<section class="social" id="resenas">
-  <div class="container">
-    <div class="social-grid">
-
-      <div>
-        <div class="ig-head">
-          <div class="eyebrow">Instagram</div>
-          <h2>Trabajos frescos, <em>todas las semanas.</em></h2>
-        </div>
-        <div class="ig-grid">
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/3.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/4.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/5.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/6.webp')" aria-label="Post de Instagram"></a>
-        </div>
-        <a class="ig-handle" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Seguinos · @blackstones.ar →</a>
-      </div>
-
-      <div class="rev-col">
-        <div class="rev-label">Lo que dicen los clientes</div>
-        <div class="rev-rating">
-          <b>4,9</b>
-          <span class="rr-stars">★★★★★</span>
-          <span class="rr-meta">89 opiniones en Google</span>
-        </div>
-        <div class="rev-scroll" role="region" aria-label="Reseñas de clientes">
-          <article class="rev-q">
-            <div class="stars">★★★★★</div>
-            <p>Pocas veces en mi vida pagué algo y quedé tan conforme. Esta gente sabe lo que hace — un trabajo brillante.</p>
-            <footer>— Pablo Pelossi</footer>
-          </article>
-          <article class="rev-q">
-            <div class="stars">★★★★★</div>
-            <p>Desde el momento que entré supe que compraría. La atención de Laura es maravillosa, buen precio y excelente producto.</p>
-            <footer>— Ana</footer>
-          </article>
-          <article class="rev-q">
-            <div class="stars">★★★★★</div>
-            <p>Es la 3ra mesada que les pido. Siempre trabajos a tiempo, muy buena atención y precios. Quedaron impecables.</p>
-            <footer>— Sofía</footer>
-          </article>
-          <article class="rev-q">
-            <div class="stars">★★★★★</div>
-            <p>5 estrellas es poco. Atención, prolijidad, buenos precios, detallistas. Tuve que esperar 8 meses y los chicos me esperaron.</p>
-            <footer>— Gloria</footer>
-          </article>
-          <article class="rev-q">
-            <div class="stars">★★★★★</div>
-            <p>Mi mesada tenía muchos ángulos y diagonales, y la verdad quedó muy bien. Súper conforme. Los recomiendo.</p>
-            <footer>— Marcela</footer>
-          </article>
-        </div>
-        <a class="rev-more" href="https://share.google/674RKVdI1dnTyTZBY" target="_blank" rel="noopener">Ver todas en Google →</a>
-      </div>
-
+<!-- ============ TRABAJOS ============ -->
+<section id="trabajos" class="work-dark">
+  <div class="container work-head">
+    <div>
+      <div class="eyebrow">Trabajos reales</div>
+      <h2>Cocinas que ya <em>se usan todos los días.</em></h2>
     </div>
+    <a class="work-more" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Más en Instagram →</a>
+  </div>
+  <div class="work-strip">
+    <figure class="work-card" style="background-image:url('foto_proyectos/Alcorta.webp')"><figcaption>Alcorta<small>Entregado</small></figcaption></figure>
+    <figure class="work-card" style="background-image:url('foto_proyectos/Larrea.webp')"><figcaption>Larrea<small>Entregado</small></figcaption></figure>
+    <figure class="work-card" style="background-image:url('foto_proyectos/Once.webp')"><figcaption>Once<small>Entregado</small></figcaption></figure>
+    <figure class="work-card" style="background-image:url('foto_proyectos/Viel.webp')"><figcaption>Viel<small>Entregado</small></figcaption></figure>
+    <figure class="work-card" style="background-image:url('foto_proyectos/SKY_4.webp')"><figcaption>Sky<small>Entregado</small></figcaption></figure>
+    <figure class="work-card" style="background-image:url('foto_proyectos/SKY_10.webp')"><figcaption>Sky II<small>Entregado</small></figcaption></figure>
   </div>
 </section>
 
