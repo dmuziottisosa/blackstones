@@ -9,7 +9,8 @@ Todo lo que se publica al mundo: ads pagos, copy de IG/web, creativos visuales, 
 | `meta-ads/` ⭐ | Estrategia de Meta, campañas activas, library de creativos ganadores, tests-log |
 | `copywriting/` | Frameworks (Schwartz, Sugarman, etc.), captions por canal, banco de hooks |
 | `creatives/` | Static ads (~120 prompts), video scripts, conceptos visuales |
-| `whatsapp/` | Flow de venta por WhatsApp, templates por escenario, banco de objeciones |
+| `whatsapp/` | Flow de venta por WhatsApp (inbound), templates por escenario, banco de objeciones |
+| `b2b-outreach/` | Prospección B2B fría (outbound): blueprint Apify → base → WhatsApp. **Estado: esperando línea dedicada.** |
 
 ## Reglas de esta carpeta
 
