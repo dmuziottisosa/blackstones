@@ -57,7 +57,30 @@ APIFY (Google Maps)            NORMALIZADOR (Python)          ENVÍO (cola rate-
 
 ## 4. PASO 0 — Conseguir la línea (lo único bloqueante hoy)
 
-Instrucciones para el dueño:
+### 4.1 — Setup del perfil de WhatsApp Business (decidido jun-2026)
+
+| Campo | Valor exacto |
+|---|---|
+| **Nombre comercial** | `BlackStones Marmolería` |
+| **Categoría** | Mejoras del Hogar (o "Construcción y obras" si está disponible) |
+| **Descripción** *(217/256 chars)* | `Proveedor y marmolería para estudios y desarrolladoras. Granito, cuarzo y sinterizado. +1.000 obras en CABA y GBA. Presupuesto por escrito en 24 hs, plazos de 15 a 20 días desde la medición. Showroom Av. Alberdi 3575.` |
+| **Dirección** | Av. Juan Bautista Alberdi 3575, CABA — completar mapa |
+| **Horario** | Lun–Vie 9–17 · Sáb 9–13 (coincide con la landing) |
+| **Web primaria** | `blackstones.com.ar` |
+| **Web secundaria** | `instagram.com/blackstones.ar` |
+| **Email** | `contacto@blackstones.com.ar` |
+| **Foto de perfil** | Isotipo de la montaña sobre fondo crema, cuadrado 640×640+ (NO el wordmark — se recorta mal en redondo) |
+| **Catálogo de WA** | 3-4 productos: granito, cuarzo, sinterizado (fotos reales de obras) |
+| **Mensaje de bienvenida** | DESACTIVADO (un auto-mensaje en línea fría B2B grita "bot") |
+| **Respuestas rápidas** | `/web` → `https://blackstones.com.ar` (para el segundo mensaje, no el primero) |
+
+> **Por qué "Proveedor y marmolería":** decisión deliberada — abre con los dos
+> modelos de negocio (venta de lámina **y** mesada terminada) en 3 palabras. El
+> arquitecto/desarrollador entiende al instante que puede comprarte materia
+> prima O cocina llave en mano. Diferenciador real frente a competidores que
+> solo hacen una de las dos cosas.
+
+### 4.2 — Pasos prácticos del dueño
 
 1. **Conseguí un chip/SIM nuevo** (prepago sirve) o un número virtual estable.
    Que sea un número que puedas tener prendido y no te importe "gastar".
