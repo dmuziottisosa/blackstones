@@ -73,6 +73,14 @@ if (array_key_exists('concepto', $body)) {
     $cot_updates['concepto'] = $c;
 }
 
+// Material final: el material confirmado de la venta entregada. Sobrescribe
+// los items del desglose en el top del reporte. Formato libre.
+if (array_key_exists('material_final', $body)) {
+    $mf = trim((string)$body['material_final']);
+    if (strlen($mf) > 200) bs_error('material_final demasiado largo (max 200 chars)');
+    $cot_updates['material_final'] = $mf;
+}
+
 if (array_key_exists('notas', $body)) {
     $n = trim((string)$body['notas']);
     if (strlen($n) > 2000) bs_error('notas demasiado largas (max 2000 chars)');
@@ -144,6 +152,13 @@ try {
             if (intval($cot['sub']) === $sub) {
                 if (isset($cot_updates['concepto'])) {
                     $cot['concepto'] = $cot_updates['concepto'];
+                }
+                if (isset($cot_updates['material_final'])) {
+                    if ($cot_updates['material_final'] === '') {
+                        unset($cot['material_final']);
+                    } else {
+                        $cot['material_final'] = $cot_updates['material_final'];
+                    }
                 }
                 if (isset($cot_updates['notas'])) {
                     $cot['notas'] = $cot_updates['notas'];

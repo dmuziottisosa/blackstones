@@ -403,6 +403,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .origen-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
 .origen-badge.origen-publicidad{background:var(--gd-soft);color:var(--gdd)}
 .origen-badge.origen-local{background:rgba(90,74,53,.08);color:var(--text2)}
+.field-hint{color:var(--text2);font-weight:400;font-size:11px;margin-left:6px}
 </style>
 </head>
 <body>
@@ -444,6 +445,11 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       <option value="aprobado">Aprobado</option>
       <option value="entregado">Entregado</option>
       <option value="perdido">Perdido</option>
+    </select>
+    <select id="filter-origen" title="Filtrar por origen del presupuesto">
+      <option value="">Todos los orígenes</option>
+      <option value="publicidad">Publicidad</option>
+      <option value="local">Local</option>
     </select>
     <button class="btn-search" onclick="cargarActivos()">Buscar</button>
     <button class="btn-excel" onclick="exportarExcel()" title="Descargar resumen de la tabla como CSV (abre en Excel)">
@@ -525,6 +531,11 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
         <input type="text" id="me-concepto" maxlength="200" placeholder="Ej: Cocina principal, Baño 1" autocomplete="off">
       </div>
       <div class="field-full">
+        <label>Material final <span class="field-hint">(el que pasa al reporte)</span></label>
+        <input type="text" id="me-material-final" maxlength="200" placeholder="Ej: Granito · Gris Mara · Sinterizado · Calacatta" autocomplete="off">
+        <div class="field-note">Si está vacío, el reporte usa los materiales del desglose. Definilo cuando confirmes la venta para asegurarte de que cuente bien.</div>
+      </div>
+      <div class="field-full">
         <label>Dirección</label>
         <input type="text" id="me-direccion" maxlength="200" autocomplete="off">
       </div>
@@ -588,6 +599,10 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       <div>
         <label>Concepto</label>
         <input type="text" id="mm-concepto" maxlength="200" autocomplete="off" placeholder="Ej: Cocina">
+      </div>
+      <div class="field-full">
+        <label>Material final <span class="field-hint">(el que pasa al reporte)</span></label>
+        <input type="text" id="mm-material-final" maxlength="200" autocomplete="off" placeholder="Ej: Granito · Gris Mara · Sinterizado · Calacatta">
       </div>
     </div>
 
@@ -750,9 +765,11 @@ function exportarExcel() {
 async function cargarActivos() {
   const q = document.getElementById('filter-q').value.trim();
   const estado = document.getElementById('filter-estado').value;
+  const origen = document.getElementById('filter-origen').value;
   const url = `/calculadora/api/list.php?page=${_activosPage}&per_page=${_activosPerPage}` +
               (q ? '&q=' + encodeURIComponent(q) : '') +
-              (estado ? '&estado=' + estado : '');
+              (estado ? '&estado=' + estado : '') +
+              (origen ? '&origen=' + origen : '');
   try {
     const r = await fetch(url, { credentials: 'same-origin' });
     const d = await r.json();
@@ -1123,6 +1140,7 @@ function abrirModalEditar(nro, sub) {
   document.getElementById('me-dni').value       = r.cliente_dni || '';
   document.getElementById('me-direccion').value = r.cliente_direccion || '';
   document.getElementById('me-concepto').value  = r.concepto || '';
+  document.getElementById('me-material-final').value = r.material_final || '';
   document.getElementById('me-notas').value     = r.notas || '';
   // Formato AR para display (los inputs son text para evitar el bug del calc
   // donde "347.000" se parseaba como 347 por parseFloat — ver bsParseAR en calc.html).
@@ -1352,8 +1370,9 @@ async function guardarEdicion() {
       dni:       document.getElementById('me-dni').value.trim(),
       direccion: document.getElementById('me-direccion').value.trim(),
     },
-    concepto:  document.getElementById('me-concepto').value.trim(),
-    notas:     document.getElementById('me-notas').value.trim(),
+    concepto:        document.getElementById('me-concepto').value.trim(),
+    material_final:  document.getElementById('me-material-final').value.trim(),
+    notas:           document.getElementById('me-notas').value.trim(),
     monto_usd: _parseMontoAR(document.getElementById('me-usd').value),
     monto_ars: _parseMontoAR(document.getElementById('me-ars').value),
     fecha:     document.getElementById('me-fecha').value,
@@ -1558,13 +1577,14 @@ function devolverAActivos(nro, sub, nombre) {
 
 // === Modal: agregar entregado manual ===
 function abrirModalManual() {
-  document.getElementById('mm-nombre').value   = '';
-  document.getElementById('mm-celular').value  = '';
-  document.getElementById('mm-concepto').value = '';
-  document.getElementById('mm-usd').value      = '';
-  document.getElementById('mm-ars').value      = '';
-  document.getElementById('mm-fecha').value    = new Date().toISOString().substring(0, 10);
-  document.getElementById('mm-origen').value   = 'local';
+  document.getElementById('mm-nombre').value         = '';
+  document.getElementById('mm-celular').value        = '';
+  document.getElementById('mm-concepto').value       = '';
+  document.getElementById('mm-material-final').value = '';
+  document.getElementById('mm-usd').value            = '';
+  document.getElementById('mm-ars').value            = '';
+  document.getElementById('mm-fecha').value          = new Date().toISOString().substring(0, 10);
+  document.getElementById('mm-origen').value         = 'local';
   document.getElementById('modal-manual-overlay').classList.add('show');
   setTimeout(() => { try { document.getElementById('mm-nombre').focus(); } catch(e){} }, 100);
 }
@@ -1576,13 +1596,14 @@ function cerrarModalManual() {
 async function guardarManual() {
   const btn = document.getElementById('mm-save-btn');
   const payload = {
-    nombre:    document.getElementById('mm-nombre').value.trim(),
-    celular:   document.getElementById('mm-celular').value.trim(),
-    concepto:  document.getElementById('mm-concepto').value.trim(),
-    monto_usd: _parseMontoAR(document.getElementById('mm-usd').value),
-    monto_ars: _parseMontoAR(document.getElementById('mm-ars').value),
-    fecha:     document.getElementById('mm-fecha').value,
-    origen:    document.getElementById('mm-origen').value,
+    nombre:         document.getElementById('mm-nombre').value.trim(),
+    celular:        document.getElementById('mm-celular').value.trim(),
+    concepto:       document.getElementById('mm-concepto').value.trim(),
+    material_final: document.getElementById('mm-material-final').value.trim(),
+    monto_usd:      _parseMontoAR(document.getElementById('mm-usd').value),
+    monto_ars:      _parseMontoAR(document.getElementById('mm-ars').value),
+    fecha:          document.getElementById('mm-fecha').value,
+    origen:         document.getElementById('mm-origen').value,
   };
   if (!payload.nombre) { toast('El nombre no puede quedar vacío.', 'error'); return; }
   if (!(payload.monto_usd > 0) && !(payload.monto_ars > 0)) {
@@ -1630,6 +1651,7 @@ if (_tab === 'activos') {
   cargarActivos();
   document.getElementById('filter-q').addEventListener('keypress', e => { if (e.key === 'Enter') cargarActivos(); });
   document.getElementById('filter-estado').addEventListener('change', cargarActivos);
+  document.getElementById('filter-origen').addEventListener('change', cargarActivos);
 } else {
   cargarReporte();
 }

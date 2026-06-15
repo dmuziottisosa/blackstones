@@ -42,6 +42,8 @@ if (mb_strlen($nombre) > 120) bs_error('nombre demasiado largo');
 $celular  = trim((string)($body['celular'] ?? ''));
 $concepto = trim((string)($body['concepto'] ?? ''));
 if (mb_strlen($concepto) > 200) bs_error('concepto demasiado largo');
+$material_final = trim((string)($body['material_final'] ?? ''));
+if (mb_strlen($material_final) > 200) bs_error('material_final demasiado largo');
 
 $monto_usd = floatval($body['monto_usd'] ?? 0);
 $monto_ars = floatval($body['monto_ars'] ?? 0);
@@ -111,6 +113,7 @@ try {
                 'sub'      => 1,
                 'fecha'    => $fecha,
                 'concepto' => $concepto,
+                'material_final' => $material_final,
                 'estado'   => 'entregado',
                 'origen'   => $origen,
                 'entregado_at' => $entregado_at,

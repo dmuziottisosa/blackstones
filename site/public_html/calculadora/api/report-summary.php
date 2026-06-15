@@ -215,13 +215,23 @@ function _live_scan_month($month_start, $month_end) {
             $result['by_origen'][$ori]['monto_usd'] += $monto_usd;
             $result['by_origen'][$ori]['monto_ars'] += $monto_ars;
 
-            foreach (['m','a','l','i','b'] as $sec) {
-                foreach ($cot['presupuesto']['secciones'][$sec]['items'] ?? [] as $item) {
-                    $key = ($item['mat'] ?? '') . ' · ' . ($item['color'] ?? '');
-                    if ($key === ' · ') continue;
-                    if (!isset($result['materiales'][$key])) $result['materiales'][$key] = ['count' => 0, 'monto_usd' => 0];
-                    $result['materiales'][$key]['count']++;
-                    $result['materiales'][$key]['monto_usd'] += $monto_usd;
+            // Top materiales: prioridad al material_final si esta seteado
+            // (es el material confirmado de la venta; gana sobre los items
+            // del desglose). Si no, fallback a los items de la cot.
+            $mf = trim((string)($cot['material_final'] ?? ''));
+            if ($mf !== '') {
+                if (!isset($result['materiales'][$mf])) $result['materiales'][$mf] = ['count' => 0, 'monto_usd' => 0];
+                $result['materiales'][$mf]['count']++;
+                $result['materiales'][$mf]['monto_usd'] += $monto_usd;
+            } else {
+                foreach (['m','a','l','i','b'] as $sec) {
+                    foreach ($cot['presupuesto']['secciones'][$sec]['items'] ?? [] as $item) {
+                        $key = ($item['mat'] ?? '') . ' · ' . ($item['color'] ?? '');
+                        if ($key === ' · ') continue;
+                        if (!isset($result['materiales'][$key])) $result['materiales'][$key] = ['count' => 0, 'monto_usd' => 0];
+                        $result['materiales'][$key]['count']++;
+                        $result['materiales'][$key]['monto_usd'] += $monto_usd;
+                    }
                 }
             }
         }
