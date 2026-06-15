@@ -404,6 +404,13 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .origen-badge.origen-publicidad{background:var(--gd-soft);color:var(--gdd)}
 .origen-badge.origen-local{background:rgba(90,74,53,.08);color:var(--text2)}
 .field-hint{color:var(--text2);font-weight:400;font-size:11px;margin-left:6px}
+/* Segmented control del switch de origen en el reporte */
+.origen-switch-wrap{display:flex;align-items:center;gap:14px;margin:8px 0 22px}
+.origen-switch-label{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text2)}
+.origen-switch{display:inline-flex;background:var(--card);border:1px solid var(--border);border-radius:999px;padding:3px;gap:0}
+.origen-switch .ori-btn{background:transparent;border:none;color:var(--text2);padding:6px 14px;font-size:12.5px;font-weight:700;letter-spacing:.02em;border-radius:999px;cursor:pointer;transition:all .18s}
+.origen-switch .ori-btn:hover{color:var(--text)}
+.origen-switch .ori-btn.active{background:var(--dk);color:#F0E9DD;box-shadow:0 1px 4px rgba(0,0,0,.12)}
 /* Predictor de material — reutiliza el formato 'Marca · Color' que ya
    usa el sistema en top_materiales del reporte. Diccionario vivo: lo
    sirve /api/colors-db.php desde calc.html (source of truth). */
@@ -1088,8 +1095,16 @@ async function toggleOrigen(el, nro, sub) {
       : '<span class="od"></span>Local';
     el.classList.add('saved');
     setTimeout(() => el.classList.remove('saved'), 1200);
-    const cached = _activosCache.find(x => x.cliente_nro === nro && parseInt(x.sub) === parseInt(sub));
-    if (cached) cached.origen = next;
+    const match = x => x.cliente_nro === nro && parseInt(x.sub) === parseInt(sub);
+    const cachedA = (_activosCache || []).find(match);
+    if (cachedA) cachedA.origen = next;
+    const cachedE = (_entregadosCache || []).find(match);
+    if (cachedE) cachedE.origen = next;
+    // Si en Reporte el filtro de origen esta activo, la fila ya no
+    // pertenece a la vista — refrescamos todo el dashboard.
+    if (typeof _tab !== 'undefined' && _tab === 'reporte' && _reporteOrigen && _reporteOrigen !== next) {
+      cargarReporte();
+    }
   } catch (e) {
     el.classList.remove('saving');
     el.classList.add('error');
@@ -1434,7 +1449,8 @@ async function guardarEdicion() {
 async function cargarReporte() {
   const cont = document.getElementById('reporte-content');
   try {
-    const r = await fetch('/calculadora/api/report-summary.php', { credentials: 'same-origin' });
+    const url = '/calculadora/api/report-summary.php' + (_reporteOrigen ? `?origen=${_reporteOrigen}` : '');
+    const r = await fetch(url, { credentials: 'same-origin' });
     const d = await r.json();
     if (!d.ok) { cont.innerHTML = `<div class="empty">Error: ${d.error}</div>`; return; }
 
@@ -1444,6 +1460,17 @@ async function cargarReporte() {
     const banner = d.banner_mes_pendiente
       ? `<div class="banner"><span>📊 Reporte de <b>${d.banner_mes_pendiente}</b> generado. ¿Lo viste?</span><button onclick="marcarVisto('${d.banner_mes_pendiente}')">Marcar como visto</button></div>`
       : '';
+
+    // Segmented control Todo / Publicidad / Local
+    const origenSwitch = `
+      <div class="origen-switch-wrap">
+        <div class="origen-switch-label">Origen</div>
+        <div class="origen-switch" id="origen-switch" role="tablist">
+          <button class="ori-btn ${_reporteOrigen === '' ? 'active' : ''}" data-val="" onclick="setReporteOrigen('')">Todo</button>
+          <button class="ori-btn ${_reporteOrigen === 'publicidad' ? 'active' : ''}" data-val="publicidad" onclick="setReporteOrigen('publicidad')">Publicidad</button>
+          <button class="ori-btn ${_reporteOrigen === 'local' ? 'active' : ''}" data-val="local" onclick="setReporteOrigen('local')">Local</button>
+        </div>
+      </div>`;
     const statCards = `
       <div class="stat-cards">
         <div class="stat-card"><div class="stat-label">Entregados</div><div class="stat-value">${totals.entregados_count || 0}</div></div>
@@ -1517,7 +1544,7 @@ async function cargarReporte() {
       <div id="entregados-tabla"><div class="loading">Cargando entregados…</div></div>
     `;
 
-    cont.innerHTML = banner + statCards + origenSection + topMat + mesesTable + entregadosSection;
+    cont.innerHTML = banner + origenSwitch + statCards + origenSection + topMat + mesesTable + entregadosSection;
     cargarEntregados();
   } catch (e) {
     cont.innerHTML = `<div class="empty">No se pudo cargar el reporte (${e.message})</div>`;
@@ -1526,12 +1553,23 @@ async function cargarReporte() {
 
 // Cache de entregados (para que abrirModalEditar los encuentre)
 let _entregadosCache = [];
+// Filtro de origen para el tab Reporte: '' = todos, 'publicidad', 'local'
+let _reporteOrigen = '';
+
+function setReporteOrigen(val) {
+  _reporteOrigen = val;
+  document.querySelectorAll('#origen-switch .ori-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === val);
+  });
+  cargarReporte();
+}
 
 async function cargarEntregados() {
   const cont = document.getElementById('entregados-tabla');
   if (!cont) return;
   try {
-    const r = await fetch('/calculadora/api/list.php?estado=entregado&per_page=200', { credentials: 'same-origin' });
+    const url = '/calculadora/api/list.php?estado=entregado&per_page=200' + (_reporteOrigen ? `&origen=${_reporteOrigen}` : '');
+    const r = await fetch(url, { credentials: 'same-origin' });
     const d = await r.json();
     if (!d.ok) { cont.innerHTML = `<div class="empty">Error: ${escapeHtml(d.error || '')}</div>`; return; }
     _entregadosCache = d.results || [];
@@ -1541,8 +1579,10 @@ async function cargarEntregados() {
     }
     const rows = _entregadosCache.map(r => {
       const nombre = (r.cliente_nombre || '—');
+      // 'organico' es alias historico de 'local'
       const origenVal = (r.origen === 'publicidad') ? 'publicidad' : 'local';
       const origenLabel = (origenVal === 'publicidad') ? 'Publicidad' : 'Local';
+      const origenCls = (origenVal === 'publicidad') ? 'pub' : 'org';
       const nombreEsc = (r.cliente_nombre || '').replace(/'/g, "\\'");
       const zip = r.estado === 'entregado'
         ? `<a class="act-zip" href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
@@ -1552,7 +1592,7 @@ async function cargarEntregados() {
           <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
           <td><b>${escapeHtml(nombre)}</b>${r.cliente_celular ? `<br><span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : ''}</td>
           <td>${r.concepto ? escapeHtml(r.concepto) : '<span class="muted">—</span>'}</td>
-          <td><span class="origen-badge origen-${origenVal}">${origenLabel}</span></td>
+          <td><button type="button" class="origen-cell ${origenCls}" data-origen="${origenVal}" onclick="toggleOrigen(this, '${r.cliente_nro}', ${r.sub})" title="Click para alternar Publicidad / Local"><span class="od"></span>${origenLabel}</button></td>
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
           <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>

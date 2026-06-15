@@ -24,6 +24,11 @@ bs_ensure_dirs();
 $months_back = 24;
 $now = time();
 
+// Filtro por origen: 'publicidad' | 'local' | '' (= todos).
+// Si esta activo, todo el dashboard se recalcula contra ese bucket.
+$origen_filter = $_GET['origen'] ?? '';
+if (!in_array($origen_filter, ['publicidad', 'local'], true)) $origen_filter = '';
+
 // ============================================================
 // 1. Obtener datos por mes (archivo o live)
 // ============================================================
@@ -74,43 +79,65 @@ for ($i = 0; $i < $months_back; $i++) {
             }
         }
 
-        $meses[] = [
-            'mes'              => $year_month,
-            'entregados_count' => $count,
-            'monto_usd'        => floatval($totales_mes['monto_usd'] ?? 0),
-            'monto_ars'        => floatval($totales_mes['monto_ars'] ?? 0),
-            'by_origen'        => $mes_by_origen,
-            'source'           => 'archivo',
-        ];
-        $total_count += $count;
-        $total_usd += floatval($totales_mes['monto_usd'] ?? 0);
-        $total_ars += floatval($totales_mes['monto_ars'] ?? 0);
+        // Con filtro: los totales del mes son los del bucket; sin filtro: todos.
+        if ($origen_filter !== '') {
+            $b = $mes_by_origen[$origen_filter] ?? ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0];
+            $mes_count = intval($b['count'] ?? 0);
+            $mes_usd   = floatval($b['monto_usd'] ?? 0);
+            $mes_ars   = floatval($b['monto_ars'] ?? 0);
+        } else {
+            $mes_count = $count;
+            $mes_usd   = floatval($totales_mes['monto_usd'] ?? 0);
+            $mes_ars   = floatval($totales_mes['monto_ars'] ?? 0);
+        }
+
+        if ($mes_count > 0 || $origen_filter === '') {
+            $meses[] = [
+                'mes'              => $year_month,
+                'entregados_count' => $mes_count,
+                'monto_usd'        => $mes_usd,
+                'monto_ars'        => $mes_ars,
+                'by_origen'        => $mes_by_origen,
+                'source'           => 'archivo',
+            ];
+        }
+        $total_count += $mes_count;
+        $total_usd   += $mes_usd;
+        $total_ars   += $mes_ars;
+        // by_origen acumula SIEMPRE los dos buckets (asi el switch tiene
+        // contadores correctos en el panel 'Por origen').
         foreach (['publicidad', 'local'] as $ori) {
             $by_origen[$ori]['count']     += intval($mes_by_origen[$ori]['count'] ?? 0);
             $by_origen[$ori]['monto_usd'] += floatval($mes_by_origen[$ori]['monto_usd'] ?? 0);
             $by_origen[$ori]['monto_ars'] += floatval($mes_by_origen[$ori]['monto_ars'] ?? 0);
         }
 
-        foreach ($data['entregados'] ?? [] as $e) {
-            $cn = $e['cliente_nro'] ?? '';
-            if ($cn) $clientes_unicos[$cn] = true;
-            foreach ($e['materiales'] ?? [] as $mat_color) {
-                if (!$mat_color) continue;
-                if (!isset($materiales_map[$mat_color])) $materiales_map[$mat_color] = ['count' => 0, 'monto_usd' => 0];
-                $materiales_map[$mat_color]['count']++;
+        // Clientes únicos y top materiales del archivo: solo cargan SI no
+        // hay filtro (el archivo no tiene breakdown por cotización individual,
+        // así que no se puede atribuir cada cliente/material a un bucket).
+        if ($origen_filter === '') {
+            foreach ($data['entregados'] ?? [] as $e) {
+                $cn = $e['cliente_nro'] ?? '';
+                if ($cn) $clientes_unicos[$cn] = true;
+                foreach ($e['materiales'] ?? [] as $mat_color) {
+                    if (!$mat_color) continue;
+                    if (!isset($materiales_map[$mat_color])) $materiales_map[$mat_color] = ['count' => 0, 'monto_usd' => 0];
+                    $materiales_map[$mat_color]['count']++;
+                }
             }
-        }
-        foreach ($data['top_materiales'] ?? [] as $tm) {
-            $key = $tm['material_color'] ?? '';
-            if ($key && isset($materiales_map[$key])) {
-                $materiales_map[$key]['monto_usd'] += floatval($tm['monto_usd'] ?? 0);
+            foreach ($data['top_materiales'] ?? [] as $tm) {
+                $key = $tm['material_color'] ?? '';
+                if ($key && isset($materiales_map[$key])) {
+                    $materiales_map[$key]['monto_usd'] += floatval($tm['monto_usd'] ?? 0);
+                }
             }
         }
     } else {
-        // Fuente: live scan
+        // Fuente: live scan (lee disco, atribuye cada cotización a su bucket)
         $month_start = strtotime("first day of $year_month 00:00:00");
         $month_end   = strtotime("last day of $year_month 23:59:59");
-        $live = _live_scan_month($month_start, $month_end);
+        $live = _live_scan_month($month_start, $month_end, $origen_filter);
+        if ($live['count'] === 0 && $origen_filter !== '') continue;
         if ($live['count'] === 0) continue;
 
         $meses[] = [
@@ -178,7 +205,7 @@ bs_ok([
 // ============================================================
 // Helper: live scan de un mes
 // ============================================================
-function _live_scan_month($month_start, $month_end) {
+function _live_scan_month($month_start, $month_end, $origen_filter = '') {
     $result = [
         'count' => 0, 'monto_usd' => 0, 'monto_ars' => 0,
         'clientes_unicos' => [], 'materiales' => [],
@@ -200,6 +227,14 @@ function _live_scan_month($month_start, $month_end) {
             if (!$entregado_at) continue;
             if ($entregado_at < $month_start || $entregado_at > $month_end) continue;
 
+            // Normalizar origen ('organico' alias historico de 'local')
+            $ori = ($cot['origen'] ?? 'local');
+            if ($ori !== 'publicidad') $ori = 'local';
+
+            // Filtro por origen: si esta activo y no matchea, skip TODO
+            // (no suma al count, totales, clientes_unicos ni materiales).
+            if ($origen_filter !== '' && $ori !== $origen_filter) continue;
+
             $totales = $cot['presupuesto']['totales'] ?? [];
             $monto_usd = floatval($totales['usd'] ?? 0);
             $monto_ars = floatval($totales['ars'] ?? 0);
@@ -207,10 +242,6 @@ function _live_scan_month($month_start, $month_end) {
             $result['monto_usd'] += $monto_usd;
             $result['monto_ars'] += $monto_ars;
             $result['clientes_unicos'][] = $cliente['cliente_nro'] ?? '';
-            // Breakdown por origen. Default 'local' si no hay campo.
-            // 'organico' (alias historico) se normaliza a 'local'.
-            $ori = ($cot['origen'] ?? 'local');
-            if ($ori !== 'publicidad') $ori = 'local';
             $result['by_origen'][$ori]['count']++;
             $result['by_origen'][$ori]['monto_usd'] += $monto_usd;
             $result['by_origen'][$ori]['monto_ars'] += $monto_ars;
