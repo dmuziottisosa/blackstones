@@ -404,6 +404,18 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 .origen-badge.origen-publicidad{background:var(--gd-soft);color:var(--gdd)}
 .origen-badge.origen-local{background:rgba(90,74,53,.08);color:var(--text2)}
 .field-hint{color:var(--text2);font-weight:400;font-size:11px;margin-left:6px}
+/* Predictor de material — reutiliza el formato 'Marca · Color' que ya
+   usa el sistema en top_materiales del reporte. Diccionario vivo: lo
+   sirve /api/colors-db.php desde calc.html (source of truth). */
+.mat-pred-wrap{position:relative}
+.mat-pred-box{position:absolute;top:100%;left:0;right:0;z-index:60;background:var(--card);border:1px solid var(--border);border-radius:8px;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.08);margin-top:2px;display:none}
+.mat-pred-box.open{display:block}
+.mat-pred-item{padding:8px 12px;cursor:pointer;font-size:13px;color:var(--text);border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.mat-pred-item:last-child{border-bottom:none}
+.mat-pred-item:hover,.mat-pred-item.active{background:var(--gd-soft)}
+.mat-pred-item .pred-color{font-weight:600}
+.mat-pred-item .pred-marca{font-size:11px;color:var(--text2);background:var(--card-alt);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.mat-pred-empty{padding:10px 12px;font-size:12px;color:var(--text3);font-style:italic}
 </style>
 </head>
 <body>
@@ -530,9 +542,10 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
         <label>Concepto</label>
         <input type="text" id="me-concepto" maxlength="200" placeholder="Ej: Cocina principal, Baño 1" autocomplete="off">
       </div>
-      <div class="field-full">
+      <div class="field-full mat-pred-wrap">
         <label>Material final <span class="field-hint">(el que pasa al reporte)</span></label>
-        <input type="text" id="me-material-final" maxlength="200" placeholder="Ej: Granito · Gris Mara · Sinterizado · Calacatta" autocomplete="off">
+        <input type="text" id="me-material-final" class="mat-pred-input" maxlength="200" placeholder="Ej: Guidoni · Calacata Gold" autocomplete="off" data-pred-box="me-material-final-box">
+        <div class="mat-pred-box" id="me-material-final-box"></div>
         <div class="field-note">Si está vacío, el reporte usa los materiales del desglose. Definilo cuando confirmes la venta para asegurarte de que cuente bien.</div>
       </div>
       <div class="field-full">
@@ -600,9 +613,10 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
         <label>Concepto</label>
         <input type="text" id="mm-concepto" maxlength="200" autocomplete="off" placeholder="Ej: Cocina">
       </div>
-      <div class="field-full">
+      <div class="field-full mat-pred-wrap">
         <label>Material final <span class="field-hint">(el que pasa al reporte)</span></label>
-        <input type="text" id="mm-material-final" maxlength="200" autocomplete="off" placeholder="Ej: Granito · Gris Mara · Sinterizado · Calacatta">
+        <input type="text" id="mm-material-final" class="mat-pred-input" maxlength="200" autocomplete="off" placeholder="Ej: Guidoni · Calacata Gold" data-pred-box="mm-material-final-box">
+        <div class="mat-pred-box" id="mm-material-final-box"></div>
       </div>
     </div>
 
@@ -1644,6 +1658,124 @@ async function marcarVisto(mes) {
     cargarReporte();
   } catch(e) {}
 }
+
+// ============================================================
+// Predictor de material final — lazy load del diccionario
+// ============================================================
+// El diccionario vive en calc.html (source of truth). El endpoint
+// /api/colors-db.php lo extrae con cache por mtime. Lo cargamos una
+// sola vez por sesión y servimos los matches con busqueda loose
+// (sin tildes, sin puntuacion).
+let _matDict = null;
+let _matDictPromise = null;
+
+function _matLoose(s) {
+  return (s || '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+async function _loadMatDict() {
+  if (_matDict) return _matDict;
+  if (_matDictPromise) return _matDictPromise;
+  _matDictPromise = (async () => {
+    try {
+      const r = await fetch('/calculadora/api/colors-db.php', { credentials: 'same-origin' });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'colors-db');
+      // Precomputo el haystack normalizado por entrada
+      d.colors.forEach(c => { c._h = _matLoose(c.full); });
+      _matDict = d.colors;
+      return _matDict;
+    } catch (e) {
+      console.warn('colors-db fallo:', e);
+      _matDict = []; // no rompe el modal, solo deshabilita predictor
+      return _matDict;
+    }
+  })();
+  return _matDictPromise;
+}
+
+function _matRenderBox(input, box) {
+  const q = _matLoose(input.value);
+  if (!_matDict || !_matDict.length) { box.classList.remove('open'); return; }
+  let matches;
+  if (!q) {
+    matches = _matDict.slice(0, 12); // sin query: primeros 12
+  } else {
+    matches = _matDict.filter(c => c._h.indexOf(q) !== -1).slice(0, 12);
+  }
+  if (!matches.length) {
+    box.innerHTML = '<div class="mat-pred-empty">Sin sugerencias — el texto se guarda igual.</div>';
+    box.classList.add('open');
+    return;
+  }
+  box.innerHTML = matches.map((c, i) => `
+    <div class="mat-pred-item${i === 0 ? ' active' : ''}" data-full="${escapeHtml(c.full)}">
+      <span class="pred-color">${escapeHtml(c.n)}</span>
+      <span class="pred-marca">${escapeHtml(c.marca_label)}</span>
+    </div>
+  `).join('');
+  box.classList.add('open');
+}
+
+function _matInitInput(inputId, boxId) {
+  const input = document.getElementById(inputId);
+  const box = document.getElementById(boxId);
+  if (!input || !box || input.dataset.predWired === '1') return;
+  input.dataset.predWired = '1';
+
+  input.addEventListener('focus', async () => {
+    await _loadMatDict();
+    _matRenderBox(input, box);
+  });
+  input.addEventListener('input', async () => {
+    await _loadMatDict();
+    _matRenderBox(input, box);
+  });
+  input.addEventListener('keydown', (e) => {
+    if (!box.classList.contains('open')) return;
+    const items = box.querySelectorAll('.mat-pred-item');
+    if (!items.length) return;
+    let active = box.querySelector('.mat-pred-item.active');
+    let idx = Array.from(items).indexOf(active);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (active) active.classList.remove('active');
+      idx = (idx + 1) % items.length;
+      items[idx].classList.add('active');
+      items[idx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (active) active.classList.remove('active');
+      idx = idx <= 0 ? items.length - 1 : idx - 1;
+      items[idx].classList.add('active');
+      items[idx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      if (active) {
+        e.preventDefault();
+        input.value = active.dataset.full;
+        box.classList.remove('open');
+      }
+    } else if (e.key === 'Escape') {
+      box.classList.remove('open');
+    }
+  });
+  box.addEventListener('mousedown', (e) => {
+    const item = e.target.closest('.mat-pred-item');
+    if (!item) return;
+    e.preventDefault();
+    input.value = item.dataset.full;
+    box.classList.remove('open');
+  });
+  input.addEventListener('blur', () => {
+    setTimeout(() => box.classList.remove('open'), 150);
+  });
+}
+
+// Wire de ambos modales (idempotente)
+_matInitInput('me-material-final', 'me-material-final-box');
+_matInitInput('mm-material-final', 'mm-material-final-box');
 
 // Init según tab
 const _tab = '<?= $tab ?>';
