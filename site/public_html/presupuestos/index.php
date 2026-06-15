@@ -391,6 +391,18 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
   .actions-cell{min-width:380px}
   .actions-cell button,.actions-cell a{font-size:10.5px;padding:4px 8px}
 }
+/* Reporte — sección entregados */
+.sec-head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:28px}
+.sec-head-row .sec-h{margin:0}
+.btn-add-manual{background:var(--gd);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;transition:filter .15s}
+.btn-add-manual:hover{filter:brightness(1.06)}
+.sec-note{color:var(--text2);font-size:12.5px;margin:6px 0 14px}
+.entregados-table{width:100%;border-collapse:collapse}
+.entregados-table .act-btn{background:transparent;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 9px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.entregados-table .act-btn:hover{border-color:var(--gd);color:var(--gdd)}
+.origen-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+.origen-badge.origen-publicidad{background:var(--gd-soft);color:var(--gdd)}
+.origen-badge.origen-local{background:rgba(90,74,53,.08);color:var(--text2)}
 </style>
 </head>
 <body>
@@ -551,6 +563,63 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 
     <div class="calc-link">
       ¿Cambiar items, materiales o m²? <a id="me-calc-link" href="#" target="_blank">Abrir en calculadora →</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: agregar entregado manual (histórico que no pasó por la calc) -->
+<div class="modal-overlay" id="modal-manual-overlay" onmousedown="modalOverlayDown(event)" onclick="modalOverlayClick(event, cerrarModalManual)">
+  <div class="modal modal-edit">
+    <div class="modal-title-row">
+      <h3>Agregar entregado manual</h3>
+    </div>
+    <div class="modal-sub">Para cargar una venta entregada que no pasó por la calculadora. Suma al reporte.</div>
+
+    <div class="sep-h" data-label="Cliente"></div>
+    <div class="field-grid">
+      <div class="field-full">
+        <label>Nombre</label>
+        <input type="text" id="mm-nombre" maxlength="120" autocomplete="off" placeholder="Nombre del cliente">
+      </div>
+      <div>
+        <label>Celular</label>
+        <input type="text" id="mm-celular" maxlength="30" autocomplete="off">
+      </div>
+      <div>
+        <label>Concepto</label>
+        <input type="text" id="mm-concepto" maxlength="200" autocomplete="off" placeholder="Ej: Cocina">
+      </div>
+    </div>
+
+    <div class="sep-h" data-label="Entrega"></div>
+    <div class="field-grid">
+      <div>
+        <label>Monto USD</label>
+        <input type="text" inputmode="decimal" id="mm-usd" autocomplete="off" placeholder="0,00">
+      </div>
+      <div>
+        <label>Monto ARS</label>
+        <input type="text" inputmode="decimal" id="mm-ars" autocomplete="off" placeholder="0">
+      </div>
+      <div>
+        <label>Fecha de entrega</label>
+        <input type="date" id="mm-fecha">
+      </div>
+      <div>
+        <label>Origen</label>
+        <select id="mm-origen">
+          <option value="local">Local</option>
+          <option value="publicidad">Publicidad</option>
+        </select>
+      </div>
+      <div class="field-full">
+        <div class="field-note">Cargá al menos un monto (USD o ARS). Queda marcado como "ajuste manual".</div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cerrarModalManual()">Cancelar</button>
+      <button class="btn-confirm" onclick="guardarManual()" id="mm-save-btn">Agregar entregado</button>
     </div>
   </div>
 </div>
@@ -789,7 +858,7 @@ async function ejecutarCambioEstado(nro, sub, nuevo) {
       'success',
       { title: 'Estado actualizado' }
     );
-    cargarActivos();
+    refrescarVista();
   } catch (e) {
     toast(e.message, 'error', { title: 'Error de red' });
   }
@@ -811,7 +880,7 @@ function confirmarBorrar(nro, sub, nombre) {
         const d = await r.json();
         if (!d.ok) { toast(d.error, 'error', { title: 'Error al eliminar' }); return; }
         toast('Presupuesto eliminado.', 'success');
-        cargarActivos();
+        refrescarVista();
       } catch (e) {
         toast(e.message, 'error', { title: 'Error de red' });
       }
@@ -1029,8 +1098,15 @@ function _fmtMontoEdit(n, withDecimals) {
   }).format(n);
 }
 
+// Refresca la vista activa (activos o reporte) tras una acción
+function refrescarVista() {
+  if (_tab === 'reporte') { cargarReporte(); }
+  else { cargarActivos(); }
+}
+
 function abrirModalEditar(nro, sub) {
-  const r = _activosCache.find(x => x.cliente_nro === nro && parseInt(x.sub) === parseInt(sub));
+  const pool = (_activosCache || []).concat(_entregadosCache || []);
+  const r = pool.find(x => x.cliente_nro === nro && parseInt(x.sub) === parseInt(sub));
   if (!r) {
     toast('No se encontró la cotización en el listado actual. Recargá la tabla.', 'error');
     return;
@@ -1311,7 +1387,7 @@ async function guardarEdicion() {
     if (d.cliente_updated && d.cliente_updated.length) extras.push(`Cliente: ${d.cliente_updated.join(', ')}`);
     if (d.cotizacion_updated && d.cotizacion_updated.length) extras.push(`Cotización: ${d.cotizacion_updated.join(', ')}`);
     toast(extras.join(' · ') || 'Cambios guardados.', 'success', { title: 'Edición guardada' });
-    cargarActivos();
+    refrescarVista();
   } catch (e) {
     btn.disabled = false;
     btn.innerText = oldText;
@@ -1399,9 +1475,140 @@ async function cargarReporte() {
       </table>
     ` : '<div class="empty">Sin entregados todavía.</div>';
 
-    cont.innerHTML = banner + statCards + origenSection + topMat + mesesTable;
+    const entregadosSection = `
+      <div class="sec-head-row">
+        <h3 class="sec-h">Entregados en sistema</h3>
+        <button class="btn-add-manual" onclick="abrirModalManual()">+ Agregar manual</button>
+      </div>
+      <div class="sec-note">Los que siguen en el sistema (últimos 180 días). Acá los editás, los devolvés a activos o los eliminás.</div>
+      <div id="entregados-tabla"><div class="loading">Cargando entregados…</div></div>
+    `;
+
+    cont.innerHTML = banner + statCards + origenSection + topMat + mesesTable + entregadosSection;
+    cargarEntregados();
   } catch (e) {
     cont.innerHTML = `<div class="empty">No se pudo cargar el reporte (${e.message})</div>`;
+  }
+}
+
+// Cache de entregados (para que abrirModalEditar los encuentre)
+let _entregadosCache = [];
+
+async function cargarEntregados() {
+  const cont = document.getElementById('entregados-tabla');
+  if (!cont) return;
+  try {
+    const r = await fetch('/calculadora/api/list.php?estado=entregado&per_page=200', { credentials: 'same-origin' });
+    const d = await r.json();
+    if (!d.ok) { cont.innerHTML = `<div class="empty">Error: ${escapeHtml(d.error || '')}</div>`; return; }
+    _entregadosCache = d.results || [];
+    if (!_entregadosCache.length) {
+      cont.innerHTML = '<div class="empty">No hay entregados en el sistema.</div>';
+      return;
+    }
+    const rows = _entregadosCache.map(r => {
+      const nombre = (r.cliente_nombre || '—');
+      const origenVal = (r.origen === 'publicidad') ? 'publicidad' : 'local';
+      const origenLabel = (origenVal === 'publicidad') ? 'Publicidad' : 'Local';
+      const nombreEsc = (r.cliente_nombre || '').replace(/'/g, "\\'");
+      const zip = r.estado === 'entregado'
+        ? `<a class="act-zip" href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
+        : '';
+      return `
+        <tr>
+          <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
+          <td><b>${escapeHtml(nombre)}</b>${r.cliente_celular ? `<br><span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : ''}</td>
+          <td>${r.concepto ? escapeHtml(r.concepto) : '<span class="muted">—</span>'}</td>
+          <td><span class="origen-badge origen-${origenVal}">${origenLabel}</span></td>
+          <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
+          <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
+          <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
+          <td class="actions-cell">
+            <button class="act-btn" onclick="abrirModalEditar('${r.cliente_nro}', ${r.sub})" title="Editar">Editar</button>
+            ${zip}
+            <button class="act-btn" onclick="devolverAActivos('${r.cliente_nro}', ${r.sub}, '${nombreEsc}')" title="Volver a activos">↩ A activos</button>
+            <button class="act-danger" onclick="confirmarBorrar('${r.cliente_nro}', ${r.sub}, '${nombreEsc}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+          </td>
+        </tr>`;
+    }).join('');
+    cont.innerHTML = `
+      <table class="entregados-table">
+        <thead><tr><th>N°</th><th>Cliente</th><th>Concepto</th><th>Origen</th><th class="num">USD</th><th class="num">ARS</th><th>Fecha</th><th>Acciones</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } catch (e) {
+    cont.innerHTML = `<div class="empty">No se pudo cargar (${e.message})</div>`;
+  }
+}
+
+// Devolver un entregado a presupuestos activos (state.php entregado → aprobado)
+function devolverAActivos(nro, sub, nombre) {
+  abrirModal(
+    'Devolver a activos',
+    `¿Devolver <b>${nro}-${sub}</b> de <b>${nombre}</b> a presupuestos activos?<br><br>` +
+    `Vuelve a estado <b>Aprobado</b> y deja de contar como entregado en el reporte.<br>` +
+    `<span style="color:var(--text2)">Nota: las sub-versiones que se borraron al entregar no se recuperan.</span>`,
+    async () => {
+      cerrarModal();
+      await ejecutarCambioEstado(nro, sub, 'aprobado');
+    },
+    'btn-confirm'
+  );
+}
+
+// === Modal: agregar entregado manual ===
+function abrirModalManual() {
+  document.getElementById('mm-nombre').value   = '';
+  document.getElementById('mm-celular').value  = '';
+  document.getElementById('mm-concepto').value = '';
+  document.getElementById('mm-usd').value      = '';
+  document.getElementById('mm-ars').value      = '';
+  document.getElementById('mm-fecha').value    = new Date().toISOString().substring(0, 10);
+  document.getElementById('mm-origen').value   = 'local';
+  document.getElementById('modal-manual-overlay').classList.add('show');
+  setTimeout(() => { try { document.getElementById('mm-nombre').focus(); } catch(e){} }, 100);
+}
+
+function cerrarModalManual() {
+  document.getElementById('modal-manual-overlay').classList.remove('show');
+}
+
+async function guardarManual() {
+  const btn = document.getElementById('mm-save-btn');
+  const payload = {
+    nombre:    document.getElementById('mm-nombre').value.trim(),
+    celular:   document.getElementById('mm-celular').value.trim(),
+    concepto:  document.getElementById('mm-concepto').value.trim(),
+    monto_usd: _parseMontoAR(document.getElementById('mm-usd').value),
+    monto_ars: _parseMontoAR(document.getElementById('mm-ars').value),
+    fecha:     document.getElementById('mm-fecha').value,
+    origen:    document.getElementById('mm-origen').value,
+  };
+  if (!payload.nombre) { toast('El nombre no puede quedar vacío.', 'error'); return; }
+  if (!(payload.monto_usd > 0) && !(payload.monto_ars > 0)) {
+    toast('Cargá al menos un monto (USD o ARS).', 'error'); return;
+  }
+  btn.disabled = true;
+  const oldText = btn.innerText;
+  btn.innerText = 'Agregando…';
+  try {
+    const r = await fetch('/calculadora/api/add-manual.php', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const d = await r.json();
+    btn.disabled = false;
+    btn.innerText = oldText;
+    if (!d.ok) { toast(d.error, 'error', { title: 'Error al agregar' }); return; }
+    cerrarModalManual();
+    toast(`Entregado ${d.cliente_nro}-${d.sub} agregado.`, 'success', { title: 'Listo' });
+    refrescarVista();
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerText = oldText;
+    toast(e.message, 'error', { title: 'Error de red' });
   }
 }
 

@@ -54,7 +54,9 @@ $ALLOWED = [
     'borrador'  => ['enviado', 'perdido'],
     'enviado'   => ['aprobado', 'perdido'],
     'aprobado'  => ['entregado'],
-    'entregado' => [],
+    // entregado → aprobado: "devolver a activos". Reversión deliberada desde
+    // el hub. NO recupera las hermanas borradas al entregar (ya no existen).
+    'entregado' => ['aprobado'],
     'perdido'   => [],
 ];
 
@@ -93,6 +95,17 @@ try {
             // Si pasa a entregado, marcar entregado_at
             if ($nuevo_estado === 'entregado') {
                 $cot['entregado_at'] = $now;
+            }
+
+            // Reversión entregado → aprobado ("devolver a activos"):
+            // limpiar entregado_at y borrar el ZIP (ya no aplica).
+            if ($estado_anterior === 'entregado' && $nuevo_estado === 'aprobado') {
+                unset($cot['entregado_at']);
+                if (!empty($cot['zip_path'])) {
+                    $zip_abs = BS_DATA_DIR . '/' . $cot['zip_path'];
+                    if (file_exists($zip_abs)) @unlink($zip_abs);
+                    $cot['zip_path'] = null;
+                }
             }
 
             $found = true;
