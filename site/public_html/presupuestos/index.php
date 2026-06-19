@@ -847,7 +847,9 @@ async function cargarActivos() {
       const zip = r.estado === 'entregado'
         ? `<a class="act-zip" href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
         : '';
-      const del = `<button class="act-danger" onclick="confirmarBorrar('${r.cliente_nro}', ${r.sub}, '${(r.cliente_nombre || '').replace(/'/g, "\\'")}')" title="Eliminar presupuesto" aria-label="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>`;
+      // (Eliminar por fila se removió: usar el checkbox + 'Eliminar
+      // seleccionados' de la barra superior. La tabla de Entregados del
+      // Reporte sigue teniendo su botón individual.)
       const cliNombre = (r.cliente_nombre || '').toLowerCase();
       // 'organico' es alias historico de 'local'
       const origenVal = (r.origen === 'publicidad') ? 'publicidad' : 'local';
@@ -866,7 +868,7 @@ async function cargarActivos() {
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
           <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
-          <td class="actions-cell">${editar} ${cargar} ${verPdf} ${xlsx} ${transitions} ${zip} ${nueva} ${del}</td>
+          <td class="actions-cell">${editar} ${cargar} ${verPdf} ${xlsx} ${transitions} ${zip} ${nueva}</td>
         </tr>
       `;
     }).join('');
