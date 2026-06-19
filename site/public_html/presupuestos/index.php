@@ -150,6 +150,20 @@ h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px
 /* Header sticky: queda fijo arriba mientras scrolleás las filas. El th
    ya tiene fondo solido (var(--dk)), asi que no se transparenta. */
 .table-wrap thead th{position:sticky;top:0;z-index:5}
+/* Selección múltiple */
+.col-check{width:34px;text-align:center;padding-left:14px!important;padding-right:6px!important}
+.col-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--gd)}
+tr.row-sel td{background:var(--gd-soft)}
+.bulk-bar{display:none;align-items:center;gap:14px;background:var(--dk);color:var(--cr);border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;box-shadow:var(--shadow);animation:bulkIn .18s ease}
+.bulk-bar.show{display:flex}
+@keyframes bulkIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.bulk-count{font-size:13px;font-weight:600;letter-spacing:.02em}
+.bulk-count b{color:var(--gd);font-size:15px}
+.bulk-del{display:inline-flex;align-items:center;gap:7px;background:#C0392B;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:filter .15s;margin-left:auto}
+.bulk-del:hover{filter:brightness(1.08)}
+.bulk-del svg{width:15px;height:15px}
+.bulk-clear{background:transparent;border:1px solid rgba(240,233,221,.3);color:var(--cr);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.bulk-clear:hover{background:rgba(240,233,221,.1)}
 .table-wrap table{box-shadow:none;border:0;border-radius:0}
 table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
 thead{background:var(--dk)}
@@ -481,10 +495,19 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
     </button>
   </div>
 
+  <div class="bulk-bar" id="bulk-bar">
+    <span class="bulk-count"><b id="bulk-n">0</b> seleccionado(s)</span>
+    <button class="bulk-del" onclick="borrarSeleccionados()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      Eliminar seleccionados
+    </button>
+    <button class="bulk-clear" onclick="limpiarSeleccion()">Cancelar</button>
+  </div>
   <div class="table-wrap">
   <table id="activos-tabla">
     <thead>
       <tr>
+        <th class="col-check"><input type="checkbox" id="check-all" onchange="toggleCheckAll(this)" title="Seleccionar todos" aria-label="Seleccionar todos"></th>
         <th>N°</th>
         <th>Cliente</th>
         <th>Celular</th>
@@ -497,7 +520,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       </tr>
     </thead>
     <tbody id="activos-body">
-      <tr><td colspan="9" class="loading">Cargando...</td></tr>
+      <tr><td colspan="10" class="loading">Cargando...</td></tr>
     </tbody>
   </table>
   </div>
@@ -788,6 +811,8 @@ function exportarExcel() {
 }
 
 async function cargarActivos() {
+  // La selección no cruza cargas/paginas (evita borrar filas que ya no ves)
+  _selActivos.clear();
   const q = document.getElementById('filter-q').value.trim();
   const estado = document.getElementById('filter-estado').value;
   const origen = document.getElementById('filter-origen').value;
@@ -799,12 +824,12 @@ async function cargarActivos() {
     const r = await fetch(url, { credentials: 'same-origin' });
     const d = await r.json();
     if (!d.ok) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">Error: ${d.error}</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Error: ${d.error}</td></tr>`;
       _activosCache = [];
       return;
     }
     if (d.results.length === 0) {
-      document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">Sin resultados</td></tr>`;
+      document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">Sin resultados</td></tr>`;
       document.getElementById('activos-pagination').innerHTML = '';
       _activosCache = [];
       return;
@@ -828,8 +853,11 @@ async function cargarActivos() {
       const origenVal = (r.origen === 'publicidad') ? 'publicidad' : 'local';
       const origenLabel = (origenVal === 'publicidad') ? 'Publicidad' : 'Local';
       const origenCls = (origenVal === 'publicidad') ? 'pub' : 'org';
+      const selKey = `${r.cliente_nro}-${r.sub}`;
+      const isSel = _selActivos.has(selKey);
       return `
-        <tr>
+        <tr class="${isSel ? 'row-sel' : ''}" data-selkey="${selKey}">
+          <td class="col-check"><input type="checkbox" class="row-check" data-nro="${r.cliente_nro}" data-sub="${r.sub}" data-nombre="${escapeHtml(cliNombre || r.cliente_nro)}" onchange="toggleRowSel(this)" ${isSel ? 'checked' : ''} aria-label="Seleccionar ${selKey}"></td>
           <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
           <td><span class="cliente-nombre" contenteditable="true" data-nro="${r.cliente_nro}" data-orig="${escapeHtml(cliNombre)}" onblur="onClienteNombreBlur(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el nombre">${cliNombre ? escapeHtml(cliNombre) : '—'}</span>${r.cliente_dni ? `<span class="cliente-dni">DNI ${escapeHtml(r.cliente_dni)}</span>` : ''}</td>
           <td>${r.cliente_celular ? `<span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : '<span class="muted">—</span>'}</td>
@@ -843,13 +871,14 @@ async function cargarActivos() {
       `;
     }).join('');
     document.getElementById('activos-body').innerHTML = rows;
+    _refreshBulkBar();
 
     const totalPages = Math.ceil(d.total / d.per_page);
     document.getElementById('activos-pagination').innerHTML = totalPages > 1
       ? `<button onclick="_activosPage=Math.max(1,_activosPage-1);cargarActivos()" ${_activosPage<=1?'disabled':''}>← Anterior</button> Página ${d.page} de ${totalPages} · ${d.total} resultados <button onclick="_activosPage=Math.min(${totalPages},_activosPage+1);cargarActivos()" ${_activosPage>=totalPages?'disabled':''}>Siguiente →</button>`
       : `${d.total} resultados`;
   } catch (e) {
-    document.getElementById('activos-body').innerHTML = `<tr><td colspan="9" class="empty">No se pudo cargar (${e.message})</td></tr>`;
+    document.getElementById('activos-body').innerHTML = `<tr><td colspan="10" class="empty">No se pudo cargar (${e.message})</td></tr>`;
   }
 }
 
@@ -1557,6 +1586,85 @@ async function cargarReporte() {
 
 // Cache de entregados (para que abrirModalEditar los encuentre)
 let _entregadosCache = [];
+
+// ============================================================
+// Selección múltiple + borrado masivo (tab Activos)
+// ============================================================
+const _selActivos = new Set(); // keys "nro-sub"
+
+function _refreshBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const n = _selActivos.size;
+  document.getElementById('bulk-n').textContent = n;
+  bar.classList.toggle('show', n > 0);
+  // Estado del check-all: marcado si todas las filas visibles están sel.
+  const checks = document.querySelectorAll('.row-check');
+  const all = document.getElementById('check-all');
+  if (all && checks.length) {
+    const visSel = Array.from(checks).filter(c => c.checked).length;
+    all.checked = visSel === checks.length;
+    all.indeterminate = visSel > 0 && visSel < checks.length;
+  }
+}
+
+function toggleRowSel(cb) {
+  const key = `${cb.dataset.nro}-${cb.dataset.sub}`;
+  if (cb.checked) _selActivos.add(key); else _selActivos.delete(key);
+  const tr = cb.closest('tr');
+  if (tr) tr.classList.toggle('row-sel', cb.checked);
+  _refreshBulkBar();
+}
+
+function toggleCheckAll(cb) {
+  document.querySelectorAll('.row-check').forEach(rc => {
+    rc.checked = cb.checked;
+    const key = `${rc.dataset.nro}-${rc.dataset.sub}`;
+    if (cb.checked) _selActivos.add(key); else _selActivos.delete(key);
+    const tr = rc.closest('tr');
+    if (tr) tr.classList.toggle('row-sel', cb.checked);
+  });
+  _refreshBulkBar();
+}
+
+function limpiarSeleccion() {
+  _selActivos.clear();
+  document.querySelectorAll('.row-check').forEach(rc => { rc.checked = false; rc.closest('tr')?.classList.remove('row-sel'); });
+  const all = document.getElementById('check-all');
+  if (all) { all.checked = false; all.indeterminate = false; }
+  _refreshBulkBar();
+}
+
+function borrarSeleccionados() {
+  const items = Array.from(_selActivos).map(k => {
+    const i = k.lastIndexOf('-');
+    return { nro: k.slice(0, i), sub: parseInt(k.slice(i + 1)) };
+  });
+  if (!items.length) return;
+  abrirModal(
+    'Eliminar seleccionados',
+    `¿Eliminar <b>${items.length}</b> presupuesto(s) seleccionado(s)?<br><br>Esta acción no se puede deshacer.`,
+    async () => {
+      cerrarModal();
+      let ok = 0, fail = 0;
+      for (const it of items) {
+        try {
+          const r = await fetch('/calculadora/api/delete.php', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cliente_nro: it.nro, sub: it.sub })
+          });
+          const d = await r.json();
+          if (d.ok) ok++; else fail++;
+        } catch (e) { fail++; }
+      }
+      _selActivos.clear();
+      if (fail === 0) toast(`${ok} presupuesto(s) eliminado(s).`, 'success', { title: 'Listo' });
+      else toast(`${ok} eliminado(s), ${fail} con error.`, fail && !ok ? 'error' : 'success', { title: 'Borrado parcial' });
+      refrescarVista();
+    },
+    'btn-danger'
+  );
+}
 // Filtro de origen para el tab Reporte: '' = todos, 'publicidad', 'local'
 let _reporteOrigen = '';
 
