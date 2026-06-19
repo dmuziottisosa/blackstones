@@ -213,11 +213,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 /* === ACTION BUTTONS — agrupados por jerarquía === */
 .actions-cell{display:flex;gap:4px;flex-wrap:nowrap;align-items:center;white-space:nowrap}
 .actions-cell button,.actions-cell a{font-size:11px;padding:5px 9px;border-radius:5px;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;line-height:1.2;letter-spacing:.005em}
-/* Primary: + Nueva (outline gold sutil, no domina la fila) */
-.actions-cell .act-primary{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
-.actions-cell .act-primary:hover{background:var(--gd);color:#1A1816;border-color:var(--gd);transform:translateY(-1px);box-shadow:0 2px 8px var(--gd-glow)}
-[data-theme="dark"] .actions-cell .act-primary{color:var(--gd)}
-[data-theme="dark"] .actions-cell .act-primary:hover{background:var(--gd);color:#1A1816}
+/* (act-primary '+ Nueva' eliminada — se quitó esa acción de la tabla) */
 /* Utility: Ver PDF, Cargar (outline subtle) */
 .actions-cell .act-util{background:transparent;color:var(--text2);border-color:var(--border)}
 .actions-cell .act-util:hover{background:var(--gd-soft);color:var(--gdd);border-color:var(--gd)}
@@ -843,7 +839,6 @@ async function cargarActivos() {
       const verPdf = `<a class="act-util" href="/calculadora/api/render-pdf.php?nro=${r.cliente_nro}&sub=${r.sub}" target="_blank">PDF</a>`;
       const xlsx = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&autoxlsx=1" target="_blank" title="Descargar Excel detallado de este presupuesto">Excel</a>`;
       const cargar = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}" target="_blank">Cargar</a>`;
-      const nueva = `<a class="act-primary" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&blank=1" target="_blank" title="Cotizar otra cosa para este mismo cliente">+ Nueva</a>`;
       const zip = r.estado === 'entregado'
         ? `<a class="act-zip" href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
         : '';
@@ -868,7 +863,7 @@ async function cargarActivos() {
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
           <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
-          <td class="actions-cell">${editar} ${cargar} ${verPdf} ${xlsx} ${transitions} ${zip} ${nueva}</td>
+          <td class="actions-cell">${editar} ${cargar} ${verPdf} ${xlsx} ${transitions} ${zip}</td>
         </tr>
       `;
     }).join('');
