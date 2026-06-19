@@ -836,8 +836,6 @@ async function cargarActivos() {
         `<button class="act-trans act-trans-${t}" onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${t}')">→ ${ESTADOS_LABELS[t]}</button>`
       ).join('');
       const editar = `<button class="act-util act-edit" onclick="abrirModalEditar('${r.cliente_nro}', ${r.sub})" title="Edición rápida (cliente, concepto, montos, fecha)" aria-label="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`;
-      const verPdf = `<a class="act-util" href="/calculadora/api/render-pdf.php?nro=${r.cliente_nro}&sub=${r.sub}" target="_blank">PDF</a>`;
-      const xlsx = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}&autoxlsx=1" target="_blank" title="Descargar Excel detallado de este presupuesto">Excel</a>`;
       const cargar = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}" target="_blank">Cargar</a>`;
       const zip = r.estado === 'entregado'
         ? `<a class="act-zip" href="/calculadora/api/download-zip.php?nro=${r.cliente_nro}&sub=${r.sub}">⬇ ZIP</a>`
@@ -863,7 +861,7 @@ async function cargarActivos() {
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
           <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
-          <td class="actions-cell">${editar} ${cargar} ${verPdf} ${xlsx} ${transitions} ${zip}</td>
+          <td class="actions-cell">${editar} ${cargar} ${transitions} ${zip}</td>
         </tr>
       `;
     }).join('');
