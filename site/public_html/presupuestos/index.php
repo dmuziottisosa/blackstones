@@ -147,6 +147,16 @@ h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px
    es mas ancha que el container (muchas columnas + acciones), scrollea
    adentro del wrapper en vez de desbordar y descentrar el layout. */
 .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
+/* Barra de scroll horizontal duplicada ARRIBA de la tabla:
+   un div hermano con la misma anchura virtual que la tabla, sincronizado
+   bidireccionalmente por JS. Cuando la tabla no requiere scroll, la barra
+   se oculta sola (con .no-overflow). */
+.table-scroll-top{width:100%;overflow-x:auto;overflow-y:hidden;height:14px;border-radius:8px;margin-bottom:8px;background:transparent;scrollbar-width:thin;scrollbar-color:var(--gd) transparent}
+.table-scroll-top::-webkit-scrollbar{height:10px}
+.table-scroll-top::-webkit-scrollbar-track{background:transparent}
+.table-scroll-top::-webkit-scrollbar-thumb{background:var(--gd);border-radius:8px;border:2px solid var(--bg)}
+.table-scroll-top.no-overflow{display:none}
+.table-scroll-top-inner{height:1px}
 .table-wrap table{box-shadow:none;border:0;border-radius:0}
 table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
 thead{background:var(--dk)}
@@ -477,7 +487,8 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
     </button>
   </div>
 
-  <div class="table-wrap">
+  <div class="table-scroll-top" id="activos-scroll-top" aria-hidden="true"><div class="table-scroll-top-inner"></div></div>
+  <div class="table-wrap" id="activos-table-wrap">
   <table id="activos-tabla">
     <thead>
       <tr>
@@ -839,6 +850,7 @@ async function cargarActivos() {
       `;
     }).join('');
     document.getElementById('activos-body').innerHTML = rows;
+    _syncTopScroll();
 
     const totalPages = Math.ceil(d.total / d.per_page);
     document.getElementById('activos-pagination').innerHTML = totalPages > 1
@@ -1553,6 +1565,41 @@ async function cargarReporte() {
 
 // Cache de entregados (para que abrirModalEditar los encuentre)
 let _entregadosCache = [];
+
+// ============================================================
+// Sincronizacion de la barra de scroll superior con la tabla.
+// Patron clasico: barra dummy arriba con el mismo ancho virtual que la
+// tabla, ambas se escuchan mutuamente. Idempotente — se puede llamar
+// despues de cada render. Se oculta sola si no hay overflow.
+// ============================================================
+let _topScrollWired = false;
+function _syncTopScroll() {
+  const top  = document.getElementById('activos-scroll-top');
+  const wrap = document.getElementById('activos-table-wrap');
+  if (!top || !wrap) return;
+  const inner = top.firstElementChild;
+  const tbl = wrap.querySelector('table');
+  const needs = tbl && tbl.scrollWidth > wrap.clientWidth + 1;
+  top.classList.toggle('no-overflow', !needs);
+  if (!needs) { inner.style.width = '0'; return; }
+  // El inner manda el ancho virtual = scrollWidth de la tabla
+  inner.style.width = tbl.scrollWidth + 'px';
+  if (!_topScrollWired) {
+    let lockTop = false, lockBot = false;
+    top.addEventListener('scroll', () => {
+      if (lockTop) { lockTop = false; return; }
+      lockBot = true; wrap.scrollLeft = top.scrollLeft;
+    });
+    wrap.addEventListener('scroll', () => {
+      if (lockBot) { lockBot = false; return; }
+      lockTop = true; top.scrollLeft = wrap.scrollLeft;
+    });
+    window.addEventListener('resize', _syncTopScroll, { passive: true });
+    _topScrollWired = true;
+  }
+  // Estado inicial: ambos arrancan en 0
+  top.scrollLeft = wrap.scrollLeft;
+}
 // Filtro de origen para el tab Reporte: '' = todos, 'publicidad', 'local'
 let _reporteOrigen = '';
 
