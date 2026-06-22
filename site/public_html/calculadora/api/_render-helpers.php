@@ -506,7 +506,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     echo '<div><b>Anticipo del 50 %</b> a la aceptación del presupuesto · <b>Saldo restante</b> contra entrega en obra.<br><span style="color:#6B6560;font-style:italic">La fabricación se inicia una vez acreditada la seña.</span></div>';
 
     echo '<div style="font-family:\'Fraunces\',serif;font-weight:600;color:#1A1816;font-size:11px;letter-spacing:.04em;margin:14px 0 6px;border-bottom:1px solid rgba(196,167,125,.35);padding-bottom:4px">ALCANCE DEL PRESUPUESTO</div>';
-    echo '<div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> Incluye la <b>fabricación</b> de los trabajos detallados y <b>zócalos perimetrales de hasta 5 cm</b> de altura si el cliente lo requiere.</div>';
+    echo '<div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> Incluye la <b>fabricación</b> de los trabajos detallados <b>(con las medidas indicadas)</b> y <b>zócalos perimetrales de hasta 5 cm</b> de altura si el cliente lo requiere.</div>';
     echo '<div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> El <b>traslado e instalación</b> de los trabajos se cotiza aparte según la zona.</div>';
     echo '<div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> No incluye trabajos de plomería ni instalación de equipos eléctricos como anafes, campanas, hornos u otros artefactos.</div>';
     echo '<div><b style="color:#C4A77D">●</b> No incluye subida de piezas por escalera; este servicio se cotiza por separado en función del piso y la complejidad de acceso.</div>';
