@@ -212,6 +212,10 @@ table select{cursor:pointer}
 .flete-bar .cfg input#fleteManual{font-family:'Manrope',sans-serif;font-size:.85rem;font-weight:700;color:var(--ars);padding:5px 10px;border:1px solid var(--ars);border-radius:5px;background:var(--input-bg);width:130px;text-align:right;margin-left:6px;outline:none;transition:border-color .15s}
 .flete-bar .cfg input#fleteManual:focus{border-color:var(--ars);box-shadow:0 0 0 3px rgba(14,165,233,.12)}
 .flete-bar .cfg input#fleteManual::placeholder{color:var(--text2);font-weight:500}
+.flete-bar .cfg input#fleteZonaNombre{font-family:'Manrope',sans-serif;font-size:.85rem;font-weight:600;color:var(--text);padding:5px 10px;border:1px solid var(--border);border-radius:5px;background:var(--input-bg);width:170px;margin-left:6px;outline:none;transition:border-color .15s,box-shadow .15s}
+.flete-bar .cfg input#fleteZonaNombre:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-glow)}
+.flete-bar .cfg input#fleteZonaNombre.invalid{border-color:#dc3545;box-shadow:0 0 0 3px rgba(220,53,69,.14)}
+.flete-bar .cfg input#fleteZonaNombre::placeholder{color:var(--text2);font-weight:500}
 .flete-bar .flete-val{font-size:.9rem;font-weight:700;color:var(--gr);margin-left:auto}
 
 /* === ADICIONALES === */
@@ -624,6 +628,7 @@ table select{cursor:pointer}
   .flete-bar .cfg label{font-size:.65rem}
   .flete-bar .cfg select{flex:1;min-height:34px;font-size:.78rem}
   .flete-bar .cfg input#fleteManual{flex:1;min-height:34px}
+  .flete-bar .cfg input#fleteZonaNombre{flex:1 1 100%;min-height:34px;width:auto;margin-left:0}
   .flete-bar .flete-val{margin-left:auto;width:auto;text-align:right;font-size:.85rem;padding:0 4px}
   .flete-bar > div[style*="width:1px"]{display:none!important}
 
@@ -1001,6 +1006,7 @@ table select{cursor:pointer}
       <option value="300000">GBA — $ 300.000</option>
       <option value="manual">Otra zona…</option>
     </select>
+    <input id="fleteZonaNombre" type="text" placeholder="Nombre de la zona" maxlength="60" oninput="onFleteZonaNombreInput(this)" style="display:none">
     <input id="fleteManual" type="text" placeholder="Monto $" oninput="calc()" onfocus="this.value=stripDots(this.value)" onblur="onFleteManualBlur(this)" style="display:none">
   </div>
   <span class="flete-val" id="flete-display">$ 0</span>
@@ -2198,19 +2204,42 @@ function fmtARS(n){return'$ '+n.toLocaleString('es-AR',{maximumFractionDigits:0}
 function onFleteZonaChange(){
   const sel=document.getElementById('fleteZona');
   const inp=document.getElementById('fleteManual');
+  const nom=document.getElementById('fleteZonaNombre');
   if(sel.value==='manual'){
     inp.style.display='';
-    setTimeout(()=>inp.focus(),50);
+    if(nom)nom.style.display='';
+    setTimeout(()=>{if(nom)nom.focus();else inp.focus();},50);
   }else{
     inp.style.display='none';
     inp.value='';
+    if(nom){nom.style.display='none';nom.value='';nom.classList.remove('invalid');}
   }
+  calc();
+}
+function onFleteZonaNombreInput(el){
+  // Limpiar marca de error apenas el usuario escribe algo
+  if(el.value.trim())el.classList.remove('invalid');
   calc();
 }
 function onFleteManualBlur(el){
   const raw=parseFloat(stripDots(el.value))||0;
   el.value=raw>0?fmt(raw):'';
   calc();
+}
+// Valida que si la zona es "Otra zona" (manual), el nombre no quede vacío.
+// Devuelve true si OK; si falla, marca el input, lo enfoca y devuelve false.
+function validateFleteZonaNombre(){
+  const sel=document.getElementById('fleteZona');
+  if(!sel||sel.value!=='manual')return true;
+  const nom=document.getElementById('fleteZonaNombre');
+  const v=nom?nom.value.trim():'';
+  if(!v){
+    if(nom){nom.style.display='';nom.classList.add('invalid');nom.focus();}
+    alert('Pusiste "Otra zona" en el flete: completá el nombre de la zona antes de continuar.');
+    return false;
+  }
+  if(nom)nom.classList.remove('invalid');
+  return true;
 }
 function getFleteVal(){
   const sel=document.getElementById('fleteZona');
@@ -2224,7 +2253,11 @@ function getFleteVal(){
 function getFleteZonaLabel(){
   const sel=document.getElementById('fleteZona');
   if(!sel)return '';
-  if(sel.value==='manual')return 'Otra zona';
+  if(sel.value==='manual'){
+    const nom=document.getElementById('fleteZonaNombre');
+    const v=nom?nom.value.trim():'';
+    return v||'Otra zona';
+  }
   return sel.selectedOptions[0].text.split('—')[0].trim();
 }
 // True cuando el dropdown está explícitamente en "Sin flete" (value=0).
@@ -3686,6 +3719,7 @@ function renderAll(){Object.keys(D).forEach(renderSec)}
 function limpiar(){
   init();document.getElementById('pzL').value='1';document.getElementById('fleteZona').value='0';document.getElementById('factura').value='0';
   const fm=document.getElementById('fleteManual');if(fm){fm.value='';fm.style.display='none'}
+  const fzn=document.getElementById('fleteZonaNombre');if(fzn){fzn.value='';fzn.style.display='none';fzn.classList.remove('invalid')}
   // Adicionales
   ['esc','ang'].forEach(p=>{
     const c=document.getElementById(p+'Cant');if(c)c.value=0;
@@ -3872,6 +3906,7 @@ window.addEventListener('resize',_bsRepositionAutocomplete);
 // GENERAR EXCEL
 // ================================================================
 async function generarExcel(){
+  if(!validateFleteZonaNombre())return;
   const wb=new ExcelJS.Workbook();
   const ws=wb.addWorksheet('Presupuesto');
   // 6 columnas: # / Detalle (más ancho, ahora incluye color y material) / L / A / USD / ARS
@@ -4571,6 +4606,7 @@ async function generarExcel(){
 // GENERAR PDF (vía window.print → guardar como PDF)
 // ================================================================
 function generarPDF(){
+  if(!validateFleteZonaNombre())return;
   const cli=document.getElementById('cli').value||'—';
   const dir=document.getElementById('dir').value||'—';
   const cel=document.getElementById('cel').value||'—';
@@ -5068,8 +5104,10 @@ function toggleTheme(){
           var ang = (typeof getAdic === 'function') ? getAdic('ang') : { cant: 0, monto: 0, total: 0, mon: 'USD' };
           var fleteVal = (typeof getFleteVal === 'function') ? getFleteVal() : 0;
           var fleteZona = (typeof getFleteZonaLabel === 'function') ? getFleteZonaLabel() : (fz ? fz.value : '');
+          var fleteZonaNombre = '';
+          try { var _fzn = document.getElementById('fleteZonaNombre'); if (_fzn && fz && fz.value === 'manual') fleteZonaNombre = _fzn.value.trim(); } catch(e){}
           return {
-            flete:    { zona: fleteZona, monto: fleteVal },
+            flete:    { zona: fleteZona, zona_nombre: fleteZonaNombre, monto: fleteVal },
             escalera: esc,
             angulos:  ang
           };
@@ -5130,6 +5168,10 @@ function toggleTheme(){
         alert('Falta el celular del cliente.');
         reset();
         var celEl = document.getElementById('cel'); if (celEl) celEl.focus();
+        return;
+      }
+      if (typeof validateFleteZonaNombre === 'function' && !validateFleteZonaNombre()) {
+        reset();
         return;
       }
 
@@ -5250,6 +5292,14 @@ function toggleTheme(){
         if (ad.flete.monto){
           var fm = document.getElementById('fleteManual');
           if (fm && fz && fz.value === 'manual'){ fm.value = ad.flete.monto; if (typeof onFleteManualBlur === 'function'){ try { onFleteManualBlur(fm); } catch(e){} } }
+        }
+        // Restaurar nombre de zona custom cuando la cotización fue guardada en modo "Otra zona"
+        var fzn = document.getElementById('fleteZonaNombre');
+        if (fzn && fz && fz.value === 'manual'){
+          var nombreGuardado = ad.flete.zona_nombre || (ad.flete.zona && ad.flete.zona !== 'Otra zona' ? ad.flete.zona : '');
+          fzn.style.display = '';
+          fzn.value = nombreGuardado;
+          fzn.classList.remove('invalid');
         }
       }
       if (ad.escalera){ setVal('escCant', ad.escalera.cant); setVal('escMonto', ad.escalera.monto); var esm = document.getElementById('escMon'); if (esm && ad.escalera.mon) esm.value = ad.escalera.mon; }
