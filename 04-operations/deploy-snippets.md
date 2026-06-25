@@ -193,29 +193,40 @@ Para repos públicos con historial limpio: en vez de emitir Base64 de 273 KB, pe
 **Forma del bloque que la IA emite:**
 
 ```powershell
+# === BlackStones · deploy calc.html DESDE GITHUB (repo publico, sin token) ===
 Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
 $serverPath = "calculadora/calc.html"
-$githubRepo = "dmuziottisosa/blackstones"
-$commitSHA = "33f48926df1a629b7747d0c3baf4edded15d1357"  # ← actualizar al último commit
+$raw = "https://raw.githubusercontent.com/dmuziottisosa/blackstones/33f48926df1a629b7747d0c3baf4edded15d1357/site/public_html/calculadora/calc.html"  # ← actualizar SHA al último commit
 $tmp = Join-Path $env:TEMP ("bs_" + [guid]::NewGuid().ToString().Substring(0,8) + ".html")
 
-# Descargar desde GitHub raw (sin auth, público)
-curl.exe -s -o $tmp "https://raw.githubusercontent.com/$githubRepo/$commitSHA/$serverPath"
-if (-not (Test-Path $tmp)) { throw "GitHub download fallo" }
+# 1) Bajar de GitHub (con guards: no 404, tamano razonable, trae el cambio)
+curl.exe -L -f -o $tmp $raw
+if (-not (Test-Path $tmp) -or (Get-Item $tmp).Length -lt 100000) { throw "Descarga fallo o archivo muy chico. Aborto." }
+if (-not (Select-String -Path $tmp -Pattern 'fleteZonaNombre' -Quiet)) { Remove-Item $tmp; throw "El archivo no tiene el cambio esperado. Aborto." }
+Write-Host ("Bajados " + (Get-Item $tmp).Length + " bytes de GitHub") -ForegroundColor Cyan
 
-# Subir a FTP
+# 2) Subir por FTP a Hostinger
 curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -T $tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverPath"
 Remove-Item $tmp
-Start-Process "https://blackstones.com.ar/$serverPath`?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"
+Write-Host "Subido OK" -ForegroundColor Green
+Start-Process "https://blackstones.com.ar/calculadora/?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"
 ```
+
+**Los tres guards (validado end-to-end el 2026-06-25):**
+
+1. **`-L -f` en el download:** `-L` sigue redirects, `-f` hace que curl **falle con exit code** si GitHub devuelve un HTTP error (404, 500). Sin `-f`, curl baja la página HTML de error y la subiría a producción como si fuera la calc. Con `-f`, el archivo nunca se crea y el `Test-Path` aborta.
+2. **Guard de tamaño (`< 100000` → throw):** atrapa descargas truncadas o respuestas de error chicas. La calc real pesa ~312 KB; cualquier cosa menor a 100 KB es sospechosa.
+3. **Guard de contenido (`Select-String -Pattern 'fleteZonaNombre'`):** confirma que el archivo bajado **tiene el cambio que esperás** antes de pisar la live. Es el guard más importante: te protege de subir un SHA viejo por error. **Cambialo en cada deploy** por un string único del cambio nuevo (ver nota abajo).
 
 **Por qué esta estrategia es limpia:**
 
 - **Commit SHA en lugar de branch:** evita el problema de CDN cache (~5 min de staleness con branch names). SHA = inmutable.
-- **Sin Base64:** 12 líneas legibles vs. 273 KB de ruido. Si lo necesitás copiar a otra machine, es trivial.
+- **Sin Base64:** ~16 líneas legibles vs. 273 KB de ruido. Si lo necesitás copiar a otra machine, es trivial.
 - **Sin auth:** `raw.githubusercontent.com` es accesible sin GitHub token. Validado en repos públicos.
 - **Reproducible:** el SHA es el hash del commit exacto. Vos podés verificar en GitHub el archivo que vas a bajar.
-- **Fallback:** si el download falla, `Test-Path` lo atrapa antes de subir.
+- **Triple fallback:** si el download falla, devuelve algo chico, o no trae el cambio → aborta **antes** del FTP. La live queda intacta. Cero corrupción silenciosa.
+
+> ⚠️ **El guard de contenido es específico de cada deploy.** El `'fleteZonaNombre'` del ejemplo era el marcador del cambio de junio 2026. Cuando la IA emita un deploy nuevo, tiene que reemplazar ese patrón por un string único del cambio en cuestión (un id nuevo, una función nueva, un texto nuevo). Si lo dejás con el patrón viejo, el guard pasa pero no valida el cambio nuevo.
 
 **Cuándo NO usar Receta 7:**
 
@@ -226,12 +237,11 @@ Start-Process "https://blackstones.com.ar/$serverPath`?v=$([DateTimeOffset]::Now
 
 **Actualización del SHA cuando la IA hace commit:**
 
-La IA va a decir: "Commit: `abc123def456...`". Vos tomás esos primeros 40 caracteres (el SHA completo), reemplazás en el script y corres. Ejemplo:
+La IA va a emitir el bloque ya con el SHA correcto en la URL `$raw` y el guard de contenido ajustado al cambio nuevo. No tenés que editar nada a mano — copiá-pegá-corré. Si por algún motivo necesitás cambiar el SHA vos mismo, está embebido en la URL:
 
 ```
-✔ Committed: 33f48926df1a629b7747d0c3baf4edded15d1357
-                                                    ↑
-Copias este valor y lo pegás en $commitSHA del script.
+https://raw.githubusercontent.com/dmuziottisosa/blackstones/33f48926df1a629b7747d0c3baf4edded15d1357/site/public_html/...
+                                                            └──────────── SHA del commit (40 chars) ────────────┘
 ```
 
 ---
@@ -250,6 +260,8 @@ Copias este valor y lo pegás en $commitSHA del script.
 | `[[System.IO](http://System.IO).File]::...` o `[r.total](http://r.total)>0` en el script pegado | El chat autolinkea cualquier cadena con forma `palabra.palabra` que parezca dominio o namespace, **incluso dentro de bloques de código** | Ver § "Reglas para que el chat no rompa el script" abajo |
 | `curl: (67) Access denied: 500` después de un download silencioso | El download falló (`-s` lo ocultó) → `$tmp` no existe → upload sube archivo de 0 bytes | Sacar el `-s` del `curl` de download; agregar `if (-not (Test-Path $tmp))` guard |
 | Variables del `.env` aparecen vacías en `Write-Host` pero curl funciona OK | Es display-only: el chat autolinkea valores que parecen dominio en el output del terminal cuando se copia de vuelta al chat. El valor real está OK | Ignorar el display, confiar en que curl funcione |
+| `curl: (22) The requested URL returned error: 404` en Receta 7 | El SHA o el path en la URL `$raw` están mal, o el archivo no existe en ese commit | Verificar el SHA en GitHub; `-f` ya aborta sin tocar producción |
+| `El archivo no tiene el cambio esperado. Aborto.` en Receta 7 | El guard `Select-String` no encontró el patrón → bajaste un SHA viejo, o el patrón del guard quedó del deploy anterior | Confirmar que el SHA es el del commit nuevo; actualizar el `-Pattern` al string del cambio actual |
 
 ---
 
