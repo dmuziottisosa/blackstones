@@ -1,16 +1,27 @@
-# Deploy snippets — PowerShell · Base64-inline · infalible
+# Deploy snippets — PowerShell · Base64-inline · raw fetch · infalible
 
-> Estado: **layer-3 active belief.** Adoptado el 2026-05-02 después de descartar GitHub raw fetch (PAT fricción) y clone local (acoplamiento al filesystem del usuario).
+> Estado: **layer-3 active belief.** Adoptado el 2026-05-02 (Base64), evolucionó el 2026-06-25 (GitHub raw fetch para repos públicos).
 >
-> **Patrón canónico:**
-> 1. La IA modifica el archivo en el repo + commit a GitHub (source of truth).
-> 2. La IA emite, en la misma respuesta, un bloque PowerShell autocontenido con el archivo entero codificado en **Base64**.
-> 3. Vos copy-pasteás el bloque. PowerShell decodifica → escribe temp → curl FTP upload → borra temp → abre browser.
+> **Dos patrones canónicos según contexto:**
+> 
+> **Patrón A: GitHub raw fetch (PÚBLICO, ≤3 años, mantenido)** — Ver § Receta 7. 12 líneas, cero Base64, cero auth. Commit SHA = cache-bust automático.
+> 1. La IA modifica el archivo + commit a GitHub.
+> 2. La IA emite un bloque PowerShell que descarga desde `raw.githubusercontent.com/{repo}/{sha}/{path}`.
+> 3. Vos pegás el bloque. PowerShell descarga → escribe temp → curl FTP upload → borra temp → abre browser.
 >
-> **Por qué es infalible:**
+> **Patrón B: Base64 inline (CUALQUIER estado de repo)** — Ver § Receta 1. 6 líneas + Base64 payload. 
+> 1. La IA modifica el archivo + commit a GitHub (source of truth).
+> 2. La IA emite un bloque PowerShell autocontenido con el archivo entero codificado en **Base64**.
+> 3. Vos pegás el bloque. PowerShell decodifica → escribe temp → curl FTP upload → borra temp → abre browser.
+>
+> **Cuándo usar Receta 7 (raw) vs Receta 1 (Base64):**
+> - GitHub raw fetch: **repo es público, archivo existe en commit reciente, queremos el bloque más corto.**
+> - Base64: **repo es privado, archivo es nuevo sin commit, o preferís máxima robustez vs. brevedad.**
+>
+> **Por qué estos patrones funcionan:**
 > - Sin auth externa (no GitHub token, no `gh` CLI, no clone).
-> - Base64 es ASCII puro — sin quoting, sin escape, sin encoding traps.
-> - `FromBase64String` valida byte-por-byte. Si algo falla, falla con error visible.
+> - Base64 (Receta 1): ASCII puro — sin quoting, sin escape, sin encoding traps. `FromBase64String` valida byte-por-byte.
+> - Raw fetch (Receta 7): HTTP directo a CDN, cache-bust con SHA. Una línea de `curl`, una línea de `FTP upload`.
 > - Reproducible: bytes en GitHub = bytes en producción, garantizado.
 > - El usuario ve cada paso en consola.
 
@@ -171,6 +182,56 @@ $serverPath = "calculadora/calc.html"
 $dest = "$env:USERPROFILE\Desktop\bs_backup_$($serverPath -replace '/', '_')"
 curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -o $dest "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverPath"
 Write-Host "Bajado a $dest" -ForegroundColor Green
+```
+
+---
+
+## ⚡ Receta 7 — Deploy desde GitHub raw (repos públicos, brevedad máxima)
+
+Para repos públicos con historial limpio: en vez de emitir Base64 de 273 KB, pegás un bloque de 12 líneas que descarga directo desde GitHub.
+
+**Forma del bloque que la IA emite:**
+
+```powershell
+Get-Content D:\blackstones\.env | ForEach-Object { if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim() } }
+$serverPath = "calculadora/calc.html"
+$githubRepo = "dmuziottisosa/blackstones"
+$commitSHA = "33f48926df1a629b7747d0c3baf4edded15d1357"  # ← actualizar al último commit
+$tmp = Join-Path $env:TEMP ("bs_" + [guid]::NewGuid().ToString().Substring(0,8) + ".html")
+
+# Descargar desde GitHub raw (sin auth, público)
+curl.exe -s -o $tmp "https://raw.githubusercontent.com/$githubRepo/$commitSHA/$serverPath"
+if (-not (Test-Path $tmp)) { throw "GitHub download fallo" }
+
+# Subir a FTP
+curl.exe --user "${env:FTP_USER}:${env:FTP_PASS}" -T $tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$serverPath"
+Remove-Item $tmp
+Start-Process "https://blackstones.com.ar/$serverPath`?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"
+```
+
+**Por qué esta estrategia es limpia:**
+
+- **Commit SHA en lugar de branch:** evita el problema de CDN cache (~5 min de staleness con branch names). SHA = inmutable.
+- **Sin Base64:** 12 líneas legibles vs. 273 KB de ruido. Si lo necesitás copiar a otra machine, es trivial.
+- **Sin auth:** `raw.githubusercontent.com` es accesible sin GitHub token. Validado en repos públicos.
+- **Reproducible:** el SHA es el hash del commit exacto. Vos podés verificar en GitHub el archivo que vas a bajar.
+- **Fallback:** si el download falla, `Test-Path` lo atrapa antes de subir.
+
+**Cuándo NO usar Receta 7:**
+
+- Repo es **privado** → GitHub raw exige auth (GITHUB_TOKEN + vos no tenés PAT guardado).
+- El archivo **no existe en el commit** → 404 antes de que llegue a FTP.
+- El repo es **fork o muy viejo** → raw.githubusercontent.com puede no tener el commit cacheado.
+- Querés **máxima robustez sin pensar en detalles** → Receta 1 (Base64) funciona en cualquier contexto.
+
+**Actualización del SHA cuando la IA hace commit:**
+
+La IA va a decir: "Commit: `abc123def456...`". Vos tomás esos primeros 40 caracteres (el SHA completo), reemplazás en el script y corres. Ejemplo:
+
+```
+✔ Committed: 33f48926df1a629b7747d0c3baf4edded15d1357
+                                                    ↑
+Copias este valor y lo pegás en $commitSHA del script.
 ```
 
 ---
