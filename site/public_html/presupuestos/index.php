@@ -228,6 +228,10 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 [data-theme="dark"] .actions-cell .act-trans-aprobado:hover{background:#0E2A18;color:#34D670;border-color:#34D670}
 [data-theme="dark"] .actions-cell .act-trans-entregado:hover{background:#2A2522;color:#C4A77D;border-color:#C4A77D}
 [data-theme="dark"] .actions-cell .act-trans-perdido:hover{background:#2A1414;color:#E26666;border-color:#E26666}
+/* Back: ← Estado (retroceso paso a paso). Sutil y diferenciado del avance
+   para evitar clicks por error junto a "→ Entregado" que sí es destructivo. */
+.actions-cell .act-back{background:transparent;color:var(--text2);border-color:transparent;opacity:.62;font-weight:500}
+.actions-cell .act-back:hover{opacity:1;background:var(--gd-soft);color:var(--gdd);border-color:var(--border)}
 /* ZIP: distinct */
 .actions-cell .act-zip{background:transparent;color:#1F8F47;border-color:#9DD9B0;font-weight:700}
 .actions-cell .act-zip:hover{background:#DDF2DD;border-color:#1F8F47;transform:translateY(-1px)}
@@ -718,6 +722,15 @@ const TRANSICIONES = {
   perdido: []
 };
 
+// Retroceso paso a paso (un solo estado hacia atrás). La cadena es
+// reversible hasta borrador: aprobado → enviado → borrador. perdido se
+// recupera a enviado. entregado se devuelve a aprobado desde el Reporte.
+const TRANSICIONES_BACK = {
+  enviado: 'borrador',
+  aprobado: 'enviado',
+  perdido: 'enviado'
+};
+
 // === FORMATEO ===
 const MESES_ABBR = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 function fmtFecha(s) {
@@ -835,6 +848,9 @@ async function cargarActivos() {
       const transitions = (TRANSICIONES[r.estado] || []).map(t =>
         `<button class="act-trans act-trans-${t}" onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${t}')">→ ${ESTADOS_LABELS[t]}</button>`
       ).join('');
+      const back = TRANSICIONES_BACK[r.estado]
+        ? `<button class="act-trans act-back" onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${TRANSICIONES_BACK[r.estado]}')" title="Volver a ${ESTADOS_LABELS[TRANSICIONES_BACK[r.estado]]}">← ${ESTADOS_LABELS[TRANSICIONES_BACK[r.estado]]}</button>`
+        : '';
       const editar = `<button class="act-util act-edit" onclick="abrirModalEditar('${r.cliente_nro}', ${r.sub})" title="Edición rápida (cliente, concepto, montos, fecha)" aria-label="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`;
       const cargar = `<a class="act-util" href="/calculadora/?load=${r.cliente_nro}-${r.sub}" target="_blank">Cargar</a>`;
       const zip = r.estado === 'entregado'
@@ -861,7 +877,7 @@ async function cargarActivos() {
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
           <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
-          <td class="actions-cell">${editar} ${cargar} ${transitions} ${zip}</td>
+          <td class="actions-cell">${editar} ${cargar} ${transitions} ${back} ${zip}</td>
         </tr>
       `;
     }).join('');

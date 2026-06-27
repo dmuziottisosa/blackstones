@@ -179,23 +179,25 @@ Campos específicos:
 
 ### 4.1 Diagrama
 
+Las flechas `▲` indican el retroceso paso a paso (manual, solo re-etiqueta).
+
 ```
                     ┌─────────────┐
                     │  borrador   │  (default al crear)
                     └──────┬──────┘
-                           │
+                           │ ▲ (← desde enviado)
                     ┌──────┴──────┐
                     ▼             ▼
               ┌──────────┐  ┌──────────┐
-              │ enviado  │  │ perdido  │
+              │ enviado  │◄─┤ perdido  │  (perdido → enviado: recupera)
               └────┬─────┘  └──────────┘
-                   │
+                   │ ▲ (← desde aprobado)
             ┌──────┴──────┐
             ▼             ▼
       ┌──────────┐  ┌──────────┐
       │ aprobado │  │ perdido  │
       └────┬─────┘  └──────────┘
-           │
+           │ ▲ (← "devolver a activos" desde el Reporte)
            ▼
      ┌────────────┐
      │ entregado  │ ─► dispara borrado de hermanas (no entregadas) +
@@ -205,18 +207,24 @@ Campos específicos:
 
 ### 4.2 Transiciones permitidas
 
-| Desde | A | Trigger |
-|---|---|---|
-| borrador | enviado | **Manual** desde página de presupuestos. |
-| borrador | perdido | **Manual**. |
-| enviado | aprobado | **Manual**. |
-| enviado | perdido | **Manual**. |
-| aprobado | entregado | **Manual**. Dispara aviso UI + **borrado inmediato de hermanas no entregadas** (ver § 4.4). |
-| entregado | (borrado) | Automático por cron, +60 días después de `entregado_at`. NO hay light-archive intermedio — eliminación completa. |
+| Desde | A | Dirección | Trigger |
+|---|---|---|---|
+| borrador | enviado | avance | **Manual** desde página de presupuestos. |
+| borrador | perdido | avance | **Manual**. |
+| enviado | aprobado | avance | **Manual**. |
+| enviado | perdido | avance | **Manual**. |
+| aprobado | entregado | avance | **Manual**. Dispara aviso UI + **borrado inmediato de hermanas no entregadas** (ver § 4.4). |
+| aprobado | enviado | retroceso | **Manual**. Botón `← Enviado`. Solo re-etiqueta. |
+| enviado | borrador | retroceso | **Manual**. Botón `← Borrador`. Solo re-etiqueta. |
+| perdido | enviado | retroceso | **Manual**. Recupera un presupuesto marcado perdido por error. |
+| entregado | aprobado | retroceso | **Manual** ("devolver a activos" desde el Reporte). Limpia `entregado_at` + borra el ZIP. NO recupera hermanas (ya no existen). |
+| entregado | (borrado) | — | Automático por cron, +60 días después de `entregado_at`. NO hay light-archive intermedio — eliminación completa. |
 
 **Todas las transiciones de estado son manuales.** Sin auto-transiciones por exportación ni por otros disparadores. El equipo decide explícitamente cada cambio desde la página de presupuestos.
 
-**Sin transiciones inversas.** Si el cliente "vuelve" después de perder, se crea sub-versión nueva con estado `borrador`, no se reabre la perdida.
+**Retroceso paso a paso (agregado 2026-06-27).** La cadena `aprobado → enviado → borrador` es reversible un estado a la vez, para corregir un cambio de estado hecho por error. Los retrocesos solo re-etiquetan la cotización (registran la transición en `transiciones[]`); no borran ni regeneran datos — salvo `entregado → aprobado`, que limpia `entregado_at` y borra el ZIP. En la UI los botones de retroceso usan flecha `←` y estilo sutil, separados visualmente del avance destructivo `→ Entregado`.
+
+> **Nota histórica:** hasta el 2026-06-27 el contrato decía "sin transiciones inversas" y para recuperar un presupuesto había que crear una sub-versión nueva. Se revirtió esa regla porque en la operación real era común marcar un estado por error (ej: aprobar antes de tiempo) sin forma de corregirlo. La cadena reversible resuelve eso sin perder el historial en `transiciones[]`.
 
 ### 4.3 Campo `transiciones[]`
 

@@ -11,10 +11,18 @@
 //   }
 //
 // Reglas (ver json-contract-v1.md § 4.2):
+//   Avance:
 //   - borrador → enviado | perdido
 //   - enviado → aprobado | perdido
 //   - aprobado → entregado
-//   - SIN transiciones inversas
+//   Retroceso paso a paso (agregado 2026-06-27 — la cadena es reversible
+//   hasta borrador, el primer estado):
+//   - aprobado → enviado
+//   - enviado  → borrador
+//   - perdido  → enviado  (recuperar un presupuesto marcado perdido)
+//   - entregado → aprobado (ya existía: "devolver a activos")
+//   Estos retrocesos solo re-etiquetan; no borran ni regeneran nada
+//   (salvo entregado → aprobado, que limpia entregado_at y el ZIP).
 //   - Al pasar a "entregado":
 //     * Borrar todas las hermanas no-entregado del mismo cliente.
 //     * Marcar `entregado_at` en la cotización.
@@ -52,12 +60,15 @@ if (!in_array($nuevo_estado, $VALID_STATES, true)) bs_error('nuevo_estado invál
 // Reglas de transición permitidas
 $ALLOWED = [
     'borrador'  => ['enviado', 'perdido'],
-    'enviado'   => ['aprobado', 'perdido'],
-    'aprobado'  => ['entregado'],
+    // enviado → borrador: retroceso paso a paso. Solo re-etiqueta.
+    'enviado'   => ['aprobado', 'perdido', 'borrador'],
+    // aprobado → enviado: retroceso paso a paso. Solo re-etiqueta.
+    'aprobado'  => ['entregado', 'enviado'],
     // entregado → aprobado: "devolver a activos". Reversión deliberada desde
     // el hub. NO recupera las hermanas borradas al entregar (ya no existen).
     'entregado' => ['aprobado'],
-    'perdido'   => [],
+    // perdido → enviado: recuperar un presupuesto marcado perdido por error.
+    'perdido'   => ['enviado'],
 ];
 
 $cliente_path = BS_CLIENTES_DIR . '/' . $cliente_nro . '.json';
