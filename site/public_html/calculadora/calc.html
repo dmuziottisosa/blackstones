@@ -2581,20 +2581,11 @@ function calc(){
       sm+=m2;
       if(it.mon==='USD'){su+=total;gusd+=total}else{sa+=total;gars+=total}
 
-      // Filtros por sección: requiere material + medidas mínimas + precio cargado
-      let valid=false;
-      if(s==='m')valid=it.mat&&it.d1&&it.d2&&it.price>0;
-      else if(s==='a')valid=it.mat&&it.d1&&it.d2&&it.price>0;
-      else if(s==='l'){
-        const pz=document.getElementById('pzL').value;
-        valid=it.mat&&it.price>0&&(pz==='1'?(it.d1&&it.d3):(it.d1&&it.d2&&it.d3&&it.d4));
-      }
-      else if(s==='i')valid=it.mat&&it.d1&&it.d2&&it.price>0;
-      else if(s==='b'){
-        const tipo=it.tipo||'Bacha armada';
-        if(tipo==='Con Traforo')valid=it.mat&&it.d1&&it.d2&&it.price>0;
-        else valid=it.mat&&it.d1&&it.d2&&it.d3&&it.d4&&it.price>0;
-      }
+      // Regla única (la misma que usa Excel via _itemHasTotal): si el item
+      // aporta al total (material + precio + m² > 0), aparece en el desglose.
+      // Antes cada sección exigía TODAS sus medidas y un baño sin las medidas
+      // de la bacha interior sumaba al total pero no se veía en el desglose.
+      const valid=!!(it.mat&&it.price>0&&m2>0);
 
       if(valid){
         const desc=(it.color||matLabel(it.mat))+(it.color&&it.mat?' ('+matLabel(it.mat)+')':'');
@@ -4623,20 +4614,10 @@ function generarPDF(){
   let sumU=0,sumA=0;
 
   let items='';
-  // Validador de fila válida para PDF
+  // Validador de fila válida para PDF — misma regla que el desglose en vivo
+  // y que Excel (_itemHasTotal): si aporta al total, aparece en el PDF.
   function _pdfRowValid(key,it){
-    if(key==='m'||key==='a')return it.mat&&it.d1&&it.d2&&it.price>0;
-    if(key==='l'){
-      const pz=document.getElementById('pzL').value;
-      return it.mat&&it.price>0&&(pz==='1'?(it.d1&&it.d3):(it.d1&&it.d2&&it.d3&&it.d4));
-    }
-    if(key==='i')return it.mat&&it.d1&&it.d2&&it.price>0;
-    if(key==='b'){
-      const tipo=it.tipo||'Bacha armada';
-      if(tipo==='Con Traforo')return it.mat&&it.d1&&it.d2&&it.price>0;
-      return it.mat&&it.d1&&it.d2&&it.d3&&it.d4&&it.price>0;
-    }
-    return false;
+    return !!(it.mat&&it.price>0&&calcM2(key,it)>0);
   }
 
   function addSec(key,label){

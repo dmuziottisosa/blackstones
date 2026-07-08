@@ -205,19 +205,14 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
         $secObj = $presup['secciones'][$secKey] ?? null;
         if (!$secObj || empty($secObj['items'])) continue;
 
-        // filtrar items válidos
+        // filtrar items válidos — misma regla que la calc (_itemHasTotal):
+        // material + precio + m² > 0 ⇒ el item aporta al total y se muestra.
+        // (Antes se exigían todas las medidas y un baño sin bacha interior
+        // sumaba al total pero desaparecía del desglose.)
         $valid = [];
         foreach ($secObj['items'] as $it) {
             if (empty($it['mat']) || empty($it['price'])) continue;
-            // Validador básico por sección
-            if ($secKey === 'm' || $secKey === 'a') { if (!$it['d1'] || !$it['d2']) continue; }
-            elseif ($secKey === 'l') { if (!$it['d1'] || !$it['d3']) continue; }
-            elseif ($secKey === 'i') { if (!$it['d1'] || !$it['d2']) continue; }
-            elseif ($secKey === 'b') {
-                $tipo = $it['tipo'] ?? 'Bacha armada';
-                if ($tipo === 'Con Traforo') { if (!$it['d1'] || !$it['d2']) continue; }
-                else { if (!$it['d1'] || !$it['d2'] || !$it['d3'] || !$it['d4']) continue; }
-            }
+            if (bs_calc_m2($secKey, $it, $pzL) <= 0) continue;
             $valid[] = $it;
         }
         if (empty($valid)) continue;
