@@ -31,6 +31,11 @@ function bs_mat_label($m) {
 function bs_is_sint($m) {
     return in_array($m, ['Xtone', 'Prima', 'Neolith', 'Dekton', 'Suprastone'], true);
 }
+// Fecha YYYY-MM-DD → DD/MM/AAAA (referencias de tipo de cambio en el render del hub)
+function bs_fmt_fecha_dmy($s) {
+    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})/', (string)$s, $m)) return $m[3] . '/' . $m[2] . '/' . $m[1];
+    return (string)$s;
+}
 
 // --------------------------------------------------------
 // Lógica de cálculo portada de calc.js
@@ -482,7 +487,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
         echo '<tr><td colspan="6" style="padding:0;height:3px;background:#C4A77D"></td></tr>';
         echo '<tr><td colspan="6" style="padding:0;height:6px;background:#FAF8F4"></td></tr>';
         echo '<tr style="background:#2A2522;color:#FAF8F4">';
-        echo '<td colspan="4" style="font-weight:700;padding:10px 12px;font-size:12px">TOTAL EN ARS · al cambio del día<br>';
+        echo '<td colspan="4" style="font-weight:700;padding:10px 12px;font-size:12px">TOTAL EN ARS · al cambio del ' . $h(bs_fmt_fecha_dmy($fecha)) . '<br>';
         echo '<span style="font-size:9px;color:#A89580;font-weight:400">USD ' . number_format($totU, 2, ',', '.') . ' × ' . $fARS($dolar) . ' por dólar</span></td>';
         echo '<td colspan="2" style="text-align:center;font-weight:700;color:#0EA5E9;font-size:14px;padding:10px">' . $fARS($totalCombinado) . '</td></tr>';
     }
@@ -490,8 +495,8 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     echo '</tbody></table>';
 
     // Tipo de cambio
-    echo '<div style="margin-top:12px;padding:8px;background:#FAF8F4;border-radius:4px;font-size:10px"><b>Tipo de cambio referencia:</b> ';
-    echo ($dolar > 0 ? 'USD 1 = ' . $fARS($dolar) . ' (Dólar Oficial Venta · DolarHoy)' : 'consultar al momento del pago');
+    echo '<div style="margin-top:12px;padding:8px;background:#FAF8F4;border-radius:4px;font-size:10px"><b>Tipo de cambio referencia' . ($dolar > 0 ? ' al ' . $h(bs_fmt_fecha_dmy($fecha)) : '') . ':</b> ';
+    echo ($dolar > 0 ? 'USD 1 = ' . $fARS($dolar) . ' (Dólar Oficial Venta · DolarHoy). Los importes en USD se convierten a esta cotización; sujeto al valor del día de pago.' : 'consultar al momento del pago');
     echo '</div>';
 
     // Notas editoriales

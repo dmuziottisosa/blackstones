@@ -1279,6 +1279,8 @@ const MAT_LABELS={
   'Suprastone':'Suprastone'
 };
 function matLabel(m){return MAT_LABELS[m]||m||''}
+// Fecha YYYY-MM-DD → DD/MM/AAAA (para las referencias de tipo de cambio en PDF/Excel)
+function fmtFechaDMY(s){const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}/${m[2]}/${m[1]}`:(s||'');}
 const SINT=['Xtone','Prima','Neolith','Dekton','Suprastone'];
 
 // === BASE DE DATOS DE COLORES (autocompletado) ===
@@ -4478,7 +4480,7 @@ async function generarExcel(){
     row++;
     // Bloque TOTAL EN ARS con fondo DK2
     fillR(row,fDk2);ws.mergeCells(`A${row}:D${row}`);
-    setC(row,1,`  TOTAL EN ARS · al cambio del día  (USD ${fmtUSD(tUSD).replace('USD ','')} × ${fmtARS(DOLAR_VENTA)})`,{name:'Arial',size:11,bold:true,color:{argb:'FFFAF8F4'}},fDk2);
+    setC(row,1,`  TOTAL EN ARS · al cambio del ${fmtFechaDMY(fechaVal)}  (USD ${fmtUSD(tUSD).replace('USD ','')} × ${fmtARS(DOLAR_VENTA)})`,{name:'Arial',size:11,bold:true,color:{argb:'FFFAF8F4'}},fDk2);
     ws.mergeCells(`E${row}:F${row}`);
     setC(row,5,totalCombinado,{name:'Arial',size:12,bold:true,color:{argb:ARS}},fDk2,{horizontal:'center',vertical:'middle'});
     ws.getRow(row).getCell(5).numFmt='$ #,##0';
@@ -4492,7 +4494,7 @@ async function generarExcel(){
   // Tipo cambio
   fillR(row,fCr);ws.mergeCells(`A${row}:F${row}`);
   const tipoCambioTxt=DOLAR_VENTA>0
-    ?`Tipo de cambio referencia: USD 1 = ${fmtARS(DOLAR_VENTA)} (Dólar Oficial Venta · DolarHoy)`
+    ?`Tipo de cambio referencia al ${fmtFechaDMY(fechaVal)}: USD 1 = ${fmtARS(DOLAR_VENTA)} (Dólar Oficial Venta · DolarHoy). Los importes en USD se convierten a esta cotización; sujeto al valor del día de pago.`
     :'Tipo de cambio referencia: consultar al momento del pago';
   setC(row,1,tipoCambioTxt,{name:'Arial',size:10,italic:true,color:{argb:'FF6B6560'}},fCr,{horizontal:'right',vertical:'middle'});
   row+=2;
@@ -4933,7 +4935,7 @@ function generarPDF(){
     // Separador dorado fino + respiro
     items+=`<tr><td colspan="6" style="padding:0;height:3px;background:#C4A77D"></td></tr>`;
     items+=`<tr><td colspan="6" style="padding:0;height:6px;background:#FAF8F4"></td></tr>`;
-    items+=`<tr style="background:#2A2522;color:#FAF8F4"><td colspan="4" style="font-weight:700;padding:10px 12px;font-size:12px">TOTAL EN ARS · al cambio del día<br><span style="font-size:9px;color:#A89580;font-weight:400">USD ${fmtUSD(totU).replace('USD ','')} × ${fmtARS(DOLAR_VENTA)} por dólar</span></td><td colspan="2" style="text-align:center;font-weight:700;color:#0EA5E9;font-size:14px;padding:10px">${fmtARS(totalCombinado)}</td></tr>`;
+    items+=`<tr style="background:#2A2522;color:#FAF8F4"><td colspan="4" style="font-weight:700;padding:10px 12px;font-size:12px">TOTAL EN ARS · al cambio del ${fmtFechaDMY(fecha)}<br><span style="font-size:9px;color:#A89580;font-weight:400">USD ${fmtUSD(totU).replace('USD ','')} × ${fmtARS(DOLAR_VENTA)} por dólar</span></td><td colspan="2" style="text-align:center;font-weight:700;color:#0EA5E9;font-size:14px;padding:10px">${fmtARS(totalCombinado)}</td></tr>`;
   }
 
   // VARIANTES (alternativas de color) — render diferido al final del documento
@@ -4973,7 +4975,7 @@ td,th{padding:5px 8px}
 <div style="background:#FAF8F4;padding:8px 12px;font-size:11px;display:flex;justify-content:space-between"><b>Presupuesto N° ${nro}</b><span>${fecha}</span></div>
 <table style="margin:8px 0"><tr><td><b>CLIENTE:</b> ${cli}</td><td><b>DNI/CUIT:</b> ${dni}</td></tr><tr><td><b>DIRECCIÓN:</b> ${dir}</td><td><b>CELULAR:</b> ${cel}</td></tr></table>
 <table><thead><tr style="background:#1A1816;color:#FAF8F4"><th style="text-align:center;font-size:10px;width:6%">CANT</th><th style="text-align:left;font-size:10px;width:48%;padding-left:10px">DETALLE</th><th style="text-align:center;font-size:10px;width:11%">L (m)</th><th style="text-align:center;font-size:10px;width:13%">A (m)</th><th style="text-align:center;font-size:10px;width:11%">USD</th><th style="text-align:center;font-size:10px;width:11%">PESOS $</th></tr></thead><tbody>${items}</tbody></table>
-<div style="margin-top:12px;padding:8px;background:#FAF8F4;border-radius:4px;font-size:10px"><b>Tipo de cambio referencia:</b> ${DOLAR_VENTA>0?`USD 1 = ${fmtARS(DOLAR_VENTA)} (Dólar Oficial Venta)`:'consultar al momento del pago'}</div>
+<div style="margin-top:12px;padding:8px;background:#FAF8F4;border-radius:4px;font-size:10px"><b>Tipo de cambio referencia${DOLAR_VENTA>0?` al ${fmtFechaDMY(fecha)}`:''}:</b> ${DOLAR_VENTA>0?`USD 1 = ${fmtARS(DOLAR_VENTA)} (Dólar Oficial Venta). Los importes en USD se convierten a esta cotización; sujeto al valor del día de pago.`:'consultar al momento del pago'}</div>
 <div class="notes-block" style="margin-top:12px;padding:14px 16px;background:#FAF8F4;border-radius:4px;font-size:10px;color:#3A332E;line-height:1.5">
   <div style="font-family:'Fraunces',serif;font-weight:600;color:#1A1816;font-size:11px;letter-spacing:.04em;margin-bottom:6px;border-bottom:1px solid rgba(196,167,125,.35);padding-bottom:4px">FORMA DE PAGO</div>
   <div><b>Anticipo del 50 %</b> a la aceptación del presupuesto · <b>Saldo restante</b> contra entrega en obra.<br><span style="color:#6B6560;font-style:italic">La fabricación se inicia una vez acreditada la seña.</span></div>
