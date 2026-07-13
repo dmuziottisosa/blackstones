@@ -65,7 +65,7 @@ function bs_calc_m2($s, $it, $pzL = '1') {
     if ($s === 'i') {
         if (!$d1 && !$d2) return 0;
         $regActive = bs_is_sint($it['mat'] ?? '') || (($it['reg'] ?? '') === 'Sí');
-        $regCm = floatval($it['rv'] ?? 5); if ($regCm <= 0) $regCm = 5;
+        $regCm = floatval($it['rv'] ?? 4); if ($regCm <= 0) $regCm = 4;
         $reg = $regActive ? ($regCm / 100) : 0;
         $tapa = ($d1 + $reg * 2) * ($d2 + $reg * 2);
         $alto = floatval($it['altoLat'] ?? 0); if ($alto <= 0) $alto = 0.90;

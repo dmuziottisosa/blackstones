@@ -2432,11 +2432,11 @@ function renderSec(s){
       // Sinterizado: input habilitado, mínimo 5. No sinterizado: dropdown Sí/No + input editable
       let regCellHtml;
       if(isS){
-        const v=it.rv||5;
-        regCellHtml=`<div style="display:flex;gap:3px;align-items:center;justify-content:center"><span style="font-size:.65rem;color:var(--text2)">Sí</span><input type="number" step="1" min="5" value="${v}" placeholder="5" oninput="upd('${s}',${i},'rv',this.value)" style="width:42px;font-size:.7rem"></div>`;
+        const v=it.rv||4;
+        regCellHtml=`<div style="display:flex;gap:3px;align-items:center;justify-content:center"><span style="font-size:.65rem;color:var(--text2)">Sí</span><input type="number" step="1" min="4" value="${v}" placeholder="4" oninput="upd('${s}',${i},'rv',this.value)" style="width:42px;font-size:.7rem"></div>`;
       }else{
         const sel=`<select style="width:48px;font-size:.7rem" onchange="upd('${s}',${i},'reg',this.value)"><option${it.reg!=='Sí'?' selected':''}>No</option><option${it.reg==='Sí'?' selected':''}>Sí</option></select>`;
-        const inp=it.reg==='Sí'?`<input type="number" step="1" min="5" value="${it.rv||5}" placeholder="5" oninput="upd('${s}',${i},'rv',this.value)" style="width:38px;font-size:.7rem">`:'';
+        const inp=it.reg==='Sí'?`<input type="number" step="1" min="4" value="${it.rv||4}" placeholder="4" oninput="upd('${s}',${i},'rv',this.value)" style="width:38px;font-size:.7rem">`:'';
         regCellHtml=`<div style="display:flex;gap:3px;align-items:center;justify-content:center">${sel}${inp}</div>`;
       }
       const nLatSel=`<select style="width:54px" onchange="upd('${s}',${i},'nLat',this.value)"><option${it.nLat==0?' selected':''}>0</option><option${it.nLat==1?' selected':''}>1</option><option${it.nLat==2?' selected':''}>2</option></select>`;
@@ -2480,7 +2480,7 @@ function calcM2(s,it){
     if(!it.d1&&!it.d2)return 0;
     // Isla: regrueso editable (default 5cm), aplica en los 4 lados
     const regActive=isSint(it.mat)||it.reg==='Sí';
-    const regCm=parseFloat(it.rv)||5;
+    const regCm=parseFloat(it.rv)||4;
     const reg=regActive?(regCm/100):0;
     const tapa=(it.d1+reg*2)*(it.d2+reg*2);
     // Laterales: alto x ancho. Si sinterizado, los laterales llevan regrueso en el alto en los 2 lados
@@ -2790,8 +2790,8 @@ function calc(){
   renderVariants();
 }
 
-function upd(s,i,f,v){if(['d1','d2','d3','d4','price','rv','altoLat'].includes(f))v=parseFloat(v)||0;if(f==='cant'||f==='nBachas')v=Math.max(1,parseInt(v)||1);D[s].items[i][f]=v;if(f==='reg'){if(s==='i'){if(v==='Sí'&&!D[s].items[i].rv)D[s].items[i].rv=5}else{if(v!=='Sin'&&D[s].items[i].rv===0)D[s].items[i].rv=5}renderSec(s)}if(f==='tipo')renderSec(s);if(f==='ag'&&s==='a'){if(!v||v==='Sin')D[s].items[i].agPrice=0;renderSec(s)}calc()}
-function updMat(s,i,v){D[s].items[i].mat=v;if(isSint(v)){if(s==='i'){D[s].items[i].reg='Sí';if(!D[s].items[i].rv)D[s].items[i].rv=5}else if(s==='b'){if(D[s].items[i].reg==='Sin')D[s].items[i].reg='Frente + 2 lat';if(!D[s].items[i].rv)D[s].items[i].rv=5}else{D[s].items[i].reg='L+A';D[s].items[i].rv=5}}else{if(s==='i'){D[s].items[i].reg='No'}else if(s!=='b'){D[s].items[i].reg='Sin';D[s].items[i].rv=0}}if(v)ensureSecOpen(s);renderSec(s);calc()}
+function upd(s,i,f,v){if(['d1','d2','d3','d4','price','rv','altoLat'].includes(f))v=parseFloat(v)||0;if(f==='cant'||f==='nBachas')v=Math.max(1,parseInt(v)||1);D[s].items[i][f]=v;if(f==='reg'){if(s==='i'){if(v==='Sí'&&!D[s].items[i].rv)D[s].items[i].rv=4}else{if(v!=='Sin'&&D[s].items[i].rv===0)D[s].items[i].rv=4}renderSec(s)}if(f==='tipo')renderSec(s);if(f==='ag'&&s==='a'){if(!v||v==='Sin')D[s].items[i].agPrice=0;renderSec(s)}calc()}
+function updMat(s,i,v){D[s].items[i].mat=v;if(isSint(v)){if(s==='i'){D[s].items[i].reg='Sí';if(!D[s].items[i].rv)D[s].items[i].rv=4}else if(s==='b'){if(D[s].items[i].reg==='Sin')D[s].items[i].reg='Frente + 2 lat';if(!D[s].items[i].rv)D[s].items[i].rv=4}else{D[s].items[i].reg='L+A';D[s].items[i].rv=4}}else{if(s==='i'){D[s].items[i].reg='No'}else if(s!=='b'){D[s].items[i].reg='Sin';D[s].items[i].rv=0}}if(v)ensureSecOpen(s);renderSec(s);calc()}
 function setQ(s,v){
   D[s].qty=parseInt(v)||1;
   // Defensive: si qty pasa el array, llenar con mks vacíos
@@ -2916,7 +2916,7 @@ function applyVariantToItem(orig,v,secKey){
   }else if(v.regMode==='inherit'){
     // Hereda el regrueso del original. Si es sinterizado y el original era < 5cm, sube a 5
     if(isSintMat){
-      const minRv=5;
+      const minRv=4;
       if(!it.rv||it.rv<minRv)it.rv=minRv;
       if(secKey==='i')it.reg='Sí';
       else if(secKey==='b'&&it.reg==='Sin')it.reg='Frente + 2 lat';
@@ -2926,9 +2926,9 @@ function applyVariantToItem(orig,v,secKey){
   }else{
     // auto: comportamiento estándar
     if(isSintMat){
-      if(secKey==='i'){it.reg='Sí';if(!it.rv||it.rv<5)it.rv=5}
-      else if(secKey==='b'&&it.reg==='Sin'){it.reg='Frente + 2 lat';it.rv=5}
-      else if(secKey!=='b'){it.reg='L+A';if(!it.rv||it.rv<5)it.rv=5}
+      if(secKey==='i'){it.reg='Sí';if(!it.rv||it.rv<4)it.rv=4}
+      else if(secKey==='b'&&it.reg==='Sin'){it.reg='Frente + 2 lat';it.rv=4}
+      else if(secKey!=='b'){it.reg='L+A';if(!it.rv||it.rv<4)it.rv=4}
     }else{
       // Material no sinterizado: respeta lo que tenga, no fuerza
     }
@@ -3618,9 +3618,9 @@ function pickColor(s,i,name,material,price,currency){
   it.mon=currency;
   // Reglas de regrueso según material seleccionado
   if(isSint(material)){
-    if(s==='i'){it.reg='Sí';if(!it.rv)it.rv=5}
-    else if(s==='b'){if(it.reg==='Sin')it.reg='Frente + 2 lat';if(!it.rv)it.rv=5}
-    else{it.reg='L+A';it.rv=5}
+    if(s==='i'){it.reg='Sí';if(!it.rv)it.rv=4}
+    else if(s==='b'){if(it.reg==='Sin')it.reg='Frente + 2 lat';if(!it.rv)it.rv=4}
+    else{it.reg='L+A';it.rv=4}
   }else{
     if(s==='i'){it.reg='No'}
     else if(s!=='b'){it.reg='Sin';it.rv=0}
