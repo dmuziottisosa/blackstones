@@ -886,66 +886,6 @@ table select{cursor:pointer}
   </div>
 </div>
 
-<!-- ALZADA -->
-<div class="sec" id="sec-a">
-  <div class="sh">
-    <button type="button" class="sh-toggle" onclick="toggleSec('a')" aria-expanded="false" aria-controls="body-a">
-      <div class="sh-title">
-        <svg class="sh-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        <h2>Cotización Alzada <span class="sec-count" id="cnt-a"></span></h2>
-      </div>
-      <div class="sh-summary" id="sum-a"><span class="sh-empty">vacía</span></div>
-    </button>
-    <div class="sh-ct"><label>Cantidad</label><select id="qty-a" onchange="setQ('a',this.value)"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option></select></div>
-  </div>
-  <div class="sec-body" id="body-a">
-    <div class="sec-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Elegí un material para comenzar a cotizar</div>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Etiqueta</th><th>Material</th><th>Color</th><th>Largo (m)</th><th>Ancho (m)</th><th>Traforo</th><th>$ Traforo</th><th>$/M²</th><th>Mon</th><th>M²</th><th>Total</th><th></th></tr></thead><tbody id="tb-a"></tbody></table></div>
-    <div class="add-row-btn-wrap"><button type="button" class="add-row-btn" onclick="addRow('a')" title="Agregar fila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar fila</button></div>
-    <div class="ssub"><span class="ssub-m2">M² <strong id="sm-a">0</strong></span><span class="ssub-usd"><strong id="su-a">—</strong></span><span class="ssub-ars"><strong id="sa-a">—</strong></span></div>
-  </div>
-</div>
-
-<!-- MESADA EN L -->
-<div class="sec" id="sec-l">
-  <div class="sh">
-    <button type="button" class="sh-toggle" onclick="toggleSec('l')" aria-expanded="false" aria-controls="body-l">
-      <div class="sh-title">
-        <svg class="sh-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        <h2>Cotización Mesada en L <span class="sec-count" id="cnt-l"></span></h2>
-      </div>
-      <div class="sh-summary" id="sum-l"><span class="sh-empty">vacía</span></div>
-    </button>
-    <div class="sh-ct"><label>Piezas</label><select id="pzL" onchange="renderAll();calc()"><option value="1">1 pieza</option><option value="2">2 piezas</option></select><label style="margin-left:6px">Cant</label><select id="qty-l" onchange="setQ('l',this.value)"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option></select></div>
-  </div>
-  <div class="sec-body" id="body-l">
-    <div class="sec-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Elegí un material para comenzar a cotizar</div>
-    <div class="tbl-wrap"><table><thead id="th-l"></thead><tbody id="tb-l"></tbody></table></div>
-    <div class="add-row-btn-wrap"><button type="button" class="add-row-btn" onclick="addRow('l')" title="Agregar fila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar fila</button></div>
-    <div class="ssub"><span class="ssub-m2">M² <strong id="sm-l">0</strong></span><span class="ssub-usd"><strong id="su-l">—</strong></span><span class="ssub-ars"><strong id="sa-l">—</strong></span></div>
-  </div>
-</div>
-
-<!-- ISLA -->
-<div class="sec" id="sec-i">
-  <div class="sh">
-    <button type="button" class="sh-toggle" onclick="toggleSec('i')" aria-expanded="false" aria-controls="body-i">
-      <div class="sh-title">
-        <svg class="sh-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        <h2>Cotización Isla <span class="sec-count" id="cnt-i"></span></h2>
-      </div>
-      <div class="sh-summary" id="sum-i"><span class="sh-empty">vacía</span></div>
-    </button>
-    <div class="sh-ct"><label>Cantidad</label><select id="qty-i" onchange="setQ('i',this.value)"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option></select></div>
-  </div>
-  <div class="sec-body" id="body-i">
-    <div class="sec-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Elegí un material para comenzar a cotizar</div>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Etiqueta</th><th>Material</th><th>Color</th><th>L tapa (m)</th><th>A tapa (m)</th><th>Regrueso</th><th>Alto lat (m)</th><th>A lat (m)</th><th>N° lat</th><th>Cara int</th><th>Agujeros</th><th>$/M²</th><th>Mon</th><th>M²</th><th>Total</th><th></th></tr></thead><tbody id="tb-i"></tbody></table></div>
-    <div class="add-row-btn-wrap"><button type="button" class="add-row-btn" onclick="addRow('i')" title="Agregar fila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar fila</button></div>
-    <div class="ssub"><span class="ssub-m2">M² <strong id="sm-i">0</strong></span><span class="ssub-usd"><strong id="su-i">—</strong></span><span class="ssub-ars"><strong id="sa-i">—</strong></span></div>
-  </div>
-</div>
-
 <!-- MESADA DE BAÑO -->
 <div class="sec" id="sec-b">
   <div class="sh">
@@ -2121,7 +2061,7 @@ function searchColors(query){
 function isSint(m){return SINT.includes(m)}
 const REGS=['Sin','L','A','L+A'];
 const AGS=['Sin','Bacha','Anafe','Ambos'];
-const D={m:{qty:1,items:[]},a:{qty:1,items:[]},l:{qty:1,items:[]},i:{qty:1,items:[]},b:{qty:1,items:[]}};
+const D={m:{qty:1,items:[]},b:{qty:1,items:[]}};
 // Zócalos > 5 cm — viven dentro de Adicionales pero con su propia estructura (color + dimensiones + precio)
 const ZOCALOS={qty:1,items:[]};
 function mkZoc(){return{color:'',mat:'',d1:0,d2:0,price:0,mon:'USD'}}
@@ -2135,13 +2075,13 @@ function mkExtra(){return{name:'',amount:0,mon:'ARS'}}
 const VARS={items:[]};
 function mkVar(){return{color:'',mat:'',price:0,mon:'USD',selection:{},regMode:'auto',regManualVal:null}}
 const MAX_VARS=5;
-const NAMES={m:'Mesada',a:'Alzada',l:'Mesada en L',i:'Isla',b:'Mesada de baño'};
+const NAMES={m:'Mesada',b:'Mesada de baño'};
 
 function mk(mat=''){return{mat,color:'',d1:0,d2:0,d3:0,d4:0,price:0,mon:'USD',reg:'Sin',rv:0,ag:'Sin',agPrice:0,nLat:1,caraInt:'No',altoLat:0.90,tipo:'Bacha armada',tag:''}}
 function init(){Object.keys(D).forEach(s=>{D[s].items=[];for(let i=0;i<15;i++)D[s].items.push(mk())});D.m.items[0].mat='Guidoni';initZocalos()}
 
 // === ACCORDEÓN DE SECCIONES ===
-const SEC_KEYS=['m','a','l','i','b'];
+const SEC_KEYS=['m','b'];
 const ACCORDION_LS='bs-sec-open';
 function getSecState(){
   try{
@@ -2184,7 +2124,7 @@ function ensureSecOpen(s){
 function applyInitialSecState(){
   const saved=getSecState();
   // Default: solo Mesada abierta
-  const def={m:true,a:false,l:false,i:false,b:false};
+  const def={m:true,b:false};
   const state=saved||def;
   SEC_KEYS.forEach(s=>setSecOpen(s,!!state[s]));
 }
@@ -2424,7 +2364,7 @@ function refreshTagsDatalist(){
   const dl=document.getElementById('tags-datalist');
   if(!dl)return;
   const all=new Set();
-  ['m','a','l','i','b'].forEach(s=>{
+  SEC_KEYS.forEach(s=>{
     getKnownTags(s).forEach(t=>all.add(t));
   });
   dl.innerHTML=[...all].sort((a,b)=>a.localeCompare(b)).map(t=>`<option value="${t.replace(/"/g,'&quot;')}">`).join('');
@@ -2868,7 +2808,7 @@ function addRow(s){
 // Devuelve las secciones que tienen al menos un item con total
 function getActiveSections(){
   const out=[];
-  ['m','a','l','i','b'].forEach(s=>{
+  SEC_KEYS.forEach(s=>{
     const items=D[s].items.slice(0,D[s].qty);
     const filled=[];
     items.forEach((it,idx)=>{
@@ -2893,7 +2833,7 @@ function calcVariantTotal(v){
   let total=0,m2tot=0;
   const sectionsResult=[];
   // Iterar sobre cada sección seleccionada (preserva orden m, l, i, b)
-  ['m','a','l','i','b'].forEach(secKey=>{
+  SEC_KEYS.forEach(secKey=>{
     if(!v.selection[secKey])return;
     const sec=D[secKey];
     if(!sec)return;
@@ -3710,7 +3650,7 @@ function dupRow(s,i){
 }
 function renderAll(){Object.keys(D).forEach(renderSec)}
 function limpiar(){
-  init();document.getElementById('pzL').value='1';document.getElementById('fleteZona').value='0';document.getElementById('factura').value='0';
+  init();document.getElementById('fleteZona').value='0';document.getElementById('factura').value='0';
   const fm=document.getElementById('fleteManual');if(fm){fm.value='';fm.style.display='none'}
   const fzn=document.getElementById('fleteZonaNombre');if(fzn){fzn.value='';fzn.style.display='none';fzn.classList.remove('invalid')}
   // Adicionales
@@ -4149,15 +4089,6 @@ async function generarExcel(){
 
   // MESADA — solo items con precio + medidas
   renderSectionGrouped('m','Mesada de cocina');
-
-  // ALZADA — solo items con precio + medidas
-  renderSectionGrouped('a','Alzada');
-
-  // MESADA EN L — usa el helper general (la lógica de 1/2 piezas vive en _buildItemDetail)
-  renderSectionGrouped('l','Mesada en L');
-
-  // ISLA
-  renderSectionGrouped('i','Isla');
 
   // MESADA DE BAÑO
   renderSectionGrouped('b','Mesada de baño');
@@ -4725,9 +4656,6 @@ function generarPDF(){
     }
   }
   addSec('m','Mesada de cocina');
-  addSec('a','Alzada');
-  addSec('l','Mesada en L');
-  addSec('i','Isla');
   addSec('b','Mesada de baño');
 
   // VARIANTES (alternativas — no suman al total) — render diferido al final

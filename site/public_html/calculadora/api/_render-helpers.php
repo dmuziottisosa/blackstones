@@ -206,7 +206,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
         return '<td style="text-align:' . $a . ';vertical-align:top;padding:9px 6px' . ($extra ? ';' . $extra : '') . '">' . $content . '</td>';
     };
 
-    foreach (['m', 'a', 'l', 'i', 'b'] as $secKey) {
+    foreach (['m', 'b'] as $secKey) {
         $secObj = $presup['secciones'][$secKey] ?? null;
         if (!$secObj || empty($secObj['items'])) continue;
 
