@@ -90,11 +90,16 @@ function bs_calc_m2($s, $it, $pzL = '1') {
     }
     return 0;
 }
+// nBachas: cantidad de traforos en baño Con Traforo. Permite 0.
+// Item viejo sin el campo => 1 (default histórico). Explícito 0 => 0.
+function bs_n_bachas($it) {
+    return isset($it['nBachas']) ? max(0, intval($it['nBachas'])) : 1;
+}
 function bs_ag_cost($it, $s) {
     // Baño: solo "Con Traforo" cobra agujeros = N bachas (traforos), sin anafe
     if ($s === 'b') {
         if (($it['tipo'] ?? 'Bacha armada') !== 'Con Traforo') return 0;
-        $n = max(1, intval($it['nBachas'] ?? 1));
+        $n = bs_n_bachas($it);
         return (($it['mon'] ?? 'USD') === 'USD' ? 80 : 100000) * $n;
     }
     $ag = $it['ag'] ?? 'Sin';
@@ -111,7 +116,8 @@ function bs_ag_label($it, $s) {
     // Baño Con Traforo: N bachas (traforos), sin anafe
     if ($s === 'b') {
         if (($it['tipo'] ?? 'Bacha armada') !== 'Con Traforo') return '';
-        $n = max(1, intval($it['nBachas'] ?? 1));
+        $n = bs_n_bachas($it);
+        if ($n <= 0) return '';
         $cu = ($it['mon'] ?? 'USD') === 'USD' ? 'USD 80 c/u' : '$100.000 c/u';
         return $n . ' bacha' . ($n > 1 ? 's' : '') . ' · traforo (' . $cu . ')';
     }

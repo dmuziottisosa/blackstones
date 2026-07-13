@@ -2296,11 +2296,14 @@ function agCell(s,i,it){
   return`<select style="width:68px;font-size:.7rem" onchange="upd('${s}',${i},'ag',this.value)">${o(AGS,it.ag)}</select>`;
 }
 
+// nBachas: cantidad de bachas (traforos) en baño Con Traforo. Permite 0.
+// Item viejo sin el campo => 1 (default histórico). Explícito 0 => 0.
+function nBachasVal(it){return it.nBachas==null?1:Math.max(0,parseInt(it.nBachas)||0);}
 function agCost(it,s){
   // Baño: solo "Con Traforo" cobra agujeros = N bachas (traforos), sin anafe.
   if(s==='b'){
     if((it.tipo||'Bacha armada')!=='Con Traforo')return 0;
-    const n=Math.max(1,parseInt(it.nBachas)||1);
+    const n=nBachasVal(it);
     return (it.mon==='USD'?80:100000)*n;
   }
   if(!it.ag||it.ag==='Sin')return 0;
@@ -2319,7 +2322,8 @@ function agLabel(it,s){
   // Baño Con Traforo: N bachas (traforos), sin anafe
   if(s==='b'){
     if((it.tipo||'Bacha armada')!=='Con Traforo')return'';
-    const n=Math.max(1,parseInt(it.nBachas)||1);
+    const n=nBachasVal(it);
+    if(n<=0)return'';
     const cu=it.mon==='USD'?'USD 80 c/u':'$100.000 c/u';
     return `${n} bacha${n>1?'s':''} · traforo (${cu})`;
   }
@@ -2452,7 +2456,7 @@ function renderSec(s){
       const aInt=tipo==='Bacha armada'?ni(it.d4,s,i,'d4','Ai'):'<span style="color:var(--text2);font-size:.7rem;opacity:.4">—</span>';
       // Con Traforo: cantidad de bachas (traforos). Sin anafe (es de cocina, no de baño).
       const agB=tipo==='Con Traforo'
-        ?`<input type="number" min="1" step="1" value="${it.nBachas||1}" oninput="upd('${s}',${i},'nBachas',this.value)" style="width:52px;text-align:center" title="Cantidad de bachas (traforos)">`
+        ?`<input type="number" min="0" step="1" value="${it.nBachas!=null?it.nBachas:1}" oninput="upd('${s}',${i},'nBachas',this.value)" style="width:52px;text-align:center" title="Cantidad de bachas (traforos) — puede ser 0">`
         :'';
       h+=`<tr><td>${n}</td><td class="td-tag">${tag}</td><td>${tipoSel}</td><td>${mat}</td><td>${col}</td><td>${ni(it.d1,s,i,'d1','Le')}</td><td>${ni(it.d2,s,i,'d2','Ae')}</td><td>${lInt}</td><td>${aInt}</td><td>${rc}</td><td>${agB}</td><td>${pr}</td><td>${mn}</td>${cantCell}${m2}${tot}${acts}</tr>`;
     }
@@ -2790,7 +2794,7 @@ function calc(){
   renderVariants();
 }
 
-function upd(s,i,f,v){if(['d1','d2','d3','d4','price','rv','altoLat'].includes(f))v=parseFloat(v)||0;if(f==='cant'||f==='nBachas')v=Math.max(1,parseInt(v)||1);D[s].items[i][f]=v;if(f==='reg'){if(s==='i'){if(v==='Sí'&&!D[s].items[i].rv)D[s].items[i].rv=4}else{if(v!=='Sin'&&D[s].items[i].rv===0)D[s].items[i].rv=4}renderSec(s)}if(f==='tipo')renderSec(s);if(f==='ag'&&s==='a'){if(!v||v==='Sin')D[s].items[i].agPrice=0;renderSec(s)}calc()}
+function upd(s,i,f,v){if(['d1','d2','d3','d4','price','rv','altoLat'].includes(f))v=parseFloat(v)||0;if(f==='cant')v=Math.max(1,parseInt(v)||1);if(f==='nBachas')v=Math.max(0,parseInt(v)||0);D[s].items[i][f]=v;if(f==='reg'){if(s==='i'){if(v==='Sí'&&!D[s].items[i].rv)D[s].items[i].rv=4}else{if(v!=='Sin'&&D[s].items[i].rv===0)D[s].items[i].rv=4}renderSec(s)}if(f==='tipo')renderSec(s);if(f==='ag'&&s==='a'){if(!v||v==='Sin')D[s].items[i].agPrice=0;renderSec(s)}calc()}
 function updMat(s,i,v){D[s].items[i].mat=v;if(isSint(v)){if(s==='i'){D[s].items[i].reg='Sí';if(!D[s].items[i].rv)D[s].items[i].rv=4}else if(s==='b'){if(D[s].items[i].reg==='Sin')D[s].items[i].reg='Frente + 2 lat';if(!D[s].items[i].rv)D[s].items[i].rv=4}else{D[s].items[i].reg='L+A';D[s].items[i].rv=4}}else{if(s==='i'){D[s].items[i].reg='No'}else if(s!=='b'){D[s].items[i].reg='Sin';D[s].items[i].rv=0}}if(v)ensureSecOpen(s);renderSec(s);calc()}
 function setQ(s,v){
   D[s].qty=parseInt(v)||1;
@@ -3980,8 +3984,8 @@ async function generarExcel(){
       subParts.push(`interior ${it.d3}×${it.d4}`);
     }
     if(secKey==='b'&&tipoB==='Con Traforo'){
-      const nb=Math.max(1,parseInt(it.nBachas)||1);
-      subParts.push(`${nb} bacha${nb>1?'s':''} (traforo)`);
+      const nb=nBachasVal(it);
+      if(nb>0)subParts.push(`${nb} bacha${nb>1?'s':''} (traforo)`);
     }
     // Agujeros de cocina (bacha/anafe) — NO aplica a baño (baño usa N bachas arriba)
     const supportsAg=(secKey==='m'||secKey==='a'||secKey==='l'||secKey==='i');
@@ -4640,8 +4644,8 @@ function generarPDF(){
         }
         // Con Traforo: N bachas (traforos), sin anafe
         if(key==='b'&&tipoB==='Con Traforo'){
-          const nb=Math.max(1,parseInt(it.nBachas)||1);
-          subParts.push(`${nb} bacha${nb>1?'s':''} (traforo)`);
+          const nb=nBachasVal(it);
+          if(nb>0)subParts.push(`${nb} bacha${nb>1?'s':''} (traforo)`);
         }
         // Adicionales de cocina (ag bacha/anafe) — NO aplica a baño
         const supportsAg=(key==='m'||key==='a'||key==='l'||key==='i');
@@ -4746,8 +4750,8 @@ function generarPDF(){
             subParts.push(`interior ${it.d3}×${it.d4}`);
           }
           if(secKey==='b'&&tipoB==='Con Traforo'){
-            const nb=Math.max(1,parseInt(it.nBachas)||1);
-            subParts.push(`${nb} bacha${nb>1?'s':''} (traforo)`);
+            const nb=nBachasVal(it);
+            if(nb>0)subParts.push(`${nb} bacha${nb>1?'s':''} (traforo)`);
           }
           const supportsAg=(secKey==='m'||secKey==='a'||secKey==='l'||secKey==='i');
           if(supportsAg&&it.ag&&it.ag!=='Sin'){
