@@ -91,6 +91,12 @@ function bs_calc_m2($s, $it, $pzL = '1') {
     return 0;
 }
 function bs_ag_cost($it, $s) {
+    // Baño: solo "Con Traforo" cobra agujeros = N bachas (traforos), sin anafe
+    if ($s === 'b') {
+        if (($it['tipo'] ?? 'Bacha armada') !== 'Con Traforo') return 0;
+        $n = max(1, intval($it['nBachas'] ?? 1));
+        return (($it['mon'] ?? 'USD') === 'USD' ? 80 : 100000) * $n;
+    }
     $ag = $it['ag'] ?? 'Sin';
     if (!$ag || $ag === 'Sin') return 0;
     if ($s === 'a') {
@@ -102,6 +108,13 @@ function bs_ag_cost($it, $s) {
     return $ag === 'Ambos' ? $perHole * 2 : $perHole;
 }
 function bs_ag_label($it, $s) {
+    // Baño Con Traforo: N bachas (traforos), sin anafe
+    if ($s === 'b') {
+        if (($it['tipo'] ?? 'Bacha armada') !== 'Con Traforo') return '';
+        $n = max(1, intval($it['nBachas'] ?? 1));
+        $cu = ($it['mon'] ?? 'USD') === 'USD' ? 'USD 80 c/u' : '$100.000 c/u';
+        return $n . ' bacha' . ($n > 1 ? 's' : '') . ' · traforo (' . $cu . ')';
+    }
     $ag = $it['ag'] ?? 'Sin';
     if (!$ag || $ag === 'Sin') return '';
     if ($s === 'a') {

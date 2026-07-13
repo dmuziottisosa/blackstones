@@ -2077,7 +2077,7 @@ function mkVar(){return{color:'',mat:'',price:0,mon:'USD',selection:{},regMode:'
 const MAX_VARS=5;
 const NAMES={m:'Mesada',b:'Mesada de baño'};
 
-function mk(mat=''){return{mat,color:'',d1:0,d2:0,d3:0,d4:0,price:0,mon:'USD',reg:'Sin',rv:0,ag:'Sin',agPrice:0,nLat:1,caraInt:'No',altoLat:0.90,tipo:'Bacha armada',tag:'',cant:1}}
+function mk(mat=''){return{mat,color:'',d1:0,d2:0,d3:0,d4:0,price:0,mon:'USD',reg:'Sin',rv:0,ag:'Sin',agPrice:0,nLat:1,caraInt:'No',altoLat:0.90,tipo:'Bacha armada',tag:'',cant:1,nBachas:1}}
 function init(){Object.keys(D).forEach(s=>{D[s].items=[];for(let i=0;i<15;i++)D[s].items.push(mk())});D.m.items[0].mat='Guidoni';initZocalos()}
 
 // === ACCORDEÓN DE SECCIONES ===
@@ -2297,6 +2297,12 @@ function agCell(s,i,it){
 }
 
 function agCost(it,s){
+  // Baño: solo "Con Traforo" cobra agujeros = N bachas (traforos), sin anafe.
+  if(s==='b'){
+    if((it.tipo||'Bacha armada')!=='Con Traforo')return 0;
+    const n=Math.max(1,parseInt(it.nBachas)||1);
+    return (it.mon==='USD'?80:100000)*n;
+  }
   if(!it.ag||it.ag==='Sin')return 0;
   // Alzada: precio manual por fila (no tabla preset)
   if(s==='a'){
@@ -2310,6 +2316,13 @@ function agCost(it,s){
 }
 
 function agLabel(it,s){
+  // Baño Con Traforo: N bachas (traforos), sin anafe
+  if(s==='b'){
+    if((it.tipo||'Bacha armada')!=='Con Traforo')return'';
+    const n=Math.max(1,parseInt(it.nBachas)||1);
+    const cu=it.mon==='USD'?'USD 80 c/u':'$100.000 c/u';
+    return `${n} bacha${n>1?'s':''} · traforo (${cu})`;
+  }
   if(!it.ag||it.ag==='Sin')return'';
   // Alzada: traforos con precio manual
   if(s==='a'){
@@ -2437,7 +2450,10 @@ function renderSec(s){
       const tipoSel=`<select style="width:110px;font-size:.7rem" onchange="upd('${s}',${i},'tipo',this.value)"><option${tipo==='Bacha armada'?' selected':''}>Bacha armada</option><option${tipo==='Con Traforo'?' selected':''}>Con Traforo</option></select>`;
       const lInt=tipo==='Bacha armada'?ni(it.d3,s,i,'d3','Li'):'<span style="color:var(--text2);font-size:.7rem;opacity:.4">—</span>';
       const aInt=tipo==='Bacha armada'?ni(it.d4,s,i,'d4','Ai'):'<span style="color:var(--text2);font-size:.7rem;opacity:.4">—</span>';
-      const agB=tipo==='Con Traforo'?agCell(s,i,it):'';
+      // Con Traforo: cantidad de bachas (traforos). Sin anafe (es de cocina, no de baño).
+      const agB=tipo==='Con Traforo'
+        ?`<input type="number" min="1" step="1" value="${it.nBachas||1}" oninput="upd('${s}',${i},'nBachas',this.value)" style="width:52px;text-align:center" title="Cantidad de bachas (traforos)">`
+        :'';
       h+=`<tr><td>${n}</td><td class="td-tag">${tag}</td><td>${tipoSel}</td><td>${mat}</td><td>${col}</td><td>${ni(it.d1,s,i,'d1','Le')}</td><td>${ni(it.d2,s,i,'d2','Ae')}</td><td>${lInt}</td><td>${aInt}</td><td>${rc}</td><td>${agB}</td><td>${pr}</td><td>${mn}</td>${cantCell}${m2}${tot}${acts}</tr>`;
     }
   }
@@ -2774,7 +2790,7 @@ function calc(){
   renderVariants();
 }
 
-function upd(s,i,f,v){if(['d1','d2','d3','d4','price','rv','altoLat'].includes(f))v=parseFloat(v)||0;if(f==='cant')v=Math.max(1,parseInt(v)||1);D[s].items[i][f]=v;if(f==='reg'){if(s==='i'){if(v==='Sí'&&!D[s].items[i].rv)D[s].items[i].rv=5}else{if(v!=='Sin'&&D[s].items[i].rv===0)D[s].items[i].rv=5}renderSec(s)}if(f==='tipo')renderSec(s);if(f==='ag'&&s==='a'){if(!v||v==='Sin')D[s].items[i].agPrice=0;renderSec(s)}calc()}
+function upd(s,i,f,v){if(['d1','d2','d3','d4','price','rv','altoLat'].includes(f))v=parseFloat(v)||0;if(f==='cant'||f==='nBachas')v=Math.max(1,parseInt(v)||1);D[s].items[i][f]=v;if(f==='reg'){if(s==='i'){if(v==='Sí'&&!D[s].items[i].rv)D[s].items[i].rv=5}else{if(v!=='Sin'&&D[s].items[i].rv===0)D[s].items[i].rv=5}renderSec(s)}if(f==='tipo')renderSec(s);if(f==='ag'&&s==='a'){if(!v||v==='Sin')D[s].items[i].agPrice=0;renderSec(s)}calc()}
 function updMat(s,i,v){D[s].items[i].mat=v;if(isSint(v)){if(s==='i'){D[s].items[i].reg='Sí';if(!D[s].items[i].rv)D[s].items[i].rv=5}else if(s==='b'){if(D[s].items[i].reg==='Sin')D[s].items[i].reg='Frente + 2 lat';if(!D[s].items[i].rv)D[s].items[i].rv=5}else{D[s].items[i].reg='L+A';D[s].items[i].rv=5}}else{if(s==='i'){D[s].items[i].reg='No'}else if(s!=='b'){D[s].items[i].reg='Sin';D[s].items[i].rv=0}}if(v)ensureSecOpen(s);renderSec(s);calc()}
 function setQ(s,v){
   D[s].qty=parseInt(v)||1;
@@ -2852,7 +2868,7 @@ function calcVariantTotal(v){
       const variantItem=applyVariantToItem(orig,v,secKey);
       const cant=Math.max(1,parseInt(orig.cant)||1);   // la variante hereda la cantidad de la pieza original
       const m2u=calcM2(secKey,variantItem);
-      const ag=agCost(variantItem);
+      const ag=agCost(variantItem,secKey);
       const tipo=variantItem.tipo||'Bacha armada';
       const unitTotal=secKey==='b'&&tipo==='Bacha armada'?(m2u*(variantItem.price||0)):(m2u*(variantItem.price||0)+ag);
       const m2=m2u*cant;
@@ -3963,7 +3979,12 @@ async function generarExcel(){
     if(secKey==='b'&&tipoB==='Bacha armada'){
       subParts.push(`interior ${it.d3}×${it.d4}`);
     }
-    const supportsAg=(secKey==='m'||secKey==='a'||secKey==='l'||secKey==='i'||(secKey==='b'&&tipoB==='Con Traforo'));
+    if(secKey==='b'&&tipoB==='Con Traforo'){
+      const nb=Math.max(1,parseInt(it.nBachas)||1);
+      subParts.push(`${nb} bacha${nb>1?'s':''} (traforo)`);
+    }
+    // Agujeros de cocina (bacha/anafe) — NO aplica a baño (baño usa N bachas arriba)
+    const supportsAg=(secKey==='m'||secKey==='a'||secKey==='l'||secKey==='i');
     if(supportsAg&&it.ag&&it.ag!=='Sin'){
       let agTxt;
       if(secKey==='a')agTxt=it.ag==='Ambos'?'+ traforo gas + traforo tomas':`+ ${it.ag.toLowerCase()}`;
@@ -4617,8 +4638,13 @@ function generarPDF(){
         if(key==='b'&&tipoB==='Bacha armada'){
           subParts.push(`interior ${it.d3}×${it.d4}`);
         }
-        // Adicionales (ag bacha/anafe/traforo)
-        const supportsAg=(key==='m'||key==='a'||key==='l'||key==='i'||(key==='b'&&tipoB==='Con Traforo'));
+        // Con Traforo: N bachas (traforos), sin anafe
+        if(key==='b'&&tipoB==='Con Traforo'){
+          const nb=Math.max(1,parseInt(it.nBachas)||1);
+          subParts.push(`${nb} bacha${nb>1?'s':''} (traforo)`);
+        }
+        // Adicionales de cocina (ag bacha/anafe) — NO aplica a baño
+        const supportsAg=(key==='m'||key==='a'||key==='l'||key==='i');
         if(supportsAg&&it.ag&&it.ag!=='Sin'){
           let agTxt;
           if(key==='a'){
@@ -4719,7 +4745,11 @@ function generarPDF(){
           if(secKey==='b'&&tipoB==='Bacha armada'){
             subParts.push(`interior ${it.d3}×${it.d4}`);
           }
-          const supportsAg=(secKey==='m'||secKey==='a'||secKey==='l'||secKey==='i'||(secKey==='b'&&tipoB==='Con Traforo'));
+          if(secKey==='b'&&tipoB==='Con Traforo'){
+            const nb=Math.max(1,parseInt(it.nBachas)||1);
+            subParts.push(`${nb} bacha${nb>1?'s':''} (traforo)`);
+          }
+          const supportsAg=(secKey==='m'||secKey==='a'||secKey==='l'||secKey==='i');
           if(supportsAg&&it.ag&&it.ag!=='Sin'){
             let agTxt;
             if(secKey==='a')agTxt=it.ag==='Ambos'?'+ traforo gas + traforo tomas':`+ ${it.ag.toLowerCase()}`;
