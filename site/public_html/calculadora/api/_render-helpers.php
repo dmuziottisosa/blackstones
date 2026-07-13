@@ -228,13 +228,15 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
 
         $secU = 0; $secA = 0;
         foreach ($valid as $it) {
-            $m2 = bs_calc_m2($secKey, $it, $pzL);
+            $cant = max(1, intval($it['cant'] ?? 1));
+            $m2u = bs_calc_m2($secKey, $it, $pzL);   // m² de una pieza
             $price = floatval($it['price']);
-            $matTotal = $m2 * $price;
             $tipoB = $it['tipo'] ?? 'Bacha armada';
             $supportsAg = ($secKey === 'm' || $secKey === 'a' || $secKey === 'l' || $secKey === 'i' || ($secKey === 'b' && $tipoB === 'Con Traforo'));
-            $ag = $supportsAg ? bs_ag_cost($it, $secKey) : 0;
-            $rowTotal = $matTotal + $ag;
+            $agU = $supportsAg ? bs_ag_cost($it, $secKey) : 0;
+            // Valores de línea: (unidad) × cantidad
+            $m2 = $m2u * $cant;
+            $rowTotal = ($m2u * $price + $agU) * $cant;
 
             $matName = bs_mat_label($it['mat'] ?? '');
             $colorTxt = $it['color'] ?? '';
@@ -277,7 +279,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
             $arsCell = $ars > 0 ? '<span style="color:#1A1816;font-weight:700">' . $fARS($ars) . '</span>' : '<span style="color:#A89580">—</span>';
 
             echo '<tr style="border-bottom:1px solid #F0ECE6">';
-            echo $td('1', 'center');
+            echo $td((string)$cant, 'center');
             echo '<td style="vertical-align:top;padding:9px 10px;line-height:1.4">' . $mainLine . $subLineHtml . '</td>';
             echo $td($h($dimL), 'center');
             echo $td($m2Cell, 'center');

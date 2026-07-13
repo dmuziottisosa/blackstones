@@ -1251,8 +1251,10 @@ function _fmtNum(n) { if (!n) return '0'; return new Intl.NumberFormat('es-AR', 
 function _fmtMoney(amount, mon) { if (!amount) return '—'; return `${mon || 'USD'} ${_fmtNum(amount)}`; }
 function _fmtMed(it) {
   const d1 = it.d1 || 0, d2 = it.d2 || 0, d3 = it.d3 || 0, d4 = it.d4 || 0;
-  if (d3 || d4) return `${d1}×${d2} + ${d3}×${d4} m`;
-  return `${d1}×${d2} m`;
+  const cant = Math.max(1, parseInt(it.cant) || 1);
+  const cantTxt = cant > 1 ? ` · × ${cant}` : '';
+  if (d3 || d4) return `${d1}×${d2} + ${d3}×${d4} m${cantTxt}`;
+  return `${d1}×${d2} m${cantTxt}`;
 }
 function _fmtItemMeta(it) {
   const parts = [];

@@ -880,7 +880,7 @@ table select{cursor:pointer}
   </div>
   <div class="sec-body" id="body-m">
     <div class="sec-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Elegí un material para comenzar a cotizar</div>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Etiqueta</th><th>Material</th><th>Color</th><th>Largo (m)</th><th>Ancho (m)</th><th>Reg (cm)</th><th>Agujeros</th><th>$/M²</th><th>Mon</th><th>M²</th><th>Total</th><th></th></tr></thead><tbody id="tb-m"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Etiqueta</th><th>Material</th><th>Color</th><th>Largo (m)</th><th>Ancho (m)</th><th>Reg (cm)</th><th>Agujeros</th><th>$/M²</th><th>Mon</th><th>Cant</th><th>M²</th><th>Total</th><th></th></tr></thead><tbody id="tb-m"></tbody></table></div>
     <div class="add-row-btn-wrap"><button type="button" class="add-row-btn" onclick="addRow('m')" title="Agregar fila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar fila</button></div>
     <div class="ssub"><span class="ssub-m2">M² <strong id="sm-m">0</strong></span><span class="ssub-usd"><strong id="su-m">—</strong></span><span class="ssub-ars"><strong id="sa-m">—</strong></span></div>
   </div>
@@ -900,7 +900,7 @@ table select{cursor:pointer}
   </div>
   <div class="sec-body" id="body-b">
     <div class="sec-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Elegí un material para comenzar a cotizar</div>
-    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Etiqueta</th><th>Tipo</th><th>Material</th><th>Color</th><th>L ext (m)</th><th>A ext (m)</th><th>L int (m)</th><th>A int (m)</th><th>Reg</th><th>Agujeros</th><th>$/M²</th><th>Mon</th><th>M²</th><th>Total</th><th></th></tr></thead><tbody id="tb-b"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Etiqueta</th><th>Tipo</th><th>Material</th><th>Color</th><th>L ext (m)</th><th>A ext (m)</th><th>L int (m)</th><th>A int (m)</th><th>Reg</th><th>Agujeros</th><th>$/M²</th><th>Mon</th><th>Cant</th><th>M²</th><th>Total</th><th></th></tr></thead><tbody id="tb-b"></tbody></table></div>
     <div class="add-row-btn-wrap"><button type="button" class="add-row-btn" onclick="addRow('b')" title="Agregar fila"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar fila</button></div>
     <div class="ssub"><span class="ssub-m2">M² <strong id="sm-b">0</strong></span><span class="ssub-usd"><strong id="su-b">—</strong></span><span class="ssub-ars"><strong id="sa-b">—</strong></span></div>
   </div>
@@ -2077,7 +2077,7 @@ function mkVar(){return{color:'',mat:'',price:0,mon:'USD',selection:{},regMode:'
 const MAX_VARS=5;
 const NAMES={m:'Mesada',b:'Mesada de baño'};
 
-function mk(mat=''){return{mat,color:'',d1:0,d2:0,d3:0,d4:0,price:0,mon:'USD',reg:'Sin',rv:0,ag:'Sin',agPrice:0,nLat:1,caraInt:'No',altoLat:0.90,tipo:'Bacha armada',tag:''}}
+function mk(mat=''){return{mat,color:'',d1:0,d2:0,d3:0,d4:0,price:0,mon:'USD',reg:'Sin',rv:0,ag:'Sin',agPrice:0,nLat:1,caraInt:'No',altoLat:0.90,tipo:'Bacha armada',tag:'',cant:1}}
 function init(){Object.keys(D).forEach(s=>{D[s].items=[];for(let i=0;i<15;i++)D[s].items.push(mk())});D.m.items[0].mat='Guidoni';initZocalos()}
 
 // === ACCORDEÓN DE SECCIONES ===
@@ -2387,6 +2387,7 @@ function renderSec(s){
     const rc=regCell(s,i,it);
     const ag=agCell(s,i,it);
     const m2=`<td class="m2v" id="m2-${s}-${i}">0</td>`,tot=`<td class="tv" id="tot-${s}-${i}">0</td>`;
+    const cantCell=`<td><input type="number" min="1" step="1" value="${it.cant||1}" oninput="upd('${s}',${i},'cant',this.value)" style="width:44px;text-align:center" title="Cantidad de piezas iguales"></td>`;
     // Etiqueta — input chico con datalist (autocompleta etiquetas previas)
     const tag=`<input type="text" class="tag-input" list="tags-datalist" value="${(it.tag||'').replace(/"/g,'&quot;')}" placeholder="Sin etiqueta" oninput="updTag('${s}',${i},this.value)" autocomplete="off">`;
     const canUp=i>0;
@@ -2394,7 +2395,7 @@ function renderSec(s){
     const acts=`<td><div class="row-actions"><button class="row-act-btn ${canUp?'':'is-disabled'}" title="Subir fila" onclick="moveRow('${s}',${i},-1)" ${canUp?'':'disabled'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button><button class="row-act-btn ${canDown?'':'is-disabled'}" title="Bajar fila" onclick="moveRow('${s}',${i},1)" ${canDown?'':'disabled'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><button class="row-act-btn" title="Duplicar fila" onclick="dupRow('${s}',${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button><button class="row-act-btn" title="Limpiar fila" onclick="clearRow('${s}',${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg></button><button class="row-act-btn danger" title="Eliminar fila" onclick="delRow('${s}',${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></td>`;
 
     if(s==='m')
-      h+=`<tr><td>${n}</td><td class="td-tag">${tag}</td><td>${mat}</td><td>${col}</td><td>${ni(it.d1,s,i,'d1','L')}</td><td>${ni(it.d2,s,i,'d2','A')}</td><td>${rc}</td><td>${ag}</td><td>${pr}</td><td>${mn}</td>${m2}${tot}${acts}</tr>`;
+      h+=`<tr><td>${n}</td><td class="td-tag">${tag}</td><td>${mat}</td><td>${col}</td><td>${ni(it.d1,s,i,'d1','L')}</td><td>${ni(it.d2,s,i,'d2','A')}</td><td>${rc}</td><td>${ag}</td><td>${pr}</td><td>${mn}</td>${cantCell}${m2}${tot}${acts}</tr>`;
     else if(s==='a'){
       // Alzada: traforo gas/tomas/ambos con precio manual por fila, sin regrueso
       const trafOpts=['Sin','Traforo gas','Traforo tomas','Ambos'];
@@ -2437,7 +2438,7 @@ function renderSec(s){
       const lInt=tipo==='Bacha armada'?ni(it.d3,s,i,'d3','Li'):'<span style="color:var(--text2);font-size:.7rem;opacity:.4">—</span>';
       const aInt=tipo==='Bacha armada'?ni(it.d4,s,i,'d4','Ai'):'<span style="color:var(--text2);font-size:.7rem;opacity:.4">—</span>';
       const agB=tipo==='Con Traforo'?agCell(s,i,it):'';
-      h+=`<tr><td>${n}</td><td class="td-tag">${tag}</td><td>${tipoSel}</td><td>${mat}</td><td>${col}</td><td>${ni(it.d1,s,i,'d1','Le')}</td><td>${ni(it.d2,s,i,'d2','Ae')}</td><td>${lInt}</td><td>${aInt}</td><td>${rc}</td><td>${agB}</td><td>${pr}</td><td>${mn}</td>${m2}${tot}${acts}</tr>`;
+      h+=`<tr><td>${n}</td><td class="td-tag">${tag}</td><td>${tipoSel}</td><td>${mat}</td><td>${col}</td><td>${ni(it.d1,s,i,'d1','Le')}</td><td>${ni(it.d2,s,i,'d2','Ae')}</td><td>${lInt}</td><td>${aInt}</td><td>${rc}</td><td>${agB}</td><td>${pr}</td><td>${mn}</td>${cantCell}${m2}${tot}${acts}</tr>`;
     }
   }
   tb.innerHTML=h;
@@ -2504,13 +2505,16 @@ function calc(){
     let sm=0,su=0,sa=0;let secItems=[];
     for(let i=0;i<D[s].qty;i++){
       const it=D[s].items[i];
-      const m2=calcM2(s,it);
-      const matTotal=m2*(it.price||0);
+      const cant=Math.max(1,parseInt(it.cant)||1);
+      const m2u=calcM2(s,it);           // m² de UNA pieza
       // Bacha armada NO suma agujeros, solo Traforo (y mesada/mesada en L/isla/alzada siempre)
       const tipoB=it.tipo||'Bacha armada';
       const supportsAg=(s==='m'||s==='a'||s==='l'||s==='i'||(s==='b'&&tipoB==='Con Traforo'));
-      const ag=supportsAg?agCost(it,s):0;
-      const total=matTotal+ag;
+      const agU=supportsAg?agCost(it,s):0;
+      // Valores de LÍNEA: (unidad) × cantidad. Todo lo que suma y se muestra usa la línea.
+      const m2=m2u*cant;
+      const ag=agU*cant;
+      const total=(m2u*(it.price||0)+agU)*cant;
       // Persistir subtotal computado en el item (para que consumidores
       // del JSON guardado lean el total real, sin recomputar la formula).
       it._subtotal_usd = it.mon==='USD' ? total : 0;
@@ -2532,7 +2536,7 @@ function calc(){
       if(valid){
         const desc=(it.color||matLabel(it.mat))+(it.color&&it.mat?' ('+matLabel(it.mat)+')':'');
         const agTxt=agLabel(it,s);
-        secItems.push({name:NAMES[s]+' '+(i+1),desc,agTxt,m2,tag:(it.tag||'').trim(),
+        secItems.push({name:NAMES[s]+' '+(i+1),desc,agTxt,m2,cant,tag:(it.tag||'').trim(),
           usd:it.mon==='USD'?total:0,ars:it.mon==='ARS'?total:0,
           agUsd:it.mon==='USD'?ag:0,agArs:it.mon==='ARS'?ag:0});
       }
@@ -2661,6 +2665,7 @@ function calc(){
       let gU=0,gA=0;
       g.items.forEach(it=>{
         let detail=it.desc;
+        if(it.cant>1)detail+=` <small style="color:var(--gd);font-weight:600">× ${it.cant}</small>`;
         if(it.agTxt)detail+=`<br><small style="color:var(--ts)">${it.agTxt}</small>`;
         dh+=`<tr><td style="padding-left:20px">${it.name}</td><td>${detail}</td><td>${it.m2.toFixed(2)}</td><td>${it.usd>0?fmtUSD(it.usd):'—'}</td><td ${arsC}>${it.ars>0?fmtARS(it.ars):'—'}</td></tr>`;
         gU+=it.usd||0;gA+=it.ars||0;
@@ -2769,7 +2774,7 @@ function calc(){
   renderVariants();
 }
 
-function upd(s,i,f,v){if(['d1','d2','d3','d4','price','rv','altoLat'].includes(f))v=parseFloat(v)||0;D[s].items[i][f]=v;if(f==='reg'){if(s==='i'){if(v==='Sí'&&!D[s].items[i].rv)D[s].items[i].rv=5}else{if(v!=='Sin'&&D[s].items[i].rv===0)D[s].items[i].rv=5}renderSec(s)}if(f==='tipo')renderSec(s);if(f==='ag'&&s==='a'){if(!v||v==='Sin')D[s].items[i].agPrice=0;renderSec(s)}calc()}
+function upd(s,i,f,v){if(['d1','d2','d3','d4','price','rv','altoLat'].includes(f))v=parseFloat(v)||0;if(f==='cant')v=Math.max(1,parseInt(v)||1);D[s].items[i][f]=v;if(f==='reg'){if(s==='i'){if(v==='Sí'&&!D[s].items[i].rv)D[s].items[i].rv=5}else{if(v!=='Sin'&&D[s].items[i].rv===0)D[s].items[i].rv=5}renderSec(s)}if(f==='tipo')renderSec(s);if(f==='ag'&&s==='a'){if(!v||v==='Sin')D[s].items[i].agPrice=0;renderSec(s)}calc()}
 function updMat(s,i,v){D[s].items[i].mat=v;if(isSint(v)){if(s==='i'){D[s].items[i].reg='Sí';if(!D[s].items[i].rv)D[s].items[i].rv=5}else if(s==='b'){if(D[s].items[i].reg==='Sin')D[s].items[i].reg='Frente + 2 lat';if(!D[s].items[i].rv)D[s].items[i].rv=5}else{D[s].items[i].reg='L+A';D[s].items[i].rv=5}}else{if(s==='i'){D[s].items[i].reg='No'}else if(s!=='b'){D[s].items[i].reg='Sin';D[s].items[i].rv=0}}if(v)ensureSecOpen(s);renderSec(s);calc()}
 function setQ(s,v){
   D[s].qty=parseInt(v)||1;
@@ -2845,13 +2850,16 @@ function calcVariantTotal(v){
     selectedRows.forEach(idx=>{
       const orig=allItems[idx];
       const variantItem=applyVariantToItem(orig,v,secKey);
-      const m2=calcM2(secKey,variantItem);
+      const cant=Math.max(1,parseInt(orig.cant)||1);   // la variante hereda la cantidad de la pieza original
+      const m2u=calcM2(secKey,variantItem);
       const ag=agCost(variantItem);
       const tipo=variantItem.tipo||'Bacha armada';
-      const itemTotal=secKey==='b'&&tipo==='Bacha armada'?(m2*(variantItem.price||0)):(m2*(variantItem.price||0)+ag);
+      const unitTotal=secKey==='b'&&tipo==='Bacha armada'?(m2u*(variantItem.price||0)):(m2u*(variantItem.price||0)+ag);
+      const m2=m2u*cant;
+      const itemTotal=unitTotal*cant;
       secTotal+=itemTotal;
       secM2+=m2;
-      secRows.push({idx,m2,total:itemTotal,desc:buildItemDesc(secKey,variantItem),orig,variantItem});
+      secRows.push({idx,m2,total:itemTotal,cant,desc:buildItemDesc(secKey,variantItem),orig,variantItem});
     });
     if(secRows.length){
       sectionsResult.push({key:secKey,name:NAMES[secKey],total:secTotal,m2:secM2,rows:secRows});
@@ -3977,8 +3985,8 @@ async function generarExcel(){
   function addItem(r,it,m2,total,catLabel,secKey){
     const det=_buildItemDetail(secKey,it,catLabel);
     fillR(r,fWh);
-    // Cant
-    setC(r,1,1,{name:'Arial',size:10},fWh,{horizontal:'center',vertical:'middle'});
+    // Cant (piezas iguales)
+    setC(r,1,Math.max(1,parseInt(it.cant)||1),{name:'Arial',size:10},fWh,{horizontal:'center',vertical:'middle'});
     // Detalle (con sub-línea si aplica) usando richText
     const detailParts=[{text:det.mainText,font:{name:'Arial',size:10,color:{argb:DK}}}];
     if(det.subText){
@@ -4073,11 +4081,13 @@ async function generarExcel(){
       }
       let gU=0,gA=0;
       group.items.forEach(({idx,it})=>{
-        const m2=calcM2(secKey,it);
+        const cant=Math.max(1,parseInt(it.cant)||1);
+        const m2u=calcM2(secKey,it);
         const ag=agCost(it,secKey);
         const tipoB=it.tipo||'Bacha armada';
         const sumAg=secKey==='b'?(tipoB==='Con Traforo'?ag:0):ag;
-        const total=m2*(it.price||0)+sumAg;
+        const m2=m2u*cant;
+        const total=(m2u*(it.price||0)+sumAg)*cant;
         addItem(row,it,m2,total,catLabel,secKey);
         if(it.mon==='USD'){secU+=total;gU+=total}else{secA+=total;gA+=total}
         row++;
@@ -4566,10 +4576,12 @@ function generarPDF(){
       }
       let gU=0,gA=0;
       group.items.forEach(({idx,it})=>{
-        const m2=calcM2(key,it),ag=agCost(it,key);
+        const cant=Math.max(1,parseInt(it.cant)||1);
+        const m2u=calcM2(key,it),ag=agCost(it,key);
         const tipoB=it.tipo||'Bacha armada';
         const sumAg=key==='b'?(tipoB==='Con Traforo'?ag:0):ag;
-        const total=m2*(it.price||0)+sumAg;
+        const m2=m2u*cant;
+        const total=(m2u*(it.price||0)+sumAg)*cant;
         // Construir Detalle según tipo de item
         const colorTxt=it.color||'';
         const matTxt=matLabel(it.mat)||'';
@@ -4639,7 +4651,7 @@ function generarPDF(){
         const usdCell=usd>0?`<span style="color:#1A1816;font-weight:700">${fmtUSD(usd)}</span>`:'<span style="color:#A89580">—</span>';
         const arsCell=ars>0?`<span style="color:#1A1816;font-weight:700">${fmtARS(ars)}</span>`:'<span style="color:#A89580">—</span>';
         // FILA ÚNICA por item
-        items+=`<tr style="border-bottom:1px solid #F0ECE6"><td style="text-align:center;vertical-align:top;padding:9px 6px">1</td><td style="vertical-align:top;padding:9px 10px;line-height:1.4">${mainLine}${subLineHtml}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${dimL}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${m2Cell}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${usdCell}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${arsCell}</td></tr>`;
+        items+=`<tr style="border-bottom:1px solid #F0ECE6"><td style="text-align:center;vertical-align:top;padding:9px 6px">${cant}</td><td style="vertical-align:top;padding:9px 10px;line-height:1.4">${mainLine}${subLineHtml}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${dimL}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${m2Cell}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${usdCell}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${arsCell}</td></tr>`;
       });
       // Subtotal del grupo SOLO si hay 2+ grupos con nombre
       if(group.tag&&multiNamedGroups&&(gU>0||gA>0)){
@@ -4726,7 +4738,7 @@ function generarPDF(){
           const usd=v.mon==='USD'?rowData.total:0,ars=v.mon==='ARS'?rowData.total:0;
           const usdCell=usd>0?`<span style="color:#1A1816;font-weight:700">${fmtUSD(usd)}</span>`:'<span style="color:#A89580">—</span>';
           const arsCell=ars>0?`<span style="color:#1A1816;font-weight:700">${fmtARS(ars)}</span>`:'<span style="color:#A89580">—</span>';
-          items+=`<tr style="border-bottom:1px solid #F0ECE6"><td style="text-align:center;vertical-align:top;padding:9px 6px">1</td><td style="vertical-align:top;padding:9px 10px;line-height:1.4">${mainLine}${subLineHtml}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${dimL}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${m2Cell}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${usdCell}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${arsCell}</td></tr>`;
+          items+=`<tr style="border-bottom:1px solid #F0ECE6"><td style="text-align:center;vertical-align:top;padding:9px 6px">${rowData.cant||1}</td><td style="vertical-align:top;padding:9px 10px;line-height:1.4">${mainLine}${subLineHtml}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${dimL}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${m2Cell}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${usdCell}</td><td style="text-align:center;vertical-align:top;padding:9px 6px">${arsCell}</td></tr>`;
           secSubT+=rowData.total;
         });
         // Subtotal de sección DENTRO de variante — solo si hay 2+ secciones
