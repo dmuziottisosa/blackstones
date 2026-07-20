@@ -1188,6 +1188,10 @@ table select{cursor:pointer}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
     Generar PDF
   </button>
+  <button class="btn btn-p" onclick="generarImagen()" id="btn-imagen" title="Descargar el presupuesto como imagen PNG (ideal para WhatsApp)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    Generar Imagen
+  </button>
   <button class="btn btn-p" onclick="bsGuardarPresupuesto()" id="btn-guardar" title="Guardar el presupuesto en el registry">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
     Guardar presupuesto
@@ -1201,6 +1205,7 @@ table select{cursor:pointer}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
 const MATS=['Guidoni','Marmol','Granito_n','Granito_i','Xtone','Pura','Prima','Dekton','Silestone','Neolith','Suprastone'];
@@ -4564,7 +4569,7 @@ async function generarExcel(){
 // ================================================================
 // GENERAR PDF (vía window.print → guardar como PDF)
 // ================================================================
-function generarPDF(){
+function generarPDF(opts){
   if(!validateFleteZonaNombre())return;
   const cli=document.getElementById('cli').value||'—';
   const dir=document.getElementById('dir').value||'—';
@@ -4976,6 +4981,9 @@ td,th{padding:5px 8px}
 <div style="text-align:center;font-size:8px;color:#6B6560;margin-top:12px;padding-top:8px;border-top:1px solid #F2EDE3">BlackStones Marmolería  ·  Cel: 11 2468-5820  ·  Of: 5611-5919  ·  contacto@blackstones.com.ar  ·  Av. J.B. Alberdi 3575, CABA  ·  blackstones.com.ar</div>
 </body></html>`;
 
+  // Reuso del mismo HTML para "Generar Imagen": devolver el string sin abrir ventana.
+  if(opts&&opts.returnHtml)return html;
+
   // Si window.bsPdfInline === true → reemplazar la pestaña actual con el preview
   // (usado por el flujo "Ver PDF" del hub para no mostrar la UI de la calc)
   if (window.bsPdfInline) {
@@ -4994,6 +5002,66 @@ td,th{padding:5px 8px}
   w.document.write(html);
   w.document.close();
   clearDirty();
+}
+
+// === GENERAR IMAGEN (PNG del presupuesto, ideal para WhatsApp) ===
+// Reusa el mismo HTML del PDF, lo renderiza en un iframe aislado y lo
+// captura con html2canvas. Sin imágenes en el doc => sin problemas CORS.
+async function generarImagen(){
+  if(!validateFleteZonaNombre())return;
+  if(typeof html2canvas!=='function'){
+    alert('No se pudo cargar el generador de imagen (html2canvas). Revisá la conexión y reintentá.');
+    return;
+  }
+  const nro=document.getElementById('nro').value||'0000';
+  const btn=document.getElementById('btn-imagen');
+  const prev=btn?btn.innerHTML:'';
+  if(btn){btn.disabled=true;btn.textContent='Generando…';}
+  const html=generarPDF({returnHtml:true});
+  if(!html){ if(btn){btn.disabled=false;btn.innerHTML=prev;} return; }
+  const iframe=document.createElement('iframe');
+  iframe.setAttribute('aria-hidden','true');
+  iframe.style.cssText='position:fixed;top:0;left:-10000px;width:820px;height:100px;border:0;background:#fff';
+  document.body.appendChild(iframe);
+  try{
+    const doc=iframe.contentDocument||iframe.contentWindow.document;
+    doc.open();doc.write(html);doc.close();
+    // Sacar la barra "no-print" (botón imprimir) del render de la imagen
+    doc.querySelectorAll('.no-print').forEach(function(e){e.remove();});
+    doc.body.style.padding='18px';
+    // Esperar layout + fuentes
+    await new Promise(function(res){
+      if(doc.readyState==='complete')res(); else iframe.onload=function(){res();};
+      setTimeout(res,1500);
+    });
+    try{ if(doc.fonts&&doc.fonts.ready) await doc.fonts.ready; }catch(e){}
+    // Ajustar alto del iframe al contenido (por prolijidad; html2canvas mide scrollHeight igual)
+    const h=Math.max(doc.body.scrollHeight,doc.documentElement.scrollHeight);
+    iframe.style.height=h+'px';
+    const canvas=await html2canvas(doc.body,{
+      scale:2,backgroundColor:'#ffffff',
+      width:820,windowWidth:820,height:h,windowHeight:h,
+      scrollX:0,scrollY:0,useCORS:true,logging:false
+    });
+    await new Promise(function(res){
+      canvas.toBlob(function(blob){
+        if(blob){
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement('a');
+          a.href=url;a.download='Presupuesto-'+nro+'.png';
+          document.body.appendChild(a);a.click();a.remove();
+          setTimeout(function(){URL.revokeObjectURL(url);},2000);
+        }
+        res();
+      },'image/png');
+    });
+    clearDirty();
+  }catch(err){
+    alert('No se pudo generar la imagen: '+(err&&err.message?err.message:err));
+  }finally{
+    iframe.remove();
+    if(btn){btn.disabled=false;btn.innerHTML=prev;}
+  }
 }
 
 // === THEME TOGGLE ===
