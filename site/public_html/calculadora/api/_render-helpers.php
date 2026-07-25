@@ -15,6 +15,7 @@ function bs_mat_labels() {
         'Marmol'     => 'Mármol',
         'Granito_n'  => 'Granito Nacional',
         'Granito_i'  => 'Granito Importado',
+        'Cuarcita'   => 'Cuarcita',
         'Xtone'      => 'Xtone',
         'Pura'       => 'Purastone',
         'Prima'      => 'Pura Prima',
