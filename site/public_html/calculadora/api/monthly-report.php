@@ -58,6 +58,12 @@ for ($i = 1; $i <= 3; $i++) {
     $m2_total = 0;
     $clientes_unicos = [];
     $materiales_count = [];
+    // Breakdown por origen del presupuesto. Sin esto el reporte no puede
+    // distinguir publicidad de local una vez que la data viva se purga.
+    $by_origen_mes = [
+        'publicidad' => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
+        'local'      => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
+    ];
 
     if (is_dir(BS_CLIENTES_DIR)) {
         foreach (scandir(BS_CLIENTES_DIR) as $f) {
@@ -94,6 +100,10 @@ for ($i = 1; $i <= 3; $i++) {
                     $materiales_count[$mat_key]['monto_usd'] += $monto_usd;
                 }
 
+                // Origen del presupuesto ('organico' es alias historico de 'local')
+                $ori = ($cot['origen'] ?? 'local');
+                if ($ori !== 'publicidad') $ori = 'local';
+
                 $entregados_del_mes[] = [
                     'cliente_nro'    => $cliente['cliente_nro'] ?? '',
                     'sub'            => $cot['sub'] ?? 0,
@@ -101,6 +111,7 @@ for ($i = 1; $i <= 3; $i++) {
                     'cliente_dni'    => $cli['dni'] ?? '',
                     'fecha_entregado'=> date('Y-m-d', $entregado_at),
                     'concepto'       => $cot['concepto'] ?? '',
+                    'origen'         => $ori,
                     'monto_usd'      => $monto_usd,
                     'monto_ars'      => $monto_ars,
                     'materiales'     => array_keys($mats_in_cot),
@@ -109,6 +120,9 @@ for ($i = 1; $i <= 3; $i++) {
                 $monto_usd_total += $monto_usd;
                 $monto_ars_total += $monto_ars;
                 $clientes_unicos[$cliente['cliente_nro'] ?? ''] = true;
+                $by_origen_mes[$ori]['count']++;
+                $by_origen_mes[$ori]['monto_usd'] += $monto_usd;
+                $by_origen_mes[$ori]['monto_ars'] += $monto_ars;
             }
         }
     }
@@ -140,6 +154,7 @@ for ($i = 1; $i <= 3; $i++) {
             'clientes_unicos'  => count($clientes_unicos),
             'monto_usd'        => $monto_usd_total,
             'monto_ars'        => $monto_ars_total,
+            'by_origen'        => $by_origen_mes,
         ],
         'top_materiales' => $top_materiales,
         'entregados'     => $entregados_del_mes,

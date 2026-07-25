@@ -49,7 +49,16 @@ for ($i = 0; $i < $months_back; $i++) {
     $year_month = date('Y-m', $month_ts);
     $report_path = BS_REGISTRO_BY_MONTH_DIR . '/' . $year_month . '.json';
 
-    if (file_exists($report_path)) {
+    // FUENTE DE VERDAD = los datos vivos de bs-data/clientes.
+    // Reflejan el origen actual (editable desde el hub) y las entregas
+    // marcadas DESPUES de que el cron archivo el mes. El archivo mensual
+    // queda solo como fallback para meses cuya data ya se purgo por
+    // retencion (ahi es lo unico que queda).
+    $month_start = strtotime("first day of $year_month 00:00:00");
+    $month_end   = strtotime("last day of $year_month 23:59:59");
+    $live = _live_scan_month($month_start, $month_end, $origen_filter);
+
+    if ($live['all_count'] === 0 && file_exists($report_path)) {
         // Fuente: archivo
         $data = bs_read_json($report_path);
         if (!$data) continue;
@@ -133,11 +142,17 @@ for ($i = 0; $i < $months_back; $i++) {
             }
         }
     } else {
-        // Fuente: live scan (lee disco, atribuye cada cotización a su bucket)
-        $month_start = strtotime("first day of $year_month 00:00:00");
-        $month_end   = strtotime("last day of $year_month 23:59:59");
-        $live = _live_scan_month($month_start, $month_end, $origen_filter);
-        if ($live['count'] === 0 && $origen_filter !== '') continue;
+        // Fuente: datos vivos.
+        // by_origen acumula SIEMPRE los dos buckets, aunque haya filtro
+        // activo — igual que la rama de archivo. Asi el panel 'Por origen'
+        // muestra una sola escala y no mezcla archivo con live.
+        foreach (['publicidad', 'local'] as $ori) {
+            $by_origen[$ori]['count']     += intval($live['by_origen'][$ori]['count'] ?? 0);
+            $by_origen[$ori]['monto_usd'] += floatval($live['by_origen'][$ori]['monto_usd'] ?? 0);
+            $by_origen[$ori]['monto_ars'] += floatval($live['by_origen'][$ori]['monto_ars'] ?? 0);
+        }
+        // Sin filas para el filtro activo: no hay mes que mostrar, pero el
+        // breakdown de arriba ya quedo contabilizado.
         if ($live['count'] === 0) continue;
 
         $meses[] = [
@@ -151,11 +166,7 @@ for ($i = 0; $i < $months_back; $i++) {
         $total_count += $live['count'];
         $total_usd += $live['monto_usd'];
         $total_ars += $live['monto_ars'];
-        foreach (['publicidad', 'local'] as $ori) {
-            $by_origen[$ori]['count']     += intval($live['by_origen'][$ori]['count'] ?? 0);
-            $by_origen[$ori]['monto_usd'] += floatval($live['by_origen'][$ori]['monto_usd'] ?? 0);
-            $by_origen[$ori]['monto_ars'] += floatval($live['by_origen'][$ori]['monto_ars'] ?? 0);
-        }
+        // (by_origen ya se acumulo arriba, antes del early-continue)
         foreach ($live['clientes_unicos'] as $cn) $clientes_unicos[$cn] = true;
         foreach ($live['materiales'] as $mat_color => $info) {
             if (!isset($materiales_map[$mat_color])) $materiales_map[$mat_color] = ['count' => 0, 'monto_usd' => 0];
@@ -205,22 +216,35 @@ bs_ok([
 // ============================================================
 // Helper: live scan de un mes
 // ============================================================
+// Lee todos los clientes UNA sola vez por request. El dashboard escanea
+// 24 meses; sin este cache releia el directorio completo 24 veces.
+function _bs_clientes_all() {
+    static $cache = null;
+    if ($cache !== null) return $cache;
+    $cache = [];
+    if (!is_dir(BS_CLIENTES_DIR)) return $cache;
+    foreach (scandir(BS_CLIENTES_DIR) as $f) {
+        if (!preg_match('/^(\d{4,})\.json$/', $f)) continue;
+        $c = bs_read_json(BS_CLIENTES_DIR . '/' . $f);
+        if ($c) $cache[] = $c;
+    }
+    return $cache;
+}
+
 function _live_scan_month($month_start, $month_end, $origen_filter = '') {
     $result = [
         'count' => 0, 'monto_usd' => 0, 'monto_ars' => 0,
+        // all_count = entregados del mes SIN filtrar. Indica si el mes tiene
+        // data viva (y por lo tanto si hace falta caer al archivo).
+        'all_count' => 0,
         'clientes_unicos' => [], 'materiales' => [],
         'by_origen' => [
             'publicidad' => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
             'local'      => ['count' => 0, 'monto_usd' => 0, 'monto_ars' => 0],
         ],
     ];
-    if (!is_dir(BS_CLIENTES_DIR)) return $result;
 
-    foreach (scandir(BS_CLIENTES_DIR) as $f) {
-        if (!preg_match('/^(\d{4,})\.json$/', $f)) continue;
-        $cliente = bs_read_json(BS_CLIENTES_DIR . '/' . $f);
-        if (!$cliente) continue;
-
+    foreach (_bs_clientes_all() as $cliente) {
         foreach ($cliente['cotizaciones'] ?? [] as $cot) {
             if (($cot['estado'] ?? '') !== 'entregado') continue;
             $entregado_at = strtotime($cot['entregado_at'] ?? $cot['fecha'] ?? '');
@@ -231,20 +255,26 @@ function _live_scan_month($month_start, $month_end, $origen_filter = '') {
             $ori = ($cot['origen'] ?? 'local');
             if ($ori !== 'publicidad') $ori = 'local';
 
-            // Filtro por origen: si esta activo y no matchea, skip TODO
-            // (no suma al count, totales, clientes_unicos ni materiales).
-            if ($origen_filter !== '' && $ori !== $origen_filter) continue;
-
             $totales = $cot['presupuesto']['totales'] ?? [];
             $monto_usd = floatval($totales['usd'] ?? 0);
             $monto_ars = floatval($totales['ars'] ?? 0);
+
+            // by_origen y all_count acumulan SIEMPRE, sin importar el filtro:
+            // el panel 'Por origen' muestra los dos buckets aunque estes
+            // filtrando, y all_count decide si el mes tiene data viva.
+            $result['all_count']++;
+            $result['by_origen'][$ori]['count']++;
+            $result['by_origen'][$ori]['monto_usd'] += $monto_usd;
+            $result['by_origen'][$ori]['monto_ars'] += $monto_ars;
+
+            // De aca para abajo si respetamos el filtro (totales del mes,
+            // clientes unicos y top materiales).
+            if ($origen_filter !== '' && $ori !== $origen_filter) continue;
+
             $result['count']++;
             $result['monto_usd'] += $monto_usd;
             $result['monto_ars'] += $monto_ars;
             $result['clientes_unicos'][] = $cliente['cliente_nro'] ?? '';
-            $result['by_origen'][$ori]['count']++;
-            $result['by_origen'][$ori]['monto_usd'] += $monto_usd;
-            $result['by_origen'][$ori]['monto_ars'] += $monto_ars;
 
             // Top materiales: prioridad al material_final si esta seteado
             // (es el material confirmado de la venta; gana sobre los items
