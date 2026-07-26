@@ -249,7 +249,7 @@ function _live_scan_month($month_start, $month_end, $origen_filter = '') {
             if (($cot['estado'] ?? '') !== 'entregado') continue;
             // El mes se decide por la fecha de contrato si esta cargada;
             // si no, por la fecha de entrega (comportamiento historico).
-            $ref = bs_fecha_ref($cot, $cot['entregado_at'] ?? $cot['fecha'] ?? '');
+            $ref = bs_fecha_ref($cot);
             $entregado_at = strtotime($ref);
             if (!$entregado_at) continue;
             if ($entregado_at < $month_start || $entregado_at > $month_end) continue;

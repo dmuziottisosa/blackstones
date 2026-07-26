@@ -149,21 +149,29 @@ function bs_ok($data = []) {
 }
 
 // ============================================================
-// Fecha de referencia de una cotizacion
+// Fecha de referencia de una cotizacion — UNA sola definicion
 // ============================================================
-// 'fecha_contrato' (la fecha real del acuerdo, editable desde el hub) es
-// la que MANDA para categorizar, ordenar y filtrar en toda la pestaña de
-// presupuestos: listado de activos, agrupacion por mes del reporte y
-// generacion de los reportes mensuales.
+// Es la fecha con la que se categoriza, ordena y filtra en TODA la
+// pestaña de presupuestos: listado de activos, tabla de entregados,
+// agrupacion por mes del dashboard y generacion de reportes mensuales.
 //
-// Si no esta cargada, cada consumidor pasa su fallback historico, para
-// que los presupuestos viejos sigan cayendo donde siempre:
-//   - listados            -> fecha del presupuesto
-//   - reportes de entregas -> entregado_at (y en su defecto la fecha)
+// Cadena unica, en este orden:
+//   1. fecha_contrato  — la fecha real del acuerdo (editable en el hub)
+//   2. entregado_at    — cuando se entrego (las activas no lo tienen)
+//   3. fecha           — cuando se guardo el presupuesto
+//
+// IMPORTANTE: la funcion NO acepta un fallback por parametro a proposito.
+// Cuando lo aceptaba, cada consumidor pasaba el suyo y las vistas
+// terminaban mandando la misma cotizacion a meses distintos ('Por mes'
+// usaba entregado_at y la tabla usaba fecha). Con una sola definicion
+// cerrada eso no puede volver a pasar.
 //
 // NO se usa para la retencion (cleanup-retention.php): ahi el reloj
 // tiene que seguir corriendo desde la entrega real, no desde el contrato.
-function bs_fecha_ref($cot, $fallback = '') {
+function bs_fecha_ref($cot) {
     $fc = trim((string)($cot['fecha_contrato'] ?? ''));
-    return $fc !== '' ? $fc : $fallback;
+    if ($fc !== '') return $fc;
+    $ea = trim((string)($cot['entregado_at'] ?? ''));
+    if ($ea !== '') return $ea;
+    return (string)($cot['fecha'] ?? '');
 }
