@@ -73,7 +73,9 @@ for ($i = 1; $i <= 3; $i++) {
 
             foreach ($cliente['cotizaciones'] ?? [] as $cot) {
                 if (($cot['estado'] ?? '') !== 'entregado') continue;
-                $entregado_at = strtotime($cot['entregado_at'] ?? $cot['fecha'] ?? '');
+                // Mismo criterio que el dashboard: manda la fecha de contrato.
+                $ref = bs_fecha_ref($cot, $cot['entregado_at'] ?? $cot['fecha'] ?? '');
+                $entregado_at = strtotime($ref);
                 if (!$entregado_at) continue;
                 if ($entregado_at < $month_start || $entregado_at > $month_end) continue;
 
@@ -182,7 +184,7 @@ if (is_dir(BS_CLIENTES_DIR)) {
         foreach ($cliente['cotizaciones'] ?? [] as $cot) {
             if (($cot['estado'] ?? '') !== 'entregado') continue;
 
-            $entregado_at = $cot['entregado_at'] ?? $cot['fecha'] ?? '';
+            $entregado_at = bs_fecha_ref($cot, $cot['entregado_at'] ?? $cot['fecha'] ?? '');
             $totales = $cot['presupuesto']['totales'] ?? [];
             $monto_usd = floatval($totales['usd'] ?? 0);
             $cli = $cliente['cliente'] ?? [];

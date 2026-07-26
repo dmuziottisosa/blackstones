@@ -1730,7 +1730,7 @@ async function cargarEntregados() {
           <td><button type="button" class="origen-cell ${origenCls}" data-origen="${origenVal}" onclick="toggleOrigen(this, '${r.cliente_nro}', ${r.sub})" title="Click para alternar Publicidad / Local"><span class="od"></span>${origenLabel}</button></td>
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
-          <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
+          <td><span class="cell-fecha"${r.fecha_contrato ? ' title="Fecha de contrato"' : ''}>${fmtFecha(r.fecha_efectiva || r.fecha)}</span></td>
           <td class="actions-cell">
             <button class="act-btn" onclick="abrirModalEditar('${r.cliente_nro}', ${r.sub})" title="Editar">Editar</button>
             ${zip}

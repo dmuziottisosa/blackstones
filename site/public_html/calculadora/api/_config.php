@@ -147,3 +147,23 @@ function bs_error($message, $code = 400) {
 function bs_ok($data = []) {
     bs_json_response(array_merge(['ok' => true], $data), 200);
 }
+
+// ============================================================
+// Fecha de referencia de una cotizacion
+// ============================================================
+// 'fecha_contrato' (la fecha real del acuerdo, editable desde el hub) es
+// la que MANDA para categorizar, ordenar y filtrar en toda la pestaña de
+// presupuestos: listado de activos, agrupacion por mes del reporte y
+// generacion de los reportes mensuales.
+//
+// Si no esta cargada, cada consumidor pasa su fallback historico, para
+// que los presupuestos viejos sigan cayendo donde siempre:
+//   - listados            -> fecha del presupuesto
+//   - reportes de entregas -> entregado_at (y en su defecto la fecha)
+//
+// NO se usa para la retencion (cleanup-retention.php): ahi el reloj
+// tiene que seguir corriendo desde la entrega real, no desde el contrato.
+function bs_fecha_ref($cot, $fallback = '') {
+    $fc = trim((string)($cot['fecha_contrato'] ?? ''));
+    return $fc !== '' ? $fc : $fallback;
+}

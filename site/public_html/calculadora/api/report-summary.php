@@ -247,7 +247,10 @@ function _live_scan_month($month_start, $month_end, $origen_filter = '') {
     foreach (_bs_clientes_all() as $cliente) {
         foreach ($cliente['cotizaciones'] ?? [] as $cot) {
             if (($cot['estado'] ?? '') !== 'entregado') continue;
-            $entregado_at = strtotime($cot['entregado_at'] ?? $cot['fecha'] ?? '');
+            // El mes se decide por la fecha de contrato si esta cargada;
+            // si no, por la fecha de entrega (comportamiento historico).
+            $ref = bs_fecha_ref($cot, $cot['entregado_at'] ?? $cot['fecha'] ?? '');
+            $entregado_at = strtotime($ref);
             if (!$entregado_at) continue;
             if ($entregado_at < $month_start || $entregado_at > $month_end) continue;
 

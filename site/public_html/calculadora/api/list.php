@@ -97,8 +97,8 @@ if (is_dir(BS_CLIENTES_DIR)) {
             // Filtro fechas — manda la fecha de contrato; si no esta cargada,
             // se usa la fecha del presupuesto como fallback.
             $fecha = $cot['fecha'] ?? '';
-            $fecha_contrato = $cot['fecha_contrato'] ?? '';
-            $fecha_efectiva = $fecha_contrato !== '' ? $fecha_contrato : $fecha;
+            $fecha_contrato = trim((string)($cot['fecha_contrato'] ?? ''));
+            $fecha_efectiva = bs_fecha_ref($cot, $fecha);
             $fecha_date = substr($fecha_efectiva, 0, 10); // YYYY-MM-DD
             if ($desde !== '' && $fecha_date < $desde) continue;
             if ($hasta !== '' && $fecha_date > $hasta) continue;
