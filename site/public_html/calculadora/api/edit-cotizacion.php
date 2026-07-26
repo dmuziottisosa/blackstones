@@ -105,6 +105,19 @@ if (array_key_exists('fecha', $body)) {
     }
 }
 
+// Fecha de contrato: la fecha real del acuerdo con el cliente, distinta de
+// 'fecha' (cuando se guardo el presupuesto). Es la que manda para filtrar y
+// ordenar en Activos. Vacia = se usa 'fecha' como fallback.
+if (array_key_exists('fecha_contrato', $body)) {
+    $fc = trim((string)$body['fecha_contrato']);
+    if ($fc === '') {
+        $cot_updates['fecha_contrato'] = ''; // vaciar el campo
+    } else {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}/', $fc)) bs_error('fecha_contrato formato YYYY-MM-DD');
+        $cot_updates['fecha_contrato'] = strpos($fc, 'T') !== false ? $fc : ($fc . 'T12:00:00-03:00');
+    }
+}
+
 if (array_key_exists('origen', $body)) {
     // Whitelist: solo 'publicidad' o 'local'. Aceptamos 'organico' como
     // alias historico del periodo 1ed8c6f-7c33dd4 y lo normalizamos a
@@ -162,6 +175,10 @@ try {
                 }
                 if (isset($cot_updates['notas'])) {
                     $cot['notas'] = $cot_updates['notas'];
+                }
+                if (array_key_exists('fecha_contrato', $cot_updates)) {
+                    if ($cot_updates['fecha_contrato'] === '') unset($cot['fecha_contrato']);
+                    else $cot['fecha_contrato'] = $cot_updates['fecha_contrato'];
                 }
                 if (isset($cot_updates['fecha'])) {
                     $cot['fecha'] = $cot_updates['fecha'];

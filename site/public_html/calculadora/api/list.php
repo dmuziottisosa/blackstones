@@ -94,9 +94,12 @@ if (is_dir(BS_CLIENTES_DIR)) {
                 if ($cot_origen !== $origen_filter) continue;
             }
 
-            // Filtro fechas
+            // Filtro fechas — manda la fecha de contrato; si no esta cargada,
+            // se usa la fecha del presupuesto como fallback.
             $fecha = $cot['fecha'] ?? '';
-            $fecha_date = substr($fecha, 0, 10); // YYYY-MM-DD
+            $fecha_contrato = $cot['fecha_contrato'] ?? '';
+            $fecha_efectiva = $fecha_contrato !== '' ? $fecha_contrato : $fecha;
+            $fecha_date = substr($fecha_efectiva, 0, 10); // YYYY-MM-DD
             if ($desde !== '' && $fecha_date < $desde) continue;
             if ($hasta !== '' && $fecha_date > $hasta) continue;
 
@@ -134,6 +137,8 @@ if (is_dir(BS_CLIENTES_DIR)) {
                 'cliente_direccion' => $cli['direccion'] ?? '',
                 'sub'               => $cot['sub'] ?? 0,
                 'fecha'             => $fecha,
+                'fecha_contrato'    => $fecha_contrato,
+                'fecha_efectiva'    => $fecha_efectiva,
                 'concepto'          => $cot['concepto'] ?? '',
                 'material_final'    => $cot['material_final'] ?? '',
                 'notas'             => $cot['notas'] ?? '',
@@ -151,9 +156,9 @@ if (is_dir(BS_CLIENTES_DIR)) {
     }
 }
 
-// Ordenar por fecha desc
+// Ordenar por fecha efectiva desc (contrato si existe, si no la del presupuesto)
 usort($results, function($a, $b) {
-    return strcmp($b['fecha'], $a['fecha']);
+    return strcmp($b['fecha_efectiva'], $a['fecha_efectiva']);
 });
 
 $total = count($results);

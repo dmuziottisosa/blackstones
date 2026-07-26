@@ -602,9 +602,17 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
         <label>Monto ARS</label>
         <input type="text" inputmode="decimal" id="me-ars" autocomplete="off" placeholder="0">
       </div>
-      <div class="field-full">
-        <label>Fecha</label>
+      <div>
+        <label>Fecha del presupuesto</label>
         <input type="date" id="me-fecha">
+        <div class="field-note">Cuándo se guardó el presupuesto.</div>
+      </div>
+      <div>
+        <label>Fecha de contrato</label>
+        <input type="date" id="me-fecha-contrato">
+        <div class="field-note">La que ordena y filtra en Activos. Si la dejás vacía, se usa la del presupuesto.</div>
+      </div>
+      <div class="field-full">
         <div class="field-note">Editar los montos sin recalcular items deja la cotización marcada como "ajuste manual".</div>
       </div>
     </div>
@@ -800,7 +808,7 @@ function exportarExcel() {
     ESTADOS_LABELS[r.estado] || r.estado || '',
     r.monto_usd || 0,
     r.monto_ars || 0,
-    (r.fecha || '').substring(0, 10)
+    (r.fecha_efectiva || r.fecha || '').substring(0, 10)
   ]);
   const csvEscape = v => {
     const s = String(v ?? '');
@@ -876,7 +884,7 @@ async function cargarActivos() {
           <td><button type="button" class="origen-cell ${origenCls}" data-origen="${origenVal}" onclick="toggleOrigen(this, '${r.cliente_nro}', ${r.sub})" title="Click para alternar Publicidad / Sin publicidad"><span class="od"></span>${origenLabel}</button></td>
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
-          <td><span class="cell-fecha">${fmtFecha(r.fecha)}</span></td>
+          <td><span class="cell-fecha"${r.fecha_contrato ? ' title="Fecha de contrato"' : ''}>${fmtFecha(r.fecha_efectiva || r.fecha)}</span></td>
           <td class="actions-cell">${editar} ${cargar} ${transitions} ${back} ${zip}</td>
         </tr>
       `;
@@ -1220,6 +1228,7 @@ function abrirModalEditar(nro, sub) {
   document.getElementById('me-usd').value       = (+r.monto_usd || 0) > 0 ? _fmtMontoEdit(r.monto_usd, true) : '';
   document.getElementById('me-ars').value       = (+r.monto_ars || 0) > 0 ? _fmtMontoEdit(r.monto_ars, false) : '';
   document.getElementById('me-fecha').value     = (r.fecha || '').substring(0, 10);
+  document.getElementById('me-fecha-contrato').value = (r.fecha_contrato || '').substring(0, 10);
   document.getElementById('me-calc-link').href  = `/calculadora/?load=${r.cliente_nro}-${r.sub}`;
 
   document.getElementById('modal-edit-overlay').classList.add('show');
@@ -1451,6 +1460,7 @@ async function guardarEdicion() {
     monto_usd: _parseMontoAR(document.getElementById('me-usd').value),
     monto_ars: _parseMontoAR(document.getElementById('me-ars').value),
     fecha:     document.getElementById('me-fecha').value,
+    fecha_contrato: document.getElementById('me-fecha-contrato').value,
   };
 
   if (!payload.cliente.nombre) {
