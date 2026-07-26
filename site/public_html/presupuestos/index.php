@@ -106,6 +106,9 @@ h1{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px
 .filters .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text3);pointer-events:none;transition:color .15s}
 .filters .search-wrap:focus-within svg{color:var(--gd)}
 .filters input,.filters select{padding:9px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;background:var(--card);color:var(--text);transition:all .15s;outline:none}
+/* Filtros propios de la tabla de Entregados (Reporte) */
+.ent-filters{margin-bottom:12px;padding:11px 13px}
+.ent-filters-count{font-size:12.5px;color:var(--text2);font-variant-numeric:tabular-nums;margin-left:auto}
 .filters .search-wrap input{padding-left:34px;width:100%}
 .filters select{min-width:180px;cursor:pointer}
 .filters input:hover,.filters select:hover{border-color:var(--gd)}
@@ -1152,9 +1155,10 @@ async function toggleOrigen(el, nro, sub) {
     if (cachedA) cachedA.origen = next;
     const cachedE = (_entregadosCache || []).find(match);
     if (cachedE) cachedE.origen = next;
-    // Si en Reporte el filtro de origen esta activo, la fila ya no
-    // pertenece a la vista — refrescamos todo el dashboard.
-    if (typeof _tab !== 'undefined' && _tab === 'reporte' && _reporteOrigen && _reporteOrigen !== next) {
+    // En Reporte, cambiar el origen de una fila mueve plata entre los
+    // buckets de 'Por origen' y puede sacarla del filtro de la tabla:
+    // refrescamos el dashboard entero (los filtros locales se conservan).
+    if (typeof _tab !== 'undefined' && _tab === 'reporte') {
       cargarReporte();
     }
   } catch (e) {
@@ -1693,26 +1697,91 @@ let _reporteOrigen = '';
 
 function setReporteOrigen(val) {
   _reporteOrigen = val;
+  // La tabla de Entregados sigue al switch global por default; despues
+  // podes cambiarle el filtro solo a ella.
+  _entFiltroOrigen = val;
   document.querySelectorAll('#origen-switch .ori-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.val === val);
   });
   cargarReporte();
 }
 
+// Filtros propios de la tabla de Entregados (client-side sobre lo ya
+// cargado: son instantaneos y no vuelven a pegarle a la API).
+// El origen arranca sincronizado con el switch de arriba, pero podes
+// cambiarlo solo para la tabla sin tocar el resto del dashboard.
+let _entFiltroMes = '';
+let _entFiltroOrigen = '';
+
+function _entOrigenDe(r) { return (r.origen === 'publicidad') ? 'publicidad' : 'local'; }
+function _entMesDe(r) { return (r.fecha_efectiva || r.fecha || '').substring(0, 7); }
+function _entMesLabel(ym) {
+  const m = String(ym).match(/^(\d{4})-(\d{2})$/);
+  return m ? `${MESES_ABBR[parseInt(m[2], 10) - 1] || ''} ${m[1]}` : ym;
+}
+function setEntFiltro(campo, val) {
+  if (campo === 'mes') _entFiltroMes = val; else _entFiltroOrigen = val;
+  renderEntregados();
+}
+
 async function cargarEntregados() {
   const cont = document.getElementById('entregados-tabla');
   if (!cont) return;
   try {
-    const url = '/calculadora/api/list.php?estado=entregado&per_page=200' + (_reporteOrigen ? `&origen=${_reporteOrigen}` : '');
+    // Traemos todo y filtramos en el cliente: asi la tabla tiene sus
+    // propios filtros sin depender del switch global.
+    const url = '/calculadora/api/list.php?estado=entregado&per_page=200';
     const r = await fetch(url, { credentials: 'same-origin' });
     const d = await r.json();
     if (!d.ok) { cont.innerHTML = `<div class="empty">Error: ${escapeHtml(d.error || '')}</div>`; return; }
     _entregadosCache = d.results || [];
-    if (!_entregadosCache.length) {
-      cont.innerHTML = '<div class="empty">No hay entregados en el sistema.</div>';
-      return;
-    }
-    const rows = _entregadosCache.map(r => {
+    renderEntregados();
+  } catch (e) {
+    cont.innerHTML = `<div class="empty">No se pudo cargar (${e.message})</div>`;
+  }
+}
+
+function renderEntregados() {
+  const cont = document.getElementById('entregados-tabla');
+  if (!cont) return;
+  if (!_entregadosCache.length) {
+    cont.innerHTML = '<div class="empty">No hay entregados en el sistema.</div>';
+    return;
+  }
+  // Meses disponibles segun la fecha efectiva (contrato si esta cargada)
+  const meses = [...new Set(_entregadosCache.map(_entMesDe).filter(Boolean))].sort().reverse();
+  if (_entFiltroMes && meses.indexOf(_entFiltroMes) === -1) _entFiltroMes = '';
+
+  const filtrados = _entregadosCache.filter(r => {
+    if (_entFiltroOrigen && _entOrigenDe(r) !== _entFiltroOrigen) return false;
+    if (_entFiltroMes && _entMesDe(r) !== _entFiltroMes) return false;
+    return true;
+  });
+
+  const sumU = filtrados.reduce((a, r) => a + (+r.monto_usd || 0), 0);
+  const sumA = filtrados.reduce((a, r) => a + (+r.monto_ars || 0), 0);
+  const hayFiltro = !!(_entFiltroMes || _entFiltroOrigen);
+  const filtros = `
+    <div class="filters ent-filters">
+      <select onchange="setEntFiltro('mes', this.value)" title="Filtrar por mes">
+        <option value=""${_entFiltroMes === '' ? ' selected' : ''}>Todos los meses</option>
+        ${meses.map(m => `<option value="${m}"${_entFiltroMes === m ? ' selected' : ''}>${_entMesLabel(m)}</option>`).join('')}
+      </select>
+      <select onchange="setEntFiltro('origen', this.value)" title="Filtrar por origen">
+        <option value=""${_entFiltroOrigen === '' ? ' selected' : ''}>Todos los orígenes</option>
+        <option value="publicidad"${_entFiltroOrigen === 'publicidad' ? ' selected' : ''}>Publicidad</option>
+        <option value="local"${_entFiltroOrigen === 'local' ? ' selected' : ''}>Local</option>
+      </select>
+      <span class="ent-filters-count">${filtrados.length} de ${_entregadosCache.length} · ${fmtUSD(sumU)} · ${fmtARS(sumA)}</span>
+      ${hayFiltro ? `<button class="btn-search" onclick="setEntFiltro('mes','');setEntFiltro('origen','')">Limpiar</button>` : ''}
+    </div>`;
+
+  if (!filtrados.length) {
+    cont.innerHTML = filtros + '<div class="empty">Ningún entregado con esos filtros.</div>';
+    return;
+  }
+  {
+    const rows = filtrados.map(r => {
       const nombre = (r.cliente_nombre || '—');
       // 'organico' es alias historico de 'local'
       const origenVal = (r.origen === 'publicidad') ? 'publicidad' : 'local';
@@ -1739,13 +1808,11 @@ async function cargarEntregados() {
           </td>
         </tr>`;
     }).join('');
-    cont.innerHTML = `
+    cont.innerHTML = filtros + `
       <table class="entregados-table">
         <thead><tr><th>N°</th><th>Cliente</th><th>Concepto</th><th>Origen</th><th class="num">USD</th><th class="num">ARS</th><th>Fecha</th><th>Acciones</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
-  } catch (e) {
-    cont.innerHTML = `<div class="empty">No se pudo cargar (${e.message})</div>`;
   }
 }
 
