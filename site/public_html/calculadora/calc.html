@@ -1261,6 +1261,10 @@ function calcDescEfectivo(sumUsd,sumArs,fleteVal){
   const baseArs=Math.max(0,(+sumArs||0)-(+fleteVal||0));   // el flete no se descuenta
   return{usd:baseUsd*DESC_EFECTIVO,ars:baseArs*DESC_EFECTIVO};
 }
+// Descuento aplicado a una variante de color. Las variantes son SOLO
+// items (nunca incluyen flete ni colocación), así que el 20% va sobre
+// todo el subtotal.
+function descVarTotal(total){return isEfectivo()?Math.max(0,+total||0)*DESC_EFECTIVO:0}
 function setEfectivo(on){
   const el=document.getElementById('efectivo');
   if(!el)return;
@@ -3068,8 +3072,12 @@ function renderVariantCard(v,idx,sections){
   const result=calcVariantTotal(v);
   const hasResult=result.hasItems&&result.total>0;
   const resultClass=result.mon==='ARS'?'ars':'';
+  const _dVar=hasResult?descVarTotal(result.total):0;
+  const _fVar=result.mon==='USD'?fmtUSD:fmtARS;
   const resultValue=hasResult
-    ? `<span class="var-result-val ${resultClass}">${result.mon==='USD'?fmtUSD(result.total):fmtARS(result.total)}</span>`
+    ? (_dVar>0
+        ? `<span class="var-result-val ${resultClass}">${_fVar(result.total-_dVar)}<small style="display:block;font-size:.62rem;font-weight:500;color:#1F8F47;font-family:'Manrope',sans-serif">efectivo −20% · lista ${_fVar(result.total)}</small></span>`
+        : `<span class="var-result-val ${resultClass}">${_fVar(result.total)}</span>`)
     : `<span class="var-result-val empty">Pendiente</span>`;
   const matInfo=v.mat
     ? `<div class="var-mat-info"><span class="var-mat-tag">${matLabel(v.mat)}</span><span class="var-price-tag">${v.mon==='USD'?fmtUSD(v.price)+' /m²':fmtARS(v.price)+' /m²'}</span></div>`
@@ -4255,7 +4263,24 @@ async function generarExcel(){
         setC(row,6,r.total,{name:'Arial',size:11,bold:true,color:{argb:'FF5A4A35'}},fSt,{horizontal:'center',vertical:'middle'});
         ws.getRow(row).getCell(6).numFmt='$ #,##0';
       }
-      row+=2;
+      row++;
+      // Con pago en efectivo (la variante no incluye flete: 20% sobre todo)
+      const dVarX=descVarTotal(r.total);
+      if(dVarX>0){
+        const netoVarX=r.total-dVarX;
+        fillR(row,fSt);
+        setC(row,2,`Variante ${vIdx+1} con pago en efectivo (−20%)`,{name:'Arial',size:9.5,bold:true,italic:true,color:{argb:'FF1F8F47'}},fSt,{horizontal:'right',vertical:'middle'});
+        ws.mergeCells(`B${row}:D${row}`);
+        if(v.mon==='USD'){
+          setC(row,5,netoVarX,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fSt,{horizontal:'center',vertical:'middle'});
+          ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00';
+        }else{
+          setC(row,6,netoVarX,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fSt,{horizontal:'center',vertical:'middle'});
+          ws.getRow(row).getCell(6).numFmt='$ #,##0';
+        }
+        row++;
+      }
+      row++;
     });
   };
 
@@ -4426,8 +4451,11 @@ async function generarExcel(){
   const descX=calcDescEfectivo(sumUSD,sumARS,fleteVal);
   const netoXU=sumUSD-descX.usd,netoXA=sumARS-descX.ars;
 
+  // Subtotal por sección y subtotal general. Igual que en el PDF: si hay
+  // descuento por efectivo, el bloque se muestra aunque "Total" este off.
+  const hayDescX=(descX.usd>0||descX.ars>0);
   // Subtotal por sección y subtotal general
-  if(incTotal){
+  if(incTotal||hayDescX){
     row++;fillR(row,fAl);ws.mergeCells(`A${row}:D${row}`);
     setC(row,1,'  Subtotal',{name:'Arial',size:11,bold:true},fAl);
     if(sumUSD>0){setC(row,5,sumUSD,{name:'Arial',size:10,bold:true,color:{argb:DK}},fAl,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00'}
@@ -4868,6 +4896,14 @@ function generarPDF(opts){
       const usdSub=v.mon==='USD'?fmtUSD(r.total):'';
       const arsSub=v.mon==='ARS'?fmtARS(r.total):'';
       items+=`<tr style="background:#EDE5D0;border-top:1.5px solid #C4A77D"><td colspan="4" style="text-align:right;font-style:italic;color:#5A4A35;padding:7px 12px;font-weight:700;font-size:10px">Subtotal Variante ${vIdx+1}</td><td style="text-align:center;font-weight:700;color:#5A4A35">${usdSub}</td><td style="text-align:center;font-weight:700;color:#5A4A35">${arsSub}</td></tr>`;
+      // Con pago en efectivo (la variante no incluye flete: 20% sobre todo)
+      const dVarP=descVarTotal(r.total);
+      if(dVarP>0){
+        const netoVar=r.total-dVarP;
+        const usdEf=v.mon==='USD'?fmtUSD(netoVar):'';
+        const arsEf=v.mon==='ARS'?fmtARS(netoVar):'';
+        items+=`<tr style="background:#EDE5D0"><td colspan="4" style="text-align:right;font-style:italic;color:#1F8F47;padding:5px 12px;font-weight:700;font-size:9.5px">Variante ${vIdx+1} con pago en efectivo (−20%)</td><td style="text-align:center;font-weight:700;color:#1F8F47">${usdEf}</td><td style="text-align:center;font-weight:700;color:#1F8F47">${arsEf}</td></tr>`;
+      }
     });
   }
   // Extraemos el bloque variantes recién acumulado para reposicionarlo al final
@@ -4976,7 +5012,11 @@ function generarPDF(opts){
   const senaU=Math.round(totU/2),senaA=Math.round(totA/2);
   const saldoU=totU-senaU,saldoA=totA-senaA;
 
-  if(incTotal){
+  // Si el descuento por efectivo esta activo mostramos el bloque de totales
+  // SI O SI, aunque "Total" este apagado: un descuento sin total a la vista
+  // deja el PDF con precios de lista y el descuento invisible al cliente.
+  const hayDescP=(descP.usd>0||descP.ars>0);
+  if(incTotal||hayDescP){
     items+=`<tr style="background:#F2EDE3"><td colspan="4" style="font-weight:700;padding-left:12px">Subtotal</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumU>0?fmtUSD(sumU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumA>0?fmtARS(sumA):''}</td></tr>`;
     if(descP.usd>0||descP.ars>0)items+=`<tr><td colspan="4" style="padding-left:12px;color:#1F8F47;font-weight:600">Descuento pago en efectivo (20%)<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">No aplica sobre flete y colocación</span></td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.usd>0?'− '+fmtUSD(descP.usd):''}</td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.ars>0?'− '+fmtARS(descP.ars):''}</td></tr>`;
     if(conFact)items+=`<tr><td colspan="4" style="padding-left:12px">I.V.A. (21%)</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaU>0?fmtUSD(ivaU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaA>0?fmtARS(ivaA):''}</td></tr>`;
