@@ -471,10 +471,18 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     }
 
     // === Totales ===
-    $ivaU = $factura ? $sumU * 0.21 : 0;
-    $ivaA = $factura ? $sumA * 0.21 : 0;
-    $totU = $sumU + $ivaU;
-    $totA = $sumA + $ivaA;
+    // Descuento por pago en efectivo: 20% sobre todo MENOS flete y
+    // colocacion (el flete se cobra entero). Misma formula que la calc.
+    // Va antes del IVA: si hay factura, el 21% se calcula sobre el neto.
+    $efectivo = !empty($presup['efectivo']);
+    $descU = $efectivo ? max(0, $sumU) * 0.20 : 0;
+    $descA = $efectivo ? max(0, $sumA - $fleteVal) * 0.20 : 0;
+    $netoU = $sumU - $descU;
+    $netoA = $sumA - $descA;
+    $ivaU = $factura ? $netoU * 0.21 : 0;
+    $ivaA = $factura ? $netoA * 0.21 : 0;
+    $totU = $netoU + $ivaU;
+    $totA = $netoA + $ivaA;
     $senaU = round($totU / 2);
     $senaA = round($totA / 2);
     $saldoU = $totU - $senaU;
@@ -484,6 +492,12 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
         echo '<tr style="background:#F2EDE3"><td colspan="4" style="font-weight:700;padding-left:12px">Subtotal</td>';
         echo '<td style="text-align:center;font-weight:700;color:#1A1816">' . ($sumU > 0 ? $fUSD($sumU) : '') . '</td>';
         echo '<td style="text-align:center;font-weight:700;color:#1A1816">' . ($sumA > 0 ? $fARS($sumA) : '') . '</td></tr>';
+        if ($descU > 0 || $descA > 0) {
+            echo '<tr><td colspan="4" style="padding-left:12px;color:#1F8F47;font-weight:600">Descuento pago en efectivo (20%)';
+            echo '<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">No aplica sobre flete y colocación</span></td>';
+            echo '<td style="text-align:center;font-weight:700;color:#1F8F47">' . ($descU > 0 ? '− ' . $fUSD($descU) : '') . '</td>';
+            echo '<td style="text-align:center;font-weight:700;color:#1F8F47">' . ($descA > 0 ? '− ' . $fARS($descA) : '') . '</td></tr>';
+        }
         if ($factura) {
             echo '<tr><td colspan="4" style="padding-left:12px">I.V.A. (21%)</td>';
             echo '<td style="text-align:center;font-weight:700;color:#1A1816">' . ($ivaU > 0 ? $fUSD($ivaU) : '') . '</td>';

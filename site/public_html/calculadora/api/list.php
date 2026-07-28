@@ -147,6 +147,8 @@ if (is_dir(BS_CLIENTES_DIR)) {
                 'monto_ars'         => $monto_ars,
                 'm2'                => $m2,
                 'ajuste_manual'     => isset($cot['ajuste_manual']) ? true : false,
+                // Se cobro con el descuento de pago en efectivo (-20%)
+                'efectivo'          => !empty($cot['presupuesto']['efectivo']),
                 // Origen del presupuesto: 'publicidad' o 'local'. Default
                 // 'local' si no existe el campo. 'organico' es alias
                 // historico que mapeamos a 'local'.

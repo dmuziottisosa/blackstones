@@ -378,6 +378,14 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 /* Badge "ajuste manual" */
 .badge-manual{display:inline-block;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#A55E00;background:#FBF1DA;padding:2px 6px;border-radius:8px;margin-left:6px;vertical-align:middle}
 [data-theme="dark"] .badge-manual{color:#E8B95C;background:#3A2A14}
+/* Pago en efectivo (-20%) */
+.badge-efectivo{display:inline-block;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1F8F47;background:#DDF2DD;padding:2px 6px;border-radius:8px;margin-left:6px;vertical-align:middle}
+[data-theme="dark"] .badge-efectivo{color:#34D670;background:#0E2A18}
+.modal-edit .efectivo-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .16s}
+.modal-edit .efectivo-btn svg{width:15px;height:15px;flex-shrink:0}
+.modal-edit .efectivo-btn:hover{border-color:#1F8F47;color:#1F8F47;background:rgba(37,211,102,.06)}
+.modal-edit .efectivo-btn.on{background:#25D366;border-color:#25D366;color:#0B3D1E}
+[data-theme="dark"] .modal-edit .efectivo-btn.on{color:#04220F}
 
 /* === SECTION HEADERS for stats === */
 .sec-h{margin:28px 0 12px;font-family:'Fraunces',serif;font-weight:600;color:var(--text);font-size:18px;letter-spacing:-.005em;display:flex;align-items:center;gap:10px}
@@ -614,6 +622,14 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
         <label>Fecha de contrato</label>
         <input type="date" id="me-fecha-contrato">
         <div class="field-note">La que ordena y filtra en Activos. Si la dejás vacía, se usa la del presupuesto.</div>
+      </div>
+      <div class="field-full">
+        <label>Forma de pago</label>
+        <button type="button" id="me-efectivo" class="efectivo-btn" aria-pressed="false" onclick="toggleMeEfectivo()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
+          <span id="me-efectivo-label">Pago en efectivo (−20%)</span>
+        </button>
+        <div class="field-note">Deja registrado cómo se cobró. No recalcula los montos: para cambiar el precio, editá los importes o abrí en la calculadora.</div>
       </div>
       <div class="field-full">
         <div class="field-note">Editar los montos sin recalcular items deja la cotización marcada como "ajuste manual".</div>
@@ -1206,6 +1222,22 @@ function refrescarVista() {
   else { cargarActivos(); }
 }
 
+// Toggle de "pago en efectivo" del modal. Es un flag de registro: NO
+// recalcula los montos (esos vienen de la calculadora).
+function isMeEfectivo() {
+  const el = document.getElementById('me-efectivo');
+  return !!(el && el.getAttribute('aria-pressed') === 'true');
+}
+function setMeEfectivo(on) {
+  const el = document.getElementById('me-efectivo');
+  if (!el) return;
+  el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  el.classList.toggle('on', !!on);
+  const lbl = document.getElementById('me-efectivo-label');
+  if (lbl) lbl.textContent = on ? 'Pago en efectivo (−20%)' : 'No fue en efectivo';
+}
+function toggleMeEfectivo() { setMeEfectivo(!isMeEfectivo()); }
+
 function abrirModalEditar(nro, sub) {
   const pool = (_activosCache || []).concat(_entregadosCache || []);
   const r = pool.find(x => x.cliente_nro === nro && parseInt(x.sub) === parseInt(sub));
@@ -1218,7 +1250,9 @@ function abrirModalEditar(nro, sub) {
   document.getElementById('me-id-label').innerText = `${r.cliente_nro}-${r.sub}`;
   document.getElementById('me-state-sub').innerHTML =
     `Estado: <b>${ESTADOS_LABELS[r.estado] || r.estado}</b>` +
-    (r.ajuste_manual ? ' <span class="badge-manual">Ajuste manual</span>' : '');
+    (r.ajuste_manual ? ' <span class="badge-manual">Ajuste manual</span>' : '') +
+    (r.efectivo ? ' <span class="badge-efectivo">Efectivo −20%</span>' : '');
+  setMeEfectivo(!!r.efectivo);
 
   document.getElementById('me-nombre').value    = r.cliente_nombre || '';
   document.getElementById('me-celular').value   = r.cliente_celular || '';
@@ -1465,6 +1499,7 @@ async function guardarEdicion() {
     monto_ars: _parseMontoAR(document.getElementById('me-ars').value),
     fecha:     document.getElementById('me-fecha').value,
     fecha_contrato: document.getElementById('me-fecha-contrato').value,
+    efectivo:  isMeEfectivo(),
   };
 
   if (!payload.cliente.nombre) {

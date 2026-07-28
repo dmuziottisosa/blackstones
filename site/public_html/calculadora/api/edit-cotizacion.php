@@ -118,6 +118,14 @@ if (array_key_exists('fecha_contrato', $body)) {
     }
 }
 
+// Pago en efectivo: flag de como se cobro. Vive dentro de 'presupuesto'
+// (al lado de 'factura'). Editarlo NO recalcula los montos: solo corrige
+// el registro. Para cambiar el precio se editan los montos o se reabre en
+// la calculadora.
+if (array_key_exists('efectivo', $body)) {
+    $cot_updates['efectivo'] = !empty($body['efectivo']);
+}
+
 if (array_key_exists('origen', $body)) {
     // Whitelist: solo 'publicidad' o 'local'. Aceptamos 'organico' como
     // alias historico del periodo 1ed8c6f-7c33dd4 y lo normalizamos a
@@ -175,6 +183,12 @@ try {
                 }
                 if (isset($cot_updates['notas'])) {
                     $cot['notas'] = $cot_updates['notas'];
+                }
+                if (array_key_exists('efectivo', $cot_updates)) {
+                    if (!isset($cot['presupuesto']) || !is_array($cot['presupuesto'])) {
+                        $cot['presupuesto'] = [];
+                    }
+                    $cot['presupuesto']['efectivo'] = $cot_updates['efectivo'];
                 }
                 if (array_key_exists('fecha_contrato', $cot_updates)) {
                     if ($cot_updates['fecha_contrato'] === '') unset($cot['fecha_contrato']);
