@@ -447,10 +447,12 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     // Bachas y accesorios
     $bachas_raw = $presup['bachas'] ?? [];
     if (isset($bachas_raw['items']) && is_array($bachas_raw['items'])) $bachas_raw = $bachas_raw['items'];
+    // Inicializado afuera: mas abajo se resta del descuento por efectivo y
+    // tiene que existir aunque el presupuesto no tenga bachas.
+    $bSum = 0;
     if (!empty($bachas_raw)) {
         echo '<tr style="background:#F2EDE3"><td style="text-align:center;color:#7A6649">●</td>';
         echo '<td colspan="5" style="font-weight:700;padding:6px 10px">Bachas y accesorios</td></tr>';
-        $bSum = 0;
         foreach ((array)$bachas_raw as $b) {
             $price = floatval($b['price'] ?? 0); $qty = intval($b['qty'] ?? 1);
             if ($price <= 0) continue;
@@ -471,12 +473,13 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     }
 
     // === Totales ===
-    // Descuento por pago en efectivo: 20% sobre todo MENOS flete y
-    // colocacion (el flete se cobra entero). Misma formula que la calc.
+    // Descuento por pago en efectivo: 20% sobre todo MENOS flete/colocacion
+    // y bachas/accesorios (esos se cobran enteros). Misma formula que la calc.
     // Va antes del IVA: si hay factura, el 21% se calcula sobre el neto.
     $efectivo = !empty($presup['efectivo']);
+    $excluidoDesc = $fleteVal + $bSum;   // no reciben descuento
     $descU = $efectivo ? max(0, $sumU) * 0.20 : 0;
-    $descA = $efectivo ? max(0, $sumA - $fleteVal) * 0.20 : 0;
+    $descA = $efectivo ? max(0, $sumA - $excluidoDesc) * 0.20 : 0;
     $netoU = $sumU - $descU;
     $netoA = $sumA - $descA;
     $ivaU = $factura ? $netoU * 0.21 : 0;
@@ -494,7 +497,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
         echo '<td style="text-align:center;font-weight:700;color:#1A1816">' . ($sumA > 0 ? $fARS($sumA) : '') . '</td></tr>';
         if ($descU > 0 || $descA > 0) {
             echo '<tr><td colspan="4" style="padding-left:12px;color:#1F8F47;font-weight:600">Descuento pago en efectivo (20%)';
-            echo '<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">No aplica sobre flete y colocación</span></td>';
+            echo '<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">No aplica sobre flete, colocación, bachas ni accesorios</span></td>';
             echo '<td style="text-align:center;font-weight:700;color:#1F8F47">' . ($descU > 0 ? '− ' . $fUSD($descU) : '') . '</td>';
             echo '<td style="text-align:center;font-weight:700;color:#1F8F47">' . ($descA > 0 ? '− ' . $fARS($descA) : '') . '</td></tr>';
         }

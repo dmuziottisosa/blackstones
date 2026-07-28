@@ -285,15 +285,16 @@ const P = {
 function calc(){
   const ef = document.getElementById('ef').checked;
   const fa = document.getElementById('fa').checked;
-  let usd = 0, ars = 0, flete = 0;
+  let usd = 0, ars = 0, excl = 0;
   P.secciones.forEach(s => s.items.forEach(i => usd += i.usd));
-  P.servicios.forEach(s => { ars += s.ars; if (s.esFlete) flete += s.ars; });
-  P.bachas.forEach(b => ars += b.ars);
+  // Ni flete/colocación ni bachas/accesorios reciben el descuento.
+  P.servicios.forEach(s => { ars += s.ars; excl += s.ars; });
+  P.bachas.forEach(b => { ars += b.ars; excl += b.ars; });
   const dU = ef ? usd * .20 : 0;
-  const dA = ef ? Math.max(0, ars - flete) * .20 : 0;
+  const dA = ef ? Math.max(0, ars - excl) * .20 : 0;
   const nU = usd - dU, nA = ars - dA;
   const iU = fa ? nU * .21 : 0, iA = fa ? nA * .21 : 0;
-  return { ef, fa, usd, ars, flete, dU, dA, nU, nA, iU, iA, tU: nU + iU, tA: nA + iA };
+  return { ef, fa, usd, ars, excl, dU, dA, nU, nA, iU, iA, tU: nU + iU, tA: nA + iA };
 }
 const U = n => 'USD ' + n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const A = n => '$ ' + n.toLocaleString('es-AR',{maximumFractionDigits:0});
@@ -320,7 +321,7 @@ S.push({ nm:'Actual', d:'El que sale hoy de la calculadora. Sirve de referencia 
     P.servicios.forEach(s => r += `<tr><td class="n">1</td><td><b>${s.det}: ${s.zona}</b></td><td></td><td></td><td>—</td><td class="n"><b>${A(s.ars)}</b></td></tr>`);
     P.bachas.forEach(b => r += `<tr><td class="n">1</td><td><b>${b.cod}</b> · ${b.det}</td><td></td><td></td><td>—</td><td class="n"><b>${A(b.ars)}</b></td></tr>`);
     r += `<tr class="subsec"><td colspan="4">Subtotal</td><td class="n">${U(c.usd)}</td><td class="n">${A(c.ars)}</td></tr>`;
-    if (c.ef) r += `<tr class="desc"><td colspan="4">Descuento pago en efectivo (20%)<div class="sub" style="color:var(--piedra)">No aplica sobre flete y colocación</div></td><td class="n">− ${U(c.dU)}</td><td class="n">− ${A(c.dA)}</td></tr>`;
+    if (c.ef) r += `<tr class="desc"><td colspan="4">Descuento pago en efectivo (20%)<div class="sub" style="color:var(--piedra)">No aplica sobre flete, colocación, bachas ni accesorios</div></td><td class="n">− ${U(c.dU)}</td><td class="n">− ${A(c.dA)}</td></tr>`;
     if (c.fa) r += `<tr><td colspan="4" style="padding:8px 12px">I.V.A. (21%)</td><td class="n">${U(c.iU)}</td><td class="n">${A(c.iA)}</td></tr>`;
     r += `<tr class="tot"><td colspan="4">TOTAL</td><td class="n" style="color:#7BE3A0">${U(c.tU)}</td><td class="n" style="color:#6ED2F5">${A(c.tA)}</td></tr>`;
     if (c.ef) r += `<tr class="tot" style="background:var(--tinta2)"><td colspan="4" style="font-size:.72rem">SEÑA 50 %</td><td class="n" style="color:var(--oro)">${U(c.tU/2)}</td><td class="n" style="color:var(--oro)">${A(c.tA/2)}</td></tr>`;
@@ -374,7 +375,7 @@ S.push({ nm:'Editorial', d:'Aire, tipografía grande y el total como pieza centr
     P.bachas.forEach(b => r += `<div class="it"><b>${b.det}</b><span class="p">${A(b.ars)}</span><span class="m">Código ${b.cod}</span></div>`);
     r += `</div>`;
     let f = `<div class="l"><span>Subtotal</span><span class="n">${U(c.usd)} · ${A(c.ars)}</span></div>`;
-    if (c.ef) f += `<div class="l d"><span>Pago en efectivo −20 % <i style="font-style:normal;color:var(--piedra);font-weight:400">(sin flete)</i></span><span class="n">− ${U(c.dU)} · − ${A(c.dA)}</span></div>`;
+    if (c.ef) f += `<div class="l d"><span>Pago en efectivo −20 % <i style="font-style:normal;color:var(--piedra);font-weight:400">(sin flete ni bachas)</i></span><span class="n">− ${U(c.dU)} · − ${A(c.dA)}</span></div>`;
     if (c.fa) f += `<div class="l"><span>I.V.A. 21 %</span><span class="n">${U(c.iU)} · ${A(c.iA)}</span></div>`;
     if (c.sn) f += `<div class="l"><span>Seña 50 % para iniciar</span><span class="n">${U(c.tU/2)} · ${A(c.tA/2)}</span></div>`;
     return `<div class="esp s3 hoja">
@@ -409,7 +410,7 @@ S.push({ nm:'Bloques por ambiente', d:'Cada ambiente en su tarjeta con subtotal 
       <div class="r">Presupuesto N° ${P.nro} · ${P.fecha}<br><b style="color:#1A1816">${P.cliente}</b><br>${P.dir}</div></div>
       ${r}
       <div class="tot">
-        <div><div class="lbl">Total${c.ef?' con pago en efectivo':''}</div>${c.ef?`<div class="d">Ya con el 20 % de descuento · el flete se cobra entero</div>`:''}${c.sn?`<div class="d" style="color:var(--oro)">Seña 50 %: ${U(c.tU/2)} · ${A(c.tA/2)}</div>`:''}</div>
+        <div><div class="lbl">Total${c.ef?' con pago en efectivo':''}</div>${c.ef?`<div class="d">Ya con el 20 % de descuento · el flete y las bachas se cobran enteros</div>`:''}${c.sn?`<div class="d" style="color:var(--oro)">Seña 50 %: ${U(c.tU/2)} · ${A(c.tA/2)}</div>`:''}</div>
         <div style="text-align:right"><div class="v">${U(c.tU)}</div><div class="v" style="font-size:1.2rem;color:#6ED2F5">${A(c.tA)}</div></div>
       </div>
     </div>`;
@@ -423,7 +424,7 @@ S.push({ nm:'Compacto', d:'Angosto (600 px) y pensado para mandar como imagen po
     P.servicios.forEach(s => r += `<div class="it"><div class="t"><span>${s.det}</span><span class="n">${A(s.ars)}</span></div><div class="m">Zona ${s.zona}</div></div>`);
     P.bachas.forEach(b => r += `<div class="it"><div class="t"><span>${b.det}</span><span class="n">${A(b.ars)}</span></div><div class="m">Código ${b.cod}</div></div>`);
     let f = `<div class="l"><span>Subtotal</span><span class="n">${U(c.usd)} · ${A(c.ars)}</span></div>`;
-    if (c.ef) f += `<div class="l d"><span>Efectivo −20 % (sin flete)</span><span class="n">− ${U(c.dU)} · − ${A(c.dA)}</span></div>`;
+    if (c.ef) f += `<div class="l d"><span>Efectivo −20 % (sin flete ni bachas)</span><span class="n">− ${U(c.dU)} · − ${A(c.dA)}</span></div>`;
     if (c.fa) f += `<div class="l"><span>I.V.A. 21 %</span><span class="n">${U(c.iU)} · ${A(c.iA)}</span></div>`;
     if (c.sn) f += `<div class="l"><span>Seña 50 %</span><span class="n">${U(c.tU/2)} · ${A(c.tA/2)}</span></div>`;
     return `<div class="esp angosto s5 hoja">
@@ -484,7 +485,7 @@ S.push({ nm:'Resumen + detalle', d:'Dos columnas: a la izquierda lo que importa 
         <div class="blk"><div class="k">Presupuesto</div><div class="v">N° ${P.nro}<br>${P.fecha}</div></div>
         <div class="blk"><div class="k">Cliente</div><div class="v">${P.cliente}<br><span style="font-weight:400;color:var(--piedra2)">${P.dir}</span></div></div>
         <div class="price"><div class="k">Total${c.ef?' en efectivo':''}</div><div class="v">${U(c.tU)}</div><div class="v2">${A(c.tA)}</div>
-          ${c.ef?`<div class="ahorro">Ahorrás ${U(c.dU)} y ${A(c.dA)} pagando en efectivo. El flete se cobra entero.</div>`:''}
+          ${c.ef?`<div class="ahorro">Ahorrás ${U(c.dU)} y ${A(c.dA)} pagando en efectivo. El flete y las bachas se cobran enteros.</div>`:''}
           ${c.sn?`<div class="ahorro" style="color:var(--oro)">Seña 50 %: ${U(c.tU/2)} · ${A(c.tA/2)}</div>`:''}
         </div>
         <div class="blk" style="margin-top:26px"><div class="k">Entrega</div><div class="v" style="font-weight:400">15 a 20 días corridos desde la medición.</div></div>

@@ -1191,11 +1191,11 @@ table select{cursor:pointer}
 </div>
 
 <div class="efectivo-row">
-  <button type="button" id="efectivo" class="efectivo-btn" aria-pressed="false" onclick="toggleEfectivo()" title="Aplica 20% de descuento sobre el total, sin contar flete y colocación">
+  <button type="button" id="efectivo" class="efectivo-btn" aria-pressed="false" onclick="toggleEfectivo()" title="Aplica 20% de descuento sobre el total, sin contar flete, colocación, bachas ni accesorios">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
     Pago en efectivo <b>−20%</b>
   </button>
-  <span class="efectivo-note">El 20% se descuenta de todo menos flete y colocación.</span>
+  <span class="efectivo-note">El 20% se descuenta de todo menos flete, colocación, bachas y accesorios.</span>
   <span class="efectivo-val" id="efectivo-val"></span>
 </div>
 
@@ -1255,10 +1255,19 @@ function isEfectivo(){const el=document.getElementById('efectivo');return !!(el&
 // UNA sola definición del descuento. Los tres consumidores (desglose en
 // vivo, PDF y Excel) la llaman igual, así no pueden desincronizarse.
 // Recibe las sumas BRUTAS (que ya incluyen el flete) y el flete a excluir.
-function calcDescEfectivo(sumUsd,sumArs,fleteVal){
+// Lo que NO recibe descuento: flete/colocación y bachas/accesorios.
+// Se calcula acá adentro a propósito. Si fuera un parámetro, cada
+// consumidor podría pasar una lista distinta y el desglose, el PDF y el
+// Excel dejarían de coincidir.
+function excluidoDelDescuento(){
+  const f=(typeof getFleteVal==='function')?(+getFleteVal()||0):0;
+  const b=(typeof getBachasTotal==='function')?(+getBachasTotal()||0):0;
+  return f+b;
+}
+function calcDescEfectivo(sumUsd,sumArs){
   if(!isEfectivo())return{usd:0,ars:0};
-  const baseUsd=Math.max(0,+sumUsd||0);                    // el flete nunca es USD
-  const baseArs=Math.max(0,(+sumArs||0)-(+fleteVal||0));   // el flete no se descuenta
+  const baseUsd=Math.max(0,+sumUsd||0);   // flete y bachas nunca son USD
+  const baseArs=Math.max(0,(+sumArs||0)-excluidoDelDescuento());
   return{usd:baseUsd*DESC_EFECTIVO,ars:baseArs*DESC_EFECTIVO};
 }
 // Descuento aplicado a una variante de color. Las variantes son SOLO
@@ -2714,7 +2723,7 @@ function calc(){
   const conFactura=document.getElementById('factura').value==='1';
   // Descuento por pago en efectivo: 20% sobre todo menos flete/colocación.
   // Va ANTES del IVA — si hay factura, el 21% se calcula sobre el neto.
-  const descEf=calcDescEfectivo(gusd,gars,fleteVal);
+  const descEf=calcDescEfectivo(gusd,gars);
   const netoUsd=gusd-descEf.usd;
   const netoArs=gars-descEf.ars;
   const ivaUsd=conFactura?netoUsd*0.21:0;
@@ -2804,7 +2813,7 @@ function calc(){
   }
   if(descEf.usd>0||descEf.ars>0){
     dh+=`<tr class="svc"><td colspan="2">Subtotal</td><td></td><td>${gusd>0?fmtUSD(gusd):'—'}</td><td ${arsC}>${gars>0?fmtARS(gars):'—'}</td></tr>`;
-    dh+=`<tr class="svc" style="color:#1F8F47"><td colspan="2">Descuento pago en efectivo 20% <small style="color:var(--ts)">(no aplica sobre flete y colocación)</small></td><td></td><td>${descEf.usd>0?'− '+fmtUSD(descEf.usd):'—'}</td><td>${descEf.ars>0?'− '+fmtARS(descEf.ars):'—'}</td></tr>`;
+    dh+=`<tr class="svc" style="color:#1F8F47"><td colspan="2">Descuento pago en efectivo 20% <small style="color:var(--ts)">(no aplica sobre flete, colocación, bachas ni accesorios)</small></td><td></td><td>${descEf.usd>0?'− '+fmtUSD(descEf.usd):'—'}</td><td>${descEf.ars>0?'− '+fmtARS(descEf.ars):'—'}</td></tr>`;
   }
   if(conFactura){
     dh+=`<tr class="svc"><td colspan="2">${(descEf.usd>0||descEf.ars>0)?'Subtotal con descuento':'Subtotal'}</td><td></td><td>${netoUsd>0?fmtUSD(netoUsd):'—'}</td><td ${arsC}>${netoArs>0?fmtARS(netoArs):'—'}</td></tr>`;
@@ -4448,7 +4457,7 @@ async function generarExcel(){
   }
 
   // Descuento por pago en efectivo (20% sobre todo menos flete), antes del IVA
-  const descX=calcDescEfectivo(sumUSD,sumARS,fleteVal);
+  const descX=calcDescEfectivo(sumUSD,sumARS);
   const netoXU=sumUSD-descX.usd,netoXA=sumARS-descX.ars;
 
   // Subtotal por sección y subtotal general. Igual que en el PDF: si hay
@@ -4465,7 +4474,7 @@ async function generarExcel(){
     // Descuento por pago en efectivo (antes del IVA)
     if(descX.usd>0||descX.ars>0){
       fillR(row,fWh);ws.mergeCells(`A${row}:D${row}`);
-      setC(row,1,'  Descuento pago en efectivo (20%) — no aplica sobre flete y colocación',{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh);
+      setC(row,1,'  Descuento pago en efectivo (20%) — no aplica sobre flete, colocación, bachas ni accesorios',{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh);
       if(descX.usd>0){setC(row,5,-descX.usd,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00'}
       if(descX.ars>0){setC(row,6,-descX.ars,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(6).numFmt='$ #,##0'}
       row++;
@@ -5005,7 +5014,7 @@ function generarPDF(opts){
   }
 
   // Descuento por pago en efectivo (20% sobre todo menos flete), antes del IVA
-  const descP=calcDescEfectivo(sumU,sumA,fleteVal);
+  const descP=calcDescEfectivo(sumU,sumA);
   const netoU=sumU-descP.usd,netoA=sumA-descP.ars;
   const ivaU=conFact?netoU*0.21:0,ivaA=conFact?netoA*0.21:0;
   const totU=netoU+ivaU,totA=netoA+ivaA;
@@ -5018,7 +5027,7 @@ function generarPDF(opts){
   const hayDescP=(descP.usd>0||descP.ars>0);
   if(incTotal||hayDescP){
     items+=`<tr style="background:#F2EDE3"><td colspan="4" style="font-weight:700;padding-left:12px">Subtotal</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumU>0?fmtUSD(sumU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumA>0?fmtARS(sumA):''}</td></tr>`;
-    if(descP.usd>0||descP.ars>0)items+=`<tr><td colspan="4" style="padding-left:12px;color:#1F8F47;font-weight:600">Descuento pago en efectivo (20%)<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">No aplica sobre flete y colocación</span></td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.usd>0?'− '+fmtUSD(descP.usd):''}</td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.ars>0?'− '+fmtARS(descP.ars):''}</td></tr>`;
+    if(descP.usd>0||descP.ars>0)items+=`<tr><td colspan="4" style="padding-left:12px;color:#1F8F47;font-weight:600">Descuento pago en efectivo (20%)<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">No aplica sobre flete, colocación, bachas ni accesorios</span></td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.usd>0?'− '+fmtUSD(descP.usd):''}</td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.ars>0?'− '+fmtARS(descP.ars):''}</td></tr>`;
     if(conFact)items+=`<tr><td colspan="4" style="padding-left:12px">I.V.A. (21%)</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaU>0?fmtUSD(ivaU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaA>0?fmtARS(ivaA):''}</td></tr>`;
     items+=`<tr style="background:#1A1816;color:#FAF8F4"><td colspan="4" style="font-weight:700;font-size:13px;padding-left:12px">TOTAL</td><td style="text-align:center;font-weight:700;color:#25D366;font-size:13px">${totU>0?fmtUSD(totU):''}</td><td style="text-align:center;font-weight:700;color:#0EA5E9;font-size:13px">${totA>0?fmtARS(totA):''}</td></tr>`;
   }else if((sumU>0||sumA>0)&&((items.match(/Subtotal de secci[oó]n|Subtotal Z[oó]calos|Subtotal Otros conceptos|Subtotal Bachas/g)||[]).length>=2)){
