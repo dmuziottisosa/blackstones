@@ -507,6 +507,17 @@ table select{cursor:pointer}
 /* === GRAND TOTAL === */
 .grand-label{font-family:'Fraunces',serif;color:var(--gd);font-size:.75rem;font-weight:400;letter-spacing:.08em;text-transform:uppercase;padding:0 28px;margin-top:16px}
 .grand{background:var(--dk);border-radius:10px;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;margin-top:6px;border:1px solid rgba(196,167,125,.18);box-shadow:0 8px 32px -12px rgba(0,0,0,.35),inset 0 1px 0 rgba(196,167,125,.08);position:relative}
+/* Pago en efectivo (−20%) — debajo del precio total */
+.efectivo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding:12px 16px;border:1px dashed var(--border);border-radius:8px;background:var(--card)}
+.efectivo-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:inherit;font-size:.82rem;font-weight:700;letter-spacing:.01em;cursor:pointer;transition:all .16s;white-space:nowrap}
+.efectivo-btn svg{width:16px;height:16px;flex-shrink:0}
+.efectivo-btn:hover{border-color:#25D366;color:#1F8F47;background:rgba(37,211,102,.06)}
+.efectivo-btn.on{background:#25D366;border-color:#25D366;color:#0B3D1E;box-shadow:0 2px 10px -2px rgba(37,211,102,.5)}
+.efectivo-note{font-size:.7rem;color:var(--text2);font-style:italic;line-height:1.35}
+.efectivo-val{margin-left:auto;font-family:'Fraunces',serif;font-size:.95rem;font-weight:600;color:#1F8F47;font-variant-numeric:tabular-nums;white-space:nowrap}
+[data-theme="dark"] .efectivo-btn.on{color:#04220F}
+[data-theme="dark"] .efectivo-val{color:#34D670}
+@media(max-width:600px){.efectivo-row{gap:8px}.efectivo-val{margin-left:0;width:100%}}
 .grand .prices{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}
 .grand .price-block h3{font-family:'Fraunces',serif;color:var(--gd);font-size:.7rem;font-weight:400;margin-bottom:2px;letter-spacing:.04em}
 .grand .price-block .val{font-family:'Fraunces',serif;color:var(--gr);font-size:2rem;font-weight:600;transition:transform .25s ease}
@@ -1179,6 +1190,15 @@ table select{cursor:pointer}
   </div>
 </div>
 
+<div class="efectivo-row">
+  <button type="button" id="efectivo" class="efectivo-btn" aria-pressed="false" onclick="toggleEfectivo()" title="Aplica 20% de descuento sobre el total, sin contar flete y colocación">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
+    Pago en efectivo <b>−20%</b>
+  </button>
+  <span class="efectivo-note">El 20% se descuenta de todo menos flete y colocación.</span>
+  <span class="efectivo-val" id="efectivo-val"></span>
+</div>
+
 <div class="actions">
   <button class="btn btn-p" onclick="generarExcel()" id="btn-excel">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1225,6 +1245,29 @@ const MAT_LABELS={
   'Suprastone':'Suprastone'
 };
 function matLabel(m){return MAT_LABELS[m]||m||''}
+
+// === PAGO EN EFECTIVO ===
+// 20% de descuento sobre TODO menos flete y colocación (el flete se cobra
+// entero). Es independiente de "con factura": si hay factura, el IVA se
+// calcula sobre el importe YA descontado.
+const DESC_EFECTIVO=0.20;
+function isEfectivo(){const el=document.getElementById('efectivo');return !!(el&&el.getAttribute('aria-pressed')==='true')}
+// UNA sola definición del descuento. Los tres consumidores (desglose en
+// vivo, PDF y Excel) la llaman igual, así no pueden desincronizarse.
+// Recibe las sumas BRUTAS (que ya incluyen el flete) y el flete a excluir.
+function calcDescEfectivo(sumUsd,sumArs,fleteVal){
+  if(!isEfectivo())return{usd:0,ars:0};
+  const baseUsd=Math.max(0,+sumUsd||0);                    // el flete nunca es USD
+  const baseArs=Math.max(0,(+sumArs||0)-(+fleteVal||0));   // el flete no se descuenta
+  return{usd:baseUsd*DESC_EFECTIVO,ars:baseArs*DESC_EFECTIVO};
+}
+function setEfectivo(on){
+  const el=document.getElementById('efectivo');
+  if(!el)return;
+  el.setAttribute('aria-pressed',on?'true':'false');
+  el.classList.toggle('on',!!on);
+}
+function toggleEfectivo(){setEfectivo(!isEfectivo());calc();markDirty()}
 // Fecha YYYY-MM-DD → DD/MM/AAAA (para las referencias de tipo de cambio en PDF/Excel)
 function fmtFechaDMY(s){const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}/${m[2]}/${m[1]}`:(s||'');}
 const SINT=['Xtone','Prima','Neolith','Dekton','Suprastone'];
@@ -2665,10 +2708,15 @@ function calc(){
 
   // Desglose
   const conFactura=document.getElementById('factura').value==='1';
-  const ivaUsd=conFactura?gusd*0.21:0;
-  const ivaArs=conFactura?gars*0.21:0;
-  const totalUsd=gusd+ivaUsd;
-  const totalArs=gars+ivaArs;
+  // Descuento por pago en efectivo: 20% sobre todo menos flete/colocación.
+  // Va ANTES del IVA — si hay factura, el 21% se calcula sobre el neto.
+  const descEf=calcDescEfectivo(gusd,gars,fleteVal);
+  const netoUsd=gusd-descEf.usd;
+  const netoArs=gars-descEf.ars;
+  const ivaUsd=conFactura?netoUsd*0.21:0;
+  const ivaArs=conFactura?netoArs*0.21:0;
+  const totalUsd=netoUsd+ivaUsd;
+  const totalArs=netoArs+ivaArs;
 
   const arsC='style="color:#0EA5E9"';
   let dh='';
@@ -2750,8 +2798,12 @@ function calc(){
       dh+=`<tr><td style="padding-left:20px">${b.code}</td><td>${b.desc} <small style="color:var(--ts)">× ${b.qty}</small></td><td></td><td>—</td><td ${arsC}>${fmtARS(t)}</td></tr>`;
     });
   }
-  if(conFactura){
+  if(descEf.usd>0||descEf.ars>0){
     dh+=`<tr class="svc"><td colspan="2">Subtotal</td><td></td><td>${gusd>0?fmtUSD(gusd):'—'}</td><td ${arsC}>${gars>0?fmtARS(gars):'—'}</td></tr>`;
+    dh+=`<tr class="svc" style="color:#1F8F47"><td colspan="2">Descuento pago en efectivo 20% <small style="color:var(--ts)">(no aplica sobre flete y colocación)</small></td><td></td><td>${descEf.usd>0?'− '+fmtUSD(descEf.usd):'—'}</td><td>${descEf.ars>0?'− '+fmtARS(descEf.ars):'—'}</td></tr>`;
+  }
+  if(conFactura){
+    dh+=`<tr class="svc"><td colspan="2">${(descEf.usd>0||descEf.ars>0)?'Subtotal con descuento':'Subtotal'}</td><td></td><td>${netoUsd>0?fmtUSD(netoUsd):'—'}</td><td ${arsC}>${netoArs>0?fmtARS(netoArs):'—'}</td></tr>`;
     dh+=`<tr class="svc"><td colspan="2">IVA 21%</td><td></td><td>${ivaUsd>0?fmtUSD(ivaUsd):'—'}</td><td ${arsC}>${ivaArs>0?fmtARS(ivaArs):'—'}</td></tr>`;
   }
   dh+=`<tr class="tot"><td colspan="2">TOTAL</td><td>${gm.toFixed(2)}</td><td>${totalUsd>0?fmtUSD(totalUsd):'—'}</td><td style="color:#0EA5E9!important">${totalArs>0?fmtARS(totalArs):'—'}</td></tr>`;
@@ -2767,9 +2819,20 @@ function calc(){
 
   // Persistir totales reales en window para que bsCollectState los lea sin
   // pasar por el DOM (el parseo del DOM "658.000" -> 658 era el bug raiz).
-  window.bsLastTotals = { gusd:gusd, gars:gars, gm:gm, totalUsd:totalUsd, totalArs:totalArs, ivaUsd:ivaUsd, ivaArs:ivaArs, conFactura:conFactura };
-  document.getElementById('iva-usd').innerHTML=conFactura?`Subtotal ${fmtUSD(gusd)}<br>IVA 21% ${fmtUSD(ivaUsd)}`:'';
-  document.getElementById('iva-ars').innerHTML=conFactura&&gars>0?`Subtotal ${fmtARS(gars)}<br>IVA 21% ${fmtARS(ivaArs)}`:'';
+  window.bsLastTotals = { gusd:gusd, gars:gars, gm:gm, totalUsd:totalUsd, totalArs:totalArs, ivaUsd:ivaUsd, ivaArs:ivaArs, conFactura:conFactura,
+                          efectivo:isEfectivo(), descUsd:descEf.usd, descArs:descEf.ars, netoUsd:netoUsd, netoArs:netoArs };
+  document.getElementById('iva-usd').innerHTML=conFactura?`Subtotal ${fmtUSD(netoUsd)}<br>IVA 21% ${fmtUSD(ivaUsd)}`:'';
+  document.getElementById('iva-ars').innerHTML=conFactura&&netoArs>0?`Subtotal ${fmtARS(netoArs)}<br>IVA 21% ${fmtARS(ivaArs)}`:'';
+  // Ahorro al lado del botón de efectivo
+  const efVal=document.getElementById('efectivo-val');
+  if(efVal){
+    if(descEf.usd>0||descEf.ars>0){
+      const p=[];
+      if(descEf.usd>0)p.push('− '+fmtUSD(descEf.usd));
+      if(descEf.ars>0)p.push('− '+fmtARS(descEf.ars));
+      efVal.textContent='Ahorro '+p.join(' · ');
+    }else efVal.textContent='';
+  }
 
   // Total en ARS convertido (si está activa la opción)
   const incTotalARS=document.getElementById('optTotalARS')?.checked;
@@ -3684,7 +3747,7 @@ function dupRow(s,i){
 }
 function renderAll(){Object.keys(D).forEach(renderSec)}
 function limpiar(){
-  init();document.getElementById('fleteZona').value='0';document.getElementById('factura').value='0';
+  init();document.getElementById('fleteZona').value='0';document.getElementById('factura').value='0';setEfectivo(false);
   const fm=document.getElementById('fleteManual');if(fm){fm.value='';fm.style.display='none'}
   const fzn=document.getElementById('fleteZonaNombre');if(fzn){fzn.value='';fzn.style.display='none';fzn.classList.remove('invalid')}
   // Adicionales
@@ -4359,6 +4422,10 @@ async function generarExcel(){
     if(bSubA>0){addSectionSubtotal(row,0,bSubA);row++}
   }
 
+  // Descuento por pago en efectivo (20% sobre todo menos flete), antes del IVA
+  const descX=calcDescEfectivo(sumUSD,sumARS,fleteVal);
+  const netoXU=sumUSD-descX.usd,netoXA=sumARS-descX.ars;
+
   // Subtotal por sección y subtotal general
   if(incTotal){
     row++;fillR(row,fAl);ws.mergeCells(`A${row}:D${row}`);
@@ -4367,12 +4434,21 @@ async function generarExcel(){
     if(sumARS>0){setC(row,6,sumARS,{name:'Arial',size:10,bold:true,color:{argb:DK}},fAl,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(6).numFmt='$ #,##0'}
     row++;
 
-    // IVA
+    // Descuento por pago en efectivo (antes del IVA)
+    if(descX.usd>0||descX.ars>0){
+      fillR(row,fWh);ws.mergeCells(`A${row}:D${row}`);
+      setC(row,1,'  Descuento pago en efectivo (20%) — no aplica sobre flete y colocación',{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh);
+      if(descX.usd>0){setC(row,5,-descX.usd,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00'}
+      if(descX.ars>0){setC(row,6,-descX.ars,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(6).numFmt='$ #,##0'}
+      row++;
+    }
+
+    // IVA — sobre el neto (ya descontado)
     if(conFact){
       fillR(row,fWh);ws.mergeCells(`A${row}:D${row}`);
       setC(row,1,'  I.V.A. (21%)',{name:'Arial',size:10},fWh);
-      if(sumUSD>0){setC(row,5,sumUSD*0.21,{name:'Arial',size:10,bold:true,color:{argb:DK}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00'}
-      if(sumARS>0){setC(row,6,sumARS*0.21,{name:'Arial',size:10,bold:true,color:{argb:DK}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(6).numFmt='$ #,##0'}
+      if(netoXU>0){setC(row,5,netoXU*0.21,{name:'Arial',size:10,bold:true,color:{argb:DK}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00'}
+      if(netoXA>0){setC(row,6,netoXA*0.21,{name:'Arial',size:10,bold:true,color:{argb:DK}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(6).numFmt='$ #,##0'}
       row++;
     }
   }else if((sumUSD>0||sumARS>0)&&_subtotalCount>=2){
@@ -4385,8 +4461,8 @@ async function generarExcel(){
   }
 
   // TOTAL
-  const tUSD=conFact?sumUSD*1.21:sumUSD;
-  const tARS=conFact?sumARS*1.21:sumARS;
+  const tUSD=conFact?netoXU*1.21:netoXU;
+  const tARS=conFact?netoXA*1.21:netoXA;
   let totalRow=null,senaRow=null;
   if(incTotal){
     fillR(row,fDk);ws.mergeCells(`A${row}:D${row}`);
@@ -4892,13 +4968,17 @@ function generarPDF(opts){
     }
   }
 
-  const ivaU=conFact?sumU*0.21:0,ivaA=conFact?sumA*0.21:0;
-  const totU=sumU+ivaU,totA=sumA+ivaA;
+  // Descuento por pago en efectivo (20% sobre todo menos flete), antes del IVA
+  const descP=calcDescEfectivo(sumU,sumA,fleteVal);
+  const netoU=sumU-descP.usd,netoA=sumA-descP.ars;
+  const ivaU=conFact?netoU*0.21:0,ivaA=conFact?netoA*0.21:0;
+  const totU=netoU+ivaU,totA=netoA+ivaA;
   const senaU=Math.round(totU/2),senaA=Math.round(totA/2);
   const saldoU=totU-senaU,saldoA=totA-senaA;
 
   if(incTotal){
     items+=`<tr style="background:#F2EDE3"><td colspan="4" style="font-weight:700;padding-left:12px">Subtotal</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumU>0?fmtUSD(sumU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumA>0?fmtARS(sumA):''}</td></tr>`;
+    if(descP.usd>0||descP.ars>0)items+=`<tr><td colspan="4" style="padding-left:12px;color:#1F8F47;font-weight:600">Descuento pago en efectivo (20%)<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">No aplica sobre flete y colocación</span></td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.usd>0?'− '+fmtUSD(descP.usd):''}</td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.ars>0?'− '+fmtARS(descP.ars):''}</td></tr>`;
     if(conFact)items+=`<tr><td colspan="4" style="padding-left:12px">I.V.A. (21%)</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaU>0?fmtUSD(ivaU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaA>0?fmtARS(ivaA):''}</td></tr>`;
     items+=`<tr style="background:#1A1816;color:#FAF8F4"><td colspan="4" style="font-weight:700;font-size:13px;padding-left:12px">TOTAL</td><td style="text-align:center;font-weight:700;color:#25D366;font-size:13px">${totU>0?fmtUSD(totU):''}</td><td style="text-align:center;font-weight:700;color:#0EA5E9;font-size:13px">${totA>0?fmtARS(totA):''}</td></tr>`;
   }else if((sumU>0||sumA>0)&&((items.match(/Subtotal de secci[oó]n|Subtotal Z[oó]calos|Subtotal Otros conceptos|Subtotal Bachas/g)||[]).length>=2)){
@@ -5139,6 +5219,9 @@ function toggleTheme(){
           };
         }, { flete: {}, escalera: {}, angulos: {} }),
         factura:    _safe(function(){ return document.getElementById('factura').value === '1'; }, false),
+        // Pago en efectivo (-20% sobre todo menos flete). Sin esto, al
+        // reabrir un presupuesto guardado volveria sin el descuento.
+        efectivo:   _safe(function(){ return isEfectivo(); }, false),
         dolar_venta: _safe(function(){ return DOLAR_VENTA || 0; }, 0),
         totales:    _safe(function(){
           // Leer del objeto interno (no del DOM) — el parseo del DOM
@@ -5284,6 +5367,7 @@ function toggleTheme(){
     if (p.variantes && typeof VARS !== 'undefined' && Array.isArray(p.variantes.items)) VARS.items = p.variantes.items;
     if (p.bachas && typeof BACHAS !== 'undefined' && Array.isArray(p.bachas.items)) BACHAS.items = p.bachas.items;
     var fac = document.getElementById('factura'); if (fac) fac.value = p.factura ? '1' : '0';
+    try { setEfectivo(!!p.efectivo); } catch(e){}
     if (p.dolar_venta){ try { if (typeof DOLAR_VENTA !== 'undefined') DOLAR_VENTA = p.dolar_venta; } catch(e){} }
     if (s.exports_options){
       setChk('optTotal',    s.exports_options.incTotal);
