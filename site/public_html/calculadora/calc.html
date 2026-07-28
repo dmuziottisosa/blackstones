@@ -5370,10 +5370,15 @@ function toggleTheme(){
     try { setEfectivo(!!p.efectivo); } catch(e){}
     if (p.dolar_venta){ try { if (typeof DOLAR_VENTA !== 'undefined') DOLAR_VENTA = p.dolar_venta; } catch(e){} }
     if (s.exports_options){
-      setChk('optTotal',    s.exports_options.incTotal);
-      setChk('optSena',     s.exports_options.incSena);
-      setChk('optSaldo',    s.exports_options.incSaldo);
-      setChk('optTotalARS', s.exports_options.incTotalARS);
+      // Solo pisamos el checkbox si el presupuesto guardado TRAE el valor.
+      // Antes se hacia checked = !!valor: un presupuesto viejo sin
+      // 'incTotal' lo dejaba en false y el PDF salia sin el bloque de
+      // totales (ni TOTAL, ni IVA, ni descuento) sin que se notara.
+      var _eo = s.exports_options;
+      if (typeof _eo.incTotal    === 'boolean') setChk('optTotal',    _eo.incTotal);
+      if (typeof _eo.incSena     === 'boolean') setChk('optSena',     _eo.incSena);
+      if (typeof _eo.incSaldo    === 'boolean') setChk('optSaldo',    _eo.incSaldo);
+      if (typeof _eo.incTotalARS === 'boolean') setChk('optTotalARS', _eo.incTotalARS);
     }
     if (p.adicionales){
       var ad = p.adicionales;
