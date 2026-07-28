@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BlackStones · 8 estilos de presupuesto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tinta:#14120F; --tinta2:#211D18;
+  --piedra:#6B6560; --piedra2:#98918A;
+  --oro:#C4A77D; --oro-d:#8B7148;
+  --crema:#FAF8F4; --crema2:#F2EDE3;
+  --papel:#FFFFFF;
+  --linea:#E6DFD3; --linea2:#F0EBE1;
+  --verde:#1F8F47; --verde-bg:#E4F3E7;
+  --agua:#0782B8;
+  --f-disp:'Fraunces',Georgia,'Times New Roman',serif;
+  --f-body:'Manrope',-apple-system,'Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--f-body);background:var(--tinta);color:var(--crema);-webkit-font-smoothing:antialiased}
+
+/* ============ CHROME (quieto a propósito) ============ */
+.app{display:grid;grid-template-columns:290px 1fr;min-height:100vh}
+.rail{background:var(--tinta);border-right:1px solid rgba(196,167,125,.16);padding:26px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail-head{padding:0 24px 22px;border-bottom:1px solid rgba(196,167,125,.14);margin-bottom:18px}
+.rail-head h1{font-family:var(--f-disp);font-weight:500;font-size:1.18rem;letter-spacing:-.01em;line-height:1.15}
+.rail-head h1 em{font-style:italic;color:var(--oro)}
+.rail-head p{font-size:.72rem;color:var(--piedra2);margin-top:7px;line-height:1.5}
+.tabs{display:flex;flex-direction:column;gap:2px;padding:0 12px}
+.tab{display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start;width:100%;text-align:left;background:none;border:0;border-radius:7px;padding:11px 12px;cursor:pointer;color:var(--piedra2);font-family:inherit;transition:background .15s,color .15s}
+.tab:hover{background:rgba(196,167,125,.07);color:var(--crema)}
+.tab.on{background:rgba(196,167,125,.13);color:var(--crema)}
+.tab:focus-visible{outline:2px solid var(--oro);outline-offset:-2px}
+.tab-n{font-family:var(--f-disp);font-size:.9rem;color:var(--oro);line-height:1.25;font-variant-numeric:tabular-nums}
+.tab.on .tab-n{color:var(--oro)}
+.tab-nm{font-size:.83rem;font-weight:700;letter-spacing:.005em;line-height:1.3}
+.tab-d{font-size:.68rem;color:var(--piedra);margin-top:3px;line-height:1.45}
+.tab.on .tab-d{color:var(--piedra2)}
+
+.rail-ctl{margin:22px 12px 0;padding:16px 12px 4px;border-top:1px solid rgba(196,167,125,.14)}
+.rail-ctl h2{font-size:.62rem;text-transform:uppercase;letter-spacing:.13em;color:var(--piedra);margin-bottom:11px;font-weight:800}
+.sw{display:flex;align-items:center;gap:9px;padding:7px 0;cursor:pointer;font-size:.79rem;color:var(--crema)}
+.sw input{appearance:none;width:34px;height:19px;border-radius:99px;background:rgba(250,248,244,.14);position:relative;cursor:pointer;flex-shrink:0;transition:background .18s}
+.sw input::after{content:'';position:absolute;top:2.5px;left:2.5px;width:14px;height:14px;border-radius:50%;background:var(--crema);transition:transform .18s}
+.sw input:checked{background:var(--verde)}
+.sw input:checked::after{transform:translateX(15px)}
+.sw input:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
+
+.stage{padding:34px 40px 80px;background:#0D0B09;overflow-x:auto}
+.stage-bar{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.stage-bar h2{font-family:var(--f-disp);font-weight:500;font-size:1.5rem;letter-spacing:-.015em}
+.stage-bar p{font-size:.79rem;color:var(--piedra2);max-width:62ch;line-height:1.55}
+.hoja{background:var(--papel);color:#1A1816;margin:0 auto;box-shadow:0 22px 60px -20px rgba(0,0,0,.7);border-radius:2px}
+
+/* ============ COMÚN A LOS ESPECÍMENES ============ */
+.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.esp{width:830px}
+.esp.angosto{width:600px}
+@media print{
+  body{background:#fff}
+  .rail,.stage-bar{display:none}
+  .app{display:block}
+  .stage{padding:0;background:#fff}
+  .hoja{box-shadow:none;width:100%!important}
+}
+
+/* ---- 1 · ACTUAL ---- */
+.s1 .hd{background:var(--tinta);color:var(--crema);padding:20px 26px}
+.s1 .hd b{font-family:var(--f-disp);font-weight:500;font-size:1.6rem;display:block;letter-spacing:-.01em}
+.s1 .hd span{font-size:.63rem;color:var(--oro);letter-spacing:.26em;text-transform:uppercase}
+.s1 .hd .ct{font-size:.66rem;color:rgba(250,248,244,.62);margin-top:7px}
+.s1 .meta{background:var(--crema2);padding:11px 26px;display:flex;justify-content:space-between;font-size:.8rem;font-weight:700}
+.s1 .cli{padding:16px 26px;display:grid;grid-template-columns:1fr 1fr;gap:8px 26px;font-size:.79rem;border-bottom:1px solid var(--linea)}
+.s1 table{width:100%;border-collapse:collapse;font-size:.78rem}
+.s1 thead th{background:var(--tinta);color:var(--crema);font-size:.62rem;text-transform:uppercase;letter-spacing:.09em;padding:8px 10px;text-align:center}
+.s1 thead th:nth-child(2){text-align:left}
+.s1 .cat td{background:var(--crema2);font-weight:700;padding:7px 12px}
+.s1 tbody td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--linea2);vertical-align:top}
+.s1 tbody td:nth-child(2){text-align:left}
+.s1 .sub{font-size:.68rem;color:var(--oro-d);font-style:italic;margin-top:2px}
+.s1 .subsec td{background:#EDE5D0;font-style:italic;font-weight:700;font-size:.72rem;color:#5A4A35;text-align:right;padding:7px 12px}
+.s1 .tot td{background:var(--tinta);color:var(--crema);font-weight:700;font-size:.9rem;padding:11px 12px}
+.s1 .desc td{color:var(--verde);font-weight:700;padding:8px 12px}
+
+/* ---- 2 · FICHA TÉCNICA ---- */
+.s2{padding:44px 46px;font-size:.8rem}
+.s2 .top{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:2px solid var(--tinta)}
+.s2 .top b{font-family:var(--f-disp);font-weight:500;font-size:1.35rem;display:block}
+.s2 .top span{font-size:.6rem;letter-spacing:.24em;text-transform:uppercase;color:var(--piedra)}
+.s2 .nro{text-align:right;font-size:.74rem;line-height:1.7}
+.s2 .nro b{font-family:var(--f-body);font-size:1rem}
+.s2 dl{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:6px 14px;margin:18px 0 26px;font-size:.76rem}
+.s2 dt{color:var(--piedra);font-size:.62rem;text-transform:uppercase;letter-spacing:.09em;padding-top:2px}
+.s2 dd{font-weight:600}
+.s2 table{width:100%;border-collapse:collapse;font-size:.76rem}
+.s2 th{text-align:left;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--piedra);border-bottom:1px solid var(--tinta);padding:0 8px 7px}
+.s2 th.r,.s2 td.r{text-align:right}
+.s2 td{padding:9px 8px;border-bottom:1px solid var(--linea2);vertical-align:top}
+.s2 .gr td{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--oro-d);font-weight:800;padding:16px 8px 5px;border-bottom:0}
+.s2 .det{color:var(--piedra);font-size:.7rem;margin-top:2px}
+.s2 .fin{margin-top:22px;margin-left:auto;width:340px;font-size:.78rem}
+.s2 .fin .l{display:flex;justify-content:space-between;padding:6px 0}
+.s2 .fin .l.d{color:var(--verde);font-weight:700}
+.s2 .fin .l.t{border-top:2px solid var(--tinta);margin-top:6px;padding-top:11px;font-family:var(--f-disp);font-size:1.15rem;font-weight:600}
+
+/* ---- 3 · EDITORIAL ---- */
+.s3{padding:60px 64px}
+.s3 .eyebrow{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--oro-d);font-weight:800}
+.s3 h2{font-family:var(--f-disp);font-weight:400;font-size:2.5rem;line-height:1.06;letter-spacing:-.022em;margin:12px 0 6px;text-wrap:balance}
+.s3 h2 em{font-style:italic;color:var(--oro-d)}
+.s3 .lede{color:var(--piedra);font-size:.86rem;max-width:52ch;line-height:1.65}
+.s3 .rule{height:1px;background:var(--linea);margin:32px 0}
+.s3 .grp{margin-bottom:26px}
+.s3 .grp h3{font-family:var(--f-disp);font-size:1rem;font-weight:500;margin-bottom:12px;display:flex;align-items:baseline;gap:10px}
+.s3 .grp h3::after{content:'';flex:1;height:1px;background:var(--linea)}
+.s3 .it{display:grid;grid-template-columns:1fr auto;gap:4px 22px;padding:11px 0;border-bottom:1px solid var(--linea2)}
+.s3 .it b{font-weight:600;font-size:.86rem}
+.s3 .it .m{grid-column:1;color:var(--piedra);font-size:.73rem}
+.s3 .it .p{grid-row:1/3;align-self:center;font-family:var(--f-disp);font-size:1rem;font-weight:500}
+.s3 .cierre{margin-top:38px;padding:26px 30px;background:var(--crema);border-radius:3px}
+.s3 .cierre .l{display:flex;justify-content:space-between;font-size:.82rem;padding:5px 0;color:var(--piedra)}
+.s3 .cierre .l.d{color:var(--verde);font-weight:700}
+.s3 .big{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding-top:16px;border-top:1px solid var(--linea)}
+.s3 .big span{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--piedra)}
+.s3 .big b{font-family:var(--f-disp);font-weight:500;font-size:2.1rem;letter-spacing:-.02em}
+
+/* ---- 4 · BLOQUES POR AMBIENTE ---- */
+.s4{padding:38px 40px;background:var(--crema)}
+.s4 .hd{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px}
+.s4 .hd b{font-family:var(--f-disp);font-weight:500;font-size:1.4rem}
+.s4 .hd .r{text-align:right;font-size:.73rem;color:var(--piedra);line-height:1.6}
+.s4 .card{background:var(--papel);border-radius:8px;padding:20px 22px;margin-bottom:14px;box-shadow:0 1px 3px rgba(20,18,15,.07)}
+.s4 .card h3{font-size:.64rem;text-transform:uppercase;letter-spacing:.13em;color:var(--oro-d);font-weight:800;margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline}
+.s4 .card h3 i{font-style:normal;font-family:var(--f-disp);font-size:.95rem;color:#1A1816;letter-spacing:0;text-transform:none;font-weight:500}
+.s4 .row{display:grid;grid-template-columns:1fr auto;gap:3px 18px;padding:9px 0;border-top:1px solid var(--linea2)}
+.s4 .row:first-of-type{border-top:0}
+.s4 .row b{font-weight:600;font-size:.82rem}
+.s4 .row .m{color:var(--piedra);font-size:.71rem}
+.s4 .row .p{grid-row:1/3;align-self:center;font-weight:700;font-size:.86rem}
+.s4 .tot{background:var(--tinta);color:var(--crema);border-radius:8px;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.s4 .tot .lbl{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--oro)}
+.s4 .tot .v{font-family:var(--f-disp);font-size:1.75rem;font-weight:500}
+.s4 .tot .d{font-size:.71rem;color:#8FE3AC;margin-top:3px}
+
+/* ---- 5 · COMPACTO (imagen / WhatsApp) ---- */
+.s5{padding:0;font-size:.82rem}
+.s5 .hd{background:var(--tinta);color:var(--crema);padding:18px 22px;text-align:center}
+.s5 .hd b{font-family:var(--f-disp);font-weight:500;font-size:1.3rem;display:block}
+.s5 .hd span{font-size:.58rem;letter-spacing:.24em;text-transform:uppercase;color:var(--oro)}
+.s5 .who{padding:13px 22px;background:var(--crema2);font-size:.76rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.s5 .body{padding:16px 22px}
+.s5 .it{padding:10px 0;border-bottom:1px solid var(--linea2)}
+.s5 .it .t{display:flex;justify-content:space-between;gap:14px;font-weight:600}
+.s5 .it .m{color:var(--piedra);font-size:.7rem;margin-top:2px}
+.s5 .fin{padding:14px 22px 20px;background:var(--crema)}
+.s5 .fin .l{display:flex;justify-content:space-between;font-size:.78rem;padding:4px 0;color:var(--piedra)}
+.s5 .fin .l.d{color:var(--verde);font-weight:700}
+.s5 .big{background:var(--tinta);color:var(--crema);padding:16px 22px;text-align:center}
+.s5 .big span{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--oro);display:block;margin-bottom:3px}
+.s5 .big b{font-family:var(--f-disp);font-weight:500;font-size:1.7rem;letter-spacing:-.01em}
+.s5 .pie{padding:11px 22px;text-align:center;font-size:.63rem;color:var(--piedra)}
+
+/* ---- 6 · CONTRATO ---- */
+.s6{padding:46px 52px;border:1px solid var(--tinta);border-width:8px 1px 1px;font-size:.79rem}
+.s6 .hd{text-align:center;padding-bottom:20px;border-bottom:1px solid var(--linea)}
+.s6 .hd b{font-family:var(--f-disp);font-weight:500;font-size:1.5rem;display:block;letter-spacing:.01em}
+.s6 .hd span{font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--piedra)}
+.s6 .hd .doc{margin-top:14px;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--oro-d);font-weight:800}
+.s6 .art{margin-top:24px}
+.s6 .art h3{font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:var(--piedra);padding-bottom:6px;border-bottom:1px solid var(--linea);margin-bottom:11px}
+.s6 .art h3 i{font-style:normal;color:var(--oro-d);margin-right:8px}
+.s6 .pp{display:grid;grid-template-columns:auto 1fr;gap:5px 16px;font-size:.77rem}
+.s6 .pp dt{color:var(--piedra)}
+.s6 table{width:100%;border-collapse:collapse;font-size:.76rem}
+.s6 td{padding:8px 6px;border-bottom:1px solid var(--linea2);vertical-align:top}
+.s6 td.r{text-align:right;white-space:nowrap}
+.s6 .det{color:var(--piedra);font-size:.7rem}
+.s6 .fin{margin-top:16px;border-top:1px solid var(--tinta);padding-top:12px}
+.s6 .fin .l{display:flex;justify-content:space-between;padding:5px 0}
+.s6 .fin .l.d{color:var(--verde);font-weight:700}
+.s6 .fin .l.t{font-family:var(--f-disp);font-size:1.15rem;font-weight:600;padding-top:9px;margin-top:5px;border-top:1px solid var(--linea)}
+.s6 .firmas{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:52px;font-size:.68rem;color:var(--piedra);text-align:center}
+.s6 .firmas div{border-top:1px solid var(--tinta);padding-top:7px}
+
+/* ---- 7 · RESUMEN + DETALLE ---- */
+.s7{display:grid;grid-template-columns:270px 1fr;min-height:640px}
+.s7 .aside{background:var(--tinta);color:var(--crema);padding:34px 26px}
+.s7 .aside b.mk{font-family:var(--f-disp);font-weight:500;font-size:1.25rem;display:block}
+.s7 .aside .mks{font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:var(--oro)}
+.s7 .aside .blk{margin-top:30px;padding-top:18px;border-top:1px solid rgba(196,167,125,.2)}
+.s7 .aside .k{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--piedra2);margin-bottom:4px}
+.s7 .aside .v{font-size:.82rem;font-weight:600;line-height:1.45}
+.s7 .aside .price{margin-top:30px;padding-top:20px;border-top:1px solid rgba(196,167,125,.2)}
+.s7 .aside .price .v{font-family:var(--f-disp);font-size:1.85rem;font-weight:500;letter-spacing:-.02em;line-height:1.1}
+.s7 .aside .price .v2{font-family:var(--f-disp);font-size:1.15rem;color:#6ED2F5;margin-top:5px}
+.s7 .aside .ahorro{margin-top:12px;font-size:.7rem;color:#8FE3AC;line-height:1.5}
+.s7 .main{padding:34px 32px}
+.s7 .main h3{font-size:.61rem;text-transform:uppercase;letter-spacing:.13em;color:var(--oro-d);font-weight:800;margin:22px 0 10px}
+.s7 .main h3:first-child{margin-top:0}
+.s7 .it{display:grid;grid-template-columns:1fr auto;gap:3px 18px;padding:10px 0;border-bottom:1px solid var(--linea2);font-size:.79rem}
+.s7 .it b{font-weight:600}
+.s7 .it .m{color:var(--piedra);font-size:.71rem}
+.s7 .it .p{grid-row:1/3;align-self:center;font-weight:700}
+.s7 .sub{display:flex;justify-content:space-between;padding:9px 0;font-size:.76rem;color:var(--piedra);font-style:italic}
+.s7 .sub.d{color:var(--verde);font-style:normal;font-weight:700}
+
+/* ---- 8 · MINIMAL NUMÉRICO ---- */
+.s8{padding:56px 58px;font-size:.82rem}
+.s8 .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:44px}
+.s8 .hd b{font-family:var(--f-disp);font-weight:400;font-size:1.2rem;letter-spacing:.02em}
+.s8 .hd .n{font-size:.73rem;color:var(--piedra)}
+.s8 .who{font-size:.79rem;line-height:1.75;margin-bottom:40px}
+.s8 .who .k{color:var(--piedra2);display:inline-block;width:74px;font-size:.68rem}
+.s8 .grp{margin-bottom:30px}
+.s8 .grp .gh{font-size:.68rem;color:var(--piedra);margin-bottom:9px}
+.s8 .ln{display:flex;justify-content:space-between;gap:24px;padding:7px 0;line-height:1.5}
+.s8 .ln .d{flex:1}
+.s8 .ln .d i{font-style:normal;color:var(--piedra);font-size:.72rem;display:block;margin-top:1px}
+.s8 .ln .v{font-weight:600}
+.s8 .fin{margin-top:44px;padding-top:16px;border-top:1px solid var(--tinta)}
+.s8 .fin .ln{padding:6px 0}
+.s8 .fin .ln.d{color:var(--verde);font-weight:700}
+.s8 .fin .ln.t{margin-top:12px;padding-top:14px;border-top:1px solid var(--linea)}
+.s8 .fin .ln.t .d{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--piedra);align-self:center}
+.s8 .fin .ln.t .v{font-family:var(--f-disp);font-size:1.9rem;font-weight:400;letter-spacing:-.02em}
+.s8 .pie{margin-top:46px;font-size:.66rem;color:var(--piedra2);line-height:1.7}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail">
+    <div class="rail-head">
+      <h1>8 estilos de <em>presupuesto</em></h1>
+      <p>Mismo presupuesto, misma plata, ocho formas de presentarlo. Elegí el que se lea mejor de un vistazo.</p>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="rail-ctl">
+      <h2>Ver con</h2>
+      <label class="sw"><input type="checkbox" id="ef" checked> Pago en efectivo −20%</label>
+      <label class="sw"><input type="checkbox" id="fa"> Con factura (IVA 21%)</label>
+      <label class="sw"><input type="checkbox" id="sn"> Seña y saldo</label>
+    </div>
+  </nav>
+  <main class="stage">
+    <div class="stage-bar">
+      <h2 id="st-nm">—</h2>
+      <p id="st-d">—</p>
+    </div>
+    <div id="hoja"></div>
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   DATOS — uno solo para los 8 estilos, así la comparación es justa.
+   Números reales de un presupuesto tipo: mesada + baño + flete + bacha.
+   ============================================================ */
+const P = {
+  nro:'0779', fecha:'27/07/2026',
+  cliente:'Carolina Vidal', dni:'27.884.109',
+  dir:'Av. del Libertador 4820 · Núñez, CABA',
+  cel:'+54 9 11 3865-6381',
+  dolar:1520,
+  secciones:[
+    { nombre:'Mesada de cocina', items:[
+      { cant:1, det:'Mesada de cocina', color:'Arabescato Comercial', mat:'Mármol',
+        meta:'Regrueso L+A 4 cm · agujero bacha', l:'2,40', a:'0,62', m2:'1,64', usd:1158.40 },
+      { cant:1, det:'Mesada de cocina', color:'Arabescato Comercial', mat:'Mármol',
+        meta:'Regrueso L+A 4 cm · agujero bacha', l:'1,20', a:'0,52', m2:'0,62', usd:579.20 }
+    ]},
+    { nombre:'Mesada de baño', items:[
+      { cant:1, det:'Mesada de baño · Con Traforo', color:'Gris Mara', mat:'Granito Nacional',
+        meta:'1 bacha · traforo', l:'1,40', a:'0,50', m2:'0,70', usd:336.00 }
+    ]}
+  ],
+  servicios:[ { det:'Flete y colocación', zona:'GBA', ars:300000, esFlete:true } ],
+  bachas:[ { cod:'OI-73', det:'Bacha Johnson Acero 34×40', ars:185000 } ]
+};
+
+/* ---- Cálculo: el 20% NO toca flete y colocación ---- */
+function calc(){
+  const ef = document.getElementById('ef').checked;
+  const fa = document.getElementById('fa').checked;
+  let usd = 0, ars = 0, flete = 0;
+  P.secciones.forEach(s => s.items.forEach(i => usd += i.usd));
+  P.servicios.forEach(s => { ars += s.ars; if (s.esFlete) flete += s.ars; });
+  P.bachas.forEach(b => ars += b.ars);
+  const dU = ef ? usd * .20 : 0;
+  const dA = ef ? Math.max(0, ars - flete) * .20 : 0;
+  const nU = usd - dU, nA = ars - dA;
+  const iU = fa ? nU * .21 : 0, iA = fa ? nA * .21 : 0;
+  return { ef, fa, usd, ars, flete, dU, dA, nU, nA, iU, iA, tU: nU + iU, tA: nA + iA };
+}
+const U = n => 'USD ' + n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const A = n => '$ ' + n.toLocaleString('es-AR',{maximumFractionDigits:0});
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const items = () => P.secciones.flatMap(s => s.items.map(i => ({...i, sec:s.nombre})));
+
+/* ============================================================
+   ESTILOS
+   ============================================================ */
+const S = [];
+
+/* 1 · ACTUAL */
+S.push({ nm:'Actual', d:'El que sale hoy de la calculadora. Sirve de referencia para comparar.',
+  html(c){
+    let r = '';
+    P.secciones.forEach(s => {
+      r += `<tr class="cat"><td></td><td colspan="5">${s.nombre}</td></tr>`;
+      let sub = 0;
+      s.items.forEach(i => { sub += i.usd;
+        r += `<tr><td class="n">${i.cant}</td><td><b>${i.det}</b> · ${i.color} <i style="color:var(--oro-d)">(${i.mat})</i><div class="sub">${i.meta}</div></td><td class="n">${i.l}</td><td class="n">${i.a}<div class="sub">${i.m2} m²</div></td><td class="n"><b>${U(i.usd)}</b></td><td>—</td></tr>`; });
+      r += `<tr class="subsec"><td colspan="4">Subtotal de sección</td><td class="n">${U(sub)}</td><td>—</td></tr>`;
+    });
+    r += `<tr class="cat"><td></td><td colspan="5">Servicios adicionales</td></tr>`;
+    P.servicios.forEach(s => r += `<tr><td class="n">1</td><td><b>${s.det}: ${s.zona}</b></td><td></td><td></td><td>—</td><td class="n"><b>${A(s.ars)}</b></td></tr>`);
+    P.bachas.forEach(b => r += `<tr><td class="n">1</td><td><b>${b.cod}</b> · ${b.det}</td><td></td><td></td><td>—</td><td class="n"><b>${A(b.ars)}</b></td></tr>`);
+    r += `<tr class="subsec"><td colspan="4">Subtotal</td><td class="n">${U(c.usd)}</td><td class="n">${A(c.ars)}</td></tr>`;
+    if (c.ef) r += `<tr class="desc"><td colspan="4">Descuento pago en efectivo (20%)<div class="sub" style="color:var(--piedra)">No aplica sobre flete y colocación</div></td><td class="n">− ${U(c.dU)}</td><td class="n">− ${A(c.dA)}</td></tr>`;
+    if (c.fa) r += `<tr><td colspan="4" style="padding:8px 12px">I.V.A. (21%)</td><td class="n">${U(c.iU)}</td><td class="n">${A(c.iA)}</td></tr>`;
+    r += `<tr class="tot"><td colspan="4">TOTAL</td><td class="n" style="color:#7BE3A0">${U(c.tU)}</td><td class="n" style="color:#6ED2F5">${A(c.tA)}</td></tr>`;
+    if (c.ef) r += `<tr class="tot" style="background:var(--tinta2)"><td colspan="4" style="font-size:.72rem">SEÑA 50 %</td><td class="n" style="color:var(--oro)">${U(c.tU/2)}</td><td class="n" style="color:var(--oro)">${A(c.tA/2)}</td></tr>`;
+    return `<div class="esp s1 hoja">
+      <div class="hd"><b>BlackStones</b><span>Marmolería</span><div class="ct">Av. Juan Bautista Alberdi 3575 · CABA · +54 9 11 2468-5820 · blackstones.com.ar</div></div>
+      <div class="meta"><span>Presupuesto N° ${P.nro}</span><span>${P.fecha}</span></div>
+      <div class="cli"><div><b>CLIENTE:</b> ${P.cliente}</div><div><b>DNI:</b> ${P.dni}</div><div><b>DIRECCIÓN:</b> ${P.dir}</div><div><b>CELULAR:</b> ${P.cel}</div></div>
+      <table><thead><tr><th>Cant</th><th>Detalle</th><th>L (m)</th><th>A (m)</th><th>USD</th><th>Pesos $</th></tr></thead><tbody>${r}</tbody></table>
+      <div style="padding:14px 26px;font-size:.66rem;color:var(--piedra);border-top:1px solid var(--linea)">Tipo de cambio referencia al ${P.fecha}: USD 1 = ${A(P.dolar)} (Dólar Oficial Venta). Sujeto al valor del día de pago.</div>
+    </div>`;
+  }});
+
+/* 2 · FICHA TÉCNICA */
+S.push({ nm:'Ficha técnica', d:'Densa y contable. Cero fondos de color: la grilla y la alineación numérica hacen todo el trabajo.',
+  html(c){
+    let r = '';
+    P.secciones.forEach(s => {
+      r += `<tr class="gr"><td colspan="5">${s.nombre}</td></tr>`;
+      s.items.forEach(i => r += `<tr><td class="n">${i.cant}</td><td><b>${i.color}</b> <span style="color:var(--piedra)">${i.mat}</span><div class="det">${i.det} · ${i.meta}</div></td><td class="r n">${i.l} × ${i.a}</td><td class="r n">${i.m2}</td><td class="r n"><b>${U(i.usd)}</b></td></tr>`);
+    });
+    r += `<tr class="gr"><td colspan="5">Servicios y accesorios</td></tr>`;
+    P.servicios.forEach(s => r += `<tr><td class="n">1</td><td><b>${s.det}</b><div class="det">Zona ${s.zona} · no recibe descuento</div></td><td class="r">—</td><td class="r">—</td><td class="r n"><b>${A(s.ars)}</b></td></tr>`);
+    P.bachas.forEach(b => r += `<tr><td class="n">1</td><td><b>${b.det}</b><div class="det">Código ${b.cod}</div></td><td class="r">—</td><td class="r">—</td><td class="r n"><b>${A(b.ars)}</b></td></tr>`);
+    let f = `<div class="l"><span>Subtotal</span><span class="n">${U(c.usd)} + ${A(c.ars)}</span></div>`;
+    if (c.ef) f += `<div class="l d"><span>Descuento efectivo 20 %</span><span class="n">− ${U(c.dU)} − ${A(c.dA)}</span></div>`;
+    if (c.fa) f += `<div class="l"><span>I.V.A. 21 %</span><span class="n">${U(c.iU)} + ${A(c.iA)}</span></div>`;
+    f += `<div class="l t"><span>Total</span><span class="n">${U(c.tU)}</span></div><div class="l t" style="border:0;margin:0;padding-top:2px"><span></span><span class="n" style="color:var(--agua)">${A(c.tA)}</span></div>`;
+    if (c.sn) f += `<div class="l" style="margin-top:10px;border-top:1px solid var(--linea);padding-top:10px"><span>Seña 50 %</span><span class="n">${U(c.tU/2)} + ${A(c.tA/2)}</span></div><div class="l"><span>Saldo contra entrega</span><span class="n">${U(c.tU/2)} + ${A(c.tA/2)}</span></div>`;
+    return `<div class="esp s2 hoja">
+      <div class="top"><div><b>BlackStones</b><span>Marmolería · CABA y GBA</span></div>
+      <div class="nro">Presupuesto<br><b>N° ${P.nro}</b><br>${P.fecha}</div></div>
+      <dl><dt>Cliente</dt><dd>${P.cliente}</dd><dt>DNI</dt><dd>${P.dni}</dd>
+          <dt>Obra</dt><dd>${P.dir}</dd><dt>Celular</dt><dd>${P.cel}</dd></dl>
+      <table><thead><tr><th>Cant</th><th>Material y trabajo</th><th class="r">Medidas</th><th class="r">m²</th><th class="r">Importe</th></tr></thead><tbody>${r}</tbody></table>
+      <div class="fin">${f}</div>
+      <div style="margin-top:26px;font-size:.66rem;color:var(--piedra);line-height:1.6">Tipo de cambio referencia al ${P.fecha}: USD 1 = ${A(P.dolar)}. Sujeto al valor del día de pago. · Plazo de entrega: 15 a 20 días corridos desde la medición.</div>
+    </div>`;
+  }});
+
+/* 3 · EDITORIAL */
+S.push({ nm:'Editorial', d:'Aire, tipografía grande y el total como pieza central. El que mejor pasa el Test de Living.',
+  html(c){
+    let r = '';
+    P.secciones.forEach(s => {
+      r += `<div class="grp"><h3>${s.nombre}</h3>`;
+      s.items.forEach(i => r += `<div class="it"><b>${i.color} <span style="font-weight:400;color:var(--piedra)">· ${i.mat}</span></b><span class="p">${U(i.usd)}</span><span class="m">${i.l} × ${i.a} m · ${i.m2} m² · ${i.meta}</span></div>`);
+      r += `</div>`;
+    });
+    r += `<div class="grp"><h3>Traslado y accesorios</h3>`;
+    P.servicios.forEach(s => r += `<div class="it"><b>${s.det}</b><span class="p">${A(s.ars)}</span><span class="m">Zona ${s.zona}</span></div>`);
+    P.bachas.forEach(b => r += `<div class="it"><b>${b.det}</b><span class="p">${A(b.ars)}</span><span class="m">Código ${b.cod}</span></div>`);
+    r += `</div>`;
+    let f = `<div class="l"><span>Subtotal</span><span class="n">${U(c.usd)} · ${A(c.ars)}</span></div>`;
+    if (c.ef) f += `<div class="l d"><span>Pago en efectivo −20 % <i style="font-style:normal;color:var(--piedra);font-weight:400">(sin flete)</i></span><span class="n">− ${U(c.dU)} · − ${A(c.dA)}</span></div>`;
+    if (c.fa) f += `<div class="l"><span>I.V.A. 21 %</span><span class="n">${U(c.iU)} · ${A(c.iA)}</span></div>`;
+    if (c.sn) f += `<div class="l"><span>Seña 50 % para iniciar</span><span class="n">${U(c.tU/2)} · ${A(c.tA/2)}</span></div>`;
+    return `<div class="esp s3 hoja">
+      <div class="eyebrow">BlackStones Marmolería · Presupuesto N° ${P.nro}</div>
+      <h2>La piedra la elegís vos.<br><em>El resto es oficio nuestro.</em></h2>
+      <p class="lede">Para ${P.cliente} — ${P.dir}. Presupuesto cerrado por escrito, con fecha ${P.fecha}. Entrega 15 a 20 días corridos desde la medición.</p>
+      <div class="rule"></div>${r}
+      <div class="cierre">${f}
+        <div class="big"><span>Total</span><b>${U(c.tU)}</b></div>
+        <div class="big" style="border:0;padding-top:4px;margin-top:0"><span></span><b style="font-size:1.5rem;color:var(--agua)">${A(c.tA)}</b></div>
+      </div>
+    </div>`;
+  }});
+
+/* 4 · BLOQUES POR AMBIENTE */
+S.push({ nm:'Bloques por ambiente', d:'Cada ambiente en su tarjeta con subtotal propio. El más claro cuando la obra tiene cocina, baño y más.',
+  html(c){
+    let r = '';
+    P.secciones.forEach(s => {
+      let sub = 0; s.items.forEach(i => sub += i.usd);
+      r += `<div class="card"><h3><span>${s.nombre}</span><i>${U(sub)}</i></h3>`;
+      s.items.forEach(i => r += `<div class="row"><b>${i.color} <span style="font-weight:400;color:var(--piedra)">${i.mat}</span></b><span class="p n">${U(i.usd)}</span><span class="m">${i.l} × ${i.a} m · ${i.m2} m² · ${i.meta}</span></div>`);
+      r += `</div>`;
+    });
+    let sSub = 0; P.servicios.forEach(s => sSub += s.ars); P.bachas.forEach(b => sSub += b.ars);
+    r += `<div class="card"><h3><span>Traslado y accesorios</span><i>${A(sSub)}</i></h3>`;
+    P.servicios.forEach(s => r += `<div class="row"><b>${s.det}</b><span class="p n">${A(s.ars)}</span><span class="m">Zona ${s.zona} · no recibe el descuento por efectivo</span></div>`);
+    P.bachas.forEach(b => r += `<div class="row"><b>${b.det}</b><span class="p n">${A(b.ars)}</span><span class="m">Código ${b.cod}</span></div>`);
+    r += `</div>`;
+    return `<div class="esp s4 hoja">
+      <div class="hd"><div><b>BlackStones</b><div style="font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--oro-d)">Marmolería</div></div>
+      <div class="r">Presupuesto N° ${P.nro} · ${P.fecha}<br><b style="color:#1A1816">${P.cliente}</b><br>${P.dir}</div></div>
+      ${r}
+      <div class="tot">
+        <div><div class="lbl">Total${c.ef?' con pago en efectivo':''}</div>${c.ef?`<div class="d">Ya con el 20 % de descuento · el flete se cobra entero</div>`:''}${c.sn?`<div class="d" style="color:var(--oro)">Seña 50 %: ${U(c.tU/2)} · ${A(c.tA/2)}</div>`:''}</div>
+        <div style="text-align:right"><div class="v">${U(c.tU)}</div><div class="v" style="font-size:1.2rem;color:#6ED2F5">${A(c.tA)}</div></div>
+      </div>
+    </div>`;
+  }});
+
+/* 5 · COMPACTO */
+S.push({ nm:'Compacto', d:'Angosto (600 px) y pensado para mandar como imagen por WhatsApp. Se lee entero en un celular.',
+  html(c){
+    let r = '';
+    items().forEach(i => r += `<div class="it"><div class="t"><span>${i.color}</span><span class="n">${U(i.usd)}</span></div><div class="m">${i.sec} · ${i.l} × ${i.a} m · ${i.mat}</div></div>`);
+    P.servicios.forEach(s => r += `<div class="it"><div class="t"><span>${s.det}</span><span class="n">${A(s.ars)}</span></div><div class="m">Zona ${s.zona}</div></div>`);
+    P.bachas.forEach(b => r += `<div class="it"><div class="t"><span>${b.det}</span><span class="n">${A(b.ars)}</span></div><div class="m">Código ${b.cod}</div></div>`);
+    let f = `<div class="l"><span>Subtotal</span><span class="n">${U(c.usd)} · ${A(c.ars)}</span></div>`;
+    if (c.ef) f += `<div class="l d"><span>Efectivo −20 % (sin flete)</span><span class="n">− ${U(c.dU)} · − ${A(c.dA)}</span></div>`;
+    if (c.fa) f += `<div class="l"><span>I.V.A. 21 %</span><span class="n">${U(c.iU)} · ${A(c.iA)}</span></div>`;
+    if (c.sn) f += `<div class="l"><span>Seña 50 %</span><span class="n">${U(c.tU/2)} · ${A(c.tA/2)}</span></div>`;
+    return `<div class="esp angosto s5 hoja">
+      <div class="hd"><b>BlackStones</b><span>Marmolería</span></div>
+      <div class="who"><span><b>${P.cliente}</b></span><span>N° ${P.nro} · ${P.fecha}</span></div>
+      <div class="body">${r}</div>
+      <div class="fin">${f}</div>
+      <div class="big"><span>Total${c.ef?' en efectivo':''}</span><b>${U(c.tU)}</b><b style="display:block;font-size:1.25rem;color:#6ED2F5">${A(c.tA)}</b></div>
+      <div class="pie">Entrega 15 a 20 días corridos desde la medición · +54 9 11 2468-5820</div>
+    </div>`;
+  }});
+
+/* 6 · CONTRATO */
+S.push({ nm:'Contrato', d:'Formal, articulado y con firmas. Para el momento de cerrar, no para la primera cotización.',
+  html(c){
+    let r = '';
+    items().forEach(i => r += `<tr><td><b>${i.color}</b> — ${i.mat}<div class="det">${i.sec} · ${i.l} × ${i.a} m · ${i.m2} m² · ${i.meta}</div></td><td class="r n"><b>${U(i.usd)}</b></td></tr>`);
+    P.servicios.forEach(s => r += `<tr><td><b>${s.det}</b><div class="det">Zona ${s.zona} · excluido del descuento por pago en efectivo</div></td><td class="r n"><b>${A(s.ars)}</b></td></tr>`);
+    P.bachas.forEach(b => r += `<tr><td><b>${b.det}</b><div class="det">Código ${b.cod}</div></td><td class="r n"><b>${A(b.ars)}</b></td></tr>`);
+    let f = `<div class="l"><span>Subtotal</span><span class="n">${U(c.usd)} + ${A(c.ars)}</span></div>`;
+    if (c.ef) f += `<div class="l d"><span>Descuento por pago en efectivo (20 %)</span><span class="n">− ${U(c.dU)} − ${A(c.dA)}</span></div>`;
+    if (c.fa) f += `<div class="l"><span>I.V.A. (21 %)</span><span class="n">${U(c.iU)} + ${A(c.iA)}</span></div>`;
+    f += `<div class="l t"><span>Total convenido</span><span class="n">${U(c.tU)} + ${A(c.tA)}</span></div>`;
+    if (c.sn) f += `<div class="l" style="margin-top:8px"><span>Anticipo 50 % a la aceptación</span><span class="n">${U(c.tU/2)} + ${A(c.tA/2)}</span></div><div class="l"><span>Saldo contra entrega en obra</span><span class="n">${U(c.tU/2)} + ${A(c.tA/2)}</span></div>`;
+    return `<div class="esp s6 hoja">
+      <div class="hd"><b>BlackStones</b><span>Marmolería</span><div class="doc">Presupuesto N° ${P.nro} · ${P.fecha}</div></div>
+      <div class="art"><h3><i>I</i>Partes</h3><dl class="pp"><dt>Comitente</dt><dd><b>${P.cliente}</b> — DNI ${P.dni}</dd><dt>Obra</dt><dd>${P.dir}</dd><dt>Contacto</dt><dd>${P.cel}</dd></dl></div>
+      <div class="art"><h3><i>II</i>Objeto y precio</h3><table><tbody>${r}</tbody></table><div class="fin">${f}</div></div>
+      <div class="art"><h3><i>III</i>Condiciones</h3>
+        <div style="font-size:.74rem;line-height:1.7;color:#33302C">
+          <div>· Plazo de entrega: 15 a 20 días corridos desde la medición técnica en obra.</div>
+          <div>· La medición se realiza con los muebles bajo mesada instalados y nivelados.</div>
+          <div>· El granito, por su condición de roca natural, no cuenta con garantía de fábrica.</div>
+          <div>· No incluye trabajos de plomería ni instalación de artefactos eléctricos.</div>
+          <div>· Tipo de cambio referencia al ${P.fecha}: USD 1 = ${A(P.dolar)}. Sujeto al valor del día de pago.</div>
+        </div></div>
+      <div class="firmas"><div>Por BlackStones Marmolería</div><div>${P.cliente}</div></div>
+    </div>`;
+  }});
+
+/* 7 · RESUMEN + DETALLE */
+S.push({ nm:'Resumen + detalle', d:'Dos columnas: a la izquierda lo que importa decidir, a la derecha el detalle para el que quiera revisarlo.',
+  html(c){
+    let r = '';
+    P.secciones.forEach(s => {
+      r += `<h3>${s.nombre}</h3>`;
+      s.items.forEach(i => r += `<div class="it"><b>${i.color} <span style="font-weight:400;color:var(--piedra)">${i.mat}</span></b><span class="p n">${U(i.usd)}</span><span class="m">${i.l} × ${i.a} m · ${i.m2} m² · ${i.meta}</span></div>`);
+    });
+    r += `<h3>Traslado y accesorios</h3>`;
+    P.servicios.forEach(s => r += `<div class="it"><b>${s.det}</b><span class="p n">${A(s.ars)}</span><span class="m">Zona ${s.zona} · sin descuento</span></div>`);
+    P.bachas.forEach(b => r += `<div class="it"><b>${b.det}</b><span class="p n">${A(b.ars)}</span><span class="m">Código ${b.cod}</span></div>`);
+    r += `<div class="sub"><span>Subtotal</span><span class="n">${U(c.usd)} · ${A(c.ars)}</span></div>`;
+    if (c.ef) r += `<div class="sub d"><span>Pago en efectivo −20 %</span><span class="n">− ${U(c.dU)} · − ${A(c.dA)}</span></div>`;
+    if (c.fa) r += `<div class="sub"><span>I.V.A. 21 %</span><span class="n">${U(c.iU)} · ${A(c.iA)}</span></div>`;
+    return `<div class="esp s7 hoja">
+      <div class="aside">
+        <b class="mk">BlackStones</b><div class="mks">Marmolería</div>
+        <div class="blk"><div class="k">Presupuesto</div><div class="v">N° ${P.nro}<br>${P.fecha}</div></div>
+        <div class="blk"><div class="k">Cliente</div><div class="v">${P.cliente}<br><span style="font-weight:400;color:var(--piedra2)">${P.dir}</span></div></div>
+        <div class="price"><div class="k">Total${c.ef?' en efectivo':''}</div><div class="v">${U(c.tU)}</div><div class="v2">${A(c.tA)}</div>
+          ${c.ef?`<div class="ahorro">Ahorrás ${U(c.dU)} y ${A(c.dA)} pagando en efectivo. El flete se cobra entero.</div>`:''}
+          ${c.sn?`<div class="ahorro" style="color:var(--oro)">Seña 50 %: ${U(c.tU/2)} · ${A(c.tA/2)}</div>`:''}
+        </div>
+        <div class="blk" style="margin-top:26px"><div class="k">Entrega</div><div class="v" style="font-weight:400">15 a 20 días corridos desde la medición.</div></div>
+      </div>
+      <div class="main">${r}</div>
+    </div>`;
+  }});
+
+/* 8 · MINIMAL NUMÉRICO */
+S.push({ nm:'Minimal numérico', d:'Sin cromo, sin fondos, sin líneas de más. Solo tipografía y números alineados. La claridad al extremo.',
+  html(c){
+    let r = '';
+    P.secciones.forEach(s => {
+      r += `<div class="grp"><div class="gh">${s.nombre}</div>`;
+      s.items.forEach(i => r += `<div class="ln"><span class="d">${i.color}<i>${i.mat} · ${i.l} × ${i.a} m · ${i.m2} m² · ${i.meta}</i></span><span class="v n">${U(i.usd)}</span></div>`);
+      r += `</div>`;
+    });
+    r += `<div class="grp"><div class="gh">Traslado y accesorios</div>`;
+    P.servicios.forEach(s => r += `<div class="ln"><span class="d">${s.det}<i>Zona ${s.zona} · sin descuento</i></span><span class="v n">${A(s.ars)}</span></div>`);
+    P.bachas.forEach(b => r += `<div class="ln"><span class="d">${b.det}<i>${b.cod}</i></span><span class="v n">${A(b.ars)}</span></div>`);
+    r += `</div>`;
+    let f = `<div class="ln"><span class="d">Subtotal</span><span class="v n">${U(c.usd)} · ${A(c.ars)}</span></div>`;
+    if (c.ef) f += `<div class="ln d"><span class="d">Pago en efectivo −20 %</span><span class="v n">− ${U(c.dU)} · − ${A(c.dA)}</span></div>`;
+    if (c.fa) f += `<div class="ln"><span class="d">I.V.A. 21 %</span><span class="v n">${U(c.iU)} · ${A(c.iA)}</span></div>`;
+    f += `<div class="ln t"><span class="d">Total</span><span class="v n">${U(c.tU)}</span></div><div class="ln" style="padding-top:0"><span class="d"></span><span class="v n" style="font-family:var(--f-disp);font-size:1.3rem;font-weight:400;color:var(--agua)">${A(c.tA)}</span></div>`;
+    if (c.sn) f += `<div class="ln" style="margin-top:10px"><span class="d">Seña 50 %</span><span class="v n">${U(c.tU/2)} · ${A(c.tA/2)}</span></div>`;
+    return `<div class="esp s8 hoja">
+      <div class="hd"><b>BlackStones Marmolería</b><span class="n">N° ${P.nro} · ${P.fecha}</span></div>
+      <div class="who"><div><span class="k">Cliente</span>${P.cliente}</div><div><span class="k">Obra</span>${P.dir}</div><div><span class="k">Celular</span>${P.cel}</div></div>
+      ${r}<div class="fin">${f}</div>
+      <div class="pie">Entrega 15 a 20 días corridos desde la medición técnica en obra.<br>Tipo de cambio referencia al ${P.fecha}: USD 1 = ${A(P.dolar)}. Sujeto al valor del día de pago.</div>
+    </div>`;
+  }});
+
+/* ============================================================
+   SHELL
+   ============================================================ */
+let cur = 0;
+const $ = id => document.getElementById(id);
+
+$('tabs').innerHTML = S.map((s,i) =>
+  `<button class="tab${i===cur?' on':''}" data-i="${i}" type="button">
+     <span class="tab-n">${String(i+1).padStart(2,'0')}</span>
+     <span><span class="tab-nm">${esc(s.nm)}</span><span class="tab-d">${esc(s.d)}</span></span>
+   </button>`).join('');
+
+function render(){
+  const c = calc();
+  c.sn = $('sn').checked;
+  $('st-nm').textContent = S[cur].nm;
+  $('st-d').textContent  = S[cur].d;
+  $('hoja').innerHTML = S[cur].html(c);
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('on', i === cur));
+}
+$('tabs').addEventListener('click', e => {
+  const b = e.target.closest('.tab'); if (!b) return;
+  cur = +b.dataset.i; render();
+});
+['ef','fa','sn'].forEach(id => $(id).addEventListener('change', render));
+document.addEventListener('keydown', e => {
+  if (e.key >= '1' && e.key <= '8') { cur = +e.key - 1; render(); }
+});
+render();
+</script>
+</body>
+</html>
