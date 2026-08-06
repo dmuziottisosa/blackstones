@@ -1,0 +1,60 @@
+# Lista de precios — julio 2026
+
+> **Fuente oficial** del catálogo de materiales usado por la calc.
+> Supersede a `../lista-precios-2026-05/` **solo en materiales** (COLORS_DB).
+> Piletas (BACHAS_DB) NO cambia: sigue vigente `../lista-precios-2026-05/piletas.xlsx`.
+> **Cargado en calc:** sí (commit 2026-07-29).
+
+## Formato del archivo
+
+Una sola hoja ("Copia de Para la Calculadora"), dos columnas:
+- **Col A** — nombre del color (o header de sección/subgrupo, sin precio)
+- **Col B** — precio FINAL para la calc (columna "caculadora")
+
+A diferencia de la lista de mayo, ya no hay columnas intermedias: el precio
+de la col B se carga tal cual (redondeado a 2 decimales).
+
+## Resultado de la carga
+
+676 colores (antes 559):
+
+| Marca | Items | Currency |
+|---|---|---|
+| Marmol | 194 | USD |
+| Suprastone | 125 | USD |
+| **Cuarcita** | **81** | USD |
+| Neolith | 50 | USD |
+| Pura | 45 | USD |
+| Prima | 43 | USD |
+| Dekton | 42 | USD |
+| Guidoni | 29 | USD |
+| Xtone | 27 | USD |
+| Granito_i | 23 | USD |
+| Granito_n | 17 | ARS |
+
+## Cambio de mapeo vs mayo 2026
+
+**Las cuarcitas ahora van al material `Cuarcita`** (agregado a la calc en
+julio 2026). En mayo caían en `Marmol` porque el material no existía.
+Secciones afectadas: `CUARCITAS IMPORTADOS`, `Cuarcitas y Granitos
+Exoticos`, `Cuarcitas Cantera del Mundo`.
+
+El resto del mapeo sección→marca es el mismo de
+`../lista-precios-2026-05/README.md`, más:
+- `Stefano -Terrazo` → Marmol (no hay material Terrazo)
+- `MARMOL BLANCOS VETEADOS - CANTERAS` → Marmol
+
+## Duplicados con precio distinto (decisión: gana la primera aparición)
+
+El xlsx trae ~15 nombres repetidos DENTRO del mismo material con precios
+distintos (distintos GRUPOS). Se conservó la primera aparición. Los más
+notorios, por si hay que corregir la fuente:
+
+- Pura: familia "(J)" duplicada entre GRUPO 3 (846,62) y GRUPO 4 (1.218,75)
+- Cuarcita: Patagonia (660,66 vs 2.380,62) · Super White · Salvatore · Volga Blue · Fusion
+- Marmol: Statuarietto (1.431,43 vs 1.218,75) · Grigio Carnico (1.218,75 vs 446,88)
+- Suprastone: Calacatta (DP)(BM)* (1.381,25 vs 1.686,75)
+
+Los repetidos ENTRE materiales distintos (ej. Calacatta Gold en Guidoni y
+en Suprastone, Taj Mahal en Cuarcita/Prima/Marmol) son legítimos y se
+conservaron todos.
