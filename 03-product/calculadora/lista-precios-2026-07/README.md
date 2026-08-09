@@ -3,7 +3,10 @@
 > **Fuente oficial** del catálogo de materiales usado por la calc.
 > Supersede a `../lista-precios-2026-05/` **solo en materiales** (COLORS_DB).
 > Piletas (BACHAS_DB) NO cambia: sigue vigente `../lista-precios-2026-05/piletas.xlsx`.
-> **Cargado en calc:** sí (commit 2026-07-29).
+> **Cargado en calc:** sí — v2 ("usar este"), commit 2026-07-29.
+> La v1 del mismo día quedó reemplazada: la v2 corrige precios (Guidoni
+> baja ~25-30%, algunos granitos suben), limpia los duplicados de Pura
+> que la v1 traía, y elimina 16 filas redundantes. 664 colores.
 
 ## Formato del archivo
 
@@ -16,15 +19,15 @@ de la col B se carga tal cual (redondeado a 2 decimales).
 
 ## Resultado de la carga
 
-676 colores (antes 559):
+664 colores (antes 559):
 
 | Marca | Items | Currency |
 |---|---|---|
-| Marmol | 194 | USD |
+| Marmol | 194 + 1 ARS | USD |
 | Suprastone | 125 | USD |
 | **Cuarcita** | **81** | USD |
 | Neolith | 50 | USD |
-| Pura | 45 | USD |
+| Pura | 32 | USD |
 | Prima | 43 | USD |
 | Dekton | 42 | USD |
 | Guidoni | 29 | USD |
@@ -58,3 +61,11 @@ notorios, por si hay que corregir la fuente:
 Los repetidos ENTRE materiales distintos (ej. Calacatta Gold en Guidoni y
 en Suprastone, Taj Mahal en Cuarcita/Prima/Marmol) son legítimos y se
 conservaron todos.
+
+## Correcciones manuales sobre la v2
+
+- **Piedra Caliza Patagonica**: figura en una sección USD pero su precio
+  (224.939) es claramente ARS (en mayo era "AR$55000"). Cargada como ARS.
+- **Calacatta Plus** y **Portoro Super** a USD 7.312,50: se cargaron tal
+  cual (mármoles de lujo), pero vale confirmar que no sea otro error de
+  moneda en la planilla fuente.
