@@ -3,7 +3,7 @@
 > **Fuente oficial** del catálogo de materiales usado por la calc.
 > Supersede a `../lista-precios-2026-05/` **solo en materiales** (COLORS_DB).
 > Piletas (BACHAS_DB) NO cambia: sigue vigente `../lista-precios-2026-05/piletas.xlsx`.
-> **Cargado en calc:** sí — v2 ("usar este"), commit 2026-07-29.
+> **Cargado en calc:** sí — v3 (definitiva, "ahora sí"), commit 2026-07-29.
 > La v1 del mismo día quedó reemplazada: la v2 corrige precios (Guidoni
 > baja ~25-30%, algunos granitos suben), limpia los duplicados de Pura
 > que la v1 traía, y elimina 16 filas redundantes. 664 colores.
@@ -19,7 +19,7 @@ de la col B se carga tal cual (redondeado a 2 decimales).
 
 ## Resultado de la carga
 
-664 colores (antes 559):
+663 colores (antes 559):
 
 | Marca | Items | Currency |
 |---|---|---|
@@ -69,3 +69,8 @@ conservaron todos.
 - **Calacatta Plus** y **Portoro Super** a USD 7.312,50: se cargaron tal
   cual (mármoles de lujo), pero vale confirmar que no sea otro error de
   moneda en la planilla fuente.
+
+## v3 (definitiva)
+
+vs v2: renombra "Calacatta, Calacatta Arni" -> "Calacatta Armi", elimina la
+fila con typo "Statuario Exra". Sin cambios de precio.
