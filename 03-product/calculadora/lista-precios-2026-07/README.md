@@ -19,7 +19,7 @@ de la col B se carga tal cual (redondeado a 2 decimales).
 
 ## Resultado de la carga
 
-663 colores (antes 559):
+691 colores (antes 559):
 
 | Marca | Items | Currency |
 |---|---|---|
@@ -74,3 +74,19 @@ conservaron todos.
 
 vs v2: renombra "Calacatta, Calacatta Arni" -> "Calacatta Armi", elimina la
 fila con typo "Statuario Exra". Sin cambios de precio.
+
+## Bug del parser corregido (v3-fix)
+
+Las primeras cargas de julio dejaron **Silestone en 0 colores**. Causa: los
+colores de esa marca se llaman "Silestone Blanco Zeus", "Silestone White
+Storm"..., y el parser detectaba la sección con 
+ANTES de mirar el precio — así que cada color se interpretaba como
+encabezado de sección y se descartaba.
+
+**Regla del parser, de acá en adelante: una fila CON precio es siempre un
+color, nunca un encabezado.** El chequeo de sección solo corre sobre filas
+sin precio. Con eso volvieron las 28 filas de Silestone (663 -> 691).
+
+Es un riesgo latente para cualquier marca cuyos colores lleven el nombre
+de la marca adelante (Xtone, Prima, Neolith...). Al cargar una lista
+nueva, verificar que TODAS las marcas de MATS tengan colores > 0.
