@@ -324,6 +324,10 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     }
 
     // Servicios adicionales
+    // Acumulado de lo que NO recibe descuento por efectivo (ademas del flete
+    // y las bachas): escalera, angulos/mensulas y otros conceptos. Misma
+    // regla que excluidoDelDescuento() en calc.html.
+    $adicU = 0; $adicA = 0;
     $adic = $presup['adicionales'] ?? [];
     $fleteVal = floatval($adic['flete']['monto'] ?? 0);
     $escP = $adic['escalera'] ?? null;
@@ -363,7 +367,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
             echo '<tr style="border-bottom:1px solid #F0ECE6">';
             echo $td($cant) . '<td colspan="3" style="vertical-align:top;padding:9px 10px;font-weight:600;color:#1A1816">' . $h($desc) . '</td>';
             echo $td($usdC) . $td($arsC) . '</tr>';
-            if ($mon === 'USD') $sumU += $total; else $sumA += $total;
+            if ($mon === 'USD') { $sumU += $total; $adicU += $total; } else { $sumA += $total; $adicA += $total; }
         }
         if (!empty($angP['total']) && floatval($angP['total']) > 0) {
             $cant = intval($angP['cant'] ?? 0);
@@ -377,7 +381,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
             echo '<tr style="border-bottom:1px solid #F0ECE6">';
             echo $td($cant) . '<td colspan="3" style="vertical-align:top;padding:9px 10px;font-weight:600;color:#1A1816">' . $h($desc) . '</td>';
             echo $td($usdC) . $td($arsC) . '</tr>';
-            if ($mon === 'USD') $sumU += $total; else $sumA += $total;
+            if ($mon === 'USD') { $sumU += $total; $adicU += $total; } else { $sumA += $total; $adicA += $total; }
         }
     }
 
@@ -434,7 +438,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
             echo '<tr style="border-bottom:1px solid #F0ECE6">';
             echo $td('1') . '<td colspan="3" style="vertical-align:top;padding:9px 10px;font-weight:600;color:#1A1816">' . $h($e['name']) . '</td>';
             echo $td($usdC) . $td($arsC) . '</tr>';
-            if ($mon === 'USD') { $sumU += $amount; $eU += $amount; } else { $sumA += $amount; $eA += $amount; }
+            if ($mon === 'USD') { $sumU += $amount; $eU += $amount; $adicU += $amount; } else { $sumA += $amount; $eA += $amount; $adicA += $amount; }
         }
         if ($eU > 0 || $eA > 0) {
             echo '<tr style="background:#EDE5D0;border-top:1.5px solid #C4A77D">';
@@ -473,13 +477,16 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     }
 
     // === Totales ===
-    // Descuento por pago en efectivo: 20% sobre todo MENOS flete/colocacion
-    // y bachas/accesorios (esos se cobran enteros). Misma formula que la calc.
+    // Descuento por pago en efectivo: 20% sobre la PIEDRA (mesadas, baños,
+    // zocalos). NO reciben descuento: flete/colocacion, bachas/accesorios,
+    // escalera, angulos/mensulas y otros conceptos. Misma regla que
+    // excluidoDelDescuento() en calc.html.
     // Va antes del IVA: si hay factura, el 21% se calcula sobre el neto.
     $efectivo = !empty($presup['efectivo']);
-    $excluidoDesc = $fleteVal + $bSum;   // no reciben descuento
-    $descU = $efectivo ? max(0, $sumU) * 0.20 : 0;
-    $descA = $efectivo ? max(0, $sumA - $excluidoDesc) * 0.20 : 0;
+    $excluidoDescU = $adicU;
+    $excluidoDescA = $fleteVal + $bSum + $adicA;
+    $descU = $efectivo ? max(0, $sumU - $excluidoDescU) * 0.20 : 0;
+    $descA = $efectivo ? max(0, $sumA - $excluidoDescA) * 0.20 : 0;
     $netoU = $sumU - $descU;
     $netoA = $sumA - $descA;
     $ivaU = $factura ? $netoU * 0.21 : 0;
@@ -497,7 +504,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
         echo '<td style="text-align:center;font-weight:700;color:#1A1816">' . ($sumA > 0 ? $fARS($sumA) : '') . '</td></tr>';
         if ($descU > 0 || $descA > 0) {
             echo '<tr><td colspan="4" style="padding-left:12px;color:#1F8F47;font-weight:600">Descuento pago en efectivo (20%)';
-            echo '<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">No aplica sobre flete, colocación, bachas ni accesorios</span></td>';
+            echo '<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">Solo sobre la piedra. No aplica sobre flete, colocación, adicionales, bachas ni accesorios</span></td>';
             echo '<td style="text-align:center;font-weight:700;color:#1F8F47">' . ($descU > 0 ? '− ' . $fUSD($descU) : '') . '</td>';
             echo '<td style="text-align:center;font-weight:700;color:#1F8F47">' . ($descA > 0 ? '− ' . $fARS($descA) : '') . '</td></tr>';
         }

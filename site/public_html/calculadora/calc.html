@@ -1191,7 +1191,7 @@ table select{cursor:pointer}
 </div>
 
 <div class="efectivo-row">
-  <button type="button" id="efectivo" class="efectivo-btn" aria-pressed="false" onclick="toggleEfectivo()" title="Aplica 20% de descuento sobre el total, sin contar flete, colocación, bachas ni accesorios">
+  <button type="button" id="efectivo" class="efectivo-btn" aria-pressed="false" onclick="toggleEfectivo()" title="Aplica 20% de descuento sobre la piedra (mesadas, baños, zócalos). No descuenta flete, colocación, adicionales, bachas ni accesorios">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
     Pago en efectivo <b>−20%</b>
   </button>
@@ -1247,32 +1247,49 @@ const MAT_LABELS={
 function matLabel(m){return MAT_LABELS[m]||m||''}
 
 // === PAGO EN EFECTIVO ===
-// 20% de descuento sobre TODO menos flete y colocación (el flete se cobra
-// entero). Es independiente de "con factura": si hay factura, el IVA se
-// calcula sobre el importe YA descontado.
+// 20% de descuento sobre la PIEDRA (mesadas, baños y zócalos: todo lo que
+// se cotiza por m²). Es independiente de "con factura": si hay factura, el
+// IVA se calcula sobre el importe YA descontado.
 const DESC_EFECTIVO=0.20;
 function isEfectivo(){const el=document.getElementById('efectivo');return !!(el&&el.getAttribute('aria-pressed')==='true')}
 // UNA sola definición del descuento. Los tres consumidores (desglose en
-// vivo, PDF y Excel) la llaman igual, así no pueden desincronizarse.
-// Recibe las sumas BRUTAS (que ya incluyen el flete) y el flete a excluir.
-// Lo que NO recibe descuento: flete/colocación y bachas/accesorios.
-// Se calcula acá adentro a propósito. Si fuera un parámetro, cada
+// vivo, PDF/imagen y Excel) la llaman igual, así no pueden desincronizarse.
+// Recibe las sumas BRUTAS (que ya incluyen todo) y resta lo excluido.
+// Lo que NO recibe descuento — todo lo que no es piedra por m²:
+//   · flete y colocación               (ARS)
+//   · bachas y accesorios              (ARS)
+//   · subidas a escalera               (USD o ARS)
+//   · ángulos / ménsulas               (USD o ARS)
+//   · otros conceptos (extras manuales) (USD o ARS)
+// Los zócalos SÍ reciben descuento: son piedra por m², igual que una mesada.
+// La lista se calcula acá adentro a propósito. Si fuera un parámetro, cada
 // consumidor podría pasar una lista distinta y el desglose, el PDF y el
-// Excel dejarían de coincidir.
+// Excel dejarían de coincidir. Misma regla en api/_render-helpers.php.
 function excluidoDelDescuento(){
-  const f=(typeof getFleteVal==='function')?(+getFleteVal()||0):0;
-  const b=(typeof getBachasTotal==='function')?(+getBachasTotal()||0):0;
-  return f+b;
+  let usd=0,ars=0;
+  if(typeof getFleteVal==='function')ars+=(+getFleteVal()||0);
+  if(typeof getBachasTotal==='function')ars+=(+getBachasTotal()||0);
+  if(typeof getAdic==='function'){
+    ['esc','ang'].forEach(k=>{
+      const a=getAdic(k);
+      if(!(a.total>0))return;
+      if(a.mon==='USD')usd+=a.total;else ars+=a.total;
+    });
+  }
+  if(typeof getExtrasTotalUSD==='function')usd+=(+getExtrasTotalUSD()||0);
+  if(typeof getExtrasTotalARS==='function')ars+=(+getExtrasTotalARS()||0);
+  return{usd,ars};
 }
 function calcDescEfectivo(sumUsd,sumArs){
   if(!isEfectivo())return{usd:0,ars:0};
-  const baseUsd=Math.max(0,+sumUsd||0);   // flete y bachas nunca son USD
-  const baseArs=Math.max(0,(+sumArs||0)-excluidoDelDescuento());
+  const ex=excluidoDelDescuento();
+  const baseUsd=Math.max(0,(+sumUsd||0)-ex.usd);
+  const baseArs=Math.max(0,(+sumArs||0)-ex.ars);
   return{usd:baseUsd*DESC_EFECTIVO,ars:baseArs*DESC_EFECTIVO};
 }
 // Descuento aplicado a una variante de color. Las variantes son SOLO
-// items (nunca incluyen flete ni colocación), así que el 20% va sobre
-// todo el subtotal.
+// piedra (nunca incluyen flete, adicionales ni bachas), así que el 20% va
+// sobre todo el subtotal.
 function descVarTotal(total){return isEfectivo()?Math.max(0,+total||0)*DESC_EFECTIVO:0}
 function setEfectivo(on){
   const el=document.getElementById('efectivo');
@@ -2259,7 +2276,11 @@ function mkExtra(){return{name:'',amount:0,mon:'ARS'}}
 // Variantes de color (cotizaciones alternativas, no suman al total)
 // scope: 'all' = toda la sección, 'rows' = filas específicas (array de índices)
 const VARS={items:[]};
-function mkVar(){return{color:'',mat:'',price:0,mon:'USD',selection:{},regMode:'auto',regManualVal:null}}
+// regMode: 'inherit' (default — la variante copia el regrueso de la pieza
+// original tal cual, así los m² coinciden) | 'manual' (el operador fija cm).
+// El viejo 'auto' (forzaba L+A en sinterizado y desfasaba los m² respecto
+// de la tabla) se trata como 'inherit' al cargar presupuestos guardados.
+function mkVar(){return{color:'',mat:'',price:0,mon:'USD',selection:{},regMode:'inherit',regManualVal:null}}
 const MAX_VARS=5;
 const NAMES={m:'Mesada',b:'Mesada de baño'};
 
@@ -2470,9 +2491,9 @@ function regCell(s,i,it){
     const showVal=cur!=='Sin';
     return`<div class="reg-cell"><select style="width:90px;font-size:.65rem" onchange="upd('${s}',${i},'reg',this.value)">${opts.map(v=>`<option${v===cur?' selected':''}>${v}</option>`).join('')}</select>${showVal?`<input type="number" step="1" value="${it.rv}" oninput="upd('${s}',${i},'rv',this.value)">`:''}</div>`;
   }
-  // Para mesada/alzada/L/etc: si el material es sinterizado, default es L+A pero
+  // Para mesada: si el material es sinterizado, default es L+A pero
   // respetamos lo que el usuario haya elegido manualmente (no forzamos 'L+A' en cada render)
-  const curReg=it.reg||(isSint(it.mat)?'L+A':'Sin');
+  const curReg=regModeOf(it);
   const showVal=curReg!=='Sin';
   return`<div class="reg-cell"><select onchange="upd('${s}',${i},'reg',this.value)">${o(REGS,curReg)}</select>${showVal?`<input type="number" step="1" value="${it.rv}" oninput="upd('${s}',${i},'rv',this.value)">`:''}
   </div>`;
@@ -2650,10 +2671,14 @@ function renderSec(s){
   tb.innerHTML=h;
 }
 
+// Regrueso EFECTIVO de una pieza de mesada: lo que eligió el operador, o el
+// default del material si no tocó nada (sinterizado nace con L+A). Única
+// definición: la usan el cálculo de m², el select de la tabla y las
+// variantes de color (que heredan exactamente esto).
+function regModeOf(it){return it.reg||(isSint(it.mat)?'L+A':'Sin')}
 function getR(it){
   const v=it.rv/100;
-  // Si tiene reg seteado, usar ese (default 'L+A' para sinterizados nuevos)
-  let r=it.reg||(isSint(it.mat)?'L+A':'Sin');
+  const r=regModeOf(it);
   if(r==='L')return[0,v];if(r==='A')return[v,0];if(r==='L+A')return[v,v];return[0,0];
 }
 
@@ -2937,7 +2962,7 @@ function calc(){
   }
   if(descEf.usd>0||descEf.ars>0){
     dh+=`<tr class="svc"><td colspan="2">Subtotal</td><td></td><td>${gusd>0?fmtUSD(gusd):'—'}</td><td ${arsC}>${gars>0?fmtARS(gars):'—'}</td></tr>`;
-    dh+=`<tr class="svc" style="color:#1F8F47"><td colspan="2">Descuento pago en efectivo 20% <small style="color:var(--ts)">(no aplica sobre flete, colocación, bachas ni accesorios)</small></td><td></td><td>${descEf.usd>0?'− '+fmtUSD(descEf.usd):'—'}</td><td>${descEf.ars>0?'− '+fmtARS(descEf.ars):'—'}</td></tr>`;
+    dh+=`<tr class="svc" style="color:#1F8F47"><td colspan="2">Descuento pago en efectivo 20% <small style="color:var(--ts)">(solo sobre la piedra — no aplica sobre flete, colocación, adicionales, bachas ni accesorios)</small></td><td></td><td>${descEf.usd>0?'− '+fmtUSD(descEf.usd):'—'}</td><td>${descEf.ars>0?'− '+fmtARS(descEf.ars):'—'}</td></tr>`;
   }
   if(conFactura){
     dh+=`<tr class="svc"><td colspan="2">${(descEf.usd>0||descEf.ars>0)?'Subtotal con descuento':'Subtotal'}</td><td></td><td>${netoUsd>0?fmtUSD(netoUsd):'—'}</td><td ${arsC}>${netoArs>0?fmtARS(netoArs):'—'}</td></tr>`;
@@ -3097,51 +3122,38 @@ function calcVariantTotal(v){
   return {total,m2:m2tot,mon:v.mon||'USD',hasItems:true,sections:sectionsResult};
 }
 
-// Aplica reglas de regrueso/regrueso heredado al cambiar de material
-// secKey: 'm' | 'l' | 'i' | 'b' — la sección a la que pertenece este item
+// Construye el item de la variante: misma pieza, otro color/material/precio.
+// secKey: 'm' | 'b' — la sección a la que pertenece este item.
+//
+// Regla: la variante NUNCA cambia la geometría de la pieza. El regrueso es
+// una decisión que el operador ya tomó en la tabla; la variante solo cambia
+// el color. Así los m² de la variante son exactamente los de la pieza
+// original y el presupuesto queda prolijo (antes el modo 'auto' forzaba
+// L+A al pasar a sinterizado y la alzada aparecía con más m² que arriba).
+//
+//  'inherit' (default) = copia el regrueso efectivo del original, pinneado
+//                        explícitamente para que el default por material
+//                        del clon (que ahora es sinterizado) no lo pise.
+//  'manual'            = el operador fija los cm a propósito.
 function applyVariantToItem(orig,v,secKey){
-  // Clon profundo del item original
   const it={...orig};
   it.mat=v.mat;
   it.color=v.color;
   it.price=v.price;
   it.mon=v.mon;
-  // Reglas de regrueso según regMode:
-  //  'auto'    = aplica reglas estándar del material (sinterizado obliga regrueso)
-  //  'inherit' = mantiene el regrueso del item original
-  //  'manual'  = el usuario fija el valor
-  const isSintMat=isSint(v.mat);
   if(v.regMode==='manual'&&v.regManualVal!=null){
-    if(secKey==='i'){
-      it.reg=parseFloat(v.regManualVal)>0?'Sí':'No';
-      it.rv=parseFloat(v.regManualVal)||0;
-    }else if(secKey==='b'){
-      // Bacha mantiene su lógica
-      if(parseFloat(v.regManualVal)>0&&it.reg==='Sin')it.reg='Frente + 2 lat';
-      it.rv=parseFloat(v.regManualVal)||0;
+    const cm=parseFloat(v.regManualVal)||0;
+    if(secKey==='b'){
+      if(cm>0&&(!it.reg||it.reg==='Sin'))it.reg='Frente + 2 lat';
+      else if(cm<=0)it.reg='Sin';
     }else{
-      it.reg=parseFloat(v.regManualVal)>0?'L+A':'Sin';
-      it.rv=parseFloat(v.regManualVal)||0;
+      it.reg=cm>0?'L+A':'Sin';
     }
-  }else if(v.regMode==='inherit'){
-    // Hereda el regrueso del original. Si es sinterizado y el original era < 5cm, sube a 5
-    if(isSintMat){
-      const minRv=4;
-      if(!it.rv||it.rv<minRv)it.rv=minRv;
-      if(secKey==='i')it.reg='Sí';
-      else if(secKey==='b'&&it.reg==='Sin')it.reg='Frente + 2 lat';
-      else if(secKey!=='b')it.reg='L+A';
-    }
-    // si no es sinterizado: respeta tal cual el original
+    it.rv=cm;
   }else{
-    // auto: comportamiento estándar
-    if(isSintMat){
-      if(secKey==='i'){it.reg='Sí';if(!it.rv||it.rv<4)it.rv=4}
-      else if(secKey==='b'&&it.reg==='Sin'){it.reg='Frente + 2 lat';it.rv=4}
-      else if(secKey!=='b'){it.reg='L+A';if(!it.rv||it.rv<4)it.rv=4}
-    }else{
-      // Material no sinterizado: respeta lo que tenga, no fuerza
-    }
+    // inherit (y cualquier valor viejo como 'auto'): regrueso idéntico al original
+    if(secKey!=='b')it.reg=regModeOf(orig);
+    it.rv=orig.rv;
   }
   return it;
 }
@@ -3239,10 +3251,10 @@ function renderVariantCard(v,idx,sections){
     selectionBlock=`<div class="var-selection-list">${blocks}</div>`;
   }
 
-  // Reg mode
-  const regAuto=v.regMode==='auto'?'active':'';
-  const regInh=v.regMode==='inherit'?'active':'';
+  // Reg mode: 'manual' o heredar (todo lo que no sea manual, incluido el
+  // 'auto' viejo de presupuestos guardados)
   const regMan=v.regMode==='manual'?'active':'';
+  const regInh=regMan?'':'active';
   const regManInput=v.regMode==='manual'
     ? `<input type="number" min="0" step="1" placeholder="cm" value="${v.regManualVal||''}" oninput="updVariant(${idx},'regManualVal',this.value)" class="var-reg-input">`
     : '';
@@ -3273,8 +3285,7 @@ function renderVariantCard(v,idx,sections){
     <div class="var-reg-row">
       <span class="var-reg-lbl">Regrueso</span>
       <div class="var-toggle">
-        <button type="button" class="${regAuto}" onclick="updVariant(${idx},'regMode','auto')" title="Aplicar reglas del material elegido">Automático</button>
-        <button type="button" class="${regInh}" onclick="updVariant(${idx},'regMode','inherit')" title="Heredar el regrueso del item original">Heredar</button>
+        <button type="button" class="${regInh}" onclick="updVariant(${idx},'regMode','inherit')" title="Mismo regrueso que la pieza original — los m² coinciden con la tabla">Heredar</button>
         <button type="button" class="${regMan}" onclick="updVariant(${idx},'regMode','manual')" title="Fijar manualmente el regrueso en cm">Manual</button>
       </div>
       ${regManInput}
@@ -4598,7 +4609,7 @@ async function generarExcel(){
     // Descuento por pago en efectivo (antes del IVA)
     if(descX.usd>0||descX.ars>0){
       fillR(row,fWh);ws.mergeCells(`A${row}:D${row}`);
-      setC(row,1,'  Descuento pago en efectivo (20%) — no aplica sobre flete, colocación, bachas ni accesorios',{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh);
+      setC(row,1,'  Descuento pago en efectivo (20%) — solo sobre la piedra. No aplica sobre flete, colocación, adicionales, bachas ni accesorios',{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh);
       if(descX.usd>0){setC(row,5,-descX.usd,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00'}
       if(descX.ars>0){setC(row,6,-descX.ars,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fWh,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(6).numFmt='$ #,##0'}
       row++;
@@ -5151,7 +5162,7 @@ function generarPDF(opts){
   const hayDescP=(descP.usd>0||descP.ars>0);
   if(incTotal||hayDescP){
     items+=`<tr style="background:#F2EDE3"><td colspan="4" style="font-weight:700;padding-left:12px">Subtotal</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumU>0?fmtUSD(sumU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${sumA>0?fmtARS(sumA):''}</td></tr>`;
-    if(descP.usd>0||descP.ars>0)items+=`<tr><td colspan="4" style="padding-left:12px;color:#1F8F47;font-weight:600">Descuento pago en efectivo (20%)<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">No aplica sobre flete, colocación, bachas ni accesorios</span></td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.usd>0?'− '+fmtUSD(descP.usd):''}</td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.ars>0?'− '+fmtARS(descP.ars):''}</td></tr>`;
+    if(descP.usd>0||descP.ars>0)items+=`<tr><td colspan="4" style="padding-left:12px;color:#1F8F47;font-weight:600">Descuento pago en efectivo (20%)<br><span style="font-size:9px;color:#7A6649;font-style:italic;font-weight:400">Solo sobre la piedra. No aplica sobre flete, colocación, adicionales, bachas ni accesorios</span></td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.usd>0?'− '+fmtUSD(descP.usd):''}</td><td style="text-align:center;font-weight:700;color:#1F8F47">${descP.ars>0?'− '+fmtARS(descP.ars):''}</td></tr>`;
     if(conFact)items+=`<tr><td colspan="4" style="padding-left:12px">I.V.A. (21%)</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaU>0?fmtUSD(ivaU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816">${ivaA>0?fmtARS(ivaA):''}</td></tr>`;
     items+=`<tr style="background:#1A1816;color:#FAF8F4"><td colspan="4" style="font-weight:700;font-size:13px;padding-left:12px">TOTAL</td><td style="text-align:center;font-weight:700;color:#25D366;font-size:13px">${totU>0?fmtUSD(totU):''}</td><td style="text-align:center;font-weight:700;color:#0EA5E9;font-size:13px">${totA>0?fmtARS(totA):''}</td></tr>`;
   }else if((sumU>0||sumA>0)&&((items.match(/Subtotal de secci[oó]n|Subtotal Z[oó]calos|Subtotal Otros conceptos|Subtotal Bachas/g)||[]).length>=2)){
