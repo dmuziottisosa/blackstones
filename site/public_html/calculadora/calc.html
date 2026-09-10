@@ -4723,14 +4723,28 @@ async function generarExcel(){
   fillR(row,fGd);ws.getRow(row).height=3;ws.mergeCells(`A${row}:F${row}`);row++;
   ws.getRow(row).height=10;row++;
 
-  // FORMA DE PAGO
+  // FORMA DE PAGO Y PLAZOS
   fillR(row,fDk2);ws.mergeCells(`A${row}:F${row}`);
-  setC(row,1,'  FORMA DE PAGO',{name:'Arial',size:11,bold:true,color:{argb:'FFFAF8F4'}},fDk2);
+  setC(row,1,'  FORMA DE PAGO Y PLAZOS',{name:'Arial',size:11,bold:true,color:{argb:'FFFAF8F4'}},fDk2);
   ws.getRow(row).height=22;row++;
   fillR(row,fCr);ws.mergeCells(`A${row}:F${row}`);
-  setC(row,1,'  Anticipo del 50 % a la aceptación del presupuesto. Saldo restante contra entrega en obra.',{name:'Arial',size:10,bold:true},fCr);row++;
+  setC(row,1,'  Con muebles listos para medir: seña del 50 %. Sin muebles listos: seña del 70 %. Saldo restante contra entrega en obra.',{name:'Arial',size:10,bold:true},fCr);
+  ws.getRow(row).getCell(1).alignment={wrapText:true,vertical:'middle'};
+  ws.getRow(row).height=30;row++;
   fillR(row,fCr);ws.mergeCells(`A${row}:F${row}`);
-  setC(row,1,'  La fabricación se inicia una vez acreditada la seña.',{name:'Arial',size:10,italic:true,color:{argb:'FF6B6560'}},fCr);row+=2;
+  setC(row,1,'  La fabricación se inicia una vez acreditada la seña.',{name:'Arial',size:10,italic:true,color:{argb:'FF6B6560'}},fCr);row++;
+  const plazos=[
+    'Si transcurren 30 días desde la seña y los muebles aún no están instalados y nivelados, deberá abonarse el saldo pendiente del material.',
+    'Cancelación por parte del cliente: la devolución de la seña estará sujeta al estado del pedido. Se descontarán los gastos efectivamente generados (reserva/compra de material, traslados, medición, fabricación o almacenamiento).',
+    'Los servicios pendientes podrán actualizarse si el trabajo se demora por causas atribuibles al cliente.'
+  ];
+  plazos.forEach(c=>{
+    fillR(row,fCr);ws.mergeCells(`A${row}:F${row}`);
+    setC(row,1,'  •  '+c,{name:'Arial',size:9,color:{argb:'FF1A1816'}},fCr);
+    ws.getRow(row).getCell(1).alignment={wrapText:true,vertical:'middle'};
+    ws.getRow(row).height=32;row++;
+  });
+  row++;
 
   // ALCANCE DEL PRESUPUESTO
   fillR(row,fDk2);ws.mergeCells(`A${row}:F${row}`);
@@ -4800,7 +4814,7 @@ async function generarExcel(){
 
   // FOOTER
   row++;fillR(row,fCr);ws.mergeCells(`A${row}:F${row}`);
-  setC(row,1,'BlackStones Marmolería  ·  Cel: 11 2468-5820  ·  Of: 5611-5919  ·  contacto@blackstones.com.ar  ·  Av. J.B. Alberdi 3575, CABA  ·  blackstones.com.ar',{name:'Arial',size:8,bold:true,color:{argb:'FF6B6560'}},fCr,{horizontal:'center',vertical:'middle'});
+  setC(row,1,'BlackStones Marmolería  ·  Cel: 11 2468-5820  ·  Of: 7536-1961  ·  contacto@blackstones.com.ar  ·  Av. J.B. Alberdi 3575, CABA  ·  blackstones.com.ar',{name:'Arial',size:8,bold:true,color:{argb:'FF6B6560'}},fCr,{horizontal:'center',vertical:'middle'});
 
   // Print area
   ws.pageSetup={paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1};
@@ -5221,8 +5235,11 @@ td,th{padding:5px 8px}
 <table><thead><tr style="background:#1A1816;color:#FAF8F4"><th style="text-align:center;font-size:10px;width:6%">CANT</th><th style="text-align:left;font-size:10px;width:48%;padding-left:10px">DETALLE</th><th style="text-align:center;font-size:10px;width:11%">L (m)</th><th style="text-align:center;font-size:10px;width:13%">A (m)</th><th style="text-align:center;font-size:10px;width:11%">USD</th><th style="text-align:center;font-size:10px;width:11%">PESOS $</th></tr></thead><tbody>${items}</tbody></table>
 <div style="margin-top:12px;padding:8px;background:#FAF8F4;border-radius:4px;font-size:10px"><b>Tipo de cambio referencia${DOLAR_VENTA>0?` al ${fmtFechaDMY(fecha)}`:''}:</b> ${DOLAR_VENTA>0?`USD 1 = ${fmtARS(DOLAR_VENTA)} (Dólar Oficial Venta). Los importes en USD se convierten a esta cotización; sujeto al valor del día de pago.`:'consultar al momento del pago'}</div>
 <div class="notes-block" style="margin-top:12px;padding:14px 16px;background:#FAF8F4;border-radius:4px;font-size:10px;color:#3A332E;line-height:1.5">
-  <div style="font-family:'Fraunces',serif;font-weight:600;color:#1A1816;font-size:11px;letter-spacing:.04em;margin-bottom:6px;border-bottom:1px solid rgba(196,167,125,.35);padding-bottom:4px">FORMA DE PAGO</div>
-  <div><b>Anticipo del 50 %</b> a la aceptación del presupuesto · <b>Saldo restante</b> contra entrega en obra.<br><span style="color:#6B6560;font-style:italic">La fabricación se inicia una vez acreditada la seña.</span></div>
+  <div style="font-family:'Fraunces',serif;font-weight:600;color:#1A1816;font-size:11px;letter-spacing:.04em;margin-bottom:6px;border-bottom:1px solid rgba(196,167,125,.35);padding-bottom:4px">FORMA DE PAGO Y PLAZOS</div>
+  <div style="margin-bottom:4px"><b>Con muebles listos para medir: seña del 50 %.</b> <b>Sin muebles listos: seña del 70 %.</b> Saldo restante contra entrega en obra.<br><span style="color:#6B6560;font-style:italic">La fabricación se inicia una vez acreditada la seña.</span></div>
+  <div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> Si transcurren <b>30 días desde la seña</b> y los muebles aún no están instalados y nivelados, deberá abonarse el saldo pendiente del material.</div>
+  <div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> <b>Cancelación por parte del cliente:</b> la devolución de la seña estará sujeta al estado del pedido. Se descontarán los gastos efectivamente generados (reserva/compra de material, traslados, medición, fabricación o almacenamiento).</div>
+  <div><b style="color:#C4A77D">●</b> Los servicios pendientes podrán actualizarse si el trabajo se demora por causas atribuibles al cliente.</div>
 
   <div style="font-family:'Fraunces',serif;font-weight:600;color:#1A1816;font-size:11px;letter-spacing:.04em;margin:14px 0 6px;border-bottom:1px solid rgba(196,167,125,.35);padding-bottom:4px">ALCANCE DEL PRESUPUESTO</div>
   <div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> Incluye la <b>fabricación</b> de los trabajos detallados <b>(con las medidas indicadas)</b> y <b>zócalos perimetrales de hasta 5 cm</b> de altura si el cliente lo requiere.</div>
@@ -5243,7 +5260,7 @@ td,th{padding:5px 8px}
   <div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> Las instalaciones se realizan en <b>horario laboral, de lunes a viernes</b>.</div>
   <div><b style="color:#C4A77D">●</b> Si por causas atribuibles al cliente la instalación no puede concluirse en la fecha pactada, la reprogramación implica un costo adicional de visita.</div>
 </div>
-<div style="text-align:center;font-size:8px;color:#6B6560;margin-top:12px;padding-top:8px;border-top:1px solid #F2EDE3">BlackStones Marmolería  ·  Cel: 11 2468-5820  ·  Of: 5611-5919  ·  contacto@blackstones.com.ar  ·  Av. J.B. Alberdi 3575, CABA  ·  blackstones.com.ar</div>
+<div style="text-align:center;font-size:8px;color:#6B6560;margin-top:12px;padding-top:8px;border-top:1px solid #F2EDE3">BlackStones Marmolería  ·  Cel: 11 2468-5820  ·  Of: 7536-1961  ·  contacto@blackstones.com.ar  ·  Av. J.B. Alberdi 3575, CABA  ·  blackstones.com.ar</div>
 </body></html>`;
 
   // Reuso del mismo HTML para "Generar Imagen": devolver el string sin abrir ventana.

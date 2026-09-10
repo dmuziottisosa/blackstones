@@ -548,8 +548,11 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     // Notas editoriales
     echo '<div class="notes-block" style="margin-top:12px;padding:14px 16px;background:#FAF8F4;border-radius:4px;font-size:10px;color:#3A332E;line-height:1.5">';
 
-    echo '<div style="font-family:\'Fraunces\',serif;font-weight:600;color:#1A1816;font-size:11px;letter-spacing:.04em;margin-bottom:6px;border-bottom:1px solid rgba(196,167,125,.35);padding-bottom:4px">FORMA DE PAGO</div>';
-    echo '<div><b>Anticipo del 50 %</b> a la aceptación del presupuesto · <b>Saldo restante</b> contra entrega en obra.<br><span style="color:#6B6560;font-style:italic">La fabricación se inicia una vez acreditada la seña.</span></div>';
+    echo '<div style="font-family:\'Fraunces\',serif;font-weight:600;color:#1A1816;font-size:11px;letter-spacing:.04em;margin-bottom:6px;border-bottom:1px solid rgba(196,167,125,.35);padding-bottom:4px">FORMA DE PAGO Y PLAZOS</div>';
+    echo '<div style="margin-bottom:4px"><b>Con muebles listos para medir: seña del 50 %.</b> <b>Sin muebles listos: seña del 70 %.</b> Saldo restante contra entrega en obra.<br><span style="color:#6B6560;font-style:italic">La fabricación se inicia una vez acreditada la seña.</span></div>';
+    echo '<div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> Si transcurren <b>30 días desde la seña</b> y los muebles aún no están instalados y nivelados, deberá abonarse el saldo pendiente del material.</div>';
+    echo '<div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> <b>Cancelación por parte del cliente:</b> la devolución de la seña estará sujeta al estado del pedido. Se descontarán los gastos efectivamente generados (reserva/compra de material, traslados, medición, fabricación o almacenamiento).</div>';
+    echo '<div><b style="color:#C4A77D">●</b> Los servicios pendientes podrán actualizarse si el trabajo se demora por causas atribuibles al cliente.</div>';
 
     echo '<div style="font-family:\'Fraunces\',serif;font-weight:600;color:#1A1816;font-size:11px;letter-spacing:.04em;margin:14px 0 6px;border-bottom:1px solid rgba(196,167,125,.35);padding-bottom:4px">ALCANCE DEL PRESUPUESTO</div>';
     echo '<div style="margin-bottom:4px"><b style="color:#C4A77D">●</b> Incluye la <b>fabricación</b> de los trabajos detallados <b>(con las medidas indicadas)</b> y <b>zócalos perimetrales de hasta 5 cm</b> de altura si el cliente lo requiere.</div>';
@@ -572,7 +575,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
 
     echo '</div>';
 
-    echo '<div style="text-align:center;font-size:8px;color:#6B6560;margin-top:12px;padding-top:8px;border-top:1px solid #F2EDE3">BlackStones Marmolería  ·  Cel: 11 2468-5820  ·  Of: 5611-5919  ·  contacto@blackstones.com.ar  ·  Av. J.B. Alberdi 3575, CABA  ·  blackstones.com.ar</div>';
+    echo '<div style="text-align:center;font-size:8px;color:#6B6560;margin-top:12px;padding-top:8px;border-top:1px solid #F2EDE3">BlackStones Marmolería  ·  Cel: 11 2468-5820  ·  Of: 7536-1961  ·  contacto@blackstones.com.ar  ·  Av. J.B. Alberdi 3575, CABA  ·  blackstones.com.ar</div>';
 
     if ($wrap_html) echo '</body></html>';
 }
