@@ -4181,11 +4181,14 @@ async function generarExcel(){
     const colorTxt=it.color||'';
     const matTxt=matLabel(it.mat)||'';
     const tipoB=it.tipo||'Bacha armada';
-    let mainConcept=catLabel;
-    if(secKey==='b')mainConcept=`${catLabel} · ${tipoB}`;
-    const colorPart=colorTxt?` · ${colorTxt}`:'';
+    // Mesadas: la fila arranca por el color (el bloque y la etiqueta ya dicen
+    // qué es). Baño: conserva "Mesada de baño · tipo" porque el tipo importa.
+    const parts=[];
+    if(secKey==='b')parts.push(catLabel,tipoB);
+    if(colorTxt)parts.push(colorTxt);
+    if(!parts.length)parts.push(secKey==='m'?'Mesada':catLabel);   // fila sin color: singular
     const matPart=matTxt?`  (${matTxt})`:'';
-    const mainText=`${mainConcept}${colorPart}${matPart}`;
+    const mainText=`${parts.join(' · ')}${matPart}`;
     const subParts=[];
     if(secKey==='l'){
       const pz=document.getElementById('pzL').value||'1';
@@ -4344,7 +4347,7 @@ async function generarExcel(){
   }
 
   // MESADA — solo items con precio + medidas
-  renderSectionGrouped('m','Mesada de cocina');
+  renderSectionGrouped('m','Mesadas');
 
   // MESADA DE BAÑO
   renderSectionGrouped('b','Mesada de baño');
@@ -4878,14 +4881,15 @@ function generarPDF(opts){
         // Construir Detalle según tipo de item
         const colorTxt=it.color||'';
         const matTxt=matLabel(it.mat)||'';
-        const colorPart=colorTxt?` · <strong style="color:#1A1816">${colorTxt}</strong>`:'';
+        const colorHtml=colorTxt?`<strong style="color:#1A1816">${colorTxt}</strong>`:'';
         const matPart=matTxt?` <span style="color:#7A6649;font-style:italic;font-size:10.5px">(${matTxt})</span>`:'';
-        let mainConcept=label;
-        // Para baño: agregar tipo (Bacha armada / Con Traforo) en concepto
-        if(key==='b'){
-          mainConcept=`${label} · ${tipoB}`;
-        }
-        let mainLine=`${mainConcept}${colorPart}${matPart}`;
+        // Mesadas: la fila arranca por el color (el bloque y la etiqueta ya
+        // dicen qué es). Baño: conserva "Mesada de baño · tipo".
+        const parts=[];
+        if(key==='b')parts.push(label,tipoB);
+        if(colorHtml)parts.push(colorHtml);
+        if(!parts.length)parts.push(key==='m'?'Mesada':label);   // fila sin color: singular
+        let mainLine=`${parts.join(' · ')}${matPart}`;
         // Sub-líneas (info extra y adicionales)
         const subParts=[];
         // Mesada en L: indicar piezas
@@ -4965,7 +4969,7 @@ function generarPDF(opts){
       items+=`<tr style="background:#EDE5D0;border-top:1.5px solid #C4A77D"><td colspan="4" style="text-align:right;font-style:italic;color:#5A4A35;padding:7px 12px;font-size:10px;font-weight:600">Subtotal de sección</td><td style="text-align:center;font-weight:700;color:#5A4A35">${usdSub}</td><td style="text-align:center;font-weight:700;color:#5A4A35">${arsSub}</td></tr>`;
     }
   }
-  addSec('m','Mesada de cocina');
+  addSec('m','Mesadas');
   addSec('b','Mesada de baño');
 
   // VARIANTES (alternativas — no suman al total) — render diferido al final
@@ -4993,11 +4997,14 @@ function generarPDF(opts){
           // Construir Detalle igual que en addSec
           const colorTxt=v.color||'';
           const matTxt=matLabel(v.mat)||'';
-          const colorPart=colorTxt?` · <strong style="color:#1A1816">${colorTxt}</strong>`:'';
+          const colorHtml=colorTxt?`<strong style="color:#1A1816">${colorTxt}</strong>`:'';
           const matPart=matTxt?` <span style="color:#7A6649;font-style:italic;font-size:10.5px">(${matTxt})</span>`:'';
-          let mainConcept=secRes.name;
-          if(secKey==='b')mainConcept=`${secRes.name} · ${tipoB}`;
-          const mainLine=`${mainConcept}${colorPart}${matPart}`;
+          // Misma regla que addSec: mesadas arrancan por el color, baño conserva tipo
+          const parts=[];
+          if(secKey==='b')parts.push(secRes.name,tipoB);
+          if(colorHtml)parts.push(colorHtml);
+          if(!parts.length)parts.push(secKey==='m'?'Mesada':secRes.name);
+          const mainLine=`${parts.join(' · ')}${matPart}`;
           // Sub-líneas
           const subParts=[];
           if(secKey==='l'){

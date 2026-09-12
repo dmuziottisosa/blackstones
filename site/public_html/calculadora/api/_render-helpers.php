@@ -158,7 +158,7 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
     $incTotalARS = $opts_export['incTotalARS'] ?? false;
 
     $secciones_labels = [
-        'm' => 'Mesada de cocina',
+        'm' => 'Mesadas',
         'a' => 'Alzada',
         'l' => 'Mesada en L',
         'i' => 'Isla',
@@ -262,13 +262,18 @@ function bs_render_html_summary($cliente_obj, $cot_data, $opts = []) {
             $colorTxt = $it['color'] ?? '';
 
             // Línea principal
-            $colorPart = $colorTxt ? ' · <strong style="color:#1A1816">' . $h($colorTxt) . '</strong>' : '';
             $matPart = $matName ? ' <span style="color:#7A6649;font-style:italic;font-size:10.5px">(' . $h($matName) . ')</span>' : '';
-            $secLabelDisplay = $secLabel;
-            if ($secKey === 'b' && !empty($it['tipo'])) {
-                $secLabelDisplay = $secLabel . ' · ' . $it['tipo'];
+            // Mesadas: la fila arranca por el color (el bloque y la etiqueta ya
+            // dicen que es). Baño: conserva "Mesada de baño · tipo". Misma
+            // regla que _buildItemDetail / addSec en calc.html.
+            $parts = [];
+            if ($secKey === 'b') {
+                $parts[] = $h($secLabel);
+                if (!empty($it['tipo'])) $parts[] = $h($it['tipo']);
             }
-            $mainLine = $h($secLabelDisplay) . $colorPart . $matPart;
+            if ($colorTxt !== '') $parts[] = '<strong style="color:#1A1816">' . $h($colorTxt) . '</strong>';
+            if (empty($parts)) $parts[] = $secKey === 'm' ? 'Mesada' : $h($secLabel);   // fila sin color: singular
+            $mainLine = implode(' · ', $parts) . $matPart;
 
             // Sub-línea: regrueso + agujeros
             $subBits = [];
