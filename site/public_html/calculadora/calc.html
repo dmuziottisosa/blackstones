@@ -354,6 +354,11 @@ table select{cursor:pointer}
 .var-result-val{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--gr);line-height:1}
 .var-result-val.ars{color:var(--ars)}
 .var-result-val.empty{color:var(--text2);font-weight:400;font-size:.85rem;font-style:italic;font-family:'Manrope',sans-serif}
+/* Total del presupuesto eligiendo la variante (piedra + todo lo demás) */
+.var-card-foot.total{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.var-card-foot.total .var-result-lbl{color:var(--text)}
+.var-card-foot.total .var-result-val{color:var(--text);font-size:1.25rem}
+.var-cuenta{font-size:.66rem;color:var(--text2);font-style:italic;line-height:1.45;margin-top:4px}
 
 .var-warn{margin-top:10px;font-size:.7rem;color:#C44747;background:#FDF1F1;padding:6px 10px;border-radius:5px;border-left:3px solid #C44747;font-style:italic}
 
@@ -1287,10 +1292,75 @@ function calcDescEfectivo(sumUsd,sumArs){
   const baseArs=Math.max(0,(+sumArs||0)-ex.ars);
   return{usd:baseUsd*DESC_EFECTIVO,ars:baseArs*DESC_EFECTIVO};
 }
-// Descuento aplicado a una variante de color. Las variantes son SOLO
-// piedra (nunca incluyen flete, adicionales ni bachas), así que el 20% va
-// sobre todo el subtotal.
-function descVarTotal(total){return isEfectivo()?Math.max(0,+total||0)*DESC_EFECTIVO:0}
+
+// Línea de un item de piedra: m² y total de la LÍNEA (unidad × cantidad).
+// Única definición: la usan calc() (desglose) y el total con variante.
+// Bacha armada NO suma agujeros; solo Con Traforo (y las mesadas siempre).
+function itemLine(s,it){
+  const cant=Math.max(1,parseInt(it.cant)||1);
+  const m2u=calcM2(s,it);
+  const tipoB=it.tipo||'Bacha armada';
+  const supportsAg=(s==='m'||s==='a'||s==='l'||s==='i'||(s==='b'&&tipoB==='Con Traforo'));
+  const agU=supportsAg?agCost(it,s):0;
+  return{cant,m2u,agU,m2:m2u*cant,ag:agU*cant,total:(m2u*(it.price||0)+agU)*cant,mon:it.mon==='ARS'?'ARS':'USD'};
+}
+
+// Total del presupuesto SI el cliente elige la variante v: el total principal
+// con las filas tildadas reemplazadas por el precio de la variante. Todo lo
+// demás queda igual: filas no tildadas, zócalos, adicionales, flete, bachas,
+// descuento por efectivo e IVA. Así el número es comparable 1:1 con el TOTAL
+// de arriba (antes el cliente comparaba el TOTAL con el subtotal de piedra
+// de la variante y asumía que el flete y los traforos estaban incluidos).
+// Devuelve los términos por grupo para la línea de cuenta.
+function calcTotalConVariante(v,r){
+  r=r||calcVariantTotal(v);
+  if(!r.hasItems||!(r.total>0))return null;
+  const Z=()=>({USD:0,ARS:0});
+  const T={piedra:Z(),otras:Z(),zocalos:Z(),adicionales:Z(),flete:Z(),bachas:Z()};
+  T.piedra[r.mon==='ARS'?'ARS':'USD']+=r.total;
+  SEC_KEYS.forEach(s=>{
+    const sel=(v.selection&&v.selection[s])||[];
+    D[s].items.slice(0,D[s].qty).forEach((it,idx)=>{
+      if(sel.includes(idx)||!itemHasValidTotal(s,it))return;
+      const L=itemLine(s,it);T.otras[L.mon]+=L.total;
+    });
+  });
+  T.zocalos.USD+=(+getZocalosTotalUSD()||0);T.zocalos.ARS+=(+getZocalosTotalARS()||0);
+  ['esc','ang'].forEach(k=>{const a=getAdic(k);if(a.total>0)T.adicionales[a.mon==='USD'?'USD':'ARS']+=a.total});
+  T.adicionales.USD+=(+getExtrasTotalUSD()||0);T.adicionales.ARS+=(+getExtrasTotalARS()||0);
+  T.flete.ARS+=(+getFleteVal()||0);
+  T.bachas.ARS+=(+getBachasTotal()||0);
+  const sumU=Object.values(T).reduce((a,t)=>a+t.USD,0);
+  const sumA=Object.values(T).reduce((a,t)=>a+t.ARS,0);
+  const desc=calcDescEfectivo(sumU,sumA);
+  const conFactura=document.getElementById('factura').value==='1';
+  const netoU=sumU-desc.usd,netoA=sumA-desc.ars;
+  const ivaU=conFactura?netoU*0.21:0,ivaA=conFactura?netoA*0.21:0;
+  return{terms:T,sumU,sumA,desc,conFactura,ivaU,ivaA,totalU:netoU+ivaU,totalA:netoA+ivaA};
+}
+// Línea de cuenta legible bajo el total con variante. Solo los grupos que
+// existen en este presupuesto; nada de "bachas $ 0".
+//   = piedra USD 2.715,26 + adicionales USD 486,51 + flete y colocación $ 180.000 − efectivo 20 % USD 543,05
+function cuentaConVariante(tc){
+  const f=t=>{const p=[];if(t.USD>0)p.push(fmtUSD(t.USD));if(t.ARS>0)p.push(fmtARS(t.ARS));return p.join(' + ')};
+  const parts=[];
+  const add=(label,t)=>{if(t.USD>0||t.ARS>0)parts.push(label+' '+f(t))};
+  add('piedra',tc.terms.piedra);
+  add('otras piezas',tc.terms.otras);
+  add('zócalos',tc.terms.zocalos);
+  add('adicionales',tc.terms.adicionales);
+  add('flete y colocación',tc.terms.flete);
+  add('bachas y accesorios',tc.terms.bachas);
+  let s='= '+parts.join(' + ');
+  if(tc.desc.usd>0||tc.desc.ars>0)s+=' − efectivo 20 % '+f({USD:tc.desc.usd,ARS:tc.desc.ars});
+  if(tc.conFactura&&(tc.ivaU>0||tc.ivaA>0))s+=' + IVA 21 % '+f({USD:tc.ivaU,ARS:tc.ivaA});
+  return s;
+}
+// Monto del total con variante para mostrar: "USD 3.201,77 · $ 180.000"
+function fmtTotalConVariante(tc,sep){
+  const p=[];if(tc.totalU>0)p.push(fmtUSD(tc.totalU));if(tc.totalA>0)p.push(fmtARS(tc.totalA));
+  return p.join(sep||' · ');
+}
 function setEfectivo(on){
   const el=document.getElementById('efectivo');
   if(!el)return;
@@ -2736,16 +2806,9 @@ function calc(){
     let sm=0,su=0,sa=0;let secItems=[];
     for(let i=0;i<D[s].qty;i++){
       const it=D[s].items[i];
-      const cant=Math.max(1,parseInt(it.cant)||1);
-      const m2u=calcM2(s,it);           // m² de UNA pieza
-      // Bacha armada NO suma agujeros, solo Traforo (y mesada/mesada en L/isla/alzada siempre)
-      const tipoB=it.tipo||'Bacha armada';
-      const supportsAg=(s==='m'||s==='a'||s==='l'||s==='i'||(s==='b'&&tipoB==='Con Traforo'));
-      const agU=supportsAg?agCost(it,s):0;
-      // Valores de LÍNEA: (unidad) × cantidad. Todo lo que suma y se muestra usa la línea.
-      const m2=m2u*cant;
-      const ag=agU*cant;
-      const total=(m2u*(it.price||0)+agU)*cant;
+      // Valores de LÍNEA: (unidad) × cantidad. Todo lo que suma y se muestra
+      // usa la línea. Única definición en itemLine().
+      const {cant,m2u,agU,m2,ag,total}=itemLine(s,it);
       // Persistir subtotal computado en el item (para que consumidores
       // del JSON guardado lean el total real, sin recomputar la formula).
       it._subtotal_usd = it.mon==='USD' ? total : 0;
@@ -3217,13 +3280,15 @@ function renderVariantCard(v,idx,sections){
   const result=calcVariantTotal(v);
   const hasResult=result.hasItems&&result.total>0;
   const resultClass=result.mon==='ARS'?'ars':'';
-  const _dVar=hasResult?descVarTotal(result.total):0;
   const _fVar=result.mon==='USD'?fmtUSD:fmtARS;
   const resultValue=hasResult
-    ? (_dVar>0
-        ? `<span class="var-result-val ${resultClass}">${_fVar(result.total-_dVar)}<small style="display:block;font-size:.62rem;font-weight:500;color:#1F8F47;font-family:'Manrope',sans-serif">efectivo −20% · lista ${_fVar(result.total)}</small></span>`
-        : `<span class="var-result-val ${resultClass}">${_fVar(result.total)}</span>`)
+    ? `<span class="var-result-val ${resultClass}">${_fVar(result.total)}</span>`
     : `<span class="var-result-val empty">Pendiente</span>`;
+  // Total del presupuesto eligiendo esta variante (piedra + todo lo demás)
+  const _tc=hasResult?calcTotalConVariante(v,result):null;
+  const totalBlock=_tc
+    ? `<div class="var-card-foot total"><span class="var-result-lbl">Total eligiendo esta variante</span><span class="var-result-val var-total-val">${fmtTotalConVariante(_tc)}</span></div><div class="var-cuenta">${cuentaConVariante(_tc)}</div>`
+    : '';
   const matInfo=v.mat
     ? `<div class="var-mat-info"><span class="var-mat-tag">${matLabel(v.mat)}</span><span class="var-price-tag">${v.mon==='USD'?fmtUSD(v.price)+' /m²':fmtARS(v.price)+' /m²'}</span></div>`
     : `<div class="var-mat-info empty">Buscá un color del catálogo</div>`;
@@ -3292,9 +3357,10 @@ function renderVariantCard(v,idx,sections){
     </div>
     ${result.hasItems&&result.total===0?'<div class="var-warn">Los items seleccionados no tienen total válido.</div>':''}
     <div class="var-card-foot">
-      <span class="var-result-lbl">Subtotal variante</span>
+      <span class="var-result-lbl">Subtotal variante · piedra</span>
       ${resultValue}
     </div>
+    ${totalBlock}
   </div>`;
 }
 
@@ -3388,7 +3454,7 @@ function updateVariantHeaderInfo(idx){
   if(titleEl){
     titleEl.innerHTML=v.color||'<span class="var-untitled">Sin definir</span>';
   }
-  const resEl=card.querySelector('.var-result-val');
+  const resEl=card.querySelector('.var-card-foot:not(.total) .var-result-val');
   if(resEl){
     if(res.hasItems&&res.total>0){
       resEl.textContent=res.mon==='USD'?fmtUSD(res.total):fmtARS(res.total);
@@ -3398,6 +3464,12 @@ function updateVariantHeaderInfo(idx){
       resEl.className='var-result-val empty';
     }
   }
+  // Total eligiendo la variante + línea de cuenta (si el bloque existe en el card)
+  const totEl=card.querySelector('.var-total-val');
+  const cuentaEl=card.querySelector('.var-cuenta');
+  const tc=(res.hasItems&&res.total>0)?calcTotalConVariante(v,res):null;
+  if(totEl)totEl.textContent=tc?fmtTotalConVariante(tc):'—';
+  if(cuentaEl)cuentaEl.textContent=tc?cuentaConVariante(tc):'';
 }
 
 function onVariantColorFocus(idx,el){
@@ -4399,33 +4471,34 @@ async function generarExcel(){
           row++;
         }
       });
-      // Subtotal variante (suma de todas las secciones) — destacado con borde dorado
+      // Subtotal variante: SOLO la piedra (en chico)
       fillR(row,fSt);topBorderR(row);
-      setC(row,2,`Subtotal variante ${vIdx+1}`,{name:'Arial',size:10,bold:true,italic:true,color:{argb:'FF5A4A35'}},fSt,{horizontal:'right',vertical:'middle'});
+      setC(row,2,`Subtotal variante ${vIdx+1} · piedra`,{name:'Arial',size:9.5,italic:true,color:{argb:'FF5A4A35'}},fSt,{horizontal:'right',vertical:'middle'});
       ws.mergeCells(`B${row}:D${row}`);
       if(v.mon==='USD'){
-        setC(row,5,r.total,{name:'Arial',size:11,bold:true,color:{argb:'FF5A4A35'}},fSt,{horizontal:'center',vertical:'middle'});
+        setC(row,5,r.total,{name:'Arial',size:10,bold:true,color:{argb:'FF5A4A35'}},fSt,{horizontal:'center',vertical:'middle'});
         ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00';
       }else{
-        setC(row,6,r.total,{name:'Arial',size:11,bold:true,color:{argb:'FF5A4A35'}},fSt,{horizontal:'center',vertical:'middle'});
+        setC(row,6,r.total,{name:'Arial',size:10,bold:true,color:{argb:'FF5A4A35'}},fSt,{horizontal:'center',vertical:'middle'});
         ws.getRow(row).getCell(6).numFmt='$ #,##0';
       }
       row++;
-      // Con pago en efectivo (la variante no incluye flete: 20% sobre todo)
-      const dVarX=descVarTotal(r.total);
-      if(dVarX>0){
-        const netoVarX=r.total-dVarX;
-        fillR(row,fSt);
-        setC(row,2,`Variante ${vIdx+1} con pago en efectivo (−20%)`,{name:'Arial',size:9.5,bold:true,italic:true,color:{argb:'FF1F8F47'}},fSt,{horizontal:'right',vertical:'middle'});
-        ws.mergeCells(`B${row}:D${row}`);
-        if(v.mon==='USD'){
-          setC(row,5,netoVarX,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fSt,{horizontal:'center',vertical:'middle'});
-          ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00';
-        }else{
-          setC(row,6,netoVarX,{name:'Arial',size:10,bold:true,color:{argb:'FF1F8F47'}},fSt,{horizontal:'center',vertical:'middle'});
-          ws.getRow(row).getCell(6).numFmt='$ #,##0';
+      // TOTAL eligiendo la variante: piedra + todo lo demás, comparable 1:1
+      // con el TOTAL principal. Misma regla de visibilidad que ese bloque.
+      if(incTotal||isEfectivo()){
+        const tc=calcTotalConVariante(v,r);
+        if(tc){
+          fillR(row,fSt);
+          setC(row,2,`TOTAL ELIGIENDO VARIANTE ${vIdx+1}`,{name:'Arial',size:10.5,bold:true,color:{argb:'FF1A1816'}},fSt,{horizontal:'right',vertical:'middle'});
+          ws.mergeCells(`B${row}:D${row}`);
+          if(tc.totalU>0){setC(row,5,tc.totalU,{name:'Arial',size:11,bold:true,color:{argb:'FF1A1816'}},fSt,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(5).numFmt='"USD" #,##0.00'}
+          if(tc.totalA>0){setC(row,6,tc.totalA,{name:'Arial',size:11,bold:true,color:{argb:'FF1A1816'}},fSt,{horizontal:'center',vertical:'middle'});ws.getRow(row).getCell(6).numFmt='$ #,##0'}
+          ws.getRow(row).height=22;row++;
+          fillR(row,fWh);ws.mergeCells(`A${row}:F${row}`);
+          setC(row,1,'  '+cuentaConVariante(tc),{name:'Arial',size:8.5,italic:true,color:{argb:'FF7A6649'}},fWh,{horizontal:'right',vertical:'middle'});
+          ws.getRow(row).getCell(1).alignment={wrapText:true,vertical:'middle',horizontal:'right'};
+          ws.getRow(row).height=26;row++;
         }
-        row++;
       }
       row++;
     });
@@ -5057,17 +5130,20 @@ function generarPDF(opts){
           items+=`<tr style="background:#F5EFE2"><td colspan="4" style="text-align:right;font-style:italic;color:#8B7960;padding:5px 12px 5px 32px;font-size:9.5px;font-weight:500">Subtotal · ${secRes.name}</td><td style="text-align:center;font-weight:600;color:#7A6649;font-size:9.5px">${usdSec}</td><td style="text-align:center;font-weight:600;color:#7A6649;font-size:9.5px">${arsSec}</td></tr>`;
         }
       });
-      // Subtotal total de la variante
+      // Subtotal de la variante: SOLO la piedra (en chico, para que el cliente
+      // vea cuánto es el cambio de color)
       const usdSub=v.mon==='USD'?fmtUSD(r.total):'';
       const arsSub=v.mon==='ARS'?fmtARS(r.total):'';
-      items+=`<tr style="background:#EDE5D0;border-top:1.5px solid #C4A77D"><td colspan="4" style="text-align:right;font-style:italic;color:#5A4A35;padding:7px 12px;font-weight:700;font-size:10px">Subtotal Variante ${vIdx+1}</td><td style="text-align:center;font-weight:700;color:#5A4A35">${usdSub}</td><td style="text-align:center;font-weight:700;color:#5A4A35">${arsSub}</td></tr>`;
-      // Con pago en efectivo (la variante no incluye flete: 20% sobre todo)
-      const dVarP=descVarTotal(r.total);
-      if(dVarP>0){
-        const netoVar=r.total-dVarP;
-        const usdEf=v.mon==='USD'?fmtUSD(netoVar):'';
-        const arsEf=v.mon==='ARS'?fmtARS(netoVar):'';
-        items+=`<tr style="background:#EDE5D0"><td colspan="4" style="text-align:right;font-style:italic;color:#1F8F47;padding:5px 12px;font-weight:700;font-size:9.5px">Variante ${vIdx+1} con pago en efectivo (−20%)</td><td style="text-align:center;font-weight:700;color:#1F8F47">${usdEf}</td><td style="text-align:center;font-weight:700;color:#1F8F47">${arsEf}</td></tr>`;
+      items+=`<tr style="background:#EDE5D0;border-top:1.5px solid #C4A77D"><td colspan="4" style="text-align:right;font-style:italic;color:#5A4A35;padding:7px 12px;font-weight:600;font-size:10px">Subtotal Variante ${vIdx+1} · piedra</td><td style="text-align:center;font-weight:600;color:#5A4A35">${usdSub}</td><td style="text-align:center;font-weight:600;color:#5A4A35">${arsSub}</td></tr>`;
+      // TOTAL eligiendo la variante: piedra + todo lo demás del presupuesto,
+      // comparable 1:1 con el TOTAL principal. Misma regla que ese bloque:
+      // se muestra si "Total" está activo o si hay descuento por efectivo.
+      if(incTotal||isEfectivo()){
+        const tc=calcTotalConVariante(v,r);
+        if(tc){
+          items+=`<tr style="background:#E6DCC4"><td colspan="4" style="text-align:right;color:#1A1816;padding:8px 12px;font-weight:700;font-size:10.5px;letter-spacing:.02em">TOTAL ELIGIENDO VARIANTE ${vIdx+1}</td><td style="text-align:center;font-weight:700;color:#1A1816;font-size:11px">${tc.totalU>0?fmtUSD(tc.totalU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816;font-size:11px">${tc.totalA>0?fmtARS(tc.totalA):''}</td></tr>`;
+          items+=`<tr><td colspan="6" style="text-align:right;font-size:9px;font-style:italic;color:#7A6649;padding:4px 12px 9px;line-height:1.4">${cuentaConVariante(tc)}</td></tr>`;
+        }
       }
     });
   }
