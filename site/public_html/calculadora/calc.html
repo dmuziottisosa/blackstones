@@ -354,11 +354,9 @@ table select{cursor:pointer}
 .var-result-val{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--gr);line-height:1}
 .var-result-val.ars{color:var(--ars)}
 .var-result-val.empty{color:var(--text2);font-weight:400;font-size:.85rem;font-style:italic;font-family:'Manrope',sans-serif}
-/* Total del presupuesto eligiendo la variante (piedra + todo lo demás) */
-.var-card-foot.total{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
-.var-card-foot.total .var-result-lbl{color:var(--text)}
-.var-card-foot.total .var-result-val{color:var(--text);font-size:1.25rem}
-.var-cuenta{font-size:.66rem;color:var(--text2);font-style:italic;line-height:1.45;margin-top:4px}
+/* Total eligiendo la variante — una línea chica en el card (el detalle va en PDF/Excel) */
+.var-cuenta{font-size:.66rem;color:var(--text2);font-style:italic;line-height:1.45;margin-top:6px;text-align:right}
+.var-cuenta b{color:var(--text);font-style:normal;font-weight:600}
 
 .var-warn{margin-top:10px;font-size:.7rem;color:#C44747;background:#FDF1F1;padding:6px 10px;border-radius:5px;border-left:3px solid #C44747;font-style:italic}
 
@@ -3284,10 +3282,12 @@ function renderVariantCard(v,idx,sections){
   const resultValue=hasResult
     ? `<span class="var-result-val ${resultClass}">${_fVar(result.total)}</span>`
     : `<span class="var-result-val empty">Pendiente</span>`;
-  // Total del presupuesto eligiendo esta variante (piedra + todo lo demás)
+  // Total del presupuesto eligiendo esta variante (piedra + todo lo demás).
+  // En la calc va minimalista: una línea chica. El detalle completo
+  // (subtotal piedra + TOTAL + cuenta) lo ve el cliente en PDF/imagen/Excel.
   const _tc=hasResult?calcTotalConVariante(v,result):null;
   const totalBlock=_tc
-    ? `<div class="var-card-foot total"><span class="var-result-lbl">Total eligiendo esta variante</span><span class="var-result-val var-total-val">${fmtTotalConVariante(_tc)}</span></div><div class="var-cuenta">${cuentaConVariante(_tc)}</div>`
+    ? `<div class="var-cuenta">Total eligiendo esta variante: <b class="var-total-val">${fmtTotalConVariante(_tc)}</b> <span style="opacity:.75">· así lo ve el cliente en PDF, imagen y Excel</span></div>`
     : '';
   const matInfo=v.mat
     ? `<div class="var-mat-info"><span class="var-mat-tag">${matLabel(v.mat)}</span><span class="var-price-tag">${v.mon==='USD'?fmtUSD(v.price)+' /m²':fmtARS(v.price)+' /m²'}</span></div>`
@@ -3454,7 +3454,7 @@ function updateVariantHeaderInfo(idx){
   if(titleEl){
     titleEl.innerHTML=v.color||'<span class="var-untitled">Sin definir</span>';
   }
-  const resEl=card.querySelector('.var-card-foot:not(.total) .var-result-val');
+  const resEl=card.querySelector('.var-card-foot .var-result-val');
   if(resEl){
     if(res.hasItems&&res.total>0){
       resEl.textContent=res.mon==='USD'?fmtUSD(res.total):fmtARS(res.total);
@@ -3464,12 +3464,10 @@ function updateVariantHeaderInfo(idx){
       resEl.className='var-result-val empty';
     }
   }
-  // Total eligiendo la variante + línea de cuenta (si el bloque existe en el card)
+  // Total eligiendo la variante (línea chica del card)
   const totEl=card.querySelector('.var-total-val');
-  const cuentaEl=card.querySelector('.var-cuenta');
   const tc=(res.hasItems&&res.total>0)?calcTotalConVariante(v,res):null;
   if(totEl)totEl.textContent=tc?fmtTotalConVariante(tc):'—';
-  if(cuentaEl)cuentaEl.textContent=tc?cuentaConVariante(tc):'';
 }
 
 function onVariantColorFocus(idx,el){
