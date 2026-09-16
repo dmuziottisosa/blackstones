@@ -3371,11 +3371,10 @@ function addVariant(){
   const v=mkVar();
   // Default: TODAS las secciones con TODAS sus filas tildadas
   sections.forEach(s=>{v.selection[s.key]=[...s.filledRows]});
-  // Si es la primera variante, autodesactivamos "Total" (queda modificable manualmente)
-  if(VARS.items.length===0){
-    const optTotal=document.getElementById('optTotal');
-    if(optTotal&&optTotal.checked)optTotal.checked=false;
-  }
+  // Antes acá se apagaba "Total" al agregar la primera variante (para no
+  // mostrar un único TOTAL al lado de alternativas). Ya no: cada variante
+  // lleva su propio "TOTAL ELIGIENDO VARIANTE N", así que el TOTAL principal
+  // tiene que quedar visible para que el cliente compare 1:1.
   VARS.items.push(v);
   renderVariants();
   calc();
@@ -4482,8 +4481,9 @@ async function generarExcel(){
       }
       row++;
       // TOTAL eligiendo la variante: piedra + todo lo demás, comparable 1:1
-      // con el TOTAL principal. Misma regla de visibilidad que ese bloque.
-      if(incTotal||isEfectivo()){
+      // con el TOTAL principal. Siempre que haya variante, sin depender del
+      // tilde "Total" (misma regla que el PDF).
+      {
         const tc=calcTotalConVariante(v,r);
         if(tc){
           fillR(row,fSt);
@@ -5134,9 +5134,10 @@ function generarPDF(opts){
       const arsSub=v.mon==='ARS'?fmtARS(r.total):'';
       items+=`<tr style="background:#EDE5D0;border-top:1.5px solid #C4A77D"><td colspan="4" style="text-align:right;font-style:italic;color:#5A4A35;padding:7px 12px;font-weight:600;font-size:10px">Subtotal Variante ${vIdx+1} · piedra</td><td style="text-align:center;font-weight:600;color:#5A4A35">${usdSub}</td><td style="text-align:center;font-weight:600;color:#5A4A35">${arsSub}</td></tr>`;
       // TOTAL eligiendo la variante: piedra + todo lo demás del presupuesto,
-      // comparable 1:1 con el TOTAL principal. Misma regla que ese bloque:
-      // se muestra si "Total" está activo o si hay descuento por efectivo.
-      if(incTotal||isEfectivo()){
+      // comparable 1:1 con el TOTAL principal. Se muestra SIEMPRE que haya
+      // variante: es la razón de ser de la línea (el cliente comparaba el
+      // TOTAL con el subtotal de piedra). No depende del tilde "Total".
+      {
         const tc=calcTotalConVariante(v,r);
         if(tc){
           items+=`<tr style="background:#E6DCC4"><td colspan="4" style="text-align:right;color:#1A1816;padding:8px 12px;font-weight:700;font-size:10.5px;letter-spacing:.02em">TOTAL ELIGIENDO VARIANTE ${vIdx+1}</td><td style="text-align:center;font-weight:700;color:#1A1816;font-size:11px">${tc.totalU>0?fmtUSD(tc.totalU):''}</td><td style="text-align:center;font-weight:700;color:#1A1816;font-size:11px">${tc.totalA>0?fmtARS(tc.totalA):''}</td></tr>`;
