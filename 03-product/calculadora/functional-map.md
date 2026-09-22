@@ -78,12 +78,16 @@ calculadora/
   1. Anclar en `href="/cotizaciondolaroficial"` y tomar los 2 primeros `<div class="val">`.
   2. Anclar en `aria-label="Link a Dólar Oficial"`.
   3. Anclar en el texto "Dólar Oficial" entre Blue y MEP.
+- **Fallback 4 (sept 2026): `dolarapi.com/v1/dolares/oficial`** (JSON, sin scraping). Entra solo si dolarhoy no respondió o el valor parseado no pasa la validación. El JSON sale con `fuente: "dolarapi.com"` y la calc lo etiqueta "DolarApi" en el header.
+- **Parseo es-AR** (`parseValor`): si hay coma, la coma es el decimal y los puntos son miles. Si no hay coma, un punto seguido de exactamente 3 dígitos es separador de miles (`"1.485"` → 1485). Este fue el bug de sept 2026: dolarhoy dejó de mostrar decimales (`$1.535` en vez de `$1.535,00`), el parser lo leía como 1,535 pesos, la validación lo rechazaba y la calc quedaba en "Error al cargar · cargá el valor manualmente".
 - **Cache**: 5 min en `dolar_cache.json`. Override con `?nocache=1`.
 - **Debug mode**: `?debug=1` devuelve HTML con info del scraping.
 - **Validación de sanity**: si `venta < 1000` o `venta > 5000` → 500 (rangos absurdos para Argentina ⇒ scraping rompió).
 - **Output JSON**: `{compra, venta, fuente, source, fechaActualizacion}`.
 
-**Cuándo se llama desde `calc.html`:** automáticamente al cargar la página (línea 3573). Botón de refresh manual disponible. Fallback: input numérico para tipear el dólar a mano si el scraper falla.
+**Cuándo se llama desde `calc.html`:** automáticamente al cargar la página (`fetchDolar(true)`). Botón de refresh manual (`fetchDolar()`). Fallback: input numérico para tipear el dólar a mano si el scraper falla.
+
+**Presupuestos guardados (sept 2026):** al reabrir uno (`?load=` o borrador recuperado) la calc usa el dólar con el que se emitió (`presupuesto.dolar_venta`), lo muestra en el header con la etiqueta "Del presupuesto · DD/MM/AAAA", y la carga automática de hoy **no lo pisa** — así el PDF/Excel se reproducen igual. El botón ↻ sí lo pisa: el operador decide recotizar al de hoy. Antes se pisaba `DOLAR_VENTA` en silencio y el header seguía mostrando el de hoy: la calc usaba un valor y el operador veía otro.
 
 **Bonus:** la calc también consulta `dolarapi.com` para el blue (display-only, no entra en el cálculo).
 

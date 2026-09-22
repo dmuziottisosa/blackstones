@@ -23,17 +23,24 @@ if (!$forceRefresh && !$debugMode && file_exists($cacheFile) && (time() - filemt
 }
 
 // ============================================================
-// Helper: convierte "1.435,00" → 1435.00 / "$1390" → 1390
+// Helper: convierte el formato es-AR de dolarhoy a float.
+//   "1.435,00" → 1435.00     "$1.485" → 1485     "$1390" → 1390
+//   "1435.5"   → 1435.5      "1.485,50" → 1485.50
+// Regla: si hay coma, la coma es el decimal y los puntos son miles.
+// Si NO hay coma, un punto seguido de exactamente 3 dígitos al final es
+// separador de miles (es-AR), no decimal. Antes "1.485" se leía como
+// 1,485 pesos y el endpoint devolvía error (sept 2026, cuando dolarhoy
+// dejó de mostrar los decimales).
 // ============================================================
 function parseValor($s) {
     $s = trim($s);
     $s = str_replace('$', '', $s);
     $s = str_replace(' ', '', $s);
-    if (strpos($s, '.') !== false && strpos($s, ',') !== false) {
+    if (strpos($s, ',') !== false) {
         $s = str_replace('.', '', $s);
         $s = str_replace(',', '.', $s);
-    } else if (strpos($s, ',') !== false) {
-        $s = str_replace(',', '.', $s);
+    } else if (preg_match('/^\d{1,3}(\.\d{3})+$/', $s)) {
+        $s = str_replace('.', '', $s);
     }
     return floatval($s);
 }
@@ -110,6 +117,26 @@ if ($res['httpCode'] === 200 && $res['html']) {
 }
 
 // ============================================================
+// FALLBACK 3 — dolarapi.com (JSON, sin scraping). Se usa solo si
+// dolarhoy no respondió o el valor parseado no pasa la validación.
+// Misma fuente que la calc ya usa para el blue. Hoy (sept 2026) el
+// "oficial" de dolarapi coincide con el de dolarhoy.
+// ============================================================
+$ventaValida = function($v) { return $v && $v >= 1000 && $v <= 5000; };
+if (!$ventaValida($venta)) {
+    $debug['dolarhoy_descartado'] = ['compra' => $compra, 'venta' => $venta, 'source' => $source];
+    $api = fetchUrl('https://dolarapi.com/v1/dolares/oficial');
+    if ($api['httpCode'] === 200 && $api['html']) {
+        $j = json_decode($api['html'], true);
+        if (is_array($j) && !empty($j['venta'])) {
+            $compra = floatval($j['compra'] ?? 0);
+            $venta  = floatval($j['venta']);
+            $source = 'dolarapi-fallback';
+        }
+    }
+}
+
+// ============================================================
 // MODO DEBUG — devuelve HTML con info detallada
 // ============================================================
 if ($debugMode) {
@@ -129,7 +156,7 @@ if ($debugMode) {
 // ============================================================
 // VALIDACIÓN — el oficial debe estar en un rango razonable
 // ============================================================
-if (!$venta || $venta < 1000 || $venta > 5000) {
+if (!$ventaValida($venta)) {
     http_response_code(500);
     echo json_encode([
         'error' => 'No se pudo obtener cotización válida',
@@ -147,7 +174,7 @@ if (!$venta || $venta < 1000 || $venta > 5000) {
 $result = [
     'compra' => $compra,
     'venta' => $venta,
-    'fuente' => 'dolarhoy.com',
+    'fuente' => $source === 'dolarapi-fallback' ? 'dolarapi.com' : 'dolarhoy.com',
     'source' => $source,
     'fechaActualizacion' => date('c')
 ];
