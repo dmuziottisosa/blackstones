@@ -122,21 +122,14 @@
        ============================================================ -->
   <link rel="preload" as="image" href="foto_bloque_1/mesada_bloque1.webp" fetchpriority="high" media="(min-width:900px)">
   <link rel="preload" as="image" href="foto_bloque_1/locale_interno.jpeg" fetchpriority="high" media="(max-width:899px)">
-  <!-- Granito: panel activo por default, prioridad alta -->
-  <link rel="preload" as="image" href="granitos/black-cosmic.webp" fetchpriority="high">
-  <link rel="preload" as="image" href="granitos/crema-julia.webp" fetchpriority="high">
-  <link rel="preload" as="image" href="granitos/ebony-crystal.webp" fetchpriority="high">
-  <link rel="preload" as="image" href="granitos/gris-mara.webp" fetchpriority="high">
-  <!-- Cuarzo: segundo panel, prioridad auto -->
-  <link rel="preload" as="image" href="purastone/arabescato-venatino.webp">
-  <link rel="preload" as="image" href="purastone/basaltina.webp">
-  <link rel="preload" as="image" href="purastone/bianco-luxe.webp">
-  <link rel="preload" as="image" href="purastone/blanco-cana.webp">
-  <!-- Sinterizado xtone: tercer panel, prioridad baja -->
-  <link rel="preload" as="image" href="xtone/AlpinusWhite.webp" fetchpriority="low">
-  <link rel="preload" as="image" href="xtone/Amazonite.webp" fetchpriority="low">
-  <link rel="preload" as="image" href="xtone/ArsBeige.webp" fetchpriority="low">
-  <link rel="preload" as="image" href="xtone/AstanaGrey.webp" fetchpriority="low">
+  <!-- Granito: panel activo por default. Miniaturas (granitos/t/), que son
+       las que usan los tiles. Prioridad baja para no competir con el hero.
+       Cuarzo y sinterizado no se precargan: sus tiles se piden recién al
+       abrir la pestaña (carga diferida del catálogo). -->
+  <link rel="preload" as="image" href="granitos/t/black-cosmic.webp" fetchpriority="low">
+  <link rel="preload" as="image" href="granitos/t/blanco-dallas.webp" fetchpriority="low">
+  <link rel="preload" as="image" href="granitos/t/crema-julia.webp" fetchpriority="low">
+  <link rel="preload" as="image" href="granitos/t/ebony-crystal.webp" fetchpriority="low">
 <style>
 /* ============================================================
    BLACKSTONES V3
@@ -1439,98 +1432,98 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
           <div class="colors-grid">
 
           <button class="color-tile" data-tipo="oscuro-vetas" type="button" aria-label="Black Cosmic">
-            <span class="color-tile-portada" style="background-image: url('granitos/black-cosmic.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/black-cosmic-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/black-cosmic.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/black-cosmic-muestra.webp" data-full="granitos/black-cosmic-muestra.webp"></span>
             <span class="color-tile-label"><strong>Black Cosmic</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Blanco Dallas">
-            <span class="color-tile-portada" style="background-image: url('granitos/blanco-dallas.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/blanco-dallas-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/blanco-dallas.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/blanco-dallas-muestra.webp" data-full="granitos/blanco-dallas-muestra.webp"></span>
             <span class="color-tile-label"><strong>Blanco Dallas</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Crema Julia">
-            <span class="color-tile-portada" style="background-image: url('granitos/crema-julia.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/crema-julia-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/crema-julia.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/crema-julia-muestra.webp" data-full="granitos/crema-julia-muestra.webp"></span>
             <span class="color-tile-label"><strong>Crema Julia</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro-vetas" type="button" aria-label="Ebony Crystal">
-            <span class="color-tile-portada" style="background-image: url('granitos/ebony-crystal.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/ebony-crystal-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/ebony-crystal.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/ebony-crystal-muestra.webp" data-full="granitos/ebony-crystal-muestra.webp"></span>
             <span class="color-tile-label"><strong>Ebony Crystal</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Gris Mara">
-            <span class="color-tile-portada" style="background-image: url('granitos/gris-mara.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/gris-mara-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/gris-mara.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/gris-mara-muestra.webp" data-full="granitos/gris-mara-muestra.webp"></span>
             <span class="color-tile-label"><strong>Gris Mara</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Gris Perla">
-            <span class="color-tile-portada" style="background-image: url('granitos/gris-perla.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/gris-perla-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/gris-perla.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/gris-perla-muestra.webp" data-full="granitos/gris-perla-muestra.webp"></span>
             <span class="color-tile-label"><strong>Gris Perla</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Kashmir White">
-            <span class="color-tile-portada" style="background-image: url('granitos/kashmir-white.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/kashmir-white-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/kashmir-white.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/kashmir-white-muestra.webp" data-full="granitos/kashmir-white-muestra.webp"></span>
             <span class="color-tile-label"><strong>Kashmir White</strong><span>Granito · India</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Negro Absoluto">
-            <span class="color-tile-portada" style="background-image: url('granitos/negro-absoluto.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/negro-absoluto-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/negro-absoluto.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/negro-absoluto-muestra.webp" data-full="granitos/negro-absoluto-muestra.webp"></span>
             <span class="color-tile-label"><strong>Negro Absoluto</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro-vetas" type="button" aria-label="Negro Boreal">
-            <span class="color-tile-portada" style="background-image: url('granitos/negro-boreal.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/negro-boreal-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/negro-boreal.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/negro-boreal-muestra.webp" data-full="granitos/negro-boreal-muestra.webp"></span>
             <span class="color-tile-label"><strong>Negro Boreal</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Negro Brasil">
-            <span class="color-tile-portada" style="background-image: url('granitos/negro-brasil.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/negro-brasil-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/negro-brasil.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/negro-brasil-muestra.webp" data-full="granitos/negro-brasil-muestra.webp"></span>
             <span class="color-tile-label"><strong>Negro Brasil</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Negro Brasil Leather">
-            <span class="color-tile-portada" style="background-image: url('granitos/negro-brasil-leather.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/negro-brasil-leather-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/negro-brasil-leather.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/negro-brasil-leather-muestra.webp" data-full="granitos/negro-brasil-leather-muestra.webp"></span>
             <span class="color-tile-label"><strong>Negro Brasil Leather</strong><span>Granito · Acabado leather</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Rosa Antico">
-            <span class="color-tile-portada" style="background-image: url('granitos/rosa-antico.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/rosa-antico-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/rosa-antico.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/rosa-antico-muestra.webp" data-full="granitos/rosa-antico-muestra.webp"></span>
             <span class="color-tile-label"><strong>Rosa Antico</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Rosa del Salto">
-            <span class="color-tile-portada" style="background-image: url('granitos/rosa-del-salto.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/rosa-del-salto-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/rosa-del-salto.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/rosa-del-salto-muestra.webp" data-full="granitos/rosa-del-salto-muestra.webp"></span>
             <span class="color-tile-label"><strong>Rosa del Salto</strong><span>Granito · Argentina</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="San Felipe">
-            <span class="color-tile-portada" style="background-image: url('granitos/san-felipe.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/san-felipe-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/san-felipe.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/san-felipe-muestra.webp" data-full="granitos/san-felipe-muestra.webp"></span>
             <span class="color-tile-label"><strong>San Felipe</strong><span>Granito</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Sierra Chica">
-            <span class="color-tile-portada" style="background-image: url('granitos/sierra-chica.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/sierra-chica-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/sierra-chica.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/sierra-chica-muestra.webp" data-full="granitos/sierra-chica-muestra.webp"></span>
             <span class="color-tile-label"><strong>Sierra Chica</strong><span>Granito · Argentina</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Verde Ubatuba">
-            <span class="color-tile-portada" style="background-image: url('granitos/verde-ubatuba.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('granitos/verde-ubatuba-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="granitos/t/verde-ubatuba.webp"></span>
+            <span class="color-tile-muestra" data-bg="granitos/t/verde-ubatuba-muestra.webp" data-full="granitos/verde-ubatuba-muestra.webp"></span>
             <span class="color-tile-label"><strong>Verde Ubatuba</strong><span>Granito · Brasil</span></span>
           </button>
 
@@ -1562,242 +1555,242 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
         <div class="colors-grid">
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Arabescato Cervaiole">
-            <span class="color-tile-portada" style="background-image: url('purastone/arabescato_cervaiole.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/arabescato_cervaiole-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/arabescato_cervaiole.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/arabescato_cervaiole-muestra.webp" data-full="purastone/arabescato_cervaiole-muestra.webp"></span>
             <span class="color-tile-label"><strong>Arabescato Cervaiole</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Arabescato Venatino">
-            <span class="color-tile-portada" style="background-image: url('purastone/arabescato-venatino.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/arabescato-venatino-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/arabescato-venatino.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/arabescato-venatino-muestra.webp" data-full="purastone/arabescato-venatino-muestra.webp"></span>
             <span class="color-tile-label"><strong>Arabescato Venatino</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Basaltina">
-            <span class="color-tile-portada" style="background-image: url('purastone/basaltina.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/basaltina-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/basaltina.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/basaltina-muestra.webp" data-full="purastone/basaltina-muestra.webp"></span>
             <span class="color-tile-label"><strong>Basaltina</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Bianco Luxe">
-            <span class="color-tile-portada" style="background-image: url('purastone/bianco-luxe.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/bianco-luxe-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/bianco-luxe.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/bianco-luxe-muestra.webp" data-full="purastone/bianco-luxe-muestra.webp"></span>
             <span class="color-tile-label"><strong>Bianco Luxe</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Bianco Silver">
-            <span class="color-tile-portada" style="background-image: url('purastone/bianco-silver.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/bianco-silver-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/bianco-silver.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/bianco-silver-muestra.webp" data-full="purastone/bianco-silver-muestra.webp"></span>
             <span class="color-tile-label"><strong>Bianco Silver</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Blanco Cana">
-            <span class="color-tile-portada" style="background-image: url('purastone/blanco-cana.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/blanco-cana-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/blanco-cana.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/blanco-cana-muestra.webp" data-full="purastone/blanco-cana-muestra.webp"></span>
             <span class="color-tile-label"><strong>Blanco Cana</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Blanco Glitter">
-            <span class="color-tile-portada" style="background-image: url('purastone/blanco-glitter.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/blanco-glitter-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/blanco-glitter.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/blanco-glitter-muestra.webp" data-full="purastone/blanco-glitter-muestra.webp"></span>
             <span class="color-tile-label"><strong>Blanco Glitter</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Blanco Icon">
-            <span class="color-tile-portada" style="background-image: url('purastone/blanco-icon.jpg');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/blanco-icon-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/blanco-icon.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/blanco-icon-muestra.webp" data-full="purastone/blanco-icon-muestra.webp"></span>
             <span class="color-tile-label"><strong>Blanco Icon</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Blanco Nube">
-            <span class="color-tile-portada" style="background-image: url('purastone/blanco-nube.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/blanco-nube-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/blanco-nube.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/blanco-nube-muestra.webp" data-full="purastone/blanco-nube-muestra.webp"></span>
             <span class="color-tile-label"><strong>Blanco Nube</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Blanco Paloma">
-            <span class="color-tile-portada" style="background-image: url('purastone/blanco-paloma.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/blanco-paloma-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/blanco-paloma.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/blanco-paloma-muestra.webp" data-full="purastone/blanco-paloma-muestra.webp"></span>
             <span class="color-tile-label"><strong>Blanco Paloma</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Blue">
-            <span class="color-tile-portada" style="background-image: url('purastone/blue.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/blue-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/blue.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/blue-muestra.webp" data-full="purastone/blue-muestra.webp"></span>
             <span class="color-tile-label"><strong>Blue</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Calacatta Antico">
-            <span class="color-tile-portada" style="background-image: url('purastone/calacatta-antico.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/calacatta-antico-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/calacatta-antico.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/calacatta-antico-muestra.webp" data-full="purastone/calacatta-antico-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Antico</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Calacatta Borghini">
-            <span class="color-tile-portada" style="background-image: url('purastone/calacatta-borghini.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/calacatta-borghini-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/calacatta-borghini.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/calacatta-borghini-muestra.webp" data-full="purastone/calacatta-borghini-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Borghini</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Calacatta Clasico">
-            <span class="color-tile-portada" style="background-image: url('purastone/calacatta-clasico.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/calacatta-clasico-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/calacatta-clasico.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/calacatta-clasico-muestra.webp" data-full="purastone/calacatta-clasico-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Clásico</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Calacatta Dor">
-            <span class="color-tile-portada" style="background-image: url('purastone/calacatta-dor.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/calacatta-dor-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/calacatta-dor.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/calacatta-dor-muestra.webp" data-full="purastone/calacatta-dor-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Dor</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Calacatta Gold">
-            <span class="color-tile-portada" style="background-image: url('purastone/calacatta-gold.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/calacatta-gold-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/calacatta-gold.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/calacatta-gold-muestra.webp" data-full="purastone/calacatta-gold-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Gold</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Calacatta Versalles">
-            <span class="color-tile-portada" style="background-image: url('purastone/calacatta-versalles.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/calacatta-versalles-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/calacatta-versalles.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/calacatta-versalles-muestra.webp" data-full="purastone/calacatta-versalles-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Versalles</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Cemento">
-            <span class="color-tile-portada" style="background-image: url('purastone/cemento.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/cemento-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/cemento.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/cemento-muestra.webp" data-full="purastone/cemento-muestra.webp"></span>
             <span class="color-tile-label"><strong>Cemento</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Concrete">
-            <span class="color-tile-portada" style="background-image: url('purastone/concrete.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/concrete-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/concrete.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/concrete-muestra.webp" data-full="purastone/concrete-muestra.webp"></span>
             <span class="color-tile-label"><strong>Concrete</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Concrete Dark">
-            <span class="color-tile-portada" style="background-image: url('purastone/concrete-dark.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/concrete-dark-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/concrete-dark.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/concrete-dark-muestra.webp" data-full="purastone/concrete-dark-muestra.webp"></span>
             <span class="color-tile-label"><strong>Concrete Dark</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Concrete Sand">
-            <span class="color-tile-portada" style="background-image: url('purastone/concrete-sand.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/concrete-sand-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/concrete-sand.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/concrete-sand-muestra.webp" data-full="purastone/concrete-sand-muestra.webp"></span>
             <span class="color-tile-label"><strong>Concrete Sand</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Crema Pisa">
-            <span class="color-tile-portada" style="background-image: url('purastone/crema-pisa.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/crema-pisa-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/crema-pisa.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/crema-pisa-muestra.webp" data-full="purastone/crema-pisa-muestra.webp"></span>
             <span class="color-tile-label"><strong>Crema Pisa</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Estatuario Venato">
-            <span class="color-tile-portada" style="background-image: url('purastone/estatuario-venato.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/estatuario-venato-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/estatuario-venato.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/estatuario-venato-muestra.webp" data-full="purastone/estatuario-venato-muestra.webp"></span>
             <span class="color-tile-label"><strong>Estatuario Venato</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Greyge">
-            <span class="color-tile-portada" style="background-image: url('purastone/greyge.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/greyge-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/greyge.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/greyge-muestra.webp" data-full="purastone/greyge-muestra.webp"></span>
             <span class="color-tile-label"><strong>Greyge</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Gris Fosil">
-            <span class="color-tile-portada" style="background-image: url('purastone/gris-fosil.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/gris-fosil-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/gris-fosil.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/gris-fosil-muestra.webp" data-full="purastone/gris-fosil-muestra.webp"></span>
             <span class="color-tile-label"><strong>Gris Fósil</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Gris Topo">
-            <span class="color-tile-portada" style="background-image: url('purastone/gris-topo.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/gris-topo-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/gris-topo.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/gris-topo-muestra.webp" data-full="purastone/gris-topo-muestra.webp"></span>
             <span class="color-tile-label"><strong>Gris Topo</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Gris Zen">
-            <span class="color-tile-portada" style="background-image: url('purastone/gris-zen.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/gris-zen-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/gris-zen.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/gris-zen-muestra.webp" data-full="purastone/gris-zen-muestra.webp"></span>
             <span class="color-tile-label"><strong>Gris Zen</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="sin-clasificar" type="button" aria-label="Invisible Grey">
-            <span class="color-tile-portada" style="background-image: url('purastone/invisible-grey.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/invisible-grey-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/invisible-grey.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/invisible-grey-muestra.webp" data-full="purastone/invisible-grey-muestra.webp"></span>
             <span class="color-tile-label"><strong>Invisible Grey</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Negro Betun">
-            <span class="color-tile-portada" style="background-image: url('purastone/negro-betun.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/negro-betun-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/negro-betun.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/negro-betun-muestra.webp" data-full="purastone/negro-betun-muestra.webp"></span>
             <span class="color-tile-label"><strong>Negro Betún</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Negro Glitter">
-            <span class="color-tile-portada" style="background-image: url('purastone/negro-glitter.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/negro-glitter-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/negro-glitter.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/negro-glitter-muestra.webp" data-full="purastone/negro-glitter-muestra.webp"></span>
             <span class="color-tile-label"><strong>Negro Glitter</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="sin-clasificar" type="button" aria-label="Negro Marquina">
-            <span class="color-tile-portada" style="background-image: url('purastone/negro-marquina.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/negro-marquina-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/negro-marquina.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/negro-marquina-muestra.webp" data-full="purastone/negro-marquina-muestra.webp"></span>
             <span class="color-tile-label"><strong>Negro Marquina</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="sin-clasificar" type="button" aria-label="Noir">
-            <span class="color-tile-portada" style="background-image: url('purastone/noir.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/noir-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/noir.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/noir-muestra.webp" data-full="purastone/noir-muestra.webp"></span>
             <span class="color-tile-label"><strong>Noir</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Pink">
-            <span class="color-tile-portada" style="background-image: url('purastone/pink.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/pink-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/pink.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/pink-muestra.webp" data-full="purastone/pink-muestra.webp"></span>
             <span class="color-tile-label"><strong>Pink</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="oscuro" type="button" aria-label="Porfido Gris">
-            <span class="color-tile-portada" style="background-image: url('purastone/porfido-gris.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/porfido-gris-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/porfido-gris.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/porfido-gris-muestra.webp" data-full="purastone/porfido-gris-muestra.webp"></span>
             <span class="color-tile-label"><strong>Pórfido Gris</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Pura Statuarietto">
-            <span class="color-tile-portada" style="background-image: url('purastone/pura-statuarietto.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/pura-statuarietto-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/pura-statuarietto.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/pura-statuarietto-muestra.webp" data-full="purastone/pura-statuarietto-muestra.webp"></span>
             <span class="color-tile-label"><strong>Pura Statuarietto</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="sin-clasificar" type="button" aria-label="Sat">
-            <span class="color-tile-portada" style="background-image: url('purastone/sat.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/sat-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/sat.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/sat-muestra.webp" data-full="purastone/sat-muestra.webp"></span>
             <span class="color-tile-label"><strong>Sat</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Statuario">
-            <span class="color-tile-portada" style="background-image: url('purastone/statuario.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/statuario-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/statuario.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/statuario-muestra.webp" data-full="purastone/statuario-muestra.webp"></span>
             <span class="color-tile-label"><strong>Statuario</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro-vetas" type="button" aria-label="Taj">
-            <span class="color-tile-portada" style="background-image: url('purastone/taj.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/taj-muestra.jpg');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/taj.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/taj-muestra.webp" data-full="purastone/taj-muestra.jpg"></span>
             <span class="color-tile-label"><strong>Taj</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Terrazo White">
-            <span class="color-tile-portada" style="background-image: url('purastone/terrazo-white.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/terrazo-white-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/terrazo-white.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/terrazo-white-muestra.webp" data-full="purastone/terrazo-white-muestra.webp"></span>
             <span class="color-tile-label"><strong>Terrazo White</strong><span>Purastone</span></span>
           </button>
 
           <button class="color-tile" data-tipo="claro" type="button" aria-label="Venatino">
-            <span class="color-tile-portada" style="background-image: url('purastone/venatino.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('purastone/venatino-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="purastone/t/venatino.webp"></span>
+            <span class="color-tile-muestra" data-bg="purastone/t/venatino-muestra.webp" data-full="purastone/venatino-muestra.webp"></span>
             <span class="color-tile-label"><strong>Venatino</strong><span>Purastone</span></span>
           </button>
 
@@ -1836,140 +1829,140 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
         <div class="colors-grid">
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="sin-clasificar" aria-label="Alpinus White">
-            <span class="color-tile-portada" style="background-image: url('xtone/AlpinusWhite.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/alpinus-white-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/AlpinusWhite.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/alpinus-white-muestra.webp" data-full="xtone/alpinus-white-muestra.webp"></span>
             <span class="color-tile-label"><strong>Alpinus White</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="sin-clasificar" aria-label="Amazonite">
-            <span class="color-tile-portada" style="background-image: url('xtone/Amazonite.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/amazonite-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/Amazonite.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/amazonite-muestra.webp" data-full="xtone/amazonite-muestra.webp"></span>
             <span class="color-tile-label"><strong>Amazonite</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro" aria-label="Ars Beige">
-            <span class="color-tile-portada" style="background-image: url('xtone/ArsBeige.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/ars-beige-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/ArsBeige.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/ars-beige-muestra.webp" data-full="xtone/ars-beige-muestra.webp"></span>
             <span class="color-tile-label"><strong>Ars Beige</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="oscuro-vetas" aria-label="Astana Grey">
-            <span class="color-tile-portada" style="background-image: url('xtone/AstanaGrey.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/astana-grey-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/AstanaGrey.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/astana-grey-muestra.webp" data-full="xtone/astana-grey-muestra.webp"></span>
             <span class="color-tile-label"><strong>Astana Grey</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro" aria-label="Blue Roma">
-            <span class="color-tile-portada" style="background-image: url('xtone/BlueRoma.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/blue-roma-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/BlueRoma.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/blue-roma-muestra.webp" data-full="xtone/blue-roma-muestra.webp"></span>
             <span class="color-tile-label"><strong>Blue Roma</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro" aria-label="Bottega Acero">
-            <span class="color-tile-portada" style="background-image: url('xtone/BottegaAcero.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/bottega-acero-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/BottegaAcero.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/bottega-acero-muestra.webp" data-full="xtone/bottega-acero-muestra.webp"></span>
             <span class="color-tile-label"><strong>Bottega Acero</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="oscuro" aria-label="Bottega Antracita">
-            <span class="color-tile-portada" style="background-image: url('xtone/BottegaAntracita.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/bottega-antracita-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/BottegaAntracita.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/bottega-antracita-muestra.webp" data-full="xtone/bottega-antracita-muestra.webp"></span>
             <span class="color-tile-label"><strong>Bottega Antracita</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro" aria-label="Bottega Caliza">
-            <span class="color-tile-portada" style="background-image: url('xtone/BottegaCaliza.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/bottega-caliza-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/BottegaCaliza.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/bottega-caliza-muestra.webp" data-full="xtone/bottega-caliza-muestra.webp"></span>
             <span class="color-tile-label"><strong>Bottega Caliza</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro-vetas" aria-label="Calacatta Antico">
-            <span class="color-tile-portada" style="background-image: url('xtone/CalacattaAntico.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/calacatta-antico-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/CalacattaAntico.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/calacatta-antico-muestra.webp" data-full="xtone/calacatta-antico-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Antico</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro-vetas" aria-label="Calacatta Gold">
-            <span class="color-tile-portada" style="background-image: url('xtone/CalacattaGold.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/calacatta-gold-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/CalacattaGold.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/calacatta-gold-muestra.webp" data-full="xtone/calacatta-gold-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Gold</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro-vetas" aria-label="Calacatta Green">
-            <span class="color-tile-portada" style="background-image: url('xtone/CalacattaGreen.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/calacatta-green-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/CalacattaGreen.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/calacatta-green-muestra.webp" data-full="xtone/calacatta-green-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Green</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro-vetas" aria-label="Calacatta Viola">
-            <span class="color-tile-portada" style="background-image: url('xtone/CalacattaViola.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/calacatta-viola-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/CalacattaViola.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/calacatta-viola-muestra.webp" data-full="xtone/calacatta-viola-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Viola</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro" aria-label="Ewood Camel">
-            <span class="color-tile-portada" style="background-image: url('xtone/EwoodCamel.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/ewood-camel-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/EwoodCamel.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/ewood-camel-muestra.webp" data-full="xtone/ewood-camel-muestra.webp"></span>
             <span class="color-tile-label"><strong>Ewood Camel</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro-vetas" aria-label="Glem White">
-            <span class="color-tile-portada" style="background-image: url('xtone/GlemWhite.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/glem-white-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/GlemWhite.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/glem-white-muestra.webp" data-full="xtone/glem-white-muestra.webp"></span>
             <span class="color-tile-label"><strong>Glem White</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro-vetas" aria-label="Invisible White">
-            <span class="color-tile-portada" style="background-image: url('xtone/InvisibleWhite.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/invisible-white-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/InvisibleWhite.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/invisible-white-muestra.webp" data-full="xtone/invisible-white-muestra.webp"></span>
             <span class="color-tile-label"><strong>Invisible White</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="oscuro" aria-label="Liem Grey">
-            <span class="color-tile-portada" style="background-image: url('xtone/LiemGrey.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/liem-grey-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/LiemGrey.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/liem-grey-muestra.webp" data-full="xtone/liem-grey-muestra.webp"></span>
             <span class="color-tile-label"><strong>Liem Grey</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro" aria-label="Moon White">
-            <span class="color-tile-portada" style="background-image: url('xtone/MoonWhite.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/moon-white-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/MoonWhite.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/moon-white-muestra.webp" data-full="xtone/moon-white-muestra.webp"></span>
             <span class="color-tile-label"><strong>Moon White</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro" aria-label="Navona">
-            <span class="color-tile-portada" style="background-image: url('xtone/Navona.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/navona-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/Navona.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/navona-muestra.webp" data-full="xtone/navona-muestra.webp"></span>
             <span class="color-tile-label"><strong>Navona</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="oscuro-vetas" aria-label="Orobico Dark">
-            <span class="color-tile-portada" style="background-image: url('xtone/OrobicoDark.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/orobico-dark-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/OrobicoDark.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/orobico-dark-muestra.webp" data-full="xtone/orobico-dark-muestra.webp"></span>
             <span class="color-tile-label"><strong>Orobico Dark</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro-vetas" aria-label="Paonazzo Biondo">
-            <span class="color-tile-portada" style="background-image: url('xtone/PaonazzoBiondo.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/paonazzo-biondo-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/PaonazzoBiondo.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/paonazzo-biondo-muestra.webp" data-full="xtone/paonazzo-biondo-muestra.webp"></span>
             <span class="color-tile-label"><strong>Paonazzo Biondo</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="oscuro-vetas" aria-label="Port Laurent">
-            <span class="color-tile-portada" style="background-image: url('xtone/PortLaurent.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/port-laurent-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/PortLaurent.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/port-laurent-muestra.webp" data-full="xtone/port-laurent-muestra.webp"></span>
             <span class="color-tile-label"><strong>Port Laurent</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="oscuro" aria-label="Solo Black">
-            <span class="color-tile-portada" style="background-image: url('xtone/SoloBlack.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/solo-black-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/SoloBlack.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/solo-black-muestra.webp" data-full="xtone/solo-black-muestra.webp"></span>
             <span class="color-tile-label"><strong>Solo Black</strong><span>Xtone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="xtone" data-tipo="claro-vetas" aria-label="Taj Mahal">
-            <span class="color-tile-portada" style="background-image: url('xtone/TajMahal.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('xtone/taj-mahal-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="xtone/t/TajMahal.webp"></span>
+            <span class="color-tile-muestra" data-bg="xtone/t/taj-mahal-muestra.webp" data-full="xtone/taj-mahal-muestra.webp"></span>
             <span class="color-tile-label"><strong>Taj Mahal</strong><span>Xtone</span></span>
           </button>
 
@@ -1979,428 +1972,428 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
                ============================================================ -->
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Alice White">
-            <span class="color-tile-portada" style="background-image: url('suprastone/alice-white.jpg');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/alice-white-muestra.jpeg');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/alice-white.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/alice-white-muestra.webp" data-full="suprastone/alice-white-muestra.jpeg"></span>
             <span class="color-tile-label"><strong>Alice White</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="sin-clasificar" aria-label="Brazilianite">
-            <span class="color-tile-portada" style="background-image: url('suprastone/brazilianite.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/brazilianite-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/brazilianite.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/brazilianite-muestra.webp" data-full="suprastone/brazilianite-muestra.webp"></span>
             <span class="color-tile-label"><strong>Brazilianite</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="oscuro-vetas" aria-label="Bulgaria Dark Grey">
-            <span class="color-tile-portada" style="background-image: url('suprastone/bulgaria-dark-grey.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/bulgaria-dark-grey-muestra.jpg');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/bulgaria-dark-grey.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/bulgaria-dark-grey-muestra.webp" data-full="suprastone/bulgaria-dark-grey-muestra.jpg"></span>
             <span class="color-tile-label"><strong>Bulgaria Dark Grey</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Calacatta Gold">
-            <span class="color-tile-portada" style="background-image: url('suprastone/calacatta-gold.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/calacatta-gold-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/calacatta-gold.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/calacatta-gold-muestra.webp" data-full="suprastone/calacatta-gold-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Gold</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Calacatta Viola">
-            <span class="color-tile-portada" style="background-image: url('suprastone/calacatta-viola.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/calacatta-viola-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/calacatta-viola.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/calacatta-viola-muestra.webp" data-full="suprastone/calacatta-viola-muestra.webp"></span>
             <span class="color-tile-label"><strong>Calacatta Viola</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Cardenaskin">
-            <span class="color-tile-portada" style="background-image: url('suprastone/cardenaskin.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/cardenaskin-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/cardenaskin.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/cardenaskin-muestra.webp" data-full="suprastone/cardenaskin-muestra.webp"></span>
             <span class="color-tile-label"><strong>Cardenaskin</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="oscuro-vetas" aria-label="Carmen Black">
-            <span class="color-tile-portada" style="background-image: url('suprastone/carmen-black.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/carmen-black-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/carmen-black.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/carmen-black-muestra.webp" data-full="suprastone/carmen-black-muestra.webp"></span>
             <span class="color-tile-label"><strong>Carmen Black</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Classic Bulgari">
-            <span class="color-tile-portada" style="background-image: url('suprastone/classic-bulgari.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/classic-bulgari-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/classic-bulgari.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/classic-bulgari-muestra.webp" data-full="suprastone/classic-bulgari-muestra.webp"></span>
             <span class="color-tile-label"><strong>Classic Bulgari</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="oscuro-vetas" aria-label="Emperador Brown">
-            <span class="color-tile-portada" style="background-image: url('suprastone/emperador-brown.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/emperador-brown-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/emperador-brown.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/emperador-brown-muestra.webp" data-full="suprastone/emperador-brown-muestra.webp"></span>
             <span class="color-tile-label"><strong>Emperador Brown</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="oscuro" aria-label="Gamma Grey">
-            <span class="color-tile-portada" style="background-image: url('suprastone/gamma-grey.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/gamma-grey-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/gamma-grey.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/gamma-grey-muestra.webp" data-full="suprastone/gamma-grey-muestra.webp"></span>
             <span class="color-tile-label"><strong>Gamma Grey</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Golden Times">
-            <span class="color-tile-portada" style="background-image: url('suprastone/golden-times.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/golden-times-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/golden-times.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/golden-times-muestra.webp" data-full="suprastone/golden-times-muestra.webp"></span>
             <span class="color-tile-label"><strong>Golden Times</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="oscuro-vetas" aria-label="Lauren Gold">
-            <span class="color-tile-portada" style="background-image: url('suprastone/lauren-gold.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/lauren-gold-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/lauren-gold.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/lauren-gold-muestra.webp" data-full="suprastone/lauren-gold-muestra.webp"></span>
             <span class="color-tile-label"><strong>Lauren Gold</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Luxury White">
-            <span class="color-tile-portada" style="background-image: url('suprastone/luxury-white.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/luxury-white-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/luxury-white.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/luxury-white-muestra.webp" data-full="suprastone/luxury-white-muestra.webp"></span>
             <span class="color-tile-label"><strong>Luxury White</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro" aria-label="Onice">
-            <span class="color-tile-portada" style="background-image: url('suprastone/onice.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/onice-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/onice.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/onice-muestra.webp" data-full="suprastone/onice-muestra.webp"></span>
             <span class="color-tile-label"><strong>Onice</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="oscuro" aria-label="Paboni Black">
-            <span class="color-tile-portada" style="background-image: url('suprastone/paboni-black.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/paboni-black-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/paboni-black.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/paboni-black-muestra.webp" data-full="suprastone/paboni-black-muestra.webp"></span>
             <span class="color-tile-label"><strong>Paboni Black</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Panda White">
-            <span class="color-tile-portada" style="background-image: url('suprastone/panda-white.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/panda-white-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/panda-white.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/panda-white-muestra.webp" data-full="suprastone/panda-white-muestra.webp"></span>
             <span class="color-tile-label"><strong>Panda White</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="sin-clasificar" aria-label="Patagonia">
-            <span class="color-tile-portada" style="background-image: url('suprastone/patagonia.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/patagonia-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/patagonia.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/patagonia-muestra.webp" data-full="suprastone/patagonia-muestra.webp"></span>
             <span class="color-tile-label"><strong>Patagonia</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="sin-clasificar" aria-label="Peacock">
-            <span class="color-tile-portada" style="background-image: url('suprastone/peacock.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/peacock-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/peacock.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/peacock-muestra.webp" data-full="suprastone/peacock-muestra.webp"></span>
             <span class="color-tile-label"><strong>Peacock</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro" aria-label="Pure White">
-            <span class="color-tile-portada" style="background-image: url('suprastone/pure-white.jpg');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/pure-white-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/pure-white.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/pure-white-muestra.webp" data-full="suprastone/pure-white-muestra.webp"></span>
             <span class="color-tile-label"><strong>Pure White</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="oscuro-vetas" aria-label="Rolex Black Gold">
-            <span class="color-tile-portada" style="background-image: url('suprastone/rolex-black-gold.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/rolex-black-gold-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/rolex-black-gold.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/rolex-black-gold-muestra.webp" data-full="suprastone/rolex-black-gold-muestra.webp"></span>
             <span class="color-tile-label"><strong>Rolex Black Gold</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro" aria-label="Roma Beige Travertine">
-            <span class="color-tile-portada" style="background-image: url('suprastone/roma-beige-travertine.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/roma-beige-travertine-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/roma-beige-travertine.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/roma-beige-travertine-muestra.webp" data-full="suprastone/roma-beige-travertine-muestra.webp"></span>
             <span class="color-tile-label"><strong>Roma Beige Travertine</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="sin-clasificar" aria-label="Saloran Grey">
-            <span class="color-tile-portada" style="background-image: url('suprastone/saloran-grey.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/saloran-grey-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/saloran-grey.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/saloran-grey-muestra.webp" data-full="suprastone/saloran-grey-muestra.webp"></span>
             <span class="color-tile-label"><strong>Saloran Grey</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Snow Plus">
-            <span class="color-tile-portada" style="background-image: url('suprastone/snow-plus.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/snow-plus-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/snow-plus.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/snow-plus-muestra.webp" data-full="suprastone/snow-plus-muestra.webp"></span>
             <span class="color-tile-label"><strong>Snow Plus</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Statuario">
-            <span class="color-tile-portada" style="background-image: url('suprastone/statuario.jpg');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/statuario-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/statuario.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/statuario-muestra.webp" data-full="suprastone/statuario-muestra.webp"></span>
             <span class="color-tile-label"><strong>Statuario</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro" aria-label="Taj Mahal Suprastone">
-            <span class="color-tile-portada" style="background-image: url('suprastone/taj-mahal.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/taj-mahal-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/taj-mahal.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/taj-mahal-muestra.webp" data-full="suprastone/taj-mahal-muestra.webp"></span>
             <span class="color-tile-label"><strong>Taj Mahal</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="oscuro-vetas" aria-label="Tangula Black">
-            <span class="color-tile-portada" style="background-image: url('suprastone/tangula-black.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/tangula-black-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/tangula-black.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/tangula-black-muestra.webp" data-full="suprastone/tangula-black-muestra.webp"></span>
             <span class="color-tile-label"><strong>Tangula Black</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="oscuro-vetas" aria-label="Titan Black">
-            <span class="color-tile-portada" style="background-image: url('suprastone/titan-black.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/titan-black-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/titan-black.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/titan-black-muestra.webp" data-full="suprastone/titan-black-muestra.webp"></span>
             <span class="color-tile-label"><strong>Titan Black</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro" aria-label="Travertine">
-            <span class="color-tile-portada" style="background-image: url('suprastone/travertine.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/travertine-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/travertine.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/travertine-muestra.webp" data-full="suprastone/travertine-muestra.webp"></span>
             <span class="color-tile-label"><strong>Travertine</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="suprastone" data-tipo="claro-vetas" aria-label="Vitoni Beige">
-            <span class="color-tile-portada" style="background-image: url('suprastone/vitoni-beige.jpg');"></span>
-            <span class="color-tile-muestra" style="background-image: url('suprastone/vitoni-beige-muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="suprastone/t/vitoni-beige.webp"></span>
+            <span class="color-tile-muestra" data-bg="suprastone/t/vitoni-beige-muestra.webp" data-full="suprastone/vitoni-beige-muestra.webp"></span>
             <span class="color-tile-label"><strong>Vitoni Beige</strong><span>Suprastone</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Aura">
-            <span class="color-tile-portada" style="background-image: url('dekton/aura.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/aura_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/aura.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/aura_muestra.webp" data-full="dekton/aura_muestra.webp"></span>
             <span class="color-tile-label"><strong>Aura</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Aura Bookmatch">
-            <span class="color-tile-portada" style="background-image: url('dekton/Aura-Bookmatch.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/Aura-Bookmatch_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/Aura-Bookmatch.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/Aura-Bookmatch_muestra.webp" data-full="dekton/Aura-Bookmatch_muestra.webp"></span>
             <span class="color-tile-label"><strong>Aura Bookmatch</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Awake">
-            <span class="color-tile-portada" style="background-image: url('dekton/awake.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/awake_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/awake.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/awake_muestra.webp" data-full="dekton/awake_muestra.webp"></span>
             <span class="color-tile-label"><strong>Awake</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Bergen">
-            <span class="color-tile-portada" style="background-image: url('dekton/bergen.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/bergen_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/bergen.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/bergen_muestra.webp" data-full="dekton/bergen_muestra.webp"></span>
             <span class="color-tile-label"><strong>Bergen</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro" aria-label="Bromo">
-            <span class="color-tile-portada" style="background-image: url('dekton/bromo.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/bromo_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/bromo.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/bromo_muestra.webp" data-full="dekton/bromo_muestra.webp"></span>
             <span class="color-tile-label"><strong>Bromo</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Ceppo">
-            <span class="color-tile-portada" style="background-image: url('dekton/ceppo.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/ceppo_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/ceppo.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/ceppo_muestra.webp" data-full="dekton/ceppo_muestra.webp"></span>
             <span class="color-tile-label"><strong>Ceppo</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Danae">
-            <span class="color-tile-portada" style="background-image: url('dekton/danae.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/danae_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/danae.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/danae_muestra.webp" data-full="dekton/danae_muestra.webp"></span>
             <span class="color-tile-label"><strong>Danae</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Daze">
-            <span class="color-tile-portada" style="background-image: url('dekton/daze.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/daze_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/daze.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/daze_muestra.webp" data-full="dekton/daze_muestra.webp"></span>
             <span class="color-tile-label"><strong>Daze</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro" aria-label="Domoos">
-            <span class="color-tile-portada" style="background-image: url('dekton/domoos.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/domoos_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/domoos.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/domoos_muestra.webp" data-full="dekton/domoos_muestra.webp"></span>
             <span class="color-tile-label"><strong>Domoos</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Entzo">
-            <span class="color-tile-portada" style="background-image: url('dekton/entzo.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/entzo_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/entzo.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/entzo_muestra.webp" data-full="dekton/entzo_muestra.webp"></span>
             <span class="color-tile-label"><strong>Entzo</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Grigio">
-            <span class="color-tile-portada" style="background-image: url('dekton/grigio.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/grigio_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/grigio.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/grigio_muestra.webp" data-full="dekton/grigio_muestra.webp"></span>
             <span class="color-tile-label"><strong>Grigio</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Halo">
-            <span class="color-tile-portada" style="background-image: url('dekton/halo.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/halo_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/halo.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/halo_muestra.webp" data-full="dekton/halo_muestra.webp"></span>
             <span class="color-tile-label"><strong>Halo</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Kairos">
-            <span class="color-tile-portada" style="background-image: url('dekton/kairos.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/kairos_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/kairos.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/kairos_muestra.webp" data-full="dekton/kairos_muestra.webp"></span>
             <span class="color-tile-label"><strong>Kairos</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro-vetas" aria-label="Kelya">
-            <span class="color-tile-portada" style="background-image: url('dekton/kelya.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/kelya_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/kelya.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/kelya_muestra.webp" data-full="dekton/kelya_muestra.webp"></span>
             <span class="color-tile-label"><strong>Kelya</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Keon">
-            <span class="color-tile-portada" style="background-image: url('dekton/keon.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/keon_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/keon.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/keon_muestra.webp" data-full="dekton/keon_muestra.webp"></span>
             <span class="color-tile-label"><strong>Keon</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Khalo">
-            <span class="color-tile-portada" style="background-image: url('dekton/khalo.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/khalo_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/khalo.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/khalo_muestra.webp" data-full="dekton/khalo_muestra.webp"></span>
             <span class="color-tile-label"><strong>Khalo</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro-vetas" aria-label="Kira">
-            <span class="color-tile-portada" style="background-image: url('dekton/kira.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/kira_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/kira.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/kira_muestra.webp" data-full="dekton/kira_muestra.webp"></span>
             <span class="color-tile-label"><strong>Kira</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Kreta">
-            <span class="color-tile-portada" style="background-image: url('dekton/kreta.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/kreta_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/kreta.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/kreta_muestra.webp" data-full="dekton/kreta_muestra.webp"></span>
             <span class="color-tile-label"><strong>Kreta</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro-vetas" aria-label="Laurent">
-            <span class="color-tile-portada" style="background-image: url('dekton/laurent.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/laurent_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/laurent.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/laurent_muestra.webp" data-full="dekton/laurent_muestra.webp"></span>
             <span class="color-tile-label"><strong>Laurent</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Lucid">
-            <span class="color-tile-portada" style="background-image: url('dekton/lucid.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/lucid_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/lucid.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/lucid_muestra.webp" data-full="dekton/lucid_muestra.webp"></span>
             <span class="color-tile-label"><strong>Lucid</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Marina">
-            <span class="color-tile-portada" style="background-image: url('dekton/marina.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/marina_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/marina.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/marina_muestra.webp" data-full="dekton/marina_muestra.webp"></span>
             <span class="color-tile-label"><strong>Marina</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Marmorio">
-            <span class="color-tile-portada" style="background-image: url('dekton/marmorio.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/marmorio_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/marmorio.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/marmorio_muestra.webp" data-full="dekton/marmorio_muestra.webp"></span>
             <span class="color-tile-label"><strong>Marmorio</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Morpheus">
-            <span class="color-tile-portada" style="background-image: url('dekton/morpheus.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/morpheus_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/morpheus.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/morpheus_muestra.webp" data-full="dekton/morpheus_muestra.webp"></span>
             <span class="color-tile-label"><strong>Morpheus</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Nara">
-            <span class="color-tile-portada" style="background-image: url('dekton/nara.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/nara_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/nara.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/nara_muestra.webp" data-full="dekton/nara_muestra.webp"></span>
             <span class="color-tile-label"><strong>Nara</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Natura">
-            <span class="color-tile-portada" style="background-image: url('dekton/natura.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/natura_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/natura.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/natura_muestra.webp" data-full="dekton/natura_muestra.webp"></span>
             <span class="color-tile-label"><strong>Natura</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Nebbia">
-            <span class="color-tile-portada" style="background-image: url('dekton/nebbia.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/nebbia_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/nebbia.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/nebbia_muestra.webp" data-full="dekton/nebbia_muestra.webp"></span>
             <span class="color-tile-label"><strong>Nebbia</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Neural">
-            <span class="color-tile-portada" style="background-image: url('dekton/neural.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/neural_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/neural.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/neural_muestra.webp" data-full="dekton/neural_muestra.webp"></span>
             <span class="color-tile-label"><strong>Neural</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Nilium">
-            <span class="color-tile-portada" style="background-image: url('dekton/nilium.jpg');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/nilium_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/nilium.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/nilium_muestra.webp" data-full="dekton/nilium_muestra.webp"></span>
             <span class="color-tile-label"><strong>Nilium</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Olimpo">
-            <span class="color-tile-portada" style="background-image: url('dekton/olimpo.jpg');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/olimpo_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/olimpo.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/olimpo_muestra.webp" data-full="dekton/olimpo_muestra.webp"></span>
             <span class="color-tile-label"><strong>Olimpo</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro-vetas" aria-label="Opera">
-            <span class="color-tile-portada" style="background-image: url('dekton/opera.jpg');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/opera_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/opera.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/opera_muestra.webp" data-full="dekton/opera_muestra.webp"></span>
             <span class="color-tile-label"><strong>Opera</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro-vetas" aria-label="Radium">
-            <span class="color-tile-portada" style="background-image: url('dekton/radium.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/radium_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/radium.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/radium_muestra.webp" data-full="dekton/radium_muestra.webp"></span>
             <span class="color-tile-label"><strong>Radium</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Rem">
-            <span class="color-tile-portada" style="background-image: url('dekton/rem.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/rem_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/rem.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/rem_muestra.webp" data-full="dekton/rem_muestra.webp"></span>
             <span class="color-tile-label"><strong>Rem</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Reverie">
-            <span class="color-tile-portada" style="background-image: url('dekton/reverie.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/reverie_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/reverie.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/reverie_muestra.webp" data-full="dekton/reverie_muestra.webp"></span>
             <span class="color-tile-label"><strong>Reverie</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Salina">
-            <span class="color-tile-portada" style="background-image: url('dekton/salina.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/salina_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/salina.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/salina_muestra.webp" data-full="dekton/salina_muestra.webp"></span>
             <span class="color-tile-label"><strong>Salina</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro" aria-label="Sirius">
-            <span class="color-tile-portada" style="background-image: url('dekton/sirius.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/sirius_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/sirius.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/sirius_muestra.webp" data-full="dekton/sirius_muestra.webp"></span>
             <span class="color-tile-label"><strong>Sirius</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Sirocco">
-            <span class="color-tile-portada" style="background-image: url('dekton/sirocco.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/sirocco_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/sirocco.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/sirocco_muestra.webp" data-full="dekton/sirocco_muestra.webp"></span>
             <span class="color-tile-label"><strong>Sirocco</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Soke">
-            <span class="color-tile-portada" style="background-image: url('dekton/soke.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/soke_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/soke.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/soke_muestra.webp" data-full="dekton/soke_muestra.webp"></span>
             <span class="color-tile-label"><strong>Soke</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro-vetas" aria-label="Somnia">
-            <span class="color-tile-portada" style="background-image: url('dekton/somnia.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/somnia_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/somnia.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/somnia_muestra.webp" data-full="dekton/somnia_muestra.webp"></span>
             <span class="color-tile-label"><strong>Somnia</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="oscuro-vetas" aria-label="Trilium">
-            <span class="color-tile-portada" style="background-image: url('dekton/trilium.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/trilium_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/trilium.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/trilium_muestra.webp" data-full="dekton/trilium_muestra.webp"></span>
             <span class="color-tile-label"><strong>Trilium</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Vera">
-            <span class="color-tile-portada" style="background-image: url('dekton/vera.jpg');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/vera_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/vera.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/vera_muestra.webp" data-full="dekton/vera_muestra.webp"></span>
             <span class="color-tile-label"><strong>Vera</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro-vetas" aria-label="Vigil">
-            <span class="color-tile-portada" style="background-image: url('dekton/vigil.webp');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/vigil_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/vigil.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/vigil_muestra.webp" data-full="dekton/vigil_muestra.webp"></span>
             <span class="color-tile-label"><strong>Vigil</strong><span>Dekton</span></span>
           </button>
 
           <button class="color-tile" type="button" data-marca="dekton" data-tipo="claro" aria-label="Zenith">
-            <span class="color-tile-portada" style="background-image: url('dekton/zenith.avif');"></span>
-            <span class="color-tile-muestra" style="background-image: url('dekton/zenith_muestra.webp');"></span>
+            <span class="color-tile-portada" data-bg="dekton/t/zenith.webp"></span>
+            <span class="color-tile-muestra" data-bg="dekton/t/zenith_muestra.webp" data-full="dekton/zenith_muestra.webp"></span>
             <span class="color-tile-label"><strong>Zenith</strong><span>Dekton</span></span>
           </button>
 
@@ -2596,8 +2589,11 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
         const muestraEl = tile.querySelector('.color-tile-muestra');
         const labelEl = tile.querySelector('.color-tile-label');
         if (!muestraEl || !labelEl) return;
-        // Extraer URL de la muestra del background-image inline
-        const bgStyle = muestraEl.style.backgroundImage;
+        // Foto grande de la muestra: data-full (original). El tile muestra una
+        // miniatura liviana; el visor baja el original solo al hacer clic.
+        const bgStyle = muestraEl.dataset.full
+          ? `url('${muestraEl.dataset.full}')`
+          : muestraEl.style.backgroundImage;
         const nameEl = labelEl.querySelector('strong');
         const marcaEl = labelEl.querySelector('span');
         const name = nameEl ? nameEl.textContent : '';
@@ -2625,6 +2621,41 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
         tile.style.cursor = 'pointer';
         tile.addEventListener('click', () => openLightbox(tile));
       });
+
+      // ============================================================
+      // CARGA DIFERIDA DEL CATÁLOGO
+      // Cada tile trae sus imágenes en data-bg (miniatura de 560 px) y
+      // solo se pide cuando el tile está por entrar en pantalla. Los
+      // tiles de pestañas ocultas o debajo del "Ver más" no bajan nada
+      // hasta que se muestran. La foto "en uso" (muestra) se pide recién
+      // al pasar el mouse, tocar o enfocar el tile.
+      // Antes: 42 fotos (3,2 MB) al abrir la página y 183 fotos (15,9 MB)
+      // al tocar la pestaña Sinterizado.
+      // ============================================================
+      const setBg = (el) => {
+        if (!el || !el.dataset.bg) return;
+        el.style.backgroundImage = `url('${el.dataset.bg}')`;
+        el.removeAttribute('data-bg');
+      };
+      const loadMuestra = (tile) => setBg(tile.querySelector('.color-tile-muestra[data-bg]'));
+      const catalogTiles = document.querySelectorAll('.color-tile');
+      catalogTiles.forEach(tile => {
+        ['pointerenter', 'touchstart', 'focus'].forEach(ev =>
+          tile.addEventListener(ev, () => loadMuestra(tile), { once: true, passive: true }));
+      });
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(en => {
+            if (!en.isIntersecting) return;
+            setBg(en.target.querySelector('.color-tile-portada[data-bg]'));
+            io.unobserve(en.target);
+          });
+        }, { rootMargin: '400px 0px' });
+        catalogTiles.forEach(tile => io.observe(tile));
+      } else {
+        // Navegador sin IntersectionObserver: cargar todo como antes
+        catalogTiles.forEach(tile => tile.querySelectorAll('[data-bg]').forEach(setBg));
+      }
 
       // Wire up clicks en ig-tiles (Instagram grid)
       // Usa el mismo lightbox pero extrae la imagen del background-image del tile
