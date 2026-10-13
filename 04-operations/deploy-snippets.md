@@ -262,6 +262,23 @@ https://raw.githubusercontent.com/dmuziottisosa/blackstones/33f48926df1a629b7747
 | Variables del `.env` aparecen vacías en `Write-Host` pero curl funciona OK | Es display-only: el chat autolinkea valores que parecen dominio en el output del terminal cuando se copia de vuelta al chat. El valor real está OK | Ignorar el display, confiar en que curl funcione |
 | `curl: (22) The requested URL returned error: 404` en Receta 7 | El SHA o el path en la URL `$raw` están mal, o el archivo no existe en ese commit | Verificar el SHA en GitHub; `-f` ya aborta sin tocar producción |
 | `El archivo no tiene el cambio esperado. Aborto.` en Receta 7 | El guard `Select-String` no encontró el patrón → bajaste un SHA viejo, o el patrón del guard quedó del deploy anterior | Confirmar que el SHA es el del commit nuevo; actualizar el `-Pattern` al string del cambio actual |
+| `curl: (28)` timeout de FTP **siempre en el archivo ~29**, aunque el archivo esté bien | El FTP de Hostinger bloquea la IP unos minutos si se abren muchas conexiones seguidas (una por archivo) | Esperar ~15 min. Subir en lote: **una conexión por carpeta** con `curl -T "{a,b,c}" ftp://.../carpeta/` (ver § Receta 8) |
+| El guard del script falla con un texto que **tiene tilde** (`CATÁLOGO`) | PowerShell pegado desde el chat puede cambiar `Á` por `A` | Los guards de contenido van **sin tildes ni ñ** (ej.: un nombre de función) |
+| Aparece "Deploy OK" aunque hubo un error antes | Se pegó el bloque **en tramos**: PowerShell sigue con las líneas siguientes después de un `throw` | Pegar el bloque **entero de una vez** |
+
+---
+
+## ⚡ Receta 8 — Muchos archivos (decenas o cientos) sin que el FTP bloquee
+
+Validada en oct 2026 con 301 archivos (miniaturas del catálogo). Ver el bloque completo en el hilo del commit `69d4efc`; la forma es:
+
+1. **Manifiesto en el repo** (`04-operations/deploy-manifests/AAAA-MM-tema.txt`): una ruta por línea, relativa a `site/public_html`, con el `index.html` (o el archivo que "activa" el cambio) **al final**.
+2. **Bajar todo de GitHub raw a una carpeta temporal** (HTTP, no toca el FTP).
+3. **Subir una carpeta por conexión**: `Push-Location` a la carpeta local y `curl.exe --ftp-create-dirs -T "{f1,f2,...}" "ftp://HOST/BASE/carpeta/"`. Curl reutiliza la conexión para todos los archivos del glob.
+4. **Verificar por HTTP** que todos los archivos respondan 200 **antes** de subir el archivo que los activa.
+5. Recién ahí, subir el `index.html`.
+
+Por qué el orden importa: si algo falla a mitad de camino, la página publicada sigue siendo la vieja y nunca apunta a archivos que no están.
 
 ---
 
