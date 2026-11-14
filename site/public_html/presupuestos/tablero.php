@@ -223,6 +223,17 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-det{margin-top:8px;padding-top:10px;border-top:1px solid var(--border-soft);font-size:13px;display:grid;gap:7px;cursor:auto;user-select:text;-webkit-user-select:text}
 .c-det .fila{display:flex;gap:8px}
 .c-det .fila span{color:var(--text3);flex:0 0 74px}
+/* Hitos: lo ya hecho en etapas anteriores, con su fecha, a la vista en la ficha */
+.c-hitos{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:7px}
+.c-hitos span{padding:2px 8px;border-radius:999px;background:var(--gr-soft);color:var(--gr);font-size:11.5px;font-weight:600;white-space:nowrap}
+.c-hitos b{font-weight:800;font-variant-numeric:tabular-nums}
+/* Historial completo, en "Más" */
+.c-hist{font-size:12.5px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:8px 10px}
+.c-hist .t{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
+.c-hist .e{margin-top:7px;color:var(--text)}
+.c-hist .e span{color:var(--text3);font-weight:500}
+.c-hist .i{display:flex;justify-content:space-between;gap:10px;padding:2px 0 2px 10px;color:var(--text2)}
+.c-hist .i span:last-child{color:var(--text3);white-space:nowrap;font-variant-numeric:tabular-nums}
 .c-det .fila div{flex:1;min-width:0;overflow-wrap:anywhere}
 .c-det a{color:var(--gdd);font-weight:600}
 [data-theme="dark"] .c-det a{color:var(--gd)}
@@ -634,6 +645,8 @@ function htmlCard(c){
     if(c.fabrica.length&&!e.checks.some(k=>k.id==='fabrica'))datos.push('Fabricó: '+c.fabrica.join(', '));
     if(c.equipo.length&&!e.checks.some(k=>k.id==='equipo'))datos.push('Instalan: '+c.equipo.join(', '));
     if(datos.length)h+='<div class="c-promesa">'+esc(datos.join(' · '))+'</div>';
+    // Lo que ya pasó, con su fecha: se ve acá sin tener que volver la ficha atrás.
+    if(c.hitos.length)h+='<div class="c-hitos">'+c.hitos.map(x=>'<span>'+esc(x.txt)+(x.fecha?' <b>'+esc(ddmm(x.fecha))+'</b>':'')+'</span>').join('')+'</div>';
   }
   if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
   // Foto de bacha y plano: se suman en Por medir (o desde "Más") y quedan a la vista después.
@@ -662,6 +675,14 @@ function htmlCard(c){
     h+='<div class="c-det">';
     if(c.celular)h+='<div class="fila"><span>Teléfono</span><div>'+(wa?'<a href="'+esc(wa)+'" target="_blank" rel="noopener">'+esc(c.celular)+'</a>':esc(c.celular))+'</div></div>';
     if(c.direccion)h+='<div class="fila"><span>Dirección</span><div><a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(c.direccion)+'" target="_blank" rel="noopener">'+esc(c.direccion)+'</a></div></div>';
+    if(c.historia.length){
+      h+='<div class="c-hist"><div class="t">Historial</div>';
+      c.historia.forEach(et=>{
+        h+='<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' <span>· salió el '+esc(fechaCorta(et.salio))+'</span>':'')+'</div>';
+        h+=et.items.length?et.items.map(x=>'<div class="i"><span>'+esc(x.txt)+'</span><span>'+(x.fecha?esc(fechaCorta(x.fecha)):'—')+'</span></div>').join(''):'<div class="i"><span>Sin tildes cargados</span><span></span></div>';
+      });
+      h+='</div>';
+    }
     h+='<input type="text" maxlength="300" data-nota placeholder="Nota (ej: falta la bacha)" value="'+esc(c.nota)+'">';
     h+='<div class="acciones">';
     if(c.tiene_detalle)h+='<a href="/calculadora/api/render-pdf.php?nro='+encodeURIComponent(c.cliente_nro)+'&sub='+c.sub+'" target="_blank" rel="noopener">Ver presupuesto</a>';

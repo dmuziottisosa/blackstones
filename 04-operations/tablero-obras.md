@@ -57,6 +57,15 @@ Los demás:
 - **Por fabricar** es el control de la pieza antes de que salga del taller. Si la obra no lleva bacha, los dos tildes de bacha se tildan igual.
 - **Por instalar** no tiene tilde de "instalada": pasar la tarjeta a Por archivar es decir que se instaló.
 
+## Historial de la obra
+
+Al avanzar, la ficha no pierde lo que ya pasó:
+
+- **En la ficha:** una fila de hitos con su fecha ("Medido 24/10 · Cortado 16/11 · Corte aprobado 17/11 · Fabricado 20/11").
+- **En "Más" → Historial:** por cada etapa anterior, todos los tildes cumplidos con el día en que se tildaron y su dato (quién midió, cuánto fue la seña, de quién es la bacha, quién cortó), y el día en que la obra salió de esa etapa.
+
+Las fechas de los tildes se guardan desde que existe el historial. Lo tildado antes, o lo que vino del traspaso de la planilla, figura sin fecha (salvo la medición, que sí la tiene).
+
 ## Foto de bacha y plano
 
 En Por medir cada tarjeta tiene dos botones: **+ Foto bacha** y **+ Plano**. La foto de la bacha también se puede adjuntar desde el cuadro donde se marca de quién es (nuestra, del cliente, no lleva).

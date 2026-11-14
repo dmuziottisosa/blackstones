@@ -86,6 +86,9 @@ $BS_ETAPAS = [
         'boton_listo' => 'Ya cortado',
         'hecho'       => 'Ya cortadas · esperando el control del gerente',
         'pendientes'  => 'Necesitan cortarse',
+        // hitos: tildes cuya fecha conviene ver de un vistazo en las etapas
+        // siguientes, además del botón de la etapa (que siempre es un hito).
+        'hitos'       => ['qc_corte'],
         'checks' => [
             'cortador' => 'Cortador',
             'cortado'  => 'Cortado',
@@ -204,7 +207,7 @@ function bs_tablero_leer() {
 }
 
 function bs_tablero_obra_vacia() {
-    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'fabricado_at' => '', 'adjuntos' => [], 'desde' => '', 'hist' => []];
+    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'fabricado_at' => '', 'tildes_at' => [], 'adjuntos' => [], 'desde' => '', 'hist' => []];
 }
 
 /** Adjuntos de una obra, ya validados: [{id, tipo, ext}]. */
