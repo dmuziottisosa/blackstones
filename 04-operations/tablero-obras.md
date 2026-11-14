@@ -129,11 +129,24 @@ Para pasar muchas obras de una vez, `calculadora/api/tablero-importar.php`:
 
 Es un traspaso: la planilla se adapta a los campos del tablero, no al revés. Lo que no tiene campo (saldo pendiente, día de entrega, horario del turno, modelo de bacha) va a la nota de la ficha. El formato del archivo está en el encabezado del endpoint.
 
+## Calendario (la vista de halcón)
+
+`/presupuestos/calendario.php`, pestaña "Calendario". Son las mismas obras del tablero puestas en el mes: no guarda nada propio, lee y escribe por `tablero.php`. Lo que se cambia acá se ve al instante en el tablero y al revés.
+
+- **Qué muestra:** mediciones (azul), instalaciones (violeta), retiros (verde agua) y el día en que vence el plazo de cada obra (recuadro punteado; ámbar a 7 días o menos, rojo si ya venció). Las obras en Por cortar y Por fabricar no tienen fecha propia: aparecen por su vencimiento. La leyenda de arriba cuenta lo del mes y sirve para ocultar o mostrar cada tipo.
+- **Pendientes (panel de la derecha; en celular, arriba):** plazo vencido, turnos atrasados y lo que todavía no tiene día (sin fecha de medición, sin turno de instalación, sin fecha de retiro). Lo urgente va primero y se ve siempre, aunque caiga en otro mes.
+- **Agendar y reagendar:** tocar una obra abre su ficha corta (día, hora, plazo). En computadora también se arrastra a otro día. Una instalación sin hora, al soltarla, pide la hora ahí mismo.
+- **Cambiar el plazo de entrega:** desde la ficha, o arrastrando el recuadro "Vence". El plazo normal sigue siendo medición + 15/20 días corridos; el modificado queda guardado en la obra (`plazo`) y manda sobre el calculado. "Volver al plazo normal" lo borra. En el tablero la ficha dice "plazo modificado".
+- **Avisos en el turno ("!"):** atrasado, falta la hora, se pisa con otra instalación, o la instalación quedó después del plazo.
+- **Celular:** en vez de la grilla, la lista del mes día por día (solo los días que tienen algo, más hoy).
+- **"Ver la ficha en el tablero":** abre `tablero.php?q=0042-1` con esa obra ya buscada.
+
 ## Dónde vive
 
 | Qué | Dónde |
 |---|---|
 | Página | `site/public_html/presupuestos/tablero.php` |
+| Calendario | `site/public_html/presupuestos/calendario.php` |
 | Endpoint de las tarjetas | `site/public_html/calculadora/api/tablero.php` |
 | Definición de etapas, tildes y listas de personas | `site/public_html/calculadora/api/_tablero.php` (array `$BS_ETAPAS`: para cambiar un tilde o un título se toca solo ahí) |
 | Adjuntos (subir, ver, borrar) | `site/public_html/calculadora/api/tablero-adjunto.php` |

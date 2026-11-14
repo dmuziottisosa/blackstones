@@ -228,7 +228,7 @@ function bs_tablero_leer() {
 }
 
 function bs_tablero_obra_vacia() {
-    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'fabricado_at' => '', 'tildes_at' => [], 'adjuntos' => [], 'desde' => '', 'hist' => []];
+    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'plazo' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'fabricado_at' => '', 'tildes_at' => [], 'adjuntos' => [], 'desde' => '', 'hist' => []];
 }
 
 /** Adjuntos de una obra, ya validados: [{id, tipo, ext}]. */

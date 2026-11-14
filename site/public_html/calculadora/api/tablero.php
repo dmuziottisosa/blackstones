@@ -198,11 +198,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 // Plazo prometido: medición + plazo en días CORRIDOS (cuentan sábados,
                 // domingos y feriados). 'limite' es ese día exacto; 'semana', el lunes
                 // de su semana. Sin medida tomada todavía no hay estimación.
+                // El plazo se puede fijar a mano (desde el calendario): si hay uno,
+                // manda sobre el calculado. 'limite_auto' queda como referencia.
                 $semana = '';
-                $limite_dia = '';
+                $limite_auto = '';
                 if (bs_tablero_fecha_valida($obra['medido_at'])) {
-                    $limite = strtotime($obra['medido_at'] . ' +' . $plazo . ' days');
-                    $limite_dia = date('Y-m-d', $limite);
+                    $limite_auto = date('Y-m-d', strtotime($obra['medido_at'] . ' +' . $plazo . ' days'));
+                }
+                $plazo_manual = bs_tablero_fecha_valida((string)$obra['plazo']);
+                $limite_dia = $plazo_manual ? (string)$obra['plazo'] : $limite_auto;
+                if ($limite_dia !== '') {
+                    $limite = strtotime($limite_dia);
                     $semana = date('Y-m-d', strtotime('-' . (intval(date('N', $limite)) - 1) . ' days', $limite));
                 }
 
@@ -251,6 +257,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     }, bs_tablero_adjuntos($obra)),
                     'semana'      => $semana,
                     'limite'      => $limite_dia,
+                    'limite_auto' => $limite_auto,
+                    'plazo_manual' => $plazo_manual,
+                    'plazo_dias'  => $plazo,
                     'desde'       => $desde,
                 ];
             }
@@ -283,7 +292,7 @@ $accion = (string)($body['accion'] ?? '');
 
 if (intval($cliente_nro) <= 0) bs_error('cliente_nro inválido');
 if ($sub <= 0) bs_error('sub inválido');
-if (!in_array($accion, ['check', 'fecha', 'nota', 'mover', 'borrar'], true)) bs_error('accion inválida');
+if (!in_array($accion, ['check', 'fecha', 'plazo', 'nota', 'mover', 'borrar'], true)) bs_error('accion inválida');
 
 // La obra tiene que existir como cotización aprobada: el tablero no crea
 // obras, solo acompaña a las que el hub ya aprobó.
@@ -442,6 +451,16 @@ try {
             bs_error('Hora inválida');
         }
         $obra['hora'] = $hora;
+
+    } elseif ($accion === 'plazo') {
+        // Plazo de entrega fijado a mano. Vacío = volver al calculado
+        // (medición + 15/20 días corridos).
+        $fecha = trim((string)($body['fecha'] ?? ''));
+        if ($fecha !== '' && !bs_tablero_fecha_valida($fecha)) {
+            bs_lock_release($fp);
+            bs_error('Fecha inválida');
+        }
+        $obra['plazo'] = $fecha;
 
     } elseif ($accion === 'nota') {
         $nota = trim(preg_replace('/\s+/u', ' ', (string)($body['nota'] ?? '')));

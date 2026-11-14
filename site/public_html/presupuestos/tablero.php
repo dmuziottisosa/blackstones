@@ -386,6 +386,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   <a href="/presupuestos/?tab=activos">Presupuestos · Activos</a>
   <a href="/presupuestos/?tab=reporte">Presupuestos · Reporte</a>
   <a href="/presupuestos/tablero.php" class="active">Tablero</a>
+  <a href="/presupuestos/calendario.php">Calendario</a>
 </nav>
 <div class="gold-line"></div>
 
@@ -715,7 +716,7 @@ function htmlCard(c){
   if(c.semana&&c.etapa!=='archivar'){
     // Lejos del plazo alcanza con la semana; cerca o vencido, se dice el día.
     const pl=plazo(c);
-    const txt=pl==='vencida'?'Plazo vencido el '+fechaCorta(c.limite):(pl==='cerca'?'Vence '+(c.limite===HOY?'hoy':'el '+fechaCorta(c.limite)):'Entrega estimada: semana del '+ddmm(c.semana));
+    const txt=pl==='vencida'?'Plazo vencido el '+fechaCorta(c.limite):(pl==='cerca'?'Vence '+(c.limite===HOY?'hoy':'el '+fechaCorta(c.limite)):'Entrega estimada: semana del '+ddmm(c.semana))+(c.plazo_manual?' · plazo modificado':'');
     h+='<div class="c-promesa'+(pl?' '+pl:'')+'">'+esc(txt)+'</div>';
   }
   // Datos que se cargan al medir y quedan a la vista para el taller y el que instala.
@@ -1457,6 +1458,12 @@ function libre(){
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&libre())cargar();});
 setInterval(()=>{if(!document.hidden&&libre())cargar();},60000);
+
+// Llegando desde el calendario ("Ver la ficha en el tablero"): ?q=0042-1 abre con esa obra buscada.
+(function(){
+  const q=new URLSearchParams(location.search).get('q');
+  if(q){$('buscar').value=q;$('buscar').dispatchEvent(new Event('input'));}
+})();
 
 cargar();
 </script>
