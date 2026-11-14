@@ -86,6 +86,9 @@ $BS_ETAPAS = [
         'boton_listo' => 'Ya cortado',
         'hecho'       => 'Ya cortadas · esperando el control del gerente',
         'pendientes'  => 'Necesitan cortarse',
+        // urge: tildes que, si faltan, ponen la ficha en "por avanzar" aunque
+        // no esté hecha ni atrasada. Acá: todavía no se le entregó al cortador.
+        'urge'        => ['entregado_corte'],
         // hitos: tildes cuya fecha conviene ver de un vistazo en las etapas
         // siguientes, además del botón de la etapa (que siempre es un hito).
         'hitos'       => ['qc_corte'],
@@ -96,10 +99,10 @@ $BS_ETAPAS = [
             'entregado_corte' => 'Entregado al cortador',
             'cortado'  => 'Cortado',
             // Control del corte, punto por punto, antes de aprobarlo.
-            'qc_c_mesada'   => 'Medida mesada',
-            'qc_c_zocalos'  => 'Medida zócalos',
-            'qc_c_color'    => 'Color mesada',
-            'qc_c_traforos' => 'Traforos / agujeros',
+            'qc_c_mesada'   => 'Medida de mesada correcta',
+            'qc_c_zocalos'  => 'Medida de zócalos correcta',
+            'qc_c_color'    => 'Color de mesada correcto',
+            'qc_c_traforos' => 'Traforos / agujeros correctos',
             'qc_corte' => 'Corte aprobado',
         ],
     ],

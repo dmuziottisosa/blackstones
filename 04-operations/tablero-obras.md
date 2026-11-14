@@ -30,7 +30,7 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
 | **Por medir** | Medición | Medidor · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor |
-| **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Entregado al cortador · Cortado (botón) · Medida mesada · Medida zócalos · Color mesada · Traforos / agujeros · Corte aprobado |
+| **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Entregado al cortador · Cortado (botón) · Medida de mesada correcta · Medida de zócalos correcta · Color de mesada correcto · Traforos / agujeros correctos · Corte aprobado |
 | **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Fabricado (botón) · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
 | **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
@@ -89,7 +89,8 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 - **Aviso rojo "!" en Por instalar:** la obra que no tiene día u hora de instalación se marca con un signo de exclamación rojo, y el encabezado de la columna cuenta cuántas están "sin turno". Rojo con "!" es que falta definir la fecha; rojo "atrasada" es que la fecha ya pasó.
 - **Entrega estimada:** semana en que cae medición + plazo (granito 15 días, el resto 20). Aparece al tildar "Medida tomada". Es guía: el orden de fabricación lo da la cola.
 - **Cola:** dentro de cada columna van primero las que tienen turno (el más próximo arriba) y después por orden de llegada a esa columna. Cada ficha muestra su lugar (1, 2, 3…) y la 1 va enmarcada como **Próxima**. El número es el lugar real en la cola: no cambia al buscar o filtrar. Las ya medidas y ya cortadas no llevan número.
-- **Dos filtros en Por medir, Por cortar y Por fabricar:** "Necesitan medirse / cortarse / fabricarse" (falta ejecutar) y "Necesitan continuar". Este segundo es el pendiente urgente: junta lo que ya está marcado como hecho pero sigue en la columna, y lo que tenía fecha y se le pasó sin hacerse (había que medir el 14, es 15 y sigue sin medir). Cuando tiene fichas, el botón se pone rojo. Prender uno apaga el otro.
+- **Dos filtros en Por medir, Por cortar y Por fabricar:** "Necesitan medirse / cortarse / fabricarse" (falta ejecutar) y "Necesitan continuar". Este segundo es el pendiente urgente: junta lo que ya está marcado como hecho pero sigue en la columna, y lo que tenía fecha y se le pasó sin hacerse (había que medir el 14, es 15 y sigue sin medir). En Por cortar suma un tercer caso: las que todavía no se le entregaron al cortador. Cuando tiene fichas, el botón se pone rojo. Prender uno apaga el otro.
+- **Aviso "N por avanzar" arriba de la columna:** en rojo con "!", cuenta esas mismas fichas sobre toda la columna (no cambia al filtrar). Tocarlo prende el filtro "Necesitan continuar". Convive con el aviso "N sin fecha".
 - **Fabricado:** Por fabricar tiene su botón, igual que Medido y Cortado. La ficha baja a "Ya fabricadas" y espera el control.
 - **Qué mueve una ficha de lugar:** solo la fecha, la hora y los botones Medido / Cortado / Fabricado. Un tilde común nunca la reordena. Cuando una ficha cambia de lugar, la pantalla la acompaña y la marca un instante.
 - **Botón de etapa:** "Marcar medido" y "Marcar cortado" son lo más visible de la ficha; hechos, quedan en verde ("Ya medido", "Ya cortado").

@@ -198,7 +198,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-fecha.aviso{background:var(--red-soft);border:1.5px solid var(--red);color:var(--red);font-weight:700}
 .c-fecha.aviso::before,.col-aviso::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--red);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
 .card.sin-turno{box-shadow:0 0 0 1.5px var(--red)}
-.col-aviso{display:inline-flex;align-items:center;gap:5px;margin-left:auto;margin-right:8px;padding:2px 9px 2px 3px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:11.5px;font-weight:700;white-space:nowrap}
+.col-avisos{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 10px;margin-top:-4px}
+.col-aviso{display:inline-flex;align-items:center;gap:5px;border:none;font-family:inherit;cursor:pointer;padding:3px 10px 3px 3px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:11.5px;font-weight:700;white-space:nowrap}
 
 .c-promesa{font-size:12.5px;color:var(--text3);margin-top:7px}
 .c-promesa.cerca{color:var(--amb);font-weight:600}
@@ -339,6 +340,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .col{display:none;background:none;border:none;padding:0}
   .col.on{display:block}
   .col-h{display:none}
+  .col-avisos{padding:0 0 10px;margin-top:0}
   .chk{padding:10px 13px 10px 10px;font-size:13px}
   .c-hecho{padding:14px 12px;font-size:16px}
   .c-fecha{padding:9px 12px;font-size:13px}
@@ -530,6 +532,15 @@ function sinTurno(c){
 function hecho(c){
   const e=etapaDe(c.etapa);
   return !!(e.boton&&c.checks[e.boton]);
+}
+// "Por avanzar": la ficha necesita que alguien haga algo YA para no quedarse parada.
+//   - ya está hecha (medida, cortada, fabricada) y sigue en la columna
+//   - tenía fecha y se le pasó sin hacerse
+//   - le falta un paso que la etapa marca como urgente (Por cortar: entregarla al cortador)
+function urgente(c){
+  const e=etapaDe(c.etapa);
+  if(!e.boton)return false;
+  return hecho(c)||atrasada(c)||(e.urge||[]).some(k=>!c.checks[k]);
 }
 function atrasada(c){ // la fecha pasó y no se cumplió (o la tarjeta sigue en la columna)
   const e=etapaDe(c.etapa);
@@ -729,7 +740,7 @@ function dibujar(){
     // hecho y sigue acá esperando que la pasen? Son excluyentes: prender una apaga la otra.
     // "Necesitan continuar" es el pendiente urgente: lo que ya está hecho y sigue acá, y también
     // lo que tenía fecha y se le pasó sin hacerse (había que medir el 14, es 15 y sigue sin medir).
-    if(e.boton)filtros.push(['pend_'+e.id,e.pendientes,c=>!hecho(c)],['cont_'+e.id,'Necesitan continuar',c=>hecho(c)||atrasada(c)]);
+    if(e.boton)filtros.push(['pend_'+e.id,e.pendientes,c=>!hecho(c)],['cont_'+e.id,'Necesitan continuar',urgente]);
     if(esPrimera)filtros.push(['plano','Sin plano',c=>sinAdjunto(c,'plano')],['bacha','Sin foto de bacha',c=>sinAdjunto(c,'bacha')]);
     // cada columna tiene su propio filtro de fecha: Por medir "Sin fecha", Por instalar "Sin turno"
     if(e.exige_fecha||e.avisa_fecha)filtros.push(['turno_'+e.id,e.exige_fecha?'Sin turno':'Sin fecha',sinTurno]);
@@ -740,7 +751,15 @@ function dibujar(){
     const sinT=lista.filter(sinTurno).length;
     tabs+='<button type="button" class="et-'+esc(e.id)+(on?' on':'')+(llega?' llego':'')+(sinT?' con-aviso':'')+'" data-col="'+esc(e.id)+'">'+esc(corto)+'<i>'+lista.length+'</i></button>';
     let h='<section class="col et-'+esc(e.id)+(on?' on':'')+'" data-col="'+esc(e.id)+'">';
-    h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2>'+(sinT?'<span class="col-aviso">'+sinT+(e.exige_fecha?' sin turno':' sin fecha')+'</span>':'')+'<span class="col-n">'+lista.length+'</span></div>';
+    h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2><span class="col-n">'+lista.length+'</span></div>';
+    // Avisos de la columna, siempre sobre TODAS sus fichas (no cambian al filtrar). Tocarlos prende su filtro.
+    const nSinF=deEtapa.filter(sinTurno).length,nUrg=e.boton?deEtapa.filter(urgente).length:0;
+    if(nSinF||nUrg){
+      h+='<div class="col-avisos">';
+      if(nUrg)h+='<button type="button" class="col-aviso" data-falta="cont_'+esc(e.id)+'">'+nUrg+' por avanzar</button>';
+      if(nSinF)h+='<button type="button" class="col-aviso" data-falta="turno_'+esc(e.id)+'">'+nSinF+(e.exige_fecha?' sin turno':' sin fecha')+'</button>';
+      h+='</div>';
+    }
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
     if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
     if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+(f[0].indexOf('turno_')===0&&deEtapa.some(f[2])?' avi':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
