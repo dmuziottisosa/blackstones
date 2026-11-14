@@ -30,7 +30,7 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
 | **Por medir** | Medición | Medidor · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor |
-| **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Entregado al cortador · Cortado (botón) · Corte aprobado |
+| **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Entregado al cortador · Cortado (botón) · Medida mesada · Medida zócalos · Color mesada · Traforos / agujeros · Corte aprobado |
 | **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Fabricado (botón) · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
 | **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |

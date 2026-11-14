@@ -95,6 +95,11 @@ $BS_ETAPAS = [
             // (plano u orden). Este tilde deja dicho que ya lo recibió.
             'entregado_corte' => 'Entregado al cortador',
             'cortado'  => 'Cortado',
+            // Control del corte, punto por punto, antes de aprobarlo.
+            'qc_c_mesada'   => 'Medida mesada',
+            'qc_c_zocalos'  => 'Medida zócalos',
+            'qc_c_color'    => 'Color mesada',
+            'qc_c_traforos' => 'Traforos / agujeros',
             'qc_corte' => 'Corte aprobado',
         ],
     ],
