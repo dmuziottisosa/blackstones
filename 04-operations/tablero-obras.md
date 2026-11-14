@@ -97,6 +97,7 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 - **"Se pisan" (Por instalar):** dos instalaciones con el mismo día, un instalador en común y menos de 2 horas entre una y otra (`CHOQUE_MIN` en la página). Avisa, no frena: la ficha dice con quién y a qué hora ("David también instala 10:00 hs · 0041 …"), la columna muestra "N se pisan" y el filtro "Se pisan" aparece solo cuando hay alguna. Se calcula en pantalla con los datos que ya trae el tablero.
 - **Fabricado:** Por fabricar tiene su botón, igual que Medido y Cortado. La ficha baja a "Ya fabricadas" y espera el control.
 - **Qué mueve una ficha de lugar:** solo la fecha, la hora y los botones Medido / Cortado / Fabricado. Un tilde común nunca la reordena. Cuando una ficha cambia de lugar, la pantalla la acompaña y la marca un instante.
+- **Pasar de etapa es siempre a mano:** aunque estén todos los tildes, la ficha no avanza sola. El gerente la pasa con "Siguiente" o arrastrándola. Decisión del dueño (2026-11-14): tiene que haber intención en el paso. Lo que quedó completo y no se pasó se ve en rojo como "por avanzar".
 - **Botón de etapa:** "Marcar medido" y "Marcar cortado" son lo más visible de la ficha; hechos, quedan en verde ("Ya medido", "Ya cortado").
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.
 
