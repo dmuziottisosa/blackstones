@@ -134,6 +134,8 @@ $BS_ETAPAS = [
         'urge'        => ['entregado_fab'],
         'urge_txt'    => 'sin entregar',
         'en_manos'    => ['entregado_fab', 'Con el fabricador'],
+        // Igual que "Corte aprobado": su fecha queda a la vista en las etapas siguientes.
+        'hitos'       => ['qc_fab'],
         // Control de la pieza antes de que salga del taller.
         'checks' => [
             'fabrica'       => 'Fabricadores',
@@ -145,6 +147,8 @@ $BS_ETAPAS = [
             'qc_inglete'    => 'Inglete y zócalos',
             'qc_bacha'      => 'Es la bacha correcta',
             'qc_bacha_lado' => 'Bacha hacia el lado correcto',
+            // Cierre del control: el gerente da por buena la pieza.
+            'qc_fab'        => 'Fabricación aprobada',
         ],
     ],
     'instalar' => [
