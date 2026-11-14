@@ -196,9 +196,22 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 /* AVISO "!" en rojo: la obra no tiene fecha (Por medir) o turno (Por instalar). Sin fecha no hay
    plazo, y lo que no tiene plazo se queda olvidado: se marca igual de fuerte que lo atrasado. */
 .c-fecha.aviso{background:var(--red-soft);border:1.5px solid var(--red);color:var(--red);font-weight:700}
-.c-fecha.aviso::before,.col-aviso::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--red);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
+.c-fecha.aviso::before,.col-aviso::before,.aviso-g::before,.c-choque::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--red);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
 .card.sin-turno{box-shadow:0 0 0 1.5px var(--red)}
 .col-avisos{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 4px 10px;margin-top:-4px}
+/* Avisos de todo el tablero (plazo prometido al cliente). Tocarlos deja a la vista solo esas fichas. */
+.avisos-g{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.avisos-g:empty{display:none}
+.aviso-g{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--red);font-family:inherit;cursor:pointer;padding:6px 14px 6px 6px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700;white-space:nowrap}
+.aviso-g.on{background:var(--red);color:var(--card)}
+.aviso-g.on::before{background:var(--card);color:var(--red)}
+.aviso-g.cerca{border-color:var(--amb);background:var(--amb-soft);color:var(--amb)}
+.aviso-g.cerca::before{background:var(--amb)}
+.aviso-g.cerca.on{background:var(--amb);color:var(--card)}
+.aviso-g.cerca.on::before{background:var(--card);color:var(--amb)}
+/* Dos instalaciones que comparten instalador el mismo día, casi a la misma hora. */
+.c-choque{display:flex;align-items:flex-start;gap:6px;margin-top:8px;font-size:12.5px;font-weight:700;color:var(--red);overflow-wrap:anywhere}
+.card.choque{box-shadow:0 0 0 1.5px var(--red)}
 .col-aviso-det{font-size:11.5px;font-weight:600;color:var(--red)}
 .col-aviso{display:inline-flex;align-items:center;gap:5px;border:none;font-family:inherit;cursor:pointer;padding:3px 10px 3px 3px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:11.5px;font-weight:700;white-space:nowrap}
 
@@ -319,6 +332,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .h-tabs a{padding:9px 12px;font-size:.62rem;letter-spacing:.06em}
   .wrap{padding:0 12px 60px}
   .buscar{margin:10px 0 0}
+  .avisos-g{margin:10px 0 0}
   .buscar input{max-width:none;font-size:16px}
   .col-tabs{display:flex;gap:4px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
   .col-tabs button{flex:1 1 0;min-width:0;padding:7px 2px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:10.5px;letter-spacing:-.01em;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
@@ -378,6 +392,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
     <button type="button" id="buscarX" aria-label="Borrar búsqueda" hidden>×</button>
     <span id="buscarN"></span>
   </div>
+  <div class="avisos-g" id="avisosG"></div>
   <div class="col-tabs" id="colTabs"></div>
   <div class="board" id="board"><div class="aviso">Cargando…</div></div>
   <div id="aparte"></div>
@@ -554,6 +569,29 @@ function motivosAvanzar(e,cards){
   if(h)p.push(h+' '+(h===1?(t[0]||'hecha'):(t[1]||'hechas')));
   return p.join(' · ');
 }
+// Plazo prometido al cliente (semana estimada de entrega): '' | 'cerca' (vence esta semana) | 'vencida'.
+function plazo(c){
+  if(!c.semana||c.etapa==='archivar')return '';
+  const esta=lunesDe(HOY);
+  return c.semana<esta?'vencida':(c.semana===esta?'cerca':'');
+}
+let plazoF=''; // aviso general prendido: muestra solo las fichas con ese plazo
+// Instalaciones que se pisan: mismo día, mismo instalador y menos de CHOQUE_MIN minutos entre una y otra.
+const CHOQUE_MIN=120;
+let CHOQUES={}; // key → ["David también instala 10:00 hs · 0041 Carolina P.", …]
+function minutos(h){const m=/^(\d\d):(\d\d)$/.exec(h||'');return m?m[1]*60+(+m[2]):null;}
+function calcularChoques(){
+  CHOQUES={};
+  const l=CARDS.filter(c=>etapaDe(c.etapa).exige_fecha&&c.fecha&&c.fecha>=HOY&&c.hora&&c.equipo.length);
+  const anotar=(a,b,quien)=>{(CHOQUES[a.key]=CHOQUES[a.key]||[]).push(quien.join(', ')+(quien.length>1?' también instalan ':' también instala ')+b.hora+' hs · '+b.cliente_nro+' '+(nombreCorto(b.nombre)||''));};
+  for(let i=0;i<l.length;i++)for(let j=i+1;j<l.length;j++){
+    const a=l[i],b=l[j];
+    if(a.fecha!==b.fecha||Math.abs(minutos(a.hora)-minutos(b.hora))>=CHOQUE_MIN)continue;
+    const quien=a.equipo.filter(x=>b.equipo.indexOf(x)>=0);
+    if(quien.length){anotar(a,b,quien);anotar(b,a,quien);}
+  }
+}
+const sePisa=c=>!!CHOQUES[c.key];
 function atrasada(c){ // la fecha pasó y no se cumplió (o la tarjeta sigue en la columna)
   const e=etapaDe(c.etapa);
   return !!(e.fecha&&c.fecha&&c.fecha<HOY&&!(e.cierra&&c.checks[e.cierra]));
@@ -630,7 +668,7 @@ function htmlCard(c){
   const idx=cols.indexOf(e);
   const sig=idx>=0?cols[idx+1]:null;
   const pos=POS[c.key]||0;
-  let cls='card'+(atrasada(c)?' alerta':(sinTurno(c)?' sin-turno':''))+(pos===1?' primera':''),estilo='';
+  let cls='card'+(atrasada(c)?' alerta':(sinTurno(c)?' sin-turno':(sePisa(c)?' choque':'')))+(pos===1?' primera':''),estilo='';
   if(recien&&recien.key===c.key){
     const dt=Math.max(0,Date.now()-recien.t); // si se redibuja en el medio, la animación sigue donde iba
     if(dt<1000){cls+=' '+recien.tipo;estilo=' style="animation-delay:-'+dt+'ms"';}
@@ -662,10 +700,11 @@ function htmlCard(c){
     if(c.fecha&&e.pide_hora&&e.exige_fecha&&!c.hora&&!atrasada(c))cls=' aviso';
     h+='<div class="c-turno"><button type="button" class="c-fecha'+cls+'" data-act="fecha">'+esc(txt)+'</button></div>';
   }
-  // Semana estimada de entrega: guía, no alarma.
+  if(sePisa(c))h+=CHOQUES[c.key].map(t=>'<div class="c-choque">'+esc(t)+'</div>').join('');
+  // Semana estimada de entrega. Las vencidas y las de esta semana se cuentan además arriba del tablero.
   if(c.semana&&c.etapa!=='archivar'){
     const esta=lunesDe(HOY);
-    const cls=c.semana<esta?' vencida':(c.semana===esta?' cerca':'');
+    const cls=plazo(c)?' '+plazo(c):'';
     const txt=c.semana===esta?'esta semana':'semana del '+ddmm(c.semana)+(c.semana<esta?' · ya pasó':'');
     h+='<div class="c-promesa'+cls+'">Entrega estimada: '+esc(txt)+'</div>';
   }
@@ -736,9 +775,16 @@ function dibujar(){
   if(!etapaDe(colMovil))colMovil=ETAPAS[0].id;
 
   numerarColas();
-  const visibles=CARDS.filter(coincide);
+  calcularChoques();
+  // Avisos de todo el tablero: el plazo prometido. Se cuentan sobre todas las fichas, en cualquier columna.
+  const nVen=CARDS.filter(c=>plazo(c)==='vencida').length,nCer=CARDS.filter(c=>plazo(c)==='cerca').length;
+  if((plazoF==='vencida'&&!nVen)||(plazoF==='cerca'&&!nCer))plazoF='';
+  $('avisosG').innerHTML=(nVen?'<button type="button" class="aviso-g'+(plazoF==='vencida'?' on':'')+'" data-plazo="vencida" aria-pressed="'+(plazoF==='vencida')+'">'+nVen+' con plazo vencido</button>':'')
+    +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'">'+nCer+(nCer===1?' vence esta semana':' vencen esta semana')+'</button>':'');
+  const filtrando=buscado.length>0||!!plazoF;
+  const visibles=CARDS.filter(coincide).filter(c=>!plazoF||plazo(c)===plazoF);
   // Buscando en celular: si la pestaña abierta no tiene resultados, salta a la primera que sí.
-  if(buscado.length&&visibles.length&&!visibles.some(c=>c.etapa===colMovil))colMovil=ETAPAS.find(e=>visibles.some(c=>c.etapa===e.id)).id;
+  if(filtrando&&visibles.length&&!visibles.some(c=>c.etapa===colMovil))colMovil=ETAPAS.find(e=>visibles.some(c=>c.etapa===e.id)).id;
   $('buscarN').textContent=buscado.length?(visibles.length?visibles.length+(visibles.length===1?' obra':' obras'):'Sin resultados'):'';
 
   let tabs='',cols='',aparte='';
@@ -758,36 +804,40 @@ function dibujar(){
     if(esPrimera)filtros.push(['plano','Sin plano',c=>sinAdjunto(c,'plano')],['bacha','Sin foto de bacha',c=>sinAdjunto(c,'bacha')]);
     // cada columna tiene su propio filtro de fecha: Por medir "Sin fecha", Por instalar "Sin turno"
     if(e.exige_fecha||e.avisa_fecha)filtros.push(['turno_'+e.id,e.exige_fecha?'Sin turno':'Sin fecha',sinTurno]);
+    // "Se pisan": solo aparece cuando hay alguna (o si quedó prendido).
+    const nPisan=e.exige_fecha?deEtapa.filter(sePisa).length:0;
+    if(nPisan||falta['pisa_'+e.id])filtros.push(['pisa_'+e.id,'Se pisan',sePisa]);
     const lista=deEtapa.filter(c=>filtros.every(f=>!falta[f[0]]||f[2](c))).sort(ordenCola);
     const on=e.id===colMovil;
     const corto=e.aparte?'Retiro':e.titulo.replace('Por ','').replace(/^./,x=>x.toUpperCase());
     const llega=recien&&recien.tipo==='llego'&&Date.now()-recien.t<300&&lista.some(c=>c.key===recien.key);
-    const sinT=lista.filter(sinTurno).length;
+    const sinT=lista.filter(sinTurno).length+lista.filter(sePisa).length;
     tabs+='<button type="button" class="et-'+esc(e.id)+(on?' on':'')+(llega?' llego':'')+(sinT?' con-aviso':'')+'" data-col="'+esc(e.id)+'">'+esc(corto)+'<i>'+lista.length+'</i></button>';
     let h='<section class="col et-'+esc(e.id)+(on?' on':'')+'" data-col="'+esc(e.id)+'">';
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2><span class="col-n">'+lista.length+'</span></div>';
     // Avisos de la columna, siempre sobre TODAS sus fichas (no cambian al filtrar). Tocarlos prende su filtro.
     const nSinF=deEtapa.filter(sinTurno).length,nUrg=e.boton?deEtapa.filter(urgente).length:0;
-    if(nSinF||nUrg){
+    if(nSinF||nUrg||nPisan){
       h+='<div class="col-avisos">';
       if(nUrg)h+='<button type="button" class="col-aviso" data-falta="cont_'+esc(e.id)+'">'+nUrg+' por avanzar</button>';
       // El porqué, al lado: sin esto el número puede quedar igual aunque la ficha haya cambiado de caso
       // (dejó de estar "ya cortada" pero ahora está "sin entregar") y parece que no se actualizó.
       if(nUrg)h+='<span class="col-aviso-det">'+esc(motivosAvanzar(e,deEtapa))+'</span>';
       if(nSinF)h+='<button type="button" class="col-aviso" data-falta="turno_'+esc(e.id)+'">'+nSinF+(e.exige_fecha?' sin turno':' sin fecha')+'</button>';
+      if(nPisan)h+='<button type="button" class="col-aviso" data-falta="pisa_'+esc(e.id)+'">'+nPisan+' se pisan</button>';
       h+='</div>';
     }
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
     if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
-    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+(f[0].indexOf('turno_')===0&&deEtapa.some(f[2])?' avi':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
+    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+((f[0].indexOf('turno_')===0||f[0].indexOf('pisa_')===0)&&deEtapa.some(f[2])?' avi':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
     // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
     // El separador va antes del bloque final de fichas ya hechas.
     let corte=lista.length;
     while(e.boton&&corte>0&&hecho(lista[corte-1]))corte--;
     const nHechas=lista.length-corte;
     const cards=lista.map((c,i)=>(nHechas&&i===corte?'<div class="col-sep">'+esc(e.hecho)+' ('+nHechas+')</div>':'')+htmlCard(c)).join('');
-    if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(buscado.length?'Sin resultados':'Nadie retira por el local')+'</div>';
-    else h+=lista.length?cards:'<div class="col-vacia">'+(buscado.length?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
+    if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(filtrando?'Sin resultados':'Nadie retira por el local')+'</div>';
+    else h+=lista.length?cards:'<div class="col-vacia">'+(filtrando?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
     h+='</section>';
     if(e.aparte)aparte+=h;else cols+=h;
   });
@@ -869,6 +919,8 @@ $('colTabs').addEventListener('click',ev=>{
 
 wrap.addEventListener('click',ev=>{
   if(ev.target.closest('[data-cargar]')){pedirCargar();return;}
+  const bp=ev.target.closest('[data-plazo]');
+  if(bp){plazoF=plazoF===bp.dataset.plazo?'':bp.dataset.plazo;dibujar();return;}
   const bf=ev.target.closest('[data-falta]');
   if(bf){
     // Los filtros de estado de una columna (ejecutar / continuar / con el cortador) son
