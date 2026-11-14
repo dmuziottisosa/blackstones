@@ -28,13 +28,16 @@
 //                      cuadro "Retiro en local". Desde ahí, "atras" la
 //                      devuelve a la columna de la que salió.
 //
+// Fotos de bacha y planos: los sube y los sirve tablero-adjunto.php.
+// Acá solo se listan en cada tarjeta ("adjuntos").
+//
 // Storage propio: bs-data/tablero/obras.json
 //   Vive aparte de clientes/ a propósito: no cambia el JSON contract del
 //   registry y la calc/hub siguen funcionando igual si este archivo falta.
 //   Clave de cada obra: "{cliente_nro}-{sub}".
 // ============================================================
 
-require_once __DIR__ . '/_config.php';
+require_once __DIR__ . '/_tablero.php';
 require_once __DIR__ . '/_auth.php';
 
 bs_require_auth();
@@ -42,11 +45,6 @@ bs_check_csrf();
 bs_ensure_dirs();
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
-
-define('BS_TABLERO_DIR',  BS_DATA_DIR . '/tablero');
-define('BS_TABLERO_FILE', BS_TABLERO_DIR . '/obras.json');
-define('BS_TABLERO_LOCK', BS_TABLERO_DIR . '/.write.lock');
-define('BS_TABLERO_NOTA_MAX', 140);
 
 // ------------------------------------------------------------
 // Definición única de las etapas. El frontend dibuja desde acá:
@@ -138,18 +136,6 @@ foreach ($BS_ETAPAS as $id => $def) {
 // como SEMANA estimada de entrega: es guía, el orden lo da la cola.
 define('BS_PLAZO_GRANITO', 15);
 define('BS_PLAZO_RESTO',   20);
-
-function bs_tablero_leer() {
-    $data = bs_read_json(BS_TABLERO_FILE);
-    if (!is_array($data) || !isset($data['obras']) || !is_array($data['obras'])) {
-        return ['version' => '1.0', 'obras' => []];
-    }
-    return $data;
-}
-
-function bs_tablero_obra_vacia() {
-    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'desde' => '', 'hist' => []];
-}
 
 function bs_tablero_hora_valida($h) {
     return is_string($h) && preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $h) === 1;
@@ -275,7 +261,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'concepto'    => (string)($cot['concepto'] ?? ''),
                     'material'    => $material,
                     'zona'        => bs_tablero_zona($cot),
-                    'tiene_detalle' => isset($cot['presupuesto']) && is_array($cot['presupuesto']),
+                    // Las obras cargadas a mano no tienen presupuesto detallado para abrir.
+                    'tiene_detalle' => empty($cot['manual']) && isset($cot['presupuesto']) && is_array($cot['presupuesto']),
                     'etapa'       => $obra['etapa'],
                     'fecha'       => bs_tablero_fecha_valida($obra['fecha']) ? $obra['fecha'] : '',
                     'hora'        => (bs_tablero_fecha_valida($obra['fecha']) && bs_tablero_hora_valida($obra['hora'])) ? $obra['hora'] : '',
@@ -285,6 +272,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'acceso'      => bs_tablero_acceso($obra),
                     'bacha'       => in_array($obra['bacha'], ['nuestra', 'cliente', 'no'], true) ? $obra['bacha'] : '',
                     'equipo'      => array_values(array_intersect($BS_INSTALADORES, (array)$obra['equipo'])),
+                    'adjuntos'    => array_map(function ($a) {
+                        return ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf'];
+                    }, bs_tablero_adjuntos($obra)),
                     'semana'      => $semana,
                     'desde'       => $desde,
                 ];

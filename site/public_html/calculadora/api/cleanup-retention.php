@@ -20,10 +20,15 @@
 //   Para cada bs-data/zips/*.zip con mtime > 180 días:
 //     Borrar el archivo.
 //
+//   Tablero de obras: toda obra cuya cotización ya no existe (la borró
+//   esta purga u otra acción del hub) pierde su registro y sus adjuntos
+//   (fotos de bacha y planos).
+//
 // Idempotente: corridas duplicadas no rompen nada.
 // ============================================================
 
 require_once __DIR__ . '/_config.php';
+require_once __DIR__ . '/_tablero.php';
 
 // CLI-only (NO debe ser invocable via HTTP)
 if (php_sapi_name() !== 'cli') {
@@ -41,6 +46,7 @@ $stats = [
     'cotizaciones_borradas' => 0,
     'clientes_borrados'     => 0,
     'zips_borrados'         => 0,
+    'obras_tablero_borradas' => 0,
     'errores'               => [],
 ];
 
@@ -139,15 +145,56 @@ if (is_dir(BS_ZIPS_DIR)) {
 }
 
 // ============================================================
+// Cleanup del tablero de obras (registro + adjuntos)
+// ============================================================
+// Se hace después de limpiar clientes/: lo que quedó ahí es lo que existe.
+
+$vivas = [];
+if (is_dir(BS_CLIENTES_DIR)) {
+    foreach (scandir(BS_CLIENTES_DIR) as $f) {
+        if (!preg_match('/^(\d{4,})\.json$/', $f)) continue;
+        $cliente = bs_read_json(BS_CLIENTES_DIR . '/' . $f);
+        if (!$cliente) { $vivas = null; break; } // ante la duda, no se borra nada
+        foreach ($cliente['cotizaciones'] ?? [] as $cot) {
+            $vivas[(string)($cliente['cliente_nro'] ?? '') . '-' . intval($cot['sub'] ?? 0)] = true;
+        }
+    }
+}
+if (is_array($vivas) && is_dir(BS_TABLERO_DIR)) {
+    $fp = bs_lock_acquire(BS_TABLERO_LOCK);
+    if ($fp) {
+        $tablero = bs_tablero_leer();
+        $cambio = false;
+        foreach (array_keys($tablero['obras']) as $key) {
+            if (isset($vivas[$key])) continue;
+            bs_tablero_borrar_carpeta((string)$key);
+            unset($tablero['obras'][$key]);
+            $stats['obras_tablero_borradas']++;
+            $cambio = true;
+        }
+        if ($cambio) bs_write_json_atomic(BS_TABLERO_FILE, $tablero);
+        // Carpetas de adjuntos sin registro (subida cortada a la mitad, etc.)
+        if (is_dir(BS_TABLERO_ADJ_DIR)) {
+            foreach (scandir(BS_TABLERO_ADJ_DIR) as $d) {
+                if ($d === '.' || $d === '..' || isset($vivas[$d])) continue;
+                bs_tablero_borrar_carpeta($d);
+            }
+        }
+        bs_lock_release($fp);
+    }
+}
+
+// ============================================================
 // Log
 // ============================================================
 
 $log_line = sprintf(
-    "[%s] cleanup: cotizaciones=%d clientes=%d zips=%d errores=%d\n",
+    "[%s] cleanup: cotizaciones=%d clientes=%d zips=%d obras_tablero=%d errores=%d\n",
     date('c'),
     $stats['cotizaciones_borradas'],
     $stats['clientes_borrados'],
     $stats['zips_borrados'],
+    $stats['obras_tablero_borradas'],
     count($stats['errores'])
 );
 @file_put_contents(BS_REGISTRO_CRON_LOG, $log_line, FILE_APPEND | LOCK_EX);

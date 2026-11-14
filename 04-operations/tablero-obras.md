@@ -6,7 +6,9 @@ Dónde está cada obra y qué le falta para avanzar. Vive en `blackstones.com.ar
 
 ## Cómo funciona
 
-- Una obra aparece sola cuando su presupuesto se marca **Aprobado** en Presupuestos. No se cargan obras a mano.
+- Una obra aparece sola cuando su presupuesto se marca **Aprobado** en Presupuestos.
+- Para las que no pasaron por la calculadora, la columna Por medir tiene el botón **+ Cargar obra** (cliente, teléfono, dirección, material, trabajo). Crea un presupuesto aprobado en el hub, con importe en 0: administración lo completa desde Presupuestos.
+- **Buscador** arriba del tablero: por cliente, N°, material, zona, teléfono, dirección o instalador. En celular salta solo a la pestaña donde está la obra.
 - La tarjeta se identifica con el código del presupuesto: N° de cliente + versión (`0042-1`).
 - La tarjeta se **arrastra** de una columna a otra, o se avanza con el botón **Siguiente**. Las dos cosas hacen lo mismo y respetan la misma regla.
 - **Regla única:** para avanzar hay que tener todos los tildes de la columna. Hacia atrás se mueve libre.
@@ -47,9 +49,25 @@ Los demás:
 - **Por fabricar** es el control de la pieza antes de que salga del taller. Si la obra no lleva bacha, los dos tildes de bacha se tildan igual.
 - **Por instalar** no tiene tilde de "instalada": pasar la tarjeta a Por archivar es decir que se instaló.
 
+## Foto de bacha y plano
+
+En Por medir cada tarjeta tiene dos botones: **+ Foto bacha** y **+ Plano**. La foto de la bacha también se puede adjuntar desde el cuadro donde se marca de quién es (nuestra, del cliente, no lleva).
+
+- La bacha acepta fotos. El plano acepta fotos o PDF. Hasta 6 archivos de cada uno por obra, 10 MB por archivo.
+- Las fotos se achican solas antes de subir (el plano queda más grande, para que se lea la letra chica).
+- Las miniaturas quedan en la tarjeta en todas las etapas: el taller ve el plano y la bacha al controlar la pieza.
+- Tocar una miniatura la abre; desde ahí se puede ver en grande o borrar (pide confirmar).
+- Fuera de Por medir, los botones para sumar aparecen al abrir "Más".
+- Adjuntar no es obligatorio para avanzar.
+
+Los archivos se guardan en `bs-data/tablero/adjuntos/`, fuera de la web pública: solo se ven con la sesión del hub. Se borran junto con la obra cuando la purga de 180 días elimina el presupuesto.
+
+Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona carga fotos, planos y tildes; el gerente mueve las tarjetas de etapa. Hoy cualquiera con la contraseña puede hacer las dos cosas.
+
 ## Fechas y avisos
 
 - **Medición / Instalación / Retiro:** un turno por tarjeta. Si la fecha pasó y la obra sigue sin cumplirla, la tarjeta se marca atrasada en rojo. En Por instalar el turno lleva día y hora, y los dos son obligatorios para salir de la columna.
+- **Aviso ámbar "!":** en Por instalar, la obra que no tiene día u hora de instalación se marca con un signo de exclamación ámbar, y el encabezado de la columna cuenta cuántas están "sin turno". Rojo es atrasada; ámbar es que falta definir.
 - **Entrega estimada:** semana en que cae medición + plazo (granito 15 días, el resto 20). Aparece al tildar "Medida tomada". Es guía: el orden de fabricación lo da la cola.
 - **Cola:** dentro de cada columna van primero las que tienen turno (el más próximo arriba) y después por orden de llegada a esa columna.
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.
@@ -70,6 +88,9 @@ Si un presupuesto se devuelve a Activos desde el hub, la tarjeta vuelve al table
 |---|---|
 | Página | `site/public_html/presupuestos/tablero.php` |
 | Endpoint y definición de etapas/tildes | `site/public_html/calculadora/api/tablero.php` (array `$BS_ETAPAS`: para cambiar un tilde o un título se toca solo ahí) |
+| Adjuntos (subir, ver, borrar) | `site/public_html/calculadora/api/tablero-adjunto.php` |
+| Cargar obra a mano | `site/public_html/calculadora/api/tablero-cargar.php` |
+| Constantes y funciones compartidas | `site/public_html/calculadora/api/_tablero.php` |
 | Datos | `bs-data/tablero/obras.json`, aparte de `clientes/`. Si falta, el hub y la calculadora siguen igual |
 | Archivar | `state.php` con `conservar_hermanas: true` |
 

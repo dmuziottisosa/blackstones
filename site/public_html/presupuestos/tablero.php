@@ -88,6 +88,16 @@ button{font-family:inherit;color:inherit}
 .aviso{color:var(--text2);font-size:13.5px;padding:40px 16px;text-align:center;line-height:1.6}
 .aviso b{color:var(--text)}
 
+/* === BUSCADOR === */
+.buscar{display:flex;align-items:center;gap:10px;margin-bottom:14px;position:relative}
+.buscar input{width:100%;max-width:380px;padding:10px 38px 10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--text);font-family:inherit;font-size:14px;outline:none;-webkit-appearance:none;appearance:none}
+.buscar input::-webkit-search-cancel-button{display:none}
+.buscar input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
+.buscar input.activo{border-color:var(--gd);background:var(--gd-soft);font-weight:600}
+.buscar button{margin-left:-46px;width:30px;height:30px;border:none;border-radius:50%;background:none;font-size:20px;line-height:1;color:var(--text3);cursor:pointer;flex-shrink:0}
+.buscar button:hover{color:var(--text)}
+.buscar span{font-size:12.5px;color:var(--text3);font-weight:600;white-space:nowrap}
+
 /* === COLOR DE CADA ETAPA ===
    El mismo color en la columna, la tarjeta, la pestaña del celular y el
    botón que lleva a esa etapa. Se aprende una vez y se reconoce de lejos. */
@@ -166,6 +176,11 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 [data-theme="dark"] .c-fecha.vacia{color:var(--gd)}
 .c-fecha.hoy{background:var(--gd);border-color:var(--gd);color:#1A1816}
 .c-fecha.atrasada{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+/* AVISO ámbar: a la obra le falta el turno que su etapa exige (Por instalar sin fecha u hora) */
+.c-fecha.aviso{background:var(--amb-soft);border:1.5px solid var(--amb);color:var(--amb);font-weight:700}
+.c-fecha.aviso::before,.col-aviso::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--amb);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
+.card.sin-turno{box-shadow:0 0 0 1.5px var(--amb)}
+.col-aviso{display:inline-flex;align-items:center;gap:5px;margin-left:auto;margin-right:8px;padding:2px 9px 2px 3px;border-radius:999px;background:var(--amb-soft);color:var(--amb);font-size:11.5px;font-weight:700;white-space:nowrap}
 
 .c-promesa{font-size:12.5px;color:var(--text3);margin-top:7px}
 .c-promesa.cerca{color:var(--amb);font-weight:600}
@@ -222,6 +237,30 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 [data-theme="dark"] .modal .btns .ok{background:var(--gd);color:#1A1816;border-color:var(--gd)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--dk);color:var(--cr);padding:11px 16px;border-radius:var(--radius-sm);border-left:3px solid var(--red);box-shadow:var(--shadow-lg);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:1000;max-width:calc(100vw - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.ok{border-left-color:var(--gr)}
+
+/* === CARGAR OBRA A MANO (botón de la columna Por medir) === */
+.col-cargar{display:block;width:100%;margin-bottom:10px;padding:10px;border:1.5px dashed var(--et);border-radius:var(--radius);background:var(--card);color:var(--et);font-size:13.5px;font-weight:700;cursor:pointer}
+.col-cargar:hover{background:var(--et-soft)}
+.modal .campo{display:block;margin-bottom:10px;font-size:12px;font-weight:700;color:var(--text2)}
+.modal .campo input{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
+.modal .campo input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
+
+/* === ADJUNTOS: foto de bacha y plano === */
+.c-adj{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.adj{position:relative;width:60px;height:60px;border-radius:8px;border:1px solid var(--border);background:var(--card-alt);padding:0;overflow:hidden;cursor:pointer;flex-shrink:0}
+.adj:hover{border-color:var(--et)}
+.adj img{width:100%;height:100%;object-fit:cover;display:block}
+.adj span{position:absolute;left:0;right:0;bottom:0;background:rgba(20,17,13,.74);color:#fff;font-size:9.5px;font-weight:700;line-height:1.6;text-align:center;letter-spacing:.02em}
+.adj.pdf{font-size:13px;font-weight:800;color:var(--text2);padding-bottom:14px}
+.adj.mas{border:1.5px dashed var(--et);background:var(--et-soft);color:var(--et);font-size:10.5px;font-weight:700;line-height:1.25;padding:3px}
+.visor img{display:block;max-width:100%;max-height:60vh;margin:0 auto 12px;border-radius:6px;background:var(--card-alt)}
+.visor .acciones{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13.5px}
+.visor a{color:var(--gdd);font-weight:700}
+[data-theme="dark"] .visor a{color:var(--gd)}
+.visor .borrar{border:none;background:none;padding:0;font-size:13.5px;font-weight:700;color:var(--red);cursor:pointer;text-decoration:underline}
+.modal .adjuntar{display:block;width:100%;margin-top:12px;padding:11px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:none;font-size:13.5px;font-weight:700;color:var(--text2);cursor:pointer}
+.modal .adjuntar:hover{border-color:var(--gd);color:var(--text)}
 
 /* === MÓVIL: una columna a la vez, con pestañas === */
 @media(max-width:900px){
@@ -230,10 +269,14 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .h-tabs{padding:0 8px}
   .h-tabs a{padding:9px 12px;font-size:.62rem;letter-spacing:.06em}
   .wrap{padding:0 12px 60px}
+  .buscar{margin:10px 0 0}
+  .buscar input{max-width:none;font-size:16px}
   .col-tabs{display:flex;gap:5px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
   .col-tabs button{flex:1 1 0;min-width:0;padding:7px 2px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:11.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
   .col-tabs button{border-bottom:3px solid var(--et)}
   .col-tabs button.on{background:var(--et);color:var(--et-on);border-color:var(--et)}
+  .col-tabs button.con-aviso::after{content:'!';position:absolute;top:-5px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--amb);color:var(--card);font-size:11px;font-weight:800;line-height:16px;text-align:center}
+  .col-tabs button{position:relative;overflow:visible}
   .col-tabs button i{display:block;font-style:normal;font-size:13px;opacity:.75;font-variant-numeric:tabular-nums}
   .col-tabs button.puede{background:var(--et-soft);color:var(--et);border-color:var(--et);border-style:dashed dashed solid}
   .col-tabs button.puede.drop{background:var(--et);color:var(--et-on);border-style:solid;transform:scale(1.07)}
@@ -279,6 +322,11 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 <div class="gold-line"></div>
 
 <div class="wrap">
+  <div class="buscar">
+    <input type="search" id="buscar" placeholder="Buscar cliente, N° o material" autocomplete="off" enterkeyhint="search" aria-label="Buscar obra">
+    <button type="button" id="buscarX" aria-label="Borrar búsqueda" hidden>×</button>
+    <span id="buscarN"></span>
+  </div>
   <div class="col-tabs" id="colTabs"></div>
   <div class="board" id="board"><div class="aviso">Cargando…</div></div>
   <div id="aparte"></div>
@@ -315,6 +363,9 @@ function toggleTheme(){
 // ============================================================
 const API='/calculadora/api/tablero.php';
 const API_ESTADO='/calculadora/api/state.php';
+const API_ADJ='/calculadora/api/tablero-adjunto.php';
+const API_CARGAR='/calculadora/api/tablero-cargar.php';
+const ADJ={bacha:'Bacha',plano:'Plano'}; // tipos de adjunto
 
 let ETAPAS=[];      // definición de etapas (viene del server)
 let INSTALADORES=[];// quiénes instalan (viene del server)
@@ -325,6 +376,7 @@ let colMovil=localStorage.getItem('bs-tablero-col')||'medir';
 let ocupado=false;  // hay un guardado en curso
 let fechaKey='';    // tarjeta a la que se le está eligiendo fecha
 let drag=null;      // arrastre en curso
+let buscado=[];     // palabras del buscador, ya sin mayúsculas ni acentos
 let recien=null;    // última tarjeta movida (o rebotada), para animarla: {key,tipo,t}
 const slot=document.createElement('div'); // "Soltar acá", viaja de columna en columna
 
@@ -367,8 +419,8 @@ function waLink(cel){
   if(d.indexOf('54')!==0)d='549'+d.replace(/^0/,'');
   return 'https://wa.me/'+d;
 }
-function toast(msg){
-  const t=$('toast');t.textContent=msg;t.classList.add('show');
+function toast(msg,ok){ // ok=true: aviso bueno (verde); si no, algo falta o falló (rojo)
+  const t=$('toast');t.textContent=msg;t.classList.toggle('ok',!!ok);t.classList.add('show');
   clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),4500);
 }
 
@@ -407,6 +459,11 @@ function faltanDe(c,e){
   }
   return f;
 }
+// A la obra le falta el turno que su etapa exige para salir (Por instalar: día y hora).
+function sinTurno(c){
+  const e=etapaDe(c.etapa);
+  return !!(e.exige_fecha&&(!c.fecha||(e.pide_hora&&!c.hora)));
+}
 function atrasada(c){ // la fecha pasó y no se cumplió (o la tarjeta sigue en la columna)
   const e=etapaDe(c.etapa);
   return !!(e.fecha&&c.fecha&&c.fecha<HOY&&!(e.cierra&&c.checks[e.cierra]));
@@ -422,14 +479,36 @@ function faltaPara(c,destino){
   return f;
 }
 
+const urlAdj=(c,a)=>API_ADJ+'?nro='+encodeURIComponent(c.cliente_nro)+'&sub='+c.sub+'&id='+a.id;
+function htmlAdjuntos(c,puedeSumar){
+  let h='';
+  c.adjuntos.forEach(a=>{
+    h+='<button type="button" class="adj'+(a.pdf?' pdf':'')+'" data-act="ver" data-id="'+esc(a.id)+'" title="'+ADJ[a.tipo]+'">'+
+      (a.pdf?'PDF':'<img loading="lazy" alt="" src="'+esc(urlAdj(c,a))+'&t=1">')+'<span>'+ADJ[a.tipo]+'</span></button>';
+  });
+  if(puedeSumar){
+    h+='<button type="button" class="adj mas" data-act="adjuntar" data-tipo="bacha">+ Foto bacha</button>';
+    h+='<button type="button" class="adj mas" data-act="adjuntar" data-tipo="plano">+ Plano</button>';
+  }
+  return h?'<div class="c-adj">'+h+'</div>':'';
+}
+
+// Buscador: sin mayúsculas ni acentos, y tienen que estar todas las palabras.
+const plano=t=>String(t==null?'':t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function coincide(c){
+  if(!buscado.length)return true;
+  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.equipo.join(' ')].join(' '));
+  return buscado.every(w=>c._txt.indexOf(w)>=0);
+}
+
 function htmlCard(c){
   const e=etapaDe(c.etapa);
   const cols=columnas();
   const idx=cols.indexOf(e);
   const sig=idx>=0?cols[idx+1]:null;
-  let cls='card'+(atrasada(c)?' alerta':''),estilo='';
+  let cls='card'+(atrasada(c)?' alerta':(sinTurno(c)?' sin-turno':'')),estilo='';
   if(recien&&recien.key===c.key){
-    const dt=Date.now()-recien.t; // si se redibuja en el medio, la animación sigue donde iba
+    const dt=Math.max(0,Date.now()-recien.t); // si se redibuja en el medio, la animación sigue donde iba
     if(dt<1000){cls+=' '+recien.tipo;estilo=' style="animation-delay:-'+dt+'ms"';}
   }
   let h='<article class="'+cls+'"'+estilo+' data-key="'+esc(c.key)+'">';
@@ -443,11 +522,12 @@ function htmlCard(c){
   if(e.fecha){
     let cls='',txt;
     const hora=e.pide_hora?(c.hora?' · '+c.hora+' hs':' · falta la hora'):'';
-    if(!c.fecha){cls=' vacia';txt='+ Fecha '+(e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
+    if(!c.fecha&&e.exige_fecha){cls=' aviso';txt='Falta fecha '+(e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
+    else if(!c.fecha){cls=' vacia';txt='+ Fecha '+(e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
     else if(atrasada(c)){cls=' atrasada';txt=e.fecha+' '+fechaCorta(c.fecha)+(c.hora?' · '+c.hora+' hs':'')+' · atrasada';}
     else if(c.fecha===HOY){cls=' hoy';txt=e.fecha+' · hoy'+hora;}
     else txt=e.fecha+' · '+fechaCorta(c.fecha)+hora;
-    if(c.fecha&&e.pide_hora&&!c.hora&&!atrasada(c))cls=' vacia';
+    if(c.fecha&&e.pide_hora&&!c.hora&&!atrasada(c))cls=' aviso';
     h+='<button type="button" class="c-fecha'+cls+'" data-act="fecha">'+esc(txt)+'</button>';
   }
   // Semana estimada de entrega: guía, no alarma.
@@ -466,6 +546,8 @@ function htmlCard(c){
     if(datos.length)h+='<div class="c-promesa">'+esc(datos.join(' · '))+'</div>';
   }
   if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
+  // Foto de bacha y plano: se suman en Por medir (o desde "Más") y quedan a la vista después.
+  h+=htmlAdjuntos(c,c.etapa==='medir'||abierta===c.key);
 
   h+='<div class="c-checks">';
   e.checks.forEach(k=>{
@@ -506,10 +588,15 @@ function dibujar(){
   if(!ETAPAS.length)return;
   if(!etapaDe(colMovil))colMovil=ETAPAS[0].id;
 
+  const visibles=CARDS.filter(coincide);
+  // Buscando en celular: si la pestaña abierta no tiene resultados, salta a la primera que sí.
+  if(buscado.length&&visibles.length&&!visibles.some(c=>c.etapa===colMovil))colMovil=ETAPAS.find(e=>visibles.some(c=>c.etapa===e.id)).id;
+  $('buscarN').textContent=buscado.length?(visibles.length?visibles.length+(visibles.length===1?' obra':' obras'):'Sin resultados'):'';
+
   let tabs='',cols='',aparte='';
   const ultima=columnas().length-1;
   ETAPAS.forEach(e=>{
-    const lista=CARDS.filter(c=>c.etapa===e.id).sort((a,b)=>{
+    const lista=visibles.filter(c=>c.etapa===e.id).sort((a,b)=>{
       if(!!a.fecha!==!!b.fecha)return a.fecha?-1:1;          // con turno primero
       if(a.fecha!==b.fecha)return a.fecha<b.fecha?-1:1;      // el turno más próximo arriba
       if(a.hora!==b.hora)return a.hora<b.hora?-1:1;          // mismo día: el más temprano
@@ -519,13 +606,15 @@ function dibujar(){
     const on=e.id===colMovil;
     const corto=e.aparte?'Retiro':e.titulo.replace('Por ','').replace(/^./,x=>x.toUpperCase());
     const llega=recien&&recien.tipo==='llego'&&Date.now()-recien.t<300&&lista.some(c=>c.key===recien.key);
-    tabs+='<button type="button" class="et-'+esc(e.id)+(on?' on':'')+(llega?' llego':'')+'" data-col="'+esc(e.id)+'">'+esc(corto)+'<i>'+lista.length+'</i></button>';
+    const sinT=lista.filter(sinTurno).length;
+    tabs+='<button type="button" class="et-'+esc(e.id)+(on?' on':'')+(llega?' llego':'')+(sinT?' con-aviso':'')+'" data-col="'+esc(e.id)+'">'+esc(corto)+'<i>'+lista.length+'</i></button>';
     let h='<section class="col et-'+esc(e.id)+(on?' on':'')+'" data-col="'+esc(e.id)+'">';
-    h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2><span class="col-n">'+lista.length+'</span></div>';
+    h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2>'+(sinT?'<span class="col-aviso">'+sinT+' sin turno</span>':'')+'<span class="col-n">'+lista.length+'</span></div>';
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
+    if(columnas().indexOf(e)===0)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
     const cards=lista.map(htmlCard).join('');
-    if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">Nadie retira por el local</div>';
-    else h+=lista.length?cards:'<div class="col-vacia">'+(CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
+    if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(buscado.length?'Sin resultados':'Nadie retira por el local')+'</div>';
+    else h+=lista.length?cards:'<div class="col-vacia">'+(buscado.length?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
     h+='</section>';
     if(e.aparte)aparte+=h;else cols+=h;
   });
@@ -566,6 +655,22 @@ function mover(c,destino){
 }
 
 // === Eventos ===
+$('buscar').addEventListener('input',()=>{
+  const v=$('buscar').value;
+  buscado=plano(v).split(/\s+/).filter(Boolean);
+  $('buscar').classList.toggle('activo',buscado.length>0);
+  $('buscarX').hidden=!v;
+  dibujar();
+});
+$('buscarX').addEventListener('click',()=>{
+  $('buscar').value='';
+  $('buscar').dispatchEvent(new Event('input'));
+  $('buscar').focus();
+});
+$('buscar').addEventListener('keydown',ev=>{
+  if(ev.key==='Escape'&&$('buscar').value){ev.stopPropagation();$('buscarX').click();}
+  else if(ev.key==='Enter')$('buscar').blur(); // en celular, cierra el teclado
+});
 const wrap=document.querySelector('.wrap');
 
 $('colTabs').addEventListener('click',ev=>{
@@ -578,6 +683,7 @@ $('colTabs').addEventListener('click',ev=>{
 });
 
 wrap.addEventListener('click',ev=>{
+  if(ev.target.closest('[data-cargar]')){pedirCargar();return;}
   const b=ev.target.closest('[data-act]');
   if(!b)return;
   const art=b.closest('.card');
@@ -619,6 +725,10 @@ wrap.addEventListener('click',ev=>{
     fechaKey=c.key;
     dp.value=c.fecha||'';
     try{dp.showPicker();}catch(e){dp.style.pointerEvents='auto';dp.focus();dp.click();}
+  }else if(act==='adjuntar'){
+    elegirArchivo(c,b.dataset.tipo);
+  }else if(act==='ver'){
+    verAdjunto(c,b.dataset.id);
   }else if(act==='archivar'){
     const f=faltanDe(c,etapaDe(c.etapa));
     if(f.length){toast('Falta: '+f.join(', '));return;}
@@ -765,6 +875,7 @@ document.addEventListener('contextmenu',ev=>{if(drag)ev.preventDefault();});
 // ============================================================
 let modalOk=null;
 function abrirModal(titulo,cuerpo,boton,alAceptar){
+  $('mCancelar').style.display='';
   $('mTitulo').textContent=titulo;
   $('mCuerpo').innerHTML=cuerpo;
   $('mOk').textContent=boton;
@@ -842,11 +953,42 @@ function pedirTurno(c){
   (c.fecha?$('tuHora'):$('tuDia')).focus();
 }
 
+// Cargar una obra a mano: para las que no pasaron por la calculadora.
+function pedirCargar(){
+  const campo=(id,rotulo,extra)=>'<label class="campo">'+rotulo+'<input type="text" id="'+id+'" autocomplete="off" '+(extra||'')+'></label>';
+  abrirModal('Cargar obra',
+    campo('cgNombre','Cliente','maxlength="120" placeholder="Nombre y apellido"')+
+    campo('cgCel','Teléfono','maxlength="40" inputmode="tel"')+
+    campo('cgDir','Dirección','maxlength="200"')+
+    campo('cgMat','Material y color','maxlength="200" placeholder="Ej: Blanco Suggar"')+
+    campo('cgCon','Trabajo','maxlength="200" placeholder="Ej: Cocina en L"'),
+    'Cargar obra',
+    async()=>{
+      const nombre=$('cgNombre').value.trim();
+      if(!nombre){$('cgNombre').focus();toast('Falta el nombre del cliente.');return;}
+      if(ocupado)return;
+      ocupado=true;
+      const datos={nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:$('cgMat').value,concepto:$('cgCon').value};
+      cerrarModal();
+      try{
+        const j=await pedir(API_CARGAR,datos);
+        recien={key:j.cliente_nro+'-'+j.sub,tipo:'llego',t:Date.now()}; // late al aparecer
+        toast('Obra '+j.cliente_nro+'-'+j.sub+' cargada en Por medir',true);
+      }catch(e){
+        toast(e.message);
+      }
+      ocupado=false;
+      await cargar();
+    });
+  $('cgNombre').focus();
+}
+
 // Bacha: de quién es.
 function pedirBacha(c){
   let origen='';
   abrirModal('Bacha · '+c.cliente_nro+'-'+c.sub,
-    '<p>¿De quién es la bacha?</p><div class="sena"><button type="button" data-op="nuestra">Nuestra</button><button type="button" data-op="cliente">Del cliente</button><button type="button" data-op="no">No lleva</button></div>',
+    '<p>¿De quién es la bacha?</p><div class="sena"><button type="button" data-op="nuestra">Nuestra</button><button type="button" data-op="cliente">Del cliente</button><button type="button" data-op="no">No lleva</button></div>'+
+    '<button type="button" class="adjuntar" id="bachaFoto">+ Adjuntar foto de la bacha</button>',
     'Guardar',
     ()=>{
       if(!origen){toast('Elegí de quién es la bacha.');return;}
@@ -858,6 +1000,104 @@ function pedirBacha(c){
     $('mCuerpo').querySelectorAll('[data-op]').forEach(x=>x.classList.toggle('on',x===b));
     $('mOk').focus();
   }));
+  $('bachaFoto').addEventListener('click',()=>elegirArchivo(c,'bacha'));
+}
+
+// ============================================================
+// Adjuntos: foto de bacha y plano
+// ============================================================
+const fileAdj=document.createElement('input');
+fileAdj.type='file';fileAdj.style.display='none';
+document.body.appendChild(fileAdj);
+let adjPara=null,subiendo=false;
+
+function elegirArchivo(c,tipo){
+  if(subiendo)return;
+  adjPara={nro:c.cliente_nro,sub:c.sub,tipo:tipo};
+  fileAdj.accept=tipo==='bacha'?'image/*':'image/*,application/pdf'; // el plano también puede ser PDF
+  fileAdj.value='';
+  fileAdj.click();
+}
+fileAdj.addEventListener('change',()=>{
+  const f=fileAdj.files&&fileAdj.files[0];
+  if(f&&adjPara)subir(adjPara,f);
+});
+
+// Achica la foto antes de mandarla: sube rápido desde el celular y no llena el servidor.
+function achicar(file,lado,calidad){
+  return new Promise(res=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const k=Math.min(1,lado/Math.max(img.naturalWidth,img.naturalHeight));
+      const cv=document.createElement('canvas');
+      cv.width=Math.max(1,Math.round(img.naturalWidth*k));
+      cv.height=Math.max(1,Math.round(img.naturalHeight*k));
+      const g=cv.getContext('2d');
+      g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height); // por si la imagen tiene transparencia
+      g.drawImage(img,0,0,cv.width,cv.height);
+      URL.revokeObjectURL(url);
+      cv.toBlob(b=>res(b),'image/jpeg',calidad);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);res(null);};
+    img.src=url;
+  });
+}
+
+async function subir(para,file){
+  if(subiendo)return;
+  subiendo=true;
+  toast(para.tipo==='bacha'?'Subiendo la foto de la bacha…':'Subiendo el plano…',true);
+  try{
+    const fd=new FormData();
+    fd.append('cliente_nro',para.nro);fd.append('sub',para.sub);fd.append('tipo',para.tipo);
+    if(file.type==='application/pdf'){
+      if(file.size>10*1024*1024)throw new Error('El PDF es demasiado pesado (máximo 10 MB).');
+      fd.append('archivo',file,'plano.pdf');
+    }else{
+      // el plano se guarda más grande que la bacha: tiene que leerse la letra chica
+      const grande=await achicar(file,para.tipo==='plano'?2400:1600,.86);
+      if(!grande)throw new Error('No se pudo leer la imagen. Probá con otra foto.');
+      const mini=await achicar(file,260,.72);
+      fd.append('archivo',grande,'foto.jpg');
+      if(mini)fd.append('mini',mini,'mini.jpg');
+    }
+    const r=await fetch(API_ADJ,{method:'POST',body:fd,credentials:'same-origin'});
+    if(r.status===401){location.href='/calculadora/login.php';return;}
+    let j=null;
+    try{j=await r.json();}catch(e){}
+    if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo subir el archivo');
+    toast(para.tipo==='bacha'?'Foto de bacha guardada':'Plano guardado',true);
+  }catch(e){
+    toast(e.message);
+  }
+  subiendo=false;
+  await cargar();
+}
+
+function verAdjunto(c,id){
+  const a=c.adjuntos.find(x=>x.id===id);
+  if(!a)return;
+  const url=urlAdj(c,a);
+  abrirModal(ADJ[a.tipo]+' · '+c.cliente_nro+'-'+c.sub,
+    '<div class="visor">'+(a.pdf?'':'<img src="'+esc(url)+'" alt="">')+
+    '<div class="acciones"><a href="'+esc(url)+'" target="_blank" rel="noopener">'+(a.pdf?'Abrir el PDF':'Abrir en grande')+'</a>'+
+    '<button type="button" class="borrar" id="adjBorrar">Borrar</button></div></div>',
+    'Cerrar',cerrarModal);
+  $('mCancelar').style.display='none';
+  let seguro=false;
+  $('adjBorrar').addEventListener('click',async()=>{
+    if(!seguro){seguro=true;$('adjBorrar').textContent='¿Seguro? Tocá de nuevo para borrar';return;}
+    if(ocupado)return;
+    ocupado=true;
+    cerrarModal();
+    try{
+      await pedir(API_ADJ,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'borrar',id:id});
+    }catch(e){
+      toast(e.message);
+    }
+    ocupado=false;
+    await cargar();
+  });
 }
 
 // Instaladores: uno o varios. Se puede volver a abrir para cambiarlos.
@@ -905,7 +1145,7 @@ function pedirArchivar(c){
 // === Refresco: al volver a la pestaña y cada minuto, si nadie está trabajando ===
 function libre(){
   const a=document.activeElement;
-  return !ocupado&&!drag&&!$('modalBg').classList.contains('show')&&!(a&&a.matches&&a.matches('input[data-nota]'));
+  return !ocupado&&!subiendo&&!drag&&!$('modalBg').classList.contains('show')&&!(a&&a.matches&&a.matches('input[data-nota]'));
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&libre())cargar();});
 setInterval(()=>{if(!document.hidden&&libre())cargar();},60000);
