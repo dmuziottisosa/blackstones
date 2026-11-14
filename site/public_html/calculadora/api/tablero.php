@@ -26,6 +26,7 @@
 //     accion "fecha" → { "fecha": "2026-11-24" }   ("" la borra)
 //                      En Por instalar el turno lleva hora: { "fecha": "2026-11-24", "hora": "09:30" }
 //     accion "nota"  → { "nota": "Falta la bacha" } ("" la borra)
+//     accion "borrar" → borra la ficha: tildes, datos y adjuntos de la obra
 //     accion "mover" → { "a": "fabricar" }  (arrastre: etapa de destino)
 //                      { "hacia": "adelante" | "atras" | "retiro" }  (botones)
 //                      "retiro" saca la obra de las 4 columnas y la pasa al
@@ -297,6 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'material'    => $material,
                     'zona'        => bs_tablero_zona($cot),
                     // Las obras cargadas a mano no tienen presupuesto detallado para abrir.
+                    'manual'      => !empty($cot['manual']), // cargada a mano desde el tablero
                     'tiene_detalle' => empty($cot['manual']) && isset($cot['presupuesto']) && is_array($cot['presupuesto']),
                     'etapa'       => $obra['etapa'],
                     'fecha'       => bs_tablero_fecha_valida($obra['fecha']) ? $obra['fecha'] : '',
@@ -346,7 +348,7 @@ $accion = (string)($body['accion'] ?? '');
 
 if (intval($cliente_nro) <= 0) bs_error('cliente_nro inválido');
 if ($sub <= 0) bs_error('sub inválido');
-if (!in_array($accion, ['check', 'fecha', 'nota', 'mover'], true)) bs_error('accion inválida');
+if (!in_array($accion, ['check', 'fecha', 'nota', 'mover', 'borrar'], true)) bs_error('accion inválida');
 
 // La obra tiene que existir como cotización aprobada: el tablero no crea
 // obras, solo acompaña a las que el hub ya aprobó.
@@ -374,6 +376,20 @@ try {
 
     $hoy = date('Y-m-d');
     $etapa = $obra['etapa'];
+
+    // Borrar la ficha: se van sus tildes, datos, fotos y planos. Lo que
+    // pasa con el presupuesto lo decide el tablero después (delete.php si
+    // la obra se cargó a mano, state.php → "enviado" si vino de la calc).
+    if ($accion === 'borrar') {
+        bs_tablero_borrar_carpeta($key);
+        unset($tablero['obras'][$key]);
+        if (!bs_write_json_atomic(BS_TABLERO_FILE, $tablero)) {
+            bs_lock_release($fp);
+            bs_error('No se pudo guardar el tablero', 500);
+        }
+        bs_lock_release($fp);
+        bs_ok(['key' => $key, 'borrada' => true]);
+    }
 
     if ($accion === 'check') {
         $clave = (string)($body['clave'] ?? '');

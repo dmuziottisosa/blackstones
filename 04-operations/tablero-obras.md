@@ -86,6 +86,14 @@ Desde "Más" → **Retira en el local**, o arrastrando la tarjeta al cuadro de a
 
 Si un presupuesto se devuelve a Activos desde el hub, la tarjeta vuelve al tablero con sus tildes.
 
+## Borrar una ficha
+
+En "Más" → **Borrar ficha**. Siempre pide confirmación y dice qué se pierde; Enter no confirma, hay que tocar el botón rojo.
+
+- Se borran los tildes, fechas, datos y adjuntos de esa obra. No se puede deshacer.
+- Si la obra vino de un presupuesto de la calculadora, el presupuesto **no** se borra: vuelve a Enviado en Presupuestos. Si se aprueba de nuevo, la ficha reaparece en blanco.
+- Si la obra se cargó a mano con "Cargar obra", se borra completa.
+
 ## Dónde vive
 
 | Qué | Dónde |

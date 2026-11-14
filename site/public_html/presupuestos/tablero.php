@@ -243,6 +243,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .btns button{padding:9px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card)}
 .modal .btns .ok{background:var(--dk);color:var(--cr);border-color:var(--dk)}
 [data-theme="dark"] .modal .btns .ok{background:var(--gd);color:#1A1816;border-color:var(--gd)}
+.modal .btns .ok.peligro,[data-theme="dark"] .modal .btns .ok.peligro{background:var(--red);border-color:var(--red);color:#fff}
+.c-det .lnk.rojo{color:var(--red)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--dk);color:var(--cr);padding:11px 16px;border-radius:var(--radius-sm);border-left:3px solid var(--red);box-shadow:var(--shadow-lg);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:1000;max-width:calc(100vw - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.ok{border-left-color:var(--gr)}
@@ -374,6 +376,7 @@ const API='/calculadora/api/tablero.php';
 const API_ESTADO='/calculadora/api/state.php';
 const API_ADJ='/calculadora/api/tablero-adjunto.php';
 const API_CARGAR='/calculadora/api/tablero-cargar.php';
+const API_BORRAR='/calculadora/api/delete.php';
 const ADJ={bacha:'Bacha',plano:'Plano'}; // tipos de adjunto
 
 let ETAPAS=[];      // definición de etapas (viene del server)
@@ -608,6 +611,7 @@ function htmlCard(c){
       if(idx>0)h+='<button type="button" class="lnk" data-act="atras">Volver a '+esc(cols[idx-1].titulo)+'</button>';
       h+='<button type="button" class="lnk" data-act="retiro">Retira en el local</button>';
     }
+    h+='<button type="button" class="lnk rojo" data-act="borrar">Borrar ficha</button>';
     h+='</div></div>';
   }
   return h+'</article>';
@@ -766,6 +770,8 @@ wrap.addEventListener('click',ev=>{
     fechaKey=c.key;
     dp.value=c.fecha||'';
     try{dp.showPicker();}catch(e){dp.style.pointerEvents='auto';dp.focus();dp.click();}
+  }else if(act==='borrar'){
+    pedirBorrar(c);
   }else if(act==='adjuntar'){
     elegirArchivo(c,b.dataset.tipo);
   }else if(act==='ver'){
@@ -917,6 +923,7 @@ document.addEventListener('contextmenu',ev=>{if(drag)ev.preventDefault();});
 let modalOk=null;
 function abrirModal(titulo,cuerpo,boton,alAceptar){
   $('mCancelar').style.display='';
+  $('mOk').classList.remove('peligro');
   $('mTitulo').textContent=titulo;
   $('mCuerpo').innerHTML=cuerpo;
   $('mOk').textContent=boton;
@@ -928,7 +935,7 @@ $('mCancelar').addEventListener('click',cerrarModal);
 $('modalBg').addEventListener('click',ev=>{if(ev.target===$('modalBg'))cerrarModal();});
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape'){if(drag)dragSoltar(true);cerrarModal();}
-  else if(ev.key==='Enter'&&modalOk&&$('modalBg').classList.contains('show')){ev.preventDefault();$('mOk').click();}
+  else if(ev.key==='Enter'&&modalOk&&$('modalBg').classList.contains('show')&&!$('mOk').classList.contains('peligro')){ev.preventDefault();$('mOk').click();} // (borrar nunca se confirma con Enter)
 });
 $('mOk').addEventListener('click',()=>{if(modalOk)modalOk();});
 
@@ -1162,6 +1169,39 @@ function pedirPersonas(c,clave){
     if(elegidos.has(n))elegidos.delete(n);else elegidos.add(n);
     b.classList.toggle('on',elegidos.has(n));
   }));
+}
+
+// Borrar ficha: siempre pide confirmación y dice exactamente qué se pierde.
+function pedirBorrar(c){
+  const quien=c.cliente_nro+'-'+c.sub+' · '+(nombreCorto(c.nombre)||'Sin nombre');
+  const n=c.adjuntos.length;
+  abrirModal('¿Borrar la ficha '+c.cliente_nro+'-'+c.sub+'?',
+    '<p><b>'+esc(quien)+'</b></p>'+
+    '<p>Se borran sus tildes, fechas y datos'+(n?', y '+(n===1?'el archivo adjunto':'los '+n+' archivos adjuntos'):'')+'.</p>'+
+    (c.manual
+      ?'<p>Es una obra cargada a mano: se borra completa.</p>'
+      :'<p>El presupuesto no se borra: vuelve a <b>Enviado</b> en Presupuestos.</p>')+
+    '<p class="ojo">No se puede deshacer.</p>',
+    'Borrar ficha',
+    async()=>{
+      if(ocupado)return;
+      ocupado=true;
+      cerrarModal();
+      try{
+        // 1) la ficha del tablero (tildes, datos, adjuntos)  2) el presupuesto
+        await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'borrar'});
+        if(c.manual)await pedir(API_BORRAR,{cliente_nro:c.cliente_nro,sub:c.sub});
+        else await pedir(API_ESTADO,{cliente_nro:c.cliente_nro,sub:c.sub,nuevo_estado:'enviado'});
+        if(abierta===c.key)abierta='';
+        toast('Ficha '+c.cliente_nro+'-'+c.sub+' borrada',true);
+      }catch(e){
+        toast(e.message);
+      }
+      ocupado=false;
+      await cargar();
+    });
+  $('mOk').classList.add('peligro');
+  $('mCancelar').focus(); // el foco queda en Cancelar: Enter no borra por accidente
 }
 
 // Archivar: el presupuesto pasa a "Entregado" en el hub. No borra nada.
