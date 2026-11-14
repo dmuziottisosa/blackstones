@@ -89,7 +89,10 @@ button{font-family:inherit;color:inherit}
 .aviso b{color:var(--text)}
 
 /* === BUSCADOR === */
-.buscar{display:flex;align-items:center;gap:10px;margin-bottom:14px;position:relative}
+.tope{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.hoy{font-size:14px;color:var(--text2);white-space:nowrap}
+.hoy b{font-weight:700;color:var(--text)}
+.buscar{display:flex;align-items:center;gap:10px;flex:1;min-width:0;position:relative}
 .buscar input{width:100%;max-width:380px;padding:10px 38px 10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--text);font-family:inherit;font-size:14px;outline:none;-webkit-appearance:none;appearance:none}
 .buscar input::-webkit-search-cancel-button{display:none}
 .buscar input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
@@ -331,7 +334,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .h-tabs{padding:0 8px}
   .h-tabs a{padding:9px 12px;font-size:.62rem;letter-spacing:.06em}
   .wrap{padding:0 12px 60px}
-  .buscar{margin:10px 0 0}
+  .tope{flex-direction:column-reverse;align-items:stretch;gap:8px;margin:10px 0 0}
   .avisos-g{margin:10px 0 0}
   .buscar input{max-width:none;font-size:16px}
   .col-tabs{display:flex;gap:4px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
@@ -387,10 +390,13 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 <div class="gold-line"></div>
 
 <div class="wrap">
-  <div class="buscar">
-    <input type="search" id="buscar" placeholder="Buscar cliente, N° o material" autocomplete="off" enterkeyhint="search" aria-label="Buscar obra">
-    <button type="button" id="buscarX" aria-label="Borrar búsqueda" hidden>×</button>
-    <span id="buscarN"></span>
+  <div class="tope">
+    <div class="buscar">
+      <input type="search" id="buscar" placeholder="Buscar cliente, N° o material" autocomplete="off" enterkeyhint="search" aria-label="Buscar obra">
+      <button type="button" id="buscarX" aria-label="Borrar búsqueda" hidden>×</button>
+      <span id="buscarN"></span>
+    </div>
+    <div class="hoy" id="hoyTxt"></div>
   </div>
   <div class="avisos-g" id="avisosG"></div>
   <div class="col-tabs" id="colTabs"></div>
@@ -463,6 +469,9 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const DIAS=['dom','lun','mar','mié','jue','vie','sáb'];
 
 function partes(iso){const p=iso.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);}
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS_L=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+function fechaLarga(iso){const d=partes(iso);return DIAS_L[d.getDay()]+' '+d.getDate()+' de '+MESES[d.getMonth()];}
 function ddmm(iso){const p=iso.split('-');return p[2]+'/'+p[1];}
 function fechaCorta(iso){return DIAS[partes(iso).getDay()]+' '+ddmm(iso);}
 function lunesDe(iso){ // lunes de la semana de esa fecha, YYYY-MM-DD
@@ -569,12 +578,13 @@ function motivosAvanzar(e,cards){
   if(h)p.push(h+' '+(h===1?(t[0]||'hecha'):(t[1]||'hechas')));
   return p.join(' · ');
 }
-// Plazo prometido al cliente (semana estimada de entrega): '' | 'cerca' (vence esta semana) | 'vencida'.
+// Plazo prometido al cliente (semana estimada de entrega): '' | 'cerca' (vence hoy o en los próximos 6 días) | 'vencida'.
+// Son días corridos desde la medición: vence el día exacto (c.limite), no al terminar la semana.
 function plazo(c){
-  if(!c.semana||c.etapa==='archivar')return '';
-  const esta=lunesDe(HOY);
-  return c.semana<esta?'vencida':(c.semana===esta?'cerca':'');
+  if(!c.limite||c.etapa==='archivar')return '';
+  return c.limite<HOY?'vencida':(c.limite<=masDias(HOY,6)?'cerca':'');
 }
+function masDias(iso,n){const d=partes(iso);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 let plazoF=''; // aviso general prendido: muestra solo las fichas con ese plazo
 // Instalaciones que se pisan: mismo día, mismo instalador y menos de CHOQUE_MIN minutos entre una y otra.
 const CHOQUE_MIN=120;
@@ -701,12 +711,12 @@ function htmlCard(c){
     h+='<div class="c-turno"><button type="button" class="c-fecha'+cls+'" data-act="fecha">'+esc(txt)+'</button></div>';
   }
   if(sePisa(c))h+=CHOQUES[c.key].map(t=>'<div class="c-choque">'+esc(t)+'</div>').join('');
-  // Semana estimada de entrega. Las vencidas y las de esta semana se cuentan además arriba del tablero.
+  // Semana estimada de entrega. Las vencidas y las que vencen en 7 días se cuentan además arriba del tablero.
   if(c.semana&&c.etapa!=='archivar'){
-    const esta=lunesDe(HOY);
-    const cls=plazo(c)?' '+plazo(c):'';
-    const txt=c.semana===esta?'esta semana':'semana del '+ddmm(c.semana)+(c.semana<esta?' · ya pasó':'');
-    h+='<div class="c-promesa'+cls+'">Entrega estimada: '+esc(txt)+'</div>';
+    // Lejos del plazo alcanza con la semana; cerca o vencido, se dice el día.
+    const pl=plazo(c);
+    const txt=pl==='vencida'?'Plazo vencido el '+fechaCorta(c.limite):(pl==='cerca'?'Vence '+(c.limite===HOY?'hoy':'el '+fechaCorta(c.limite)):'Entrega estimada: semana del '+ddmm(c.semana));
+    h+='<div class="c-promesa'+(pl?' '+pl:'')+'">'+esc(txt)+'</div>';
   }
   // Datos que se cargan al medir y quedan a la vista para el taller y el que instala.
   if(c.etapa!=='medir'&&c.etapa!=='archivar'){
@@ -776,11 +786,12 @@ function dibujar(){
 
   numerarColas();
   calcularChoques();
+  $('hoyTxt').innerHTML=HOY?'Hoy · <b>'+esc(fechaLarga(HOY))+'</b>':'';
   // Avisos de todo el tablero: el plazo prometido. Se cuentan sobre todas las fichas, en cualquier columna.
   const nVen=CARDS.filter(c=>plazo(c)==='vencida').length,nCer=CARDS.filter(c=>plazo(c)==='cerca').length;
   if((plazoF==='vencida'&&!nVen)||(plazoF==='cerca'&&!nCer))plazoF='';
   $('avisosG').innerHTML=(nVen?'<button type="button" class="aviso-g'+(plazoF==='vencida'?' on':'')+'" data-plazo="vencida" aria-pressed="'+(plazoF==='vencida')+'">'+nVen+' con plazo vencido</button>':'')
-    +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'">'+nCer+(nCer===1?' vence esta semana':' vencen esta semana')+'</button>':'');
+    +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'">'+nCer+(nCer===1?' vence en 7 días':' vencen en 7 días')+'</button>':'');
   const filtrando=buscado.length>0||!!plazoF;
   const visibles=CARDS.filter(coincide).filter(c=>!plazoF||plazo(c)===plazoF);
   // Buscando en celular: si la pestaña abierta no tiene resultados, salta a la primera que sí.

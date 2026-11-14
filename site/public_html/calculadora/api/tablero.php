@@ -195,11 +195,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
                 list($material, $plazo) = bs_tablero_material($cot);
 
-                // Semana estimada de entrega: lunes de la semana en que cae
-                // medición + plazo. Sin medida tomada todavía no hay estimación.
+                // Plazo prometido: medición + plazo en días CORRIDOS (cuentan sábados,
+                // domingos y feriados). 'limite' es ese día exacto; 'semana', el lunes
+                // de su semana. Sin medida tomada todavía no hay estimación.
                 $semana = '';
+                $limite_dia = '';
                 if (bs_tablero_fecha_valida($obra['medido_at'])) {
                     $limite = strtotime($obra['medido_at'] . ' +' . $plazo . ' days');
+                    $limite_dia = date('Y-m-d', $limite);
                     $semana = date('Y-m-d', strtotime('-' . (intval(date('N', $limite)) - 1) . ' days', $limite));
                 }
 
@@ -247,6 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         return ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf'];
                     }, bs_tablero_adjuntos($obra)),
                     'semana'      => $semana,
+                    'limite'      => $limite_dia,
                     'desde'       => $desde,
                 ];
             }
