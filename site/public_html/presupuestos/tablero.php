@@ -414,7 +414,7 @@ let ocupado=false;  // hay un guardado en curso
 let fechaKey='';    // tarjeta a la que se le está eligiendo fecha
 let drag=null;      // arrastre en curso
 let buscado=[];     // palabras del buscador, ya sin mayúsculas ni acentos
-const falta={plano:false,bacha:false}; // filtros de Por medir: fichas a las que les falta ese adjunto
+const falta={plano:false,bacha:false,turno:false}; // filtros "le falta…": plano y foto de bacha (Por medir), turno (Por instalar)
 let recien=null;    // última tarjeta movida (o rebotada), para animarla: {key,tipo,t}
 const slot=document.createElement('div'); // "Soltar acá", viaja de columna en columna
 
@@ -689,7 +689,11 @@ function dibujar(){
   ETAPAS.forEach(e=>{
     const esPrimera=columnas().indexOf(e)===0;
     const deEtapa=visibles.filter(c=>c.etapa===e.id);
-    const lista=deEtapa.filter(c=>!esPrimera||((!falta.plano||sinAdjunto(c,'plano'))&&(!falta.bacha||sinAdjunto(c,'bacha')))).sort(ordenCola);
+    // Filtros de la columna: [clave, texto, a quién le falta]
+    const filtros=[];
+    if(esPrimera)filtros.push(['plano','Sin plano',c=>sinAdjunto(c,'plano')],['bacha','Sin foto de bacha',c=>sinAdjunto(c,'bacha')]);
+    if(e.exige_fecha)filtros.push(['turno','Sin turno',sinTurno]);
+    const lista=deEtapa.filter(c=>filtros.every(f=>!falta[f[0]]||f[2](c))).sort(ordenCola);
     const on=e.id===colMovil;
     const corto=e.aparte?'Retiro':e.titulo.replace('Por ','').replace(/^./,x=>x.toUpperCase());
     const llega=recien&&recien.tipo==='llego'&&Date.now()-recien.t<300&&lista.some(c=>c.key===recien.key);
@@ -698,10 +702,8 @@ function dibujar(){
     let h='<section class="col et-'+esc(e.id)+(on?' on':'')+'" data-col="'+esc(e.id)+'">';
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2>'+(sinT?'<span class="col-aviso">'+sinT+' sin turno</span>':'')+'<span class="col-n">'+lista.length+'</span></div>';
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
-    if(esPrimera){
-      h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
-      h+='<div class="col-filtros">'+['plano','bacha'].map(t=>'<button type="button" class="'+(falta[t]?'on':'')+'" data-falta="'+t+'" aria-pressed="'+falta[t]+'">'+(t==='plano'?'Sin plano':'Sin foto de bacha')+' <i>'+deEtapa.filter(c=>sinAdjunto(c,t)).length+'</i></button>').join('')+'</div>';
-    }
+    if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
+    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+'" data-falta="'+f[0]+'" aria-pressed="'+falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
     // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
     const nHechas=e.boton?lista.filter(hecho).length:0;
     const cards=lista.map((c,i)=>(nHechas&&i===lista.length-nHechas?'<div class="col-sep">'+esc(e.hecho)+' ('+nHechas+')</div>':'')+htmlCard(c)).join('');
