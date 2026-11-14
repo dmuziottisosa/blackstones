@@ -1073,6 +1073,14 @@ function pedirSena(c){
     $('mCuerpo').querySelectorAll('[data-mon]').forEach(x=>x.classList.toggle('on',x===b));
     $('senaMonto').focus();
   }));
+  // Mientras se escribe, el monto se va separando en miles: 1.000 · 10.000 · 100.000 · 1.000.000
+  $('senaMonto').addEventListener('input',()=>{
+    const el=$('senaMonto');
+    const t=el.value.replace(/[^\d,]/g,'');
+    const i=t.indexOf(',');
+    const entero=(i>=0?t.slice(0,i):t).replace(/^0+(?=\d)/,'').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    el.value=entero+(i>=0?','+t.slice(i+1).replace(/,/g,'').slice(0,2):''); // la coma abre los centavos
+  });
   $('senaMonto').focus();
 }
 

@@ -30,7 +30,7 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
 | **Por medir** | Medición | Medidor · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor |
-| **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Cortado (botón) · Corte aprobado |
+| **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Entregado al cortador · Cortado (botón) · Corte aprobado |
 | **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Fabricado (botón) · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
 | **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
@@ -39,7 +39,7 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 Cuatro tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
 
 - **Medidor:** quién va a medir, uno o varios de la lista (Cesar, David, Negro, Jose; se edita en `$BS_MEDIDORES`). Después queda escrito quién midió.
-- **Trajo la seña:** el monto, en $ o USD. Es el bloqueante de salida de Por medir: la trae el medidor, o el cliente señó antes.
+- **Trajo la seña:** el monto, en $ o USD. Al escribirlo se va separando en miles (1.000 · 10.000 · 100.000 · 1.000.000). Es el bloqueante de salida de Por medir: la trae el medidor, o el cliente señó antes.
 - **Tenemos la bacha:** de quién es. Nuestra (la proveemos), del cliente, o no lleva.
 - **Piso y ascensor:** cómo sube la pieza. Planta baja, por ascensor o por escalera con cuántos pisos ($30.000 por piso si no entra en el ascensor).
 - **Instaladores** (en Por instalar, no en Por medir): quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/_tablero.php`.
@@ -53,6 +53,7 @@ Los demás:
 - **Medido:** es un botón al lado de la fecha de medición, no una pastilla. Al tocarlo, donde decía la fecha pasa a decir "Ya medido · día" y la tarjeta baja al final de la columna, bajo "Ya medidas · esperando pasar a fabricar". Así arriba queda la cola real de lo que falta medir, ordenada por fecha de medición y después por orden de llegada. Desde ese día se cuenta el plazo de entrega. Tocar "Ya medido" lo deshace.
 - **Medidas y planos listos:** es un tilde aparte de Medido. Tildarlo no marca la obra como medida.
 - **Tenemos la placa:** la placa del color está en el taller o reservada con el proveedor.
+- **Entregado al cortador:** el cortador no ve el tablero; trabaja lo que se le entrega (plano u orden). Este tilde deja dicho que ya lo recibió.
 - **Por cortar:** el cortador (Jose o Johander; se edita en `$BS_CORTADORES`) avisa que terminó con el botón **Cortado**. La ficha no avanza sola: baja a "Ya cortadas · esperando el control del gerente". Pasa a Por fabricar recién cuando el gerente tilda **Corte aprobado** y la mueve.
 - **Por fabricar** es el control de la pieza antes de que salga del taller. Si la obra no lleva bacha, los dos tildes de bacha se tildan igual.
 - **Por instalar** no tiene tilde de "instalada": pasar la tarjeta a Por archivar es decir que se instaló.

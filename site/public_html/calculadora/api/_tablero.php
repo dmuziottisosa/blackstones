@@ -91,6 +91,9 @@ $BS_ETAPAS = [
         'hitos'       => ['qc_corte'],
         'checks' => [
             'cortador' => 'Cortador',
+            // El cortador no ve el tablero: solo trabaja lo que se le entrega
+            // (plano u orden). Este tilde deja dicho que ya lo recibió.
+            'entregado_corte' => 'Entregado al cortador',
             'cortado'  => 'Cortado',
             'qc_corte' => 'Corte aprobado',
         ],
