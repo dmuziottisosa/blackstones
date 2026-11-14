@@ -178,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     // Día en que se cumplió el botón de la etapa actual (medido / cortado).
                     'boton_at'    => (function ($o) use ($BS_ETAPAS) {
                         $b = (string)($BS_ETAPAS[$o['etapa']]['boton'] ?? '');
-                        $at = $b === 'medido' ? ($o['medido_at'] ?? '') : ($b === 'cortado' ? ($o['cortado_at'] ?? '') : '');
+                        $at = in_array($b, ['medido', 'cortado', 'fabricado'], true) ? ($o[$b . '_at'] ?? '') : '';
                         return bs_tablero_fecha_valida((string)$at) ? $at : '';
                     })($obra),
                     'nota'        => (string)$obra['nota'],
@@ -203,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     foreach ($BS_ETAPAS as $id => $def) {
         $checks = [];
         foreach ($def['checks'] as $cid => $label) $checks[] = ['id' => $cid, 'label' => $label];
-        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
+        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'avisa_fecha' => !empty($def['avisa_fecha']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'pendientes' => (string)($def['pendientes'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
     }
 
     bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
@@ -344,7 +344,7 @@ try {
         if ($valor) $obra['checks'][$clave] = true;
         else unset($obra['checks'][$clave]);
 
-        // "Medido" y "Cortado" son los botones de etapa: guardan el día en
+        // "Medido", "Cortado" y "Fabricado" son los botones de etapa: guardan el día en
         // que se hicieron. Son independientes de los demás tildes: tildar
         // "Medidas y planos listos" NO marca la obra como medida, ni
         // "Corte aprobado" la marca como cortada. Así un tilde común nunca
@@ -359,8 +359,8 @@ try {
                 $obra['medido_at'] = '';
             }
         }
-        if ($clave === 'cortado') {
-            $obra['cortado_at'] = $valor ? $hoy : '';
+        if ($clave === 'cortado' || $clave === 'fabricado') {
+            $obra[$clave . '_at'] = $valor ? $hoy : '';
         }
 
     } elseif ($accion === 'fecha') {

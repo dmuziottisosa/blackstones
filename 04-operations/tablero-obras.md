@@ -29,20 +29,20 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
-| **Por medir** | Medición | Medidor · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
+| **Por medir** | Medición | Medidor · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor |
 | **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Cortado (botón) · Corte aprobado |
-| **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
+| **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Fabricado (botón) · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
 | **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
 | **Retiro en local** (cuadro aparte, abajo) | Retiro | Seña cobrada · Pieza terminada · Se avisó al cliente · Retirada · Saldo cobrado |
 
-Cinco tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
+Cuatro tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
 
 - **Medidor:** quién va a medir, uno o varios de la lista (Cesar, David, Negro, Jose; se edita en `$BS_MEDIDORES`). Después queda escrito quién midió.
 - **Trajo la seña:** el monto, en $ o USD. Es el bloqueante de salida de Por medir: la trae el medidor, o el cliente señó antes.
 - **Tenemos la bacha:** de quién es. Nuestra (la proveemos), del cliente, o no lleva.
 - **Piso y ascensor:** cómo sube la pieza. Planta baja, por ascensor o por escalera con cuántos pisos ($30.000 por piso si no entra en el ascensor).
-- **Instaladores:** quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). Se elige al medir y se puede cambiar en Por instalar tocando el mismo tilde. La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/_tablero.php`.
+- **Instaladores** (en Por instalar, no en Por medir): quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/_tablero.php`.
 
 En Por fabricar hay un quinto tilde con dato: **Fabricadores**, uno o varios de su lista (Negro, Espinola, David, Jostin, Pedro, Jose; se edita en `$BS_FABRICADORES`). En Por instalar queda escrito quién la fabricó.
 
@@ -75,10 +75,13 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 ## Fechas y avisos
 
 - **Medición / Instalación / Retiro:** un turno por tarjeta. Si la fecha pasó y la obra sigue sin cumplirla, la tarjeta se marca atrasada en rojo. En Por instalar el turno lleva día y hora, y los dos son obligatorios para salir de la columna. En Por medir el turno también puede llevar hora, pero es opcional: se puede dejar vacía y no frena nada.
+- **Sin fecha de medición:** una obra en Por medir sin fecha acordada es un estado indeseable. Se marca con el mismo aviso ámbar, el encabezado cuenta cuántas hay ("3 sin fecha") y el filtro **Sin fecha** las deja a la vista. No frena el avance, y deja de avisar cuando la obra ya está medida.
 - **Aviso ámbar "!":** en Por instalar, la obra que no tiene día u hora de instalación se marca con un signo de exclamación ámbar, y el encabezado de la columna cuenta cuántas están "sin turno". Rojo es atrasada; ámbar es que falta definir.
 - **Entrega estimada:** semana en que cae medición + plazo (granito 15 días, el resto 20). Aparece al tildar "Medida tomada". Es guía: el orden de fabricación lo da la cola.
 - **Cola:** dentro de cada columna van primero las que tienen turno (el más próximo arriba) y después por orden de llegada a esa columna. Cada ficha muestra su lugar (1, 2, 3…) y la 1 va enmarcada como **Próxima**. El número es el lugar real en la cola: no cambia al buscar o filtrar. Las ya medidas y ya cortadas no llevan número.
-- **Qué mueve una ficha de lugar:** solo la fecha, la hora y los botones Medido / Cortado. Un tilde común nunca la reordena. Cuando una ficha cambia de lugar, la pantalla la acompaña y la marca un instante.
+- **Dos filtros en Por medir, Por cortar y Por fabricar:** "Necesitan medirse / cortarse / fabricarse" (falta ejecutar) y "Necesitan continuar" (ya están marcadas como hechas pero siguen en la columna, esperando que las pasen). Prender uno apaga el otro.
+- **Fabricado:** Por fabricar tiene su botón, igual que Medido y Cortado. La ficha baja a "Ya fabricadas" y espera el control.
+- **Qué mueve una ficha de lugar:** solo la fecha, la hora y los botones Medido / Cortado / Fabricado. Un tilde común nunca la reordena. Cuando una ficha cambia de lugar, la pantalla la acompaña y la marca un instante.
 - **Botón de etapa:** "Marcar medido" y "Marcar cortado" son lo más visible de la ficha; hechos, quedan en verde ("Ya medido", "Ya cortado").
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.
 

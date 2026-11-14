@@ -55,10 +55,14 @@ $BS_ETAPAS = [
         // El turno de medición puede llevar hora, pero es opcional: sin
         // exige_fecha, ni la fecha ni la hora frenan el avance.
         'pide_hora'   => true,
+        // avisa_fecha: estar en Por medir sin fecha de medición acordada es
+        // un estado indeseable. No frena nada, pero se marca y se puede filtrar.
+        'avisa_fecha' => true,
         'boton'       => 'medido',
         'boton_txt'   => 'Marcar medido',   // lo que dice el botón antes
         'boton_listo' => 'Ya medido',       // y después
         'hecho'       => 'Ya medidas · esperando pasar a cortar',
+        'pendientes'  => 'Necesitan medirse',  // texto del filtro "falta ejecutar"
         'checks' => [
             'medidor' => 'Medidor',
             'medido' => 'Medido',
@@ -67,7 +71,6 @@ $BS_ETAPAS = [
             'bacha'  => 'Tenemos la bacha',
             'placa'  => 'Tenemos la placa',
             'acceso' => 'Piso y ascensor',
-            'equipo' => 'Instaladores',
         ],
     ],
     // Sin fecha a propósito: se corta en el orden en que entró (la cola).
@@ -82,6 +85,7 @@ $BS_ETAPAS = [
         'boton_txt'   => 'Marcar cortado',
         'boton_listo' => 'Ya cortado',
         'hecho'       => 'Ya cortadas · esperando el control del gerente',
+        'pendientes'  => 'Necesitan cortarse',
         'checks' => [
             'cortador' => 'Cortador',
             'cortado'  => 'Cortado',
@@ -93,9 +97,17 @@ $BS_ETAPAS = [
         'titulo' => 'Por fabricar',
         'fecha'  => '',
         'cierra' => '',
+        // Igual que en Por cortar: "Fabricado" avisa que se terminó; la ficha
+        // baja a "Ya fabricadas" y espera el control y que la muevan.
+        'boton'       => 'fabricado',
+        'boton_txt'   => 'Marcar fabricado',
+        'boton_listo' => 'Ya fabricado',
+        'hecho'       => 'Ya fabricadas · esperando el control',
+        'pendientes'  => 'Necesitan fabricarse',
         // Control de la pieza antes de que salga del taller.
         'checks' => [
             'fabrica'       => 'Fabricadores',
+            'fabricado'     => 'Fabricado',
             'qc_medida'     => 'Medida y color correctos',
             'qc_inglete'    => 'Inglete y zócalos',
             'qc_bacha'      => 'Es la bacha correcta',
@@ -192,7 +204,7 @@ function bs_tablero_leer() {
 }
 
 function bs_tablero_obra_vacia() {
-    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'adjuntos' => [], 'desde' => '', 'hist' => []];
+    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'fabricado_at' => '', 'adjuntos' => [], 'desde' => '', 'hist' => []];
 }
 
 /** Adjuntos de una obra, ya validados: [{id, tipo, ext}]. */

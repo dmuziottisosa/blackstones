@@ -414,7 +414,7 @@ let ocupado=false;  // hay un guardado en curso
 let fechaKey='';    // tarjeta a la que se le está eligiendo fecha
 let drag=null;      // arrastre en curso
 let buscado=[];     // palabras del buscador, ya sin mayúsculas ni acentos
-const falta={plano:false,bacha:false,turno:false}; // filtros "le falta…": plano y foto de bacha (Por medir), turno (Por instalar)
+const falta={}; // filtros "le falta…" encendidos: plano, foto de bacha y fecha (Por medir), turno (Por instalar)
 let recien=null;    // última tarjeta movida (o rebotada), para animarla: {key,tipo,t}
 const slot=document.createElement('div'); // "Soltar acá", viaja de columna en columna
 
@@ -500,7 +500,9 @@ function faltanDe(c,e){
 // A la obra le falta el turno que su etapa exige para salir (Por instalar: día y hora).
 function sinTurno(c){
   const e=etapaDe(c.etapa);
-  return !!(e.exige_fecha&&(!c.fecha||(e.pide_hora&&!c.hora)));
+  if(e.exige_fecha)return !c.fecha||!!(e.pide_hora&&!c.hora); // Por instalar: falta el día o la hora
+  if(e.avisa_fecha)return !c.fecha&&!hecho(c);                // Por medir: sin fecha acordada (si ya se midió, no aplica)
+  return false;
 }
 // La obra ya cumplió el paso principal de su etapa (en Por medir: ya se midió).
 function hecho(c){
@@ -607,7 +609,7 @@ function htmlCard(c){
   if(e.fecha&&!hecho(c)){
     let cls='',txt;
     const hora=c.hora?' · '+c.hora+' hs':(e.pide_hora&&e.exige_fecha?' · falta la hora':'');
-    if(!c.fecha&&e.exige_fecha){cls=' aviso';txt='Falta fecha '+(e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
+    if(!c.fecha&&(e.exige_fecha||e.avisa_fecha)){cls=' aviso';txt='Falta fecha '+(e.exige_fecha&&e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
     else if(!c.fecha){cls=' vacia';txt='+ Fecha de '+e.fecha.toLowerCase();}
     else if(atrasada(c)){cls=' atrasada';txt=e.fecha+' '+fechaCorta(c.fecha)+(c.hora?' · '+c.hora+' hs':'')+' · atrasada';}
     else if(c.fecha===HOY){cls=' hoy';txt=e.fecha+' · hoy'+hora;}
@@ -691,8 +693,12 @@ function dibujar(){
     const deEtapa=visibles.filter(c=>c.etapa===e.id);
     // Filtros de la columna: [clave, texto, a quién le falta]
     const filtros=[];
+    // Las dos preguntas de todos los días en las etapas con botón: ¿qué falta ejecutar? ¿qué está
+    // hecho y sigue acá esperando que la pasen? Son excluyentes: prender una apaga la otra.
+    if(e.boton)filtros.push(['pend_'+e.id,e.pendientes,c=>!hecho(c)],['cont_'+e.id,'Necesitan continuar',hecho]);
     if(esPrimera)filtros.push(['plano','Sin plano',c=>sinAdjunto(c,'plano')],['bacha','Sin foto de bacha',c=>sinAdjunto(c,'bacha')]);
-    if(e.exige_fecha)filtros.push(['turno','Sin turno',sinTurno]);
+    // cada columna tiene su propio filtro de fecha: Por medir "Sin fecha", Por instalar "Sin turno"
+    if(e.exige_fecha||e.avisa_fecha)filtros.push(['turno_'+e.id,e.exige_fecha?'Sin turno':'Sin fecha',sinTurno]);
     const lista=deEtapa.filter(c=>filtros.every(f=>!falta[f[0]]||f[2](c))).sort(ordenCola);
     const on=e.id===colMovil;
     const corto=e.aparte?'Retiro':e.titulo.replace('Por ','').replace(/^./,x=>x.toUpperCase());
@@ -700,10 +706,10 @@ function dibujar(){
     const sinT=lista.filter(sinTurno).length;
     tabs+='<button type="button" class="et-'+esc(e.id)+(on?' on':'')+(llega?' llego':'')+(sinT?' con-aviso':'')+'" data-col="'+esc(e.id)+'">'+esc(corto)+'<i>'+lista.length+'</i></button>';
     let h='<section class="col et-'+esc(e.id)+(on?' on':'')+'" data-col="'+esc(e.id)+'">';
-    h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2>'+(sinT?'<span class="col-aviso">'+sinT+' sin turno</span>':'')+'<span class="col-n">'+lista.length+'</span></div>';
+    h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2>'+(sinT?'<span class="col-aviso">'+sinT+(e.exige_fecha?' sin turno':' sin fecha')+'</span>':'')+'<span class="col-n">'+lista.length+'</span></div>';
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
     if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
-    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+'" data-falta="'+f[0]+'" aria-pressed="'+falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
+    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
     // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
     // El separador va antes del bloque final de fichas ya hechas.
     let corte=lista.length;
@@ -794,7 +800,13 @@ $('colTabs').addEventListener('click',ev=>{
 wrap.addEventListener('click',ev=>{
   if(ev.target.closest('[data-cargar]')){pedirCargar();return;}
   const bf=ev.target.closest('[data-falta]');
-  if(bf){falta[bf.dataset.falta]=!falta[bf.dataset.falta];dibujar();return;}
+  if(bf){
+    const k=bf.dataset.falta,par=k.indexOf('pend_')===0?k.replace('pend_','cont_'):(k.indexOf('cont_')===0?k.replace('cont_','pend_'):'');
+    falta[k]=!falta[k];
+    if(falta[k]&&par)falta[par]=false;
+    dibujar();
+    return;
+  }
   const b=ev.target.closest('[data-act]');
   if(!b)return;
   const art=b.closest('.card');
@@ -820,7 +832,7 @@ wrap.addEventListener('click',ev=>{
       if(clave==='bacha')c.bacha='';
       // Medido / Cortado: los botones de etapa guardan el día. No dependen de ningún otro tilde.
       if(clave==='medido'){c.medido_at=valor?((c.fecha&&c.fecha<=HOY)?c.fecha:HOY):'';c.boton_at=c.medido_at;}
-      if(clave==='cortado')c.boton_at=valor?HOY:'';
+      if(clave==='cortado'||clave==='fabricado')c.boton_at=valor?HOY:'';
     });
   }else if(act==='avanzar'){
     mover(c,cols[idx+1].id);
