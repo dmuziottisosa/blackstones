@@ -24,7 +24,9 @@
 //   Estos retrocesos solo re-etiquetan; no borran ni regeneran nada
 //   (salvo entregado → aprobado, que limpia entregado_at y el ZIP).
 //   - Al pasar a "entregado":
-//     * Borrar todas las hermanas no-entregado del mismo cliente.
+//     * Borrar todas las hermanas no-entregado del mismo cliente
+//       (salvo que el body traiga "conservar_hermanas": true — lo usa el
+//       tablero de obras, que archiva sin borrar nada).
 //     * Marcar `entregado_at` en la cotización.
 //     * Generar ZIP automático (delegado a _zip-gen.php).
 //
@@ -50,6 +52,9 @@ if (!is_array($body)) bs_error('Body JSON inválido');
 $cliente_nro = str_pad((string)intval($body['cliente_nro'] ?? ''), 4, '0', STR_PAD_LEFT);
 $sub = intval($body['sub'] ?? 0);
 $nuevo_estado = $body['nuevo_estado'] ?? '';
+// Opt-in (lo manda el tablero de obras al archivar): pasa a entregado SIN
+// borrar las otras cotizaciones del cliente. Sin el flag, todo sigue igual.
+$conservar_hermanas = !empty($body['conservar_hermanas']);
 
 if (intval($cliente_nro) <= 0) bs_error('cliente_nro inválido');
 if ($sub <= 0) bs_error('sub inválido');
@@ -143,7 +148,7 @@ try {
                     $zip_generated_path = $zip_rel;
                 }
                 $kept[] = $cot; // mantener la entregada
-            } elseif ($cot['estado'] === 'entregado') {
+            } elseif ($cot['estado'] === 'entregado' || $conservar_hermanas) {
                 $kept[] = $cot; // mantener otras entregadas (no se pisan)
             } else {
                 $siblings_eliminadas++;
