@@ -52,8 +52,10 @@ $BS_ETAPAS = [
         // una pastilla. Las obras que ya lo tienen bajan al final de la
         // columna, bajo el título "hecho": arriba queda la cola real de lo
         // que falta medir.
-        'boton'  => 'medido',
-        'hecho'  => 'Ya medidas · esperando pasar a fabricar',
+        'boton'       => 'medido',
+        'boton_txt'   => 'Marcar medido',   // lo que dice el botón antes
+        'boton_listo' => 'Ya medido',       // y después
+        'hecho'       => 'Ya medidas · esperando pasar a cortar',
         'checks' => [
             'medidor' => 'Medidor',
             'apta'   => 'Obra lista para medir',
@@ -66,6 +68,24 @@ $BS_ETAPAS = [
             'equipo' => 'Instaladores',
         ],
     ],
+    // Sin fecha a propósito: se corta en el orden en que entró (la cola).
+    'cortar' => [
+        'titulo' => 'Por cortar',
+        'fecha'  => '',
+        'cierra' => '',
+        // El cortador avisa que terminó con el botón "Cortado". La ficha NO
+        // avanza sola: baja a "Ya cortadas" y espera que el gerente haga el
+        // control ("Se cortó bien") y la pase a Por fabricar.
+        'boton'       => 'cortado',
+        'boton_txt'   => 'Marcar cortado',
+        'boton_listo' => 'Ya cortado',
+        'hecho'       => 'Ya cortadas · esperando el control del gerente',
+        'checks' => [
+            'cortador' => 'Cortador',
+            'cortado'  => 'Cortado',
+            'qc_corte' => 'Se cortó bien',
+        ],
+    ],
     // Sin fecha a propósito: se fabrica en el orden en que entró (la cola).
     'fabricar' => [
         'titulo' => 'Por fabricar',
@@ -74,7 +94,6 @@ $BS_ETAPAS = [
         // Control de la pieza antes de que salga del taller.
         'checks' => [
             'fabrica'       => 'Fabricadores',
-            'qc_corte'      => 'Se cortó bien',
             'qc_medida'     => 'Medida y color correctos',
             'qc_inglete'    => 'Inglete y zócalos',
             'qc_bacha'      => 'Es la bacha correcta',
@@ -104,7 +123,7 @@ $BS_ETAPAS = [
             'saldo' => 'Saldo cobrado',
         ],
     ],
-    // Fuera de las 4 columnas: el cliente retira por el local.
+    // Fuera de las columnas: el cliente retira por el local.
     'retiro' => [
         'titulo' => 'Retiro en local',
         'aparte' => true,
@@ -122,17 +141,20 @@ $BS_ETAPAS = [
 // Quiénes instalan. Se eligen uno o varios por obra (tilde "Instaladores").
 $BS_INSTALADORES = ['Negro', 'Espinola', 'Cesar', 'David', 'Jostin'];
 // Quiénes fabrican. Uno o varios por obra (tilde "Fabricadores", en Por fabricar).
-$BS_FABRICADORES = ['Negro', 'Espinola', 'David', 'Jostin', 'Pedro', 'Jose'];
+$BS_FABRICADORES = ['Negro', 'Espinola', 'David', 'Jostin', 'Pedro'];
+// Quiénes cortan. Uno o varios por obra (tilde "Cortador", en Por cortar).
+$BS_CORTADORES = ['Jose', 'Johander'];
 // Quiénes miden. Uno o varios por obra (tilde "Medidor", en Por medir).
 $BS_MEDIDORES = ['Cesar', 'David', 'Negro', 'Jose'];
 // tilde → [lista de nombres válidos, campo de la obra donde se guarda]
 $BS_TILDES_PERSONAS = [
     'medidor' => [$BS_MEDIDORES, 'medidor'],
     'equipo'  => [$BS_INSTALADORES, 'equipo'],
+    'cortador' => [$BS_CORTADORES, 'cortador'],
     'fabrica' => [$BS_FABRICADORES, 'fabrica'],
 ];
 
-// Las 4 columnas, en orden. "retiro" queda afuera de la secuencia.
+// Las columnas, en orden. "retiro" queda afuera de la secuencia.
 $BS_ETAPA_IDS = [];
 foreach ($BS_ETAPAS as $id => $def) {
     if (empty($def['aparte'])) $BS_ETAPA_IDS[] = $id;
@@ -160,6 +182,8 @@ function bs_tablero_fecha_valida($f) {
 function bs_tablero_normalizar($obra) {
     if (!is_array($obra['checks'])) $obra['checks'] = [];
     if (!empty($obra['checks']['medida'])) $obra['checks']['medido'] = true;
+    // Mismo criterio en Por cortar: el control del gerente supone que ya se cortó.
+    if (!empty($obra['checks']['qc_corte'])) $obra['checks']['cortado'] = true;
     return $obra;
 }
 
@@ -172,7 +196,7 @@ function bs_tablero_leer() {
 }
 
 function bs_tablero_obra_vacia() {
-    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'adjuntos' => [], 'desde' => '', 'hist' => []];
+    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'adjuntos' => [], 'desde' => '', 'hist' => []];
 }
 
 /** Adjuntos de una obra, ya validados: [{id, tipo, ext}]. */

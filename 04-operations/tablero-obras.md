@@ -19,7 +19,7 @@ Dónde está cada obra y qué le falta para avanzar. Vive en `blackstones.com.ar
 
 ## Colores
 
-Cada etapa tiene un color fijo, que se repite en la columna, el borde de la tarjeta, la pestaña del celular y el botón que lleva a esa etapa: **Por medir** azul, **Por fabricar** naranja, **Por instalar** violeta, **Por archivar** verde, **Retiro en local** turquesa. El rojo queda reservado para lo que está mal (atrasada, no puede pasar).
+Cada etapa tiene un color fijo, que se repite en la columna, el borde de la tarjeta, la pestaña del celular y el botón que lleva a esa etapa: **Por medir** azul, **Por cortar** gris grafito, **Por fabricar** naranja, **Por instalar** violeta, **Por archivar** verde, **Retiro en local** turquesa. El rojo queda reservado para lo que está mal (atrasada, no puede pasar).
 
 Al levantar una tarjeta, las columnas que la reciben se encienden en su color y las que no, se apagan. Sobre una columna, la tarjeta dice "Soltar en …" con el color de destino, o "Falta: …" en rojo. Al soltar, late una vez en el color nuevo; si no podía pasar, sacude y vuelve.
 
@@ -30,7 +30,8 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
 | **Por medir** | Medición | Medidor · Obra lista para medir · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
-| **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Se cortó bien · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
+| **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Cortado (botón) · Se cortó bien |
+| **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
 | **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
 | **Retiro en local** (cuadro aparte, abajo) | Retiro | Seña cobrada · Pieza terminada · Se avisó al cliente · Retirada · Saldo cobrado |
@@ -53,6 +54,7 @@ Los demás:
 - **Medido:** es un botón al lado de la fecha de medición, no una pastilla. Al tocarlo, donde decía la fecha pasa a decir "Ya medido · día" y la tarjeta baja al final de la columna, bajo "Ya medidas · esperando pasar a fabricar". Así arriba queda la cola real de lo que falta medir, ordenada por fecha de medición y después por orden de llegada. Desde ese día se cuenta el plazo de entrega. Tocar "Ya medido" lo deshace.
 - **Medidas y planos listos:** da por hecha la medición (marca Medido si no estaba).
 - **Tenemos la placa:** la placa del color está en el taller o reservada con el proveedor.
+- **Por cortar:** el cortador (Jose o Johander; se edita en `$BS_CORTADORES`) avisa que terminó con el botón **Cortado**. La ficha no avanza sola: baja a "Ya cortadas · esperando el control del gerente". Pasa a Por fabricar recién cuando el gerente tilda **Se cortó bien** y la mueve.
 - **Por fabricar** es el control de la pieza antes de que salga del taller. Si la obra no lleva bacha, los dos tildes de bacha se tildan igual.
 - **Por instalar** no tiene tilde de "instalada": pasar la tarjeta a Por archivar es decir que se instaló.
 
@@ -76,7 +78,8 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 - **Medición / Instalación / Retiro:** un turno por tarjeta. Si la fecha pasó y la obra sigue sin cumplirla, la tarjeta se marca atrasada en rojo. En Por instalar el turno lleva día y hora, y los dos son obligatorios para salir de la columna.
 - **Aviso ámbar "!":** en Por instalar, la obra que no tiene día u hora de instalación se marca con un signo de exclamación ámbar, y el encabezado de la columna cuenta cuántas están "sin turno". Rojo es atrasada; ámbar es que falta definir.
 - **Entrega estimada:** semana en que cae medición + plazo (granito 15 días, el resto 20). Aparece al tildar "Medida tomada". Es guía: el orden de fabricación lo da la cola.
-- **Cola:** dentro de cada columna van primero las que tienen turno (el más próximo arriba) y después por orden de llegada a esa columna.
+- **Cola:** dentro de cada columna van primero las que tienen turno (el más próximo arriba) y después por orden de llegada a esa columna. Cada ficha muestra su lugar (1, 2, 3…) y la 1 va enmarcada como **Próxima**. El número es el lugar real en la cola: no cambia al buscar o filtrar. Las ya medidas y ya cortadas no llevan número.
+- **Botón de etapa:** "Marcar medido" y "Marcar cortado" son lo más visible de la ficha; hechos, quedan en verde ("Ya medido", "Ya cortado").
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.
 
 ## Retiro en local

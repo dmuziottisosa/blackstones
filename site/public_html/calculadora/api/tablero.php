@@ -29,7 +29,7 @@
 //     accion "borrar" → borra la ficha: tildes, datos y adjuntos de la obra
 //     accion "mover" → { "a": "fabricar" }  (arrastre: etapa de destino)
 //                      { "hacia": "adelante" | "atras" | "retiro" }  (botones)
-//                      "retiro" saca la obra de las 4 columnas y la pasa al
+//                      "retiro" saca la obra de las columnas y la pasa al
 //                      cuadro "Retiro en local". Desde ahí, "atras" la
 //                      devuelve a la columna de la que salió.
 //
@@ -175,12 +175,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'hora'        => (bs_tablero_fecha_valida($obra['fecha']) && bs_tablero_hora_valida($obra['hora'])) ? $obra['hora'] : '',
                     'checks'      => (object)array_filter((array)$obra['checks']),
                     'medido_at'   => bs_tablero_fecha_valida($obra['medido_at']) ? $obra['medido_at'] : '',
+                    // Día en que se cumplió el botón de la etapa actual (medido / cortado).
+                    'boton_at'    => (function ($o) use ($BS_ETAPAS) {
+                        $b = (string)($BS_ETAPAS[$o['etapa']]['boton'] ?? '');
+                        $at = $b === 'medido' ? ($o['medido_at'] ?? '') : ($b === 'cortado' ? ($o['cortado_at'] ?? '') : '');
+                        return bs_tablero_fecha_valida((string)$at) ? $at : '';
+                    })($obra),
                     'nota'        => (string)$obra['nota'],
                     'sena'        => bs_tablero_sena($obra),
                     'acceso'      => bs_tablero_acceso($obra),
                     'bacha'       => in_array($obra['bacha'], ['nuestra', 'cliente', 'no'], true) ? $obra['bacha'] : '',
                     'equipo'      => array_values(array_intersect($BS_INSTALADORES, (array)$obra['equipo'])),
                     'fabrica'     => array_values(array_intersect($BS_FABRICADORES, (array)($obra['fabrica'] ?? []))),
+                    'cortador'    => array_values(array_intersect($BS_CORTADORES, (array)($obra['cortador'] ?? []))),
                     'medidor'     => array_values(array_intersect($BS_MEDIDORES, (array)($obra['medidor'] ?? []))),
                     'adjuntos'    => array_map(function ($a) {
                         return ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf'];
@@ -196,10 +203,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     foreach ($BS_ETAPAS as $id => $def) {
         $checks = [];
         foreach ($def['checks'] as $cid => $label) $checks[] = ['id' => $cid, 'label' => $label];
-        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'boton' => (string)($def['boton'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
+        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
     }
 
-    bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
+    bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
 }
 
 // ============================================================
@@ -325,7 +332,7 @@ try {
                 $elegidos = array_values(array_intersect($lista, (array)($body['personas'] ?? $body['equipo'] ?? [])));
                 if (!$elegidos) {
                     bs_lock_release($fp);
-                    $quien = ['medidor' => 'quién mide', 'fabrica' => 'quiénes fabrican', 'equipo' => 'quiénes instalan'];
+                    $quien = ['medidor' => 'quién mide', 'cortador' => 'quién corta', 'fabrica' => 'quiénes fabrican', 'equipo' => 'quiénes instalan'];
                     bs_error('Elegí ' . $quien[$clave] . '.');
                 }
                 $obra[$campo] = $elegidos;
@@ -351,6 +358,18 @@ try {
             } elseif ($clave === 'medido') {
                 unset($obra['checks']['medida']);
                 $obra['medido_at'] = '';
+            }
+        }
+
+        // "Cortado": el cortador terminó (queda el día). "Se cortó bien" lo
+        // da por hecho; y si se destilda "Cortado", el control tampoco vale.
+        if ($clave === 'cortado' || $clave === 'qc_corte') {
+            if ($valor) {
+                $obra['checks']['cortado'] = true;
+                if (!bs_tablero_fecha_valida((string)($obra['cortado_at'] ?? ''))) $obra['cortado_at'] = $hoy;
+            } elseif ($clave === 'cortado') {
+                unset($obra['checks']['qc_corte']);
+                $obra['cortado_at'] = '';
             }
         }
 

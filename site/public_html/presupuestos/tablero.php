@@ -3,7 +3,7 @@
 // /presupuestos/tablero.php — Tablero de obras
 // ============================================================
 // Las obras entran solas: una tarjeta por cada presupuesto "aprobado".
-// Cuatro columnas + cuadro de retiro en local. La tarjeta se arrastra de
+// Cinco columnas + cuadro de retiro en local. La tarjeta se arrastra de
 // una columna a otra, o se avanza con el botón Siguiente.
 // Datos y reglas: /calculadora/api/tablero.php
 //
@@ -104,18 +104,20 @@ button{font-family:inherit;color:inherit}
 :root{--et:var(--gd);--et-soft:var(--gd-soft);--et-on:#fff}
 [data-theme="dark"]{--et-on:#14110D}
 .et-medir{--et:#2F6DB5;--et-soft:rgba(47,109,181,.11)}
+.et-cortar{--et:#4B5563;--et-soft:rgba(75,85,99,.12)}
 .et-fabricar{--et:#B5680A;--et-soft:rgba(181,104,10,.12)}
 .et-instalar{--et:#7A52B3;--et-soft:rgba(122,82,179,.11)}
 .et-archivar{--et:#1F8F47;--et-soft:rgba(31,143,71,.11)}
 .et-retiro{--et:#14808A;--et-soft:rgba(20,128,138,.11)}
 [data-theme="dark"] .et-medir{--et:#6AA5E8;--et-soft:rgba(106,165,232,.14)}
+[data-theme="dark"] .et-cortar{--et:#A8B3C4;--et-soft:rgba(168,179,196,.14)}
 [data-theme="dark"] .et-fabricar{--et:#E8A548;--et-soft:rgba(232,165,72,.14)}
 [data-theme="dark"] .et-instalar{--et:#B594E6;--et-soft:rgba(181,148,230,.14)}
 [data-theme="dark"] .et-archivar{--et:#34D670;--et-soft:rgba(52,214,112,.13)}
 [data-theme="dark"] .et-retiro{--et:#4FC4C4;--et-soft:rgba(79,196,196,.13)}
 
 .col-tabs{display:none}
-.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:start}
+.board{display:grid;grid-template-columns:repeat(var(--ncols,5),minmax(236px,1fr));gap:12px;align-items:start;overflow-x:auto;padding-bottom:4px}
 .col{background:var(--card-alt);border:1px solid var(--border);border-top:4px solid var(--et);border-radius:var(--radius);padding:10px;min-height:120px;transition:background .15s,opacity .15s}
 .col-h{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px}
 .col-h h2{font-family:'Fraunces',serif;font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
@@ -136,7 +138,7 @@ button{font-family:inherit;color:inherit}
 .slot{border:2px dashed var(--et);border-radius:var(--radius);padding:14px 10px;margin-bottom:10px;text-align:center;font-size:13px;font-weight:700;color:var(--et);background:var(--card)}
 .slot.bloq{border-color:var(--red);color:var(--red);background:var(--card)}
 
-/* Retiro en local: cuadro aparte, debajo de las 4 columnas */
+/* Retiro en local: cuadro aparte, debajo de las columnas */
 #aparte{margin-top:14px}
 #aparte .col{min-height:0}
 #aparte .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px;align-items:start}
@@ -166,6 +168,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .card.nope{animation:nope .45s;border-color:var(--red)}
 @media(prefers-reduced-motion:reduce){.card.llego,.card.nope{animation:none}}
 .c-id{font-size:15px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+/* Lugar en la cola: 1, 2, 3… La 1 es la próxima a atender y va enmarcada en el color de la etapa. */
+.c-pos{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 6px;margin-right:8px;border-radius:999px;border:1.5px solid var(--et);color:var(--et);font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;vertical-align:1px}
+.card.primera{outline:2px solid var(--et);outline-offset:1px}
+.card.primera .c-pos{background:var(--et);color:var(--et-on)}
+.c-prox{margin:-12px -12px 10px -12px;padding:5px 12px;border-radius:9px 9px 0 0;background:var(--et-soft);color:var(--et);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.fantasma .c-prox{display:none}
 .c-id b{font-weight:700;font-variant-numeric:tabular-nums}
 .c-id .zona{color:var(--text3);font-weight:500}
 .c-mat{color:var(--text2);font-size:13px;margin-top:2px;overflow-wrap:anywhere}
@@ -179,10 +187,11 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 /* MEDIDO: botón para marcar la medición hecha, y cómo queda después */
 .c-turno{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px}
 .c-turno .c-fecha{margin-top:0}
-.c-hecho{display:inline-flex;align-items:center;padding:6px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--et);background:var(--card);color:var(--et);font-size:12.5px;font-weight:700;cursor:pointer}
-.c-hecho:hover{background:var(--et);color:var(--et-on)}
-.c-fecha.listo{background:var(--gr-soft);border-color:var(--gr);color:var(--gr)}
-.c-fecha.listo::before{content:'✓';font-weight:800}
+.c-hecho{display:block;width:100%;margin-top:10px;padding:12px;border-radius:var(--radius-sm);border:2px solid var(--et);background:var(--et);color:var(--et-on);font-size:15px;font-weight:800;letter-spacing:.01em;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm)}
+.c-hecho:hover{filter:brightness(1.08)}
+.c-hecho.listo{background:var(--gr);border-color:var(--gr);color:#fff}
+[data-theme="dark"] .c-hecho.listo{color:#04220F}
+.c-hecho.listo::before{content:'✓  '}
 .col-sep{margin:14px 2px 10px;padding-top:10px;border-top:2px dashed var(--border);font-size:11.5px;font-weight:700;color:var(--text3);letter-spacing:.02em}
 /* AVISO ámbar: a la obra le falta el turno que su etapa exige (Por instalar sin fecha u hora) */
 .c-fecha.aviso{background:var(--amb-soft);border:1.5px solid var(--amb);color:var(--amb);font-weight:700}
@@ -287,8 +296,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .wrap{padding:0 12px 60px}
   .buscar{margin:10px 0 0}
   .buscar input{max-width:none;font-size:16px}
-  .col-tabs{display:flex;gap:5px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
-  .col-tabs button{flex:1 1 0;min-width:0;padding:7px 2px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:11.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+  .col-tabs{display:flex;gap:4px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
+  .col-tabs button{flex:1 1 0;min-width:0;padding:7px 2px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:10.5px;letter-spacing:-.01em;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
   .col-tabs button{border-bottom:3px solid var(--et)}
   .col-tabs button.on{background:var(--et);color:var(--et-on);border-color:var(--et)}
   .col-tabs button.con-aviso::after{content:'!';position:absolute;top:-5px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--amb);color:var(--card);font-size:11px;font-weight:800;line-height:16px;text-align:center}
@@ -304,12 +313,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   #aparte{margin-top:0}
   #aparte .cards{grid-template-columns:1fr}
   .col-sub{display:none}
-  .board{grid-template-columns:1fr}
+  .board{grid-template-columns:1fr;overflow-x:visible;padding-bottom:0}
   .col{display:none;background:none;border:none;padding:0}
   .col.on{display:block}
   .col-h{display:none}
   .chk{padding:10px 13px 10px 10px;font-size:13px}
-  .c-hecho{padding:9px 14px;font-size:13px}
+  .c-hecho{padding:14px 12px;font-size:16px}
   .c-fecha{padding:9px 12px;font-size:13px}
   .c-avanzar{padding:13px 12px;font-size:14px}
 }
@@ -388,11 +397,13 @@ const ADJ={bacha:'Bacha',plano:'Plano'}; // tipos de adjunto
 let ETAPAS=[];      // definición de etapas (viene del server)
 let INSTALADORES=[];// quiénes instalan (viene del server)
 let FABRICADORES=[];// quiénes fabrican (viene del server)
+let CORTADORES=[];  // quiénes cortan (viene del server)
 let MEDIDORES=[];   // quiénes miden (viene del server)
 // Tildes que piden elegir personas: uno o varios nombres de una lista.
 const PERSONAS={
   medidor:{campo:'medidor',lista:()=>MEDIDORES,titulo:'Medidor',pregunta:'¿Quién va a medir?',rotulo:'Mide: '},
   equipo:{campo:'equipo',lista:()=>INSTALADORES,titulo:'Instaladores',pregunta:'¿Quiénes instalan?',rotulo:'Instalan: '},
+  cortador:{campo:'cortador',lista:()=>CORTADORES,titulo:'Cortador',pregunta:'¿Quién corta?',rotulo:'Corta: '},
   fabrica:{campo:'fabrica',lista:()=>FABRICADORES,titulo:'Fabricadores',pregunta:'¿Quiénes la fabrican?',rotulo:'Fabrican: '}
 };
 let CARDS=[];       // tarjetas
@@ -466,7 +477,7 @@ async function cargar(){
   try{
     const j=await pedir(API);
     if(drag)return; // no redibujar con una tarjeta en el aire
-    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];MEDIDORES=j.medidores||[];
+    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];MEDIDORES=j.medidores||[];
     dibujar();
   }catch(e){
     if(!CARDS.length)$('board').innerHTML='<div class="aviso" style="grid-column:1/-1">'+esc(e.message)+'</div>';
@@ -476,7 +487,7 @@ async function cargar(){
 
 const etapaDe=id=>ETAPAS.find(e=>e.id===id);
 const cardDe=key=>CARDS.find(c=>c.key===key);
-const columnas=()=>ETAPAS.filter(e=>!e.aparte); // las 4, en orden
+const columnas=()=>ETAPAS.filter(e=>!e.aparte); // las columnas, en orden
 // Qué le falta a la tarjeta para salir de su etapa: la fecha (si la etapa la exige) y los tildes.
 function faltanDe(c,e){
   const f=e.checks.filter(k=>!c.checks[k.id]).map(k=>k.label);
@@ -530,7 +541,7 @@ function htmlAdjuntos(c,puedeSumar){
 const plano=t=>String(t==null?'':t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function coincide(c){
   if(!buscado.length)return true;
-  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' ')].join(' '));
+  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' '),c.cortador.join(' ')].join(' '));
   return buscado.every(w=>c._txt.indexOf(w)>=0);
 }
 
@@ -540,28 +551,60 @@ function sinAdjunto(c,tipo){
   return !c.adjuntos.some(a=>a.tipo===tipo);
 }
 
+// Orden de la cola dentro de una etapa.
+function ordenCola(a,b){
+  const ha=hecho(a),hb=hecho(b);
+  if(ha!==hb)return ha?1:-1;                             // lo que falta hacer, arriba
+  if(ha&&a.boton_at!==b.boton_at)return a.boton_at<b.boton_at?-1:1; // ya hechas: la más vieja primero
+  if(!!a.fecha!==!!b.fecha)return a.fecha?-1:1;          // con turno primero
+  if(a.fecha!==b.fecha)return a.fecha<b.fecha?-1:1;      // el turno más próximo arriba
+  if(a.hora!==b.hora){                                   // mismo día: el más temprano; sin hora, al final
+    if(!a.hora)return 1;
+    if(!b.hora)return -1;
+    return a.hora<b.hora?-1:1;
+  }
+  if(a.desde!==b.desde)return a.desde<b.desde?-1:1;      // después, la cola: el que entró antes
+  return a.key<b.key?-1:1;
+}
+// Lugar de cada ficha en la cola de su etapa (1 = la próxima a atender). Se cuenta
+// sobre TODAS las fichas de la etapa, así el número no cambia al buscar o filtrar.
+// Las ya hechas (ya medidas, ya cortadas) no llevan número: esperan el control.
+let POS={};
+function numerarColas(){
+  POS={};
+  ETAPAS.forEach(e=>{
+    CARDS.filter(c=>c.etapa===e.id&&!hecho(c)).sort(ordenCola).forEach((c,i)=>{POS[c.key]=i+1;});
+  });
+}
+
 function htmlCard(c){
   const e=etapaDe(c.etapa);
   const cols=columnas();
   const idx=cols.indexOf(e);
   const sig=idx>=0?cols[idx+1]:null;
-  let cls='card'+(atrasada(c)?' alerta':(sinTurno(c)?' sin-turno':'')),estilo='';
+  const pos=POS[c.key]||0;
+  let cls='card'+(atrasada(c)?' alerta':(sinTurno(c)?' sin-turno':''))+(pos===1?' primera':''),estilo='';
   if(recien&&recien.key===c.key){
     const dt=Math.max(0,Date.now()-recien.t); // si se redibuja en el medio, la animación sigue donde iba
     if(dt<1000){cls+=' '+recien.tipo;estilo=' style="animation-delay:-'+dt+'ms"';}
   }
   let h='<article class="'+cls+'"'+estilo+' data-key="'+esc(c.key)+'">';
 
-  h+='<div class="c-id"><b>'+esc(c.cliente_nro)+'-'+c.sub+'</b> · '+esc(nombreCorto(c.nombre)||'Sin nombre');
+  if(pos===1)h+='<div class="c-prox">Próxima</div>';
+  h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b> · '+esc(nombreCorto(c.nombre)||'Sin nombre');
   if(c.zona)h+=' <span class="zona">· '+esc(c.zona)+'</span>';
   h+='</div>';
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
   if(mat)h+='<div class="c-mat">'+esc(mat)+'</div>';
 
-  if(e.boton&&hecho(c)){
-    // Ya se hizo: en lugar de la fecha del turno, queda dicho. Tocarlo lo deshace.
-    h+='<div class="c-turno"><button type="button" class="c-fecha listo" data-act="check" data-clave="'+esc(e.boton)+'" title="Tocar para desmarcar">Ya medido'+(c.medido_at?' · '+esc(fechaCorta(c.medido_at)):'')+'</button></div>';
-  }else if(e.fecha){
+  // El botón de la etapa (Medido / Cortado) es lo que más se ve en la tarjeta:
+  // dice de un vistazo si ese trabajo ya se hizo o no. Tocarlo otra vez lo deshace.
+  if(e.boton){
+    h+=hecho(c)
+      ?'<button type="button" class="c-hecho listo" data-act="check" data-clave="'+esc(e.boton)+'" title="Tocar para desmarcar">'+esc(e.boton_listo)+(c.boton_at?' · '+esc(fechaCorta(c.boton_at)):'')+'</button>'
+      :'<button type="button" class="c-hecho" data-act="check" data-clave="'+esc(e.boton)+'">'+esc(e.boton_txt)+'</button>';
+  }
+  if(e.fecha&&!hecho(c)){
     let cls='',txt;
     const hora=c.hora?' · '+c.hora+' hs':(e.pide_hora&&e.exige_fecha?' · falta la hora':'');
     if(!c.fecha&&e.exige_fecha){cls=' aviso';txt='Falta fecha '+(e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
@@ -570,8 +613,7 @@ function htmlCard(c){
     else if(c.fecha===HOY){cls=' hoy';txt=e.fecha+' · hoy'+hora;}
     else txt=e.fecha+' · '+fechaCorta(c.fecha)+hora;
     if(c.fecha&&e.pide_hora&&e.exige_fecha&&!c.hora&&!atrasada(c))cls=' aviso';
-    h+='<div class="c-turno"><button type="button" class="c-fecha'+cls+'" data-act="fecha">'+esc(txt)+'</button>'+
-      (e.boton?'<button type="button" class="c-hecho" data-act="check" data-clave="'+esc(e.boton)+'">'+esc(e.checks.find(k=>k.id===e.boton).label)+'</button>':'')+'</div>';
+    h+='<div class="c-turno"><button type="button" class="c-fecha'+cls+'" data-act="fecha">'+esc(txt)+'</button></div>';
   }
   // Semana estimada de entrega: guía, no alarma.
   if(c.semana&&c.etapa!=='archivar'){
@@ -586,6 +628,7 @@ function htmlCard(c){
     if(c.bacha)datos.push(c.bacha==='no'?'Sin bacha':'Bacha '+BACHA[c.bacha]);
     if(c.acceso)datos.push('Sube '+textoAcceso(c.acceso));
     if(c.medidor.length)datos.push('Midió: '+c.medidor.join(', '));
+    if(c.cortador.length&&!e.checks.some(k=>k.id==='cortador'))datos.push('Cortó: '+c.cortador.join(', '));
     if(c.fabrica.length&&!e.checks.some(k=>k.id==='fabrica'))datos.push('Fabricó: '+c.fabrica.join(', '));
     if(c.equipo.length&&!e.checks.some(k=>k.id==='equipo'))datos.push('Instalan: '+c.equipo.join(', '));
     if(datos.length)h+='<div class="c-promesa">'+esc(datos.join(' · '))+'</div>';
@@ -635,6 +678,7 @@ function dibujar(){
   if(!ETAPAS.length)return;
   if(!etapaDe(colMovil))colMovil=ETAPAS[0].id;
 
+  numerarColas();
   const visibles=CARDS.filter(coincide);
   // Buscando en celular: si la pestaña abierta no tiene resultados, salta a la primera que sí.
   if(buscado.length&&visibles.length&&!visibles.some(c=>c.etapa===colMovil))colMovil=ETAPAS.find(e=>visibles.some(c=>c.etapa===e.id)).id;
@@ -645,20 +689,7 @@ function dibujar(){
   ETAPAS.forEach(e=>{
     const esPrimera=columnas().indexOf(e)===0;
     const deEtapa=visibles.filter(c=>c.etapa===e.id);
-    const lista=deEtapa.filter(c=>!esPrimera||((!falta.plano||sinAdjunto(c,'plano'))&&(!falta.bacha||sinAdjunto(c,'bacha')))).sort((a,b)=>{
-      const ha=hecho(a),hb=hecho(b);
-      if(ha!==hb)return ha?1:-1;                             // lo que falta hacer, arriba
-      if(ha&&a.medido_at!==b.medido_at)return a.medido_at<b.medido_at?-1:1; // ya medidas: la más vieja primero
-      if(!!a.fecha!==!!b.fecha)return a.fecha?-1:1;          // con turno primero
-      if(a.fecha!==b.fecha)return a.fecha<b.fecha?-1:1;      // el turno más próximo arriba
-      if(a.hora!==b.hora){                                   // mismo día: el más temprano; sin hora, al final
-        if(!a.hora)return 1;
-        if(!b.hora)return -1;
-        return a.hora<b.hora?-1:1;
-      }
-      if(a.desde!==b.desde)return a.desde<b.desde?-1:1;      // después, la cola: el que entró antes
-      return a.key<b.key?-1:1;
-    });
+    const lista=deEtapa.filter(c=>!esPrimera||((!falta.plano||sinAdjunto(c,'plano'))&&(!falta.bacha||sinAdjunto(c,'bacha')))).sort(ordenCola);
     const on=e.id===colMovil;
     const corto=e.aparte?'Retiro':e.titulo.replace('Por ','').replace(/^./,x=>x.toUpperCase());
     const llega=recien&&recien.tipo==='llego'&&Date.now()-recien.t<300&&lista.some(c=>c.key===recien.key);
@@ -679,6 +710,7 @@ function dibujar(){
     h+='</section>';
     if(e.aparte)aparte+=h;else cols+=h;
   });
+  $('board').style.setProperty('--ncols',columnas().length);
   $('colTabs').innerHTML=tabs;
   $('board').innerHTML=cols;
   $('aparte').innerHTML=aparte;
@@ -777,6 +809,10 @@ wrap.addEventListener('click',ev=>{
       }else if(clave==='medido'){
         delete c.checks.medida;c.medido_at='';
       }
+      if(clave==='medido'||clave==='medida')c.boton_at=c.medido_at;
+      // Cortado: el control del gerente lo da por hecho; destildarlo anula el control.
+      if((clave==='cortado'||clave==='qc_corte')&&valor){c.checks.cortado=true;if(clave==='cortado'||!c.boton_at)c.boton_at=HOY;}
+      else if(clave==='cortado'){delete c.checks.qc_corte;c.boton_at='';}
     });
   }else if(act==='avanzar'){
     mover(c,cols[idx+1].id);
