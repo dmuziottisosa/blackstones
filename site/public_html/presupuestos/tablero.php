@@ -193,11 +193,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 [data-theme="dark"] .c-hecho.listo{color:#04220F}
 .c-hecho.listo::before{content:'✓  '}
 .col-sep{margin:14px 2px 10px;padding-top:10px;border-top:2px dashed var(--border);font-size:11.5px;font-weight:700;color:var(--text3);letter-spacing:.02em}
-/* AVISO ámbar: a la obra le falta el turno que su etapa exige (Por instalar sin fecha u hora) */
-.c-fecha.aviso{background:var(--amb-soft);border:1.5px solid var(--amb);color:var(--amb);font-weight:700}
-.c-fecha.aviso::before,.col-aviso::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--amb);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
-.card.sin-turno{box-shadow:0 0 0 1.5px var(--amb)}
-.col-aviso{display:inline-flex;align-items:center;gap:5px;margin-left:auto;margin-right:8px;padding:2px 9px 2px 3px;border-radius:999px;background:var(--amb-soft);color:var(--amb);font-size:11.5px;font-weight:700;white-space:nowrap}
+/* AVISO "!" en rojo: la obra no tiene fecha (Por medir) o turno (Por instalar). Sin fecha no hay
+   plazo, y lo que no tiene plazo se queda olvidado: se marca igual de fuerte que lo atrasado. */
+.c-fecha.aviso{background:var(--red-soft);border:1.5px solid var(--red);color:var(--red);font-weight:700}
+.c-fecha.aviso::before,.col-aviso::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--red);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
+.card.sin-turno{box-shadow:0 0 0 1.5px var(--red)}
+.col-aviso{display:inline-flex;align-items:center;gap:5px;margin-left:auto;margin-right:8px;padding:2px 9px 2px 3px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:11.5px;font-weight:700;white-space:nowrap}
 
 .c-promesa{font-size:12.5px;color:var(--text3);margin-top:7px}
 .c-promesa.cerca{color:var(--amb);font-weight:600}
@@ -285,6 +286,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-filtros button.urg{border-color:var(--red);color:var(--red);background:var(--red-soft)}
 .col-filtros button.urg i{opacity:1}
 .col-filtros button.urg.on{background:var(--red);border-color:var(--red);color:#fff}
+/* "Sin fecha" / "Sin turno" con fichas adentro: mismo aviso rojo con "!" que llevan esas fichas */
+.col-filtros button.avi{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--red);color:var(--red);background:var(--red-soft)}
+.col-filtros button.avi::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--red);color:var(--card);font-size:11px;font-weight:800;line-height:1;flex-shrink:0}
+.col-filtros button.avi i{opacity:1}
+.col-filtros button.avi.on{background:var(--red);color:var(--card)}
+.col-filtros button.avi.on::before{background:var(--card);color:var(--red)}
 
 /* === ADJUNTOS: foto de bacha y plano === */
 .c-adj{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
@@ -315,7 +322,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .col-tabs button{flex:1 1 0;min-width:0;padding:7px 2px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:10.5px;letter-spacing:-.01em;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
   .col-tabs button{border-bottom:3px solid var(--et)}
   .col-tabs button.on{background:var(--et);color:var(--et-on);border-color:var(--et)}
-  .col-tabs button.con-aviso::after{content:'!';position:absolute;top:-5px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--amb);color:var(--card);font-size:11px;font-weight:800;line-height:16px;text-align:center}
+  .col-tabs button.con-aviso::after{content:'!';position:absolute;top:-5px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--red);color:var(--card);font-size:11px;font-weight:800;line-height:16px;text-align:center}
   .col-tabs button{position:relative;overflow:visible}
   .col-tabs button i{display:block;font-style:normal;font-size:13px;opacity:.75;font-variant-numeric:tabular-nums}
   .col-tabs button.puede{background:var(--et-soft);color:var(--et);border-color:var(--et);border-style:dashed dashed solid}
@@ -736,7 +743,7 @@ function dibujar(){
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2>'+(sinT?'<span class="col-aviso">'+sinT+(e.exige_fecha?' sin turno':' sin fecha')+'</span>':'')+'<span class="col-n">'+lista.length+'</span></div>';
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
     if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
-    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
+    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+(f[0].indexOf('turno_')===0&&deEtapa.some(f[2])?' avi':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
     // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
     // El separador va antes del bloque final de fichas ya hechas.
     let corte=lista.length;
