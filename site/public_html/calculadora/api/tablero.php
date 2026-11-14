@@ -361,7 +361,7 @@ try {
             }
         }
 
-        // "Cortado": el cortador terminó (queda el día). "Se cortó bien" lo
+        // "Cortado": el cortador terminó (queda el día). "Corte aprobado" lo
         // da por hecho; y si se destilda "Cortado", el control tampoco vale.
         if ($clave === 'cortado' || $clave === 'qc_corte') {
             if ($valor) {

@@ -29,8 +29,8 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
-| **Por medir** | Medición | Medidor · Obra lista para medir · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
-| **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Cortado (botón) · Se cortó bien |
+| **Por medir** | Medición | Medidor · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
+| **Por cortar** | (sin fecha: se corta en orden de llegada) | Cortador · Cortado (botón) · Corte aprobado |
 | **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
 | **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
@@ -50,11 +50,10 @@ Esos datos quedan a la vista en las etapas siguientes ("Bacha del cliente · Sub
 
 Los demás:
 
-- **Obra lista para medir:** el cliente confirmó muebles colocados y mesada vieja retirada. Se tilda antes de mandar al medidor.
 - **Medido:** es un botón al lado de la fecha de medición, no una pastilla. Al tocarlo, donde decía la fecha pasa a decir "Ya medido · día" y la tarjeta baja al final de la columna, bajo "Ya medidas · esperando pasar a fabricar". Así arriba queda la cola real de lo que falta medir, ordenada por fecha de medición y después por orden de llegada. Desde ese día se cuenta el plazo de entrega. Tocar "Ya medido" lo deshace.
 - **Medidas y planos listos:** da por hecha la medición (marca Medido si no estaba).
 - **Tenemos la placa:** la placa del color está en el taller o reservada con el proveedor.
-- **Por cortar:** el cortador (Jose o Johander; se edita en `$BS_CORTADORES`) avisa que terminó con el botón **Cortado**. La ficha no avanza sola: baja a "Ya cortadas · esperando el control del gerente". Pasa a Por fabricar recién cuando el gerente tilda **Se cortó bien** y la mueve.
+- **Por cortar:** el cortador (Jose o Johander; se edita en `$BS_CORTADORES`) avisa que terminó con el botón **Cortado**. La ficha no avanza sola: baja a "Ya cortadas · esperando el control del gerente". Pasa a Por fabricar recién cuando el gerente tilda **Corte aprobado** y la mueve.
 - **Por fabricar** es el control de la pieza antes de que salga del taller. Si la obra no lleva bacha, los dos tildes de bacha se tildan igual.
 - **Por instalar** no tiene tilde de "instalada": pasar la tarjeta a Por archivar es decir que se instaló.
 

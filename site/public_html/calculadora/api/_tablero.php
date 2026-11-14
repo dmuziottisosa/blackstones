@@ -61,7 +61,6 @@ $BS_ETAPAS = [
         'hecho'       => 'Ya medidas · esperando pasar a cortar',
         'checks' => [
             'medidor' => 'Medidor',
-            'apta'   => 'Obra lista para medir',
             'medido' => 'Medido',
             'medida' => 'Medidas y planos listos',
             'sena'   => 'Trajo la seña',
@@ -78,7 +77,7 @@ $BS_ETAPAS = [
         'cierra' => '',
         // El cortador avisa que terminó con el botón "Cortado". La ficha NO
         // avanza sola: baja a "Ya cortadas" y espera que el gerente haga el
-        // control ("Se cortó bien") y la pase a Por fabricar.
+        // control ("Corte aprobado") y la pase a Por fabricar.
         'boton'       => 'cortado',
         'boton_txt'   => 'Marcar cortado',
         'boton_listo' => 'Ya cortado',
@@ -86,7 +85,7 @@ $BS_ETAPAS = [
         'checks' => [
             'cortador' => 'Cortador',
             'cortado'  => 'Cortado',
-            'qc_corte' => 'Se cortó bien',
+            'qc_corte' => 'Corte aprobado',
         ],
     ],
     // Sin fecha a propósito: se fabrica en el orden en que entró (la cola).
