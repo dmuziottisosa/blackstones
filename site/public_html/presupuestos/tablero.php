@@ -281,6 +281,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-filtros button{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer}
 .col-filtros button i{font-style:normal;opacity:.7;font-variant-numeric:tabular-nums}
 .col-filtros button.on{background:var(--et);border-color:var(--et);color:var(--et-on)}
+/* "Necesitan continuar" con fichas adentro: es un pendiente urgente, se nota */
+.col-filtros button.urg{border-color:var(--red);color:var(--red);background:var(--red-soft)}
+.col-filtros button.urg i{opacity:1}
+.col-filtros button.urg.on{background:var(--red);border-color:var(--red);color:#fff}
 
 /* === ADJUNTOS: foto de bacha y plano === */
 .c-adj{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
@@ -716,7 +720,9 @@ function dibujar(){
     const filtros=[];
     // Las dos preguntas de todos los días en las etapas con botón: ¿qué falta ejecutar? ¿qué está
     // hecho y sigue acá esperando que la pasen? Son excluyentes: prender una apaga la otra.
-    if(e.boton)filtros.push(['pend_'+e.id,e.pendientes,c=>!hecho(c)],['cont_'+e.id,'Necesitan continuar',hecho]);
+    // "Necesitan continuar" es el pendiente urgente: lo que ya está hecho y sigue acá, y también
+    // lo que tenía fecha y se le pasó sin hacerse (había que medir el 14, es 15 y sigue sin medir).
+    if(e.boton)filtros.push(['pend_'+e.id,e.pendientes,c=>!hecho(c)],['cont_'+e.id,'Necesitan continuar',c=>hecho(c)||atrasada(c)]);
     if(esPrimera)filtros.push(['plano','Sin plano',c=>sinAdjunto(c,'plano')],['bacha','Sin foto de bacha',c=>sinAdjunto(c,'bacha')]);
     // cada columna tiene su propio filtro de fecha: Por medir "Sin fecha", Por instalar "Sin turno"
     if(e.exige_fecha||e.avisa_fecha)filtros.push(['turno_'+e.id,e.exige_fecha?'Sin turno':'Sin fecha',sinTurno]);
@@ -730,7 +736,7 @@ function dibujar(){
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2>'+(sinT?'<span class="col-aviso">'+sinT+(e.exige_fecha?' sin turno':' sin fecha')+'</span>':'')+'<span class="col-n">'+lista.length+'</span></div>';
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
     if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
-    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
+    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
     // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
     // El separador va antes del bloque final de fichas ya hechas.
     let corte=lista.length;
