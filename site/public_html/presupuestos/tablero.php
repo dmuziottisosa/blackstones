@@ -88,15 +88,43 @@ button{font-family:inherit;color:inherit}
 .aviso{color:var(--text2);font-size:13.5px;padding:40px 16px;text-align:center;line-height:1.6}
 .aviso b{color:var(--text)}
 
+/* === COLOR DE CADA ETAPA ===
+   El mismo color en la columna, la tarjeta, la pestaña del celular y el
+   botón que lleva a esa etapa. Se aprende una vez y se reconoce de lejos. */
+:root{--et:var(--gd);--et-soft:var(--gd-soft);--et-on:#fff}
+[data-theme="dark"]{--et-on:#14110D}
+.et-medir{--et:#2F6DB5;--et-soft:rgba(47,109,181,.11)}
+.et-fabricar{--et:#B5680A;--et-soft:rgba(181,104,10,.12)}
+.et-instalar{--et:#7A52B3;--et-soft:rgba(122,82,179,.11)}
+.et-archivar{--et:#1F8F47;--et-soft:rgba(31,143,71,.11)}
+.et-retiro{--et:#14808A;--et-soft:rgba(20,128,138,.11)}
+[data-theme="dark"] .et-medir{--et:#6AA5E8;--et-soft:rgba(106,165,232,.14)}
+[data-theme="dark"] .et-fabricar{--et:#E8A548;--et-soft:rgba(232,165,72,.14)}
+[data-theme="dark"] .et-instalar{--et:#B594E6;--et-soft:rgba(181,148,230,.14)}
+[data-theme="dark"] .et-archivar{--et:#34D670;--et-soft:rgba(52,214,112,.13)}
+[data-theme="dark"] .et-retiro{--et:#4FC4C4;--et-soft:rgba(79,196,196,.13)}
+
 .col-tabs{display:none}
 .board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:start}
-.col{background:var(--card-alt);border:1px solid var(--border);border-radius:var(--radius);padding:10px;min-height:120px}
+.col{background:var(--card-alt);border:1px solid var(--border);border-top:4px solid var(--et);border-radius:var(--radius);padding:10px;min-height:120px;transition:background .15s,opacity .15s}
 .col-h{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px}
-.col-h h2{font-family:'Fraunces',serif;font-size:17px;font-weight:600}
-.col-n{font-size:12px;font-weight:700;color:var(--text2);background:var(--card);border:1px solid var(--border);border-radius:999px;min-width:26px;padding:1px 8px;text-align:center;font-variant-numeric:tabular-nums}
+.col-h h2{font-family:'Fraunces',serif;font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
+.col-h h2::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--et);flex-shrink:0}
+.col-n{font-size:12px;font-weight:700;color:var(--et-on);background:var(--et);border-radius:999px;min-width:26px;padding:2px 8px;text-align:center;font-variant-numeric:tabular-nums}
 .col-sub{font-size:11.5px;color:var(--text3);padding:0 6px 8px;margin-top:-6px}
 .col-vacia{color:var(--text3);font-size:13px;text-align:center;padding:22px 8px}
-.col.drop{border-color:var(--gd);box-shadow:0 0 0 2px var(--gd) inset;background:var(--gd-soft)}
+
+/* === ARRASTRE: qué se ve mientras hay una tarjeta en el aire ===
+   puede  → columna a la que se puede soltar: se enciende en su color
+   bloq   → falta algún tilde para llegar ahí: se apaga, y en rojo si se pasa por encima
+   origen → de dónde salió */
+.col.puede{background:var(--et-soft);outline:2px dashed var(--et);outline-offset:2px}
+.col.puede.drop{outline:3px solid var(--et);background:color-mix(in srgb,var(--et) 20%,var(--card-alt))}
+.col.bloq{opacity:.5}
+.col.bloq.drop{opacity:1;outline:3px solid var(--red);outline-offset:2px;background:var(--red-soft)}
+.col.origen{opacity:.8}
+.slot{border:2px dashed var(--et);border-radius:var(--radius);padding:14px 10px;margin-bottom:10px;text-align:center;font-size:13px;font-weight:700;color:var(--et);background:var(--card)}
+.slot.bloq{border-color:var(--red);color:var(--red);background:var(--card)}
 
 /* Retiro en local: cuadro aparte, debajo de las 4 columnas */
 #aparte{margin-top:14px}
@@ -105,11 +133,28 @@ button{font-family:inherit;color:inherit}
 #aparte .card{margin-bottom:0}
 
 /* === TARJETA === */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px;box-shadow:var(--shadow-sm);cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.card.arrastrando{opacity:.3}
-.fantasma{position:fixed;left:0;top:0;z-index:800;pointer-events:none;margin:0;box-shadow:var(--shadow-lg);border-color:var(--gd);cursor:grabbing}
+.card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--et);border-radius:var(--radius);padding:12px;margin-bottom:10px;box-shadow:var(--shadow-sm);cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.card:hover{border-color:var(--et)}
+.card.alerta{box-shadow:0 0 0 1.5px var(--red)}
+/* el hueco que deja la tarjeta mientras viaja */
+.card.arrastrando{background:var(--et-soft);border:2px dashed var(--et);box-shadow:none}
+.card.arrastrando>*{visibility:hidden}
+/* la tarjeta en el aire: toma el color de la etapa sobre la que está */
+.fantasma{position:fixed;left:0;top:0;z-index:800;pointer-events:none;margin:0;border:2px solid var(--et);box-shadow:var(--shadow-lg);cursor:grabbing;transition:border-color .12s}
+.fantasma .f-aviso{display:none;margin:-12px -12px 10px -12px;padding:7px 12px;border-radius:7px 7px 0 0;background:var(--et);color:var(--et-on);font-size:12.5px;font-weight:700}
+.fantasma.va .f-aviso,.fantasma.bloq .f-aviso{display:block}
+.fantasma.bloq{border-color:var(--red)}
+.fantasma.bloq .f-aviso{background:var(--red);color:#fff}
+/* con el dedo viaja una versión chica, debajo del dedo, para no tapar las pestañas */
+.fantasma.mini>*:not(.f-aviso){display:none}
+.fantasma.mini>.c-id,.fantasma.mini>.c-mat{display:block}
 body.arrastre,body.arrastre *{cursor:grabbing!important}
-.card.alerta{border-left:4px solid var(--red)}
+/* al llegar a la etapa nueva, late una vez en el color de esa etapa; si no pudo pasar, sacude */
+@keyframes llego{0%{transform:scale(1.04);box-shadow:0 0 0 0 var(--et)}55%{transform:none;box-shadow:0 0 0 9px transparent}100%{box-shadow:var(--shadow-sm)}}
+@keyframes nope{0%,100%{transform:none}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.card.llego{animation:llego 1s ease-out;background:var(--et-soft)}
+.card.nope{animation:nope .45s;border-color:var(--red)}
+@media(prefers-reduced-motion:reduce){.card.llego,.card.nope{animation:none}}
 .c-id{font-size:15px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 .c-id b{font-weight:700;font-variant-numeric:tabular-nums}
 .c-id .zona{color:var(--text3);font-weight:500}
@@ -135,10 +180,11 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .chk.on::before{content:'✓';background:var(--gr);border-color:var(--gr)}
 [data-theme="dark"] .chk.on::before{color:#04220F}
 
-.c-avanzar{display:block;width:100%;margin-top:10px;padding:10px 12px;border:none;border-radius:var(--radius-sm);background:var(--dk);color:var(--cr);font-size:13.5px;font-weight:700;cursor:pointer}
-.c-avanzar:hover{background:var(--dk2)}
-[data-theme="dark"] .c-avanzar{background:var(--gd);color:#1A1816}
-.c-avanzar.falta,[data-theme="dark"] .c-avanzar.falta{background:none;color:var(--text3);border:1px dashed var(--border);font-weight:600}
+/* el botón lleva el color de la etapa a la que manda */
+.c-avanzar{display:block;width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--et);border-radius:var(--radius-sm);background:var(--et);color:var(--et-on);font-size:13.5px;font-weight:700;cursor:pointer}
+.c-avanzar:hover{filter:brightness(1.08)}
+.c-avanzar.falta{background:none;color:var(--text3);border:1px dashed var(--border);font-weight:600}
+.c-avanzar.falta:hover{filter:none;color:var(--et);border-color:var(--et)}
 
 .c-mas{display:block;margin:8px auto 0;padding:4px 10px;border:none;background:none;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer}
 .c-mas:hover{color:var(--text)}
@@ -183,10 +229,16 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .wrap{padding:0 12px 60px}
   .col-tabs{display:flex;gap:5px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
   .col-tabs button{flex:1 1 0;min-width:0;padding:7px 2px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:11.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
-  .col-tabs button.on{background:var(--dk);color:var(--cr);border-color:var(--dk)}
-  [data-theme="dark"] .col-tabs button.on{background:var(--gd);color:#1A1816;border-color:var(--gd)}
+  .col-tabs button{border-bottom:3px solid var(--et)}
+  .col-tabs button.on{background:var(--et);color:var(--et-on);border-color:var(--et)}
   .col-tabs button i{display:block;font-style:normal;font-size:13px;opacity:.75;font-variant-numeric:tabular-nums}
-  .col-tabs button.drop{border-color:var(--gd);box-shadow:0 0 0 2px var(--gd) inset}
+  .col-tabs button.puede{background:var(--et-soft);color:var(--et);border-color:var(--et);border-style:dashed dashed solid}
+  .col-tabs button.puede.drop{background:var(--et);color:var(--et-on);border-style:solid;transform:scale(1.07)}
+  .col-tabs button.bloq{opacity:.45}
+  .col-tabs button.bloq.drop{opacity:1;background:var(--red-soft);color:var(--red);border-color:var(--red)}
+  @keyframes tabllego{0%{transform:scale(1.14);box-shadow:0 0 0 0 var(--et)}100%{transform:none;box-shadow:0 0 0 9px transparent}}
+  .col-tabs button.llego{animation:tabllego .9s ease-out}
+  .col,.col.puede,.col.bloq,.col.origen{border-top:none;outline:none;opacity:1;background:none}
   #aparte{margin-top:0}
   #aparte .cards{grid-template-columns:1fr}
   .col-sub{display:none}
@@ -269,6 +321,8 @@ let colMovil=localStorage.getItem('bs-tablero-col')||'medir';
 let ocupado=false;  // hay un guardado en curso
 let fechaKey='';    // tarjeta a la que se le está eligiendo fecha
 let drag=null;      // arrastre en curso
+let recien=null;    // última tarjeta movida (o rebotada), para animarla: {key,tipo,t}
+const slot=document.createElement('div'); // "Soltar acá", viaja de columna en columna
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -355,7 +409,12 @@ function htmlCard(c){
   const cols=columnas();
   const idx=cols.indexOf(e);
   const sig=idx>=0?cols[idx+1]:null;
-  let h='<article class="card'+(atrasada(c)?' alerta':'')+'" data-key="'+esc(c.key)+'">';
+  let cls='card'+(atrasada(c)?' alerta':''),estilo='';
+  if(recien&&recien.key===c.key){
+    const dt=Date.now()-recien.t; // si se redibuja en el medio, la animación sigue donde iba
+    if(dt<1000){cls+=' '+recien.tipo;estilo=' style="animation-delay:-'+dt+'ms"';}
+  }
+  let h='<article class="'+cls+'"'+estilo+' data-key="'+esc(c.key)+'">';
 
   h+='<div class="c-id"><b>'+esc(c.cliente_nro)+'-'+c.sub+'</b> · '+esc(nombreCorto(c.nombre)||'Sin nombre');
   if(c.zona)h+=' <span class="zona">· '+esc(c.zona)+'</span>';
@@ -390,7 +449,7 @@ function htmlCard(c){
   h+='</div>';
 
   const falta=faltanDe(c,e).length>0;
-  h+='<button type="button" class="c-avanzar'+(falta?' falta':'')+'" data-act="'+(sig?'avanzar':'archivar')+'">'+(sig?'Siguiente: '+esc(sig.titulo)+' →':'Archivar obra')+'</button>';
+  h+='<button type="button" class="c-avanzar et-'+(sig?esc(sig.id):'archivar')+(falta?' falta':'')+'" data-act="'+(sig?'avanzar':'archivar')+'">'+(sig?'Siguiente: '+esc(sig.titulo)+' →':'Archivar obra')+'</button>';
 
   const abre=abierta===c.key;
   h+='<button type="button" class="c-mas" data-act="mas" aria-expanded="'+abre+'">'+(abre?'Menos':'Más')+'</button>';
@@ -427,8 +486,9 @@ function dibujar(){
     });
     const on=e.id===colMovil;
     const corto=e.aparte?'Retiro':e.titulo.replace('Por ','').replace(/^./,x=>x.toUpperCase());
-    tabs+='<button type="button" class="'+(on?'on':'')+'" data-col="'+esc(e.id)+'">'+esc(corto)+'<i>'+lista.length+'</i></button>';
-    let h='<section class="col'+(on?' on':'')+'" data-col="'+esc(e.id)+'">';
+    const llega=recien&&recien.tipo==='llego'&&Date.now()-recien.t<300&&lista.some(c=>c.key===recien.key);
+    tabs+='<button type="button" class="et-'+esc(e.id)+(on?' on':'')+(llega?' llego':'')+'" data-col="'+esc(e.id)+'">'+esc(corto)+'<i>'+lista.length+'</i></button>';
+    let h='<section class="col et-'+esc(e.id)+(on?' on':'')+'" data-col="'+esc(e.id)+'">';
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2><span class="col-n">'+lista.length+'</span></div>';
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
     const cards=lista.map(htmlCard).join('');
@@ -461,9 +521,15 @@ async function guardar(c,body,aplicar){
 function mover(c,destino){
   if(!etapaDe(destino)||destino===c.etapa)return;
   const f=faltaPara(c,destino);
-  if(f.length){toast('Falta: '+f.join(', '));return;}
+  if(f.length){
+    recien={key:c.key,tipo:'nope',t:Date.now()};
+    dibujar();
+    toast('Falta: '+f.join(', '));
+    return;
+  }
   guardar(c,{accion:'mover',a:destino},()=>{
     c.etapa=destino;c.fecha='';c.desde=new Date().toISOString();
+    recien={key:c.key,tipo:'llego',t:Date.now()};
   });
 }
 
@@ -500,8 +566,6 @@ wrap.addEventListener('click',ev=>{
       if(clave==='sena')c.sena=null;
     });
   }else if(act==='avanzar'){
-    const f=faltanDe(c,etapaDe(c.etapa));
-    if(f.length){toast('Falta: '+f.join(', '));return;}
     mover(c,cols[idx+1].id);
   }else if(act==='atras'){
     if(idx>0)mover(c,cols[idx-1].id);
@@ -559,24 +623,54 @@ function dragMarcar(zona){
   if(drag.zona===zona)return;
   if(drag.zona)drag.zona.classList.remove('drop');
   drag.zona=zona;
-  if(zona&&zona.dataset.col!==drag.c.etapa)zona.classList.add('drop');
+  const g=drag.fantasma,aviso=g.querySelector('.f-aviso');
+  slot.remove();
+  g.className=drag.base+' et-'+drag.c.etapa;
+  if(!zona||zona.dataset.col===drag.c.etapa)return;
+  zona.classList.add('drop');
+  const destino=zona.dataset.col,f=drag.falta[destino]||[];
+  const txt=f.length?'Falta: '+f.join(', '):'Soltar en '+etapaDe(destino).titulo;
+  // la tarjeta en el aire se pinta del color de la etapa de destino, o de rojo si no puede pasar
+  g.className=drag.base+' '+(f.length?'bloq et-'+drag.c.etapa:'va et-'+destino);
+  aviso.textContent=txt;
+  if(zona.classList.contains('col')){
+    slot.className='slot'+(f.length?' bloq':'');
+    slot.textContent=txt;
+    zona.insertBefore(slot,zona.querySelector('.card,.cards,.col-vacia'));
+  }
 }
 function dragEmpezar(){
   const r=drag.art.getBoundingClientRect();
   drag.dx=drag.x-r.left;drag.dy=drag.y-r.top;
   const g=drag.art.cloneNode(true);
-  g.classList.add('fantasma');
-  g.style.width=r.width+'px';
+  drag.base='card fantasma'+(drag.dedo?' mini':'');
+  g.className=drag.base+' et-'+drag.c.etapa;
+  g.removeAttribute('style');
+  if(drag.dedo){const w=Math.min(250,r.width);g.style.width=w+'px';drag.dx=w/2;drag.dy=-26;}
+  else g.style.width=r.width+'px';
+  const aviso=document.createElement('div');
+  aviso.className='f-aviso';
+  g.insertBefore(aviso,g.firstChild);
   document.body.appendChild(g);
   drag.fantasma=g;
   drag.activo=true;
   drag.art.classList.add('arrastrando');
   document.body.classList.add('arrastre');
+  // todas las etapas muestran de entrada si reciben o no esta tarjeta
+  drag.falta={};
+  document.querySelectorAll('.col[data-col],#colTabs button[data-col]').forEach(z=>{
+    const id=z.dataset.col;
+    if(id===drag.c.etapa){z.classList.add('origen');return;}
+    if(!drag.falta[id])drag.falta[id]=faltaPara(drag.c,id);
+    z.classList.add(drag.falta[id].length?'bloq':'puede');
+  });
   dragSeguir(drag.x,drag.y);
   requestAnimationFrame(dragBorde);
 }
 function dragSeguir(x,y){
-  drag.fantasma.style.transform='translate('+(x-drag.dx)+'px,'+(y-drag.dy)+'px) rotate(1.5deg)';
+  let gx=x-drag.dx;
+  if(drag.dedo)gx=Math.max(6,Math.min(gx,window.innerWidth-drag.fantasma.offsetWidth-6)); // en celular no se sale de la pantalla
+  drag.fantasma.style.transform='translate('+gx+'px,'+(y-drag.dy)+'px) rotate(1.5deg)';
   dragMarcar(dragZona(x,y));
 }
 // Con la tarjeta quieta cerca del borde de la pantalla, la página acompaña
@@ -594,9 +688,10 @@ function dragSoltar(cancelar){
   clearTimeout(d.espera);
   if(!d.activo)return;
   d.fantasma.remove();
+  slot.remove();
   d.art.classList.remove('arrastrando');
   document.body.classList.remove('arrastre');
-  if(d.zona)d.zona.classList.remove('drop');
+  document.querySelectorAll('.col[data-col],#colTabs button[data-col]').forEach(z=>z.classList.remove('puede','bloq','origen','drop'));
   if(!cancelar&&d.zona)mover(d.c,d.zona.dataset.col);
 }
 

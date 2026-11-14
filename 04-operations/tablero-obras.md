@@ -12,6 +12,14 @@ Dónde está cada obra y qué le falta para avanzar. Vive en `blackstones.com.ar
 - **Regla única:** para avanzar hay que tener todos los tildes de la columna. Hacia atrás se mueve libre.
 - En celular se ve una columna a la vez. Para arrastrar: mantener apretada la tarjeta y soltarla sobre la pestaña de destino.
 
+## Colores
+
+Cada etapa tiene un color fijo, que se repite en la columna, el borde de la tarjeta, la pestaña del celular y el botón que lleva a esa etapa: **Por medir** azul, **Por fabricar** naranja, **Por instalar** violeta, **Por archivar** verde, **Retiro en local** turquesa. El rojo queda reservado para lo que está mal (atrasada, no puede pasar).
+
+Al levantar una tarjeta, las columnas que la reciben se encienden en su color y las que no, se apagan. Sobre una columna, la tarjeta dice "Soltar en …" con el color de destino, o "Falta: …" en rojo. Al soltar, late una vez en el color nuevo; si no podía pasar, sacude y vuelve.
+
+Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS de `presupuestos/tablero.php`.
+
 ## Las columnas y sus tildes
 
 | Columna | Fecha de la tarjeta | Tildes para salir |
