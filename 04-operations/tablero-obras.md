@@ -7,11 +7,14 @@ Dónde está cada obra y qué le falta para avanzar. Vive en `blackstones.com.ar
 ## Cómo funciona
 
 - Una obra aparece sola cuando su presupuesto se marca **Aprobado** en Presupuestos.
-- Para las que no pasaron por la calculadora, la columna Por medir tiene el botón **+ Cargar obra** (cliente, teléfono, dirección, material, trabajo). Crea un presupuesto aprobado en el hub, con importe en 0: administración lo completa desde Presupuestos.
+- La columna Por medir tiene el botón **+ Cargar obra**, con dos usos:
+  - **Con N° de presupuesto** (`0042`, o `0042-2` si tiene versiones): busca ese presupuesto de la calculadora y lo aprueba. La ficha queda atada al presupuesto real.
+  - **Sin número** (cliente, teléfono, dirección, material, trabajo): para obras que no pasaron por la calculadora. Crea un presupuesto aprobado en el hub, con importe en 0: administración lo completa desde Presupuestos.
+- En Por medir hay dos filtros, **Sin plano** y **Sin foto de bacha**, con la cantidad de fichas a las que les falta cada uno. Las obras que no llevan bacha no cuentan como faltantes.
 - **Buscador** arriba del tablero: por cliente, N°, material, zona, teléfono, dirección o instalador. En celular salta solo a la pestaña donde está la obra.
 - La tarjeta se identifica con el código del presupuesto: N° de cliente + versión (`0042-1`).
 - La tarjeta se **arrastra** de una columna a otra, o se avanza con el botón **Siguiente**. Las dos cosas hacen lo mismo y respetan la misma regla.
-- **Regla única:** para avanzar hay que tener todos los tildes de la columna. Hacia atrás se mueve libre.
+- **Regla única:** para avanzar hay que tener todos los tildes de la columna en la que está la tarjeta. Hacia atrás se mueve libre.
 - En celular se ve una columna a la vez. Para arrastrar: mantener apretada la tarjeta y soltarla sobre la pestaña de destino.
 
 ## Colores
@@ -38,9 +41,9 @@ Cinco tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
 - **Trajo la seña:** el monto, en $ o USD. Es el bloqueante de salida de Por medir: la trae el medidor, o el cliente señó antes.
 - **Tenemos la bacha:** de quién es. Nuestra (la proveemos), del cliente, o no lleva.
 - **Piso y ascensor:** cómo sube la pieza. Planta baja, por ascensor o por escalera con cuántos pisos ($30.000 por piso si no entra en el ascensor).
-- **Instaladores:** quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). Se elige al medir y se puede cambiar en Por instalar tocando el mismo tilde. La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/tablero.php`.
+- **Instaladores:** quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). Se elige al medir y se puede cambiar en Por instalar tocando el mismo tilde. La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/_tablero.php`.
 
-En Por fabricar hay un quinto tilde con dato: **Fabricadores**, uno o varios de su lista (Negro, Espinola, David, Jostin, Pedro; se edita en `$BS_FABRICADORES`). En Por instalar queda escrito quién la fabricó.
+En Por fabricar hay un quinto tilde con dato: **Fabricadores**, uno o varios de su lista (Negro, Espinola, David, Jostin, Pedro, Jose; se edita en `$BS_FABRICADORES`). En Por instalar queda escrito quién la fabricó.
 
 Esos datos quedan a la vista en las etapas siguientes ("Bacha del cliente · Sube por escalera, 3 pisos · Instalan: Negro, David").
 
@@ -94,15 +97,27 @@ En "Más" → **Borrar ficha**. Siempre pide confirmación y dice qué se pierde
 - Si la obra vino de un presupuesto de la calculadora, el presupuesto **no** se borra: vuelve a Enviado en Presupuestos. Si se aprueba de nuevo, la ficha reaparece en blanco.
 - Si la obra se cargó a mano con "Cargar obra", se borra completa.
 
+## Carga masiva (traspaso de una planilla)
+
+Para pasar muchas obras de una vez, `calculadora/api/tablero-importar.php`:
+
+1. Se sube por FTP `bs-data/tablero/importar.json` (fuera de `public_html`; tiene datos de clientes y **no va al repo**, que es público).
+2. Con sesión iniciada se abre `blackstones.com.ar/calculadora/api/tablero-importar.php`: muestra qué hay hoy y qué se va a cargar, sin tocar nada.
+3. Recién al tildar la confirmación y apretar el botón se ejecuta. Si el archivo dice `borrar_todo`, antes vacía el tablero con el mismo criterio que "Borrar ficha".
+4. El archivo se renombra a `importar-hecho-<fecha>.json`, así no corre dos veces.
+
+Es un traspaso: la planilla se adapta a los campos del tablero, no al revés. Lo que no tiene campo (saldo pendiente, día de entrega, horario del turno, modelo de bacha) va a la nota de la ficha. El formato del archivo está en el encabezado del endpoint.
+
 ## Dónde vive
 
 | Qué | Dónde |
 |---|---|
 | Página | `site/public_html/presupuestos/tablero.php` |
-| Endpoint y definición de etapas/tildes | `site/public_html/calculadora/api/tablero.php` (array `$BS_ETAPAS`: para cambiar un tilde o un título se toca solo ahí) |
+| Endpoint de las tarjetas | `site/public_html/calculadora/api/tablero.php` |
+| Definición de etapas, tildes y listas de personas | `site/public_html/calculadora/api/_tablero.php` (array `$BS_ETAPAS`: para cambiar un tilde o un título se toca solo ahí) |
 | Adjuntos (subir, ver, borrar) | `site/public_html/calculadora/api/tablero-adjunto.php` |
-| Cargar obra a mano | `site/public_html/calculadora/api/tablero-cargar.php` |
-| Constantes y funciones compartidas | `site/public_html/calculadora/api/_tablero.php` |
+| Cargar obra (a mano o por N° de presupuesto) | `site/public_html/calculadora/api/tablero-cargar.php` |
+| Carga masiva | `site/public_html/calculadora/api/tablero-importar.php` |
 | Datos | `bs-data/tablero/obras.json`, aparte de `clientes/`. Si falta, el hub y la calculadora siguen igual |
 | Archivar | `state.php` con `conservar_hermanas: true` |
 

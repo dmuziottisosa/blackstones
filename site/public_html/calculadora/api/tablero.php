@@ -51,126 +51,6 @@ bs_ensure_dirs();
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-// ------------------------------------------------------------
-// Definición única de las etapas. El frontend dibuja desde acá:
-// para cambiar un tilde o un título se toca solo este array.
-//   fecha  → qué significa la fecha de la tarjeta en esa etapa
-//   cierra → tilde que da por cumplida esa fecha (si falta y la fecha ya
-//            pasó, la tarjeta se marca atrasada). Vacío = la fecha se cumple
-//            recién cuando la tarjeta sale de la columna.
-//   checks → tildes que hay que completar para pasar a la siguiente
-//   boton / hecho → ver "medir"
-// ------------------------------------------------------------
-$BS_ETAPAS = [
-    'medir' => [
-        'titulo' => 'Por medir',
-        'fecha'  => 'Medición',
-        'cierra' => 'medido',
-        // boton: tilde que en la tarjeta es un botón propio ("Medido") y no
-        // una pastilla. Las obras que ya lo tienen bajan al final de la
-        // columna, bajo el título "hecho": arriba queda la cola real de lo
-        // que falta medir.
-        'boton'  => 'medido',
-        'hecho'  => 'Ya medidas · esperando pasar a fabricar',
-        'checks' => [
-            'medidor' => 'Medidor',
-            'apta'   => 'Obra lista para medir',
-            'medido' => 'Medido',
-            'medida' => 'Medidas y planos listos',
-            'sena'   => 'Trajo la seña',
-            'bacha'  => 'Tenemos la bacha',
-            'placa'  => 'Tenemos la placa',
-            'acceso' => 'Piso y ascensor',
-            'equipo' => 'Instaladores',
-        ],
-    ],
-    // Sin fecha a propósito: se fabrica en el orden en que entró (la cola).
-    'fabricar' => [
-        'titulo' => 'Por fabricar',
-        'fecha'  => '',
-        'cierra' => '',
-        // Control de la pieza antes de que salga del taller.
-        'checks' => [
-            'fabrica'       => 'Fabricadores',
-            'qc_corte'      => 'Se cortó bien',
-            'qc_medida'     => 'Medida y color correctos',
-            'qc_inglete'    => 'Inglete y zócalos',
-            'qc_bacha'      => 'Es la bacha correcta',
-            'qc_bacha_lado' => 'Bacha hacia el lado correcto',
-        ],
-    ],
-    'instalar' => [
-        'titulo' => 'Por instalar',
-        // Sin tilde de cierre: instalada = se pasa a "Por archivar". Si la
-        // fecha de instalación pasó y sigue acá, se marca atrasada.
-        // exige_fecha: sin fecha de instalación cargada no sale de la columna.
-        // pide_hora: el turno lleva día y hora, y la hora también es obligatoria.
-        'fecha'  => 'Instalación',
-        'cierra' => '',
-        'exige_fecha' => true,
-        'pide_hora'   => true,
-        'checks' => [
-            'avisado' => 'Se avisó al cliente',
-            'equipo'  => 'Instaladores',
-        ],
-    ],
-    'archivar' => [
-        'titulo' => 'Por archivar',
-        'fecha'  => '',
-        'cierra' => '',
-        'checks' => [
-            'saldo' => 'Saldo cobrado',
-        ],
-    ],
-    // Fuera de las 4 columnas: el cliente retira por el local.
-    'retiro' => [
-        'titulo' => 'Retiro en local',
-        'aparte' => true,
-        'fecha'  => 'Retiro',
-        'cierra' => 'retirada',
-        'checks' => [
-            'sena'      => 'Seña cobrada',
-            'terminada' => 'Pieza terminada',
-            'avisado'   => 'Se avisó al cliente',
-            'retirada'  => 'Retirada',
-            'saldo'     => 'Saldo cobrado',
-        ],
-    ],
-];
-// Quiénes instalan. Se eligen uno o varios por obra (tilde "Instaladores").
-$BS_INSTALADORES = ['Negro', 'Espinola', 'Cesar', 'David', 'Jostin'];
-// Quiénes fabrican. Uno o varios por obra (tilde "Fabricadores", en Por fabricar).
-$BS_FABRICADORES = ['Negro', 'Espinola', 'David', 'Jostin', 'Pedro'];
-// Quiénes miden. Uno o varios por obra (tilde "Medidor", en Por medir).
-$BS_MEDIDORES = ['Cesar', 'David', 'Negro', 'Jose'];
-// tilde → [lista de nombres válidos, campo de la obra donde se guarda]
-$BS_TILDES_PERSONAS = [
-    'medidor' => [$BS_MEDIDORES, 'medidor'],
-    'equipo'  => [$BS_INSTALADORES, 'equipo'],
-    'fabrica' => [$BS_FABRICADORES, 'fabrica'],
-];
-
-// Las 4 columnas, en orden. "retiro" queda afuera de la secuencia.
-$BS_ETAPA_IDS = [];
-foreach ($BS_ETAPAS as $id => $def) {
-    if (empty($def['aparte'])) $BS_ETAPA_IDS[] = $id;
-}
-
-// Plazo que se le dice al cliente, en días corridos desde la medición.
-// Regla del negocio: granito 15, todo lo demás 20. En el tablero se muestra
-// como SEMANA estimada de entrega: es guía, el orden lo da la cola.
-define('BS_PLAZO_GRANITO', 15);
-define('BS_PLAZO_RESTO',   20);
-
-function bs_tablero_hora_valida($h) {
-    return is_string($h) && preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $h) === 1;
-}
-
-function bs_tablero_fecha_valida($f) {
-    if (!is_string($f) || !preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $f, $m)) return false;
-    return checkdate(intval($m[2]), intval($m[3]), intval($m[1]));
-}
-
 /**
  * Material a mostrar y plazo prometido, leídos del presupuesto guardado.
  * Si el hub tiene cargado "material_final", manda ese texto.
@@ -227,16 +107,6 @@ function bs_tablero_acceso($obra) {
     $a = $obra['acceso'] ?? null;
     if (!is_array($a) || !in_array($a['modo'] ?? '', ['pb', 'ascensor', 'escalera'], true)) return null;
     return ['modo' => $a['modo'], 'pisos' => ($a['modo'] === 'escalera') ? max(1, intval($a['pisos'] ?? 1)) : 0];
-}
-
-/**
- * Obras cargadas antes de que existiera el botón "Medido": si tienen
- * "Medidas y planos listos", ya estaban medidas.
- */
-function bs_tablero_normalizar($obra) {
-    if (!is_array($obra['checks'])) $obra['checks'] = [];
-    if (!empty($obra['checks']['medida'])) $obra['checks']['medido'] = true;
-    return $obra;
 }
 
 function bs_tablero_zona($cot) {
@@ -549,7 +419,7 @@ try {
 
         // Regla única, valga para el botón o para el arrastre: hacia atrás
         // o hacia Retiro se mueve libre; hacia adelante hay que tener
-        // completos los tildes de todas las etapas que quedan atrás.
+        // completos los tildes de la etapa actual (y de las que saltee).
         $destino = array_search($nueva, $BS_ETAPA_IDS, true);
         $retrocede = !$en_retiro && $destino !== false && $destino < $idx;
         if ($destino !== false && !$retrocede) {
@@ -564,7 +434,10 @@ try {
                     $faltan[] = 'Hora de ' . $nombre;
                 }
             }
-            for ($i = 0; $i < $destino; $i++) {
+            // Tildes de la etapa en la que está y de las que se saltearía. Lo
+            // de más atrás no se vuelve a pedir (una obra importada puede
+            // haber entrado directo a una etapa avanzada).
+            for ($i = ($en_retiro ? 0 : $idx); $i < $destino; $i++) {
                 foreach ($BS_ETAPAS[$BS_ETAPA_IDS[$i]]['checks'] as $cid => $label) {
                     if (empty($obra['checks'][$cid])) $faltan[] = $label;
                 }

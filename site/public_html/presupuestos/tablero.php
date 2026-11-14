@@ -256,6 +256,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .campo input{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
 .modal .campo input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
 
+/* Filtros de Por medir: fichas sin plano / sin foto de bacha */
+.col-filtros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.col-filtros button{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer}
+.col-filtros button i{font-style:normal;opacity:.7;font-variant-numeric:tabular-nums}
+.col-filtros button.on{background:var(--et);border-color:var(--et);color:var(--et-on)}
+
 /* === ADJUNTOS: foto de bacha y plano === */
 .c-adj{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .adj{position:relative;width:60px;height:60px;border-radius:8px;border:1px solid var(--border);background:var(--card-alt);padding:0;overflow:hidden;cursor:pointer;flex-shrink:0}
@@ -397,6 +403,7 @@ let ocupado=false;  // hay un guardado en curso
 let fechaKey='';    // tarjeta a la que se le está eligiendo fecha
 let drag=null;      // arrastre en curso
 let buscado=[];     // palabras del buscador, ya sin mayúsculas ni acentos
+const falta={plano:false,bacha:false}; // filtros de Por medir: fichas a las que les falta ese adjunto
 let recien=null;    // última tarjeta movida (o rebotada), para animarla: {key,tipo,t}
 const slot=document.createElement('div'); // "Soltar acá", viaja de columna en columna
 
@@ -500,7 +507,8 @@ function faltaPara(c,destino){
   const i=cols.findIndex(e=>e.id===c.etapa),j=cols.findIndex(e=>e.id===destino);
   if(j<0||(i>=0&&j<i))return [];
   let f=[];
-  for(let n=0;n<j;n++)f=f.concat(faltanDe(c,cols[n]));
+  // desde la etapa en la que está (o desde el principio, si viene de Retiro) hasta la anterior al destino
+  for(let n=Math.max(i,0);n<j;n++)f=f.concat(faltanDe(c,cols[n]));
   return f;
 }
 
@@ -526,6 +534,12 @@ function coincide(c){
   return buscado.every(w=>c._txt.indexOf(w)>=0);
 }
 
+// ¿Le falta ese adjunto? La foto de bacha no se pide si la obra no lleva bacha.
+function sinAdjunto(c,tipo){
+  if(tipo==='bacha'&&c.bacha==='no')return false;
+  return !c.adjuntos.some(a=>a.tipo===tipo);
+}
+
 function htmlCard(c){
   const e=etapaDe(c.etapa);
   const cols=columnas();
@@ -549,13 +563,13 @@ function htmlCard(c){
     h+='<div class="c-turno"><button type="button" class="c-fecha listo" data-act="check" data-clave="'+esc(e.boton)+'" title="Tocar para desmarcar">Ya medido'+(c.medido_at?' · '+esc(fechaCorta(c.medido_at)):'')+'</button></div>';
   }else if(e.fecha){
     let cls='',txt;
-    const hora=e.pide_hora?(c.hora?' · '+c.hora+' hs':' · falta la hora'):'';
+    const hora=c.hora?' · '+c.hora+' hs':(e.pide_hora&&e.exige_fecha?' · falta la hora':'');
     if(!c.fecha&&e.exige_fecha){cls=' aviso';txt='Falta fecha '+(e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
-    else if(!c.fecha){cls=' vacia';txt='+ Fecha '+(e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
+    else if(!c.fecha){cls=' vacia';txt='+ Fecha de '+e.fecha.toLowerCase();}
     else if(atrasada(c)){cls=' atrasada';txt=e.fecha+' '+fechaCorta(c.fecha)+(c.hora?' · '+c.hora+' hs':'')+' · atrasada';}
     else if(c.fecha===HOY){cls=' hoy';txt=e.fecha+' · hoy'+hora;}
     else txt=e.fecha+' · '+fechaCorta(c.fecha)+hora;
-    if(c.fecha&&e.pide_hora&&!c.hora&&!atrasada(c))cls=' aviso';
+    if(c.fecha&&e.pide_hora&&e.exige_fecha&&!c.hora&&!atrasada(c))cls=' aviso';
     h+='<div class="c-turno"><button type="button" class="c-fecha'+cls+'" data-act="fecha">'+esc(txt)+'</button>'+
       (e.boton?'<button type="button" class="c-hecho" data-act="check" data-clave="'+esc(e.boton)+'">'+esc(e.checks.find(k=>k.id===e.boton).label)+'</button>':'')+'</div>';
   }
@@ -603,7 +617,7 @@ function htmlCard(c){
     h+='<div class="c-det">';
     if(c.celular)h+='<div class="fila"><span>Teléfono</span><div>'+(wa?'<a href="'+esc(wa)+'" target="_blank" rel="noopener">'+esc(c.celular)+'</a>':esc(c.celular))+'</div></div>';
     if(c.direccion)h+='<div class="fila"><span>Dirección</span><div><a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(c.direccion)+'" target="_blank" rel="noopener">'+esc(c.direccion)+'</a></div></div>';
-    h+='<input type="text" maxlength="140" data-nota placeholder="Nota (ej: falta la bacha)" value="'+esc(c.nota)+'">';
+    h+='<input type="text" maxlength="300" data-nota placeholder="Nota (ej: falta la bacha)" value="'+esc(c.nota)+'">';
     h+='<div class="acciones">';
     if(c.tiene_detalle)h+='<a href="/calculadora/api/render-pdf.php?nro='+encodeURIComponent(c.cliente_nro)+'&sub='+c.sub+'" target="_blank" rel="noopener">Ver presupuesto</a>';
     if(e.aparte)h+='<button type="button" class="lnk" data-act="atras">Volver a las columnas</button>';
@@ -629,13 +643,19 @@ function dibujar(){
   let tabs='',cols='',aparte='';
   const ultima=columnas().length-1;
   ETAPAS.forEach(e=>{
-    const lista=visibles.filter(c=>c.etapa===e.id).sort((a,b)=>{
+    const esPrimera=columnas().indexOf(e)===0;
+    const deEtapa=visibles.filter(c=>c.etapa===e.id);
+    const lista=deEtapa.filter(c=>!esPrimera||((!falta.plano||sinAdjunto(c,'plano'))&&(!falta.bacha||sinAdjunto(c,'bacha')))).sort((a,b)=>{
       const ha=hecho(a),hb=hecho(b);
       if(ha!==hb)return ha?1:-1;                             // lo que falta hacer, arriba
       if(ha&&a.medido_at!==b.medido_at)return a.medido_at<b.medido_at?-1:1; // ya medidas: la más vieja primero
       if(!!a.fecha!==!!b.fecha)return a.fecha?-1:1;          // con turno primero
       if(a.fecha!==b.fecha)return a.fecha<b.fecha?-1:1;      // el turno más próximo arriba
-      if(a.hora!==b.hora)return a.hora<b.hora?-1:1;          // mismo día: el más temprano
+      if(a.hora!==b.hora){                                   // mismo día: el más temprano; sin hora, al final
+        if(!a.hora)return 1;
+        if(!b.hora)return -1;
+        return a.hora<b.hora?-1:1;
+      }
       if(a.desde!==b.desde)return a.desde<b.desde?-1:1;      // después, la cola: el que entró antes
       return a.key<b.key?-1:1;
     });
@@ -647,7 +667,10 @@ function dibujar(){
     let h='<section class="col et-'+esc(e.id)+(on?' on':'')+'" data-col="'+esc(e.id)+'">';
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2>'+(sinT?'<span class="col-aviso">'+sinT+' sin turno</span>':'')+'<span class="col-n">'+lista.length+'</span></div>';
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
-    if(columnas().indexOf(e)===0)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
+    if(esPrimera){
+      h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
+      h+='<div class="col-filtros">'+['plano','bacha'].map(t=>'<button type="button" class="'+(falta[t]?'on':'')+'" data-falta="'+t+'" aria-pressed="'+falta[t]+'">'+(t==='plano'?'Sin plano':'Sin foto de bacha')+' <i>'+deEtapa.filter(c=>sinAdjunto(c,t)).length+'</i></button>').join('')+'</div>';
+    }
     // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
     const nHechas=e.boton?lista.filter(hecho).length:0;
     const cards=lista.map((c,i)=>(nHechas&&i===lista.length-nHechas?'<div class="col-sep">'+esc(e.hecho)+' ('+nHechas+')</div>':'')+htmlCard(c)).join('');
@@ -722,6 +745,8 @@ $('colTabs').addEventListener('click',ev=>{
 
 wrap.addEventListener('click',ev=>{
   if(ev.target.closest('[data-cargar]')){pedirCargar();return;}
+  const bf=ev.target.closest('[data-falta]');
+  if(bf){falta[bf.dataset.falta]=!falta[bf.dataset.falta];dibujar();return;}
   const b=ev.target.closest('[data-act]');
   if(!b)return;
   const art=b.closest('.card');
@@ -989,11 +1014,11 @@ function pedirAcceso(c){
 function pedirTurno(c){
   const e=etapaDe(c.etapa);
   abrirModal(e.fecha+' · '+c.cliente_nro+'-'+c.sub,
-    '<p>¿Qué día y a qué hora?</p><div class="sena"><input type="date" id="tuDia" value="'+esc(c.fecha)+'"><input type="time" id="tuHora" step="900" value="'+esc(c.hora)+'"></div>',
+    '<p>'+(e.exige_fecha?'¿Qué día y a qué hora?':'¿Qué día? La hora es opcional.')+'</p><div class="sena"><input type="date" id="tuDia" value="'+esc(c.fecha)+'"><input type="time" id="tuHora" step="900" value="'+esc(c.hora)+'"></div>',
     'Guardar',
     ()=>{
       const dia=$('tuDia').value,hora=dia?$('tuHora').value.slice(0,5):'';
-      if(dia&&!hora){$('tuHora').focus();toast('Falta la hora.');return;}
+      if(dia&&!hora&&e.exige_fecha){$('tuHora').focus();toast('Falta la hora.');return;}
       cerrarModal();
       if(dia===c.fecha&&hora===c.hora)return;
       guardar(c,{accion:'fecha',fecha:dia,hora:hora},()=>{c.fecha=dia;c.hora=hora;});
@@ -1005,6 +1030,8 @@ function pedirTurno(c){
 function pedirCargar(){
   const campo=(id,rotulo,extra)=>'<label class="campo">'+rotulo+'<input type="text" id="'+id+'" autocomplete="off" '+(extra||'')+'></label>';
   abrirModal('Cargar obra',
+    campo('cgNro','N° de presupuesto (si ya está hecho en la calculadora)','maxlength="12" inputmode="numeric" placeholder="Ej: 0042 o 0042-2"')+
+    '<p style="margin:-4px 0 12px;font-size:12px">Con el número alcanza: la ficha toma los datos de ese presupuesto. Sin número, completá lo de abajo.</p>'+
     campo('cgNombre','Cliente','maxlength="120" placeholder="Nombre y apellido"')+
     campo('cgCel','Teléfono','maxlength="40" inputmode="tel"')+
     campo('cgDir','Dirección','maxlength="200"')+
@@ -1012,11 +1039,11 @@ function pedirCargar(){
     campo('cgCon','Trabajo','maxlength="200" placeholder="Ej: Cocina en L"'),
     'Cargar obra',
     async()=>{
-      const nombre=$('cgNombre').value.trim();
-      if(!nombre){$('cgNombre').focus();toast('Falta el nombre del cliente.');return;}
+      const nombre=$('cgNombre').value.trim(),nro=$('cgNro').value.trim();
+      if(!nro&&!nombre){$('cgNombre').focus();toast('Poné el N° de presupuesto o el nombre del cliente.');return;}
       if(ocupado)return;
       ocupado=true;
-      const datos={nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:$('cgMat').value,concepto:$('cgCon').value};
+      const datos={nro:nro,nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:$('cgMat').value,concepto:$('cgCon').value};
       cerrarModal();
       try{
         const j=await pedir(API_CARGAR,datos);
@@ -1028,7 +1055,7 @@ function pedirCargar(){
       ocupado=false;
       await cargar();
     });
-  $('cgNombre').focus();
+  $('cgNro').focus();
 }
 
 // Bacha: de quién es.
