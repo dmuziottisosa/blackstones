@@ -177,15 +177,9 @@ function bs_tablero_fecha_valida($f) {
     return checkdate(intval($m[2]), intval($m[3]), intval($m[1]));
 }
 
-/**
- * Obras cargadas antes de que existiera el botón "Medido": si tienen
- * "Medidas y planos listos", ya estaban medidas.
- */
+/** Deja la obra con la forma esperada (tildes como array). No infiere ningún tilde a partir de otro. */
 function bs_tablero_normalizar($obra) {
     if (!is_array($obra['checks'])) $obra['checks'] = [];
-    if (!empty($obra['checks']['medida'])) $obra['checks']['medido'] = true;
-    // Mismo criterio en Por cortar: el control del gerente supone que ya se cortó.
-    if (!empty($obra['checks']['qc_corte'])) $obra['checks']['cortado'] = true;
     return $obra;
 }
 

@@ -705,8 +705,11 @@ function dibujar(){
     if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
     if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+'" data-falta="'+f[0]+'" aria-pressed="'+falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
     // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
-    const nHechas=e.boton?lista.filter(hecho).length:0;
-    const cards=lista.map((c,i)=>(nHechas&&i===lista.length-nHechas?'<div class="col-sep">'+esc(e.hecho)+' ('+nHechas+')</div>':'')+htmlCard(c)).join('');
+    // El separador va antes del bloque final de fichas ya hechas.
+    let corte=lista.length;
+    while(e.boton&&corte>0&&hecho(lista[corte-1]))corte--;
+    const nHechas=lista.length-corte;
+    const cards=lista.map((c,i)=>(nHechas&&i===corte?'<div class="col-sep">'+esc(e.hecho)+' ('+nHechas+')</div>':'')+htmlCard(c)).join('');
     if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(buscado.length?'Sin resultados':'Nadie retira por el local')+'</div>';
     else h+=lista.length?cards:'<div class="col-vacia">'+(buscado.length?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
     h+='</section>';
@@ -722,8 +725,19 @@ function dibujar(){
 async function guardar(c,body,aplicar){
   if(ocupado)return;
   ocupado=true;
+  // Si el cambio le mueve el lugar en la cola (fecha, hora, Medido, Cortado), la pantalla
+  // la acompaña y la marca un instante, así no se pierde de vista.
+  const sel='.card[data-key="'+c.key+'"]';
+  const a0=document.querySelector(sel);
+  const y0=a0?a0.getBoundingClientRect().top:null;
   aplicar();
   dibujar();
+  const a1=document.querySelector(sel);
+  if(a1&&y0!==null&&body.accion!=='mover'&&Math.abs(a1.getBoundingClientRect().top-y0)>30){
+    recien={key:c.key,tipo:'llego',t:Date.now()};
+    a1.classList.add('llego');
+    a1.scrollIntoView({block:'center',behavior:'smooth'});
+  }
   try{
     await pedir(API,Object.assign({cliente_nro:c.cliente_nro,sub:c.sub},body));
   }catch(e){
@@ -804,17 +818,9 @@ wrap.addEventListener('click',ev=>{
       if(clave==='sena')c.sena=null;
       if(clave==='acceso')c.acceso=null;
       if(clave==='bacha')c.bacha='';
-      // Medido: desde ese día se cuenta el plazo. Planos listos da por hecha la medición.
-      if((clave==='medido'||clave==='medida')&&valor){
-        c.checks.medido=true;
-        if(!c.medido_at)c.medido_at=(c.fecha&&c.fecha<=HOY)?c.fecha:HOY;
-      }else if(clave==='medido'){
-        delete c.checks.medida;c.medido_at='';
-      }
-      if(clave==='medido'||clave==='medida')c.boton_at=c.medido_at;
-      // Cortado: el control del gerente lo da por hecho; destildarlo anula el control.
-      if((clave==='cortado'||clave==='qc_corte')&&valor){c.checks.cortado=true;if(clave==='cortado'||!c.boton_at)c.boton_at=HOY;}
-      else if(clave==='cortado'){delete c.checks.qc_corte;c.boton_at='';}
+      // Medido / Cortado: los botones de etapa guardan el día. No dependen de ningún otro tilde.
+      if(clave==='medido'){c.medido_at=valor?((c.fecha&&c.fecha<=HOY)?c.fecha:HOY):'';c.boton_at=c.medido_at;}
+      if(clave==='cortado')c.boton_at=valor?HOY:'';
     });
   }else if(act==='avanzar'){
     mover(c,cols[idx+1].id);

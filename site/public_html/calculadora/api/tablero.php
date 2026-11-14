@@ -344,33 +344,23 @@ try {
         if ($valor) $obra['checks'][$clave] = true;
         else unset($obra['checks'][$clave]);
 
-        // "Medido" fija desde cuándo se cuenta el plazo de entrega. Toma la
-        // fecha de medición cargada si ya pasó; si no, el día de hoy.
-        // "Medidas y planos listos" da por hecha la medición; y si se
-        // destilda "Medido", los planos tampoco pueden estar listos.
-        if ($clave === 'medido' || $clave === 'medida') {
+        // "Medido" y "Cortado" son los botones de etapa: guardan el día en
+        // que se hicieron. Son independientes de los demás tildes: tildar
+        // "Medidas y planos listos" NO marca la obra como medida, ni
+        // "Corte aprobado" la marca como cortada. Así un tilde común nunca
+        // le cambia a una ficha su lugar en la cola.
+        if ($clave === 'medido') {
             if ($valor) {
-                $obra['checks']['medido'] = true;
-                if (!bs_tablero_fecha_valida($obra['medido_at'])) {
-                    $f = $obra['fecha'];
-                    $obra['medido_at'] = (bs_tablero_fecha_valida($f) && $f <= $hoy) ? $f : $hoy;
-                }
-            } elseif ($clave === 'medido') {
-                unset($obra['checks']['medida']);
+                // Desde ese día se cuenta el plazo de entrega: la fecha de
+                // medición cargada si ya pasó; si no, hoy.
+                $f = $obra['fecha'];
+                $obra['medido_at'] = (bs_tablero_fecha_valida($f) && $f <= $hoy) ? $f : $hoy;
+            } else {
                 $obra['medido_at'] = '';
             }
         }
-
-        // "Cortado": el cortador terminó (queda el día). "Corte aprobado" lo
-        // da por hecho; y si se destilda "Cortado", el control tampoco vale.
-        if ($clave === 'cortado' || $clave === 'qc_corte') {
-            if ($valor) {
-                $obra['checks']['cortado'] = true;
-                if (!bs_tablero_fecha_valida((string)($obra['cortado_at'] ?? ''))) $obra['cortado_at'] = $hoy;
-            } elseif ($clave === 'cortado') {
-                unset($obra['checks']['qc_corte']);
-                $obra['cortado_at'] = '';
-            }
+        if ($clave === 'cortado') {
+            $obra['cortado_at'] = $valor ? $hoy : '';
         }
 
     } elseif ($accion === 'fecha') {
