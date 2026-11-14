@@ -26,7 +26,7 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 |---|---|---|
 | **Por medir** | Medición | Obra lista para medir · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
 | **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Se cortó bien · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
-| **Por instalar** | Instalación (**obligatoria**) | Fecha de instalación · Se avisó al cliente · Instaladores |
+| **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
 | **Retiro en local** (cuadro aparte, abajo) | Retiro | Seña cobrada · Pieza terminada · Se avisó al cliente · Retirada · Saldo cobrado |
 
@@ -49,7 +49,7 @@ Los demás:
 
 ## Fechas y avisos
 
-- **Medición / Instalación / Retiro:** un turno por tarjeta. Si la fecha pasó y la obra sigue sin cumplirla, la tarjeta se marca atrasada en rojo. La fecha de instalación además es obligatoria para salir de Por instalar.
+- **Medición / Instalación / Retiro:** un turno por tarjeta. Si la fecha pasó y la obra sigue sin cumplirla, la tarjeta se marca atrasada en rojo. En Por instalar el turno lleva día y hora, y los dos son obligatorios para salir de la columna.
 - **Entrega estimada:** semana en que cae medición + plazo (granito 15 días, el resto 20). Aparece al tildar "Medida tomada". Es guía: el orden de fabricación lo da la cola.
 - **Cola:** dentro de cada columna van primero las que tienen turno (el más próximo arriba) y después por orden de llegada a esa columna.
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.

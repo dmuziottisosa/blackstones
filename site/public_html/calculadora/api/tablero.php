@@ -20,6 +20,7 @@
 //                      Instaladores pide quiénes van (uno o varios de $BS_INSTALADORES):
 //                      { "clave": "equipo", "valor": true, "equipo": ["Negro", "David"] }
 //     accion "fecha" → { "fecha": "2026-11-24" }   ("" la borra)
+//                      En Por instalar el turno lleva hora: { "fecha": "2026-11-24", "hora": "09:30" }
 //     accion "nota"  → { "nota": "Falta la bacha" } ("" la borra)
 //     accion "mover" → { "a": "fabricar" }  (arrastre: etapa de destino)
 //                      { "hacia": "adelante" | "atras" | "retiro" }  (botones)
@@ -90,9 +91,11 @@ $BS_ETAPAS = [
         // Sin tilde de cierre: instalada = se pasa a "Por archivar". Si la
         // fecha de instalación pasó y sigue acá, se marca atrasada.
         // exige_fecha: sin fecha de instalación cargada no sale de la columna.
+        // pide_hora: el turno lleva día y hora, y la hora también es obligatoria.
         'fecha'  => 'Instalación',
         'cierra' => '',
         'exige_fecha' => true,
+        'pide_hora'   => true,
         'checks' => [
             'avisado' => 'Se avisó al cliente',
             'equipo'  => 'Instaladores',
@@ -145,7 +148,11 @@ function bs_tablero_leer() {
 }
 
 function bs_tablero_obra_vacia() {
-    return ['etapa' => 'medir', 'fecha' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'desde' => '', 'hist' => []];
+    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'desde' => '', 'hist' => []];
+}
+
+function bs_tablero_hora_valida($h) {
+    return is_string($h) && preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $h) === 1;
 }
 
 function bs_tablero_fecha_valida($f) {
@@ -271,6 +278,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'tiene_detalle' => isset($cot['presupuesto']) && is_array($cot['presupuesto']),
                     'etapa'       => $obra['etapa'],
                     'fecha'       => bs_tablero_fecha_valida($obra['fecha']) ? $obra['fecha'] : '',
+                    'hora'        => (bs_tablero_fecha_valida($obra['fecha']) && bs_tablero_hora_valida($obra['hora'])) ? $obra['hora'] : '',
                     'checks'      => (object)array_filter((array)$obra['checks']),
                     'nota'        => (string)$obra['nota'],
                     'sena'        => bs_tablero_sena($obra),
@@ -288,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     foreach ($BS_ETAPAS as $id => $def) {
         $checks = [];
         foreach ($def['checks'] as $cid => $label) $checks[] = ['id' => $cid, 'label' => $label];
-        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'checks' => $checks];
+        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'checks' => $checks];
     }
 
     bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'cards' => $cards]);
@@ -432,6 +440,15 @@ try {
         }
         $obra['fecha'] = $fecha;
 
+        // La hora solo existe en las etapas que la piden, y siempre atada a una fecha.
+        $hora = trim((string)($body['hora'] ?? ''));
+        if ($fecha === '' || empty($BS_ETAPAS[$etapa]['pide_hora'])) $hora = '';
+        if ($hora !== '' && !bs_tablero_hora_valida($hora)) {
+            bs_lock_release($fp);
+            bs_error('Hora inválida');
+        }
+        $obra['hora'] = $hora;
+
     } elseif ($accion === 'nota') {
         $nota = trim(preg_replace('/\s+/u', ' ', (string)($body['nota'] ?? '')));
         if (mb_strlen($nota) > BS_TABLERO_NOTA_MAX) {
@@ -486,8 +503,14 @@ try {
         if ($destino !== false && !$retrocede) {
             $faltan = [];
             // La fecha de la etapa actual, si esa etapa la exige para salir.
-            if (!$en_retiro && !empty($BS_ETAPAS[$etapa]['exige_fecha']) && !bs_tablero_fecha_valida($obra['fecha'])) {
-                $faltan[] = 'Fecha de ' . mb_strtolower($BS_ETAPAS[$etapa]['fecha']);
+            if (!$en_retiro && !empty($BS_ETAPAS[$etapa]['exige_fecha'])) {
+                $nombre = mb_strtolower($BS_ETAPAS[$etapa]['fecha']);
+                $con_hora = !empty($BS_ETAPAS[$etapa]['pide_hora']);
+                if (!bs_tablero_fecha_valida($obra['fecha'])) {
+                    $faltan[] = ($con_hora ? 'Fecha y hora de ' : 'Fecha de ') . $nombre;
+                } elseif ($con_hora && !bs_tablero_hora_valida($obra['hora'])) {
+                    $faltan[] = 'Hora de ' . $nombre;
+                }
             }
             for ($i = 0; $i < $destino; $i++) {
                 foreach ($BS_ETAPAS[$BS_ETAPA_IDS[$i]]['checks'] as $cid => $label) {
@@ -502,9 +525,10 @@ try {
 
         // Cada etapa tiene su propia fecha: al cambiar de etapa se guarda
         // la anterior en el historial y la tarjeta queda sin fecha.
-        $obra['hist'][] = ['de' => $etapa, 'a' => $nueva, 'fecha' => $obra['fecha'], 'at' => date('c')];
+        $obra['hist'][] = ['de' => $etapa, 'a' => $nueva, 'fecha' => $obra['fecha'], 'hora' => $obra['hora'], 'at' => date('c')];
         $obra['etapa'] = $nueva;
         $obra['fecha'] = '';
+        $obra['hora'] = '';
         $obra['desde'] = date('c'); // entra última a la cola de la etapa nueva
     }
 

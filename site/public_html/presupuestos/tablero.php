@@ -213,6 +213,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .sena button{padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:14px;font-weight:700;color:var(--text2);cursor:pointer}
 .modal .sena button.on{background:var(--dk);color:var(--cr);border-color:var(--dk)}
 .modal .sena{flex-wrap:wrap}
+.modal .sena input[type=date],.modal .sena input[type=time]{flex:1 1 130px;font-size:16px;font-weight:600}
 .modal .sena [data-op]{flex:1 1 28%;white-space:nowrap}
 [data-theme="dark"] .modal .sena button.on{background:var(--gd);color:#1A1816;border-color:var(--gd)}
 .modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
@@ -400,7 +401,10 @@ const columnas=()=>ETAPAS.filter(e=>!e.aparte); // las 4, en orden
 // Qué le falta a la tarjeta para salir de su etapa: la fecha (si la etapa la exige) y los tildes.
 function faltanDe(c,e){
   const f=e.checks.filter(k=>!c.checks[k.id]).map(k=>k.label);
-  if(e.exige_fecha&&e.id===c.etapa&&!c.fecha)f.unshift('Fecha de '+e.fecha.toLowerCase());
+  if(e.exige_fecha&&e.id===c.etapa){
+    if(!c.fecha)f.unshift((e.pide_hora?'Fecha y hora de ':'Fecha de ')+e.fecha.toLowerCase());
+    else if(e.pide_hora&&!c.hora)f.unshift('Hora de '+e.fecha.toLowerCase());
+  }
   return f;
 }
 function atrasada(c){ // la fecha pasó y no se cumplió (o la tarjeta sigue en la columna)
@@ -438,10 +442,12 @@ function htmlCard(c){
 
   if(e.fecha){
     let cls='',txt;
-    if(!c.fecha){cls=' vacia';txt='+ Fecha de '+e.fecha.toLowerCase();}
-    else if(atrasada(c)){cls=' atrasada';txt=e.fecha+' '+fechaCorta(c.fecha)+' · atrasada';}
-    else if(c.fecha===HOY){cls=' hoy';txt=e.fecha+' · hoy';}
-    else txt=e.fecha+' · '+fechaCorta(c.fecha);
+    const hora=e.pide_hora?(c.hora?' · '+c.hora+' hs':' · falta la hora'):'';
+    if(!c.fecha){cls=' vacia';txt='+ Fecha '+(e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
+    else if(atrasada(c)){cls=' atrasada';txt=e.fecha+' '+fechaCorta(c.fecha)+(c.hora?' · '+c.hora+' hs':'')+' · atrasada';}
+    else if(c.fecha===HOY){cls=' hoy';txt=e.fecha+' · hoy'+hora;}
+    else txt=e.fecha+' · '+fechaCorta(c.fecha)+hora;
+    if(c.fecha&&e.pide_hora&&!c.hora&&!atrasada(c))cls=' vacia';
     h+='<button type="button" class="c-fecha'+cls+'" data-act="fecha">'+esc(txt)+'</button>';
   }
   // Semana estimada de entrega: guía, no alarma.
@@ -506,6 +512,7 @@ function dibujar(){
     const lista=CARDS.filter(c=>c.etapa===e.id).sort((a,b)=>{
       if(!!a.fecha!==!!b.fecha)return a.fecha?-1:1;          // con turno primero
       if(a.fecha!==b.fecha)return a.fecha<b.fecha?-1:1;      // el turno más próximo arriba
+      if(a.hora!==b.hora)return a.hora<b.hora?-1:1;          // mismo día: el más temprano
       if(a.desde!==b.desde)return a.desde<b.desde?-1:1;      // después, la cola: el que entró antes
       return a.key<b.key?-1:1;
     });
@@ -553,7 +560,7 @@ function mover(c,destino){
     return;
   }
   guardar(c,{accion:'mover',a:destino},()=>{
-    c.etapa=destino;c.fecha='';c.desde=new Date().toISOString();
+    c.etapa=destino;c.fecha='';c.hora='';c.desde=new Date().toISOString();
     recien={key:c.key,tipo:'llego',t:Date.now()};
   });
 }
@@ -602,6 +609,8 @@ wrap.addEventListener('click',ev=>{
     else guardar(c,{accion:'mover',hacia:'atras'},()=>{}); // desde Retiro: el server sabe de dónde vino
   }else if(act==='retiro'){
     mover(c,'retiro');
+  }else if(act==='fecha'&&etapaDe(c.etapa).pide_hora){
+    pedirTurno(c);
   }else if(act==='fecha'){
     const dp=$('dp');
     const r=b.getBoundingClientRect();
@@ -815,6 +824,22 @@ function pedirAcceso(c){
     $('accPisos').style.display=modo==='escalera'?'flex':'none';
     if(modo==='escalera')$('accN').focus();else $('mOk').focus();
   }));
+}
+
+// Turno con día y hora (Por instalar).
+function pedirTurno(c){
+  const e=etapaDe(c.etapa);
+  abrirModal(e.fecha+' · '+c.cliente_nro+'-'+c.sub,
+    '<p>¿Qué día y a qué hora?</p><div class="sena"><input type="date" id="tuDia" value="'+esc(c.fecha)+'"><input type="time" id="tuHora" step="900" value="'+esc(c.hora)+'"></div>',
+    'Guardar',
+    ()=>{
+      const dia=$('tuDia').value,hora=dia?$('tuHora').value.slice(0,5):'';
+      if(dia&&!hora){$('tuHora').focus();toast('Falta la hora.');return;}
+      cerrarModal();
+      if(dia===c.fecha&&hora===c.hora)return;
+      guardar(c,{accion:'fecha',fecha:dia,hora:hora},()=>{c.fecha=dia;c.hora=hora;});
+    });
+  (c.fecha?$('tuHora'):$('tuDia')).focus();
 }
 
 // Bacha: de quién es.
