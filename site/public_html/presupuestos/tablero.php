@@ -370,8 +370,10 @@ const ADJ={bacha:'Bacha',plano:'Plano'}; // tipos de adjunto
 let ETAPAS=[];      // definición de etapas (viene del server)
 let INSTALADORES=[];// quiénes instalan (viene del server)
 let FABRICADORES=[];// quiénes fabrican (viene del server)
+let MEDIDORES=[];   // quiénes miden (viene del server)
 // Tildes que piden elegir personas: uno o varios nombres de una lista.
 const PERSONAS={
+  medidor:{campo:'medidor',lista:()=>MEDIDORES,titulo:'Medidor',pregunta:'¿Quién va a medir?',rotulo:'Mide: '},
   equipo:{campo:'equipo',lista:()=>INSTALADORES,titulo:'Instaladores',pregunta:'¿Quiénes instalan?',rotulo:'Instalan: '},
   fabrica:{campo:'fabrica',lista:()=>FABRICADORES,titulo:'Fabricadores',pregunta:'¿Quiénes la fabrican?',rotulo:'Fabrican: '}
 };
@@ -445,7 +447,7 @@ async function cargar(){
   try{
     const j=await pedir(API);
     if(drag)return; // no redibujar con una tarjeta en el aire
-    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];
+    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];MEDIDORES=j.medidores||[];
     dibujar();
   }catch(e){
     if(!CARDS.length)$('board').innerHTML='<div class="aviso" style="grid-column:1/-1">'+esc(e.message)+'</div>';
@@ -503,7 +505,7 @@ function htmlAdjuntos(c,puedeSumar){
 const plano=t=>String(t==null?'':t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function coincide(c){
   if(!buscado.length)return true;
-  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.equipo.join(' '),c.fabrica.join(' ')].join(' '));
+  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' ')].join(' '));
   return buscado.every(w=>c._txt.indexOf(w)>=0);
 }
 
@@ -548,6 +550,7 @@ function htmlCard(c){
     const datos=[];
     if(c.bacha)datos.push(c.bacha==='no'?'Sin bacha':'Bacha '+BACHA[c.bacha]);
     if(c.acceso)datos.push('Sube '+textoAcceso(c.acceso));
+    if(c.medidor.length)datos.push('Midió: '+c.medidor.join(', '));
     if(c.fabrica.length&&!e.checks.some(k=>k.id==='fabrica'))datos.push('Fabricó: '+c.fabrica.join(', '));
     if(c.equipo.length&&!e.checks.some(k=>k.id==='equipo'))datos.push('Instalan: '+c.equipo.join(', '));
     if(datos.length)h+='<div class="c-promesa">'+esc(datos.join(' · '))+'</div>';

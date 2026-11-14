@@ -21,6 +21,8 @@
 //                      { "clave": "equipo", "valor": true, "personas": ["Negro", "David"] }
 //                      Fabricadores, igual, con $BS_FABRICADORES:
 //                      { "clave": "fabrica", "valor": true, "personas": ["Pedro"] }
+//                      Medidor, igual, con $BS_MEDIDORES:
+//                      { "clave": "medidor", "valor": true, "personas": ["Cesar"] }
 //     accion "fecha" → { "fecha": "2026-11-24" }   ("" la borra)
 //                      En Por instalar el turno lleva hora: { "fecha": "2026-11-24", "hora": "09:30" }
 //     accion "nota"  → { "nota": "Falta la bacha" } ("" la borra)
@@ -63,6 +65,7 @@ $BS_ETAPAS = [
         'fecha'  => 'Medición',
         'cierra' => 'medida',
         'checks' => [
+            'medidor' => 'Medidor',
             'apta'   => 'Obra lista para medir',
             'medida' => 'Medidas y planos listos',
             'sena'   => 'Trajo la seña',
@@ -129,8 +132,11 @@ $BS_ETAPAS = [
 $BS_INSTALADORES = ['Negro', 'Espinola', 'Cesar', 'David', 'Jostin'];
 // Quiénes fabrican. Uno o varios por obra (tilde "Fabricadores", en Por fabricar).
 $BS_FABRICADORES = ['Negro', 'Espinola', 'David', 'Jostin', 'Pedro'];
+// Quiénes miden. Uno o varios por obra (tilde "Medidor", en Por medir).
+$BS_MEDIDORES = ['Cesar', 'David', 'Negro', 'Jose'];
 // tilde → [lista de nombres válidos, campo de la obra donde se guarda]
 $BS_TILDES_PERSONAS = [
+    'medidor' => [$BS_MEDIDORES, 'medidor'],
     'equipo'  => [$BS_INSTALADORES, 'equipo'],
     'fabrica' => [$BS_FABRICADORES, 'fabrica'],
 ];
@@ -283,6 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'bacha'       => in_array($obra['bacha'], ['nuestra', 'cliente', 'no'], true) ? $obra['bacha'] : '',
                     'equipo'      => array_values(array_intersect($BS_INSTALADORES, (array)$obra['equipo'])),
                     'fabrica'     => array_values(array_intersect($BS_FABRICADORES, (array)($obra['fabrica'] ?? []))),
+                    'medidor'     => array_values(array_intersect($BS_MEDIDORES, (array)($obra['medidor'] ?? []))),
                     'adjuntos'    => array_map(function ($a) {
                         return ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf'];
                     }, bs_tablero_adjuntos($obra)),
@@ -300,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'checks' => $checks];
     }
 
-    bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cards' => $cards]);
+    bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
 }
 
 // ============================================================
@@ -412,7 +419,8 @@ try {
                 $elegidos = array_values(array_intersect($lista, (array)($body['personas'] ?? $body['equipo'] ?? [])));
                 if (!$elegidos) {
                     bs_lock_release($fp);
-                    bs_error($clave === 'fabrica' ? 'Elegí quiénes fabrican.' : 'Elegí quiénes instalan.');
+                    $quien = ['medidor' => 'quién mide', 'fabrica' => 'quiénes fabrican', 'equipo' => 'quiénes instalan'];
+                    bs_error('Elegí ' . $quien[$clave] . '.');
                 }
                 $obra[$campo] = $elegidos;
             } else {

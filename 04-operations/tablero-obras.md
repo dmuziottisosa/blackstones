@@ -26,14 +26,15 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
-| **Por medir** | Medición | Obra lista para medir · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
+| **Por medir** | Medición | Medidor · Obra lista para medir · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
 | **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Se cortó bien · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
 | **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
 | **Retiro en local** (cuadro aparte, abajo) | Retiro | Seña cobrada · Pieza terminada · Se avisó al cliente · Retirada · Saldo cobrado |
 
-Cuatro tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
+Cinco tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
 
+- **Medidor:** quién va a medir, uno o varios de la lista (Cesar, David, Negro, Jose; se edita en `$BS_MEDIDORES`). Después queda escrito quién midió.
 - **Trajo la seña:** el monto, en $ o USD. Es el bloqueante de salida de Por medir: la trae el medidor, o el cliente señó antes.
 - **Tenemos la bacha:** de quién es. Nuestra (la proveemos), del cliente, o no lleva.
 - **Piso y ascensor:** cómo sube la pieza. Planta baja, por ascensor o por escalera con cuántos pisos ($30.000 por piso si no entra en el ascensor).
