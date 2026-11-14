@@ -198,7 +198,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-fecha.aviso{background:var(--red-soft);border:1.5px solid var(--red);color:var(--red);font-weight:700}
 .c-fecha.aviso::before,.col-aviso::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--red);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
 .card.sin-turno{box-shadow:0 0 0 1.5px var(--red)}
-.col-avisos{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 10px;margin-top:-4px}
+.col-avisos{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 4px 10px;margin-top:-4px}
+.col-aviso-det{font-size:11.5px;font-weight:600;color:var(--red)}
 .col-aviso{display:inline-flex;align-items:center;gap:5px;border:none;font-family:inherit;cursor:pointer;padding:3px 10px 3px 3px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:11.5px;font-weight:700;white-space:nowrap}
 
 .c-promesa{font-size:12.5px;color:var(--text3);margin-top:7px}
@@ -542,6 +543,17 @@ function urgente(c){
   if(!e.boton)return false;
   return hecho(c)||atrasada(c)||(e.urge||[]).some(k=>!c.checks[k]);
 }
+// Detalle del aviso "N por avanzar": cuántas por cada motivo. Cada ficha cuenta una sola vez,
+// por su motivo más avanzado (hecha > atrasada > le falta el tilde de "urge"), así la suma da N.
+function motivosAvanzar(e,cards){
+  let h=0,a=0,u=0;
+  cards.filter(urgente).forEach(c=>{if(hecho(c))h++;else if(atrasada(c))a++;else u++;});
+  const t=e.hecha_txt||[],p=[];
+  if(u)p.push(u+' '+(e.urge_txt||'sin empezar'));
+  if(a)p.push(a+(a===1?' atrasada':' atrasadas'));
+  if(h)p.push(h+' '+(h===1?(t[0]||'hecha'):(t[1]||'hechas')));
+  return p.join(' · ');
+}
 function atrasada(c){ // la fecha pasó y no se cumplió (o la tarjeta sigue en la columna)
   const e=etapaDe(c.etapa);
   return !!(e.fecha&&c.fecha&&c.fecha<HOY&&!(e.cierra&&c.checks[e.cierra]));
@@ -759,6 +771,9 @@ function dibujar(){
     if(nSinF||nUrg){
       h+='<div class="col-avisos">';
       if(nUrg)h+='<button type="button" class="col-aviso" data-falta="cont_'+esc(e.id)+'">'+nUrg+' por avanzar</button>';
+      // El porqué, al lado: sin esto el número puede quedar igual aunque la ficha haya cambiado de caso
+      // (dejó de estar "ya cortada" pero ahora está "sin entregar") y parece que no se actualizó.
+      if(nUrg)h+='<span class="col-aviso-det">'+esc(motivosAvanzar(e,deEtapa))+'</span>';
       if(nSinF)h+='<button type="button" class="col-aviso" data-falta="turno_'+esc(e.id)+'">'+nSinF+(e.exige_fecha?' sin turno':' sin fecha')+'</button>';
       h+='</div>';
     }

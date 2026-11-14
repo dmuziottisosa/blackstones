@@ -63,6 +63,9 @@ $BS_ETAPAS = [
         'boton_listo' => 'Ya medido',       // y después
         'hecho'       => 'Ya medidas · esperando pasar a cortar',
         'pendientes'  => 'Necesitan medirse',  // texto del filtro "falta ejecutar"
+        // hecha_txt: cómo se nombra, en el detalle del aviso "por avanzar", a la
+        // ficha que ya está hecha y sigue en la columna [singular, plural].
+        'hecha_txt'   => ['ya medida', 'ya medidas'],
         'checks' => [
             'medidor' => 'Medidor',
             'medido' => 'Medido',
@@ -86,9 +89,12 @@ $BS_ETAPAS = [
         'boton_listo' => 'Ya cortado',
         'hecho'       => 'Ya cortadas · esperando el control del gerente',
         'pendientes'  => 'Necesitan cortarse',
+        'hecha_txt'   => ['ya cortada', 'ya cortadas'],
         // urge: tildes que, si faltan, ponen la ficha en "por avanzar" aunque
         // no esté hecha ni atrasada. Acá: todavía no se le entregó al cortador.
         'urge'        => ['entregado_corte'],
+        // urge_txt: el nombre de ese caso en el detalle del aviso.
+        'urge_txt'    => 'sin entregar',
         // en_manos: [tilde, texto del filtro]. Fichas que ya tienen ese tilde y
         // todavía no están hechas: lo que el cortador tiene hoy para cortar.
         'en_manos'    => ['entregado_corte', 'Con el cortador'],
@@ -121,6 +127,7 @@ $BS_ETAPAS = [
         'boton_listo' => 'Ya fabricado',
         'hecho'       => 'Ya fabricadas · esperando el control',
         'pendientes'  => 'Necesitan fabricarse',
+        'hecha_txt'   => ['ya fabricada', 'ya fabricadas'],
         // Control de la pieza antes de que salga del taller.
         'checks' => [
             'fabrica'       => 'Fabricadores',
