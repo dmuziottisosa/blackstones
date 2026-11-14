@@ -128,9 +128,18 @@ $BS_ETAPAS = [
         'hecho'       => 'Ya fabricadas · esperando el control',
         'pendientes'  => 'Necesitan fabricarse',
         'hecha_txt'   => ['ya fabricada', 'ya fabricadas'],
+        // Igual que en Por cortar: lo que todavía no se le entregó al
+        // fabricador cuenta como "por avanzar", y lo ya entregado y sin
+        // terminar es su lista de trabajo ("Con el fabricador").
+        'urge'        => ['entregado_fab'],
+        'urge_txt'    => 'sin entregar',
+        'en_manos'    => ['entregado_fab', 'Con el fabricador'],
         // Control de la pieza antes de que salga del taller.
         'checks' => [
             'fabrica'       => 'Fabricadores',
+            // Quién fabrica y si ya se le entregó son dos datos distintos:
+            // se puede asignar hoy y entregarle la pieza recién mañana.
+            'entregado_fab' => 'Entregado al fabricador',
             'fabricado'     => 'Fabricado',
             'qc_medida'     => 'Medida y color correctos',
             'qc_inglete'    => 'Inglete y zócalos',
