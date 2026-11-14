@@ -387,6 +387,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   <a href="/presupuestos/?tab=reporte">Presupuestos · Reporte</a>
   <a href="/presupuestos/tablero.php" class="active">Tablero</a>
   <a href="/presupuestos/calendario.php">Calendario</a>
+  <a href="/presupuestos/stock.php">Stock</a>
 </nav>
 <div class="gold-line"></div>
 

@@ -475,6 +475,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
   <a href="/presupuestos/?tab=reporte" class="<?= $tab==='reporte' ? 'active' : '' ?>">Presupuestos · Reporte</a>
   <a href="/presupuestos/tablero.php">Tablero</a>
   <a href="/presupuestos/calendario.php">Calendario</a>
+  <a href="/presupuestos/stock.php">Stock</a>
 </nav>
 <div class="gold-line"></div>
 
