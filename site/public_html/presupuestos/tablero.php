@@ -741,6 +741,8 @@ function dibujar(){
     // "Necesitan continuar" es el pendiente urgente: lo que ya está hecho y sigue acá, y también
     // lo que tenía fecha y se le pasó sin hacerse (había que medir el 14, es 15 y sigue sin medir).
     if(e.boton)filtros.push(['pend_'+e.id,e.pendientes,c=>!hecho(c)],['cont_'+e.id,'Necesitan continuar',urgente]);
+    // "Con el cortador": ya se le entregó y todavía no lo cortó. Es su lista de trabajo de hoy.
+    if(e.en_manos&&e.en_manos.length===2)filtros.push(['mano_'+e.id,e.en_manos[1],c=>!!c.checks[e.en_manos[0]]&&!hecho(c)]);
     if(esPrimera)filtros.push(['plano','Sin plano',c=>sinAdjunto(c,'plano')],['bacha','Sin foto de bacha',c=>sinAdjunto(c,'bacha')]);
     // cada columna tiene su propio filtro de fecha: Por medir "Sin fecha", Por instalar "Sin turno"
     if(e.exige_fecha||e.avisa_fecha)filtros.push(['turno_'+e.id,e.exige_fecha?'Sin turno':'Sin fecha',sinTurno]);
@@ -854,9 +856,11 @@ wrap.addEventListener('click',ev=>{
   if(ev.target.closest('[data-cargar]')){pedirCargar();return;}
   const bf=ev.target.closest('[data-falta]');
   if(bf){
-    const k=bf.dataset.falta,par=k.indexOf('pend_')===0?k.replace('pend_','cont_'):(k.indexOf('cont_')===0?k.replace('cont_','pend_'):'');
+    // Los filtros de estado de una columna (ejecutar / continuar / con el cortador) son
+    // excluyentes: prender uno apaga los otros dos. Los demás se combinan libremente.
+    const k=bf.dataset.falta,grupo=['pend_','cont_','mano_'],mio=grupo.find(g=>k.indexOf(g)===0);
     falta[k]=!falta[k];
-    if(falta[k]&&par)falta[par]=false;
+    if(falta[k]&&mio)grupo.filter(g=>g!==mio).forEach(g=>{falta[k.replace(mio,g)]=false;});
     dibujar();
     return;
   }

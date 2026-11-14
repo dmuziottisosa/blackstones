@@ -89,6 +89,9 @@ $BS_ETAPAS = [
         // urge: tildes que, si faltan, ponen la ficha en "por avanzar" aunque
         // no esté hecha ni atrasada. Acá: todavía no se le entregó al cortador.
         'urge'        => ['entregado_corte'],
+        // en_manos: [tilde, texto del filtro]. Fichas que ya tienen ese tilde y
+        // todavía no están hechas: lo que el cortador tiene hoy para cortar.
+        'en_manos'    => ['entregado_corte', 'Con el cortador'],
         // hitos: tildes cuya fecha conviene ver de un vistazo en las etapas
         // siguientes, además del botón de la etapa (que siempre es un hito).
         'hitos'       => ['qc_corte'],
