@@ -369,6 +369,12 @@ const ADJ={bacha:'Bacha',plano:'Plano'}; // tipos de adjunto
 
 let ETAPAS=[];      // definición de etapas (viene del server)
 let INSTALADORES=[];// quiénes instalan (viene del server)
+let FABRICADORES=[];// quiénes fabrican (viene del server)
+// Tildes que piden elegir personas: uno o varios nombres de una lista.
+const PERSONAS={
+  equipo:{campo:'equipo',lista:()=>INSTALADORES,titulo:'Instaladores',pregunta:'¿Quiénes instalan?',rotulo:'Instalan: '},
+  fabrica:{campo:'fabrica',lista:()=>FABRICADORES,titulo:'Fabricadores',pregunta:'¿Quiénes la fabrican?',rotulo:'Fabrican: '}
+};
 let CARDS=[];       // tarjetas
 let HOY='';         // YYYY-MM-DD según el server
 let abierta='';     // key de la tarjeta con el detalle abierto
@@ -439,7 +445,7 @@ async function cargar(){
   try{
     const j=await pedir(API);
     if(drag)return; // no redibujar con una tarjeta en el aire
-    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;INSTALADORES=j.instaladores||[];
+    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];
     dibujar();
   }catch(e){
     if(!CARDS.length)$('board').innerHTML='<div class="aviso" style="grid-column:1/-1">'+esc(e.message)+'</div>';
@@ -497,7 +503,7 @@ function htmlAdjuntos(c,puedeSumar){
 const plano=t=>String(t==null?'':t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function coincide(c){
   if(!buscado.length)return true;
-  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.equipo.join(' ')].join(' '));
+  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.equipo.join(' '),c.fabrica.join(' ')].join(' '));
   return buscado.every(w=>c._txt.indexOf(w)>=0);
 }
 
@@ -542,6 +548,7 @@ function htmlCard(c){
     const datos=[];
     if(c.bacha)datos.push(c.bacha==='no'?'Sin bacha':'Bacha '+BACHA[c.bacha]);
     if(c.acceso)datos.push('Sube '+textoAcceso(c.acceso));
+    if(c.fabrica.length&&!e.checks.some(k=>k.id==='fabrica'))datos.push('Fabricó: '+c.fabrica.join(', '));
     if(c.equipo.length&&!e.checks.some(k=>k.id==='equipo'))datos.push('Instalan: '+c.equipo.join(', '));
     if(datos.length)h+='<div class="c-promesa">'+esc(datos.join(' · '))+'</div>';
   }
@@ -556,7 +563,7 @@ function htmlCard(c){
     if(k.id==='sena'&&on&&c.sena)label+=' · '+plataSena(c.sena);
     if(k.id==='acceso'&&on&&c.acceso)label+=' · '+textoAcceso(c.acceso);
     if(k.id==='bacha'&&on&&c.bacha)label=c.bacha==='no'?'No lleva bacha':'Tenemos la bacha · '+BACHA[c.bacha];
-    if(k.id==='equipo'&&on&&c.equipo.length)label='Instalan: '+c.equipo.join(', ');
+    if(PERSONAS[k.id]&&on&&c[PERSONAS[k.id].campo].length)label=PERSONAS[k.id].rotulo+c[PERSONAS[k.id].campo].join(', ');
     h+='<button type="button" class="chk'+(on?' on':'')+'" data-act="check" data-clave="'+esc(k.id)+'" aria-pressed="'+on+'">'+esc(label)+'</button>';
   });
   h+='</div>';
@@ -701,7 +708,7 @@ wrap.addEventListener('click',ev=>{
     if(clave==='sena'&&valor){pedirSena(c);return;}
     if(clave==='acceso'&&valor){pedirAcceso(c);return;}
     if(clave==='bacha'&&valor){pedirBacha(c);return;}
-    if(clave==='equipo'){pedirEquipo(c);return;} // tildado o no, abre la lista para elegir o cambiar
+    if(PERSONAS[clave]){pedirPersonas(c,clave);return;} // tildado o no, abre la lista para elegir o cambiar
     guardar(c,{accion:'check',clave:clave,valor:valor},()=>{
       if(valor)c.checks[clave]=true;else delete c.checks[clave];
       if(clave==='sena')c.sena=null;
@@ -1100,19 +1107,20 @@ function verAdjunto(c,id){
   });
 }
 
-// Instaladores: uno o varios. Se puede volver a abrir para cambiarlos.
-function pedirEquipo(c){
-  const elegidos=new Set(c.equipo);
-  abrirModal('Instaladores · '+c.cliente_nro+'-'+c.sub,
-    '<p>¿Quiénes instalan? Podés marcar más de uno.</p><div class="sena">'+INSTALADORES.map(n=>'<button type="button" data-op="'+esc(n)+'" class="'+(elegidos.has(n)?'on':'')+'">'+esc(n)+'</button>').join('')+'</div>',
+// Instaladores y fabricadores: uno o varios. Se puede volver a abrir para cambiarlos.
+function pedirPersonas(c,clave){
+  const P=PERSONAS[clave],lista=P.lista();
+  const elegidos=new Set(c[P.campo]);
+  abrirModal(P.titulo+' · '+c.cliente_nro+'-'+c.sub,
+    '<p>'+P.pregunta+' Podés marcar más de uno.</p><div class="sena">'+lista.map(n=>'<button type="button" data-op="'+esc(n)+'" class="'+(elegidos.has(n)?'on':'')+'">'+esc(n)+'</button>').join('')+'</div>',
     'Guardar',
     ()=>{
-      const equipo=INSTALADORES.filter(n=>elegidos.has(n));
+      const personas=lista.filter(n=>elegidos.has(n));
       cerrarModal();
-      if(!equipo.length&&!c.checks.equipo)return;
-      guardar(c,{accion:'check',clave:'equipo',valor:equipo.length>0,equipo:equipo},()=>{
-        if(equipo.length)c.checks.equipo=true;else delete c.checks.equipo;
-        c.equipo=equipo;
+      if(!personas.length&&!c.checks[clave])return;
+      guardar(c,{accion:'check',clave:clave,valor:personas.length>0,personas:personas},()=>{
+        if(personas.length)c.checks[clave]=true;else delete c.checks[clave];
+        c[P.campo]=personas;
       });
     });
   $('mCuerpo').querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{

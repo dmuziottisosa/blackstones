@@ -27,7 +27,7 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
 | **Por medir** | Medición | Obra lista para medir · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
-| **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Se cortó bien · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
+| **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Se cortó bien · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
 | **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
 | **Retiro en local** (cuadro aparte, abajo) | Retiro | Seña cobrada · Pieza terminada · Se avisó al cliente · Retirada · Saldo cobrado |
@@ -38,6 +38,8 @@ Cuatro tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
 - **Tenemos la bacha:** de quién es. Nuestra (la proveemos), del cliente, o no lleva.
 - **Piso y ascensor:** cómo sube la pieza. Planta baja, por ascensor o por escalera con cuántos pisos ($30.000 por piso si no entra en el ascensor).
 - **Instaladores:** quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). Se elige al medir y se puede cambiar en Por instalar tocando el mismo tilde. La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/tablero.php`.
+
+En Por fabricar hay un quinto tilde con dato: **Fabricadores**, uno o varios de su lista (Negro, Espinola, David, Jostin, Pedro; se edita en `$BS_FABRICADORES`). En Por instalar queda escrito quién la fabricó.
 
 Esos datos quedan a la vista en las etapas siguientes ("Bacha del cliente · Sube por escalera, 3 pisos · Instalan: Negro, David").
 

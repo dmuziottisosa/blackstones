@@ -18,7 +18,9 @@
 //                      La bacha pide de quién es:
 //                      { "clave": "bacha", "valor": true, "origen": "nuestra" | "cliente" | "no" }
 //                      Instaladores pide quiénes van (uno o varios de $BS_INSTALADORES):
-//                      { "clave": "equipo", "valor": true, "equipo": ["Negro", "David"] }
+//                      { "clave": "equipo", "valor": true, "personas": ["Negro", "David"] }
+//                      Fabricadores, igual, con $BS_FABRICADORES:
+//                      { "clave": "fabrica", "valor": true, "personas": ["Pedro"] }
 //     accion "fecha" → { "fecha": "2026-11-24" }   ("" la borra)
 //                      En Por instalar el turno lleva hora: { "fecha": "2026-11-24", "hora": "09:30" }
 //     accion "nota"  → { "nota": "Falta la bacha" } ("" la borra)
@@ -77,6 +79,7 @@ $BS_ETAPAS = [
         'cierra' => '',
         // Control de la pieza antes de que salga del taller.
         'checks' => [
+            'fabrica'       => 'Fabricadores',
             'qc_corte'      => 'Se cortó bien',
             'qc_medida'     => 'Medida y color correctos',
             'qc_inglete'    => 'Inglete y zócalos',
@@ -124,6 +127,13 @@ $BS_ETAPAS = [
 ];
 // Quiénes instalan. Se eligen uno o varios por obra (tilde "Instaladores").
 $BS_INSTALADORES = ['Negro', 'Espinola', 'Cesar', 'David', 'Jostin'];
+// Quiénes fabrican. Uno o varios por obra (tilde "Fabricadores", en Por fabricar).
+$BS_FABRICADORES = ['Negro', 'Espinola', 'David', 'Jostin', 'Pedro'];
+// tilde → [lista de nombres válidos, campo de la obra donde se guarda]
+$BS_TILDES_PERSONAS = [
+    'equipo'  => [$BS_INSTALADORES, 'equipo'],
+    'fabrica' => [$BS_FABRICADORES, 'fabrica'],
+];
 
 // Las 4 columnas, en orden. "retiro" queda afuera de la secuencia.
 $BS_ETAPA_IDS = [];
@@ -272,6 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'acceso'      => bs_tablero_acceso($obra),
                     'bacha'       => in_array($obra['bacha'], ['nuestra', 'cliente', 'no'], true) ? $obra['bacha'] : '',
                     'equipo'      => array_values(array_intersect($BS_INSTALADORES, (array)$obra['equipo'])),
+                    'fabrica'     => array_values(array_intersect($BS_FABRICADORES, (array)($obra['fabrica'] ?? []))),
                     'adjuntos'    => array_map(function ($a) {
                         return ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf'];
                     }, bs_tablero_adjuntos($obra)),
@@ -289,7 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'checks' => $checks];
     }
 
-    bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'cards' => $cards]);
+    bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cards' => $cards]);
 }
 
 // ============================================================
@@ -394,17 +405,18 @@ try {
             }
         }
 
-        // Instaladores: uno o varios de la lista.
-        if ($clave === 'equipo') {
+        // Instaladores y fabricadores: uno o varios de su lista.
+        if (isset($BS_TILDES_PERSONAS[$clave])) {
+            list($lista, $campo) = $BS_TILDES_PERSONAS[$clave];
             if ($valor) {
-                $equipo = array_values(array_intersect($BS_INSTALADORES, (array)($body['equipo'] ?? [])));
-                if (!$equipo) {
+                $elegidos = array_values(array_intersect($lista, (array)($body['personas'] ?? $body['equipo'] ?? [])));
+                if (!$elegidos) {
                     bs_lock_release($fp);
-                    bs_error('Elegí quiénes instalan.');
+                    bs_error($clave === 'fabrica' ? 'Elegí quiénes fabrican.' : 'Elegí quiénes instalan.');
                 }
-                $obra['equipo'] = $equipo;
+                $obra[$campo] = $elegidos;
             } else {
-                $obra['equipo'] = [];
+                $obra[$campo] = [];
             }
         }
 
