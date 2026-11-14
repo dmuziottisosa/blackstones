@@ -26,7 +26,7 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
-| **Por medir** | Medición | Medidor · Obra lista para medir · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
+| **Por medir** | Medición | Medidor · Obra lista para medir · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
 | **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Fabricadores · Se cortó bien · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
 | **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
@@ -47,7 +47,8 @@ Esos datos quedan a la vista en las etapas siguientes ("Bacha del cliente · Sub
 Los demás:
 
 - **Obra lista para medir:** el cliente confirmó muebles colocados y mesada vieja retirada. Se tilda antes de mandar al medidor.
-- **Medidas y planos listos:** desde ese día se cuenta el plazo de entrega.
+- **Medido:** es un botón al lado de la fecha de medición, no una pastilla. Al tocarlo, donde decía la fecha pasa a decir "Ya medido · día" y la tarjeta baja al final de la columna, bajo "Ya medidas · esperando pasar a fabricar". Así arriba queda la cola real de lo que falta medir, ordenada por fecha de medición y después por orden de llegada. Desde ese día se cuenta el plazo de entrega. Tocar "Ya medido" lo deshace.
+- **Medidas y planos listos:** da por hecha la medición (marca Medido si no estaba).
 - **Tenemos la placa:** la placa del color está en el taller o reservada con el proveedor.
 - **Por fabricar** es el control de la pieza antes de que salga del taller. Si la obra no lleva bacha, los dos tildes de bacha se tildan igual.
 - **Por instalar** no tiene tilde de "instalada": pasar la tarjeta a Por archivar es decir que se instaló.

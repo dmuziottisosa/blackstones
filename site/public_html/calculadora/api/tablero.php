@@ -58,15 +58,23 @@ date_default_timezone_set('America/Argentina/Buenos_Aires');
 //            pasó, la tarjeta se marca atrasada). Vacío = la fecha se cumple
 //            recién cuando la tarjeta sale de la columna.
 //   checks → tildes que hay que completar para pasar a la siguiente
+//   boton / hecho → ver "medir"
 // ------------------------------------------------------------
 $BS_ETAPAS = [
     'medir' => [
         'titulo' => 'Por medir',
         'fecha'  => 'Medición',
-        'cierra' => 'medida',
+        'cierra' => 'medido',
+        // boton: tilde que en la tarjeta es un botón propio ("Medido") y no
+        // una pastilla. Las obras que ya lo tienen bajan al final de la
+        // columna, bajo el título "hecho": arriba queda la cola real de lo
+        // que falta medir.
+        'boton'  => 'medido',
+        'hecho'  => 'Ya medidas · esperando pasar a fabricar',
         'checks' => [
             'medidor' => 'Medidor',
             'apta'   => 'Obra lista para medir',
+            'medido' => 'Medido',
             'medida' => 'Medidas y planos listos',
             'sena'   => 'Trajo la seña',
             'bacha'  => 'Tenemos la bacha',
@@ -220,6 +228,16 @@ function bs_tablero_acceso($obra) {
     return ['modo' => $a['modo'], 'pisos' => ($a['modo'] === 'escalera') ? max(1, intval($a['pisos'] ?? 1)) : 0];
 }
 
+/**
+ * Obras cargadas antes de que existiera el botón "Medido": si tienen
+ * "Medidas y planos listos", ya estaban medidas.
+ */
+function bs_tablero_normalizar($obra) {
+    if (!is_array($obra['checks'])) $obra['checks'] = [];
+    if (!empty($obra['checks']['medida'])) $obra['checks']['medido'] = true;
+    return $obra;
+}
+
 function bs_tablero_zona($cot) {
     $flete = $cot['presupuesto']['adicionales']['flete'] ?? [];
     $zona = trim((string)($flete['zona_nombre'] ?? ''));
@@ -252,6 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $key = $cliente_nro . '-' . $sub;
                 $obra = array_merge(bs_tablero_obra_vacia(), $tablero['obras'][$key] ?? []);
                 if (!isset($BS_ETAPAS[$obra['etapa']])) $obra['etapa'] = 'medir';
+                $obra = bs_tablero_normalizar($obra);
 
                 list($material, $plazo) = bs_tablero_material($cot);
 
@@ -283,6 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'fecha'       => bs_tablero_fecha_valida($obra['fecha']) ? $obra['fecha'] : '',
                     'hora'        => (bs_tablero_fecha_valida($obra['fecha']) && bs_tablero_hora_valida($obra['hora'])) ? $obra['hora'] : '',
                     'checks'      => (object)array_filter((array)$obra['checks']),
+                    'medido_at'   => bs_tablero_fecha_valida($obra['medido_at']) ? $obra['medido_at'] : '',
                     'nota'        => (string)$obra['nota'],
                     'sena'        => bs_tablero_sena($obra),
                     'acceso'      => bs_tablero_acceso($obra),
@@ -304,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     foreach ($BS_ETAPAS as $id => $def) {
         $checks = [];
         foreach ($def['checks'] as $cid => $label) $checks[] = ['id' => $cid, 'label' => $label];
-        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'checks' => $checks];
+        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'boton' => (string)($def['boton'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
     }
 
     bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
@@ -349,7 +369,7 @@ try {
     $key = $cliente_nro . '-' . $sub;
     $obra = array_merge(bs_tablero_obra_vacia(), $tablero['obras'][$key] ?? []);
     if (!isset($BS_ETAPAS[$obra['etapa']])) $obra['etapa'] = 'medir';
-    if (!is_array($obra['checks'])) $obra['checks'] = [];
+    $obra = bs_tablero_normalizar($obra);
     if (!is_array($obra['hist'])) $obra['hist'] = [];
 
     $hoy = date('Y-m-d');
@@ -431,13 +451,19 @@ try {
         if ($valor) $obra['checks'][$clave] = true;
         else unset($obra['checks'][$clave]);
 
-        // "Medida tomada" fija desde cuándo se cuenta el plazo. Toma la
+        // "Medido" fija desde cuándo se cuenta el plazo de entrega. Toma la
         // fecha de medición cargada si ya pasó; si no, el día de hoy.
-        if ($clave === 'medida') {
+        // "Medidas y planos listos" da por hecha la medición; y si se
+        // destilda "Medido", los planos tampoco pueden estar listos.
+        if ($clave === 'medido' || $clave === 'medida') {
             if ($valor) {
-                $f = $obra['fecha'];
-                $obra['medido_at'] = (bs_tablero_fecha_valida($f) && $f <= $hoy) ? $f : $hoy;
-            } else {
+                $obra['checks']['medido'] = true;
+                if (!bs_tablero_fecha_valida($obra['medido_at'])) {
+                    $f = $obra['fecha'];
+                    $obra['medido_at'] = (bs_tablero_fecha_valida($f) && $f <= $hoy) ? $f : $hoy;
+                }
+            } elseif ($clave === 'medido') {
+                unset($obra['checks']['medida']);
                 $obra['medido_at'] = '';
             }
         }

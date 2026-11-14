@@ -176,6 +176,14 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 [data-theme="dark"] .c-fecha.vacia{color:var(--gd)}
 .c-fecha.hoy{background:var(--gd);border-color:var(--gd);color:#1A1816}
 .c-fecha.atrasada{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+/* MEDIDO: botón para marcar la medición hecha, y cómo queda después */
+.c-turno{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px}
+.c-turno .c-fecha{margin-top:0}
+.c-hecho{display:inline-flex;align-items:center;padding:6px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--et);background:var(--card);color:var(--et);font-size:12.5px;font-weight:700;cursor:pointer}
+.c-hecho:hover{background:var(--et);color:var(--et-on)}
+.c-fecha.listo{background:var(--gr-soft);border-color:var(--gr);color:var(--gr)}
+.c-fecha.listo::before{content:'✓';font-weight:800}
+.col-sep{margin:14px 2px 10px;padding-top:10px;border-top:2px dashed var(--border);font-size:11.5px;font-weight:700;color:var(--text3);letter-spacing:.02em}
 /* AVISO ámbar: a la obra le falta el turno que su etapa exige (Por instalar sin fecha u hora) */
 .c-fecha.aviso{background:var(--amb-soft);border:1.5px solid var(--amb);color:var(--amb);font-weight:700}
 .c-fecha.aviso::before,.col-aviso::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--amb);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
@@ -293,6 +301,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .col.on{display:block}
   .col-h{display:none}
   .chk{padding:10px 13px 10px 10px;font-size:13px}
+  .c-hecho{padding:9px 14px;font-size:13px}
   .c-fecha{padding:9px 12px;font-size:13px}
   .c-avanzar{padding:13px 12px;font-size:14px}
 }
@@ -472,6 +481,11 @@ function sinTurno(c){
   const e=etapaDe(c.etapa);
   return !!(e.exige_fecha&&(!c.fecha||(e.pide_hora&&!c.hora)));
 }
+// La obra ya cumplió el paso principal de su etapa (en Por medir: ya se midió).
+function hecho(c){
+  const e=etapaDe(c.etapa);
+  return !!(e.boton&&c.checks[e.boton]);
+}
 function atrasada(c){ // la fecha pasó y no se cumplió (o la tarjeta sigue en la columna)
   const e=etapaDe(c.etapa);
   return !!(e.fecha&&c.fecha&&c.fecha<HOY&&!(e.cierra&&c.checks[e.cierra]));
@@ -527,7 +541,10 @@ function htmlCard(c){
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
   if(mat)h+='<div class="c-mat">'+esc(mat)+'</div>';
 
-  if(e.fecha){
+  if(e.boton&&hecho(c)){
+    // Ya se hizo: en lugar de la fecha del turno, queda dicho. Tocarlo lo deshace.
+    h+='<div class="c-turno"><button type="button" class="c-fecha listo" data-act="check" data-clave="'+esc(e.boton)+'" title="Tocar para desmarcar">Ya medido'+(c.medido_at?' · '+esc(fechaCorta(c.medido_at)):'')+'</button></div>';
+  }else if(e.fecha){
     let cls='',txt;
     const hora=e.pide_hora?(c.hora?' · '+c.hora+' hs':' · falta la hora'):'';
     if(!c.fecha&&e.exige_fecha){cls=' aviso';txt='Falta fecha '+(e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
@@ -536,7 +553,8 @@ function htmlCard(c){
     else if(c.fecha===HOY){cls=' hoy';txt=e.fecha+' · hoy'+hora;}
     else txt=e.fecha+' · '+fechaCorta(c.fecha)+hora;
     if(c.fecha&&e.pide_hora&&!c.hora&&!atrasada(c))cls=' aviso';
-    h+='<button type="button" class="c-fecha'+cls+'" data-act="fecha">'+esc(txt)+'</button>';
+    h+='<div class="c-turno"><button type="button" class="c-fecha'+cls+'" data-act="fecha">'+esc(txt)+'</button>'+
+      (e.boton?'<button type="button" class="c-hecho" data-act="check" data-clave="'+esc(e.boton)+'">'+esc(e.checks.find(k=>k.id===e.boton).label)+'</button>':'')+'</div>';
   }
   // Semana estimada de entrega: guía, no alarma.
   if(c.semana&&c.etapa!=='archivar'){
@@ -561,6 +579,7 @@ function htmlCard(c){
 
   h+='<div class="c-checks">';
   e.checks.forEach(k=>{
+    if(k.id===e.boton)return; // ese tilde es el botón de arriba
     const on=!!c.checks[k.id];
     let label=k.label;
     if(k.id==='sena'&&on&&c.sena)label+=' · '+plataSena(c.sena);
@@ -607,6 +626,9 @@ function dibujar(){
   const ultima=columnas().length-1;
   ETAPAS.forEach(e=>{
     const lista=visibles.filter(c=>c.etapa===e.id).sort((a,b)=>{
+      const ha=hecho(a),hb=hecho(b);
+      if(ha!==hb)return ha?1:-1;                             // lo que falta hacer, arriba
+      if(ha&&a.medido_at!==b.medido_at)return a.medido_at<b.medido_at?-1:1; // ya medidas: la más vieja primero
       if(!!a.fecha!==!!b.fecha)return a.fecha?-1:1;          // con turno primero
       if(a.fecha!==b.fecha)return a.fecha<b.fecha?-1:1;      // el turno más próximo arriba
       if(a.hora!==b.hora)return a.hora<b.hora?-1:1;          // mismo día: el más temprano
@@ -622,7 +644,9 @@ function dibujar(){
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2>'+(sinT?'<span class="col-aviso">'+sinT+' sin turno</span>':'')+'<span class="col-n">'+lista.length+'</span></div>';
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
     if(columnas().indexOf(e)===0)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
-    const cards=lista.map(htmlCard).join('');
+    // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
+    const nHechas=e.boton?lista.filter(hecho).length:0;
+    const cards=lista.map((c,i)=>(nHechas&&i===lista.length-nHechas?'<div class="col-sep">'+esc(e.hecho)+' ('+nHechas+')</div>':'')+htmlCard(c)).join('');
     if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(buscado.length?'Sin resultados':'Nadie retira por el local')+'</div>';
     else h+=lista.length?cards:'<div class="col-vacia">'+(buscado.length?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
     h+='</section>';
@@ -717,6 +741,13 @@ wrap.addEventListener('click',ev=>{
       if(clave==='sena')c.sena=null;
       if(clave==='acceso')c.acceso=null;
       if(clave==='bacha')c.bacha='';
+      // Medido: desde ese día se cuenta el plazo. Planos listos da por hecha la medición.
+      if((clave==='medido'||clave==='medida')&&valor){
+        c.checks.medido=true;
+        if(!c.medido_at)c.medido_at=(c.fecha&&c.fecha<=HOY)?c.fecha:HOY;
+      }else if(clave==='medido'){
+        delete c.checks.medida;c.medido_at='';
+      }
     });
   }else if(act==='avanzar'){
     mover(c,cols[idx+1].id);
