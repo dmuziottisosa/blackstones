@@ -22,25 +22,34 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 
 ## Las columnas y sus tildes
 
-| Columna | Fecha de la tarjeta | Tildes para salir |
+| Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
-| **Por medir** | Medición | Obra lista para medir · Medida tomada · Seña cobrada · Tenemos placa · Bacha en taller |
-| **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Pieza terminada · Controlada |
-| **Por instalar** | Instalación | Cliente avisado · Piso y ascensor vistos · Instalada y conforme |
+| **Por medir** | Medición | Obra lista para medir · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Instaladores |
+| **Por fabricar** | (sin fecha: se fabrica en orden de llegada) | Se cortó bien · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto |
+| **Por instalar** | Instalación (**obligatoria**) | Fecha de instalación · Se avisó al cliente · Instaladores |
 | **Por archivar** | — | Saldo cobrado |
-| **Retiro en local** (cuadro aparte, abajo) | Retiro | Seña cobrada · Pieza terminada · Cliente avisado · Retirada · Saldo cobrado |
+| **Retiro en local** (cuadro aparte, abajo) | Retiro | Seña cobrada · Pieza terminada · Se avisó al cliente · Retirada · Saldo cobrado |
 
-Qué significa cada tilde que no es obvio:
+Cuatro tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
+
+- **Trajo la seña:** el monto, en $ o USD. Es el bloqueante de salida de Por medir: la trae el medidor, o el cliente señó antes.
+- **Tenemos la bacha:** de quién es. Nuestra (la proveemos), del cliente, o no lleva.
+- **Piso y ascensor:** cómo sube la pieza. Planta baja, por ascensor o por escalera con cuántos pisos ($30.000 por piso si no entra en el ascensor).
+- **Instaladores:** quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). Se elige al medir y se puede cambiar en Por instalar tocando el mismo tilde. La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/tablero.php`.
+
+Esos datos quedan a la vista en las etapas siguientes ("Bacha del cliente · Sube por escalera, 3 pisos · Instalan: Negro, David").
+
+Los demás:
 
 - **Obra lista para medir:** el cliente confirmó muebles colocados y mesada vieja retirada. Se tilda antes de mandar al medidor.
-- **Seña cobrada:** es el bloqueante de salida de Por medir. Pide el monto ($ o USD) que trajo el medidor, o que el cliente señó antes. Sin monto no se tilda.
-- **Tenemos placa:** la placa del color está en el taller o reservada con el proveedor.
-- **Bacha en taller:** si la obra no lleva bacha, se tilda igual.
-- **Piso y ascensor vistos:** se sabe si la pieza sube por ascensor o por escalera ($30.000 por piso si no entra).
+- **Medidas y planos listos:** desde ese día se cuenta el plazo de entrega.
+- **Tenemos la placa:** la placa del color está en el taller o reservada con el proveedor.
+- **Por fabricar** es el control de la pieza antes de que salga del taller. Si la obra no lleva bacha, los dos tildes de bacha se tildan igual.
+- **Por instalar** no tiene tilde de "instalada": pasar la tarjeta a Por archivar es decir que se instaló.
 
 ## Fechas y avisos
 
-- **Medición / Instalación / Retiro:** un turno por tarjeta. Si la fecha pasó y el tilde que la cumple no está, la tarjeta se marca atrasada en rojo.
+- **Medición / Instalación / Retiro:** un turno por tarjeta. Si la fecha pasó y la obra sigue sin cumplirla, la tarjeta se marca atrasada en rojo. La fecha de instalación además es obligatoria para salir de Por instalar.
 - **Entrega estimada:** semana en que cae medición + plazo (granito 15 días, el resto 20). Aparece al tildar "Medida tomada". Es guía: el orden de fabricación lo da la cola.
 - **Cola:** dentro de cada columna van primero las que tienen turno (el más próximo arriba) y después por orden de llegada a esa columna.
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.

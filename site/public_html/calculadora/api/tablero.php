@@ -13,6 +13,12 @@
 //     accion "check" → { "clave": "medida", "valor": true }
 //                      La seña pide además el monto que trajo el medidor:
 //                      { "clave": "sena", "valor": true, "monto": 250000, "moneda": "ARS" | "USD" }
+//                      Piso y ascensor pide cómo sube la pieza:
+//                      { "clave": "acceso", "valor": true, "modo": "pb" | "ascensor" | "escalera", "pisos": 3 }
+//                      La bacha pide de quién es:
+//                      { "clave": "bacha", "valor": true, "origen": "nuestra" | "cliente" | "no" }
+//                      Instaladores pide quiénes van (uno o varios de $BS_INSTALADORES):
+//                      { "clave": "equipo", "valor": true, "equipo": ["Negro", "David"] }
 //     accion "fecha" → { "fecha": "2026-11-24" }   ("" la borra)
 //     accion "nota"  → { "nota": "Falta la bacha" } ("" la borra)
 //     accion "mover" → { "a": "fabricar" }  (arrastre: etapa de destino)
@@ -46,7 +52,8 @@ define('BS_TABLERO_NOTA_MAX', 140);
 // para cambiar un tilde o un título se toca solo este array.
 //   fecha  → qué significa la fecha de la tarjeta en esa etapa
 //   cierra → tilde que da por cumplida esa fecha (si falta y la fecha ya
-//            pasó, la tarjeta se marca atrasada)
+//            pasó, la tarjeta se marca atrasada). Vacío = la fecha se cumple
+//            recién cuando la tarjeta sale de la columna.
 //   checks → tildes que hay que completar para pasar a la siguiente
 // ------------------------------------------------------------
 $BS_ETAPAS = [
@@ -56,10 +63,12 @@ $BS_ETAPAS = [
         'cierra' => 'medida',
         'checks' => [
             'apta'   => 'Obra lista para medir',
-            'medida' => 'Medida tomada',
-            'sena'   => 'Seña cobrada',
-            'placa'  => 'Tenemos placa',
-            'bacha'  => 'Bacha en taller',
+            'medida' => 'Medidas y planos listos',
+            'sena'   => 'Trajo la seña',
+            'bacha'  => 'Tenemos la bacha',
+            'placa'  => 'Tenemos la placa',
+            'acceso' => 'Piso y ascensor',
+            'equipo' => 'Instaladores',
         ],
     ],
     // Sin fecha a propósito: se fabrica en el orden en que entró (la cola).
@@ -67,19 +76,26 @@ $BS_ETAPAS = [
         'titulo' => 'Por fabricar',
         'fecha'  => '',
         'cierra' => '',
+        // Control de la pieza antes de que salga del taller.
         'checks' => [
-            'terminada'  => 'Pieza terminada',
-            'controlada' => 'Controlada',
+            'qc_corte'      => 'Se cortó bien',
+            'qc_medida'     => 'Medida y color correctos',
+            'qc_inglete'    => 'Inglete y zócalos',
+            'qc_bacha'      => 'Es la bacha correcta',
+            'qc_bacha_lado' => 'Bacha hacia el lado correcto',
         ],
     ],
     'instalar' => [
         'titulo' => 'Por instalar',
+        // Sin tilde de cierre: instalada = se pasa a "Por archivar". Si la
+        // fecha de instalación pasó y sigue acá, se marca atrasada.
+        // exige_fecha: sin fecha de instalación cargada no sale de la columna.
         'fecha'  => 'Instalación',
-        'cierra' => 'instalada',
+        'cierra' => '',
+        'exige_fecha' => true,
         'checks' => [
-            'avisado'   => 'Cliente avisado',
-            'acceso'    => 'Piso y ascensor vistos',
-            'instalada' => 'Instalada y conforme',
+            'avisado' => 'Se avisó al cliente',
+            'equipo'  => 'Instaladores',
         ],
     ],
     'archivar' => [
@@ -99,12 +115,15 @@ $BS_ETAPAS = [
         'checks' => [
             'sena'      => 'Seña cobrada',
             'terminada' => 'Pieza terminada',
-            'avisado'   => 'Cliente avisado',
+            'avisado'   => 'Se avisó al cliente',
             'retirada'  => 'Retirada',
             'saldo'     => 'Saldo cobrado',
         ],
     ],
 ];
+// Quiénes instalan. Se eligen uno o varios por obra (tilde "Instaladores").
+$BS_INSTALADORES = ['Negro', 'Espinola', 'Cesar', 'David', 'Jostin'];
+
 // Las 4 columnas, en orden. "retiro" queda afuera de la secuencia.
 $BS_ETAPA_IDS = [];
 foreach ($BS_ETAPAS as $id => $def) {
@@ -126,7 +145,7 @@ function bs_tablero_leer() {
 }
 
 function bs_tablero_obra_vacia() {
-    return ['etapa' => 'medir', 'fecha' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'desde' => '', 'hist' => []];
+    return ['etapa' => 'medir', 'fecha' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'equipo' => [], 'desde' => '', 'hist' => []];
 }
 
 function bs_tablero_fecha_valida($f) {
@@ -183,6 +202,13 @@ function bs_tablero_sena($obra) {
     $s = $obra['sena'] ?? null;
     if (!is_array($s) || floatval($s['monto'] ?? 0) <= 0) return null;
     return ['monto' => floatval($s['monto']), 'moneda' => (($s['moneda'] ?? '') === 'USD') ? 'USD' : 'ARS'];
+}
+
+/** Cómo sube la pieza: planta baja, por ascensor o por escalera (con cuántos pisos). */
+function bs_tablero_acceso($obra) {
+    $a = $obra['acceso'] ?? null;
+    if (!is_array($a) || !in_array($a['modo'] ?? '', ['pb', 'ascensor', 'escalera'], true)) return null;
+    return ['modo' => $a['modo'], 'pisos' => ($a['modo'] === 'escalera') ? max(1, intval($a['pisos'] ?? 1)) : 0];
 }
 
 function bs_tablero_zona($cot) {
@@ -248,6 +274,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'checks'      => (object)array_filter((array)$obra['checks']),
                     'nota'        => (string)$obra['nota'],
                     'sena'        => bs_tablero_sena($obra),
+                    'acceso'      => bs_tablero_acceso($obra),
+                    'bacha'       => in_array($obra['bacha'], ['nuestra', 'cliente', 'no'], true) ? $obra['bacha'] : '',
+                    'equipo'      => array_values(array_intersect($BS_INSTALADORES, (array)$obra['equipo'])),
                     'semana'      => $semana,
                     'desde'       => $desde,
                 ];
@@ -259,10 +288,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     foreach ($BS_ETAPAS as $id => $def) {
         $checks = [];
         foreach ($def['checks'] as $cid => $label) $checks[] = ['id' => $cid, 'label' => $label];
-        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'checks' => $checks];
+        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'checks' => $checks];
     }
 
-    bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'cards' => $cards]);
+    bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'cards' => $cards]);
 }
 
 // ============================================================
@@ -330,6 +359,54 @@ try {
                 $obra['sena'] = ['monto' => $monto, 'moneda' => $moneda, 'at' => $hoy];
             } else {
                 $obra['sena'] = null;
+            }
+        }
+
+        // Piso y ascensor es un dato de la medición que después usa el que
+        // instala (por escalera se cobra por piso): se guarda cómo sube.
+        if ($clave === 'acceso') {
+            if ($valor) {
+                $modo = (string)($body['modo'] ?? '');
+                $pisos = intval($body['pisos'] ?? 0);
+                if (!in_array($modo, ['pb', 'ascensor', 'escalera'], true)) {
+                    bs_lock_release($fp);
+                    bs_error('Elegí cómo sube la pieza.');
+                }
+                if ($modo === 'escalera' && ($pisos < 1 || $pisos > 60)) {
+                    bs_lock_release($fp);
+                    bs_error('Cargá cuántos pisos por escalera.');
+                }
+                $obra['acceso'] = ['modo' => $modo, 'pisos' => ($modo === 'escalera') ? $pisos : 0];
+            } else {
+                $obra['acceso'] = null;
+            }
+        }
+
+        // La bacha: de quién es (la proveemos nosotros, la trae el cliente, o no lleva).
+        if ($clave === 'bacha') {
+            if ($valor) {
+                $origen = (string)($body['origen'] ?? '');
+                if (!in_array($origen, ['nuestra', 'cliente', 'no'], true)) {
+                    bs_lock_release($fp);
+                    bs_error('Elegí de quién es la bacha.');
+                }
+                $obra['bacha'] = $origen;
+            } else {
+                $obra['bacha'] = '';
+            }
+        }
+
+        // Instaladores: uno o varios de la lista.
+        if ($clave === 'equipo') {
+            if ($valor) {
+                $equipo = array_values(array_intersect($BS_INSTALADORES, (array)($body['equipo'] ?? [])));
+                if (!$equipo) {
+                    bs_lock_release($fp);
+                    bs_error('Elegí quiénes instalan.');
+                }
+                $obra['equipo'] = $equipo;
+            } else {
+                $obra['equipo'] = [];
             }
         }
 
@@ -408,6 +485,10 @@ try {
         $retrocede = !$en_retiro && $destino !== false && $destino < $idx;
         if ($destino !== false && !$retrocede) {
             $faltan = [];
+            // La fecha de la etapa actual, si esa etapa la exige para salir.
+            if (!$en_retiro && !empty($BS_ETAPAS[$etapa]['exige_fecha']) && !bs_tablero_fecha_valida($obra['fecha'])) {
+                $faltan[] = 'Fecha de ' . mb_strtolower($BS_ETAPAS[$etapa]['fecha']);
+            }
             for ($i = 0; $i < $destino; $i++) {
                 foreach ($BS_ETAPAS[$BS_ETAPA_IDS[$i]]['checks'] as $cid => $label) {
                     if (empty($obra['checks'][$cid])) $faltan[] = $label;

@@ -210,8 +210,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .sena{display:flex;gap:8px;margin-top:4px}
 .modal .sena input{flex:1;min-width:0;padding:11px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:17px;font-weight:700;outline:none;font-variant-numeric:tabular-nums}
 .modal .sena input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
-.modal .sena button{padding:0 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:14px;font-weight:700;color:var(--text2);cursor:pointer}
+.modal .sena button{padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:14px;font-weight:700;color:var(--text2);cursor:pointer}
 .modal .sena button.on{background:var(--dk);color:var(--cr);border-color:var(--dk)}
+.modal .sena{flex-wrap:wrap}
+.modal .sena [data-op]{flex:1 1 28%;white-space:nowrap}
 [data-theme="dark"] .modal .sena button.on{background:var(--gd);color:#1A1816;border-color:var(--gd)}
 .modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
 .modal .btns button{padding:9px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card)}
@@ -314,6 +316,7 @@ const API='/calculadora/api/tablero.php';
 const API_ESTADO='/calculadora/api/state.php';
 
 let ETAPAS=[];      // definición de etapas (viene del server)
+let INSTALADORES=[];// quiénes instalan (viene del server)
 let CARDS=[];       // tarjetas
 let HOY='';         // YYYY-MM-DD según el server
 let abierta='';     // key de la tarjeta con el detalle abierto
@@ -343,6 +346,12 @@ function nombreCorto(n){
 }
 function plataSena(sn){
   return (sn.moneda==='USD'?'USD ':'$ ')+Number(sn.monto).toLocaleString('es-AR',{maximumFractionDigits:2});
+}
+const BACHA={nuestra:'nuestra',cliente:'del cliente',no:'no lleva'};
+function textoAcceso(a){
+  if(a.modo==='pb')return 'planta baja';
+  if(a.modo==='ascensor')return 'por ascensor';
+  return 'por escalera, '+a.pisos+(a.pisos===1?' piso':' pisos');
 }
 function leerMonto(txt){ // "250.000" → 250000 · "1.250,50" → 1250.5 · "1500.5" → 1500.5
   let t=String(txt).replace(/[^\d.,]/g,'');
@@ -377,7 +386,7 @@ async function cargar(){
   try{
     const j=await pedir(API);
     if(drag)return; // no redibujar con una tarjeta en el aire
-    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;
+    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;INSTALADORES=j.instaladores||[];
     dibujar();
   }catch(e){
     if(!CARDS.length)$('board').innerHTML='<div class="aviso" style="grid-column:1/-1">'+esc(e.message)+'</div>';
@@ -388,10 +397,15 @@ async function cargar(){
 const etapaDe=id=>ETAPAS.find(e=>e.id===id);
 const cardDe=key=>CARDS.find(c=>c.key===key);
 const columnas=()=>ETAPAS.filter(e=>!e.aparte); // las 4, en orden
-function faltanDe(c,e){return e.checks.filter(k=>!c.checks[k.id]).map(k=>k.label);}
-function atrasada(c){
+// Qué le falta a la tarjeta para salir de su etapa: la fecha (si la etapa la exige) y los tildes.
+function faltanDe(c,e){
+  const f=e.checks.filter(k=>!c.checks[k.id]).map(k=>k.label);
+  if(e.exige_fecha&&e.id===c.etapa&&!c.fecha)f.unshift('Fecha de '+e.fecha.toLowerCase());
+  return f;
+}
+function atrasada(c){ // la fecha pasó y no se cumplió (o la tarjeta sigue en la columna)
   const e=etapaDe(c.etapa);
-  return !!(c.fecha&&c.fecha<HOY&&e.cierra&&!c.checks[e.cierra]);
+  return !!(e.fecha&&c.fecha&&c.fecha<HOY&&!(e.cierra&&c.checks[e.cierra]));
 }
 // Qué falta para llevar la tarjeta a esa etapa (misma regla que el server):
 // hacia atrás o hacia Retiro, nada; hacia adelante, los tildes de todo lo de atrás.
@@ -437,6 +451,14 @@ function htmlCard(c){
     const txt=c.semana===esta?'esta semana':'semana del '+ddmm(c.semana)+(c.semana<esta?' · ya pasó':'');
     h+='<div class="c-promesa'+cls+'">Entrega estimada: '+esc(txt)+'</div>';
   }
+  // Datos que se cargan al medir y quedan a la vista para el taller y el que instala.
+  if(c.etapa!=='medir'&&c.etapa!=='archivar'){
+    const datos=[];
+    if(c.bacha)datos.push(c.bacha==='no'?'Sin bacha':'Bacha '+BACHA[c.bacha]);
+    if(c.acceso)datos.push('Sube '+textoAcceso(c.acceso));
+    if(c.equipo.length&&!e.checks.some(k=>k.id==='equipo'))datos.push('Instalan: '+c.equipo.join(', '));
+    if(datos.length)h+='<div class="c-promesa">'+esc(datos.join(' · '))+'</div>';
+  }
   if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
 
   h+='<div class="c-checks">';
@@ -444,6 +466,9 @@ function htmlCard(c){
     const on=!!c.checks[k.id];
     let label=k.label;
     if(k.id==='sena'&&on&&c.sena)label+=' · '+plataSena(c.sena);
+    if(k.id==='acceso'&&on&&c.acceso)label+=' · '+textoAcceso(c.acceso);
+    if(k.id==='bacha'&&on&&c.bacha)label=c.bacha==='no'?'No lleva bacha':'Tenemos la bacha · '+BACHA[c.bacha];
+    if(k.id==='equipo'&&on&&c.equipo.length)label='Instalan: '+c.equipo.join(', ');
     h+='<button type="button" class="chk'+(on?' on':'')+'" data-act="check" data-clave="'+esc(k.id)+'" aria-pressed="'+on+'">'+esc(label)+'</button>';
   });
   h+='</div>';
@@ -561,9 +586,14 @@ wrap.addEventListener('click',ev=>{
   }else if(act==='check'){
     const clave=b.dataset.clave,valor=!c.checks[clave];
     if(clave==='sena'&&valor){pedirSena(c);return;}
+    if(clave==='acceso'&&valor){pedirAcceso(c);return;}
+    if(clave==='bacha'&&valor){pedirBacha(c);return;}
+    if(clave==='equipo'){pedirEquipo(c);return;} // tildado o no, abre la lista para elegir o cambiar
     guardar(c,{accion:'check',clave:clave,valor:valor},()=>{
       if(valor)c.checks[clave]=true;else delete c.checks[clave];
       if(clave==='sena')c.sena=null;
+      if(clave==='acceso')c.acceso=null;
+      if(clave==='bacha')c.bacha='';
     });
   }else if(act==='avanzar'){
     mover(c,cols[idx+1].id);
@@ -761,6 +791,70 @@ function pedirSena(c){
     $('senaMonto').focus();
   }));
   $('senaMonto').focus();
+}
+
+// Piso y ascensor: un toque para decir cómo sube la pieza.
+function pedirAcceso(c){
+  let modo='';
+  abrirModal('Piso y ascensor · '+c.cliente_nro+'-'+c.sub,
+    '<p>¿Cómo sube la pieza?</p><div class="sena"><button type="button" data-op="pb">Planta baja</button><button type="button" data-op="ascensor">Por ascensor</button><button type="button" data-op="escalera">Por escalera</button></div>'+
+    '<div class="sena" id="accPisos" style="display:none;margin-top:10px"><input type="text" id="accN" inputmode="numeric" autocomplete="off" placeholder="¿Cuántos pisos?"></div>',
+    'Guardar',
+    ()=>{
+      if(!modo){toast('Elegí cómo sube la pieza.');return;}
+      const pisos=modo==='escalera'?parseInt($('accN').value,10):0;
+      if(modo==='escalera'&&!(pisos>=1&&pisos<=60)){$('accN').focus();toast('Cargá cuántos pisos por escalera.');return;}
+      cerrarModal();
+      guardar(c,{accion:'check',clave:'acceso',valor:true,modo:modo,pisos:pisos},()=>{
+        c.checks.acceso=true;c.acceso={modo:modo,pisos:pisos};
+      });
+    });
+  $('mCuerpo').querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
+    modo=b.dataset.op;
+    $('mCuerpo').querySelectorAll('[data-op]').forEach(x=>x.classList.toggle('on',x===b));
+    $('accPisos').style.display=modo==='escalera'?'flex':'none';
+    if(modo==='escalera')$('accN').focus();else $('mOk').focus();
+  }));
+}
+
+// Bacha: de quién es.
+function pedirBacha(c){
+  let origen='';
+  abrirModal('Bacha · '+c.cliente_nro+'-'+c.sub,
+    '<p>¿De quién es la bacha?</p><div class="sena"><button type="button" data-op="nuestra">Nuestra</button><button type="button" data-op="cliente">Del cliente</button><button type="button" data-op="no">No lleva</button></div>',
+    'Guardar',
+    ()=>{
+      if(!origen){toast('Elegí de quién es la bacha.');return;}
+      cerrarModal();
+      guardar(c,{accion:'check',clave:'bacha',valor:true,origen:origen},()=>{c.checks.bacha=true;c.bacha=origen;});
+    });
+  $('mCuerpo').querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
+    origen=b.dataset.op;
+    $('mCuerpo').querySelectorAll('[data-op]').forEach(x=>x.classList.toggle('on',x===b));
+    $('mOk').focus();
+  }));
+}
+
+// Instaladores: uno o varios. Se puede volver a abrir para cambiarlos.
+function pedirEquipo(c){
+  const elegidos=new Set(c.equipo);
+  abrirModal('Instaladores · '+c.cliente_nro+'-'+c.sub,
+    '<p>¿Quiénes instalan? Podés marcar más de uno.</p><div class="sena">'+INSTALADORES.map(n=>'<button type="button" data-op="'+esc(n)+'" class="'+(elegidos.has(n)?'on':'')+'">'+esc(n)+'</button>').join('')+'</div>',
+    'Guardar',
+    ()=>{
+      const equipo=INSTALADORES.filter(n=>elegidos.has(n));
+      cerrarModal();
+      if(!equipo.length&&!c.checks.equipo)return;
+      guardar(c,{accion:'check',clave:'equipo',valor:equipo.length>0,equipo:equipo},()=>{
+        if(equipo.length)c.checks.equipo=true;else delete c.checks.equipo;
+        c.equipo=equipo;
+      });
+    });
+  $('mCuerpo').querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
+    const n=b.dataset.op;
+    if(elegidos.has(n))elegidos.delete(n);else elegidos.add(n);
+    b.classList.toggle('on',elegidos.has(n));
+  }));
 }
 
 // Archivar: el presupuesto pasa a "Entregado" en el hub. No borra nada.
