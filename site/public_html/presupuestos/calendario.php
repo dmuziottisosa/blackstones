@@ -4,7 +4,8 @@
 // ============================================================
 // La vista de halcón del tablero: las mismas obras, puestas en el mes.
 // Muestra mediciones, instalaciones, retiros y el día en que vence el
-// plazo de cada obra. Desde acá se agenda y se reagenda (tocando o
+// plazo de cada obra (y, para lo que todavía no se midió, la entrega
+// estimada según el día de medición agendado). Desde acá se agenda y se reagenda (tocando o
 // arrastrando) y se cambia el plazo de entrega. Todo lo que se cambia
 // acá es el mismo dato del tablero: no hay nada duplicado.
 // Datos y reglas: /calculadora/api/tablero.php
@@ -138,6 +139,8 @@ button{font-family:inherit;color:inherit}
 /* Vencimiento del plazo: es un límite, no un turno. Va sin relleno y con borde punteado. */
 .ev.vence{--et:var(--text3);background:none;border:1px dashed var(--border);border-left:1px dashed var(--border);color:var(--text2);font-weight:600}
 .ev.vence:hover{border-color:var(--text3)}
+/* Entrega estimada de lo que todavía no se midió: más tenue que un vencimiento real. */
+.ev.vence.prev{color:var(--text3);font-style:italic;font-weight:500;opacity:.85}
 .ev.vence.cerca{border-color:var(--amb);color:var(--amb);background:var(--amb-soft)}
 .ev.vence.vencida{border-color:var(--red);color:var(--red);background:var(--red-soft);font-weight:700}
 
@@ -327,6 +330,13 @@ function estadoPlazo(c){ // '' | 'cerca' (vence hoy o en los próximos 6 días) 
   if(!c.limite||c.etapa==='archivar')return '';
   return c.limite<HOY?'vencida':(c.limite<=masDias(HOY,6)?'cerca':'');
 }
+// Entrega estimada de una obra que todavía no se midió: si se mide el día agendado, el plazo
+// vencería ese día + 15/20 corridos. No es un compromiso todavía (por eso va "fantasma"): se
+// vuelve vencimiento real cuando se marca Medido. Si ya tiene plazo (real o puesto a mano), no aplica.
+function previsto(c){
+  const e=etapaDe(c.etapa);
+  return (!c.limite&&e&&e.boton==='medido'&&c.fecha&&!cumplida(c))?masDias(c.fecha,c.plazo_dias):'';
+}
 // Instalaciones que se pisan: mismo día, un instalador en común y menos de 2 horas entre una y otra.
 const CHOQUE_MIN=120;
 let CHOQUES={};
@@ -375,6 +385,7 @@ function armar(){
     if(!e)return;
     if(e.fecha&&c.fecha&&!cumplida(c)&&ver[c.etapa]!==false)sumar(c.fecha,{tipo:c.etapa,c:c});
     if(c.limite&&c.etapa!=='archivar'&&ver.vence!==false)sumar(c.limite,{tipo:'vence',c:c});
+    if(previsto(c)&&ver.vence!==false)sumar(previsto(c),{tipo:'vence',c:c,prev:true});
   });
   Object.keys(dias).forEach(d=>dias[d].sort((a,b)=>{
     if((a.tipo==='vence')!==(b.tipo==='vence'))return a.tipo==='vence'?1:-1; // los turnos arriba, los vencimientos abajo
@@ -389,6 +400,10 @@ function armar(){
 function chip(ev,largo){
   const c=ev.c;
   const nom='<b>'+esc(c.cliente_nro)+'</b> '+esc(nombreCorto(c.nombre)||'Sin nombre');
+  if(ev.prev){
+    const t='Si se mide el '+fechaCorta(c.fecha)+', el plazo vence el '+fechaCorta(previsto(c))+' ('+c.plazo_dias+' días corridos)';
+    return '<button type="button" class="ev vence prev" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" title="'+esc(t)+'">Entrega estimada · '+nom+(largo?' <span>· todavía sin medir</span>':'')+'</button>';
+  }
   if(ev.tipo==='vence'){
     const p=estadoPlazo(c);
     const t='Plazo de entrega: '+fechaCorta(c.limite)+(c.plazo_manual?' (modificado)':'')+' · '+etapaDe(c.etapa).titulo;
@@ -410,7 +425,7 @@ function dibujar(){
 
   // Leyenda: qué es cada color, cuántos hay este mes, y tocarla lo oculta o lo muestra.
   const tipos=ETAPAS.filter(e=>e.fecha).map(e=>({id:e.id,txt:PLURAL[e.fecha]||e.fecha,n:CARDS.filter(c=>c.etapa===e.id&&c.fecha&&c.fecha.slice(0,7)===mes&&!cumplida(c)).length}));
-  tipos.push({id:'vence',txt:'Vencimientos',n:CARDS.filter(c=>c.limite&&c.etapa!=='archivar'&&c.limite.slice(0,7)===mes).length});
+  tipos.push({id:'vence',txt:'Vencimientos',n:CARDS.filter(c=>(c.limite&&c.etapa!=='archivar'&&c.limite.slice(0,7)===mes)||previsto(c).slice(0,7)===mes).length});
   $('ley').innerHTML=tipos.map(t=>'<button type="button" class="'+(t.id==='vence'?'':'et-'+esc(t.id))+(ver[t.id]!==false?' on':'')+'" data-ver="'+esc(t.id)+'" aria-pressed="'+(ver[t.id]!==false)+'">'+esc(t.txt)+' <b>'+t.n+'</b></button>').join('');
 
   const dias=armar();
@@ -493,7 +508,7 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
     h+='<p class="nota">'+esc(e.fecha)+' hecha: '+esc(fechaCorta(c.medido_at||c.fecha))+'.</p>';
   }
   h+='<label class="campo" for="fPlazo">Plazo de entrega</label><div class="fila"><input type="date" id="fPlazo" value="'+esc(c.limite)+'"></div>'
-    +'<p class="nota">'+(c.limite_auto?'Plazo normal: '+esc(fechaCorta(c.limite_auto))+' ('+c.plazo_dias+' días corridos desde la medición).':'Todavía no se midió: el plazo normal se calcula al medir ('+c.plazo_dias+' días corridos).')
+    +'<p class="nota">'+(c.limite_auto?'Plazo normal: '+esc(fechaCorta(c.limite_auto))+' ('+c.plazo_dias+' días corridos desde la medición).':'Todavía no se midió: el plazo normal se calcula al medir ('+c.plazo_dias+' días corridos).'+(previsto(c)?' Si se mide el '+esc(fechaCorta(c.fecha))+', vence el '+esc(fechaCorta(previsto(c)))+'.':''))
     +' <button type="button" class="lnk" id="fNormal"'+(c.plazo_manual?'':' hidden')+'>Volver al plazo normal</button></p>';
   h+='<a class="ir" href="/presupuestos/tablero.php?q='+encodeURIComponent(c.cliente_nro+'-'+c.sub)+'">Ver la ficha en el tablero →</a>';
   $('mTitulo').textContent=c.cliente_nro+'-'+c.sub+' · '+(nombreCorto(c.nombre)||'Sin nombre');
