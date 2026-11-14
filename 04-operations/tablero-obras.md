@@ -75,7 +75,7 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 
 ## Fechas y avisos
 
-- **Medición / Instalación / Retiro:** un turno por tarjeta. Si la fecha pasó y la obra sigue sin cumplirla, la tarjeta se marca atrasada en rojo. En Por instalar el turno lleva día y hora, y los dos son obligatorios para salir de la columna.
+- **Medición / Instalación / Retiro:** un turno por tarjeta. Si la fecha pasó y la obra sigue sin cumplirla, la tarjeta se marca atrasada en rojo. En Por instalar el turno lleva día y hora, y los dos son obligatorios para salir de la columna. En Por medir el turno también puede llevar hora, pero es opcional: se puede dejar vacía y no frena nada.
 - **Aviso ámbar "!":** en Por instalar, la obra que no tiene día u hora de instalación se marca con un signo de exclamación ámbar, y el encabezado de la columna cuenta cuántas están "sin turno". Rojo es atrasada; ámbar es que falta definir.
 - **Entrega estimada:** semana en que cae medición + plazo (granito 15 días, el resto 20). Aparece al tildar "Medida tomada". Es guía: el orden de fabricación lo da la cola.
 - **Cola:** dentro de cada columna van primero las que tienen turno (el más próximo arriba) y después por orden de llegada a esa columna. Cada ficha muestra su lugar (1, 2, 3…) y la 1 va enmarcada como **Próxima**. El número es el lugar real en la cola: no cambia al buscar o filtrar. Las ya medidas y ya cortadas no llevan número.

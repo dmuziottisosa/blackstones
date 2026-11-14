@@ -52,6 +52,9 @@ $BS_ETAPAS = [
         // una pastilla. Las obras que ya lo tienen bajan al final de la
         // columna, bajo el título "hecho": arriba queda la cola real de lo
         // que falta medir.
+        // El turno de medición puede llevar hora, pero es opcional: sin
+        // exige_fecha, ni la fecha ni la hora frenan el avance.
+        'pide_hora'   => true,
         'boton'       => 'medido',
         'boton_txt'   => 'Marcar medido',   // lo que dice el botón antes
         'boton_listo' => 'Ya medido',       // y después
