@@ -151,6 +151,9 @@ $BS_ETAPAS = [
         'checks' => [
             'avisado' => 'Se avisó al cliente',
             'equipo'  => 'Instaladores',
+            // Cierre de la instalación: la mesada quedó colocada y el cliente
+            // dio el visto bueno. Sin esto no pasa a Por archivar.
+            'conforme' => 'Entregado y conforme',
         ],
     ],
     'archivar' => [
