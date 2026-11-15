@@ -131,7 +131,7 @@ TEXTO, en negro cálido #1A1816, todo alineado a la izquierda:
 
 ### Placas 3 a 6 — Una por material
 
-Adjuntar en cada una: Imagen 1 = la portada aprobada · Imagen 2 = tu foto de esa piedra.
+Adjuntar en cada una: Imagen 1 = la portada aprobada · de la Imagen 2 en adelante = tus fotos de ese material (varias).
 
 Plantilla (cambiar solo lo que está entre corchetes):
 
@@ -140,11 +140,12 @@ RESULTADO: placa [3 / 4 / 5 / 6] del mismo carrusel. Presenta un material de mes
 
 REFERENCIAS:
 - Imagen 1 es la portada de esta serie. Usala como referencia de estilo: mismo fondo crema, mismo texto negro, mismas tipografías, mismos márgenes y la misma línea dorada. No copies su composición.
-- Imagen 2 es una foto real de la piedra. Es el sujeto: usá su textura, su color y sus vetas tal cual. No rediseñes la piedra, no le cambies el tono ni le agregues brillo.
+- Todas las demás imágenes adjuntas (de la Imagen 2 en adelante) son fotos reales de [granito]. Son el sujeto: usá la textura, el color y las vetas de cada una tal cual. No rediseñes las piedras, no les cambies el tono, no les agregues brillo y no inventes piedras que no estén en las fotos.
 
-ESCENA: fondo crema muy claro #FAF8F4. La foto de la piedra (Imagen 2) es un rectángulo grande con esquinas apenas redondeadas, corrido hacia arriba y a la derecha: se sale de la placa por el borde superior y por el borde derecho, y ocupa cerca de la mitad de la altura. A la izquierda de la foto, en el espacio libre, un número muy grande y fino en dorado #C4A77D: "[01]". Debajo de la foto, una línea dorada fina.
+ESCENA: fondo crema muy claro #FAF8F4. En la mitad superior, un mosaico prolijo con todas las fotos de [granito]: la Imagen 2 es la más grande y va a la derecha, saliéndose de la placa por el borde superior y por el borde derecho; las demás van más chicas a su izquierda, en una grilla ordenada. Todas con esquinas apenas redondeadas y el mismo espacio fino entre ellas. Debajo del mosaico, una línea dorada fina.
 
 TEXTO, en la mitad inferior, en negro cálido #1A1816, alineado a la izquierda:
+- Arriba del título, un número grande y fino en dorado #C4A77D: "[01]"
 - Título enorme: "[Granito]"
 - Bajada, mediana: "[El más económico de los cuatro.]"
 - Dos renglones chicos, uno debajo del otro:
