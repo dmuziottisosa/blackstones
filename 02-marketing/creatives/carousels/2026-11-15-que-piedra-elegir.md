@@ -66,6 +66,7 @@ Nada va a la placa sin fuente. Los precios salen de la lista propia cargada en l
 - **Logo:** no se le pide al modelo. Se agrega después con el archivo real.
 - **Orden:** generar primero **Granito**, adjuntando solo tus fotos de granito. Esa placa define el universo. Una vez aprobada, se adjunta como Imagen 1 en todas las demás, incluidas la portada y el cierre.
 - **Fotos por material:** 3 o 4 alcanzan. Cada foto se convierte en una losa de la pila.
+- **Zona segura:** cada prompt deja un 10% libre en los cuatro bordes. No hay una especificación oficial de Instagram; guías de terceros coinciden en diseñar en 4:5 (1080 x 1350) y dejar lo importante en el 70 a 80% central, porque la grilla del perfil recorta los costados de la portada. Verificar en la vista previa del perfil antes de publicar.
 
 ### Granito (placa 3) — la que define el estilo
 
@@ -95,7 +96,12 @@ ESTILO (igual en todas las placas de la serie):
 - Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
 - Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
 - Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
-- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+- Formato vertical para carrusel de Instagram.
+
+ZONA SEGURA:
+- Dejá un margen vacío del 10% en los cuatro bordes de la placa.
+- Todo el texto, el número, la línea dorada y la ilustración completa quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
+- El margen es solo fondo crema liso.
 
 RESTRICCIONES:
 - Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
@@ -132,7 +138,12 @@ ESTILO (igual en todas las placas de la serie):
 - Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
 - Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
 - Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
-- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+- Formato vertical para carrusel de Instagram.
+
+ZONA SEGURA:
+- Dejá un margen vacío del 10% en los cuatro bordes de la placa.
+- Todo el texto, el número, la línea dorada y la ilustración completa quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
+- El margen es solo fondo crema liso.
 
 RESTRICCIONES:
 - Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
@@ -169,7 +180,12 @@ ESTILO (igual en todas las placas de la serie):
 - Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
 - Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
 - Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
-- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+- Formato vertical para carrusel de Instagram.
+
+ZONA SEGURA:
+- Dejá un margen vacío del 10% en los cuatro bordes de la placa.
+- Todo el texto, el número, la línea dorada y la ilustración completa quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
+- El margen es solo fondo crema liso.
 
 RESTRICCIONES:
 - Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
@@ -206,7 +222,12 @@ ESTILO (igual en todas las placas de la serie):
 - Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
 - Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
 - Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
-- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+- Formato vertical para carrusel de Instagram.
+
+ZONA SEGURA:
+- Dejá un margen vacío del 10% en los cuatro bordes de la placa.
+- Todo el texto, el número, la línea dorada y la ilustración completa quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
+- El margen es solo fondo crema liso.
 
 RESTRICCIONES:
 - Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
@@ -239,7 +260,12 @@ ESTILO (igual en todas las placas de la serie):
 - Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
 - Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
 - Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
-- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+- Formato vertical para carrusel de Instagram.
+
+ZONA SEGURA:
+- Dejá un margen vacío del 10% en los cuatro bordes de la placa.
+- Todo el texto, el número, la línea dorada y la ilustración completa quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
+- El margen es solo fondo crema liso.
 
 RESTRICCIONES:
 - Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
@@ -275,7 +301,12 @@ ESTILO (igual en todas las placas de la serie):
 - Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
 - Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
 - Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
-- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+- Formato vertical para carrusel de Instagram.
+
+ZONA SEGURA:
+- Dejá un margen vacío del 10% en los cuatro bordes de la placa.
+- Todo el texto, el número, la línea dorada y la ilustración completa quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
+- El margen es solo fondo crema liso.
 
 RESTRICCIONES:
 - Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
@@ -309,7 +340,12 @@ ESTILO (igual en todas las placas de la serie):
 - Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
 - Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
 - Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
-- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+- Formato vertical para carrusel de Instagram.
+
+ZONA SEGURA:
+- Dejá un margen vacío del 10% en los cuatro bordes de la placa.
+- Todo el texto, el número, la línea dorada y la ilustración completa quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
+- El margen es solo fondo crema liso.
 
 RESTRICCIONES:
 - Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
@@ -370,5 +406,7 @@ Primer comentario:
 - [Care and cleaning — Natural Stone Institute](https://www.naturalstoneinstitute.org/consumers/care/)
 - [Care and maintenance — Caesarstone](https://www.caesarstoneus.com/customer-care/care-maintenance/)
 - [Dekton vs Neolith — GoSource (secundaria)](https://www.gosource.us/blog/dekton-vs-neolith-guide)
+- [Instagram post size 2026 — Inro (secundaria)](https://www.inro.social/blog/instagram-post-size)
+- [Instagram grid size guide — Oktopost (secundaria)](https://www.oktopost.com/blog/instagram-grid-size-guide/)
 - [Guías de sellado de granito — Slabwise (secundaria)](https://slabwise.com/guides/how-to-seal-granite-countertops)
 - Lista de precios propia: `03-product/calculadora/lista-precios-2026-08/` (cargada en `calc.html`)
