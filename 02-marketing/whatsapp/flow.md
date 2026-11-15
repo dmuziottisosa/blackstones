@@ -45,6 +45,40 @@ Con eso te paso un primer rango de precio en el día.
 
 ---
 
+### Formato vigente de la primera respuesta (en uso desde oct 2026)
+
+> Es el que se viene mandando de verdad. Manda sobre el template base de arriba. Recuperado de las conversaciones reales el 2026-11-15, para que no dependa de la memoria de nadie.
+
+Cuando el contacto llega del anuncio sin ningún dato:
+
+```
+Hola, ¡gracias por escribirnos! Para pasarte el presupuesto necesito:
+
+◾ Medidas de la mesada (largo × ancho)
+◾ Si lleva hueco para bacha, anafe o ambos
+◾ Zona de la obra
+
+Te dejo nuestro catálogo con todos los colores, separados por material:
+https://blackstones.com.ar/#colores
+
+Y si te interesa la piedra sinterizada, acá tenés la colección de Suprastone:
+https://www.suprastone.com.ar/colecciones/
+
+Para orientarte rápido:
+◾ Granito: el más económico. Aguanta la olla caliente y no se raya.
+◾ Cuarzo: look parejo, ideal para tonos claros. No aguanta la olla caliente directa.
+◾ Sinterizado: el más resistente. No se mancha, no se raya y aguanta todo.
+
+Decime cuál te gusta y te paso el presupuesto. Si dudás entre varios, te cotizo dos o tres para que compares.
+```
+
+Reglas del formato:
+- Viñetas con ◾, nunca con guiones ni números.
+- Los dos catálogos van siempre en la primera respuesta.
+- Se ofrece cotizar dos o tres opciones para comparar.
+
+---
+
 ## 3. Etapa 2 — Calificación
 
 Información mínima para cotizar:
@@ -88,6 +122,36 @@ Forma de pago: 50% al confirmar, 50% al colocar.
 
 Cualquier duda me decís. Si te sirve, coordinamos la medición técnica.
 ```
+
+### Formato vigente de la cotización (en uso desde oct 2026)
+
+> Manda sobre la estructura de arriba. Recuperado de las cotizaciones reales el 2026-11-15.
+
+```
+Hola [nombre], te paso el presupuesto para la mesada de [largo] × [ancho]:
+
+◾ *[Color] ([material])*: [USD o $ monto]
+[Una línea con lo que hace bien ese material.]
+
+◾ *[Segunda opción] ([material])*: [monto]
+[Una línea.]
+
+Incluye fabricación, traforo para [bacha / bacha y anafe] y zócalo de 5 cm.
+
+◾ *Flete y colocación en [zona]*: $ [monto]
+
+Es un presupuesto estimado: nuestro técnico rectifica las medidas en obra antes de fabricar, y ahí cerramos el número final.
+
+Plazo: [15 días corridos el granito / 20 el sinterizado], desde la medición.
+```
+
+Convenciones que se vienen usando:
+- **Zócalo de 5 cm incluido** sin cargo.
+- **El sinterizado va con regrueso de 4 cm**, y se dice ("lleva regrueso de 4 cm"). El m² se calcula con el regrueso.
+- **Traforo:** USD 80 o $ 100.000 cada uno, según la moneda del material.
+- **Flete y colocación:** CABA $ 200.000, GBA $ 300.000.
+- **Suprastone:** se manda el link de la colección para que elija el color.
+- Debajo del mensaje va siempre una lista "Para revisar antes de mandarlo", con lo que se asumió.
 
 **Reglas de la cotización:**
 - **Cerrada.** No "estimativo, después confirmamos."
