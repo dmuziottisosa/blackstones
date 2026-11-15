@@ -9,7 +9,7 @@ Dónde está cada obra y qué le falta para avanzar. Vive en `blackstones.com.ar
 - Una obra aparece sola cuando su presupuesto se marca **Aprobado** en Presupuestos.
 - La columna Por medir tiene el botón **+ Cargar obra**, con dos usos:
   - **Con N° de presupuesto** (`0042`, o `0042-2` si tiene versiones): busca ese presupuesto de la calculadora y lo aprueba. La ficha queda atada al presupuesto real.
-  - **Sin número** (cliente, teléfono, dirección, material, trabajo): para obras que no pasaron por la calculadora. Crea un presupuesto aprobado en el hub, con importe en 0: administración lo completa desde Presupuestos.
+  - **Sin número** (cliente, teléfono, dirección, material; el renglón "Trabajo" se sacó de esta ventana el 15/11/2026 para aliviarla, y se sigue pudiendo cargar desde "Editar obra"): para obras que no pasaron por la calculadora. Crea un presupuesto aprobado en el hub, con importe en 0: administración lo completa desde Presupuestos.
 - En Por medir hay dos filtros, **Sin plano** y **Sin foto de bacha**, con la cantidad de fichas a las que les falta cada uno. Las obras que no llevan bacha no cuentan como faltantes. En Por instalar hay un filtro igual, **Sin turno**, para ver solo las que no tienen día u hora de instalación.
 - **Buscador** arriba del tablero: por cliente, N°, material, zona, teléfono, dirección o instalador. En celular salta solo a la pestaña donde está la obra.
 - La tarjeta se identifica con el código del presupuesto: N° de cliente + versión (`0042-1`).

@@ -305,7 +305,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 /* === MODAL + TOAST === */
 .modal-bg{position:fixed;inset:0;background:rgba(10,9,7,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:900}
 .modal-bg.show{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:24px;max-width:440px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);--mp:24px;padding:var(--mp);max-width:440px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
 .modal h3{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-bottom:16px}
 .modal p{color:var(--text2);font-size:13.5px;line-height:1.55;margin-bottom:8px}
 .modal .sena{display:flex;gap:8px;margin-top:4px}
@@ -320,7 +320,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .lnk{background:none;border:none;padding:0;font-size:12.5px;font-weight:700;color:var(--red);text-decoration:underline;cursor:pointer}
 .modal .m-error{margin:16px 0 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--red-soft);color:var(--red);font-weight:700}
 .modal .btns button:disabled{opacity:.6;cursor:default}
-.modal .btns{display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:-24px;z-index:1;background:var(--card);margin:12px -24px -24px;padding:14px 24px 24px;border-radius:0 0 var(--radius) var(--radius)}
+.modal .btns{display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:calc(-1*var(--mp));z-index:1;background:var(--card);margin:12px calc(-1*var(--mp)) calc(-1*var(--mp));padding:14px var(--mp) var(--mp);border-radius:0 0 var(--radius) var(--radius)}
 .modal .btns button{padding:9px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card)}
 .modal .btns .ok{background:var(--dk);color:var(--cr);border-color:var(--dk)}
 [data-theme="dark"] .modal .btns .ok{background:var(--gd);color:#1A1816;border-color:var(--gd)}
@@ -342,6 +342,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .campo+.sena{margin:-10px 0 0}
 .modal .campo[hidden]{display:none}
 .modal .sena+.campo{margin-top:16px}
+.modal .campo.aire{margin-top:24px}
 .modal .campo+p{margin:-10px 0 16px;font-size:12px}
 .modal .campo input{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
 .modal .campo input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
@@ -388,7 +389,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .tope{flex-direction:column-reverse;align-items:stretch;gap:10px;margin:10px 0 0}
   .tope-d{justify-content:space-between}
   .card{padding:14px}
-  .modal{padding:20px}
+  .modal{--mp:20px}
   .avisos-g{margin:10px 0 0}
   .buscar input{max-width:none;font-size:16px}
   .col-tabs{display:flex;gap:4px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
@@ -1471,12 +1472,11 @@ function pedirCargar(){
     campo('cgCel','Teléfono','maxlength="40" inputmode="tel"')+
     campo('cgDir','Dirección','maxlength="200"')+
     campo('cgMat','Material y color','maxlength="200" placeholder="Ej: Blanco Suggar"')+
-    campo('cgCon','Trabajo','maxlength="200" placeholder="Ej: Cocina en L"')+
     // De quién es la bacha, si ya se sabe: queda anotado en la ficha. No tilda "Tenemos la bacha".
-    '<label class="campo" for="cgBachaMod">Bacha (opcional)</label><div class="sena" id="cgBacha"><button type="button" data-op="nuestra">Nuestra</button><button type="button" data-op="cliente">Del cliente</button><button type="button" data-op="no">No lleva</button></div>'+
+    '<label class="campo aire" for="cgBachaMod">Bacha (opcional)</label><div class="sena" id="cgBacha"><button type="button" data-op="nuestra">Nuestra</button><button type="button" data-op="cliente">Del cliente</button><button type="button" data-op="no">No lleva</button></div>'+
     '<label class="campo" id="cgBachaModL" hidden>Modelo de la bacha (si ya se sabe)<input type="text" id="cgBachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34"></label>'+
     // La medición se puede dejar agendada de entrada: así la obra no nace "sin fecha".
-    '<label class="campo" for="cgDia">Medición (la hora es opcional)</label><div class="sena"><input type="date" id="cgDia"><input type="time" id="cgHora" step="900" aria-label="Hora de medición"></div>'+
+    '<label class="campo aire" for="cgDia">Medición (la hora es opcional)</label><div class="sena"><input type="date" id="cgDia"><input type="time" id="cgHora" step="900" aria-label="Hora de medición"></div>'+
     '<p class="m-error" id="cgError" hidden></p>',
     'Cargar obra',
     async()=>{
@@ -1487,7 +1487,7 @@ function pedirCargar(){
       if(ocupado)return;
       ocupado=true;
       const bModelo=bacha&&bacha!=='no'?$('cgBachaMod').value.trim().replace(/\s+/g,' '):'';
-      const datos={nro:nro,nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:$('cgMat').value,concepto:$('cgCon').value};
+      const datos={nro:nro,nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:$('cgMat').value};
       // La ventana NO se cierra hasta que el server confirma: si el número no existe (o falla
       // cualquier cosa), queda abierta con todo lo escrito y el motivo a la vista.
       const b=$('mOk'),rotulo=b.textContent;
@@ -1525,7 +1525,7 @@ function pedirCargar(){
       await cargar();
     });
   // Con algo escrito, tocar afuera de la ventana no la cierra (se cierra con Cancelar).
-  modalProtegido=()=>!!bacha||['cgNro','cgNombre','cgCel','cgDir','cgMat','cgCon','cgDia','cgHora'].some(id=>$(id)&&$(id).value.trim());
+  modalProtegido=()=>!!bacha||['cgNro','cgNombre','cgCel','cgDir','cgMat','cgDia','cgHora'].some(id=>$(id)&&$(id).value.trim());
   // Bacha: tocar la opción elegida la saca (es opcional).
   $('cgBacha').querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
     bacha=bacha===b.dataset.op?'':b.dataset.op;
