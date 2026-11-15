@@ -152,6 +152,7 @@ Apenas la veamos confirmada, te confirmo la medición.
 
 | Escenario | Status |
 |---|---|
+| **Cliente pide el catálogo** | **listo** (ver abajo) |
 | Cliente pregunta solo precio sin medidas | pendiente |
 | Cliente quiere venir al showroom | pendiente |
 | Cliente pide muestra física en su casa | pendiente |
@@ -163,6 +164,27 @@ Apenas la veamos confirmada, te confirmo la medición.
 | Cliente insatisfecho post-instalación | pendiente |
 
 → Cada uno termina como archivo en `templates/`.
+
+### Cliente pide el catálogo (WhatsApp o DM de Instagram)
+
+Catálogos oficiales para compartir (dato del dueño, 2026-11-15):
+
+- **Propio:** `https://blackstones.com.ar/#colores` — granito, cuarzo y sinterizado, con pestañas por material. No tiene pestaña de mármol.
+- **Suprastone (sinterizado):** `https://www.suprastone.com.ar/colecciones/` — 8 colecciones: blancos, negros, grises, exóticos, fullbody, travertinos, 3D y beige. Placas de 1600 x 3200 mm.
+
+```
+Hola, ¿cómo estás? Te paso el catálogo:
+
+*Todos nuestros colores* (granito, cuarzo y sinterizado):
+https://blackstones.com.ar/#colores
+
+*Sinterizado Suprastone*, colección completa:
+https://www.suprastone.com.ar/colecciones/
+
+Si alguno te gusta, mandame el nombre y las medidas de tu mesada y te paso el presupuesto cerrado por escrito.
+```
+
+**Regla:** el catálogo nunca se manda solo. Siempre cierra pidiendo el color y las medidas, que es lo que hace falta para cotizar.
 
 ---
 

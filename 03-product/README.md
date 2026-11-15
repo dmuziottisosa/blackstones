@@ -10,6 +10,13 @@ Lo que vendemos: materiales, servicios, lógica detrás del precio.
 | `materials/` | Granito, cuarzo, sinterizado: ficha técnica + ficha comercial + cómo asesorar |
 | `services/` | Qué hacemos / qué no hacemos. Asesoramiento, medición, fabricación, flete, colocación. |
 
+## Catálogos para compartir con el cliente
+
+- Propio: `https://blackstones.com.ar/#colores` (granito, cuarzo y sinterizado; vive en `site/public_html/index.html`, sección `#colores`).
+- Suprastone: `https://www.suprastone.com.ar/colecciones/`.
+
+Mensaje listo para enviarlos: `02-marketing/whatsapp/flow.md` § 7.
+
 ## Pendientes (sin doc todavía)
 
 - `materials/granito.md` — info técnica, marcas, garantías (sin garantía de fábrica), cuándo recomendar
