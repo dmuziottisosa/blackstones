@@ -276,7 +276,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 /* === MODAL + TOAST === */
 .modal-bg{position:fixed;inset:0;background:rgba(10,9,7,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:900}
 .modal-bg.show{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:20px;max-width:420px;width:100%}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:20px;max-width:420px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
 .modal h3{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin-bottom:8px}
 .modal p{color:var(--text2);font-size:13.5px;line-height:1.55;margin-bottom:8px}
 .modal .sena{display:flex;gap:8px;margin-top:4px}
@@ -1325,11 +1325,15 @@ function pedirCargar(){
     campo('cgDir','Dirección','maxlength="200"')+
     campo('cgMat','Material y color','maxlength="200" placeholder="Ej: Blanco Suggar"')+
     campo('cgCon','Trabajo','maxlength="200" placeholder="Ej: Cocina en L"')+
+    // La medición se puede dejar agendada de entrada: así la obra no nace "sin fecha".
+    '<label class="campo" for="cgDia">Medición (la hora es opcional)</label><div class="sena" style="margin:-6px 0 10px"><input type="date" id="cgDia"><input type="time" id="cgHora" step="900" aria-label="Hora de medición"></div>'+
     '<p class="m-error" id="cgError" hidden></p>',
     'Cargar obra',
     async()=>{
       const nombre=$('cgNombre').value.trim(),nro=$('cgNro').value.trim();
       if(!nro&&!nombre){$('cgNombre').focus();toast('Poné el N° de presupuesto o el nombre del cliente.');return;}
+      const dia=$('cgDia').value,hora=$('cgHora').value.slice(0,5);
+      if(hora&&!dia){$('cgDia').focus();toast('Pusiste la hora: falta el día de la medición.');return;}
       if(ocupado)return;
       ocupado=true;
       const datos={nro:nro,nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:$('cgMat').value,concepto:$('cgCon').value};
@@ -1351,12 +1355,21 @@ function pedirCargar(){
       b.disabled=false;
       cerrarModal();
       recien={key:j.cliente_nro+'-'+j.sub,tipo:'llego',t:Date.now()}; // late al aparecer
-      toast('Obra '+j.cliente_nro+'-'+j.sub+' cargada en Por medir',true);
+      // La obra ya está cargada; la fecha de medición se guarda aparte. Si eso falla, la obra
+      // queda igual (marcada "sin fecha") y se avisa: nada de lo cargado se pierde.
+      let aviso='Obra '+j.cliente_nro+'-'+j.sub+' cargada en Por medir',bien=true;
+      if(dia){
+        try{
+          await pedir(API,{cliente_nro:j.cliente_nro,sub:j.sub,accion:'fecha',fecha:dia,hora:hora});
+          aviso+=' · medición '+fechaCorta(dia)+(hora?' '+hora+' hs':'');
+        }catch(e){aviso='La obra se cargó, pero no se pudo guardar la fecha de medición: '+e.message;bien=false;}
+      }
+      toast(aviso,bien);
       ocupado=false;
       await cargar();
     });
   // Con algo escrito, tocar afuera de la ventana no la cierra (se cierra con Cancelar).
-  modalProtegido=()=>['cgNro','cgNombre','cgCel','cgDir','cgMat','cgCon'].some(id=>$(id)&&$(id).value.trim());
+  modalProtegido=()=>['cgNro','cgNombre','cgCel','cgDir','cgMat','cgCon','cgDia','cgHora'].some(id=>$(id)&&$(id).value.trim());
   $('cgNro').focus();
 }
 
