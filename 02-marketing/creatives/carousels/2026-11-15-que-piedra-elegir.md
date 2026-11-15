@@ -294,18 +294,15 @@ TEXTO, en negro cálido #1A1816, todo alineado a la izquierda:
 - Abajo de todo, separado del resto: "Conocelas una por una."
 
 ESTILO (igual en todas las placas de la serie):
-- Ilustración editorial contemporánea, hermosa e impactante, hecha a mano: pintura tipo gouache con trazo fino de tinta y textura sutil de papel. No es una foto ni un render 3D.
-- Una sola idea visual por placa: un único motivo central, grande, sin objetos de relleno ni decoración alrededor.
-- La piedra pintada con detalle fiel a las fotos adjuntas: mismo color, mismo grano, mismas vetas.
-- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Fuera de los colores de la piedra y del motivo, solo negro cálido #1A1816 y dorado #C4A77D.
-- Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
-- Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
+- Placa tipográfica de la misma serie: solo texto sobre fondo liso, con textura sutil de papel. Sin ilustración, sin fotos, sin objetos.
+- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Solo negro cálido #1A1816 y dorado #C4A77D.
+- Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina.
 - Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
 - Formato vertical para carrusel de Instagram.
 
 ZONA SEGURA:
 - Dejá un margen vacío del 10% en los cuatro bordes de la placa.
-- Todo el texto, el número, la línea dorada y la ilustración completa quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
+- Todo el texto y la línea dorada quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
 - El margen es solo fondo crema liso.
 
 RESTRICCIONES:
