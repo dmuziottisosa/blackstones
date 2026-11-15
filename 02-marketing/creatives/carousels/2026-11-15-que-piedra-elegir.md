@@ -44,7 +44,7 @@ Nada va a la placa sin fuente. Los precios salen de la lista propia cargada en l
 | 4 · Cuarzo | Cuarzo | Precio medio, según la marca. / No es poroso: no absorbe manchas. / La verdad: no le apoyes la olla recién sacada del fuego. Usá apoyaplato. |
 | 5 · Sinterizado | Sinterizado | Desde el precio de un cuarzo hasta bastante más. / Resiste el calor, las rayas y las manchas. / La verdad: a la vista es más frío que una piedra natural. |
 | 6 · Mármol | Mármol | El clásico. El más conocido: Carrara. / En cocina se usa poco: el limón y el vinagre lo opacan, y se mancha. / Donde se luce: baños, vanitorys y revestimientos. |
-| 7 · Cierre | Preguntanos por nuestro catálogo. | (sin más texto) |
+| 7 · Cierre | Preguntanos por nuestro catálogo al DM. | (sin más texto, sin ilustración) |
 
 ---
 
@@ -313,35 +313,35 @@ RESTRICCIONES:
 
 ### Cierre (placa 7)
 
-Un solo pedido (decisión del dueño, 2026-11-15): que pregunten por el catálogo. Adjuntar: Imagen 1 = la placa de granito aprobada.
+Un solo pedido, sin ilustraciones (decisión del dueño, 2026-11-15). Adjuntar: Imagen 1 = la placa de granito aprobada.
 
 ```
-RESULTADO: última placa del mismo carrusel. Tiene un solo mensaje: que nos pregunten por el catálogo.
+RESULTADO: última placa del mismo carrusel. Placa tipográfica con un solo mensaje: que nos pregunten por el catálogo por mensaje directo.
 
-REFERENCIA: Imagen 1 es la placa de granito ya aprobada de esta serie. Usala como referencia de estilo: el mismo tipo de ilustración, la misma paleta, las mismas tipografías y la misma línea dorada. No copies su composición.
+REFERENCIA: Imagen 1 es la placa de granito ya aprobada de esta serie. Usala solo como referencia de paleta, tipografías, márgenes y línea dorada. No copies su ilustración ni dibujes ninguna otra.
 
-ESCENA: fondo crema muy claro #FAF8F4, liso. En la parte superior, chicos y en fila, los cuatro motivos de la serie pintados con el mismo estilo: una cordillera, una gota de vino, una llama y medio limón. Nada más.
+ESCENA: fondo crema muy claro #FAF8F4, liso. Sin ilustraciones, sin fotos, sin objetos, sin íconos. Solo el texto, con mucho espacio vacío alrededor.
 
 TEXTO, en negro cálido #1A1816, alineado a la izquierda, centrado en altura:
-- Una sola frase, como título enorme en tres renglones: "Preguntanos por nuestro catálogo."
+- Una sola frase, como título enorme en tres renglones: "Preguntanos por nuestro catálogo al DM."
+- Las letras "DM" van en mayúsculas, tal cual están escritas.
 - Una línea dorada fina y corta debajo.
 
 ESTILO (igual en todas las placas de la serie):
-- Ilustración editorial contemporánea, hermosa e impactante, hecha a mano: pintura tipo gouache con trazo fino de tinta y textura sutil de papel. No es una foto ni un render 3D.
-- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Fuera de los colores de los cuatro motivos, solo negro cálido #1A1816 y dorado #C4A77D.
-- Luz suave y pareja. Sin brillos exagerados, sin neón.
+- Placa tipográfica de la misma serie: solo texto sobre fondo liso, con textura sutil de papel.
+- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Solo negro cálido #1A1816 y dorado #C4A77D.
 - Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina.
-- Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Nada escrito todo en mayúsculas.
+- Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con interlineado apretado.
 - Formato vertical para carrusel de Instagram.
 
 ZONA SEGURA:
 - Dejá un margen vacío del 10% en los cuatro bordes de la placa.
-- El texto, la línea dorada y los cuatro motivos quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
+- El texto y la línea dorada quedan adentro de ese margen. Nada toca los bordes ni se sale de la placa.
 - El margen es solo fondo crema liso.
 
 RESTRICCIONES:
 - Escribí el texto exactamente una vez, tal cual está entre comillas, con su tilde.
-- No agregues ningún otro texto, número, logo, ícono, marca de agua ni firma.
+- No agregues ningún otro texto, número, logo, ícono, dibujo, marca de agua ni firma.
 - No dibujes personas ni manos.
 ```
 
@@ -377,7 +377,7 @@ Deslizá y mirá cuál aguanta lo que pasa en tu cocina.
 Elegir bien no es elegir la más cara.
 Es elegir la que va con cómo cocinás.
 
-Preguntanos por nuestro catálogo y te mostramos cada piedra.
+Preguntanos por nuestro catálogo al DM.
 
 📐 BlackStones · Mesadas a medida
 ```
