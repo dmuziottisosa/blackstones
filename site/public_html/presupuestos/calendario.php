@@ -6,7 +6,8 @@
 // Muestra mediciones, instalaciones, retiros y el día en que vence el
 // plazo de cada obra (y, para lo que todavía no se midió, la entrega
 // estimada según el día de medición agendado). Desde acá se agenda y se reagenda (tocando o
-// arrastrando) y se cambia el plazo de entrega. Todo lo que se cambia
+// arrastrando), se cambia el plazo de entrega y se edita la ficha
+// completa de la obra (la del tablero, embebida en modo "una ficha"). Todo lo que se cambia
 // acá es el mismo dato del tablero: no hay nada duplicado.
 // Datos y reglas: /calculadora/api/tablero.php
 //
@@ -166,7 +167,12 @@ button{font-family:inherit;color:inherit}
 /* === MODAL + TOAST (como el tablero) === */
 .modal-bg{position:fixed;inset:0;background:rgba(10,9,7,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:900}
 .modal-bg.show{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:20px;max-width:420px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:20px;max-width:900px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
+/* Dos partes: a la izquierda lo propio del calendario (día, hora, plazo); a la derecha la ficha del tablero, entera. */
+.modal .dos{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:22px;align-items:start}
+.modal .ficha-t{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text2);margin-bottom:6px}
+.modal .ficha{display:block;width:100%;height:520px;border:none;border-radius:var(--radius);background:var(--card)}
+@media(max-width:820px){.modal .dos{grid-template-columns:minmax(0,1fr);gap:18px}}
 .modal h3{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin-bottom:4px}
 .modal .sub{color:var(--text2);font-size:13px;line-height:1.5}
 .modal .sub.estado{font-weight:700;margin-bottom:2px}
@@ -255,8 +261,8 @@ button{font-family:inherit;color:inherit}
     <h3 id="mTitulo"></h3>
     <div id="mCuerpo"></div>
     <div class="btns">
-      <button type="button" id="mCancelar">Cancelar</button>
-      <button type="button" class="ok" id="mOk">Guardar</button>
+      <button type="button" id="mCancelar">Cerrar</button>
+      <button type="button" class="ok" id="mOk">Guardar fecha y plazo</button>
     </div>
   </div>
 </div>
@@ -492,7 +498,12 @@ function cambioPlazo(c,dia){
 
 // ---------- Ficha de la obra: su turno y su plazo, en un solo lugar ----------
 let modalOk=null;
-function cerrarModal(){$('modalBg').classList.remove('show');modalOk=null;}
+// Al cerrar se vuelve a leer el tablero: en la ficha se pudo haber cambiado cualquier cosa.
+function cerrarModal(recargar){
+  $('modalBg').classList.remove('show');modalOk=null;
+  $('mCuerpo').innerHTML='';
+  if(recargar!==false)cargar();
+}
 function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en un día)
   const e=etapaDe(c.etapa);
   const conTurno=!!e.fecha&&!cumplida(c);
@@ -511,10 +522,21 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
   h+='<label class="campo" for="fPlazo">Plazo de entrega</label><div class="fila"><input type="date" id="fPlazo" value="'+esc(c.limite)+'"></div>'
     +'<p class="nota">'+(c.limite_auto?'Plazo normal: '+esc(fechaCorta(c.limite_auto))+' ('+c.plazo_dias+' días corridos desde la medición).':'Todavía no se midió: el plazo normal se calcula al medir ('+c.plazo_dias+' días corridos).'+(previsto(c)?' Si se mide el '+esc(fechaCorta(c.fecha))+', vence el '+esc(fechaCorta(previsto(c)))+'.':''))
     +' <button type="button" class="lnk" id="fNormal"'+(c.plazo_manual?'':' hidden')+'>Volver al plazo normal</button></p>';
-  h+='<a class="ir" href="/presupuestos/tablero.php?q='+encodeURIComponent(c.cliente_nro+'-'+c.sub)+'">Ver la ficha en el tablero →</a>';
+  h+='<a class="ir" href="/presupuestos/tablero.php?q='+encodeURIComponent(c.cliente_nro+'-'+c.sub)+'">Ver en el tablero →</a>';
+  // La ficha del tablero, entera y editable (tildes, seña, bacha, fotos, nota): es la misma página en modo "una ficha".
+  h='<div class="dos"><div>'+h+'</div><div><div class="ficha-t">Ficha</div><iframe class="ficha" id="fFicha" title="Ficha de la obra" src="/presupuestos/tablero.php?solo='+encodeURIComponent(c.key)+'"></iframe></div></div>';
   $('mTitulo').textContent=c.cliente_nro+'-'+c.sub+' · '+(nombreCorto(c.nombre)||'Sin nombre');
   $('mCuerpo').innerHTML=h;
   $('modalBg').classList.add('show');
+  // El alto del marco sigue al de la ficha (crece al abrir "Más"), con un mínimo para que entren sus ventanitas.
+  const marco=$('fFicha');
+  marco.addEventListener('load',()=>{
+    try{
+      const doc=marco.contentDocument,ajustar=()=>{if(marco.isConnected)marco.style.height=Math.max(520,doc.documentElement.scrollHeight+2)+'px';};
+      new ResizeObserver(ajustar).observe(doc.body);
+      ajustar();
+    }catch(e){}
+  });
 
   // Aviso en vivo: el turno de instalación queda después del plazo, o se pisa con otro.
   const revisar=()=>{
@@ -538,13 +560,13 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
     }
     const pz=$('fPlazo').value;
     if(pz!==c.limite)cambios.push(cambioPlazo(c,pz));
-    cerrarModal();
+    cerrarModal(!cambios.length); // si hay cambios, guardar() recarga al terminar
     guardar(c,cambios,cambios.length?'Guardado: '+quien(c):'');
   };
   const f=foco==='plazo'?$('fPlazo'):(conTurno?(($('fDia').value&&$('fHora'))?$('fHora'):$('fDia')):$('fPlazo'));
   if(f&&matchMedia('(hover:hover)').matches)f.focus();
 }
-$('mCancelar').addEventListener('click',cerrarModal);
+$('mCancelar').addEventListener('click',()=>cerrarModal());
 $('mOk').addEventListener('click',()=>{if(modalOk)modalOk();});
 $('modalBg').addEventListener('click',ev=>{if(ev.target===$('modalBg'))cerrarModal();});
 document.addEventListener('keydown',ev=>{

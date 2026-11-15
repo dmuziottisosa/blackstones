@@ -88,6 +88,16 @@ button{font-family:inherit;color:inherit}
 .aviso{color:var(--text2);font-size:13.5px;padding:40px 16px;text-align:center;line-height:1.6}
 .aviso b{color:var(--text)}
 
+/* === MODO UNA FICHA (embebida en el calendario): sin encabezado, sin columnas, solo la ficha === */
+.solo body{background:var(--card)}
+.solo .header,.solo .h-tabs,.solo .gold-line,.solo .tope,.solo .avisos-g,.solo .col-tabs,
+.solo .col-h,.solo .col-avisos,.solo .col-sub,.solo .col-cargar,.solo .col-filtros,.solo .col-sep,.solo .c-prox{display:none!important}
+.solo .wrap{padding:0;max-width:none}
+.solo .board{display:block;overflow:visible;padding:0}
+.solo .col{display:block!important;background:none;border:none;padding:0;min-height:0}
+.solo .card{margin:0;box-shadow:none;cursor:default}
+.solo .aviso{padding:30px 10px}
+
 /* === BUSCADOR === */
 .tope{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
 .hoy{font-size:14px;color:var(--text2);white-space:nowrap}
@@ -462,6 +472,10 @@ let ocupado=false;  // hay un guardado en curso
 let fechaKey='';    // tarjeta a la que se le está eligiendo fecha
 let drag=null;      // arrastre en curso
 let buscado=[];     // palabras del buscador, ya sin mayúsculas ni acentos
+// Modo "una sola ficha" (?solo=0042-1): lo usa el calendario para mostrar la ficha completa adentro
+// de su ventana. Es esta misma página sin encabezado ni columnas: una única ficha, con todo lo suyo.
+const SOLO=(()=>{const k=new URLSearchParams(location.search).get('solo')||'';return /^\d{4,}-\d+$/.test(k)?k:'';})();
+if(SOLO)document.documentElement.classList.add('solo');
 const falta={}; // filtros "le falta…" encendidos: plano, foto de bacha y fecha (Por medir), turno (Por instalar)
 let recien=null;    // última tarjeta movida (o rebotada), para animarla: {key,tipo,t}
 const slot=document.createElement('div'); // "Soltar acá", viaja de columna en columna
@@ -794,8 +808,8 @@ function dibujar(){
   if((plazoF==='vencida'&&!nVen)||(plazoF==='cerca'&&!nCer))plazoF='';
   $('avisosG').innerHTML=(nVen?'<button type="button" class="aviso-g'+(plazoF==='vencida'?' on':'')+'" data-plazo="vencida" aria-pressed="'+(plazoF==='vencida')+'">'+nVen+' con plazo vencido</button>':'')
     +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'">'+nCer+(nCer===1?' vence en 7 días':' vencen en 7 días')+'</button>':'');
-  const filtrando=buscado.length>0||!!plazoF;
-  const visibles=CARDS.filter(coincide).filter(c=>!plazoF||plazo(c)===plazoF);
+  const filtrando=buscado.length>0||!!plazoF||!!SOLO;
+  const visibles=SOLO?CARDS.filter(c=>c.key===SOLO):CARDS.filter(coincide).filter(c=>!plazoF||plazo(c)===plazoF);
   // Buscando en celular: si la pestaña abierta no tiene resultados, salta a la primera que sí.
   if(filtrando&&visibles.length&&!visibles.some(c=>c.etapa===colMovil))colMovil=ETAPAS.find(e=>visibles.some(c=>c.etapa===e.id)).id;
   $('buscarN').textContent=buscado.length?(visibles.length?visibles.length+(visibles.length===1?' obra':' obras'):'Sin resultados'):'';
@@ -821,6 +835,7 @@ function dibujar(){
     const nPisan=e.exige_fecha?deEtapa.filter(sePisa).length:0;
     if(nPisan||falta['pisa_'+e.id])filtros.push(['pisa_'+e.id,'Se pisan',sePisa]);
     const lista=deEtapa.filter(c=>filtros.every(f=>!falta[f[0]]||f[2](c))).sort(ordenCola);
+    if(SOLO&&!lista.length)return; // en modo una ficha solo se dibuja la columna donde está
     const on=e.id===colMovil;
     const corto=e.aparte?'Retiro':e.titulo.replace('Por ','').replace(/^./,x=>x.toUpperCase());
     const llega=recien&&recien.tipo==='llego'&&Date.now()-recien.t<300&&lista.some(c=>c.key===recien.key);
@@ -858,6 +873,7 @@ function dibujar(){
   $('colTabs').innerHTML=tabs;
   $('board').innerHTML=cols;
   $('aparte').innerHTML=aparte;
+  if(SOLO&&!visibles.length)$('board').innerHTML='<div class="aviso">Esta obra ya no está en el tablero.</div>';
 }
 
 // Guarda un cambio: primero lo aplica en pantalla, después lo confirma el server.
@@ -925,7 +941,7 @@ $('colTabs').addEventListener('click',ev=>{
   const b=ev.target.closest('button[data-col]');
   if(!b)return;
   colMovil=b.dataset.col;
-  localStorage.setItem('bs-tablero-col',colMovil);
+  if(!SOLO)localStorage.setItem('bs-tablero-col',colMovil);
   dibujar();
   window.scrollTo({top:0});
 });
@@ -1110,7 +1126,7 @@ function dragSoltar(cancelar){
 }
 
 wrap.addEventListener('pointerdown',ev=>{
-  if(drag||ocupado||(ev.pointerType==='mouse'&&ev.button!==0))return;
+  if(SOLO||drag||ocupado||(ev.pointerType==='mouse'&&ev.button!==0))return;
   const art=ev.target.closest('.card');
   if(!art||ev.target.closest('button,a,input,.c-det'))return;
   const c=cardDe(art.dataset.key);
