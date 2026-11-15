@@ -26,6 +26,9 @@
 //     accion "fecha" → { "fecha": "2026-11-24" }   ("" la borra)
 //                      En Por instalar el turno lleva hora: { "fecha": "2026-11-24", "hora": "09:30" }
 //     accion "nota"  → { "nota": "Falta la bacha" } ("" la borra)
+//     accion "bacha" → { "origen": "nuestra" | "cliente" | "no", "modelo": "Johnson E37" }
+//                      Anota de quién es la bacha SIN tildar "Tenemos la bacha"
+//                      (lo usa "Cargar obra"). Con "no" sí queda tildado.
 //     accion "borrar" → borra la ficha: tildes, datos y adjuntos de la obra
 //     accion "mover" → { "a": "fabricar" }  (arrastre: etapa de destino)
 //                      { "hacia": "adelante" | "atras" | "retiro" }  (botones)
@@ -298,7 +301,7 @@ $accion = (string)($body['accion'] ?? '');
 
 if (intval($cliente_nro) <= 0) bs_error('cliente_nro inválido');
 if ($sub <= 0) bs_error('sub inválido');
-if (!in_array($accion, ['check', 'fecha', 'plazo', 'nota', 'mover', 'borrar'], true)) bs_error('accion inválida');
+if (!in_array($accion, ['check', 'fecha', 'plazo', 'nota', 'bacha', 'mover', 'borrar'], true)) bs_error('accion inválida');
 
 // La obra tiene que existir como cotización aprobada: el tablero no crea
 // obras, solo acompaña a las que el hub ya aprobó.
@@ -491,6 +494,38 @@ try {
             bs_error('La nota es muy larga (máximo ' . BS_TABLERO_NOTA_MAX . ' caracteres)');
         }
         $obra['nota'] = $nota;
+
+    } elseif ($accion === 'bacha') {
+        // De quién es la bacha, anotado al cargar la obra. Es un dato, no el
+        // tilde: "Tenemos la bacha" se sigue tildando a mano cuando la bacha
+        // está en el taller (ahí se exige el modelo si es nuestra). La única
+        // excepción es "no lleva": no hay nada que esperar, queda tildado.
+        if (!isset($BS_ETAPAS[$etapa]['checks']['bacha'])) {
+            bs_lock_release($fp);
+            bs_error('La bacha se anota en Por medir. Actualizá el tablero.', 409);
+        }
+        $origen = (string)($body['origen'] ?? '');
+        if (!in_array($origen, ['nuestra', 'cliente', 'no'], true)) {
+            bs_lock_release($fp);
+            bs_error('Elegí de quién es la bacha.');
+        }
+        $modelo = trim(preg_replace('/\s+/u', ' ', (string)($body['modelo'] ?? '')));
+        if (mb_strlen($modelo) > 80) {
+            bs_lock_release($fp);
+            bs_error('El modelo de la bacha es demasiado largo.');
+        }
+        if ($origen === 'no') $modelo = '';
+        elseif ($origen === 'nuestra' && $modelo === '' && !empty($obra['checks']['bacha'])) {
+            bs_lock_release($fp);
+            bs_error('Poné el modelo de la bacha.');
+        }
+        $obra['bacha'] = $origen;
+        $obra['bacha_modelo'] = $modelo;
+        if ($origen === 'no') {
+            $obra['checks']['bacha'] = true;
+            if (!is_array($obra['tildes_at'] ?? null)) $obra['tildes_at'] = [];
+            $obra['tildes_at']['bacha'] = $hoy;
+        }
 
     } else { // mover
         // Destino: una etapa puntual ("a", lo que manda el arrastre) o un

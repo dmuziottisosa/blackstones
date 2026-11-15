@@ -320,7 +320,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .lnk{background:none;border:none;padding:0;font-size:12.5px;font-weight:700;color:var(--red);text-decoration:underline;cursor:pointer}
 .modal .m-error{margin:16px 0 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--red-soft);color:var(--red);font-weight:700}
 .modal .btns button:disabled{opacity:.6;cursor:default}
-.modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:26px}
+.modal .btns{display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:-24px;z-index:1;background:var(--card);margin:12px -24px -24px;padding:14px 24px 24px;border-radius:0 0 var(--radius) var(--radius)}
 .modal .btns button{padding:9px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card)}
 .modal .btns .ok{background:var(--dk);color:var(--cr);border-color:var(--dk)}
 [data-theme="dark"] .modal .btns .ok{background:var(--gd);color:#1A1816;border-color:var(--gd)}
@@ -340,6 +340,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-cargar:hover{background:var(--et-soft)}
 .modal .campo{display:block;margin-bottom:16px;font-size:12px;font-weight:700;color:var(--text2)}
 .modal .campo+.sena{margin:-10px 0 0}
+.modal .campo[hidden]{display:none}
+.modal .sena+.campo{margin-top:16px}
 .modal .campo+p{margin:-10px 0 16px;font-size:12px}
 .modal .campo input{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
 .modal .campo input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
@@ -855,7 +857,9 @@ function htmlCard(c){
     let label=k.label;
     if(k.id==='sena'&&on&&c.sena)label+=' · '+plataSena(c.sena);
     if(k.id==='acceso'&&on&&c.acceso)label+=' · '+textoAcceso(c.acceso);
-    if(k.id==='bacha'&&on&&c.bacha)label=c.bacha==='no'?'No lleva bacha':'Tenemos la bacha · '+BACHA[c.bacha]+(c.bacha_modelo?' · '+c.bacha_modelo:(c.bacha==='nuestra'?' · falta el modelo':''));
+    // de quién es se ve aunque falte el tilde (se anota al cargar la obra)
+    // sin tilde dice solo de quién es ("Bacha del cliente"); con tilde, "Tenemos la bacha · …"
+    if(k.id==='bacha'&&c.bacha&&(on||c.bacha!=='no'))label=c.bacha==='no'?'No lleva bacha':(on?'Tenemos la bacha · ':'Bacha ')+BACHA[c.bacha]+(c.bacha_modelo?' · '+c.bacha_modelo:(c.bacha==='nuestra'?' · falta el modelo':''));
     if(PERSONAS[k.id]&&on&&c[PERSONAS[k.id].campo].length)label=PERSONAS[k.id].rotulo+c[PERSONAS[k.id].campo].join(', ');
     h+='<button type="button" class="chk'+(on?' on':'')+'" data-act="check" data-clave="'+esc(k.id)+'" aria-pressed="'+on+'">'+esc(label)+'</button>';
   });
@@ -1458,6 +1462,7 @@ function pedirEditar(c){
 
 // Cargar una obra a mano: para las que no pasaron por la calculadora.
 function pedirCargar(){
+  let bacha=''; // '', 'nuestra', 'cliente' o 'no'
   const campo=(id,rotulo,extra)=>'<label class="campo">'+rotulo+'<input type="text" id="'+id+'" autocomplete="off" '+(extra||'')+'></label>';
   abrirModal('Cargar obra',
     campo('cgNro','N° de presupuesto (si ya está hecho en la calculadora)','maxlength="12" inputmode="numeric" placeholder="Ej: 0042 o 0042-2"')+
@@ -1467,6 +1472,9 @@ function pedirCargar(){
     campo('cgDir','Dirección','maxlength="200"')+
     campo('cgMat','Material y color','maxlength="200" placeholder="Ej: Blanco Suggar"')+
     campo('cgCon','Trabajo','maxlength="200" placeholder="Ej: Cocina en L"')+
+    // De quién es la bacha, si ya se sabe: queda anotado en la ficha. No tilda "Tenemos la bacha".
+    '<label class="campo" for="cgBachaMod">Bacha (opcional)</label><div class="sena" id="cgBacha"><button type="button" data-op="nuestra">Nuestra</button><button type="button" data-op="cliente">Del cliente</button><button type="button" data-op="no">No lleva</button></div>'+
+    '<label class="campo" id="cgBachaModL" hidden>Modelo de la bacha (si ya se sabe)<input type="text" id="cgBachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34"></label>'+
     // La medición se puede dejar agendada de entrada: así la obra no nace "sin fecha".
     '<label class="campo" for="cgDia">Medición (la hora es opcional)</label><div class="sena"><input type="date" id="cgDia"><input type="time" id="cgHora" step="900" aria-label="Hora de medición"></div>'+
     '<p class="m-error" id="cgError" hidden></p>',
@@ -1478,6 +1486,7 @@ function pedirCargar(){
       if(hora&&!dia){$('cgDia').focus();toast('Pusiste la hora: falta el día de la medición.');return;}
       if(ocupado)return;
       ocupado=true;
+      const bModelo=bacha&&bacha!=='no'?$('cgBachaMod').value.trim().replace(/\s+/g,' '):'';
       const datos={nro:nro,nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:$('cgMat').value,concepto:$('cgCon').value};
       // La ventana NO se cierra hasta que el server confirma: si el número no existe (o falla
       // cualquier cosa), queda abierta con todo lo escrito y el motivo a la vista.
@@ -1506,25 +1515,37 @@ function pedirCargar(){
           aviso+=' · medición '+fechaCorta(dia)+(hora?' '+hora+' hs':'');
         }catch(e){aviso='La obra se cargó, pero no se pudo guardar la fecha de medición: '+e.message;bien=false;}
       }
+      if(bacha){
+        try{
+          await pedir(API,{cliente_nro:j.cliente_nro,sub:j.sub,accion:'bacha',origen:bacha,modelo:bModelo});
+        }catch(e){aviso='La obra se cargó, pero no se pudo anotar la bacha: '+e.message;bien=false;}
+      }
       toast(aviso,bien);
       ocupado=false;
       await cargar();
     });
   // Con algo escrito, tocar afuera de la ventana no la cierra (se cierra con Cancelar).
-  modalProtegido=()=>['cgNro','cgNombre','cgCel','cgDir','cgMat','cgCon','cgDia','cgHora'].some(id=>$(id)&&$(id).value.trim());
+  modalProtegido=()=>!!bacha||['cgNro','cgNombre','cgCel','cgDir','cgMat','cgCon','cgDia','cgHora'].some(id=>$(id)&&$(id).value.trim());
+  // Bacha: tocar la opción elegida la saca (es opcional).
+  $('cgBacha').querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
+    bacha=bacha===b.dataset.op?'':b.dataset.op;
+    $('cgBacha').querySelectorAll('[data-op]').forEach(x=>x.classList.toggle('on',x.dataset.op===bacha));
+    $('cgBachaModL').hidden=!bacha||bacha==='no';
+    if(bacha&&bacha!=='no')$('cgBachaMod').focus();
+  }));
   $('cgNro').focus();
 }
 
 // Bacha: de quién es.
 function pedirBacha(c){
   // Se abre tanto para tildar como para corregir: de quién es la bacha y qué modelo es.
-  let origen=c.checks.bacha?c.bacha:'';
+  let origen=c.bacha||''; // si ya se anotó al cargar la obra, viene elegida
   const op=(v,t)=>'<button type="button" data-op="'+v+'" class="'+(origen===v?'on':'')+'">'+t+'</button>';
   abrirModal('Bacha · '+c.cliente_nro+'-'+c.sub,
     '<p>¿De quién es la bacha?</p><div class="sena">'+op('nuestra','Nuestra')+op('cliente','Del cliente')+op('no','No lleva')+'</div>'+
     '<label class="campo" id="bachaModL" style="margin-top:16px"><span id="bachaModT">Modelo de la bacha</span><input type="text" id="bachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34" value="'+esc(c.bacha_modelo||'')+'"></label>'+
     '<button type="button" class="adjuntar" id="bachaFoto">+ Adjuntar foto de la bacha</button>'+
-    (c.checks.bacha?'<p style="margin:14px 0 0"><button type="button" class="lnk" id="bachaQuitar">Quitar el tilde</button></p>':''),
+    (c.checks.bacha||c.bacha?'<p style="margin:14px 0 0"><button type="button" class="lnk" id="bachaQuitar">'+(c.checks.bacha?'Quitar el tilde':'Borrar el dato')+'</button></p>':''),
     'Guardar',
     ()=>{
       if(!origen){toast('Elegí de quién es la bacha.');return;}
