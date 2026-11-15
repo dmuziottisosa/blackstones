@@ -288,6 +288,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .sena input[type=date],.modal .sena input[type=time]{flex:1 1 130px;font-size:16px;font-weight:600}
 .modal .sena [data-op]{flex:1 1 28%;white-space:nowrap}
 [data-theme="dark"] .modal .sena button.on{background:var(--gd);color:#1A1816;border-color:var(--gd)}
+.modal .m-error{margin:4px 0 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--red-soft);color:var(--red);font-weight:700}
+.modal .btns button:disabled{opacity:.6;cursor:default}
 .modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
 .modal .btns button{padding:9px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card)}
 .modal .btns .ok{background:var(--dk);color:var(--cr);border-color:var(--dk)}
@@ -1155,6 +1157,7 @@ document.addEventListener('contextmenu',ev=>{if(drag)ev.preventDefault();});
 // Modal (seña y archivar)
 // ============================================================
 let modalOk=null;
+let modalProtegido=null; // si devuelve true, tocar afuera no cierra la ventana (hay datos sin guardar)
 function abrirModal(titulo,cuerpo,boton,alAceptar){
   $('mCancelar').style.display='';
   $('mOk').classList.remove('peligro');
@@ -1164,9 +1167,9 @@ function abrirModal(titulo,cuerpo,boton,alAceptar){
   modalOk=alAceptar;
   $('modalBg').classList.add('show');
 }
-function cerrarModal(){$('modalBg').classList.remove('show');modalOk=null;}
+function cerrarModal(){$('modalBg').classList.remove('show');modalOk=null;modalProtegido=null;$('mOk').disabled=false;}
 $('mCancelar').addEventListener('click',cerrarModal);
-$('modalBg').addEventListener('click',ev=>{if(ev.target===$('modalBg'))cerrarModal();});
+$('modalBg').addEventListener('click',ev=>{if(ev.target===$('modalBg')&&!(modalProtegido&&modalProtegido()))cerrarModal();});
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape'){if(drag)dragSoltar(true);cerrarModal();}
   else if(ev.key==='Enter'&&modalOk&&$('modalBg').classList.contains('show')&&!$('mOk').classList.contains('peligro')){ev.preventDefault();$('mOk').click();} // (borrar nunca se confirma con Enter)
@@ -1253,7 +1256,8 @@ function pedirCargar(){
     campo('cgCel','Teléfono','maxlength="40" inputmode="tel"')+
     campo('cgDir','Dirección','maxlength="200"')+
     campo('cgMat','Material y color','maxlength="200" placeholder="Ej: Blanco Suggar"')+
-    campo('cgCon','Trabajo','maxlength="200" placeholder="Ej: Cocina en L"'),
+    campo('cgCon','Trabajo','maxlength="200" placeholder="Ej: Cocina en L"')+
+    '<p class="m-error" id="cgError" hidden></p>',
     'Cargar obra',
     async()=>{
       const nombre=$('cgNombre').value.trim(),nro=$('cgNro').value.trim();
@@ -1261,17 +1265,30 @@ function pedirCargar(){
       if(ocupado)return;
       ocupado=true;
       const datos={nro:nro,nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:$('cgMat').value,concepto:$('cgCon').value};
-      cerrarModal();
+      // La ventana NO se cierra hasta que el server confirma: si el número no existe (o falla
+      // cualquier cosa), queda abierta con todo lo escrito y el motivo a la vista.
+      const b=$('mOk'),rotulo=b.textContent;
+      b.disabled=true;b.textContent='Cargando…';
+      $('cgError').hidden=true;
+      let j=null;
       try{
-        const j=await pedir(API_CARGAR,datos);
-        recien={key:j.cliente_nro+'-'+j.sub,tipo:'llego',t:Date.now()}; // late al aparecer
-        toast('Obra '+j.cliente_nro+'-'+j.sub+' cargada en Por medir',true);
+        j=await pedir(API_CARGAR,datos);
       }catch(e){
-        toast(e.message);
+        ocupado=false;
+        b.disabled=false;b.textContent=rotulo;
+        $('cgError').textContent=e.message;$('cgError').hidden=false;
+        if(nro){$('cgNro').focus();$('cgNro').select();}
+        return;
       }
+      b.disabled=false;
+      cerrarModal();
+      recien={key:j.cliente_nro+'-'+j.sub,tipo:'llego',t:Date.now()}; // late al aparecer
+      toast('Obra '+j.cliente_nro+'-'+j.sub+' cargada en Por medir',true);
       ocupado=false;
       await cargar();
     });
+  // Con algo escrito, tocar afuera de la ventana no la cierra (se cierra con Cancelar).
+  modalProtegido=()=>['cgNro','cgNombre','cgCel','cgDir','cgMat','cgCon'].some(id=>$(id)&&$(id).value.trim());
   $('cgNro').focus();
 }
 
