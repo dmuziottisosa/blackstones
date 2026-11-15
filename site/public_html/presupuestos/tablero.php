@@ -91,7 +91,8 @@ button{font-family:inherit;color:inherit}
 /* === MODO UNA FICHA (embebida en el calendario): sin encabezado, sin columnas, solo la ficha === */
 .solo body{background:var(--card)}
 .solo .header,.solo .h-tabs,.solo .gold-line,.solo .tope,.solo .avisos-g,.solo .col-tabs,
-.solo .col-h,.solo .col-avisos,.solo .col-sub,.solo .col-cargar,.solo .col-filtros,.solo .col-sep,.solo .c-prox{display:none!important}
+.solo .col-h,.solo .col-avisos,.solo .col-sub,.solo .col-acc,.solo .col-filtros,.solo .col-sep,.solo .c-prox{display:none!important}
+.solo .board .col{max-height:none;overflow:visible}
 .solo .wrap{padding:0;max-width:none}
 .solo .board{display:block;overflow:visible;padding:0}
 .solo .col{display:block!important;background:none;border:none;padding:0;min-height:0}
@@ -99,7 +100,10 @@ button{font-family:inherit;color:inherit}
 .solo .aviso{padding:30px 10px}
 
 /* === BUSCADOR === */
-.tope{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.tope{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+.tope-d{display:flex;align-items:center;gap:16px}
+.vista-b{padding:7px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap}
+.vista-b:hover{border-color:var(--gd);color:var(--text)}
 .hoy{font-size:14px;color:var(--text2);white-space:nowrap}
 .hoy b{font-weight:700;color:var(--text)}
 .buscar{display:flex;align-items:center;gap:10px;flex:1;min-width:0;position:relative}
@@ -130,13 +134,21 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .et-retiro{--et:#4FC4C4;--et-soft:rgba(79,196,196,.13)}
 
 .col-tabs{display:none}
-.board{display:grid;grid-template-columns:repeat(var(--ncols,5),minmax(236px,1fr));gap:12px;align-items:start;overflow-x:auto;padding-bottom:4px}
-.col{background:var(--card-alt);border:1px solid var(--border);border-top:4px solid var(--et);border-radius:var(--radius);padding:10px;min-height:120px;transition:background .15s,opacity .15s}
-.col-h{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px}
+.board{display:grid;grid-template-columns:repeat(var(--ncols,5),minmax(244px,1fr));gap:14px;align-items:start;overflow-x:auto;padding-bottom:4px}
+.col{background:var(--card-alt);border:1px solid var(--border);border-top:4px solid var(--et);border-radius:var(--radius);padding:12px;min-height:120px;transition:background .15s,opacity .15s}
+.col-h{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 12px}
+.col .card:last-child{margin-bottom:0}
+/* En computadora la columna tiene alto fijo y se recorre por dentro; su título queda siempre a la vista. */
+@media(min-width:901px){
+  .board .col{max-height:var(--col-max,none);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+  .board .col-h{position:sticky;top:-12px;z-index:3;background:inherit;margin:-12px -12px 0;padding:14px 16px 10px;border-radius:var(--radius) var(--radius) 0 0}
+  .board .col::-webkit-scrollbar{width:8px}
+  .board .col::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
+}
 .col-h h2{font-family:'Fraunces',serif;font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
 .col-h h2::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--et);flex-shrink:0}
 .col-n{font-size:12px;font-weight:700;color:var(--et-on);background:var(--et);border-radius:999px;min-width:26px;padding:2px 8px;text-align:center;font-variant-numeric:tabular-nums}
-.col-sub{font-size:11.5px;color:var(--text3);padding:0 6px 8px;margin-top:-6px}
+.col-sub{font-size:11.5px;color:var(--text3);padding:0 4px 10px}
 .col-vacia{color:var(--text3);font-size:13px;text-align:center;padding:22px 8px}
 
 /* === ARRASTRE: qué se ve mientras hay una tarjeta en el aire ===
@@ -158,7 +170,24 @@ button{font-family:inherit;color:inherit}
 #aparte .card{margin-bottom:0}
 
 /* === TARJETA === */
-.card{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--et);border-radius:var(--radius);padding:12px;margin-bottom:10px;box-shadow:var(--shadow-sm);cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.card{position:relative;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--et);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+/* FICHA PLEGADA: dos o tres renglones. Se abre al tocarla; la flechita de la abierta la vuelve a plegar. */
+.card.plegada{padding:11px 14px 12px;cursor:pointer}
+.card.plegada .c-id{font-size:14px}
+.card.plegada .c-prox{margin:-11px -14px 10px -14px}
+.card.plegada .c-nota{margin-top:8px;padding:4px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-res{display:flex;flex-wrap:wrap;gap:5px 6px;margin-top:9px}
+.c-res .r{padding:2px 9px;border-radius:999px;background:var(--card-alt);color:var(--text2);font-size:11.5px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.c-res .r.rojo{background:var(--red-soft);color:var(--red)}
+.c-res .r.amb{background:var(--amb-soft);color:var(--amb)}
+.c-res .r.ok{background:var(--gr-soft);color:var(--gr)}
+.c-res .r.hoy{background:var(--gd);color:#1A1816}
+.c-plegar{position:absolute;top:8px;right:8px;width:28px;height:28px;border:none;border-radius:50%;background:none;cursor:pointer;z-index:1}
+.c-plegar::before{content:'';position:absolute;left:10px;top:12px;width:7px;height:7px;border-left:2px solid var(--text3);border-top:2px solid var(--text3);transform:rotate(45deg)}
+.c-plegar:hover{background:var(--card-alt)}
+.card.primera .c-plegar{top:1px}
+.card:not(.plegada):not(.primera) .c-id{padding-right:28px}
+.fantasma .c-plegar{display:none}
 .card:hover{border-color:var(--et)}
 .card.alerta{box-shadow:0 0 0 1.5px var(--red)}
 /* el hueco que deja la tarjeta mientras viaja */
@@ -166,7 +195,7 @@ button{font-family:inherit;color:inherit}
 .card.arrastrando>*{visibility:hidden}
 /* la tarjeta en el aire: toma el color de la etapa sobre la que está */
 .fantasma{position:fixed;left:0;top:0;z-index:800;pointer-events:none;margin:0;border:2px solid var(--et);box-shadow:var(--shadow-lg);cursor:grabbing;transition:border-color .12s}
-.fantasma .f-aviso{display:none;margin:-12px -12px 10px -12px;padding:7px 12px;border-radius:7px 7px 0 0;background:var(--et);color:var(--et-on);font-size:12.5px;font-weight:700}
+.fantasma .f-aviso{display:none;margin:-14px -14px 12px -14px;padding:7px 12px;border-radius:7px 7px 0 0;background:var(--et);color:var(--et-on);font-size:12.5px;font-weight:700}
 .fantasma.va .f-aviso,.fantasma.bloq .f-aviso{display:block}
 .fantasma.bloq{border-color:var(--red)}
 .fantasma.bloq .f-aviso{background:var(--red);color:#fff}
@@ -185,11 +214,11 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-pos{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 6px;margin-right:8px;border-radius:999px;border:1.5px solid var(--et);color:var(--et);font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;vertical-align:1px}
 .card.primera{outline:2px solid var(--et);outline-offset:1px}
 .card.primera .c-pos{background:var(--et);color:var(--et-on)}
-.c-prox{margin:-12px -12px 10px -12px;padding:5px 12px;border-radius:9px 9px 0 0;background:var(--et-soft);color:var(--et);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.c-prox{margin:-14px -14px 12px -14px;padding:5px 14px;border-radius:9px 9px 0 0;background:var(--et-soft);color:var(--et);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .fantasma .c-prox{display:none}
 .c-id b{font-weight:700;font-variant-numeric:tabular-nums}
 .c-id .zona{color:var(--text3);font-weight:500}
-.c-mat{color:var(--text2);font-size:13px;margin-top:2px;overflow-wrap:anywhere}
+.c-mat{color:var(--text2);font-size:13px;margin-top:3px;overflow-wrap:anywhere}
 
 .c-fecha{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer}
 .c-fecha:hover{border-color:var(--gd)}
@@ -198,22 +227,22 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-fecha.hoy{background:var(--gd);border-color:var(--gd);color:#1A1816}
 .c-fecha.atrasada{background:var(--red-soft);border-color:var(--red);color:var(--red)}
 /* MEDIDO: botón para marcar la medición hecha, y cómo queda después */
-.c-turno{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px}
+.c-turno{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
 .c-turno .c-fecha{margin-top:0}
-.c-hecho{display:block;width:100%;margin-top:10px;padding:12px;border-radius:var(--radius-sm);border:2px solid var(--et);background:var(--et);color:var(--et-on);font-size:15px;font-weight:800;letter-spacing:.01em;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm)}
+.c-hecho{display:block;width:100%;margin-top:12px;padding:12px;border-radius:var(--radius-sm);border:2px solid var(--et);background:var(--et);color:var(--et-on);font-size:15px;font-weight:800;letter-spacing:.01em;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm)}
 .c-hecho:hover{filter:brightness(1.08)}
 .c-hecho.listo{background:var(--gr);border-color:var(--gr);color:#fff}
 [data-theme="dark"] .c-hecho.listo{color:#04220F}
 .c-hecho.listo::before{content:'✓  '}
-.col-sep{margin:14px 2px 10px;padding-top:10px;border-top:2px dashed var(--border);font-size:11.5px;font-weight:700;color:var(--text3);letter-spacing:.02em}
+.col-sep{margin:16px 2px 10px;padding-top:12px;border-top:2px dashed var(--border);font-size:11.5px;font-weight:700;color:var(--text3);letter-spacing:.02em}
 /* AVISO "!" en rojo: la obra no tiene fecha (Por medir) o turno (Por instalar). Sin fecha no hay
    plazo, y lo que no tiene plazo se queda olvidado: se marca igual de fuerte que lo atrasado. */
 .c-fecha.aviso{background:var(--red-soft);border:1.5px solid var(--red);color:var(--red);font-weight:700}
 .c-fecha.aviso::before,.col-aviso::before,.aviso-g::before,.c-choque::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--red);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
 .card.sin-turno{box-shadow:0 0 0 1.5px var(--red)}
-.col-avisos{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 4px 10px;margin-top:-4px}
+.col-avisos{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 2px 12px}
 /* Avisos de todo el tablero (plazo prometido al cliente). Tocarlos deja a la vista solo esas fichas. */
-.avisos-g{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.avisos-g{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .avisos-g:empty{display:none}
 .aviso-g{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--red);font-family:inherit;cursor:pointer;padding:6px 14px 6px 6px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700;white-space:nowrap}
 .aviso-g.on{background:var(--red);color:var(--card)}
@@ -228,12 +257,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-aviso-det{font-size:11.5px;font-weight:600;color:var(--red)}
 .col-aviso{display:inline-flex;align-items:center;gap:5px;border:none;font-family:inherit;cursor:pointer;padding:3px 10px 3px 3px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:11.5px;font-weight:700;white-space:nowrap}
 
-.c-promesa{font-size:12.5px;color:var(--text3);margin-top:7px}
+.c-promesa{font-size:12.5px;color:var(--text3);margin-top:8px;line-height:1.5}
 .c-promesa.cerca{color:var(--amb);font-weight:600}
 .c-promesa.vencida{color:var(--red);font-weight:700}
-.c-nota{margin-top:8px;padding:7px 10px;border-radius:var(--radius-sm);background:var(--amb-soft);color:var(--amb);font-size:12.5px;font-weight:600;overflow-wrap:anywhere}
+.c-nota{margin-top:10px;padding:7px 10px;border-radius:var(--radius-sm);background:var(--amb-soft);color:var(--amb);font-size:12.5px;font-weight:600;overflow-wrap:anywhere}
 
-.c-checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.c-checks{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .chk{display:inline-flex;align-items:center;gap:7px;padding:7px 11px 7px 8px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer;text-align:left}
 .chk::before{content:'';flex-shrink:0;width:16px;height:16px;border-radius:5px;border:1.5px solid var(--text3);display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;color:#fff}
 .chk:hover{border-color:var(--gd)}
@@ -242,18 +271,18 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 [data-theme="dark"] .chk.on::before{color:#04220F}
 
 /* el botón lleva el color de la etapa a la que manda */
-.c-avanzar{display:block;width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--et);border-radius:var(--radius-sm);background:var(--et);color:var(--et-on);font-size:13.5px;font-weight:700;cursor:pointer}
+.c-avanzar{display:block;width:100%;margin-top:14px;padding:10px 12px;border:1px solid var(--et);border-radius:var(--radius-sm);background:var(--et);color:var(--et-on);font-size:13.5px;font-weight:700;cursor:pointer}
 .c-avanzar:hover{filter:brightness(1.08)}
 .c-avanzar.falta{background:none;color:var(--text3);border:1px dashed var(--border);font-weight:600}
 .c-avanzar.falta:hover{filter:none;color:var(--et);border-color:var(--et)}
 
-.c-mas{display:block;margin:8px auto 0;padding:4px 10px;border:none;background:none;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer}
+.c-mas{display:block;margin:10px auto -2px;padding:4px 10px;border:none;background:none;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer}
 .c-mas:hover{color:var(--text)}
-.c-det{margin-top:8px;padding-top:10px;border-top:1px solid var(--border-soft);font-size:13px;display:grid;gap:7px;cursor:auto;user-select:text;-webkit-user-select:text}
+.c-det{margin-top:10px;padding-top:12px;border-top:1px solid var(--border-soft);font-size:13px;display:grid;gap:7px;cursor:auto;user-select:text;-webkit-user-select:text}
 .c-det .fila{display:flex;gap:8px}
 .c-det .fila span{color:var(--text3);flex:0 0 74px}
 /* Hitos: lo ya hecho en etapas anteriores, con su fecha, a la vista en la ficha */
-.c-hitos{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:7px}
+.c-hitos{display:flex;flex-wrap:wrap;gap:5px 6px;margin-top:9px}
 .c-hitos span{padding:2px 8px;border-radius:999px;background:var(--gr-soft);color:var(--gr);font-size:11.5px;font-weight:600;white-space:nowrap}
 .c-hitos b{font-weight:800;font-variant-numeric:tabular-nums}
 /* Historial completo, en "Más" */
@@ -276,8 +305,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 /* === MODAL + TOAST === */
 .modal-bg{position:fixed;inset:0;background:rgba(10,9,7,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:900}
 .modal-bg.show{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:20px;max-width:420px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
-.modal h3{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin-bottom:8px}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:24px;max-width:440px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
+.modal h3{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-bottom:16px}
 .modal p{color:var(--text2);font-size:13.5px;line-height:1.55;margin-bottom:8px}
 .modal .sena{display:flex;gap:8px;margin-top:4px}
 .modal .sena input{flex:1;min-width:0;padding:11px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:17px;font-weight:700;outline:none;font-variant-numeric:tabular-nums}
@@ -288,9 +317,9 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .sena input[type=date],.modal .sena input[type=time]{flex:1 1 130px;font-size:16px;font-weight:600}
 .modal .sena [data-op]{flex:1 1 28%;white-space:nowrap}
 [data-theme="dark"] .modal .sena button.on{background:var(--gd);color:#1A1816;border-color:var(--gd)}
-.modal .m-error{margin:4px 0 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--red-soft);color:var(--red);font-weight:700}
+.modal .m-error{margin:16px 0 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--red-soft);color:var(--red);font-weight:700}
 .modal .btns button:disabled{opacity:.6;cursor:default}
-.modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+.modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:26px}
 .modal .btns button{padding:9px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card)}
 .modal .btns .ok{background:var(--dk);color:var(--cr);border-color:var(--dk)}
 [data-theme="dark"] .modal .btns .ok{background:var(--gd);color:#1A1816;border-color:var(--gd)}
@@ -301,14 +330,21 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .toast.ok{border-left-color:var(--gr)}
 
 /* === CARGAR OBRA A MANO (botón de la columna Por medir) === */
-.col-cargar{display:block;width:100%;margin-bottom:10px;padding:10px;border:1.5px dashed var(--et);border-radius:var(--radius);background:var(--card);color:var(--et);font-size:13.5px;font-weight:700;cursor:pointer}
+.col-acc{display:flex;gap:8px;align-items:stretch;margin-bottom:12px}
+.col-fb{flex:0 0 auto;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap}
+.col-fb::after{content:'';display:inline-block;margin-left:7px;width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-3px) rotate(45deg)}
+.col-fb.on::after{transform:translateY(1px) rotate(-135deg)}
+.col-fb:hover,.col-fb.on{border-color:var(--et);color:var(--et)}
+.col-cargar{display:block;flex:1 1 auto;min-width:0;margin-bottom:0;padding:8px;border:1.5px dashed var(--et);border-radius:var(--radius);background:var(--card);color:var(--et);font-size:13.5px;font-weight:700;cursor:pointer}
 .col-cargar:hover{background:var(--et-soft)}
-.modal .campo{display:block;margin-bottom:10px;font-size:12px;font-weight:700;color:var(--text2)}
-.modal .campo input{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
+.modal .campo{display:block;margin-bottom:16px;font-size:12px;font-weight:700;color:var(--text2)}
+.modal .campo+.sena{margin:-10px 0 0}
+.modal .campo+p{margin:-10px 0 16px;font-size:12px}
+.modal .campo input{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
 .modal .campo input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
 
 /* Filtros de Por medir: fichas sin plano / sin foto de bacha */
-.col-filtros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.col-filtros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .col-filtros button{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer}
 .col-filtros button i{font-style:normal;opacity:.7;font-variant-numeric:tabular-nums}
 .col-filtros button.on{background:var(--et);border-color:var(--et);color:var(--et-on)}
@@ -324,7 +360,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-filtros button.avi.on::before{background:var(--card);color:var(--red)}
 
 /* === ADJUNTOS: foto de bacha y plano === */
-.c-adj{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.c-adj{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .adj{position:relative;width:60px;height:60px;border-radius:8px;border:1px solid var(--border);background:var(--card-alt);padding:0;overflow:hidden;cursor:pointer;flex-shrink:0}
 .adj:hover{border-color:var(--et)}
 .adj img{width:100%;height:100%;object-fit:cover;display:block}
@@ -346,7 +382,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .h-tabs{padding:0 8px}
   .h-tabs a{padding:9px 12px;font-size:.62rem;letter-spacing:.06em}
   .wrap{padding:0 12px 60px}
-  .tope{flex-direction:column-reverse;align-items:stretch;gap:8px;margin:10px 0 0}
+  .tope{flex-direction:column-reverse;align-items:stretch;gap:10px;margin:10px 0 0}
+  .tope-d{justify-content:space-between}
+  .card{padding:14px}
+  .modal{padding:20px}
   .avisos-g{margin:10px 0 0}
   .buscar input{max-width:none;font-size:16px}
   .col-tabs{display:flex;gap:4px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
@@ -410,7 +449,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
       <button type="button" id="buscarX" aria-label="Borrar búsqueda" hidden>×</button>
       <span id="buscarN"></span>
     </div>
-    <div class="hoy" id="hoyTxt"></div>
+    <div class="tope-d">
+      <button type="button" class="vista-b" id="vistaB"></button>
+      <div class="hoy" id="hoyTxt"></div>
+    </div>
   </div>
   <div class="avisos-g" id="avisosG"></div>
   <div class="col-tabs" id="colTabs"></div>
@@ -475,10 +517,22 @@ let ocupado=false;  // hay un guardado en curso
 let fechaKey='';    // tarjeta a la que se le está eligiendo fecha
 let drag=null;      // arrastre en curso
 let buscado=[];     // palabras del buscador, ya sin mayúsculas ni acentos
+// FICHAS PLEGADAS: para que una columna no sea infinita hacia abajo, cada ficha se ve en dos o tres
+// renglones (quién, qué, y en qué está) y se abre al tocarla. De entrada vienen todas plegadas: así
+// se ve la cola entera de un vistazo. El botón de arriba ("Abrir todas") las muestra completas.
+let vistaTodas=false;
+try{vistaTodas=localStorage.getItem('bs-tablero-vista')==='completas';}catch(e){}
+let VISTA={};        // lo que se abrió o plegó a mano: key → true / false
+let UNICA='';        // key de la única ficha que deja el buscador, si es una sola
+let ultimoArrastre=0;// para que soltar una ficha arrastrada no cuente como "tocarla"
 // Modo "una sola ficha" (?solo=0042-1): lo usa el calendario para mostrar la ficha completa adentro
 // de su ventana. Es esta misma página sin encabezado ni columnas: una única ficha, con todo lo suyo.
 const SOLO=(()=>{const k=new URLSearchParams(location.search).get('solo')||'';return /^\d{4,}-\d+$/.test(k)?k:'';})();
 if(SOLO)document.documentElement.classList.add('solo');
+// Los filtros de cada columna vienen guardados detrás del botón "Filtrar", para que el encabezado no
+// se coma la columna. Lo que se abre queda recordado; un filtro prendido siempre se ve.
+let filtrosAb={};
+try{(JSON.parse(localStorage.getItem('bs-tablero-filtros')||'[]')||[]).forEach(k=>{filtrosAb[k]=true;});}catch(e){}
 const falta={}; // filtros "le falta…" encendidos: plano, foto de bacha y fecha (Por medir), turno (Por instalar)
 let recien=null;    // última tarjeta movida (o rebotada), para animarla: {key,tipo,t}
 const slot=document.createElement('div'); // "Soltar acá", viaja de columna en columna
@@ -691,6 +745,41 @@ function numerarColas(){
   });
 }
 
+function desplegada(c){
+  if(SOLO)return true;
+  if(c.key in VISTA)return VISTA[c.key];
+  return vistaTodas||abierta===c.key||UNICA===c.key; // buscar y que quede una sola: se muestra abierta
+}
+// La ficha plegada: N°, cliente, material y una fila de etiquetas con lo que hay que saber de un vistazo.
+function htmlPlegada(c,e,cls,estilo,pos){
+  let h='<article class="'+cls+' plegada"'+estilo+' data-key="'+esc(c.key)+'" data-act="abrir" title="Tocar para abrir la ficha">';
+  if(pos===1)h+='<div class="c-prox">Próxima</div>';
+  h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b> · '+esc(nombreCorto(c.nombre)||'Sin nombre');
+  if(c.zona)h+=' <span class="zona">· '+esc(c.zona)+'</span>';
+  h+='</div>';
+  const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
+  if(mat)h+='<div class="c-mat">'+esc(mat)+'</div>';
+  const r=[],et=(txt,tipo)=>r.push('<span class="r'+(tipo?' '+tipo:'')+'">'+esc(txt)+'</span>');
+  if(hecho(c))et(e.boton_listo+(c.boton_at?' · '+fechaCorta(c.boton_at):''),'ok');
+  else if(e.fecha){
+    if(!c.fecha){if(e.exige_fecha||e.avisa_fecha)et(e.exige_fecha?'Sin turno':'Sin fecha','rojo');}
+    else{
+      et((c.fecha===HOY?'Hoy':fechaCorta(c.fecha))+(c.hora?' · '+c.hora:'')+(atrasada(c)?' · atrasada':''),atrasada(c)?'rojo':(c.fecha===HOY?'hoy':''));
+      if(e.exige_fecha&&e.pide_hora&&!c.hora&&!atrasada(c))et('Falta la hora','rojo');
+    }
+  }
+  if(!hecho(c)&&(e.urge||[]).some(k=>!c.checks[k]))et((e.urge_txt||'sin empezar').replace(/^./,x=>x.toUpperCase()),'rojo');
+  if(sePisa(c))et('Se pisa','rojo');
+  const pl=plazo(c);
+  if(pl==='vencida')et('Plazo vencido','rojo');
+  else if(pl==='cerca')et('Vence '+(c.limite===HOY?'hoy':fechaCorta(c.limite)),'amb');
+  // cuánto le falta para poder pasar de etapa
+  if(faltanDe(c,e).length)et(e.checks.filter(k=>c.checks[k.id]).length+' de '+e.checks.length,'tildes');
+  else et('Lista para pasar','ok');
+  h+='<div class="c-res">'+r.join('')+'</div>';
+  if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
+  return h+'</article>';
+}
 function htmlCard(c){
   const e=etapaDe(c.etapa);
   const cols=columnas();
@@ -702,7 +791,9 @@ function htmlCard(c){
     const dt=Math.max(0,Date.now()-recien.t); // si se redibuja en el medio, la animación sigue donde iba
     if(dt<1000){cls+=' '+recien.tipo;estilo=' style="animation-delay:-'+dt+'ms"';}
   }
+  if(!desplegada(c))return htmlPlegada(c,e,cls,estilo,pos);
   let h='<article class="'+cls+'"'+estilo+' data-key="'+esc(c.key)+'">';
+  if(!SOLO)h+='<button type="button" class="c-plegar" data-act="plegar" aria-label="Plegar la ficha" title="Plegar"></button>';
 
   if(pos===1)h+='<div class="c-prox">Próxima</div>';
   h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b> · '+esc(nombreCorto(c.nombre)||'Sin nombre');
@@ -814,6 +905,7 @@ function dibujar(){
     +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'">'+nCer+(nCer===1?' vence en 7 días':' vencen en 7 días')+'</button>':'');
   const filtrando=buscado.length>0||!!plazoF||!!SOLO;
   const visibles=SOLO?CARDS.filter(c=>c.key===SOLO):CARDS.filter(coincide).filter(c=>!plazoF||plazo(c)===plazoF);
+  UNICA=buscado.length&&visibles.length===1?visibles[0].key:'';
   // Buscando en celular: si la pestaña abierta no tiene resultados, salta a la primera que sí.
   if(filtrando&&visibles.length&&!visibles.some(c=>c.etapa===colMovil))colMovil=ETAPAS.find(e=>visibles.some(c=>c.etapa===e.id)).id;
   $('buscarN').textContent=buscado.length?(visibles.length?visibles.length+(visibles.length===1?' obra':' obras'):'Sin resultados'):'';
@@ -860,8 +952,15 @@ function dibujar(){
       h+='</div>';
     }
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
-    if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
-    if(filtros.length)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+((f[0].indexOf('turno_')===0||f[0].indexOf('pisa_')===0)&&deEtapa.some(f[2])?' avi':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
+    // Fila de acciones: cargar (solo la primera columna) y el botón que muestra u oculta los filtros.
+    const nAct=filtros.filter(f=>falta[f[0]]).length,verF=filtros.length>0&&(!!filtrosAb[e.id]||nAct>0);
+    if(esPrimera||filtros.length){
+      h+='<div class="col-acc">';
+      if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
+      if(filtros.length)h+='<button type="button" class="col-fb'+(verF?' on':'')+'" data-filtros="'+esc(e.id)+'" aria-expanded="'+verF+'">Filtrar'+(nAct?' · '+nAct:'')+'</button>';
+      h+='</div>';
+    }
+    if(verF)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+((f[0].indexOf('turno_')===0||f[0].indexOf('pisa_')===0)&&deEtapa.some(f[2])?' avi':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
     // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
     // El separador va antes del bloque final de fichas ya hechas.
     let corte=lista.length;
@@ -875,10 +974,24 @@ function dibujar(){
   });
   $('board').style.setProperty('--ncols',columnas().length);
   $('colTabs').innerHTML=tabs;
+  // cada columna se desplaza por dentro: al redibujar, queda donde estaba
+  const sc={};
+  document.querySelectorAll('#board .col[data-col]').forEach(x=>{sc[x.dataset.col]=x.scrollTop;});
   $('board').innerHTML=cols;
+  document.querySelectorAll('#board .col[data-col]').forEach(x=>{if(sc[x.dataset.col])x.scrollTop=sc[x.dataset.col];});
   $('aparte').innerHTML=aparte;
+  $('vistaB').textContent=vistaTodas?'Plegar las fichas':'Abrir todas las fichas';
+  ajustarAlto();
   if(SOLO&&!visibles.length)$('board').innerHTML='<div class="aviso">Esta obra ya no está en el tablero.</div>';
 }
+
+// Alto de las columnas (computadora): lo que queda de pantalla debajo del encabezado. Así el tablero
+// entra en una pantalla y cada columna se recorre por dentro, en vez de crecer sin fin hacia abajo.
+function ajustarAlto(){
+  const t=$('board').getBoundingClientRect().top+window.scrollY;
+  document.documentElement.style.setProperty('--col-max',Math.max(380,window.innerHeight-t-16)+'px');
+}
+window.addEventListener('resize',ajustarAlto);
 
 // Guarda un cambio: primero lo aplica en pantalla, después lo confirma el server.
 async function guardar(c,body,aplicar){
@@ -954,6 +1067,16 @@ wrap.addEventListener('click',ev=>{
   if(ev.target.closest('[data-cargar]')){pedirCargar();return;}
   const bp=ev.target.closest('[data-plazo]');
   if(bp){plazoF=plazoF===bp.dataset.plazo?'':bp.dataset.plazo;dibujar();return;}
+  const bfi=ev.target.closest('[data-filtros]');
+  if(bfi){
+    const k=bfi.dataset.filtros;
+    filtrosAb[k]=!bfi.classList.contains('on');
+    // cerrar el panel apaga los filtros de esa columna: no quedan filtros prendidos a escondidas
+    if(!filtrosAb[k])Object.keys(falta).forEach(f=>{if(f.slice(-k.length-1)==='_'+k||(k===ETAPAS[0].id&&(f==='plano'||f==='bacha')))falta[f]=false;});
+    try{localStorage.setItem('bs-tablero-filtros',JSON.stringify(Object.keys(filtrosAb).filter(x=>filtrosAb[x])));}catch(e){}
+    dibujar();
+    return;
+  }
   const bf=ev.target.closest('[data-falta]');
   if(bf){
     // Los filtros de estado de una columna (ejecutar / continuar / con el cortador) son
@@ -970,6 +1093,15 @@ wrap.addEventListener('click',ev=>{
   const c=art&&cardDe(art.dataset.key);
   if(!c)return;
   const act=b.dataset.act;
+  if(act==='abrir'||act==='plegar'){
+    if(Date.now()-ultimoArrastre<400)return;
+    VISTA[c.key]=act==='abrir';
+    if(act==='plegar'&&abierta===c.key)abierta='';
+    dibujar();
+    const a=document.querySelector('.card[data-key="'+c.key+'"]');
+    if(a)a.scrollIntoView({block:'nearest'});
+    return;
+  }
   const cols=columnas();
   const idx=cols.findIndex(e=>e.id===c.etapa);
 
@@ -1073,6 +1205,7 @@ function dragMarcar(zona){
     slot.className='slot'+(f.length?' bloq':'');
     slot.textContent=txt;
     zona.insertBefore(slot,zona.querySelector('.card,.cards,.col-vacia'));
+    if(zona.scrollTop)zona.scrollTop=0; // la columna tiene su propio desplazamiento: que el cartel se vea
   }
 }
 function dragEmpezar(){
@@ -1123,6 +1256,7 @@ function dragSoltar(cancelar){
   drag=null;
   clearTimeout(d.espera);
   if(!d.activo)return;
+  ultimoArrastre=Date.now();
   d.fantasma.remove();
   slot.remove();
   d.art.classList.remove('arrastrando');
@@ -1259,7 +1393,7 @@ function pedirEditar(c){
   const nro0=c.manual?'':propio;
   abrirModal('Editar obra '+propio,
     campo('edNro','N° de presupuesto',nro0,'maxlength="12" inputmode="numeric" placeholder="'+(c.manual?'Todavía sin presupuesto':'Ej: 0042 o 0042-2')+'"')+
-    '<p style="margin:-4px 0 12px;font-size:12px">'+(c.manual?'Esta obra se cargó a mano. Cuando el presupuesto esté hecho, poné acá su número.':'Cambialo para pasar la ficha a otro presupuesto.')+' La ficha conserva sus tildes, fechas y fotos.</p>'+
+    '<p>'+(c.manual?'Esta obra se cargó a mano. Cuando el presupuesto esté hecho, poné acá su número.':'Cambialo para pasar la ficha a otro presupuesto.')+' La ficha conserva sus tildes, fechas y fotos.</p>'+
     campo('edNombre','Cliente',c.nombre,'maxlength="120"')+
     campo('edCel','Teléfono',c.celular,'maxlength="40" inputmode="tel"')+
     campo('edDir','Dirección',c.direccion,'maxlength="200"')+
@@ -1319,14 +1453,14 @@ function pedirCargar(){
   const campo=(id,rotulo,extra)=>'<label class="campo">'+rotulo+'<input type="text" id="'+id+'" autocomplete="off" '+(extra||'')+'></label>';
   abrirModal('Cargar obra',
     campo('cgNro','N° de presupuesto (si ya está hecho en la calculadora)','maxlength="12" inputmode="numeric" placeholder="Ej: 0042 o 0042-2"')+
-    '<p style="margin:-4px 0 12px;font-size:12px">Con el número alcanza: la ficha toma los datos de ese presupuesto. Sin número, completá lo de abajo.</p>'+
+    '<p>Con el número alcanza: la ficha toma los datos de ese presupuesto. Sin número, completá lo de abajo.</p>'+
     campo('cgNombre','Cliente','maxlength="120" placeholder="Nombre y apellido"')+
     campo('cgCel','Teléfono','maxlength="40" inputmode="tel"')+
     campo('cgDir','Dirección','maxlength="200"')+
     campo('cgMat','Material y color','maxlength="200" placeholder="Ej: Blanco Suggar"')+
     campo('cgCon','Trabajo','maxlength="200" placeholder="Ej: Cocina en L"')+
     // La medición se puede dejar agendada de entrada: así la obra no nace "sin fecha".
-    '<label class="campo" for="cgDia">Medición (la hora es opcional)</label><div class="sena" style="margin:-6px 0 10px"><input type="date" id="cgDia"><input type="time" id="cgHora" step="900" aria-label="Hora de medición"></div>'+
+    '<label class="campo" for="cgDia">Medición (la hora es opcional)</label><div class="sena"><input type="date" id="cgDia"><input type="time" id="cgHora" step="900" aria-label="Hora de medición"></div>'+
     '<p class="m-error" id="cgError" hidden></p>',
     'Cargar obra',
     async()=>{
@@ -1573,6 +1707,13 @@ function libre(){
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&libre())cargar();});
 setInterval(()=>{if(!document.hidden&&libre())cargar();},60000);
+
+$('vistaB').addEventListener('click',()=>{
+  vistaTodas=!vistaTodas;
+  VISTA={};
+  try{localStorage.setItem('bs-tablero-vista',vistaTodas?'completas':'plegadas');}catch(e){}
+  dibujar();
+});
 
 // Llegando desde el calendario ("Ver la ficha en el tablero"): ?q=0042-1 abre con esa obra buscada.
 (function(){

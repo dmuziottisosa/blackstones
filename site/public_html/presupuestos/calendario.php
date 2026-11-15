@@ -167,24 +167,24 @@ button{font-family:inherit;color:inherit}
 /* === MODAL + TOAST (como el tablero) === */
 .modal-bg{position:fixed;inset:0;background:rgba(10,9,7,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:900}
 .modal-bg.show{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:20px;max-width:900px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:24px;max-width:920px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
 /* Dos partes: a la izquierda lo propio del calendario (día, hora, plazo); a la derecha la ficha del tablero, entera. */
 .modal .dos{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:22px;align-items:start}
 .modal .ficha-t{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text2);margin-bottom:6px}
 .modal .ficha{display:block;width:100%;height:520px;border:none;border-radius:var(--radius);background:var(--card)}
 @media(max-width:820px){.modal .dos{grid-template-columns:minmax(0,1fr);gap:18px}}
-.modal h3{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin-bottom:4px}
+.modal h3{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-bottom:6px}
 .modal .sub{color:var(--text2);font-size:13px;line-height:1.5}
 .modal .sub.estado{font-weight:700;margin-bottom:2px}
-.modal .campo{display:block;margin-top:16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text2)}
+.modal .campo{display:block;margin-top:20px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text2)}
 .modal .fila{display:flex;gap:8px;margin-top:5px}
 .modal input{flex:1 1 130px;min-width:0;width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:16px;font-weight:600;outline:none}
 .modal input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
 .modal .nota{font-size:12.5px;color:var(--text3);margin-top:6px;line-height:1.5}
 .modal .nota.rojo{color:var(--red);font-weight:700}
 .modal .lnk{background:none;border:none;padding:0;font-size:12.5px;font-weight:700;color:var(--text2);text-decoration:underline;cursor:pointer}
-.modal .ir{display:inline-block;margin-top:16px;font-size:13px;font-weight:700;color:var(--text2)}
-.modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.modal .ir{display:inline-block;margin-top:20px;font-size:13px;font-weight:700;color:var(--text2)}
+.modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:26px}
 .modal .btns button{padding:9px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card)}
 .modal .btns .ok{background:var(--dk);color:var(--cr);border-color:var(--dk)}
 [data-theme="dark"] .modal .btns .ok{background:var(--gd);color:#1A1816;border-color:var(--gd)}

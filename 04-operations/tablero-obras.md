@@ -17,6 +17,15 @@ Dónde está cada obra y qué le falta para avanzar. Vive en `blackstones.com.ar
 - **Regla única:** para avanzar hay que tener todos los tildes de la columna en la que está la tarjeta. Hacia atrás se mueve libre.
 - En celular se ve una columna a la vez. Para arrastrar: mantener apretada la tarjeta y soltarla sobre la pestaña de destino.
 
+## Fichas plegadas y columnas de alto fijo
+
+Para que el tablero no sea una página infinita (decisión del dueño, 2026-11-15):
+
+- **Fichas plegadas:** cada ficha se ve en dos o tres renglones: lugar en la cola, N° y cliente, material y trabajo, y una fila de etiquetas con lo que hay que saber (fecha y hora, "Sin fecha", "Sin entregar", "Se pisa", "Plazo vencido", "Vence el…", "3 de 7" tildes o "Lista para pasar"), más la nota si tiene. Se abre al tocarla y se vuelve a plegar con la flechita. Vienen todas plegadas; "Abrir todas las fichas" (arriba) las muestra completas y lo recuerda. Si el buscador deja una sola ficha, se muestra abierta.
+- **Columnas de alto fijo (computadora):** el tablero entra en una pantalla y cada columna se recorre por dentro, con su título siempre a la vista. En celular la página se desplaza como siempre, pero con fichas plegadas.
+- **Filtros detrás de "Filtrar":** los filtros de cada columna se muestran al tocar ese botón (queda recordado). Un filtro prendido siempre se ve, y cerrar "Filtrar" los apaga. Los avisos rojos de arriba de la columna siguen prendiendo su filtro con un toque.
+- Plegada o abierta, la ficha se arrastra igual.
+
 ## Colores
 
 Cada etapa tiene un color fijo, que se repite en la columna, el borde de la tarjeta, la pestaña del celular y el botón que lleva a esa etapa: **Por medir** azul, **Por cortar** gris grafito, **Por fabricar** naranja, **Por instalar** violeta, **Por archivar** verde, **Retiro en local** turquesa. El rojo queda reservado para lo que está mal (atrasada, no puede pasar).
