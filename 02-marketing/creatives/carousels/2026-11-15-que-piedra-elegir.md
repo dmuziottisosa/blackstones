@@ -50,27 +50,52 @@ Nada va a la placa sin fuente. Los precios salen de la lista propia cargada en l
 
 ## 3. Prompts
 
+> **Dirección visual (decisión del dueño, 2026-11-15):** cada placa es una **ilustración hermosa e impactante, de una sola idea**, en paleta clara y con texto negro. Sistema de la serie: una pila de losas de la piedra y, encima, un único motivo que cuenta lo que hay que saber de ella.
+
+| Placa | Idea única | Motivo sobre la piedra |
+|---|---|---|
+| Granito | Es duro: viene de la montaña | Una cordillera que nace de la losa |
+| Cuarzo | No absorbe manchas | Una gota de vino entera, sin aureola |
+| Sinterizado | Aguanta el fuego | Una llama ardiendo sobre la piedra intacta |
+| Mármol | El limón lo opaca | Medio limón y su aureola mate |
+
 ### Antes de empezar
 
 - **Proporción:** elegir 4:5 si Higgsfield la ofrece; si no, 3:4 o 2:3. No sé qué proporciones muestra tu pantalla.
 - **Calidad:** la más alta disponible, por el texto.
 - **Logo:** no se le pide al modelo. Se agrega después con el archivo real.
-- **Orden:** generar la placa 1, aprobarla, y adjuntarla como Imagen 1 en todas las demás.
+- **Orden:** generar primero **Granito**, adjuntando solo tus fotos de granito. Esa placa define el universo. Una vez aprobada, se adjunta como Imagen 1 en todas las demás, incluidas la portada y el cierre.
+- **Fotos por material:** 3 o 4 alcanzan. Cada foto se convierte en una losa de la pila.
 
-### Bloque ESTILO (va pegado entero al final de cada prompt)
+### Granito (placa 3) — la que define el estilo
+
+Adjuntar: solo tus fotos de granito.
 
 ```
+RESULTADO: placa 3 de un carrusel de Instagram para una marmolería. Presenta el granito con una ilustración hermosa e impactante que transmite una sola idea.
+
+REFERENCIAS:
+- Todas las imágenes adjuntas son fotos reales de granito. Son la referencia del material: la piedra de la ilustración tiene que tener el color, el grano y las vetas de esas fotos. No inventes piedras que no estén en las fotos.
+
+ESCENA: en los dos tercios superiores, sobre el fondo crema liso, una pila de losas gruesas de granito flotando en el aire, vistas en tres cuartos y apenas desfasadas entre sí: una losa por cada foto adjunta de granito, cada una con el aspecto de su foto. De la losa de arriba nace una pequeña cordillera tallada en el mismo granito, como si la montaña saliera de la mesada. Nada más alrededor. Debajo de la ilustración, una línea dorada fina.
+
+TEXTO, en el tercio inferior, en negro cálido #1A1816, alineado a la izquierda:
+- Arriba del título, un número grande y fino en dorado #C4A77D: "01"
+- Título enorme: "Granito"
+- Bajada, mediana: "El más económico de los cuatro."
+- Dos renglones chicos, uno debajo del otro:
+  "Duro y resistente al uso de todos los días."
+  "La verdad: los claros tienden a mancharse."
+
 ESTILO (igual en todas las placas de la serie):
-- Pieza gráfica editorial contemporánea para carrusel de Instagram, formato vertical.
-- Paleta clara: fondo crema muy claro #FAF8F4 en toda la placa. Ningún bloque ni fondo oscuro.
-- Todo el texto en negro cálido #1A1816. El dorado #C4A77D se usa solo en líneas finas y en los números grandes, nunca en texto chico.
-- Composición moderna y asimétrica: texto alineado a la izquierda, gran contraste de tamaño entre el título enorme y el texto chico, la foto corrida hacia un borde y saliéndose de la placa.
-- Títulos en tipografía serif editorial de alto contraste, estilo Fraunces, muy grandes, con interlineado apretado y mayúscula solo en la inicial.
-- Textos en tipografía sans geométrica limpia, estilo Manrope, en peso regular. Nada escrito todo en mayúsculas.
-- Diseño plano: sin gradientes, sin brillos, sin sombras pesadas, sin neón, sin efectos 3D, sin recuadros de colores.
-- Fotos con esquinas apenas redondeadas. Una línea dorada fina como adorno.
-- Todo el texto dentro del 84% central de la placa.
-- Estética de revista de arquitectura y diseño actual.
+- Ilustración editorial contemporánea, hermosa e impactante, hecha a mano: pintura tipo gouache con trazo fino de tinta y textura sutil de papel. No es una foto ni un render 3D.
+- Una sola idea visual por placa: un único motivo central, grande, sin objetos de relleno ni decoración alrededor.
+- La piedra pintada con detalle fiel a las fotos adjuntas: mismo color, mismo grano, mismas vetas.
+- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Fuera de los colores de la piedra y del motivo, solo negro cálido #1A1816 y dorado #C4A77D.
+- Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
+- Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
+- Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
+- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
 
 RESTRICCIONES:
 - Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
@@ -78,44 +103,160 @@ RESTRICCIONES:
 - No dibujes personas ni manos.
 ```
 
-### Placa 1 — Portada
+### Cuarzo (placa 4)
 
-Sin referencia de estilo: esta placa define el universo. Si tenés las cuatro fotos de piedra, adjuntalas y usá la variante de abajo.
+Adjuntar: Imagen 1 = la placa de granito aprobada · después, tus fotos de cuarzo.
 
 ```
-RESULTADO: portada de un carrusel de Instagram para una marmolería. Tiene que frenar el scroll con una pregunta. Paleta clara y texto negro.
+RESULTADO: placa 4 de un carrusel de Instagram para una marmolería. Presenta el cuarzo con una ilustración hermosa e impactante que transmite una sola idea.
 
-ESCENA: fondo crema muy claro #FAF8F4. En la parte superior, cuatro muestras de piedra con forma de rectángulo vertical alto y esquinas apenas redondeadas, puestas en fila y escalonadas: cada una arranca un poco más abajo que la anterior, y la última se sale por el borde derecho de la placa. Cada muestra es una foto fotorrealista de una piedra distinta, vista de frente y con luz pareja:
-1) granito gris moteado, de grano fino
-2) cuarzo blanco liso y parejo
-3) sinterizado blanco con una veta gris muy fina
-4) mármol Carrara blanco con vetas grises suaves
+REFERENCIAS:
+- Imagen 1 es la placa de granito ya aprobada de esta serie. Usala como referencia de estilo: el mismo tipo de ilustración, la misma paleta, las mismas tipografías, la misma composición y la misma línea dorada. No copies su piedra ni su motivo.
+- Todas las demás imágenes adjuntas (de la Imagen 2 en adelante) son fotos reales de cuarzo. Son la referencia del material: la piedra de la ilustración tiene que tener el color, el grano y las vetas de esas fotos. No inventes piedras que no estén en las fotos.
 
-Debajo de las muestras, una línea dorada fina y corta alineada a la izquierda.
+ESCENA: en los dos tercios superiores, sobre el fondo crema liso, una pila de losas gruesas de cuarzo flotando en el aire, vistas en tres cuartos y apenas desfasadas entre sí: una losa por cada foto adjunta de cuarzo, cada una con el aspecto de su foto. Sobre la losa de arriba, una sola gota grande de vino tinto, entera y redonda como una joya, apoyada sin extenderse y sin dejar aureola: la piedra no la absorbe. Nada más alrededor. Debajo de la ilustración, una línea dorada fina.
 
-TEXTO, en negro cálido #1A1816, alineado a la izquierda, en la mitad inferior:
+TEXTO, en el tercio inferior, en negro cálido #1A1816, alineado a la izquierda:
+- Arriba del título, un número grande y fino en dorado #C4A77D: "02"
+- Título enorme: "Cuarzo"
+- Bajada, mediana: "Precio medio, según la marca."
+- Dos renglones chicos, uno debajo del otro:
+  "No es poroso: no absorbe manchas."
+  "La verdad: no le apoyes la olla recién sacada del fuego. Usá apoyaplato."
+
+ESTILO (igual en todas las placas de la serie):
+- Ilustración editorial contemporánea, hermosa e impactante, hecha a mano: pintura tipo gouache con trazo fino de tinta y textura sutil de papel. No es una foto ni un render 3D.
+- Una sola idea visual por placa: un único motivo central, grande, sin objetos de relleno ni decoración alrededor.
+- La piedra pintada con detalle fiel a las fotos adjuntas: mismo color, mismo grano, mismas vetas.
+- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Fuera de los colores de la piedra y del motivo, solo negro cálido #1A1816 y dorado #C4A77D.
+- Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
+- Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
+- Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
+- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+
+RESTRICCIONES:
+- Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
+- No agregues ningún otro texto, número, logo, ícono, marca de agua ni firma.
+- No dibujes personas ni manos.
+```
+
+### Sinterizado (placa 5)
+
+Adjuntar: Imagen 1 = la placa de granito aprobada · después, tus fotos de sinterizado.
+
+```
+RESULTADO: placa 5 de un carrusel de Instagram para una marmolería. Presenta el sinterizado con una ilustración hermosa e impactante que transmite una sola idea.
+
+REFERENCIAS:
+- Imagen 1 es la placa de granito ya aprobada de esta serie. Usala como referencia de estilo: el mismo tipo de ilustración, la misma paleta, las mismas tipografías, la misma composición y la misma línea dorada. No copies su piedra ni su motivo.
+- Todas las demás imágenes adjuntas (de la Imagen 2 en adelante) son fotos reales de sinterizado. Son la referencia del material: la piedra de la ilustración tiene que tener el color, el grano y las vetas de esas fotos. No inventes piedras que no estén en las fotos.
+
+ESCENA: en los dos tercios superiores, sobre el fondo crema liso, una pila de losas gruesas de sinterizado flotando en el aire, vistas en tres cuartos y apenas desfasadas entre sí: una losa por cada foto adjunta de sinterizado, cada una con el aspecto de su foto. Sobre la losa de arriba, una sola llama viva, naranja y dorada, ardiendo directamente sobre la piedra, que queda intacta: sin marca, sin humo negro y sin grieta. Nada más alrededor. Debajo de la ilustración, una línea dorada fina.
+
+TEXTO, en el tercio inferior, en negro cálido #1A1816, alineado a la izquierda:
+- Arriba del título, un número grande y fino en dorado #C4A77D: "03"
+- Título enorme: "Sinterizado"
+- Bajada, mediana: "Desde el precio de un cuarzo hasta bastante más."
+- Dos renglones chicos, uno debajo del otro:
+  "Resiste el calor, las rayas y las manchas."
+  "La verdad: a la vista es más frío que una piedra natural."
+
+ESTILO (igual en todas las placas de la serie):
+- Ilustración editorial contemporánea, hermosa e impactante, hecha a mano: pintura tipo gouache con trazo fino de tinta y textura sutil de papel. No es una foto ni un render 3D.
+- Una sola idea visual por placa: un único motivo central, grande, sin objetos de relleno ni decoración alrededor.
+- La piedra pintada con detalle fiel a las fotos adjuntas: mismo color, mismo grano, mismas vetas.
+- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Fuera de los colores de la piedra y del motivo, solo negro cálido #1A1816 y dorado #C4A77D.
+- Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
+- Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
+- Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
+- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+
+RESTRICCIONES:
+- Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
+- No agregues ningún otro texto, número, logo, ícono, marca de agua ni firma.
+- No dibujes personas ni manos.
+```
+
+### Mármol (placa 6)
+
+Adjuntar: Imagen 1 = la placa de granito aprobada · después, tus fotos de mármol.
+
+```
+RESULTADO: placa 6 de un carrusel de Instagram para una marmolería. Presenta el mármol con una ilustración hermosa e impactante que transmite una sola idea.
+
+REFERENCIAS:
+- Imagen 1 es la placa de granito ya aprobada de esta serie. Usala como referencia de estilo: el mismo tipo de ilustración, la misma paleta, las mismas tipografías, la misma composición y la misma línea dorada. No copies su piedra ni su motivo.
+- Todas las demás imágenes adjuntas (de la Imagen 2 en adelante) son fotos reales de mármol. Son la referencia del material: la piedra de la ilustración tiene que tener el color, el grano y las vetas de esas fotos. No inventes piedras que no estén en las fotos.
+
+ESCENA: en los dos tercios superiores, sobre el fondo crema liso, una pila de losas gruesas de mármol flotando en el aire, vistas en tres cuartos y apenas desfasadas entre sí: una losa por cada foto adjunta de mármol, cada una con el aspecto de su foto. Sobre la losa de arriba, medio limón apoyado boca abajo. Alrededor del limón, una aureola mate y apenas más clara, donde el mármol perdió el brillo. Nada más alrededor. Debajo de la ilustración, una línea dorada fina.
+
+TEXTO, en el tercio inferior, en negro cálido #1A1816, alineado a la izquierda:
+- Arriba del título, un número grande y fino en dorado #C4A77D: "04"
+- Título enorme: "Mármol"
+- Bajada, mediana: "El clásico. El más conocido: Carrara."
+- Dos renglones chicos, uno debajo del otro:
+  "En cocina se usa poco: el limón y el vinagre lo opacan, y se mancha."
+  "Donde se luce: baños, vanitorys y revestimientos."
+
+ESTILO (igual en todas las placas de la serie):
+- Ilustración editorial contemporánea, hermosa e impactante, hecha a mano: pintura tipo gouache con trazo fino de tinta y textura sutil de papel. No es una foto ni un render 3D.
+- Una sola idea visual por placa: un único motivo central, grande, sin objetos de relleno ni decoración alrededor.
+- La piedra pintada con detalle fiel a las fotos adjuntas: mismo color, mismo grano, mismas vetas.
+- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Fuera de los colores de la piedra y del motivo, solo negro cálido #1A1816 y dorado #C4A77D.
+- Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
+- Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
+- Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
+- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+
+RESTRICCIONES:
+- Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
+- No agregues ningún otro texto, número, logo, ícono, marca de agua ni firma.
+- No dibujes personas ni manos.
+```
+
+### Portada (placa 1)
+
+Adjuntar: Imagen 1 = la placa de granito aprobada. Si querés, sumá una foto de cada piedra.
+
+```
+RESULTADO: portada de un carrusel de Instagram para una marmolería. Una ilustración hermosa e impactante con una sola idea: cuatro piedras, cuatro comportamientos.
+
+REFERENCIAS:
+- Imagen 1 es la placa de granito ya aprobada de esta serie. Usala como referencia de estilo: el mismo tipo de ilustración, la misma paleta, las mismas tipografías y la misma línea dorada. No copies su composición.
+- Si hay más imágenes adjuntas, son fotos reales de las piedras: usá su color y sus vetas.
+
+ESCENA: en los dos tercios superiores, sobre el fondo crema liso, cuatro losas gruesas flotando en fila, vistas en tres cuartos, cada una con su motivo encima: una losa de granito gris con una pequeña cordillera, una de cuarzo blanco con una gota de vino tinto, una de sinterizado blanco con una llama, y una de mármol Carrara con medio limón. Nada más alrededor. Debajo, una línea dorada fina.
+
+TEXTO, en el tercio inferior, en negro cálido #1A1816, alineado a la izquierda:
 - Título enorme en tres renglones: "¿Granito, cuarzo, sinterizado o mármol?"
 - Debajo, mucho más chico: "Lo que tenés que saber antes de elegir tu mesada."
 
-[pegar acá el bloque ESTILO y RESTRICCIONES]
+ESTILO (igual en todas las placas de la serie):
+- Ilustración editorial contemporánea, hermosa e impactante, hecha a mano: pintura tipo gouache con trazo fino de tinta y textura sutil de papel. No es una foto ni un render 3D.
+- Una sola idea visual por placa: un único motivo central, grande, sin objetos de relleno ni decoración alrededor.
+- La piedra pintada con detalle fiel a las fotos adjuntas: mismo color, mismo grano, mismas vetas.
+- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Fuera de los colores de la piedra y del motivo, solo negro cálido #1A1816 y dorado #C4A77D.
+- Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
+- Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
+- Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
+- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+
+RESTRICCIONES:
+- Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
+- No agregues ningún otro texto, número, logo, ícono, marca de agua ni firma.
+- No dibujes personas ni manos.
 ```
 
-**Variante con tus fotos:** reemplazar la lista de las cuatro piedras por:
+### La confusión (placa 2)
+
+Adjuntar: Imagen 1 = la placa de granito aprobada.
 
 ```
-Cada muestra usa una de las fotos adjuntas, en este orden: Imagen 1 granito, Imagen 2 cuarzo, Imagen 3 sinterizado, Imagen 4 mármol. Usá la textura y el color reales de cada foto. No rediseñes ni retoques la piedra.
-```
+RESULTADO: segunda placa del mismo carrusel. Placa tipográfica, sin ilustración.
 
-### Placa 2 — La confusión
+REFERENCIA: Imagen 1 es la placa de granito ya aprobada de esta serie. Usala como referencia de estilo: la misma paleta, las mismas tipografías, los mismos márgenes y la misma línea dorada. No copies su ilustración.
 
-Adjuntar: Imagen 1 = la portada aprobada.
-
-```
-RESULTADO: segunda placa del mismo carrusel. Es una placa tipográfica, de solo texto. Paleta clara y texto negro.
-
-REFERENCIA: Imagen 1 es la portada de esta serie. Usala como referencia de estilo: mismo fondo crema, mismo texto negro, mismas tipografías, mismos márgenes y la misma línea dorada. No copies su composición ni sus fotos.
-
-ESCENA: fondo crema muy claro #FAF8F4. Sin fotos. El título ocupa los dos tercios superiores; el resto queda abajo.
+ESCENA: fondo crema muy claro #FAF8F4, liso. Sin ilustración ni fotos.
 
 TEXTO, en negro cálido #1A1816, todo alineado a la izquierda:
 - Título enorme en cuatro renglones: "Todas parecen piedra. No se comportan igual."
@@ -126,54 +267,32 @@ TEXTO, en negro cálido #1A1816, todo alineado a la izquierda:
   "Otra aguanta casi todo."
 - Abajo de todo, separado del resto: "Conocelas una por una."
 
-[pegar acá el bloque ESTILO y RESTRICCIONES]
+ESTILO (igual en todas las placas de la serie):
+- Ilustración editorial contemporánea, hermosa e impactante, hecha a mano: pintura tipo gouache con trazo fino de tinta y textura sutil de papel. No es una foto ni un render 3D.
+- Una sola idea visual por placa: un único motivo central, grande, sin objetos de relleno ni decoración alrededor.
+- La piedra pintada con detalle fiel a las fotos adjuntas: mismo color, mismo grano, mismas vetas.
+- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Fuera de los colores de la piedra y del motivo, solo negro cálido #1A1816 y dorado #C4A77D.
+- Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
+- Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
+- Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
+- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+
+RESTRICCIONES:
+- Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
+- No agregues ningún otro texto, número, logo, ícono, marca de agua ni firma.
+- No dibujes personas ni manos.
 ```
 
-### Placas 3 a 6 — Una por material
+### Cierre (placa 7)
 
-Adjuntar en cada una: Imagen 1 = la portada aprobada · de la Imagen 2 en adelante = tus fotos de ese material (varias).
-
-Plantilla (cambiar solo lo que está entre corchetes):
+Adjuntar: Imagen 1 = la placa de granito aprobada.
 
 ```
-RESULTADO: placa [3 / 4 / 5 / 6] del mismo carrusel. Presenta un material de mesada. Paleta clara y texto negro.
+RESULTADO: última placa del mismo carrusel. Invita a escribir por WhatsApp.
 
-REFERENCIAS:
-- Imagen 1 es la portada de esta serie. Usala como referencia de estilo: mismo fondo crema, mismo texto negro, mismas tipografías, mismos márgenes y la misma línea dorada. No copies su composición.
-- Todas las demás imágenes adjuntas (de la Imagen 2 en adelante) son fotos reales de [granito]. Son el sujeto: usá la textura, el color y las vetas de cada una tal cual. No rediseñes las piedras, no les cambies el tono, no les agregues brillo y no inventes piedras que no estén en las fotos.
+REFERENCIA: Imagen 1 es la placa de granito ya aprobada de esta serie. Usala como referencia de estilo: el mismo tipo de ilustración, la misma paleta, las mismas tipografías y la misma línea dorada. No copies su composición.
 
-ESCENA: fondo crema muy claro #FAF8F4. En la mitad superior, un mosaico prolijo con todas las fotos de [granito]: la Imagen 2 es la más grande y va a la derecha, saliéndose de la placa por el borde superior y por el borde derecho; las demás van más chicas a su izquierda, en una grilla ordenada. Todas con esquinas apenas redondeadas y el mismo espacio fino entre ellas. Debajo del mosaico, una línea dorada fina.
-
-TEXTO, en la mitad inferior, en negro cálido #1A1816, alineado a la izquierda:
-- Arriba del título, un número grande y fino en dorado #C4A77D: "[01]"
-- Título enorme: "[Granito]"
-- Bajada, mediana: "[El más económico de los cuatro.]"
-- Dos renglones chicos, uno debajo del otro:
-  "[Duro y resistente al uso de todos los días.]"
-  "[La verdad: los claros tienden a mancharse.]"
-
-[pegar acá el bloque ESTILO y RESTRICCIONES]
-```
-
-Textos para reemplazar en cada placa:
-
-| Placa | Número | Título | Bajada | Renglón 1 | Renglón 2 |
-|---|---|---|---|---|---|
-| 3 | 01 | Granito | El más económico de los cuatro. | Duro y resistente al uso de todos los días. | La verdad: los claros tienden a mancharse. |
-| 4 | 02 | Cuarzo | Precio medio, según la marca. | No es poroso: no absorbe manchas. | La verdad: no le apoyes la olla recién sacada del fuego. Usá apoyaplato. |
-| 5 | 03 | Sinterizado | Desde el precio de un cuarzo hasta bastante más. | Resiste el calor, las rayas y las manchas. | La verdad: a la vista es más frío que una piedra natural. |
-| 6 | 04 | Mármol | El clásico. El más conocido: Carrara. | En cocina se usa poco: el limón y el vinagre lo opacan, y se mancha. | Donde se luce: baños, vanitorys y revestimientos. |
-
-### Placa 7 — Cierre
-
-Adjuntar: Imagen 1 = la portada aprobada.
-
-```
-RESULTADO: última placa del mismo carrusel. Invita a escribir por WhatsApp. Es una placa tipográfica. Paleta clara y texto negro.
-
-REFERENCIA: Imagen 1 es la portada de esta serie. Usala como referencia de estilo: mismo fondo crema, mismo texto negro, mismas tipografías, mismos márgenes y la misma línea dorada. No copies sus fotos.
-
-ESCENA: fondo crema muy claro #FAF8F4. Sin fotos y sin bloques oscuros. El título queda en el tercio superior; el texto chico, abajo a la izquierda.
+ESCENA: fondo crema muy claro #FAF8F4, liso. En la parte superior, chicos y en fila, los cuatro motivos de la serie pintados con el mismo estilo: una cordillera, una gota de vino, una llama y medio limón. Nada más.
 
 TEXTO, en negro cálido #1A1816, alineado a la izquierda:
 - Título enorme en dos renglones: "¿Cuál va con tu cocina?"
@@ -182,7 +301,20 @@ TEXTO, en negro cálido #1A1816, alineado a la izquierda:
   "Mandanos las medidas por WhatsApp."
   "En 24 hs tenés el presupuesto cerrado por escrito."
 
-[pegar acá el bloque ESTILO y RESTRICCIONES]
+ESTILO (igual en todas las placas de la serie):
+- Ilustración editorial contemporánea, hermosa e impactante, hecha a mano: pintura tipo gouache con trazo fino de tinta y textura sutil de papel. No es una foto ni un render 3D.
+- Una sola idea visual por placa: un único motivo central, grande, sin objetos de relleno ni decoración alrededor.
+- La piedra pintada con detalle fiel a las fotos adjuntas: mismo color, mismo grano, mismas vetas.
+- Paleta clara: fondo crema muy claro #FAF8F4, liso. Ningún fondo ni bloque oscuro. Fuera de los colores de la piedra y del motivo, solo negro cálido #1A1816 y dorado #C4A77D.
+- Luz suave y pareja, con una sombra corta y liviana debajo del motivo. Sin brillos exagerados, sin neón.
+- Todo el texto en negro cálido #1A1816, alineado a la izquierda. El dorado solo en la línea fina y en el número.
+- Título en tipografía serif editorial de alto contraste, estilo Fraunces, muy grande, con mayúscula solo en la inicial. Textos en sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
+- Formato vertical para carrusel de Instagram. Todo el texto dentro del 84% central de la placa.
+
+RESTRICCIONES:
+- Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
+- No agregues ningún otro texto, número, logo, ícono, marca de agua ni firma.
+- No dibujes personas ni manos.
 ```
 
 ### Si una placa sale mal
@@ -190,7 +322,7 @@ TEXTO, en negro cálido #1A1816, alineado a la izquierda:
 La guía oficial pide corregir de a una cosa: adjuntar la placa fallida y pedir un solo cambio, repitiendo lo que tiene que quedar igual.
 
 ```
-Imagen 1 es la placa a corregir. Cambiá solo esto: [el texto "X" tiene que decir exactamente "Y"]. Dejá igual todo lo demás: composición, foto, colores, tipografías y el resto de los textos.
+Imagen 1 es la placa a corregir. Cambiá solo esto: [el texto "X" tiene que decir exactamente "Y"]. Dejá igual todo lo demás: ilustración, composición, colores, tipografías y el resto de los textos.
 ```
 
 ---
@@ -199,7 +331,7 @@ Imagen 1 es la placa a corregir. Cambiá solo esto: [el texto "X" tiene que deci
 
 1. Cada palabra se lee y coincide con la tabla de la sección 2, con tildes y signos de pregunta.
 2. No hay texto, logo ni ícono de más.
-3. La piedra de cada placa es la de tu foto, sin retoques.
+3. La piedra de cada ilustración tiene el color y las vetas de tus fotos, y cada placa muestra un solo motivo.
 4. Fondo claro y texto negro en las 7 placas, sin gradientes ni brillos, y pasa el test de Living (`00-brand/visual-identity/visual-system.md` § 6).
 5. En ninguna placa ni en el pie se habla de sellar el granito.
 6. El logo, si va, se agrega después con el archivo real.
