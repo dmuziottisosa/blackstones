@@ -269,10 +269,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     $etapas_out = [];
+    $con_obras = [];
+    foreach ($cards as $c) $con_obras[$c['etapa']] = true;
     foreach ($BS_ETAPAS as $id => $def) {
+        // Una etapa desactivada solo se informa si todavía tiene alguna obra adentro.
+        if (!empty($def['oculta']) && empty($con_obras[$id])) continue;
         $checks = [];
         foreach ($def['checks'] as $cid => $label) $checks[] = ['id' => $cid, 'label' => $label];
-        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'avisa_fecha' => !empty($def['avisa_fecha']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'pendientes' => (string)($def['pendientes'] ?? ''), 'urge' => array_values((array)($def['urge'] ?? [])), 'en_manos' => array_values((array)($def['en_manos'] ?? [])), 'hecha_txt' => array_values((array)($def['hecha_txt'] ?? [])), 'urge_txt' => (string)($def['urge_txt'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
+        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'oculta' => !empty($def['oculta']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'avisa_fecha' => !empty($def['avisa_fecha']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'pendientes' => (string)($def['pendientes'] ?? ''), 'urge' => array_values((array)($def['urge'] ?? [])), 'en_manos' => array_values((array)($def['en_manos'] ?? [])), 'hecha_txt' => array_values((array)($def['hecha_txt'] ?? [])), 'urge_txt' => (string)($def['urge_txt'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
     }
 
     bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
@@ -389,14 +393,16 @@ try {
                     bs_error('Elegí de quién es la bacha.');
                 }
                 // El modelo de la bacha se carga junto con el tilde: es lo que el
-                // cortador necesita para el traforo. Si la obra no lleva bacha, no aplica.
+                // cortador necesita para el traforo. Es obligatorio solo cuando la
+                // bacha es nuestra (la proveemos y sabemos cuál es). Si es del
+                // cliente es opcional, y si la obra no lleva bacha no aplica.
                 $modelo = trim(preg_replace('/\s+/u', ' ', (string)($body['modelo'] ?? '')));
                 if (mb_strlen($modelo) > 80) {
                     bs_lock_release($fp);
                     bs_error('El modelo de la bacha es demasiado largo.');
                 }
                 if ($origen === 'no') $modelo = '';
-                elseif ($modelo === '') {
+                elseif ($origen === 'nuestra' && $modelo === '') {
                     bs_lock_release($fp);
                     bs_error('Poné el modelo de la bacha.');
                 }
@@ -518,6 +524,10 @@ try {
         if (!isset($BS_ETAPAS[$nueva])) {
             bs_lock_release($fp);
             bs_error('Etapa de destino inválida');
+        }
+        if (!empty($BS_ETAPAS[$nueva]['oculta'])) {
+            bs_lock_release($fp);
+            bs_error('"' . $BS_ETAPAS[$nueva]['titulo'] . '" está desactivado por ahora.');
         }
         if ($nueva === $etapa) {
             bs_lock_release($fp);

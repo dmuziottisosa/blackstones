@@ -683,6 +683,8 @@ function atrasada(c){ // la fecha pasó y no se cumplió (o la tarjeta sigue en 
 // Qué falta para llevar la tarjeta a esa etapa (misma regla que el server):
 // hacia atrás o hacia Retiro, nada; hacia adelante, los tildes de todo lo de atrás.
 function faltaPara(c,destino){
+  const d=etapaDe(destino);
+  if(d&&d.oculta&&c.etapa!==destino)return ['"'+d.titulo+'" está desactivado por ahora'];
   const cols=columnas();
   const i=cols.findIndex(e=>e.id===c.etapa),j=cols.findIndex(e=>e.id===destino);
   if(j<0||(i>=0&&j<i))return [];
@@ -853,7 +855,7 @@ function htmlCard(c){
     let label=k.label;
     if(k.id==='sena'&&on&&c.sena)label+=' · '+plataSena(c.sena);
     if(k.id==='acceso'&&on&&c.acceso)label+=' · '+textoAcceso(c.acceso);
-    if(k.id==='bacha'&&on&&c.bacha)label=c.bacha==='no'?'No lleva bacha':'Tenemos la bacha · '+BACHA[c.bacha]+(c.bacha_modelo?' · '+c.bacha_modelo:' · falta el modelo');
+    if(k.id==='bacha'&&on&&c.bacha)label=c.bacha==='no'?'No lleva bacha':'Tenemos la bacha · '+BACHA[c.bacha]+(c.bacha_modelo?' · '+c.bacha_modelo:(c.bacha==='nuestra'?' · falta el modelo':''));
     if(PERSONAS[k.id]&&on&&c[PERSONAS[k.id].campo].length)label=PERSONAS[k.id].rotulo+c[PERSONAS[k.id].campo].join(', ');
     h+='<button type="button" class="chk'+(on?' on':'')+'" data-act="check" data-clave="'+esc(k.id)+'" aria-pressed="'+on+'">'+esc(label)+'</button>';
   });
@@ -883,7 +885,8 @@ function htmlCard(c){
     if(e.aparte)h+='<button type="button" class="lnk" data-act="atras">Volver a las columnas</button>';
     else{
       if(idx>0)h+='<button type="button" class="lnk" data-act="atras">Volver a '+esc(cols[idx-1].titulo)+'</button>';
-      h+='<button type="button" class="lnk" data-act="retiro">Retira en el local</button>';
+      // "Retiro en local" puede estar desactivado: entonces no se ofrece mandar la obra ahí.
+      if(ETAPAS.some(x=>x.aparte&&!x.oculta))h+='<button type="button" class="lnk" data-act="retiro">Retira en el local</button>';
     }
     h+='<button type="button" class="lnk" data-act="editar">Editar obra</button>';
     h+='<button type="button" class="lnk rojo" data-act="borrar">Borrar ficha</button>';
@@ -1519,19 +1522,23 @@ function pedirBacha(c){
   const op=(v,t)=>'<button type="button" data-op="'+v+'" class="'+(origen===v?'on':'')+'">'+t+'</button>';
   abrirModal('Bacha · '+c.cliente_nro+'-'+c.sub,
     '<p>¿De quién es la bacha?</p><div class="sena">'+op('nuestra','Nuestra')+op('cliente','Del cliente')+op('no','No lleva')+'</div>'+
-    '<label class="campo" id="bachaModL" style="margin-top:16px">Modelo de la bacha<input type="text" id="bachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34" value="'+esc(c.bacha_modelo||'')+'"></label>'+
+    '<label class="campo" id="bachaModL" style="margin-top:16px"><span id="bachaModT">Modelo de la bacha</span><input type="text" id="bachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34" value="'+esc(c.bacha_modelo||'')+'"></label>'+
     '<button type="button" class="adjuntar" id="bachaFoto">+ Adjuntar foto de la bacha</button>'+
     (c.checks.bacha?'<p style="margin:14px 0 0"><button type="button" class="lnk" id="bachaQuitar">Quitar el tilde</button></p>':''),
     'Guardar',
     ()=>{
       if(!origen){toast('Elegí de quién es la bacha.');return;}
       const modelo=origen==='no'?'':$('bachaMod').value.trim().replace(/\s+/g,' ');
-      if(origen!=='no'&&!modelo){$('bachaMod').focus();toast('Poné el modelo de la bacha.');return;}
+      // el modelo obliga solo si la bacha es nuestra; si es del cliente, se pone si se sabe
+      if(origen==='nuestra'&&!modelo){$('bachaMod').focus();toast('Poné el modelo de la bacha.');return;}
       cerrarModal();
       if(c.checks.bacha&&origen===c.bacha&&modelo===(c.bacha_modelo||''))return;
       guardar(c,{accion:'check',clave:'bacha',valor:true,origen:origen,modelo:modelo},()=>{c.checks.bacha=true;c.bacha=origen;c.bacha_modelo=modelo;c._txt='';});
     });
-  const ver=()=>{$('bachaModL').style.display=origen==='no'?'none':'';};
+  const ver=()=>{
+    $('bachaModL').style.display=origen==='no'?'none':'';
+    $('bachaModT').textContent=origen==='cliente'?'Modelo de la bacha (si se sabe)':'Modelo de la bacha';
+  };
   ver();
   $('mCuerpo').querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
     origen=b.dataset.op;

@@ -181,6 +181,11 @@ $BS_ETAPAS = [
     'retiro' => [
         'titulo' => 'Retiro en local',
         'aparte' => true,
+        // oculta: desactivada por ahora (decisión del dueño, 2026-11-15). No se
+        // muestra ni se le pueden mandar obras. Si alguna obra ya estaba ahí, su
+        // cuadro sigue apareciendo para que no se pierda de vista. Para
+        // reactivarla alcanza con borrar esta línea.
+        'oculta' => true,
         'fecha'  => 'Retiro',
         'cierra' => 'retirada',
         'checks' => [

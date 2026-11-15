@@ -49,7 +49,7 @@ Cuatro tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
 
 - **Medidor:** quién va a medir, uno o varios de la lista (Cesar, David, Negro, Jose; se edita en `$BS_MEDIDORES`). Después queda escrito quién midió.
 - **Trajo la seña:** el monto, en $ o USD. Al escribirlo se va separando en miles (1.000 · 10.000 · 100.000 · 1.000.000). Es el bloqueante de salida de Por medir: la trae el medidor, o el cliente señó antes.
-- **Tenemos la bacha:** de quién es (nuestra, del cliente, o no lleva) y **qué modelo es**. El modelo es obligatorio salvo que no lleve bacha, y queda a la vista en la ficha y en las etapas siguientes. Tocar el tilde ya puesto abre la ventana para corregirlo o quitarlo. El buscador encuentra la obra por el modelo.
+- **Tenemos la bacha:** de quién es (nuestra, del cliente, o no lleva) y **qué modelo es**. El modelo es obligatorio **solo si la bacha es nuestra** (la proveemos nosotros, así que sabemos cuál es). Si es del cliente se anota si se sabe, y no frena el tilde; si no lleva bacha, no aplica. Queda a la vista en la ficha y en las etapas siguientes. *(Cambiado 15/11/2026 por pedido del dueño: antes obligaba también con bacha del cliente.)* Tocar el tilde ya puesto abre la ventana para corregirlo o quitarlo. El buscador encuentra la obra por el modelo.
 - **Piso y ascensor:** cómo sube la pieza. Planta baja, por ascensor o por escalera con cuántos pisos ($30.000 por piso si no entra en el ascensor).
 - **Instaladores** (en Por instalar, no en Por medir): quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/_tablero.php`.
 
@@ -112,6 +112,8 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.
 
 ## Retiro en local
+
+> **Desactivado por ahora (15/11/2026, decisión del dueño).** No aparece el cuadro de abajo, ni el botón "Retira en el local", ni los retiros en el calendario, y el servidor rechaza mover una obra ahí. Si alguna obra ya estaba en Retiro, el cuadro se sigue mostrando solo para esa obra hasta que se la devuelva a las columnas. Para volver a activarlo: borrar la línea `'oculta' => true` de la etapa `retiro` en `site/public_html/calculadora/api/_tablero.php` y subir ese archivo. Lo que sigue describe cómo funciona cuando está activo.
 
 Desde "Más" → **Retira en el local**, o arrastrando la tarjeta al cuadro de abajo. Sale de las cuatro columnas y sigue su propio checklist. "Volver a las columnas" la devuelve a donde estaba.
 
