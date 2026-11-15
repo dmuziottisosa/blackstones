@@ -50,6 +50,8 @@ Poco texto por placa: la guía oficial pide evitar letra chica y revisar cada pa
 
 ## 3. Prompts
 
+> **Dirección visual (decisión del dueño, 2026-11-15):** paleta clara, texto negro, composición moderna. Ninguna placa lleva fondo oscuro.
+
 ### Antes de empezar
 
 - **Proporción:** elegir 4:5 si Higgsfield la ofrece; si no, 3:4 o 2:3. No sé qué proporciones muestra tu pantalla.
@@ -61,14 +63,16 @@ Poco texto por placa: la guía oficial pide evitar letra chica y revisar cada pa
 
 ```
 ESTILO (igual en todas las placas de la serie):
-- Pieza gráfica editorial para carrusel de Instagram, formato vertical.
-- Diseño plano: sin gradientes, sin brillos, sin sombras pesadas, sin neón, sin efectos 3D.
-- Paleta única: crema #FAF8F4, casi negro cálido #1A1816 y dorado #C4A77D solo en líneas finas y acentos. Ningún otro color fuera de los de la piedra.
-- Títulos en tipografía serif editorial de alto contraste, estilo Fraunces, con mayúscula solo en la inicial.
-- Textos en tipografía sans geométrica limpia, estilo Manrope. Nada escrito todo en mayúsculas.
-- Márgenes amplios: todo el texto dentro del 84% central de la placa.
+- Pieza gráfica editorial contemporánea para carrusel de Instagram, formato vertical.
+- Paleta clara: fondo crema muy claro #FAF8F4 en toda la placa. Ningún bloque ni fondo oscuro.
+- Todo el texto en negro cálido #1A1816. El dorado #C4A77D se usa solo en líneas finas y en los números grandes, nunca en texto chico.
+- Composición moderna y asimétrica: mucho aire, texto alineado a la izquierda, gran contraste de tamaño entre el título enorme y el texto chico, la foto corrida hacia un borde y saliéndose de la placa.
+- Títulos en tipografía serif editorial de alto contraste, estilo Fraunces, muy grandes, con interlineado apretado y mayúscula solo en la inicial.
+- Textos en tipografía sans geométrica limpia, estilo Manrope, en peso regular. Nada escrito todo en mayúsculas.
+- Diseño plano: sin gradientes, sin brillos, sin sombras pesadas, sin neón, sin efectos 3D, sin recuadros de colores.
 - Fotos con esquinas apenas redondeadas. Una línea dorada fina como único adorno.
-- Estética sobria de revista de arquitectura y diseño. Nada recargado.
+- Todo el texto dentro del 84% central de la placa.
+- Estética sobria de revista de arquitectura y diseño actual. Nada recargado.
 
 RESTRICCIONES:
 - Escribí cada texto exactamente una vez, tal cual está entre comillas, con sus tildes y signos.
@@ -81,27 +85,27 @@ RESTRICCIONES:
 Sin referencia de estilo: esta placa define el universo. Si tenés las cuatro fotos de piedra, adjuntalas y usá la variante de abajo.
 
 ```
-RESULTADO: portada de un carrusel de Instagram para una marmolería. Tiene que frenar el scroll con una pregunta.
+RESULTADO: portada de un carrusel de Instagram para una marmolería. Tiene que frenar el scroll con una pregunta. Paleta clara y texto negro.
 
-ESCENA: la mitad superior de la placa está dividida en cuatro franjas verticales iguales, pegadas una a la otra y separadas por líneas doradas finas. Cada franja es una foto fotorrealista de una piedra distinta, vista de frente y con luz pareja:
+ESCENA: fondo crema muy claro #FAF8F4. En la parte superior, cuatro muestras de piedra con forma de rectángulo vertical alto y esquinas apenas redondeadas, puestas en fila y escalonadas: cada una arranca un poco más abajo que la anterior, y la última se sale por el borde derecho de la placa. Cada muestra es una foto fotorrealista de una piedra distinta, vista de frente y con luz pareja:
 1) granito gris moteado, de grano fino
 2) cuarzo blanco liso y parejo
 3) sinterizado blanco con una veta gris muy fina
 4) mármol Carrara blanco con vetas grises suaves
 
-La mitad inferior es un bloque liso casi negro cálido #1A1816.
+Debajo de las muestras, mucho espacio libre y una línea dorada fina y corta alineada a la izquierda.
 
-TEXTO:
-- Título grande, en crema #FAF8F4, alineado a la izquierda dentro del bloque oscuro, en dos renglones: "¿Granito, cuarzo, sinterizado o mármol?"
-- Debajo, más chico, en dorado #C4A77D: "Lo que tenés que saber antes de elegir tu mesada."
+TEXTO, en negro cálido #1A1816, alineado a la izquierda, en la mitad inferior:
+- Título enorme en tres renglones: "¿Granito, cuarzo, sinterizado o mármol?"
+- Debajo, mucho más chico: "Lo que tenés que saber antes de elegir tu mesada."
 
 [pegar acá el bloque ESTILO y RESTRICCIONES]
 ```
 
-**Variante con tus fotos:** reemplazar el párrafo de las cuatro piedras por:
+**Variante con tus fotos:** reemplazar la lista de las cuatro piedras por:
 
 ```
-Cada franja usa una de las fotos adjuntas, en este orden: Imagen 1 granito, Imagen 2 cuarzo, Imagen 3 sinterizado, Imagen 4 mármol. Usá la textura y el color reales de cada foto. No rediseñes ni retoques la piedra.
+Cada muestra usa una de las fotos adjuntas, en este orden: Imagen 1 granito, Imagen 2 cuarzo, Imagen 3 sinterizado, Imagen 4 mármol. Usá la textura y el color reales de cada foto. No rediseñes ni retoques la piedra.
 ```
 
 ### Placa 2 — La confusión
@@ -109,20 +113,20 @@ Cada franja usa una de las fotos adjuntas, en este orden: Imagen 1 granito, Imag
 Adjuntar: Imagen 1 = la portada aprobada.
 
 ```
-RESULTADO: segunda placa del mismo carrusel. Es una placa de solo texto.
+RESULTADO: segunda placa del mismo carrusel. Es una placa tipográfica, de solo texto. Paleta clara y texto negro.
 
-REFERENCIA: Imagen 1 es la portada de esta serie. Usala como referencia de estilo: misma paleta, mismas tipografías, mismos márgenes y la misma línea dorada. No copies su composición ni sus fotos.
+REFERENCIA: Imagen 1 es la portada de esta serie. Usala como referencia de estilo: mismo fondo crema, mismo texto negro, mismas tipografías, mismos márgenes y la misma línea dorada. No copies su composición ni sus fotos.
 
-ESCENA: fondo liso crema #FAF8F4. Sin fotos.
+ESCENA: fondo crema muy claro #FAF8F4. Sin fotos. El título ocupa los dos tercios superiores; el resto queda abajo, con mucho aire entre los dos.
 
-TEXTO, todo alineado a la izquierda, en casi negro cálido #1A1816:
-- Título grande en dos renglones: "Todas parecen piedra. No se comportan igual."
+TEXTO, en negro cálido #1A1816, todo alineado a la izquierda:
+- Título enorme en cuatro renglones: "Todas parecen piedra. No se comportan igual."
 - Una línea dorada fina y corta debajo del título.
-- Tres renglones más chicos, uno debajo del otro:
+- Tres renglones chicos, uno debajo del otro:
   "Una se opaca con limón."
   "Otra no quiere la olla caliente encima."
   "Otra aguanta casi todo."
-- Abajo de todo, chico y en dorado #C4A77D: "Conocelas una por una."
+- Abajo de todo, separado del resto: "Conocelas una por una."
 
 [pegar acá el bloque ESTILO y RESTRICCIONES]
 ```
@@ -134,19 +138,18 @@ Adjuntar en cada una: Imagen 1 = la portada aprobada · Imagen 2 = tu foto de es
 Plantilla (cambiar solo lo que está entre corchetes):
 
 ```
-RESULTADO: placa [3 / 4 / 5 / 6] del mismo carrusel. Presenta un material de mesada.
+RESULTADO: placa [3 / 4 / 5 / 6] del mismo carrusel. Presenta un material de mesada. Paleta clara y texto negro.
 
 REFERENCIAS:
-- Imagen 1 es la portada de esta serie. Usala como referencia de estilo: misma paleta, mismas tipografías, mismos márgenes y la misma línea dorada. No copies su composición.
+- Imagen 1 es la portada de esta serie. Usala como referencia de estilo: mismo fondo crema, mismo texto negro, mismas tipografías, mismos márgenes y la misma línea dorada. No copies su composición.
 - Imagen 2 es una foto real de la piedra. Es el sujeto: usá su textura, su color y sus vetas tal cual. No rediseñes la piedra, no le cambies el tono ni le agregues brillo.
 
-ESCENA: fondo liso crema #FAF8F4. En la mitad superior, la foto de la piedra (Imagen 2) ocupa todo el ancho dentro de los márgenes, con esquinas apenas redondeadas. Debajo de la foto, una línea dorada fina.
+ESCENA: fondo crema muy claro #FAF8F4. La foto de la piedra (Imagen 2) es un rectángulo grande con esquinas apenas redondeadas, corrido hacia arriba y a la derecha: se sale de la placa por el borde superior y por el borde derecho, y ocupa cerca de la mitad de la altura. A la izquierda de la foto, en el espacio libre, un número muy grande y fino en dorado #C4A77D: "[01]". Debajo de la foto, una línea dorada fina.
 
-TEXTO, en la mitad inferior, alineado a la izquierda, en casi negro cálido #1A1816:
-- Arriba del título, muy chico y en dorado #C4A77D: "[1 de 4]"
-- Título grande: "[Granito]"
-- Bajada, un poco más chica: "[El más económico de los cuatro.]"
-- Dos renglones más chicos, uno debajo del otro:
+TEXTO, en la mitad inferior, en negro cálido #1A1816, alineado a la izquierda:
+- Título enorme: "[Granito]"
+- Bajada, mediana: "[El más económico de los cuatro.]"
+- Dos renglones chicos, uno debajo del otro y con aire entre ellos:
   "[Duro y resistente al uso de todos los días.]"
   "[La verdad: es poroso. Los claros se manchan más fácil y hay que sellarlos.]"
 
@@ -155,28 +158,28 @@ TEXTO, en la mitad inferior, alineado a la izquierda, en casi negro cálido #1A1
 
 Textos para reemplazar en cada placa:
 
-| Placa | Arriba | Título | Bajada | Renglón 1 | Renglón 2 |
+| Placa | Número | Título | Bajada | Renglón 1 | Renglón 2 |
 |---|---|---|---|---|---|
-| 3 | 1 de 4 | Granito | El más económico de los cuatro. | Duro y resistente al uso de todos los días. | La verdad: es poroso. Los claros se manchan más fácil y hay que sellarlos. |
-| 4 | 2 de 4 | Cuarzo | Precio medio, según la marca. | No es poroso: no absorbe manchas ni necesita sellado. | La verdad: no le apoyes la olla recién sacada del fuego. Usá apoyaplato. |
-| 5 | 3 de 4 | Sinterizado | Desde el precio de un cuarzo hasta bastante más. | Resiste el calor, las rayas y las manchas. | La verdad: a la vista es más frío que una piedra natural. |
-| 6 | 4 de 4 | Mármol | El clásico. El más conocido: Carrara. | En cocina se usa poco: el limón y el vinagre lo opacan, y se mancha. | Donde se luce: baños, vanitorys y revestimientos. |
+| 3 | 01 | Granito | El más económico de los cuatro. | Duro y resistente al uso de todos los días. | La verdad: es poroso. Los claros se manchan más fácil y hay que sellarlos. |
+| 4 | 02 | Cuarzo | Precio medio, según la marca. | No es poroso: no absorbe manchas ni necesita sellado. | La verdad: no le apoyes la olla recién sacada del fuego. Usá apoyaplato. |
+| 5 | 03 | Sinterizado | Desde el precio de un cuarzo hasta bastante más. | Resiste el calor, las rayas y las manchas. | La verdad: a la vista es más frío que una piedra natural. |
+| 6 | 04 | Mármol | El clásico. El más conocido: Carrara. | En cocina se usa poco: el limón y el vinagre lo opacan, y se mancha. | Donde se luce: baños, vanitorys y revestimientos. |
 
 ### Placa 7 — Cierre
 
 Adjuntar: Imagen 1 = la portada aprobada.
 
 ```
-RESULTADO: última placa del mismo carrusel. Invita a escribir por WhatsApp.
+RESULTADO: última placa del mismo carrusel. Invita a escribir por WhatsApp. Es una placa tipográfica. Paleta clara y texto negro.
 
-REFERENCIA: Imagen 1 es la portada de esta serie. Usala como referencia de estilo: misma paleta, mismas tipografías, mismos márgenes y la misma línea dorada. No copies sus fotos.
+REFERENCIA: Imagen 1 es la portada de esta serie. Usala como referencia de estilo: mismo fondo crema, mismo texto negro, mismas tipografías, mismos márgenes y la misma línea dorada. No copies sus fotos.
 
-ESCENA: fondo liso casi negro cálido #1A1816, igual al bloque oscuro de la portada. Sin fotos.
+ESCENA: fondo crema muy claro #FAF8F4. Sin fotos y sin bloques oscuros. El título queda en el tercio superior; el texto chico, abajo a la izquierda, con mucho aire en el medio.
 
-TEXTO, alineado a la izquierda, centrado en altura:
-- Título grande en crema #FAF8F4: "¿Cuál va con tu cocina?"
+TEXTO, en negro cálido #1A1816, alineado a la izquierda:
+- Título enorme en dos renglones: "¿Cuál va con tu cocina?"
 - Una línea dorada fina y corta debajo del título.
-- Dos renglones más chicos en crema #FAF8F4:
+- Dos renglones chicos:
   "Mandanos las medidas por WhatsApp."
   "En 24 hs tenés el presupuesto cerrado por escrito."
 
@@ -198,7 +201,7 @@ Imagen 1 es la placa a corregir. Cambiá solo esto: [el texto "X" tiene que deci
 1. Cada palabra se lee y coincide con la tabla de la sección 2, con tildes y signos de pregunta.
 2. No hay texto, logo ni ícono de más.
 3. La piedra de cada placa es la de tu foto, sin retoques.
-4. Paleta núcleo, sin gradientes ni brillos, y pasa el test de Living (`00-brand/visual-identity/visual-system.md` § 6).
+4. Fondo claro y texto negro en las 7 placas, sin gradientes ni brillos, y pasa el test de Living (`00-brand/visual-identity/visual-system.md` § 6).
 5. El logo, si va, se agrega después con el archivo real.
 
 ---
