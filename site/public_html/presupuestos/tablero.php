@@ -659,7 +659,7 @@ function plazo(c){
   return c.limite<HOY?'vencida':(c.limite<=masDias(HOY,6)?'cerca':'');
 }
 function masDias(iso,n){const d=partes(iso);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-let plazoF=''; // aviso general prendido: muestra solo las fichas con ese plazo
+let plazoF=''; // aviso general prendido ('atrasada' | 'vencida' | 'cerca'): muestra solo esas fichas
 // Instalaciones que se pisan: mismo día, mismo instalador y menos de CHOQUE_MIN minutos entre una y otra.
 const CHOQUE_MIN=120;
 let CHOQUES={}; // key → ["David también instala 10:00 hs · 0041 Carolina P.", …]
@@ -901,11 +901,15 @@ function dibujar(){
   $('hoyTxt').innerHTML=HOY?'Hoy · <b>'+esc(fechaLarga(HOY))+'</b>':'';
   // Avisos de todo el tablero: el plazo prometido. Se cuentan sobre todas las fichas, en cualquier columna.
   const nVen=CARDS.filter(c=>plazo(c)==='vencida').length,nCer=CARDS.filter(c=>plazo(c)==='cerca').length;
-  if((plazoF==='vencida'&&!nVen)||(plazoF==='cerca'&&!nCer))plazoF='';
-  $('avisosG').innerHTML=(nVen?'<button type="button" class="aviso-g'+(plazoF==='vencida'?' on':'')+'" data-plazo="vencida" aria-pressed="'+(plazoF==='vencida')+'">'+nVen+' con plazo vencido</button>':'')
+  // Atrasadas: tenían fecha (medición, instalación o retiro), la fecha pasó y siguen sin hacerse.
+  // Es lo más urgente del tablero: va primero, y cuenta todas las columnas.
+  const nAtr=CARDS.filter(atrasada).length;
+  if((plazoF==='vencida'&&!nVen)||(plazoF==='cerca'&&!nCer)||(plazoF==='atrasada'&&!nAtr))plazoF='';
+  $('avisosG').innerHTML=(nAtr?'<button type="button" class="aviso-g'+(plazoF==='atrasada'?' on':'')+'" data-plazo="atrasada" aria-pressed="'+(plazoF==='atrasada')+'">'+nAtr+(nAtr===1?' atrasada':' atrasadas')+'</button>':'')
+    +(nVen?'<button type="button" class="aviso-g'+(plazoF==='vencida'?' on':'')+'" data-plazo="vencida" aria-pressed="'+(plazoF==='vencida')+'">'+nVen+' con plazo vencido</button>':'')
     +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'">'+nCer+(nCer===1?' vence en 7 días':' vencen en 7 días')+'</button>':'');
   const filtrando=buscado.length>0||!!plazoF||!!SOLO;
-  const visibles=SOLO?CARDS.filter(c=>c.key===SOLO):CARDS.filter(coincide).filter(c=>!plazoF||plazo(c)===plazoF);
+  const visibles=SOLO?CARDS.filter(c=>c.key===SOLO):CARDS.filter(coincide).filter(c=>!plazoF||(plazoF==='atrasada'?atrasada(c):plazo(c)===plazoF));
   UNICA=buscado.length&&visibles.length===1?visibles[0].key:'';
   // Buscando en celular: si la pestaña abierta no tiene resultados, salta a la primera que sí.
   if(filtrando&&visibles.length&&!visibles.some(c=>c.etapa===colMovil))colMovil=ETAPAS.find(e=>visibles.some(c=>c.etapa===e.id)).id;
