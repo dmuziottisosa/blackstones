@@ -49,7 +49,7 @@ Cuatro tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
 
 - **Medidor:** quién va a medir, uno o varios de la lista (Cesar, David, Negro, Jose; se edita en `$BS_MEDIDORES`). Después queda escrito quién midió.
 - **Trajo la seña:** el monto, en $ o USD. Al escribirlo se va separando en miles (1.000 · 10.000 · 100.000 · 1.000.000). Es el bloqueante de salida de Por medir: la trae el medidor, o el cliente señó antes.
-- **Tenemos la bacha:** de quién es. Nuestra (la proveemos), del cliente, o no lleva.
+- **Tenemos la bacha:** de quién es (nuestra, del cliente, o no lleva) y **qué modelo es**. El modelo es obligatorio salvo que no lleve bacha, y queda a la vista en la ficha y en las etapas siguientes. Tocar el tilde ya puesto abre la ventana para corregirlo o quitarlo. El buscador encuentra la obra por el modelo.
 - **Piso y ascensor:** cómo sube la pieza. Planta baja, por ascensor o por escalera con cuántos pisos ($30.000 por piso si no entra en el ascensor).
 - **Instaladores** (en Por instalar, no en Por medir): quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/_tablero.php`.
 

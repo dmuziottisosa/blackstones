@@ -317,6 +317,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .sena input[type=date],.modal .sena input[type=time]{flex:1 1 130px;font-size:16px;font-weight:600}
 .modal .sena [data-op]{flex:1 1 28%;white-space:nowrap}
 [data-theme="dark"] .modal .sena button.on{background:var(--gd);color:#1A1816;border-color:var(--gd)}
+.modal .lnk{background:none;border:none;padding:0;font-size:12.5px;font-weight:700;color:var(--red);text-decoration:underline;cursor:pointer}
 .modal .m-error{margin:16px 0 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--red-soft);color:var(--red);font-weight:700}
 .modal .btns button:disabled{opacity:.6;cursor:default}
 .modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:26px}
@@ -709,7 +710,7 @@ function htmlAdjuntos(c,puedeSumar){
 const plano=t=>String(t==null?'':t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function coincide(c){
   if(!buscado.length)return true;
-  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' '),c.cortador.join(' ')].join(' '));
+  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.bacha_modelo,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' '),c.cortador.join(' ')].join(' '));
   return buscado.every(w=>c._txt.indexOf(w)>=0);
 }
 
@@ -831,7 +832,7 @@ function htmlCard(c){
   // Datos que se cargan al medir y quedan a la vista para el taller y el que instala.
   if(c.etapa!=='medir'&&c.etapa!=='archivar'){
     const datos=[];
-    if(c.bacha)datos.push(c.bacha==='no'?'Sin bacha':'Bacha '+BACHA[c.bacha]);
+    if(c.bacha)datos.push(c.bacha==='no'?'Sin bacha':'Bacha '+BACHA[c.bacha]+(c.bacha_modelo?' ('+c.bacha_modelo+')':''));
     if(c.acceso)datos.push('Sube '+textoAcceso(c.acceso));
     if(c.medidor.length)datos.push('Midió: '+c.medidor.join(', '));
     if(c.cortador.length&&!e.checks.some(k=>k.id==='cortador'))datos.push('Cortó: '+c.cortador.join(', '));
@@ -852,7 +853,7 @@ function htmlCard(c){
     let label=k.label;
     if(k.id==='sena'&&on&&c.sena)label+=' · '+plataSena(c.sena);
     if(k.id==='acceso'&&on&&c.acceso)label+=' · '+textoAcceso(c.acceso);
-    if(k.id==='bacha'&&on&&c.bacha)label=c.bacha==='no'?'No lleva bacha':'Tenemos la bacha · '+BACHA[c.bacha];
+    if(k.id==='bacha'&&on&&c.bacha)label=c.bacha==='no'?'No lleva bacha':'Tenemos la bacha · '+BACHA[c.bacha]+(c.bacha_modelo?' · '+c.bacha_modelo:' · falta el modelo');
     if(PERSONAS[k.id]&&on&&c[PERSONAS[k.id].campo].length)label=PERSONAS[k.id].rotulo+c[PERSONAS[k.id].campo].join(', ');
     h+='<button type="button" class="chk'+(on?' on':'')+'" data-act="check" data-clave="'+esc(k.id)+'" aria-pressed="'+on+'">'+esc(label)+'</button>';
   });
@@ -1112,7 +1113,7 @@ wrap.addEventListener('click',ev=>{
     const clave=b.dataset.clave,valor=!c.checks[clave];
     if(clave==='sena'&&valor){pedirSena(c);return;}
     if(clave==='acceso'&&valor){pedirAcceso(c);return;}
-    if(clave==='bacha'&&valor){pedirBacha(c);return;}
+    if(clave==='bacha'){pedirBacha(c);return;} // tildada o no: abre la ventana para cargar o corregir
     if(PERSONAS[clave]){pedirPersonas(c,clave);return;} // tildado o no, abre la lista para elegir o cambiar
     guardar(c,{accion:'check',clave:clave,valor:valor},()=>{
       if(valor)c.checks[clave]=true;else delete c.checks[clave];
@@ -1509,24 +1510,37 @@ function pedirCargar(){
 
 // Bacha: de quién es.
 function pedirBacha(c){
-  let origen='';
+  // Se abre tanto para tildar como para corregir: de quién es la bacha y qué modelo es.
+  let origen=c.checks.bacha?c.bacha:'';
+  const op=(v,t)=>'<button type="button" data-op="'+v+'" class="'+(origen===v?'on':'')+'">'+t+'</button>';
   abrirModal('Bacha · '+c.cliente_nro+'-'+c.sub,
-    '<p>¿De quién es la bacha?</p><div class="sena"><button type="button" data-op="nuestra">Nuestra</button><button type="button" data-op="cliente">Del cliente</button><button type="button" data-op="no">No lleva</button></div>'+
-    '<button type="button" class="adjuntar" id="bachaFoto">+ Adjuntar foto de la bacha</button>',
+    '<p>¿De quién es la bacha?</p><div class="sena">'+op('nuestra','Nuestra')+op('cliente','Del cliente')+op('no','No lleva')+'</div>'+
+    '<label class="campo" id="bachaModL" style="margin-top:16px">Modelo de la bacha<input type="text" id="bachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34" value="'+esc(c.bacha_modelo||'')+'"></label>'+
+    '<button type="button" class="adjuntar" id="bachaFoto">+ Adjuntar foto de la bacha</button>'+
+    (c.checks.bacha?'<p style="margin:14px 0 0"><button type="button" class="lnk" id="bachaQuitar">Quitar el tilde</button></p>':''),
     'Guardar',
     ()=>{
       if(!origen){toast('Elegí de quién es la bacha.');return;}
+      const modelo=origen==='no'?'':$('bachaMod').value.trim().replace(/\s+/g,' ');
+      if(origen!=='no'&&!modelo){$('bachaMod').focus();toast('Poné el modelo de la bacha.');return;}
       cerrarModal();
-      guardar(c,{accion:'check',clave:'bacha',valor:true,origen:origen},()=>{c.checks.bacha=true;c.bacha=origen;});
+      if(c.checks.bacha&&origen===c.bacha&&modelo===(c.bacha_modelo||''))return;
+      guardar(c,{accion:'check',clave:'bacha',valor:true,origen:origen,modelo:modelo},()=>{c.checks.bacha=true;c.bacha=origen;c.bacha_modelo=modelo;c._txt='';});
     });
+  const ver=()=>{$('bachaModL').style.display=origen==='no'?'none':'';};
+  ver();
   $('mCuerpo').querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
     origen=b.dataset.op;
     $('mCuerpo').querySelectorAll('[data-op]').forEach(x=>x.classList.toggle('on',x===b));
-    $('mOk').focus();
+    ver();
+    if(origen==='no')$('mOk').focus();else $('bachaMod').focus();
   }));
   $('bachaFoto').addEventListener('click',()=>elegirArchivo(c,'bacha'));
+  if($('bachaQuitar'))$('bachaQuitar').addEventListener('click',()=>{
+    cerrarModal();
+    guardar(c,{accion:'check',clave:'bacha',valor:false},()=>{delete c.checks.bacha;c.bacha='';c.bacha_modelo='';c._txt='';});
+  });
 }
-
 // ============================================================
 // Adjuntos: foto de bacha y plano
 // ============================================================

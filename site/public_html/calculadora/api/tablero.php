@@ -136,6 +136,7 @@ function bs_tablero_historia($obra) {
                 $txt .= ': ' . ($s['moneda'] === 'USD' ? 'USD ' : '$ ') . number_format($s['monto'], 0, ',', '.');
             } elseif ($cid === 'bacha' && in_array($obra['bacha'] ?? '', ['nuestra', 'cliente', 'no'], true)) {
                 $txt = ['nuestra' => 'Bacha nuestra', 'cliente' => 'Bacha del cliente', 'no' => 'No lleva bacha'][$obra['bacha']];
+                if ($obra['bacha'] !== 'no' && trim((string)($obra['bacha_modelo'] ?? '')) !== '') $txt .= ' · ' . trim((string)$obra['bacha_modelo']);
             } elseif ($cid === 'acceso' && ($a = bs_tablero_acceso($obra))) {
                 $txt .= ': ' . ($a['modo'] === 'pb' ? 'planta baja' : ($a['modo'] === 'ascensor' ? 'por ascensor' : 'por escalera, ' . $a['pisos'] . ($a['pisos'] === 1 ? ' piso' : ' pisos')));
             }
@@ -248,6 +249,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'sena'        => bs_tablero_sena($obra),
                     'acceso'      => bs_tablero_acceso($obra),
                     'bacha'       => in_array($obra['bacha'], ['nuestra', 'cliente', 'no'], true) ? $obra['bacha'] : '',
+                    'bacha_modelo' => (string)($obra['bacha_modelo'] ?? ''),
                     'equipo'      => array_values(array_intersect($BS_INSTALADORES, (array)$obra['equipo'])),
                     'fabrica'     => array_values(array_intersect($BS_FABRICADORES, (array)($obra['fabrica'] ?? []))),
                     'cortador'    => array_values(array_intersect($BS_CORTADORES, (array)($obra['cortador'] ?? []))),
@@ -386,9 +388,23 @@ try {
                     bs_lock_release($fp);
                     bs_error('Elegí de quién es la bacha.');
                 }
+                // El modelo de la bacha se carga junto con el tilde: es lo que el
+                // cortador necesita para el traforo. Si la obra no lleva bacha, no aplica.
+                $modelo = trim(preg_replace('/\s+/u', ' ', (string)($body['modelo'] ?? '')));
+                if (mb_strlen($modelo) > 80) {
+                    bs_lock_release($fp);
+                    bs_error('El modelo de la bacha es demasiado largo.');
+                }
+                if ($origen === 'no') $modelo = '';
+                elseif ($modelo === '') {
+                    bs_lock_release($fp);
+                    bs_error('Poné el modelo de la bacha.');
+                }
                 $obra['bacha'] = $origen;
+                $obra['bacha_modelo'] = $modelo;
             } else {
                 $obra['bacha'] = '';
+                $obra['bacha_modelo'] = '';
             }
         }
 
