@@ -111,6 +111,18 @@ Desde "Más" → **Retira en el local**, o arrastrando la tarjeta al cuadro de a
 
 Si un presupuesto se devuelve a Activos desde el hub, la tarjeta vuelve al tablero con sus tildes.
 
+## Editar una obra y cambiarle el N° de presupuesto
+
+Botón "Editar obra" en "Más" (también desde el calendario, que muestra la misma ficha). Se puede en cualquier etapa.
+
+- **Corregir datos:** cliente, teléfono, dirección, material y trabajo. Solo se guarda lo que cambió.
+- **Cambiar el N° de presupuesto:** la ficha se muda a ese presupuesto con todo lo hecho: tildes, fechas, seña, historial, fotos y planos. Sirve para la obra que se cargó a mano y después tuvo presupuesto en la calculadora, o para la que se ató al número equivocado. Acepta `0042` o `0042-2`.
+  - El presupuesto nuevo pasa a Aprobado.
+  - El anterior: si era una obra cargada a mano, se borra (su número no se recicla); si era un presupuesto de la calculadora, vuelve a Enviado.
+  - Los datos de la ficha pasan a ser los del presupuesto nuevo. Teléfono y dirección se heredan de la ficha solo si el presupuesto nuevo no los tiene.
+  - No se puede mudar a un presupuesto que ya está en el tablero como otra ficha, ni a uno entregado.
+- **Nunca se pierde lo escrito:** si el número no existe o algo falla, la ventana queda abierta con los datos y el motivo. Lo mismo vale para "Cargar obra".
+
 ## Borrar una ficha
 
 En "Más" → **Borrar ficha**. Siempre pide confirmación y dice qué se pierde; Enter no confirma, hay que tocar el botón rojo.
@@ -154,6 +166,7 @@ Es un traspaso: la planilla se adapta a los campos del tablero, no al revés. Lo
 | Definición de etapas, tildes y listas de personas | `site/public_html/calculadora/api/_tablero.php` (array `$BS_ETAPAS`: para cambiar un tilde o un título se toca solo ahí) |
 | Adjuntos (subir, ver, borrar) | `site/public_html/calculadora/api/tablero-adjunto.php` |
 | Cargar obra (a mano o por N° de presupuesto) | `site/public_html/calculadora/api/tablero-cargar.php` |
+| Editar obra / cambiar N° de presupuesto | `site/public_html/calculadora/api/tablero-editar.php` |
 | Carga masiva | `site/public_html/calculadora/api/tablero-importar.php` |
 | Datos | `bs-data/tablero/obras.json`, aparte de `clientes/`. Si falta, el hub y la calculadora siguen igual |
 | Archivar | `state.php` con `conservar_hermanas: true` |

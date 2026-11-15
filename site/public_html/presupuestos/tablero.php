@@ -451,6 +451,7 @@ const API='/calculadora/api/tablero.php';
 const API_ESTADO='/calculadora/api/state.php';
 const API_ADJ='/calculadora/api/tablero-adjunto.php';
 const API_CARGAR='/calculadora/api/tablero-cargar.php';
+const API_EDITAR='/calculadora/api/tablero-editar.php';
 const API_BORRAR='/calculadora/api/delete.php';
 const ADJ={bacha:'Bacha',plano:'Plano'}; // tipos de adjunto
 
@@ -792,6 +793,7 @@ function htmlCard(c){
       if(idx>0)h+='<button type="button" class="lnk" data-act="atras">Volver a '+esc(cols[idx-1].titulo)+'</button>';
       h+='<button type="button" class="lnk" data-act="retiro">Retira en el local</button>';
     }
+    h+='<button type="button" class="lnk" data-act="editar">Editar obra</button>';
     h+='<button type="button" class="lnk rojo" data-act="borrar">Borrar ficha</button>';
     h+='</div></div>';
   }
@@ -1006,6 +1008,8 @@ wrap.addEventListener('click',ev=>{
     fechaKey=c.key;
     dp.value=c.fecha||'';
     try{dp.showPicker();}catch(e){dp.style.pointerEvents='auto';dp.focus();dp.click();}
+  }else if(act==='editar'){
+    pedirEditar(c);
   }else if(act==='borrar'){
     pedirBorrar(c);
   }else if(act==='adjuntar'){
@@ -1244,6 +1248,70 @@ function pedirTurno(c){
       guardar(c,{accion:'fecha',fecha:dia,hora:hora},()=>{c.fecha=dia;c.hora=hora;});
     });
   (c.fecha?$('tuHora'):$('tuDia')).focus();
+}
+
+// Editar una obra ya cargada: corregir sus datos o cambiarle el N° de presupuesto, en cualquier etapa.
+// Al cambiar el N°, la ficha se muda a ese presupuesto con todo lo hecho (tildes, fechas, fotos).
+function pedirEditar(c){
+  const campo=(id,rotulo,valor,extra)=>'<label class="campo">'+rotulo+'<input type="text" id="'+id+'" autocomplete="off" value="'+esc(valor)+'" '+(extra||'')+'></label>';
+  const propio=c.cliente_nro+'-'+c.sub;
+  // Una obra cargada a mano no tiene presupuesto: el campo arranca vacío, para poner el número cuando exista.
+  const nro0=c.manual?'':propio;
+  abrirModal('Editar obra '+propio,
+    campo('edNro','N° de presupuesto',nro0,'maxlength="12" inputmode="numeric" placeholder="'+(c.manual?'Todavía sin presupuesto':'Ej: 0042 o 0042-2')+'"')+
+    '<p style="margin:-4px 0 12px;font-size:12px">'+(c.manual?'Esta obra se cargó a mano. Cuando el presupuesto esté hecho, poné acá su número.':'Cambialo para pasar la ficha a otro presupuesto.')+' La ficha conserva sus tildes, fechas y fotos.</p>'+
+    campo('edNombre','Cliente',c.nombre,'maxlength="120"')+
+    campo('edCel','Teléfono',c.celular,'maxlength="40" inputmode="tel"')+
+    campo('edDir','Dirección',c.direccion,'maxlength="200"')+
+    campo('edMat','Material y color',c.material,'maxlength="200"')+
+    campo('edCon','Trabajo',c.concepto,'maxlength="200"')+
+    '<p class="m-error" id="edError" hidden></p>',
+    'Guardar',
+    async()=>{
+      const v=id=>$(id).value.trim();
+      const nro=v('edNro'),cambiaNro=!!nro&&nro.replace(/^0+(?=\d)/,'')!==nro0.replace(/^0+(?=\d)/,'');
+      const body={cliente_nro:c.cliente_nro,sub:c.sub};
+      if(cambiaNro)body.nro=nro; // con N° nuevo los datos los pone ese presupuesto
+      else{
+        // solo viaja lo que cambió
+        [['nombre','edNombre',c.nombre],['celular','edCel',c.celular],['direccion','edDir',c.direccion],['material','edMat',c.material],['concepto','edCon',c.concepto]]
+          .forEach(x=>{if(v(x[1])!==String(x[2]||'').trim())body[x[0]]=v(x[1]);});
+        if(Object.keys(body).length===2){cerrarModal();return;} // no cambió nada
+        if(body.nombre===''){$('edNombre').focus();toast('El nombre no puede quedar vacío.');return;}
+      }
+      if(ocupado)return;
+      ocupado=true;
+      // Igual que al cargar: la ventana no se cierra hasta que el server confirma.
+      const b=$('mOk'),rotulo=b.textContent;
+      b.disabled=true;b.textContent='Guardando…';
+      $('edError').hidden=true;
+      let j=null;
+      try{
+        j=await pedir(API_EDITAR,body);
+      }catch(e){
+        ocupado=false;
+        b.disabled=false;b.textContent=rotulo;
+        $('edError').textContent=e.message;$('edError').hidden=false;
+        if(cambiaNro){$('edNro').focus();$('edNro').select();}
+        return;
+      }
+      b.disabled=false;
+      cerrarModal();
+      ocupado=false;
+      const key=j.cliente_nro+'-'+j.sub;
+      if(j.mudada){
+        // en modo "una ficha" (calendario) la página sigue a la obra a su número nuevo
+        if(SOLO){location.replace('?solo='+encodeURIComponent(key));return;}
+        if(abierta===c.key)abierta=key;
+        recien={key:key,tipo:'llego',t:Date.now()};
+        toast('La ficha ahora es la '+key,true);
+      }else toast('Obra '+key+' guardada',true);
+      await cargar();
+    });
+  // con algo modificado, tocar afuera no cierra la ventana
+  const ini=['edNro','edNombre','edCel','edDir','edMat','edCon'].map(id=>$(id).value);
+  modalProtegido=()=>['edNro','edNombre','edCel','edDir','edMat','edCon'].some((id,i)=>$(id)&&$(id).value!==ini[i]);
+  $(c.manual?'edNro':'edNombre').focus();
 }
 
 // Cargar una obra a mano: para las que no pasaron por la calculadora.
