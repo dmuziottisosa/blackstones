@@ -172,7 +172,7 @@ Si un presupuesto se devuelve a Activos desde el hub, la tarjeta vuelve al table
 
 Botón "Editar obra" en "Más" (también desde el calendario, que muestra la misma ficha). Se puede en cualquier etapa.
 
-- **Corregir datos:** cliente, teléfono, dirección, material y trabajo. Solo se guarda lo que cambió.
+- **Corregir datos:** cliente, teléfono, dirección, material (del catálogo de la calculadora) y **nota**. Solo se guarda lo que cambió. *(16/11/2026: el campo "Trabajo" se cambió por "Nota" a pedido del dueño; es la misma nota que se ve en la ficha y en "Más". El dato "trabajo" de las fichas que ya lo tenían se conserva y se sigue viendo, pero ya no se edita desde acá.)*
 - **Cambiar el N° de presupuesto:** la ficha se muda a ese presupuesto con todo lo hecho: tildes, fechas, seña, historial, fotos y planos. Sirve para la obra que se cargó a mano y después tuvo presupuesto en la calculadora, o para la que se ató al número equivocado. Acepta `0042` o `0042-2`.
   - El presupuesto nuevo pasa a Aprobado.
   - El anterior: si era una obra cargada a mano, se borra (su número no se recicla); si era un presupuesto de la calculadora, vuelve a Enviado.

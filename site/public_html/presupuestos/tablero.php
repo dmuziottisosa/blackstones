@@ -1696,7 +1696,8 @@ function pedirEditar(c){
     campo('edCel','Teléfono',c.celular,'maxlength="40" inputmode="tel"')+
     campo('edDir','Dirección',c.direccion,'maxlength="200"')+
     '<label class="campo mat-wrap">Material y color (del catálogo de la calculadora)<input type="text" id="edMat" autocomplete="off" maxlength="200" value="'+esc(c.material)+'"><div class="mat-caja" id="edMatCaja"></div></label>'+
-    campo('edCon','Trabajo',c.concepto,'maxlength="200"')+
+    // La nota de la ficha (lo que la frena, lo que hay que saber): se edita acá junto con lo demás.
+    campo('edNota','Nota',c.nota,'maxlength="300" placeholder="Ej: falta la bacha, llamar antes de ir"')+
     // El modelo de la bacha se puede cargar o corregir en cualquier etapa (el tilde solo vive en Por medir).
     (conBacha?campo('edBacha','Modelo de la bacha ('+BACHA[c.bacha]+')',c.bacha_modelo||'','maxlength="80" placeholder="Ej: Johnson E37, 37 × 34"'):'')+
     '<p class="m-error" id="edError" hidden></p>',
@@ -1708,7 +1709,7 @@ function pedirEditar(c){
       if(cambiaNro)body.nro=nro; // con N° nuevo los datos los pone ese presupuesto
       else{
         // solo viaja lo que cambió
-        [['nombre','edNombre',c.nombre],['celular','edCel',c.celular],['direccion','edDir',c.direccion],['material','edMat',c.material],['concepto','edCon',c.concepto]]
+        [['nombre','edNombre',c.nombre],['celular','edCel',c.celular],['direccion','edDir',c.direccion],['material','edMat',c.material]]
           .forEach(x=>{
             if(v(x[1])===String(x[2]||'').trim())return;          // no se tocó: queda exactamente como estaba
             body[x[0]]=x[0]==='material'?materialNormal(v(x[1])):v(x[1]);
@@ -1718,7 +1719,8 @@ function pedirEditar(c){
       const modelo=conBacha?v('edBacha').replace(/\s+/g,' '):'';
       const cambiaBacha=conBacha&&modelo!==(c.bacha_modelo||'');
       const cambiaDatos=cambiaNro||Object.keys(body).length>2;
-      if(!cambiaDatos&&!cambiaBacha){cerrarModal();return;} // no cambió nada
+      const nota=v('edNota').replace(/\s+/g,' '),cambiaNota=nota!==String(c.nota||'').trim();
+      if(!cambiaDatos&&!cambiaBacha&&!cambiaNota){cerrarModal();return;} // no cambió nada
       if(cambiaBacha&&!modelo&&c.bacha==='nuestra'&&c.checks.bacha){$('edBacha').focus();toast('Poné el modelo de la bacha.');return;}
       if(ocupado)return;
       ocupado=true;
@@ -1733,6 +1735,10 @@ function pedirEditar(c){
         if(cambiaBacha&&modelo!==(c.bacha_modelo||'')){
           await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'bacha',origen:c.bacha,modelo:modelo});
           c.bacha_modelo=modelo;c._txt='';
+        }
+        if(cambiaNota&&nota!==String(c.nota||'').trim()){
+          await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'nota',nota:nota});
+          c.nota=nota;c._txt='';
         }
         if(cambiaDatos)j=await pedir(API_EDITAR,body);
       }catch(e){
@@ -1756,7 +1762,7 @@ function pedirEditar(c){
       await cargar();
     });
   // con algo modificado, tocar afuera no cierra la ventana
-  const ids=['edNro','edNombre','edCel','edDir','edMat','edCon'].concat(conBacha?['edBacha']:[]);
+  const ids=['edNro','edNombre','edCel','edDir','edMat','edNota'].concat(conBacha?['edBacha']:[]);
   const ini=ids.map(id=>$(id).value);
   modalProtegido=()=>ids.some((id,i)=>$(id)&&$(id).value!==ini[i]);
   conCatalogo('edMat','edMatCaja');
