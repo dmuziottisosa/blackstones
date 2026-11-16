@@ -155,7 +155,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 [data-theme="dark"] .et-retiro{--et:#4FC4C4;--et-soft:rgba(79,196,196,.13)}
 
 .col-tabs{display:none}
-.board{display:grid;grid-template-columns:repeat(var(--ncols,5),minmax(200px,1fr));gap:14px;align-items:start;overflow-x:auto;padding-bottom:4px}
+.board{display:grid;grid-template-columns:var(--tpl,repeat(var(--ncols,5),minmax(200px,1fr)));gap:14px;align-items:start;overflow-x:auto;padding-bottom:4px}
 .col{background:var(--card-alt);border:1px solid var(--border);border-top:4px solid var(--et);border-radius:var(--radius);padding:12px;min-height:120px;transition:background .15s,opacity .15s}
 .col-h{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 12px}
 .col .card:last-child{margin-bottom:0}
@@ -165,6 +165,29 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
   .board .col-h{position:sticky;top:-12px;z-index:3;background:inherit;margin:-12px -12px 0;padding:14px 16px 10px;border-radius:var(--radius) var(--radius) 0 0}
   .board .col::-webkit-scrollbar{width:8px}
   .board .col::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
+}
+/* Plegar una etapa: queda como una tira angosta con su nombre y su contador, y las demás ganan
+   el lugar. Solo en computadora: en tablet y celular ya se ve de a una etapa por vez. */
+.col-pl,.col-al{display:none}
+@media(min-width:1100px){
+  .col-h{gap:8px}
+  .col-h h2{flex:1;min-width:0}
+  .col-pl{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin-right:-4px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;flex-shrink:0}
+  .col-pl svg{width:15px;height:15px}
+  .col-pl:focus-visible{outline:2px solid var(--gd);outline-offset:1px}
+  .board .col.cerrada{padding:0;min-height:0;overflow:hidden;cursor:pointer;align-self:stretch}
+  .board .col.cerrada>:not(.col-h){display:none}
+  .board .col.cerrada .col-h{position:static;margin:0;padding:8px 0 16px;flex-direction:column;gap:10px;border-radius:0}
+  .board .col.cerrada .col-pl{order:-1;margin:0}
+  .board .col.cerrada h2{flex:none;writing-mode:vertical-rl;white-space:nowrap;font-size:15px}
+  .board .col.cerrada .col-al{display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;font-style:normal;font-size:11px;font-weight:800}
+}
+@media(min-width:1100px) and (hover:hover){
+  .col-pl:hover{background:var(--card);color:var(--text)}
+  .board .col.cerrada:hover{background:var(--et-soft)}
+}
+@media(min-width:1100px) and (pointer:coarse){
+  .col-pl{width:40px;height:40px}
 }
 /* Tablet acostada y notebooks chicas: columnas más angostas, así que se ajustan los márgenes. */
 @media(min-width:1100px) and (max-width:1279px){
@@ -573,6 +596,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   <a href="/presupuestos/?tab=reporte">Presupuestos · Reporte</a>
   <a href="/presupuestos/tablero.php" class="active">Tablero</a>
   <a href="/presupuestos/calendario.php">Calendario</a>
+  <a href="/presupuestos/relacion-contrato.php">Relación-Contrato</a>
   <a href="/presupuestos/stock.php">Stock</a>
 </nav>
 <div class="gold-line"></div>
@@ -681,6 +705,12 @@ const SOLO=(()=>{const k=new URLSearchParams(location.search).get('solo')||'';re
 if(SOLO)document.documentElement.classList.add('solo');
 // Los filtros de cada columna vienen guardados detrás del botón "Filtrar", para que el encabezado no
 // se coma la columna. Lo que se abre queda recordado; un filtro prendido siempre se ve.
+// Etapas plegadas (solo se ven plegadas en computadora). Se recuerda en este navegador.
+let colCerr={};
+try{(JSON.parse(localStorage.getItem('bs-tablero-cerradas')||'[]')||[]).forEach(k=>{colCerr[k]=true;});}catch(e){}
+const ESCRITORIO=window.matchMedia('(min-width:1100px)');
+const ICO_PLEGAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>';
+const ICO_DESPLEGAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 17 11 12 6 7"/><polyline points="13 17 18 12 13 7"/></svg>';
 let filtrosAb={};
 try{(JSON.parse(localStorage.getItem('bs-tablero-filtros')||'[]')||[]).forEach(k=>{filtrosAb[k]=true;});}catch(e){}
 const falta={}; // filtros "le falta…" encendidos: plano, foto de bacha y fecha (Por medir), turno (Por instalar)
@@ -1002,9 +1032,14 @@ function prepararColas(){
 }
 function ordenCola(a,b){
   const ha=hecho(a),hb=hecho(b);
-  // Lo ya hecho (medida, cortada, fabricada) que sigue en la columna espera el control del gerente:
-  // es lo que frena el paso a la etapa siguiente, así que va ARRIBA de la cola. Entre ellas,
-  // primero la que vence antes (una vencida no puede quedar esperando al fondo) y después la más vieja.
+  // En las colas sin turno (cortar, fabricar) manda el calendario: primero la semana de entrega,
+  // esté hecha o no. Una obra NO sube por estar cortada: queda en su semana.
+  if(!etapaDe(a.etapa).fecha){
+    const sa=a.semana||'9999',sb=b.semana||'9999';
+    if(sa!==sb)return sa<sb?-1:1;
+  }
+  // Dentro de lo mismo, lo ya hecho (medida, cortada, fabricada) que espera el control del gerente
+  // va primero: es lo que frena el paso a la etapa siguiente. Entre ellas, la que vence antes.
   if(ha!==hb)return ha?-1:1;
   if(ha){
     const la=a.limite||'9999',lb=b.limite||'9999';
@@ -1224,6 +1259,7 @@ function dibujar(){
   $('buscarN').textContent=buscado.length?(visibles.length?visibles.length+(visibles.length===1?' obra':' obras'):'Sin resultados'):'';
 
   let tabs='',cols='',aparte='';
+  const anchos=[];
   const ultima=columnas().length-1;
   ETAPAS.forEach(e=>{
     const esPrimera=columnas().indexOf(e)===0;
@@ -1250,10 +1286,14 @@ function dibujar(){
     const llega=recien&&recien.tipo==='llego'&&Date.now()-recien.t<300&&lista.some(c=>c.key===recien.key);
     const sinT=lista.filter(sinTurno).length+lista.filter(sePisa).length;
     tabs+='<button type="button" class="et-'+esc(e.id)+(on?' on':'')+(llega?' llego':'')+(sinT?' con-aviso':'')+'" data-col="'+esc(e.id)+'">'+esc(corto)+'<i>'+lista.length+'</i></button>';
-    let h='<section class="col et-'+esc(e.id)+(on?' on':'')+'" data-col="'+esc(e.id)+'">';
-    h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2><span class="col-n">'+lista.length+'</span></div>';
     // Avisos de la columna, siempre sobre TODAS sus fichas (no cambian al filtrar). Tocarlos prende su filtro.
     const nSinF=deEtapa.filter(sinTurno).length,nUrg=e.boton?deEtapa.filter(urgente).length:0;
+    const cerr=!SOLO&&!e.aparte&&!!colCerr[e.id];
+    let h='<section class="col et-'+esc(e.id)+(on?' on':'')+(cerr?' cerrada':'')+'" data-col="'+esc(e.id)+'">';
+    h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2><span class="col-n">'+lista.length+'</span>'
+      +(nSinF||nUrg||nPisan?'<i class="col-al" title="Tiene obras por avanzar o sin fecha">!</i>':'')
+      +(e.aparte||SOLO?'':'<button type="button" class="col-pl" data-plegar="'+esc(e.id)+'" aria-expanded="'+!cerr+'" title="'+(cerr?'Desplegar ':'Plegar ')+esc(e.titulo)+'" aria-label="'+(cerr?'Desplegar ':'Plegar ')+esc(e.titulo)+'">'+(cerr?ICO_DESPLEGAR:ICO_PLEGAR)+'</button>')+'</div>';
+    if(!e.aparte)anchos.push(cerr?'54px':'minmax(200px,520px)'); // con tope: una etapa sola no se estira a todo el ancho
     if(nSinF||nUrg||nPisan){
       h+='<div class="col-avisos">';
       if(nUrg)h+='<button type="button" class="col-aviso" data-falta="cont_'+esc(e.id)+'">'+nUrg+' por avanzar</button>';
@@ -1288,7 +1328,7 @@ function dibujar(){
     // título de lo ya hecho: "Ya cortadas" + lo que esperan, y el contador a la derecha
     const seccion=(txt,n,cls)=>{const p=String(txt).split(' · ');return '<div class="col-sep'+cls+'"><span class="t">'+esc(p[0])+(p.length>1?'<small>'+esc(p.slice(1).join(' · ').replace(/^./,x=>x.toUpperCase()))+'</small>':'')+'</span><b>'+n+'</b></div>';};
     const cards=lista.map((c,i)=>(nHechas&&i===0?seccion(e.hecho,nHechas,' arriba'):'')
-      +(nHechas&&i===nHechas?'<div class="col-sep">'+esc(e.pendientes||'En cola')+' ('+(lista.length-nHechas)+')</div>':'')
+      +(nHechas&&i===nHechas?'<div class="col-sep">'+esc(e.pendientes||'En cola')+' ('+lista.filter(x=>!hecho(x)).length+')</div>':'')
       +(conSemanas&&i>=nHechas&&(i===nHechas||(lista[i-1].semana||'')!==(c.semana||''))?'<div class="col-sem'+(c.semana&&masDias(c.semana,6)<HOY?' rojo':'')+'">'+esc(sem(c))+'</div>':'')+htmlCard(c)).join('');
     if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(filtrando?'Sin resultados':'Nadie retira por el local')+'</div>';
     else h+=lista.length?cards:'<div class="col-vacia">'+(filtrando?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
@@ -1296,6 +1336,8 @@ function dibujar(){
     if(e.aparte)aparte+=h;else cols+=h;
   });
   $('board').style.setProperty('--ncols',columnas().length);
+  // una etapa plegada ocupa una tira; las demás se reparten el resto
+  if(anchos.some(a=>a==='54px'))$('board').style.setProperty('--tpl',anchos.join(' '));else $('board').style.removeProperty('--tpl');
   $('colTabs').innerHTML=tabs;
   // cada columna se desplaza por dentro: al redibujar, queda donde estaba
   const sc={};
@@ -1400,6 +1442,15 @@ $('colTabs').addEventListener('click',ev=>{
 });
 
 wrap.addEventListener('click',ev=>{
+  // Plegar / desplegar una etapa: con su botón, o tocando la tira en cualquier lado.
+  const bpl=ev.target.closest('[data-plegar]'),tira=!bpl&&ESCRITORIO.matches?ev.target.closest('#board .col.cerrada'):null;
+  if(bpl||tira){
+    const k=bpl?bpl.dataset.plegar:tira.dataset.col;
+    colCerr[k]=!colCerr[k];
+    try{localStorage.setItem('bs-tablero-cerradas',JSON.stringify(Object.keys(colCerr).filter(x=>colCerr[x])));}catch(e){}
+    dibujar();
+    return;
+  }
   if(ev.target.closest('[data-cargar]')){pedirCargar();return;}
   if(ev.target.closest('[data-limpiar]')){limpiarFiltros();return;}
   const bp=ev.target.closest('[data-plazo]');

@@ -130,6 +130,7 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
   <a href="/presupuestos/?tab=reporte">Presupuestos · Reporte</a>
   <a href="/presupuestos/tablero.php">Tablero</a>
   <a href="/presupuestos/calendario.php">Calendario</a>
+  <a href="/presupuestos/relacion-contrato.php">Relación-Contrato</a>
   <a href="/presupuestos/stock.php" class="active">Stock</a>
 </nav>
 <div class="gold-line"></div>

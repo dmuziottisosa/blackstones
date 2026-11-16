@@ -12,6 +12,8 @@ status: decidido (dueño)
 2. El campo de material de las fichas se **elige del catálogo de la calculadora** (formato "Marca · Color").
 3. En Por instalar se suma el tilde **"Dirección confirmada"**, después de "Se avisó al cliente".
 
+**Corrección del mismo día (dueño):** lo ya cortado **no sube por estar cortado**. Primero va la semana de entrega para todas las fichas; recién dentro de la misma semana lo ya cortado que espera control queda antes que lo que falta. La versión anterior ponía todo lo ya cortado arriba de la columna, y una obra de la semana siguiente podía quedar por encima de una vencida sin cortar.
+
 ## Por qué
 
 - El dueño vio una obra que vencía el 22/11 en el puesto 2 de Por cortar, adelante de una ya vencida. El orden de llegada no mira el vencimiento.
