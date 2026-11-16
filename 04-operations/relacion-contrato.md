@@ -26,7 +26,13 @@ Los definió el dueño (16/11/2026), sobre la planilla que ya usaba:
 | Factura, Muebles colocados | Sí / No (o sin marcar) |
 | Pileta | Nuestra / Del cliente / No lleva, igual que en el tablero, así se copia tal cual |
 | Medición coordinada | Opcional; es la fecha que se copia al tablero |
-| Nota | |
+| Notas | Caja grande, arriba de la ficha: es donde van los detalles del contrato. Hasta 4000 caracteres, conserva los renglones. El primer renglón se ve en la lista |
+
+## Va por mes
+
+La lista muestra **un mes por vez**, según la fecha del contrato, con flechas para ir al anterior y al siguiente (decisión del dueño, 16/11/2026). Arriba, cuatro números del mes: contratos, contratado, cobrado y por cobrar; "por cobrar" suma además lo pendiente de todos los meses. El buscador busca en todos los meses a la vez. Un mes vacío ofrece ir al último que tiene contratos.
+
+Cada renglón lleva el día del contrato como un almanaque, una barrita con cuánto del total ya entró y, si tiene, el primer renglón de la nota.
 
 ## Enlace con el tablero
 
@@ -35,6 +41,7 @@ Los definió el dueño (16/11/2026), sobre la planilla que ya usaba:
 - Si el renglón tiene **N° de presupuesto**, en vez de crear una ficha aprueba ese presupuesto (mismo camino que "Cargar obra" con número). Si ese presupuesto ya estaba en el tablero, solo se enlaza.
 - Una ficha del tablero se enlaza con un solo contrato.
 - **Enlazado, manda el tablero en lo operativo**: cliente, teléfono, dirección, material y pileta se ven como están en la ficha y se cambian desde el tablero. La plata se cambia acá.
+- **Distintivo de enlace:** el renglón enlazado lleva una raya verde a la izquierda y la marca "Enlazado" al lado de la etapa; la ficha dice "Enlazado con el tablero y el calendario" (el calendario lee del tablero, así que queda enlazado solo).
 - El renglón muestra **la etapa** de la obra (Por medir, Por cortar…), la fecha de medición o instalación y el vencimiento, y lleva a la ficha con un toque.
 - **Seña, un solo dato:** si se carga acá y la obra está en Por medir, queda tildada en el tablero ("Trajo la seña"). Si se carga en el tablero, aparece acá sola. Cuando el tablero ya tiene la seña, acá es de solo lectura.
 - Si la ficha sale del tablero (archivada o borrada) el renglón dice "Fuera del tablero" y conserva la última seña.
@@ -71,3 +78,4 @@ Para eliminarla: borrar `presupuestos/relacion-contrato.php`, `calculadora/api/c
 - Pago en una moneda de un total en otra (pesos contra un total en dólares): no hay conversión; queda como saldo en una moneda y "a favor" en la otra.
 - Permisos: hoy todo el equipo ve la plata (decisión del dueño, "por los momentos").
 - Exportar a planilla y filtros por vendedor o procedencia.
+- Un link directo al día de la obra en el calendario (hoy el link lleva a la ficha del tablero).

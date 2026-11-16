@@ -74,7 +74,11 @@ function bs_contrato_campos($body) {
     $c['telefono']  = bs_contrato_texto($body, 'telefono', 40, 'Teléfono');
     $c['direccion'] = bs_contrato_texto($body, 'direccion', 200, 'Dirección');
     $c['material']  = bs_contrato_texto($body, 'material', 200, 'Material');
-    $c['nota']      = bs_contrato_texto($body, 'nota', 500, 'Nota');
+    // La nota es el lugar de los detalles: larga y con sus renglones.
+    $nota = str_replace(["\r\n", "\r"], "\n", (string)($body['nota'] ?? ''));
+    $nota = trim(preg_replace('/\n{3,}/', "\n\n", preg_replace('/[ \t]+/u', ' ', $nota)));
+    if (mb_strlen($nota) > 4000) bs_error('La nota es muy larga (máximo 4000 caracteres)');
+    $c['nota'] = $nota;
     $c['vendedor']  = bs_contrato_texto($body, 'vendedor', 60, 'Vendedor');
     $c['contrato']  = bs_contrato_texto($body, 'contrato', 80, 'Contrato');
     $c['contrato_paralelo'] = bs_contrato_texto($body, 'contrato_paralelo', 80, 'Contrato paralelo');

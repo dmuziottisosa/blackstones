@@ -87,41 +87,70 @@ button{font-family:inherit;color:inherit}
 
 .wrap{max-width:1480px;margin:0 auto;padding:20px 20px 60px}
 
-/* === ARRIBA: buscador, resumen y alta === */
-.tope{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.buscar{flex:1 1 260px;max-width:420px}
-.buscar input{width:100%;padding:11px 16px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--text);font-family:inherit;font-size:14px;font-weight:500;outline:none}
+/* === ARRIBA: el mes, el buscador y el alta === */
+.barra{display:flex;align-items:center;flex-wrap:wrap;gap:12px 16px;margin-bottom:16px}
+.mes{display:flex;align-items:center;gap:6px}
+.mes h2{font-family:'Fraunces',serif;font-size:24px;font-weight:600;min-width:214px;text-align:center}
+.mes button{height:36px;min-width:36px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:16px;font-weight:700;color:var(--text2);cursor:pointer}
+.mes button:disabled{opacity:.35;cursor:default}
+.mes .hoy-b{font-size:13px;margin-left:4px}
+.acc{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:10px;flex:1 1 380px}
+.buscar{flex:1 1 220px;max-width:340px}
+.buscar input{width:100%;padding:10px 16px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--text);font-family:inherit;font-size:14px;font-weight:500;outline:none}
 .buscar input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
-.resumen{margin-left:auto;font-size:13px;color:var(--text2);text-align:right;line-height:1.35}
-.resumen b{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums}
 .btn{padding:10px 16px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:13.5px;font-weight:700;color:var(--text);cursor:pointer;white-space:nowrap}
 .btn.pri{background:var(--dk);border-color:var(--dk);color:var(--cr)}
 [data-theme="dark"] .btn.pri{background:var(--gd);border-color:var(--gd);color:#1A1816}
 .btn.chico{padding:7px 12px;font-size:12.5px}
 .btn:disabled{opacity:.6;cursor:default}
-.aviso-p{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:9px 14px;border:1px dashed var(--amb);border-radius:var(--radius);background:var(--amb-soft);color:var(--amb);font-size:13px;font-weight:600}
+
+/* === RESUMEN DEL MES: cuánto se contrató, cuánto entró y cuánto falta === */
+.tiles{display:grid;grid-template-columns:minmax(0,.7fr) repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.tiles[hidden]{display:none}
+.tile{min-width:0;padding:14px 18px 15px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow)}
+.tile .t{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
+.tile .v{margin-top:7px;font-family:'Fraunces',serif;font-size:25px;font-weight:600;line-height:1.22;color:var(--text);font-variant-numeric:lining-nums tabular-nums}
+.tile .v span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .v.nada{color:var(--text3)}
+.tile .s{margin-top:5px;font-size:12px;color:var(--text3);line-height:1.4;overflow-wrap:anywhere}
+.tile.cobr .v{color:var(--gr)}
+.tile.debe{border-left:4px solid var(--red)}
+.tile.debe .v{color:var(--red)}
+.tile.debe.cero{border-left-color:var(--gr)}
+.tile.debe.cero .v{color:var(--gr)}
+
+.aviso-p{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:9px 14px;border:1px dashed var(--amb);border-radius:var(--radius);background:var(--amb-soft);color:var(--amb);font-size:13px;font-weight:600}
 .aviso-p[hidden]{display:none}
 .aviso-p .btn{margin-left:auto;border-color:var(--amb);color:var(--amb);background:transparent}
 
 /* === LISTA: un renglón por contrato === */
 .lista{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-.fila,.cab{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,1.9fr);gap:14px;align-items:center;padding:12px 16px}
-.cab{padding-top:10px;padding-bottom:10px;background:var(--card-alt);font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3)}
+.fila,.cab{display:grid;grid-template-columns:48px minmax(0,2fr) minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.05fr) minmax(0,1.75fr);gap:6px 18px;align-items:center;padding:14px 20px}
+.cab{padding-top:11px;padding-bottom:11px;background:var(--card-alt);border-bottom:1px solid var(--border);font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
 .cab .der,.fila .der{text-align:right}
-.fila{border-top:1px solid var(--border-soft);cursor:pointer;min-width:0}
+.fila{border-top:1px solid var(--border-soft);cursor:pointer;min-width:0;transition:background .12s}
+.cab+.fila{border-top:none}
 .fila>div{min-width:0}
-.f-nom{font-size:14.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.f-sub{font-size:12px;color:var(--text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* El día del contrato, como en un almanaque: ordena la lista de un vistazo. */
+.dia-b{display:flex;flex-direction:column;align-items:center;justify-content:center;width:48px;height:52px;border-radius:var(--radius-sm);background:var(--card-alt);line-height:1}
+.dia-b b{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--text);font-variant-numeric:lining-nums}
+.dia-b i{margin-top:5px;font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
+.f-nom{font-size:15px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f-sub{font-size:12px;color:var(--text3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .f-sub .falta{color:var(--amb);font-weight:600}
-.f-mat{font-size:13.5px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.plata{font-size:13.5px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.35}
+.f-sub .solo-m{display:none}
+.f-mat{font-size:13.5px;font-weight:500;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plata{font-size:14px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.4}
 .plata span{display:block;white-space:nowrap}
 .plata.nada{color:var(--text3);font-weight:500}
 .plata.debe{color:var(--red);font-weight:700}
 .plata.ok{color:var(--gr);font-weight:700}
+/* cuánto del total ya entró */
+.prog{height:4px;margin:6px 0 0 auto;max-width:96px;border-radius:4px;background:var(--border);overflow:hidden}
+.prog i{display:block;height:100%;border-radius:4px;background:var(--gr)}
 .rot{display:none}
-.tab{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
-.etapa{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:5px 11px;border-radius:999px;background:var(--et-soft);color:var(--et);font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap}
+.tab{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.etapa{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:5px 12px;border-radius:999px;background:var(--et-soft);color:var(--et);font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap}
 .etapa::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--et);flex-shrink:0}
 .etapa.fuera{--et:var(--text3);--et-soft:var(--card-alt)}
 .tab small{font-size:11.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
@@ -138,8 +167,17 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .et-instalar{--et:#B594E6;--et-soft:rgba(181,148,230,.14)}
 [data-theme="dark"] .et-archivar{--et:#34D670;--et-soft:rgba(52,214,112,.13)}
 [data-theme="dark"] .et-retiro{--et:#4FC4C4;--et-soft:rgba(79,196,196,.13)}
-.prueba-t{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--amb-soft);color:var(--amb);font-size:10px;font-weight:800;letter-spacing:.06em;vertical-align:middle}
-.vacio{padding:44px 20px;text-align:center;color:var(--text2);font-size:14.5px;line-height:1.6}
+/* Distintivo: este contrato ya está enlazado con el tablero (y por eso también con el calendario). */
+.enl{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gr);white-space:nowrap}
+.enl svg{width:13px;height:13px;flex-shrink:0}
+.enl.roto{color:var(--text3)}
+.nota-t .enl{white-space:normal;margin-bottom:3px}
+.tab .fila-e{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;max-width:100%}
+.fila.enlazada{box-shadow:inset 3px 0 0 var(--gr)}
+/* La nota del contrato, en un renglón: los detalles a la vista sin abrir la ficha. */
+.f-nota{grid-column:2/-1;padding:6px 11px;border-radius:var(--radius-sm);background:var(--amb-soft);color:var(--amb);font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prueba-t{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:999px;background:var(--amb-soft);color:var(--amb);font-size:10px;font-weight:800;letter-spacing:.06em;vertical-align:middle}
+.vacio{padding:48px 20px;text-align:center;color:var(--text2);font-size:14.5px;line-height:1.6}
 .vacio h2{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:var(--text);margin-bottom:6px}
 .vacio .btns-v{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
 .error{padding:14px 16px;border-radius:var(--radius);background:var(--red-soft);color:var(--red);font-weight:600;margin-bottom:12px}
@@ -148,11 +186,27 @@ button{font-family:inherit;color:inherit}
 /* === VENTANA === */
 .modal-bg{position:fixed;inset:0;background:rgba(10,9,7,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:900}
 .modal-bg.show{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);--mp:24px;padding:var(--mp);max-width:560px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);--mp:26px;padding:var(--mp);max-width:660px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
 .modal.chica{max-width:440px}
-.modal h3{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-bottom:6px}
+.modal h3{font-family:'Fraunces',serif;font-size:22px;font-weight:600;line-height:1.25;margin-bottom:6px;overflow-wrap:anywhere}
+.m-cab{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.m-cab>div{flex:1;min-width:0}
+.m-cab h3{margin-bottom:2px}
+.m-sub{font-size:12.5px;color:var(--text3)}
+.m-cab .etapa{margin-top:3px;flex-shrink:0}
+/* Total, cobrado y saldo: siempre arriba, se recalculan mientras se escribe */
+.m-res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;border:1px solid var(--border);border-radius:var(--radius);background:var(--border);overflow:hidden}
+.m-res>div{min-width:0;padding:11px 14px 12px;background:var(--card-alt)}
+.m-res .t{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
+.m-res b{display:block;margin-top:5px;font-family:'Fraunces',serif;font-size:18px;font-weight:600;line-height:1.3;color:var(--text);font-variant-numeric:lining-nums tabular-nums;overflow-wrap:anywhere}
+.m-res b.nada{color:var(--text3)}
+.m-res b.debe{color:var(--red)}
+.m-res b.ok{color:var(--gr)}
+/* Notas: acá van los detalles del contrato. Mismo ámbar que las notas del tablero. */
+.campo.notas textarea{min-height:104px;padding:12px 14px;border-color:color-mix(in srgb,var(--amb) 30%,var(--border));background:var(--amb-soft);font-size:14.5px;line-height:1.55;resize:vertical}
+.campo.notas textarea::placeholder{color:var(--amb);opacity:.65}
 .modal .bajada{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:14px}
-.modal h4{margin:22px 0 2px;padding-top:16px;border-top:1px solid var(--border-soft);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.modal h4{margin:24px 0 0;padding-top:18px;border-top:1px solid var(--border-soft);font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--text)}
 .campo{display:block;margin-top:14px;font-size:12px;font-weight:700;color:var(--text2)}
 .campo i{font-style:normal;font-weight:500;color:var(--text3)}
 .campo input,.campo select,.campo textarea{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
@@ -170,10 +224,6 @@ button{font-family:inherit;color:inherit}
 .nota-t{margin-top:14px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--card-alt);font-size:12.5px;color:var(--text2);line-height:1.5}
 .nota-t a{color:var(--text);font-weight:700}
 .nota-t[hidden]{display:none}
-.saldo-c{display:flex;justify-content:space-between;gap:12px;margin-top:14px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--card-alt);font-size:13px;color:var(--text2)}
-.saldo-c b{color:var(--text);font-variant-numeric:tabular-nums;text-align:right}
-.saldo-c b.debe{color:var(--red)}
-.saldo-c b.ok{color:var(--gr)}
 .pagos{margin-top:10px}
 .pago{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13.5px}
 .pago .q{flex:1;min-width:0;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -199,7 +249,7 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .toast{background:var(--gd);color:#1A1816}
 @media(hover:hover){
   .fila:hover{background:var(--gd-soft)}
-  .btn:hover{border-color:var(--gd)}
+  .btn:hover,.mes button:not(:disabled):hover{border-color:var(--gd)}
   .pago button:hover{background:var(--red-soft);color:var(--red)}
 }
 a,button,.toggle{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
@@ -222,27 +272,46 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   .modal .btns button{padding:11px 18px;font-size:14px}
   .btn{padding:12px 18px}
   .btn.chico{padding:10px 14px;font-size:13px}
+  .mes button{height:42px;min-width:42px}
   .opc button{padding:12px 6px}
   .pago button{width:40px;height:40px}
 }
+/* Notebook chica y tablet acostada: los cuatro números entran más justos */
+@media(max-width:1199px){
+  .tile .v{font-size:21px}
+  .fila,.cab{gap:6px 14px;padding-left:16px;padding-right:16px}
+}
 /* Tablet parada y celular: cada contrato es una tarjeta, con el rótulo al lado de cada dato. */
 @media(max-width:899px){
+  .acc{flex:1 1 100%;margin-left:0}
+  .buscar{max-width:none}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cab{display:none}
-  .lista{background:none;border:none;box-shadow:none;overflow:visible;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .lista{background:none;border:none;box-shadow:none;overflow:visible;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
   .lista>.vacio{grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
-  .fila{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;align-items:start;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
-  .fila>.c-cli,.fila>.c-mat,.fila>.c-tab{grid-column:1/-1}
+  .fila{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;align-items:start;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .fila>.c-dia{display:none}
+  .f-sub .solo-m{display:inline}
+  .fila>.c-cli,.fila>.c-mat,.fila>.c-tab,.f-nota{grid-column:1/-1}
   .fila .der{text-align:left}
+  .prog{margin-left:0}
   .rot{display:block;margin-bottom:2px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3)}
-  .c-tab{padding-top:10px;border-top:1px solid var(--border-soft)}
+  .c-tab{padding-top:12px;border-top:1px solid var(--border-soft)}
+  .fila.enlazada{box-shadow:var(--shadow);border-left:3px solid var(--gr)}
   .tab{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px}
-  .resumen{flex:1 1 100%;margin-left:0;text-align:left}
 }
 @media(max-width:639px){
+  .mes{flex:1 1 100%}
+  .mes h2{flex:1;min-width:0;font-size:21px}
   .lista{grid-template-columns:minmax(0,1fr)}
-  .tope .btn.pri{flex:1 1 100%}
-  .buscar{max-width:none;flex-basis:100%}
+  .acc{flex-wrap:wrap}
+  .acc .btn.pri{flex:1 1 100%}
+  .buscar{flex-basis:100%}
+  .tile{padding:12px 14px 13px}
+  .tile .v{font-size:19px}
   .dos,.tres{grid-template-columns:minmax(0,1fr)}
+  .m-res b{font-size:15.5px}
+  .m-res>div{padding:10px 10px 11px}
 }
 </style>
 </head>
@@ -274,11 +343,19 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 
 <div class="wrap">
   <div class="error" id="err" hidden></div>
-  <div class="tope">
-    <div class="buscar"><input type="search" id="buscar" placeholder="Buscar cliente, N° o material" autocomplete="off" aria-label="Buscar"></div>
-    <button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button>
-    <div class="resumen" id="resumen"></div>
+  <div class="barra">
+    <div class="mes">
+      <button type="button" id="mesAnt" aria-label="Mes anterior">‹</button>
+      <h2 id="mesTxt"></h2>
+      <button type="button" id="mesSig" aria-label="Mes siguiente">›</button>
+      <button type="button" class="hoy-b" id="mesHoy">Este mes</button>
+    </div>
+    <div class="acc">
+      <div class="buscar"><input type="search" id="buscar" placeholder="Buscar en todos los meses" autocomplete="off" aria-label="Buscar cliente, N° o material en todos los meses"></div>
+      <button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button>
+    </div>
   </div>
+  <div class="tiles" id="tiles" hidden></div>
   <div class="aviso-p" id="avisoP" hidden></div>
   <div class="lista" id="lista"><div class="vacio">Cargando…</div></div>
 </div>
@@ -299,6 +376,10 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 const $=id=>document.getElementById(id);
 const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php';
 let CONTRATOS=[],CARDS={},ETAPAS={},HOY='',TABLERO_OK=false,q='';
+let mes=''; // mes a la vista, 'YYYY-MM' (por la fecha del contrato)
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const mesTxt=m=>MESES[+m.slice(5,7)-1].replace(/^./,x=>x.toUpperCase())+' '+m.slice(0,4);
+const ICO_ENL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>';
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const llano=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 async function pedir(url,body){
@@ -374,6 +455,7 @@ async function cargar(){
   try{
     const [a,t]=await Promise.all([pedir(API),pedir(API_T).catch(()=>null)]);
     CONTRATOS=a.contratos;HOY=a.hoy;
+    if(!mes)mes=HOY.slice(0,7);
     TABLERO_OK=!!t;CARDS={};ETAPAS={};
     if(t){t.cards.forEach(k=>{CARDS[k.key]=k;});t.etapas.forEach(e=>{ETAPAS[e.id]=e.titulo;});}
     $('err').hidden=true;
@@ -394,45 +476,75 @@ function espejarSenas(){
   });
 }
 
+// Cuánto del total ya entró (0 a 1), promediando las monedas que tienen total. Solo para la barrita.
+function avance(n){
+  const l=['USD','ARS'].filter(m=>n.tot[m]>0).map(m=>Math.max(0,Math.min(1,n.pag[m]/n.tot[m])));
+  return l.length?l.reduce((a,b)=>a+b,0)/l.length:null;
+}
+const sumar=(l)=>{const s={tot:{USD:0,ARS:0},pag:{USD:0,ARS:0},deb:{USD:0,ARS:0},conSaldo:0};l.forEach(c=>{const n=cuentas(c);let debe=false;['USD','ARS'].forEach(m=>{s.tot[m]+=n.tot[m];s.pag[m]+=n.pag[m];if(n.sal[m]>0.004){s.deb[m]+=n.sal[m];debe=true;}});if(debe)s.conSaldo++;});return s;};
+const lineas=o=>{const l=partes(o);return l.length?l.map(x=>'<span>'+x+'</span>').join(''):'';};
+
 function dibujar(){
   const pr=CONTRATOS.filter(c=>c.prueba).length;
   $('avisoP').hidden=!pr;
   if(pr)$('avisoP').innerHTML='<span>'+(pr===1?'Hay 1 renglón de prueba.':'Hay '+pr+' renglones de prueba.')+' No son contratos reales.</span><button type="button" class="btn chico" data-borrar-prueba>Borrar los de prueba</button>';
-  // por cobrar: la suma de lo que falta en cada moneda (los de prueba no cuentan)
-  const pc={USD:0,ARS:0};
-  CONTRATOS.filter(c=>!c.prueba).forEach(c=>{const n=cuentas(c);['USD','ARS'].forEach(m=>{if(n.sal[m]>0)pc[m]+=n.sal[m];});});
-  const reales=CONTRATOS.length-pr;
-  $('resumen').innerHTML=CONTRATOS.length?'<b>'+reales+'</b> '+(reales===1?'contrato':'contratos')+' · Por cobrar: <b>'+(partes(pc).join(' + ')||'nada')+'</b>':'';
+  const t=llano(q).trim(),buscando=!!t;
+  $('mesTxt').textContent=buscando?'Todos los meses':mesTxt(mes);
+  $('mesAnt').disabled=$('mesSig').disabled=buscando;
+  $('mesHoy').hidden=buscando||mes===HOY.slice(0,7);
   if(!CONTRATOS.length){
+    $('tiles').hidden=true;
     $('lista').innerHTML='<div class="vacio"><h2>Todavía no hay contratos</h2>Acá va un renglón por cada cliente que contrata: el total, la seña y lo que falta cobrar.<br>Desde cada renglón se puede cargar la obra en Por medir del tablero.<div class="btns-v"><button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button><button type="button" class="btn" data-prueba>Cargar 3 de prueba</button></div></div>';
     return;
   }
-  const t=llano(q).trim();
+  // Lo que se ve: los contratos del mes (por su fecha). Buscando, todos los meses.
   const lista=CONTRATOS.filter(c=>{
-    if(!t)return true;
+    if(!buscando)return (c.fecha||'').slice(0,7)===mes;
     const v=ver(c);
-    return llano([v.cliente,c.nro,keyDe(c),v.material,c.vendedor,v.telefono,v.direccion,c.contrato,c.contrato_paralelo].join(' ')).indexOf(t)>=0;
-  });
-  let h='<div class="cab"><div>Cliente</div><div>Material</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div>Tablero</div></div>';
+    return llano([v.cliente,c.nro,keyDe(c),v.material,c.vendedor,c.procedencia,v.telefono,v.direccion,c.contrato,c.contrato_paralelo,c.nota].join(' ')).indexOf(t)>=0;
+  }).sort((a,b)=>a.fecha!==b.fecha?(a.fecha<b.fecha?1:-1):(a.creado<b.creado?1:-1));
+
+  // Resumen: sobre los contratos reales; si solo hay de prueba, sobre esos (ya avisa el cartel).
+  const real=l=>{const r=l.filter(c=>!c.prueba);return r.length?r:l;};
+  const base=real(lista),s=sumar(base),todo=sumar(real(CONTRATOS)),hayDeuda=partes(s.deb).length>0;
+  $('tiles').hidden=false;
+  $('tiles').innerHTML='<div class="tile"><div class="t">Contratos</div><div class="v">'+base.length+'</div><div class="s">'+(s.conSaldo?s.conSaldo+' con saldo pendiente':(base.length?'Todos al día':(buscando?'Sin resultados':'Ninguno este mes')))+'</div></div>'
+    +'<div class="tile"><div class="t">Contratado</div><div class="v'+(lineas(s.tot)?'':' nada')+'">'+(lineas(s.tot)||'—')+'</div></div>'
+    +'<div class="tile cobr"><div class="t">Cobrado</div><div class="v'+(lineas(s.pag)?'':' nada')+'">'+(lineas(s.pag)||'—')+'</div><div class="s">Señas y pagos</div></div>'
+    +'<div class="tile debe'+(hayDeuda?'':' cero')+'"><div class="t">Por cobrar</div><div class="v'+(hayDeuda||base.length?'':' nada')+'">'+(lineas(s.deb)||(base.length?'Nada':'—'))+'</div>'+(buscando?'':'<div class="s">Entre todos los meses: '+(partes(todo.deb).join(' + ')||'nada')+'</div>')+'</div>';
+
+  if(!lista.length){
+    // mes sin contratos: se ofrece ir al último mes que tiene
+    const otros=[...new Set(CONTRATOS.map(c=>(c.fecha||'').slice(0,7)).filter(Boolean))].sort(),ult=otros.filter(m=>m<mes).pop()||otros[0];
+    $('lista').innerHTML=buscando?'<div class="vacio">Ningún contrato coincide con la búsqueda.</div>'
+      :'<div class="vacio"><h2>Sin contratos en '+esc(MESES[+mes.slice(5,7)-1])+'</h2>Los contratos se ordenan por mes según su fecha.<div class="btns-v"><button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button>'+(ult?'<button type="button" class="btn" data-ir-mes="'+esc(ult)+'">Ir a '+esc(mesTxt(ult).toLowerCase())+'</button>':'')+'</div></div>';
+    return;
+  }
+  let h='<div class="cab"><div></div><div>Cliente</div><div>Material</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div>Tablero</div></div>';
   h+=lista.map(c=>{
-    const v=ver(c),n=cuentas(c,v),k=cardDe(c),s=saldoTxt(n);
-    const sub=[c.nro?'N° '+esc(c.nro):'<span class="falta">Sin N°</span>',esc(fch(c.fecha)),esc(c.vendedor)].filter(Boolean).join(' · ');
+    const v=ver(c),n=cuentas(c,v),k=cardDe(c),s=saldoTxt(n),av=avance(n);
+    const p=(c.fecha||'').split('-').map(Number),dt=p.length===3?new Date(p[0],p[1]-1,p[2]):null;
+    // la fecha va en el renglón solo en tarjetas (tablet y celular): en computadora ya está el almanaque
+    const sub=(c.nro?'N° '+esc(c.nro):'<span class="falta">Sin N°</span>')+(fch(c.fecha)?'<span class="solo-m"> · '+esc(fch(c.fecha))+'</span>':'')+[c.vendedor,c.procedencia].filter(Boolean).map(x=>' · '+esc(x)).join('');
     const tot=partes(n.tot),pag=partes(n.pag);
     let tab;
     if(!c.enlace)tab='<button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición coordinada: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
-    else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>'+(d.t?'<small'+(d.rojo?' class="rojo"':'')+'>'+esc(d.t)+'</small>':'');}
-    else tab='<span class="etapa fuera">'+(TABLERO_OK?'Fuera del tablero':'Sin datos del tablero')+'</span><small>'+(TABLERO_OK?'Archivada o borrada':'No se pudo leer el tablero')+'</small>';
-    return '<div class="fila" data-id="'+esc(c.id)+'" tabindex="0" role="button" aria-label="Abrir el contrato de '+esc(v.cliente)+'">'
+    else if(k){const d=etapaDet(k);tab='<div class="fila-e"><a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><span class="enl" title="Enlazado con el tablero y el calendario">'+ICO_ENL+'Enlazado</span></div>'+(d.t?'<small'+(d.rojo?' class="rojo"':'')+'>'+esc(d.t)+'</small>':'');}
+    else tab='<div class="fila-e"><span class="etapa fuera">'+(TABLERO_OK?'Fuera del tablero':'Sin datos del tablero')+'</span></div><small>'+(TABLERO_OK?'Archivada o borrada':'No se pudo leer el tablero')+'</small>';
+    const nota=(c.nota||'').replace(/\s+/g,' ').trim();
+    return '<div class="fila'+(k?' enlazada':'')+'" data-id="'+esc(c.id)+'" tabindex="0" role="button" aria-label="Abrir el contrato de '+esc(v.cliente)+'">'
+      +'<div class="c-dia">'+(dt?'<div class="dia-b"><b>'+p[2]+'</b><i>'+(buscando?MESES[p[1]-1].slice(0,3):DIAS[dt.getDay()])+'</i></div>':'')+'</div>'
       +'<div class="c-cli"><div class="f-nom">'+esc(v.cliente)+(c.prueba?'<span class="prueba-t">PRUEBA</span>':'')+'</div><div class="f-sub">'+sub+'</div></div>'
       +'<div class="c-mat"><div class="f-mat">'+(esc(v.material)||'<span style="color:var(--text3)">Sin material</span>')+'</div>'+(c.medidas?'<div class="f-sub">'+esc(c.medidas)+'</div>':'')+'</div>'
       +'<div class="der"><span class="rot">Total</span><div class="plata'+(tot.length?'':' nada')+'">'+(tot.length?tot.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
-      +'<div class="der"><span class="rot">Cobrado</span><div class="plata'+(pag.length?'':' nada')+'">'+(pag.length?pag.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
+      +'<div class="der"><span class="rot">Cobrado</span><div class="plata'+(pag.length?'':' nada')+'">'+(pag.length?pag.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div>'+(av===null?'':'<div class="prog" title="'+Math.round(av*100)+'% cobrado"><i style="width:'+Math.round(av*100)+'%"></i></div>')+'</div>'
       +'<div class="der"><span class="rot">Saldo</span><div class="plata '+s.cls+'">'+s.l.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div>'
-      +'<div class="c-tab"><div class="tab">'+tab+'</div></div></div>';
+      +'<div class="c-tab"><div class="tab">'+tab+'</div></div>'
+      +(nota?'<div class="f-nota" title="'+esc(nota)+'">'+esc(nota)+'</div>':'')+'</div>';
   }).join('');
-  if(!lista.length)h+='<div class="vacio">Ningún contrato coincide con la búsqueda.</div>';
   $('lista').innerHTML=h;
 }
+function moverMes(n){const d=new Date(+mes.slice(0,4),+mes.slice(5,7)-1+n,1);mes=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');dibujar();}
 
 // --- ventanas ---
 let protegida=false,F=null; // F: el contrato que se está editando (opciones sí/no y pagos)
@@ -462,14 +574,19 @@ function abrirFicha(id){
   F={id:c?c.id:'',factura:c?c.factura:'',muebles:c?c.muebles:'',bacha:c?v.bacha:'',pagos:c?(c.pagos||[]).slice():[],fijo:fijo,senaFija:senaFija,
      empujarSena:!!(k&&!k.sena&&k.etapa==='medir'),key:k?k.key:''};
   const val=x=>esc(x==null?'':x);
-  let h='<h3>'+(c?'Contrato · '+esc(v.cliente):'Nuevo contrato')+'</h3>';
-  if(k)h+='<div class="nota-t">Está en el tablero: <a href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>'+(etapaDet(k).t?' · '+esc(etapaDet(k).t):'')+'.<br>Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div>';
-  else if(c&&c.enlace)h+='<div class="nota-t">Se cargó en el tablero como '+esc(keyDe(c))+', pero esa ficha ya no está ahí (archivada o borrada).</div>';
-  h+='<div class="dos"><label class="campo">N° de presupuesto <i>· si lo tiene</i><input id="fNro" value="'+val(c&&c.nro)+'" placeholder="0042" inputmode="numeric" autocomplete="off"></label>'
-    +'<label class="campo">Fecha del contrato<input id="fFecha" type="date" value="'+val(c?c.fecha:HOY)+'"></label></div>'
-    +'<label class="campo">Cliente<input id="fCliente" value="'+val(v.cliente)+'" autocomplete="off"'+ro+(c?'':' data-foco')+'></label>'
+  let h='<div class="m-cab"><div><h3>'+(c?esc(v.cliente):'Nuevo contrato')+'</h3>'+(c?'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de presupuesto',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>':'')+'</div>'
+    +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
+  h+='<div class="m-res"><div><div class="t">Total</div><b id="rTot"></b></div><div><div class="t">Cobrado</div><b id="rCob"></b></div><div><div class="t">Saldo</div><b id="rSal"></b></div></div>';
+  if(k)h+='<div class="nota-t"><span class="enl">'+ICO_ENL+'Enlazado con el tablero y el calendario</span><br>'+(etapaDet(k).t?esc(etapaDet(k).t)+'. ':'')+'Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div>';
+  else if(c&&c.enlace)h+='<div class="nota-t"><span class="enl roto">'+ICO_ENL+'Enlace sin ficha</span><br>Se cargó en el tablero como '+esc(keyDe(c))+', pero esa ficha ya no está ahí (archivada o borrada).</div>';
+  h+='<label class="campo notas">Notas<textarea id="fNota" rows="4" maxlength="4000" placeholder="Acá van los detalles: qué se acordó, aclaraciones de medidas, forma de pago, lo que haya que acordarse.">'+val(c&&c.nota)+'</textarea></label>';
+  h+='<h4>Cliente</h4>'
+    +'<label class="campo">Nombre<input id="fCliente" value="'+val(v.cliente)+'" autocomplete="off"'+ro+(c?'':' data-foco')+'></label>'
     +'<div class="dos"><label class="campo">Teléfono<input id="fTel" value="'+val(v.telefono)+'" inputmode="tel" autocomplete="off"'+ro+'></label>'
-    +'<label class="campo">Dirección<input id="fDir" value="'+val(v.direccion)+'" autocomplete="off"'+ro+'></label></div>'
+    +'<label class="campo">Dirección<input id="fDir" value="'+val(v.direccion)+'" autocomplete="off"'+ro+'></label></div>';
+  h+='<h4>Contrato</h4>'
+    +'<div class="dos"><label class="campo">N° de presupuesto <i>· si lo tiene</i><input id="fNro" value="'+val(c&&c.nro)+'" placeholder="0042" inputmode="numeric" autocomplete="off"></label>'
+    +'<label class="campo">Fecha del contrato<input id="fFecha" type="date" value="'+val(c?c.fecha:(mes===HOY.slice(0,7)?HOY:mes+'-01'))+'"></label></div>'
     +'<div class="dos"><label class="campo">Vendedor<input id="fVend" value="'+val(c&&c.vendedor)+'" list="lVend" autocomplete="off"></label>'
     +'<label class="campo">Procedencia<input id="fProc" value="'+val(c&&c.procedencia)+'" list="lProc" placeholder="Instagram, recomendación…" autocomplete="off"></label></div>'
     +'<div class="dos"><label class="campo">Contrato<input id="fCtto" value="'+val(c&&c.contrato)+'" autocomplete="off"></label>'
@@ -489,17 +606,16 @@ function abrirFicha(id){
     +'<label class="campo">Cómo<select id="pComo"><option value="efectivo|ARS">Efectivo $</option><option value="efectivo|USD">Efectivo USD</option><option value="transferencia|ARS">Transferencia</option></select></label>'
     +'<label class="campo">Fecha<input id="pFecha" type="date" value="'+val(HOY)+'"></label></div>'
     +'<div style="margin-top:10px"><button type="button" class="btn chico" data-pago>Agregar pago</button></div>';
-  h+='<div class="saldo-c"><span>Saldo pendiente</span><b id="fSaldo"></b></div>';
   h+='<h4>Obra</h4>'
     +'<div class="dos"><div class="campo">Factura'+opcHtml('factura',[['si','Sí'],['no','No']],F.factura)+'</div>'
     +'<div class="campo">Muebles colocados'+opcHtml('muebles',[['si','Sí'],['no','No']],F.muebles)+'</div></div>'
     +'<div class="campo">Pileta'+opcHtml('bacha',[['nuestra','Nuestra'],['cliente','Del cliente'],['no','No lleva']],F.bacha,fijo)+'</div>'
     +'<label class="campo" id="cModelo"'+(F.bacha==='nuestra'?'':' hidden')+'>Modelo de pileta<input id="fModelo" value="'+val(v.bacha_modelo)+'" autocomplete="off"'+ro+'></label>'
-    +(c&&c.enlace?'':'<label class="campo">Medición coordinada <i>· si ya tiene día</i><input id="fMedicion" type="date" value="'+val(c&&c.medicion)+'"></label>')
-    +'<label class="campo">Nota<textarea id="fNota" rows="2">'+val(c&&c.nota)+'</textarea></label>';
+    +(c&&c.enlace?'':'<label class="campo">Medición coordinada <i>· si ya tiene día</i><input id="fMedicion" type="date" value="'+val(c&&c.medicion)+'"></label>');
   h+='<div class="m-err" id="mErr" hidden></div><div class="btns">'+(c?'<button type="button" class="izq" data-borrar>Borrar contrato</button>':'')+'<button type="button" data-cerrar>Cancelar</button><button type="button" class="ok" data-guardar>Guardar</button></div>';
   abrirModal(h,false,true);
   pintarPagos();
+  crecerNota();
 }
 function datosForm(){
   const g=id=>$(id)?$(id).value.trim():'';
@@ -508,14 +624,18 @@ function datosForm(){
     sena_monto:num(g('fSen')),sena_moneda:g('fSenM')||'ARS',sena_fecha:g('fSenF'),factura:F.factura,muebles:F.muebles,bacha:F.bacha,
     bacha_modelo:F.bacha==='nuestra'?g('fModelo'):'',medicion:g('fMedicion'),nota:g('fNota')};
 }
+// La caja de notas crece con lo que se escribe (hasta un tope, después se desplaza por dentro).
+function crecerNota(){const t=$('fNota');if(!t)return;t.style.height='auto';t.style.height=Math.min(320,Math.max(104,t.scrollHeight+2))+'px';}
 // Pagos y saldo de la ventana: se recalculan con lo que está escrito, sin guardar.
 function pintarPagos(){
   if(!F)return;
   const d=datosForm(),p={USD:0,ARS:0},r=x=>Math.round(x*100)/100;
   if(d.sena_monto)p[d.sena_moneda==='USD'?'USD':'ARS']+=d.sena_monto;
   F.pagos.forEach(x=>{p[x.moneda]+=x.monto;});
-  const s=saldoTxt({tot:{USD:d.total_usd,ARS:d.total_ars},sal:{USD:r(d.total_usd-p.USD),ARS:r(d.total_ars-p.ARS)}});
-  $('fSaldo').className=s.cls;$('fSaldo').innerHTML=s.l.map(esc).join('<br>');
+  const tot={USD:d.total_usd,ARS:d.total_ars},s=saldoTxt({tot:tot,sal:{USD:r(d.total_usd-p.USD),ARS:r(d.total_ars-p.ARS)}});
+  const pon=(id,l,cls)=>{$(id).className=l.length?cls:'nada';$(id).innerHTML=l.length?l.map(esc).join('<br>'):'—';};
+  pon('rTot',partes(tot),'');pon('rCob',partes({USD:r(p.USD),ARS:r(p.ARS)}),'');
+  $('rSal').className=s.cls;$('rSal').innerHTML=s.l.map(esc).join('<br>');
   if($('fPagos'))$('fPagos').innerHTML='<div class="pagos">'+(F.pagos.length?F.pagos.map(x=>'<div class="pago"><span class="q"><b>'+esc(fch(x.fecha))+'</b> · '+(x.medio==='transferencia'?'Transferencia':'Efectivo')+(x.nota?' · '+esc(x.nota):'')+'</span><span class="m">'+plata(x.monto,x.moneda)+'</span><button type="button" data-borrar-pago="'+esc(x.id)+'" title="Borrar este pago" aria-label="Borrar este pago">×</button></div>').join(''):'<div class="nada">Sin pagos cargados, aparte de la seña.</div>')+'</div>';
 }
 async function guardar(){
@@ -529,6 +649,7 @@ async function guardar(){
     catch(e){aviso=' La seña no se pudo tildar en el tablero: '+e.message;}
   }
   cerrarModal();
+  if(/^\d{4}-\d{2}/.test(d.fecha||'')&&!llano(q).trim())mes=d.fecha.slice(0,7);
   toast((id?'Contrato guardado.':'Contrato cargado.')+aviso);
   await cargar();
   return r;
@@ -566,7 +687,7 @@ async function enviar(id){
     if(c.sena)await pedir(API_T,Object.assign({accion:'check',clave:'sena',valor:true,monto:c.sena.monto,moneda:c.sena.moneda},base)).catch(()=>falto.push('la seña'));
   }
   cerrarModal();
-  toast(yaEstaba?'Ya estaba en el tablero: quedó enlazada.':('Cargada en Por medir.'+(falto.length?' Faltó copiar '+falto.join(', ')+': cargalo en el tablero.':'')));
+  toast(yaEstaba?'Ya estaba en el tablero: quedó enlazada con el tablero y el calendario.':('Cargada en Por medir: quedó enlazada con el tablero y el calendario.'+(falto.length?' Faltó copiar '+falto.join(', ')+': cargalo en el tablero.':'')));
   await cargar();
 }
 function pedirBorrar(){
@@ -586,6 +707,7 @@ async function borrarPrueba(){
 document.addEventListener('click',ev=>{
   const t=ev.target;
   if(t.closest('[data-nuevo]')){abrirFicha('');return;}
+  if(t.closest('[data-ir-mes]')){mes=t.closest('[data-ir-mes]').dataset.irMes;dibujar();return;}
   if(t.closest('[data-prueba]')){const b=t.closest('[data-prueba]');conBoton(b,async()=>{try{await pedir(API,{accion:'prueba'});toast('Se cargaron 3 renglones de prueba.');await cargar();}catch(e){toast(e.message);throw e;}});return;}
   if(t.closest('[data-borrar-prueba]')){
     abrirModal('<h3>Borrar los de prueba</h3><div class="bajada">Se borran los renglones marcados PRUEBA. Si alguno se cargó en el tablero, esa ficha de prueba también se borra.</div><div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar>Cancelar</button><button type="button" class="ok peligro" data-confirmar-prueba>Borrar</button></div>',true,false);
@@ -638,9 +760,12 @@ document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape'&&$('modalBg').classList.contains('show')&&!protegida){cerrarModal();return;}
   if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList&&ev.target.classList.contains('fila')){ev.preventDefault();abrirFicha(ev.target.dataset.id);}
 });
-$('modal').addEventListener('input',ev=>{if(F&&['fTotU','fTotA','fSen','fSenM'].indexOf(ev.target.id)>=0)pintarPagos();});
+$('modal').addEventListener('input',ev=>{if(ev.target.id==='fNota'){crecerNota();return;}if(F&&['fTotU','fTotA','fSen','fSenM'].indexOf(ev.target.id)>=0)pintarPagos();});
 $('modal').addEventListener('change',ev=>{if(F&&ev.target.id==='fSenM')pintarPagos();});
-$('buscar').addEventListener('input',()=>{q=$('buscar').value;if(CONTRATOS.length)dibujar();});
+$('buscar').addEventListener('input',()=>{q=$('buscar').value;if(mes)dibujar();});
+$('mesAnt').addEventListener('click',()=>moverMes(-1));
+$('mesSig').addEventListener('click',()=>moverMes(1));
+$('mesHoy').addEventListener('click',()=>{mes=HOY.slice(0,7);dibujar();});
 
 // Catálogo de materiales de la calculadora, para escribir el material siempre igual ("Marca · Color").
 pedir(API_COLORES).then(r=>{$('catalogo').innerHTML=(r.colors||[]).map(c=>'<option value="'+esc(c.full)+'">').join('');}).catch(()=>{});
