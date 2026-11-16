@@ -28,11 +28,17 @@ Los definió el dueño (16/11/2026), sobre la planilla que ya usaba:
 | Medición coordinada | Opcional; es la fecha que se copia al tablero |
 | Notas | Caja grande, arriba de la ficha: es donde van los detalles del contrato. Hasta 4000 caracteres, conserva los renglones. El primer renglón se ve en la lista |
 
-## Va por mes
+## Va por mes, y se lee como una planilla de control
 
-La lista muestra **un mes por vez**, según la fecha del contrato, con flechas para ir al anterior y al siguiente (decisión del dueño, 16/11/2026). Arriba, cuatro números del mes: contratos, contratado, cobrado y por cobrar; "por cobrar" suma además lo pendiente de todos los meses. El buscador busca en todos los meses a la vez. Un mes vacío ofrece ir al último que tiene contratos.
+Criterio del dueño (16/11/2026): **no es un tablero de indicadores, es un centro de control de contratos y clientes. Lectura clara, control preciso.** Por eso la pantalla es una planilla, con columnas fijas y números alineados; nada decorativo.
 
-Cada renglón lleva el día del contrato como un almanaque, una barrita con cuánto del total ya entró y, si tiene, el primer renglón de la nota.
+- **Un mes por vez**, según la fecha del contrato, con flechas. El buscador busca en todos los meses.
+- **Franja de resumen**, en un renglón: contratos, contratado, cobrado, por cobrar del mes, y por cobrar de todos los meses.
+- **Filtros** con su cantidad: Todos, Con saldo, Pagados, Sin cargar al tablero, Sin N°.
+- **Columnas:** Fecha, N°, Cliente (debajo: vendedor y procedencia), Material (debajo: medidas), Total, Cobrado, Saldo, Factura, Muebles, Pileta, Tablero y Notas. Fecha y Cliente ordenan la planilla al tocarlas.
+- **Pie con la suma** de lo que se está viendo, debajo de Total, Cobrado y Saldo.
+- **Un número no contradice a otro:** resumen, filtros y pie cuentan los mismos renglones. Los de prueba cuentan mientras existan, y el cartel lo dice.
+- En pantallas medianas se ocultan primero Notas (queda un punto ámbar al lado del nombre) y después Factura / Muebles / Pileta; todo sigue en la ficha. Por debajo de 1100 px cada contrato es una tarjeta.
 
 ## Enlace con el tablero
 
