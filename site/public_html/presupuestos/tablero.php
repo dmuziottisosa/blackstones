@@ -24,7 +24,7 @@ header('Content-Type: text/html; charset=UTF-8');
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>BlackStones · Tablero de obras</title>
 
@@ -65,6 +65,10 @@ header('Content-Type: text/html; charset=UTF-8');
 body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 html{overflow-x:hidden}
 button{font-family:inherit;color:inherit}
+/* Al tocar: sin el destello gris del navegador ni la espera del doble toque. */
+a,button,input,.toggle{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+/* Con teclado, se ve dónde está el foco. */
+button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
 
 /* === HEADER + TABS (idénticos al hub) === */
 .header{background:var(--dk);padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
@@ -77,11 +81,20 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .toggle::after{content:'🌙';transform:translateX(22px)}
 .logout-link{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;color:var(--gd);opacity:.5;text-decoration:none;border-radius:50%}
 .logout-link svg{width:14px;height:14px}
-.logout-link:hover{opacity:1;color:var(--cr)}
+/* Los efectos al pasar el mouse van solo donde hay mouse: en pantallas táctiles quedaban "pegados" después de tocar. */
+@media(hover:hover){.logout-link:hover{opacity:1;color:var(--cr)}}
 .h-tabs{background:var(--dk);display:flex;align-items:center;padding:0 24px;border-top:1px solid rgba(196,167,125,.12);overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--gd) transparent}
 .h-tabs a{color:var(--gd);opacity:.55;text-decoration:none;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:11px 18px;white-space:nowrap;border-bottom:2px solid transparent}
-.h-tabs a:hover{opacity:1;color:var(--cr)}
+@media(hover:hover){.h-tabs a:hover{opacity:1;color:var(--cr)}}
 .h-tabs a.active{opacity:1;color:var(--gd);border-bottom-color:var(--gd)}
+/* Encabezado en celulares angostos: el nombre no empuja a los botones fuera de la pantalla. */
+.header>div{min-width:0}
+.header h1{white-space:nowrap}
+@media(max-width:380px){
+  .header h1{font-size:1.15rem}
+  .header img{height:30px!important}
+  .header .h-right{gap:8px}
+}
 
 /* === TABLERO === */
 .wrap{max-width:1480px;margin:0 auto;padding:20px 20px 60px}
@@ -104,7 +117,7 @@ button{font-family:inherit;color:inherit}
 .tope-d{display:flex;align-items:center;gap:16px}
 .tope-b{display:flex;align-items:center;gap:8px}
 .vista-b{padding:7px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap}
-.vista-b:hover{border-color:var(--gd);color:var(--text)}
+@media(hover:hover){.vista-b:hover{border-color:var(--gd);color:var(--text)}}
 .hoy{font-size:14px;color:var(--text2);white-space:nowrap}
 .hoy b{font-weight:700;color:var(--text)}
 .buscar{display:flex;align-items:center;gap:10px;flex:1;min-width:0;position:relative}
@@ -113,7 +126,7 @@ button{font-family:inherit;color:inherit}
 .buscar input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
 .buscar input.activo{border-color:var(--gd);background:var(--gd-soft);font-weight:600}
 .buscar button{margin-left:-46px;width:30px;height:30px;border:none;border-radius:50%;background:none;font-size:20px;line-height:1;color:var(--text3);cursor:pointer;flex-shrink:0}
-.buscar button:hover{color:var(--text)}
+@media(hover:hover){.buscar button:hover{color:var(--text)}}
 .buscar span{font-size:12.5px;color:var(--text3);font-weight:600;white-space:nowrap}
 
 /* === COLOR DE CADA ETAPA ===
@@ -135,16 +148,28 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .et-retiro{--et:#4FC4C4;--et-soft:rgba(79,196,196,.13)}
 
 .col-tabs{display:none}
-.board{display:grid;grid-template-columns:repeat(var(--ncols,5),minmax(244px,1fr));gap:14px;align-items:start;overflow-x:auto;padding-bottom:4px}
+.board{display:grid;grid-template-columns:repeat(var(--ncols,5),minmax(200px,1fr));gap:14px;align-items:start;overflow-x:auto;padding-bottom:4px}
 .col{background:var(--card-alt);border:1px solid var(--border);border-top:4px solid var(--et);border-radius:var(--radius);padding:12px;min-height:120px;transition:background .15s,opacity .15s}
 .col-h{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 12px}
 .col .card:last-child{margin-bottom:0}
 /* En computadora la columna tiene alto fijo y se recorre por dentro; su título queda siempre a la vista. */
-@media(min-width:901px){
+@media(min-width:1100px){
   .board .col{max-height:var(--col-max,none);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
   .board .col-h{position:sticky;top:-12px;z-index:3;background:inherit;margin:-12px -12px 0;padding:14px 16px 10px;border-radius:var(--radius) var(--radius) 0 0}
   .board .col::-webkit-scrollbar{width:8px}
   .board .col::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
+}
+/* Tablet acostada y notebooks chicas: columnas más angostas, así que se ajustan los márgenes. */
+@media(min-width:1100px) and (max-width:1279px){
+  .wrap{padding:16px 16px 48px}
+  .board{gap:10px}
+  .col{padding:8px}
+  .board .col-h{top:-8px;margin:-8px -8px 0;padding:12px 12px 10px}
+  .col-h h2{font-size:16px}
+  .card{padding:12px 11px}
+  .card.plegada{padding:10px 11px 11px}
+  .card.plegada .c-prox{margin:-10px -11px 9px -11px}
+  .c-prox{margin:-12px -11px 11px -11px;padding:5px 11px}
 }
 .col-h h2{font-family:'Fraunces',serif;font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
 .col-h h2::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--et);flex-shrink:0}
@@ -178,19 +203,20 @@ button{font-family:inherit;color:inherit}
 .card.plegada .c-prox{margin:-11px -14px 10px -14px}
 .card.plegada .c-nota{margin-top:8px;padding:4px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .c-res{display:flex;flex-wrap:wrap;gap:5px 6px;margin-top:9px}
-.c-res .r{padding:2px 9px;border-radius:999px;background:var(--card-alt);color:var(--text2);font-size:11.5px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.c-res .r{max-width:100%;overflow:hidden;text-overflow:ellipsis;padding:2px 9px;border-radius:999px;background:var(--card-alt);color:var(--text2);font-size:11.5px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .c-res .r.rojo{background:var(--red-soft);color:var(--red)}
 .c-res .r.amb{background:var(--amb-soft);color:var(--amb)}
 .c-res .r.ok{background:var(--gr-soft);color:var(--gr)}
 .c-res .r.hoy{background:var(--gd);color:#1A1816}
 .c-plegar{position:absolute;top:8px;right:8px;width:28px;height:28px;border:none;border-radius:50%;background:none;cursor:pointer;z-index:1}
 .c-plegar::before{content:'';position:absolute;left:10px;top:12px;width:7px;height:7px;border-left:2px solid var(--text3);border-top:2px solid var(--text3);transform:rotate(45deg)}
-.c-plegar:hover{background:var(--card-alt)}
+@media(hover:hover){.c-plegar:hover{background:var(--card-alt)}}
 .card.primera .c-plegar{top:1px}
 .card:not(.plegada):not(.primera) .c-id{padding-right:28px}
 .fantasma .c-plegar{display:none}
-.card:hover{border-color:var(--et)}
-.card.alerta{box-shadow:0 0 0 1.5px var(--red)}
+@media(hover:hover){.card:hover{border-color:var(--et)}}
+/* Algo la frena (atrasada, sin turno, se pisa): marco rojo. Un solo marco, sin doble borde. */
+.card.alerta,.card.sin-turno,.card.choque{border-color:var(--red);border-left-color:var(--et)}
 /* el hueco que deja la tarjeta mientras viaja */
 .card.arrastrando{background:var(--et-soft);border:2px dashed var(--et);box-shadow:none}
 .card.arrastrando>*{visibility:hidden}
@@ -213,7 +239,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-id{font-size:15px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 /* Lugar en la cola: 1, 2, 3… La 1 es la próxima a atender y va enmarcada en el color de la etapa. */
 .c-pos{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 6px;margin-right:8px;border-radius:999px;border:1.5px solid var(--et);color:var(--et);font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;vertical-align:1px}
-.card.primera{outline:2px solid var(--et);outline-offset:1px}
+/* La próxima: marco entero en el color de la etapa (pisa al rojo; el motivo sigue en las pastillas). */
+.card.primera,.card.primera.alerta,.card.primera.sin-turno,.card.primera.choque{border-color:var(--et);outline:2px solid var(--et);outline-offset:-1px}
 .card.primera .c-pos{background:var(--et);color:var(--et-on)}
 .c-prox{margin:-14px -14px 12px -14px;padding:5px 14px;border-radius:9px 9px 0 0;background:var(--et-soft);color:var(--et);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .fantasma .c-prox{display:none}
@@ -222,7 +249,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-mat{color:var(--text2);font-size:13px;margin-top:3px;overflow-wrap:anywhere}
 
 .c-fecha{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer}
-.c-fecha:hover{border-color:var(--gd)}
+@media(hover:hover){.c-fecha:hover{border-color:var(--gd)}}
 .c-fecha.vacia{border-style:dashed;color:var(--gdd);background:var(--gd-soft)}
 [data-theme="dark"] .c-fecha.vacia{color:var(--gd)}
 .c-fecha.hoy{background:var(--gd);border-color:var(--gd);color:#1A1816}
@@ -231,7 +258,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-turno{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
 .c-turno .c-fecha{margin-top:0}
 .c-hecho{display:block;width:100%;margin-top:12px;padding:12px;border-radius:var(--radius-sm);border:2px solid var(--et);background:var(--et);color:var(--et-on);font-size:15px;font-weight:800;letter-spacing:.01em;text-align:center;cursor:pointer;box-shadow:var(--shadow-sm)}
-.c-hecho:hover{filter:brightness(1.08)}
+@media(hover:hover){.c-hecho:hover{filter:brightness(1.08)}}
 .c-hecho.listo{background:var(--gr);border-color:var(--gr);color:#fff}
 [data-theme="dark"] .c-hecho.listo{color:#04220F}
 .c-hecho.listo::before{content:'✓  '}
@@ -240,10 +267,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
    plazo, y lo que no tiene plazo se queda olvidado: se marca igual de fuerte que lo atrasado. */
 .c-fecha.aviso{background:var(--red-soft);border:1.5px solid var(--red);color:var(--red);font-weight:700}
 .c-fecha.aviso::before,.col-aviso::before,.aviso-g::before,.c-choque::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--red);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
-.card.sin-turno{box-shadow:0 0 0 1.5px var(--red)}
 .col-avisos{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 2px 12px}
 /* Avisos de todo el tablero (plazo prometido al cliente). Tocarlos deja a la vista solo esas fichas. */
-.avisos-g{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.avisos-g{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;scrollbar-width:none}
+.avisos-g::-webkit-scrollbar{display:none}
 .avisos-g:empty{display:none}
 .aviso-g{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--red);font-family:inherit;cursor:pointer;padding:6px 14px 6px 6px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700;white-space:nowrap}
 .aviso-g.on{background:var(--red);color:var(--card)}
@@ -254,7 +281,6 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .aviso-g.cerca.on::before{background:var(--card);color:var(--amb)}
 /* Dos instalaciones que comparten instalador el mismo día, casi a la misma hora. */
 .c-choque{display:flex;align-items:flex-start;gap:6px;margin-top:8px;font-size:12.5px;font-weight:700;color:var(--red);overflow-wrap:anywhere}
-.card.choque{box-shadow:0 0 0 1.5px var(--red)}
 .col-aviso-det{font-size:11.5px;font-weight:600;color:var(--red)}
 .col-aviso{display:inline-flex;align-items:center;gap:5px;border:none;font-family:inherit;cursor:pointer;padding:3px 10px 3px 3px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:11.5px;font-weight:700;white-space:nowrap}
 
@@ -266,19 +292,19 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-checks{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .chk{display:inline-flex;align-items:center;gap:7px;padding:7px 11px 7px 8px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer;text-align:left}
 .chk::before{content:'';flex-shrink:0;width:16px;height:16px;border-radius:5px;border:1.5px solid var(--text3);display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;color:#fff}
-.chk:hover{border-color:var(--gd)}
+@media(hover:hover){.chk:hover{border-color:var(--gd)}}
 .chk.on{background:var(--gr-soft);border-color:var(--gr);color:var(--gr)}
 .chk.on::before{content:'✓';background:var(--gr);border-color:var(--gr)}
 [data-theme="dark"] .chk.on::before{color:#04220F}
 
 /* el botón lleva el color de la etapa a la que manda */
 .c-avanzar{display:block;width:100%;margin-top:14px;padding:10px 12px;border:1px solid var(--et);border-radius:var(--radius-sm);background:var(--et);color:var(--et-on);font-size:13.5px;font-weight:700;cursor:pointer}
-.c-avanzar:hover{filter:brightness(1.08)}
+@media(hover:hover){.c-avanzar:hover{filter:brightness(1.08)}}
 .c-avanzar.falta{background:none;color:var(--text3);border:1px dashed var(--border);font-weight:600}
-.c-avanzar.falta:hover{filter:none;color:var(--et);border-color:var(--et)}
+@media(hover:hover){.c-avanzar.falta:hover{filter:none;color:var(--et);border-color:var(--et)}}
 
 .c-mas{display:block;margin:10px auto -2px;padding:4px 10px;border:none;background:none;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer}
-.c-mas:hover{color:var(--text)}
+@media(hover:hover){.c-mas:hover{color:var(--text)}}
 .c-det{margin-top:10px;padding-top:12px;border-top:1px solid var(--border-soft);font-size:13px;display:grid;gap:7px;cursor:auto;user-select:text;-webkit-user-select:text}
 .c-det .fila{display:flex;gap:8px}
 .c-det .fila span{color:var(--text3);flex:0 0 74px}
@@ -336,9 +362,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-fb{flex:0 0 auto;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap}
 .col-fb::after{content:'';display:inline-block;margin-left:7px;width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-3px) rotate(45deg)}
 .col-fb.on::after{transform:translateY(1px) rotate(-135deg)}
-.col-fb:hover,.col-fb.on{border-color:var(--et);color:var(--et)}
+.col-fb.on{border-color:var(--et);color:var(--et)}
+@media(hover:hover){.col-fb:hover{border-color:var(--et);color:var(--et)}}
 .col-cargar{display:block;flex:1 1 auto;min-width:0;margin-bottom:0;padding:8px;border:1.5px dashed var(--et);border-radius:var(--radius);background:var(--card);color:var(--et);font-size:13.5px;font-weight:700;cursor:pointer}
-.col-cargar:hover{background:var(--et-soft)}
+@media(hover:hover){.col-cargar:hover{background:var(--et-soft)}}
 .modal .campo{display:block;margin-bottom:16px;font-size:12px;font-weight:700;color:var(--text2)}
 .modal .campo+.sena{margin:-10px 0 0}
 .modal .campo[hidden]{display:none}
@@ -367,7 +394,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 /* === ADJUNTOS: foto de bacha y plano === */
 .c-adj{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .adj{position:relative;width:60px;height:60px;border-radius:8px;border:1px solid var(--border);background:var(--card-alt);padding:0;overflow:hidden;cursor:pointer;flex-shrink:0}
-.adj:hover{border-color:var(--et)}
+@media(hover:hover){.adj:hover{border-color:var(--et)}}
 .adj img{width:100%;height:100%;object-fit:cover;display:block}
 .adj span{position:absolute;left:0;right:0;bottom:0;background:rgba(20,17,13,.74);color:#fff;font-size:9.5px;font-weight:700;line-height:1.6;text-align:center;letter-spacing:.02em}
 .adj.pdf,.adj.link{font-size:13px;font-weight:800;color:var(--text2);padding-bottom:14px}
@@ -383,23 +410,59 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 [data-theme="dark"] .visor a{color:var(--gd)}
 .visor .borrar{border:none;background:none;padding:0;font-size:13.5px;font-weight:700;color:var(--red);cursor:pointer;text-decoration:underline}
 .modal .adjuntar{display:block;width:100%;margin-top:12px;padding:11px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:none;font-size:13.5px;font-weight:700;color:var(--text2);cursor:pointer}
-.modal .adjuntar:hover{border-color:var(--gd);color:var(--text)}
+@media(hover:hover){.modal .adjuntar:hover{border-color:var(--gd);color:var(--text)}}
 
-/* === MÓVIL: una columna a la vez, con pestañas === */
-@media(max-width:900px){
-  .header{padding:12px 14px}
+/* === PANTALLAS TÁCTILES: todo lo que se toca mide lo que mide un dedo ===
+   Vale para celular y tablet, y también para una tablet acostada que muestra las 5 columnas. */
+@media(max-width:1099px),(pointer:coarse){
+  .chk{padding:10px 13px 10px 10px;font-size:13px}
+  .chk::before{width:18px;height:18px}
+  .c-hecho{padding:14px 12px;font-size:16px}
+  .c-fecha{padding:9px 12px;font-size:13px}
+  .c-avanzar{padding:13px 12px;font-size:14px}
+  .c-mas{padding:10px 16px;font-size:13px}
+  .c-plegar{width:36px;height:36px;top:4px;right:4px}
+  .c-plegar::before{left:14px;top:16px}
+  .card.primera .c-plegar{top:-2px}
+  .card:not(.plegada):not(.primera) .c-id{padding-right:34px}
+  .c-det .lnk{padding:8px 0;font-size:13.5px}
+  .c-det .acciones{gap:6px 20px}
+  .vista-b{padding:9px 14px;font-size:13px}
+  .col-fb{padding:10px 14px}
+  .col-cargar{padding:10px}
+  .col-filtros button{padding:8px 13px;font-size:12.5px}
+  .col-aviso{padding:6px 12px 6px 5px;font-size:12px}
+  .aviso-g{padding:8px 15px 8px 7px}
+  .modal .btns button{padding:11px 18px;font-size:14px}
+  .modal .lnk,.visor .borrar,.visor a{padding:8px 0;display:inline-block}
+  /* Con menos de 16 px, el iPhone y el iPad hacen zoom solos al tocar un campo. */
+  .modal .campo input,.c-det input,.buscar input{font-size:16px}
+  .toggle{width:54px;height:30px}
+  .toggle::after{top:3px}
+  .logout-link{width:36px;height:36px;opacity:.7}
+  .logout-link svg{width:16px;height:16px}
+}
+
+/* === CELULAR Y TABLET PARADA: una etapa a la vez, con pestañas === */
+@media(max-width:1099px){
+  .header{padding:12px max(14px,env(safe-area-inset-right)) 12px max(14px,env(safe-area-inset-left))}
   .header .h-right > span{display:none}
-  .h-tabs{padding:0 8px}
-  .h-tabs a{padding:9px 12px;font-size:.62rem;letter-spacing:.06em}
-  .wrap{padding:0 12px 60px}
-  .tope{flex-direction:column-reverse;align-items:stretch;gap:10px;margin:10px 0 0}
+  .h-tabs{padding:0 8px;scrollbar-width:none}
+  .h-tabs::-webkit-scrollbar{display:none}
+  .h-tabs a{padding:12px 12px;font-size:.62rem;letter-spacing:.06em}
+  .wrap{padding:0 max(12px,env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+  /* Arriba: la fecha y los botones en un renglón, el buscador en el siguiente. */
+  .tope{flex-direction:column-reverse;align-items:stretch;gap:10px;margin:12px 0 0}
   .tope-d{justify-content:space-between;flex-wrap:wrap;gap:8px}
-  .tope-d .hoy{order:-1;flex-basis:100%}
   .card{padding:14px}
   .modal{--mp:20px}
-  .avisos-g{margin:10px 0 0}
-  .buscar input{max-width:none;font-size:16px}
+  /* Los avisos van en un solo renglón que se desliza de costado: no le comen alto al tablero. */
+  .avisos-g{margin:10px -12px 0;padding:0 12px;flex-wrap:nowrap;overflow-x:auto}
+  .aviso-g{flex-shrink:0}
+  .buscar input{max-width:none}
+  .toast{bottom:calc(20px + env(safe-area-inset-bottom))}
   .col-tabs{display:flex;gap:4px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
+  .col-tabs button{min-height:44px}
   .col-tabs button{flex:1 1 0;min-width:0;padding:7px 2px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:10.5px;letter-spacing:-.01em;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
   .col-tabs button{border-bottom:3px solid var(--et)}
   .col-tabs button.on{background:var(--et);color:var(--et-on);border-color:var(--et)}
@@ -416,15 +479,40 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   #aparte{margin-top:0}
   #aparte .cards{grid-template-columns:1fr}
   .col-sub{display:none}
-  .board{grid-template-columns:1fr;overflow-x:visible;padding-bottom:0}
-  .col{display:none;background:none;border:none;padding:0}
+  .board{grid-template-columns:minmax(0,1fr);overflow-x:visible;padding-bottom:0}
+  .col{display:none;background:none;border:none;padding:0;min-width:0}
   .col.on{display:block}
   .col-h{display:none}
   .col-avisos{padding:0 0 10px;margin-top:0}
-  .chk{padding:10px 13px 10px 10px;font-size:13px}
-  .c-hecho{padding:14px 12px;font-size:16px}
-  .c-fecha{padding:9px 12px;font-size:13px}
-  .c-avanzar{padding:13px 12px;font-size:14px}
+}
+/* Celular: los textos de la barra se acortan para que entren en un renglón. */
+@media(max-width:699px){
+  .sob{display:none}
+  .hoy{font-size:13px}
+  .vista-b{padding:8px 12px}
+}
+/* === TABLET (parada, o acostada chica): las fichas de la etapa van en 2 o 3 columnas ===
+   Se leen de izquierda a derecha y de arriba abajo, en el orden de la cola. */
+@media(min-width:700px) and (max-width:1099px){
+  .wrap{padding:0 max(20px,env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left))}
+  .header{padding:14px 20px}
+  .h-tabs{padding:0 12px}
+  .h-tabs a{font-size:.68rem;padding:12px 14px}
+  .tope{flex-direction:row;align-items:center;gap:14px;margin:16px 0 0}
+  .buscar input{max-width:360px}
+  .hoy .sob{display:none}
+  .avisos-g{margin:12px -20px 0;padding:0 20px}
+  .col-tabs{gap:8px;padding:12px 0}
+  .col-tabs button{padding:9px 4px 8px;font-size:12.5px;letter-spacing:0}
+  .col-tabs button i{font-size:15px}
+  .col.on{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+  .col.on>*{grid-column:1/-1;margin-bottom:0}
+  .col.on>.card{grid-column:auto}
+  .col.on>.col-sep{margin:8px 2px 0}
+  .col-acc{max-width:420px}
+}
+@media(min-width:960px) and (max-width:1099px){
+  .col.on{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 </style>
 </head>
@@ -463,7 +551,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
     <div class="tope-d">
       <div class="tope-b">
         <button type="button" class="vista-b" id="vistaB"></button>
-        <button type="button" class="vista-b" id="exportB" title="Baja todas las obras del tablero en un archivo CSV (se abre con Excel)">Exportar tablero</button>
+        <button type="button" class="vista-b" id="exportB" title="Baja todas las obras del tablero en un archivo CSV (se abre con Excel)">Exportar<span class="sob"> tablero</span></button>
       </div>
       <div class="hoy" id="hoyTxt"></div>
     </div>
@@ -932,7 +1020,7 @@ function dibujar(){
 
   numerarColas();
   calcularChoques();
-  $('hoyTxt').innerHTML=HOY?'Hoy · <b>'+esc(fechaLarga(HOY))+'</b>':'';
+  $('hoyTxt').innerHTML=HOY?'<span class="sob">Hoy · </span><b>'+esc(fechaLarga(HOY))+'</b>':'';
   // Avisos de todo el tablero: el plazo prometido. Se cuentan sobre todas las fichas, en cualquier columna.
   const nVen=CARDS.filter(c=>plazo(c)==='vencida').length,nCer=CARDS.filter(c=>plazo(c)==='cerca').length;
   // Atrasadas: tenían fecha (medición, instalación o retiro), la fecha pasó y siguen sin hacerse.
@@ -1019,7 +1107,7 @@ function dibujar(){
   $('board').innerHTML=cols;
   document.querySelectorAll('#board .col[data-col]').forEach(x=>{if(sc[x.dataset.col])x.scrollTop=sc[x.dataset.col];});
   $('aparte').innerHTML=aparte;
-  $('vistaB').textContent=vistaTodas?'Plegar las fichas':'Abrir todas las fichas';
+  $('vistaB').innerHTML=(vistaTodas?'Plegar':'Abrir todas')+'<span class="sob"> las fichas</span>';
   ajustarAlto();
   if(SOLO&&!visibles.length)$('board').innerHTML='<div class="aviso">Esta obra ya no está en el tablero.</div>';
 }
@@ -1887,6 +1975,12 @@ function exportarCSV(){
   toast('Exportadas '+filas.length+(filas.length===1?' obra':' obras')+' · '+a.download,true);
 }
 $('exportB').addEventListener('click',exportarCSV);
+
+// En pantallas angostas la barra de páginas se desliza de costado: la página actual queda a la vista.
+(function(){
+  const a=document.querySelector('.h-tabs a.active'),n=a&&a.parentElement;
+  if(n)n.scrollLeft=Math.max(0,a.offsetLeft-(n.clientWidth-a.offsetWidth)/2);
+})();
 
 $('vistaB').addEventListener('click',()=>{
   vistaTodas=!vistaTodas;

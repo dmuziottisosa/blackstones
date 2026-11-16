@@ -20,7 +20,7 @@ header('Content-Type: text/html; charset=UTF-8');
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>BlackStones · Sistema de stock</title>
 <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png" />
@@ -75,16 +75,34 @@ button{font-family:inherit;color:inherit}
 .h-tabs a{color:var(--gd);opacity:.55;text-decoration:none;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:11px 18px;white-space:nowrap;border-bottom:2px solid transparent}
 .h-tabs a:hover{opacity:1;color:var(--cr)}
 .h-tabs a.active{opacity:1;color:var(--gd);border-bottom-color:var(--gd)}
+/* Encabezado en celulares angostos: el nombre no empuja a los botones fuera de la pantalla. */
+.header>div{min-width:0}
+.header h1{white-space:nowrap}
+@media(max-width:380px){
+  .header h1{font-size:1.15rem}
+  .header img{height:30px!important}
+  .header .h-right{gap:8px}
+}
 
 .wrap{max-width:1480px;margin:0 auto;padding:20px 20px 60px}
 .obra{max-width:520px;margin:9vh auto 0;padding:44px 28px;text-align:center;background:var(--card);border:1px dashed var(--gd);border-radius:var(--radius);box-shadow:var(--shadow)}
 .obra .et{display:inline-block;padding:5px 14px;border-radius:999px;background:var(--amb-soft);color:var(--amb);font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .obra h2{font-family:'Fraunces',serif;font-size:30px;font-weight:600;margin:16px 0 8px}
 .obra p{color:var(--text2);font-size:14.5px;line-height:1.6}
-@media(max-width:900px){
-  .header{padding:14px 16px}
+a,button,.toggle{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
+@media(max-width:1099px),(pointer:coarse){
+  .toggle{width:54px;height:30px}
+  .toggle::after{top:3px}
+  .logout-link{width:36px;height:36px;opacity:.7}
+  .logout-link svg{width:16px;height:16px}
+}
+@media(max-width:1099px){
+  .header{padding:12px max(14px,env(safe-area-inset-right)) 12px max(14px,env(safe-area-inset-left))}
   .header .h-right>span{display:none}
-  .h-tabs{padding:0 8px}
+  .h-tabs{padding:0 8px;scrollbar-width:none}
+  .h-tabs::-webkit-scrollbar{display:none}
+  .h-tabs a{padding:12px 12px}
   .wrap{padding:12px 12px 60px}
   .obra{margin-top:6vh;padding:36px 20px}
   .obra h2{font-size:26px}
@@ -125,6 +143,11 @@ button{font-family:inherit;color:inherit}
 </div>
 
 <script>
+// En pantallas angostas la barra de páginas se desliza de costado: la página actual queda a la vista.
+(function(){
+  const a=document.querySelector('.h-tabs a.active'),n=a&&a.parentElement;
+  if(n)n.scrollLeft=Math.max(0,a.offsetLeft-(n.clientWidth-a.offsetWidth)/2);
+})();
 // === THEME TOGGLE (mismo que calc, hub y tablero) ===
 function toggleTheme(){
   const html=document.documentElement;

@@ -26,6 +26,27 @@ Para que el tablero no sea una página infinita (decisión del dueño, 2026-11-1
 - **Filtros detrás de "Filtrar":** los filtros de cada columna se muestran al tocar ese botón (queda recordado). Un filtro prendido siempre se ve, y cerrar "Filtrar" los apaga. Los avisos rojos de arriba de la columna siguen prendiendo su filtro con un toque.
 - Plegada o abierta, la ficha se arrastra igual.
 
+## Pantallas: celular, tablet y computadora
+
+Pasada de diseño del 16/11/2026 (pedido del dueño: que se trabaje bien en celular y sobre todo en tablet). Vale para el tablero y el calendario.
+
+| Ancho de pantalla | Tablero | Calendario |
+|---|---|---|
+| Menos de 700 px (celular) | Una etapa a la vez, con las pestañas de colores arriba. Fichas en una columna. | El mes en lista (agenda). |
+| 700 a 1099 px (tablet parada, tablet chica acostada) | Una etapa a la vez con pestañas, y las fichas en **2 columnas** (3 desde 960 px). Se leen de izquierda a derecha, en el orden de la cola. | El mes en grilla, con los pendientes arriba. |
+| 1100 px o más (tablet acostada, computadora) | Las 5 columnas juntas, sin desplazar de costado. Entre 1100 y 1279 px los márgenes se achican para que entren. | Mes en grilla y panel de pendientes al costado. |
+
+Reglas que se cuidan en todas las pantallas:
+
+- **Lo que se toca mide lo que mide un dedo.** En pantallas táctiles (también una tablet acostada con las 5 columnas) los tildes, botones, pestañas y enlaces son más grandes.
+- **Los campos de texto usan letra de 16 px en táctil.** Con menos, iPhone y iPad hacen zoom solos al tocar un campo.
+- **Nada ensancha la pantalla.** Un renglón largo (por ejemplo la nota de una ficha plegada) se corta con "…"; antes podía ensanchar la columna más que el celular y cortar las fichas.
+- **Un solo marco por ficha.** Rojo si algo la frena (atrasada, sin turno, se pisa); la próxima de la cola lleva el marco entero en el color de su etapa. El motivo siempre está en las pastillas.
+- **En celular y tablet, los avisos de arriba van en un renglón que se desliza de costado**, para no comerle alto al tablero, y la barra de páginas deja a la vista la página actual.
+- **Pendientes del calendario resumidos:** cuando el panel va arriba del mes (celular y tablet parada) muestra los primeros y un botón "Ver los N pendientes".
+- Los efectos al pasar el mouse solo existen donde hay mouse (en táctil quedaban pegados después de tocar).
+- Arrastrar con el dedo funciona igual en tablet: mantener apretada la ficha y soltarla sobre la pestaña (tablet parada) o sobre la columna (tablet acostada).
+
 ## Colores
 
 Cada etapa tiene un color fijo, que se repite en la columna, el borde de la tarjeta, la pestaña del celular y el botón que lleva a esa etapa: **Por medir** azul, **Por cortar** gris grafito, **Por fabricar** naranja, **Por instalar** violeta, **Por archivar** verde, **Retiro en local** turquesa. El rojo queda reservado para lo que está mal (atrasada, no puede pasar).

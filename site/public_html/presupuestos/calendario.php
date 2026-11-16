@@ -28,7 +28,7 @@ header('Content-Type: text/html; charset=UTF-8');
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>BlackStones · Calendario de obras</title>
 <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png" />
@@ -78,11 +78,20 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .toggle::after{content:'🌙';transform:translateX(22px)}
 .logout-link{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;color:var(--gd);opacity:.5;text-decoration:none;border-radius:50%}
 .logout-link svg{width:14px;height:14px}
-.logout-link:hover{opacity:1;color:var(--cr)}
+/* Los efectos al pasar el mouse van solo donde hay mouse: en pantallas táctiles quedaban "pegados" después de tocar. */
+@media(hover:hover){.logout-link:hover{opacity:1;color:var(--cr)}}
 .h-tabs{background:var(--dk);display:flex;align-items:center;padding:0 24px;border-top:1px solid rgba(196,167,125,.12);overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--gd) transparent}
 .h-tabs a{color:var(--gd);opacity:.55;text-decoration:none;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:11px 18px;white-space:nowrap;border-bottom:2px solid transparent}
-.h-tabs a:hover{opacity:1;color:var(--cr)}
+@media(hover:hover){.h-tabs a:hover{opacity:1;color:var(--cr)}}
 .h-tabs a.active{opacity:1;color:var(--gd);border-bottom-color:var(--gd)}
+/* Encabezado en celulares angostos: el nombre no empuja a los botones fuera de la pantalla. */
+.header>div{min-width:0}
+.header h1{white-space:nowrap}
+@media(max-width:380px){
+  .header h1{font-size:1.15rem}
+  .header img{height:30px!important}
+  .header .h-right{gap:8px}
+}
 
 .wrap{max-width:1480px;margin:0 auto;padding:20px 20px 60px}
 .aviso{color:var(--text2);font-size:13.5px;padding:40px 16px;text-align:center;line-height:1.6}
@@ -100,7 +109,7 @@ button{font-family:inherit;color:inherit}
 .mes{display:flex;align-items:center;gap:6px}
 .mes h2{font-family:'Fraunces',serif;font-size:22px;font-weight:600;min-width:200px;text-align:center}
 .mes button{height:34px;min-width:34px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:16px;font-weight:700;color:var(--text2);cursor:pointer}
-.mes button:hover{border-color:var(--gd);color:var(--text)}
+@media(hover:hover){.mes button:hover{border-color:var(--gd);color:var(--text)}}
 .mes .hoy-b{font-size:13px;margin-left:4px}
 .ley{display:flex;flex-wrap:wrap;gap:6px}
 .ley button{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12.5px;font-weight:700;color:var(--text3);cursor:pointer}
@@ -130,7 +139,7 @@ button{font-family:inherit;color:inherit}
 
 /* === EVENTO === */
 .ev{display:block;width:100%;margin-top:4px;padding:5px 7px;border:1px solid transparent;border-left:3px solid var(--et);border-radius:var(--radius-sm);background:var(--et-soft);color:var(--text);font-size:12px;font-weight:600;text-align:left;cursor:pointer;overflow-wrap:anywhere;line-height:1.35}
-.ev:hover{border-color:var(--et);border-left-color:var(--et)}
+@media(hover:hover){.ev:hover{border-color:var(--et);border-left-color:var(--et)}}
 .ev i{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;color:var(--et)}
 .ev span{color:var(--text3);font-weight:500}
 .ev em{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;margin-right:4px;border-radius:50%;background:var(--red);color:var(--card);font-size:10.5px;font-weight:800;vertical-align:-2px}
@@ -139,7 +148,7 @@ button{font-family:inherit;color:inherit}
 .ev.arr{opacity:.4}
 /* Vencimiento del plazo: es un límite, no un turno. Va sin relleno y con borde punteado. */
 .ev.vence{--et:var(--text3);background:none;border:1px dashed var(--border);border-left:1px dashed var(--border);color:var(--text2);font-weight:600}
-.ev.vence:hover{border-color:var(--text3)}
+@media(hover:hover){.ev.vence:hover{border-color:var(--text3)}}
 /* Entrega estimada de lo que todavía no se midió: más tenue que un vencimiento real. */
 .ev.vence.prev{color:var(--text3);font-style:italic;font-weight:500;opacity:.85}
 .ev.vence.cerca{border-color:var(--amb);color:var(--amb);background:var(--amb-soft)}
@@ -192,20 +201,54 @@ button{font-family:inherit;color:inherit}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.ok{border-left-color:var(--gr)}
 
-@media(max-width:1100px){
-  .plano{grid-template-columns:minmax(0,1fr)}
-  .pend{order:-1;position:static;max-height:none}
+/* Al tocar: sin el destello gris del navegador ni la espera del doble toque. */
+a,button,input,.toggle{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
+.pend-mas{display:none}
+
+/* === PANTALLAS TÁCTILES: lo que se toca mide lo que mide un dedo === */
+@media(max-width:1100px),(pointer:coarse){
+  .mes button{height:42px;min-width:42px}
+  .ley button{padding:9px 13px;font-size:13px}
+  .ev{padding:7px 8px}
+  .agenda .ev,.pend .ev{padding:11px 12px;font-size:13.5px}
+  .modal .btns button{padding:11px 18px;font-size:14px}
+  .modal .lnk{padding:8px 0;display:inline-block}
+  .toggle{width:54px;height:30px}
+  .toggle::after{top:3px}
+  .logout-link{width:36px;height:36px;opacity:.7}
+  .logout-link svg{width:16px;height:16px}
 }
-@media(max-width:900px){
-  .header{padding:14px 16px}
+/* === CELULAR Y TABLET PARADA: los pendientes arriba, el mes abajo === */
+@media(max-width:1100px){
+  .header{padding:12px max(14px,env(safe-area-inset-right)) 12px max(14px,env(safe-area-inset-left))}
   .header .h-right>span{display:none}
-  .h-tabs{padding:0 8px}
-  .wrap{padding:12px 12px 60px}
+  .h-tabs{padding:0 8px;scrollbar-width:none}
+  .h-tabs::-webkit-scrollbar{display:none}
+  .h-tabs a{padding:12px 12px}
+  .wrap{padding:14px max(20px,env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left))}
+  .plano{grid-template-columns:minmax(0,1fr)}
+  .pend{order:-1;position:static;max-height:none;margin-bottom:10px}
+  /* Con muchos pendientes el mes quedaba muy abajo: se muestran los primeros y un botón para ver todos. */
+  .pend.corto{max-height:272px;overflow:hidden;position:relative}
+  .pend-mas{display:block;width:100%;margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-family:inherit;font-size:13.5px;font-weight:700;color:var(--text2);cursor:pointer}
+  .pend.corto .pend-mas{position:absolute;left:0;right:0;bottom:0;margin:0;border:none;border-top:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);box-shadow:0 -20px 18px -8px var(--card)}
+  .toast{bottom:calc(20px + env(safe-area-inset-bottom))}
+}
+/* Tablet parada: el mes entra en grilla; los días son más angostos. */
+@media(min-width:700px) and (max-width:1100px){
+  .dia{min-height:108px;padding:5px 4px 7px}
+  .cal .dh{padding:8px 6px}
+  .cal .ev{font-size:11.5px;padding:6px 6px;margin-top:3px}
+}
+/* Celular: el mes va en lista. */
+@media(max-width:699px){
+  .wrap{padding:12px max(12px,env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+  .h-tabs a{font-size:.62rem;letter-spacing:.06em}
   .barra{gap:10px}
   .hoy{order:-1;width:100%;margin-left:0}
   .mes{width:100%}
   .mes h2{flex:1;min-width:0;font-size:20px}
-  .mes button{height:40px;min-width:40px}
   .cal{display:none}
   .agenda{display:block}
 }
@@ -473,8 +516,24 @@ function dibujar(){
     p+='<h4>'+esc('Sin '+(e.exige_fecha?'turno':'fecha')+' de '+e.fecha.toLowerCase())+' <b>'+l.length+'</b></h4>'+l.map(c=>chip({tipo:c.etapa,c:c},false)).join('');
   });
   if(!hay)p+='<div class="ok">Nada pendiente: todo tiene su fecha y está en plazo.</div>';
+  pendTotal=(p.match(/class="ev[ "]/g)||[]).length;
+  if(pendTotal>3)p+='<button type="button" class="pend-mas" id="pendMas"></button>';
   $('pend').innerHTML=p;
+  pintarPend();
 }
+// En celular y tablet parada el panel va arriba del mes: muestra los primeros y un botón para verlos todos.
+let pendTotal=0,pendAbierto=false;
+function pintarPend(){
+  const b=$('pendMas');
+  $('pend').classList.toggle('corto',!!b&&!pendAbierto);
+  if(b)b.textContent=pendAbierto?'Mostrar menos':'Ver los '+pendTotal+' pendientes';
+}
+$('pend').addEventListener('click',ev=>{
+  if(!ev.target.closest('#pendMas'))return;
+  pendAbierto=!pendAbierto;
+  pintarPend();
+  if(!pendAbierto)$('pend').scrollIntoView({block:'nearest'});
+});
 
 // Guarda uno o más cambios de una obra: primero en pantalla, después el server.
 async function guardar(c,cambios,aviso){
@@ -587,6 +646,11 @@ document.addEventListener('click',ev=>{
   }
 });
 function moverMes(n){const d=new Date(+mes.slice(0,4),+mes.slice(5,7)-1+n,1);mes=isoDe(d).slice(0,7);dibujar();}
+// En pantallas angostas la barra de páginas se desliza de costado: la página actual queda a la vista.
+(function(){
+  const a=document.querySelector('.h-tabs a.active'),n=a&&a.parentElement;
+  if(n)n.scrollLeft=Math.max(0,a.offsetLeft-(n.clientWidth-a.offsetWidth)/2);
+})();
 $('mesAnt').addEventListener('click',()=>moverMes(-1));
 $('mesSig').addEventListener('click',()=>moverMes(1));
 $('mesHoy').addEventListener('click',()=>{mes=HOY.slice(0,7);dibujar();});
