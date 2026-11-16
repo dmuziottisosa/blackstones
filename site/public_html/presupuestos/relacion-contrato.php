@@ -978,16 +978,38 @@ async function copiar(txt,que){
   toast(COPIADO[que]+': '+txt);
 }
 
+// Borrar un contrato. Si está enlazado con una ficha que sigue en el tablero, se borran los dos
+// (regla del dueño, 16/11/2026): la ficha se borra igual que con "Borrar ficha" del tablero.
 function pedirBorrar(id){
   const c=CONTRATOS.find(x=>x.id===(id||(F&&F.id)));if(!c)return;
   id=c.id;
-  abrirModal('<h3>Borrar contrato</h3><div class="bajada">Se borra el contrato de <b>'+esc(ver(c).cliente)+'</b> con sus pagos'+(c.archivo?' y su presupuesto adjunto':'')+'. No se puede deshacer.'+(c.enlace?'<br>La ficha del tablero no se toca.':'')+'</div><div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar>Cancelar</button><button type="button" class="ok peligro" data-confirmar-borrar="'+esc(id)+'">Borrar</button></div>',true,false);
+  const k=cardDe(c),nAdj=k&&k.adjuntos?k.adjuntos.length:0;
+  abrirModal('<h3>Borrar contrato</h3><div class="bajada">Se borra el contrato de <b>'+esc(ver(c).cliente)+'</b> con sus pagos'+(c.archivo?' y su presupuesto adjunto':'')+'.'
+    +(k?'<br><br><b>También se borra su ficha del tablero</b> ('+esc(k.key)+', en '+esc(ETAPAS[k.etapa]||k.etapa)+'): sus tildes, fechas y datos'+(nAdj?', y '+(nAdj===1?'su archivo adjunto':'sus '+nAdj+' archivos adjuntos'):'')+'. '
+      +(k.manual?'Es una obra cargada a mano: se borra completa.':'El presupuesto no se borra: vuelve a Enviado en Presupuestos.')
+      :(c.enlace?'<br>La ficha del tablero ya no está (archivada o borrada): no se toca nada más.':''))
+    +'<br><br>No se puede deshacer.</div><div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar data-foco>Cancelar</button><button type="button" class="ok peligro" data-confirmar-borrar="'+esc(id)+'">'+(k?'Borrar contrato y ficha':'Borrar')+'</button></div>',true,false);
+}
+async function borrarContrato(id){
+  const c=CONTRATOS.find(x=>x.id===id);if(!c)return;
+  const k=cardDe(c);
+  // primero la ficha del tablero: si eso falla, el contrato no se toca
+  if(k){
+    const base={cliente_nro:k.cliente_nro,sub:k.sub};
+    await pedir(API_T,Object.assign({accion:'borrar'},base));
+    if(k.manual)await pedir(API_DEL,Object.assign({desde_tablero:true},base));
+    else await pedir('/calculadora/api/state.php',Object.assign({nuevo_estado:'enviado',desde_tablero:true},base));
+  }
+  await pedir(API,{accion:'borrar',id:id});
+  cerrarModal();
+  toast(k?'Contrato y ficha del tablero borrados.':'Contrato borrado.');
+  await cargar();
 }
 async function borrarPrueba(){
   const r=await pedir(API,{accion:'borrar_prueba'});
   // las fichas que se habían cargado en el tablero desde esos renglones también se van
   for(const e of (r.enlaces||[])){
-    try{await pedir(API_T,{cliente_nro:e.cliente_nro,sub:e.sub,accion:'borrar'});await pedir(API_DEL,{cliente_nro:e.cliente_nro,sub:e.sub});}catch(x){}
+    try{await pedir(API_T,{cliente_nro:e.cliente_nro,sub:e.sub,accion:'borrar'});await pedir(API_DEL,{cliente_nro:e.cliente_nro,sub:e.sub,desde_tablero:true});}catch(x){}
   }
   cerrarModal();toast('Renglones de prueba borrados.');await cargar();
 }
@@ -1017,7 +1039,7 @@ document.addEventListener('click',ev=>{
   if((b=t.closest('[data-enlazar]'))){pedirEnlazar(b.dataset.enlazar);return;}
   if((b=t.closest('[data-confirmar-enlazar]'))){conBoton(b,()=>enlazar(b.dataset.confirmarEnlazar));return;}
   if((b=t.closest('[data-confirmar-enviar]'))){conBoton(b,()=>enviar(b.dataset.confirmarEnviar));return;}
-  if((b=t.closest('[data-confirmar-borrar]'))){conBoton(b,async()=>{await pedir(API,{accion:'borrar',id:b.dataset.confirmarBorrar});cerrarModal();toast('Contrato borrado.');await cargar();});return;}
+  if((b=t.closest('[data-confirmar-borrar]'))){conBoton(b,()=>borrarContrato(b.dataset.confirmarBorrar));return;}
   if(t.closest('[data-cerrar]')){cerrarModal();return;}
   if((b=t.closest('[data-guardar]'))){conBoton(b,guardar);return;}
   if(t.closest('[data-borrar]')){pedirBorrar('');return;}

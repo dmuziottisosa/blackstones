@@ -68,6 +68,8 @@ Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, list
 - **"Cargar en Por medir"** crea la ficha en el tablero y copia solo lo que el tablero ya tiene: cliente, teléfono, dirección, material, pileta, fecha de medición y seña. Total, pagos y el resto quedan acá.
 - Si el renglón tiene **N° de presupuesto**, en vez de crear una ficha aprueba ese presupuesto (mismo camino que "Cargar obra" con número). Si ese presupuesto ya estaba en el tablero, solo se enlaza.
 - Una ficha del tablero se enlaza con un solo contrato.
+- **Enlazados, la ficha se borra en los dos lados (16/11/2026):** borrar el contrato borra también su ficha del tablero (con sus tildes y adjuntos), y borrar la ficha en el tablero borra también el contrato (con sus pagos y su presupuesto adjunto). Los dos avisan antes de borrar y dicen qué se pierde. Si el contrato no está enlazado, o su ficha ya no está en el tablero, se borra solo. **Archivar no es borrar:** el contrato queda y dice "Fuera del tablero".
+- **Borrar el presupuesto no toca nada de esto:** la ficha, el calendario y el contrato siguen (ver el decision log de la etapa).
 - **Enlazado, manda el tablero en lo operativo**: cliente, teléfono, dirección, material y pileta se ven como están en la ficha y se cambian desde el tablero. La plata se cambia acá.
 - **Distintivo de enlace:** el renglón enlazado lleva una raya verde a la izquierda y la marca "Enlazado" al lado de la etapa; la ficha dice "Enlazado con el tablero y el calendario" (el calendario lee del tablero, así que queda enlazado solo).
 - El renglón muestra **la etapa** de la obra (Por medir, Por cortar…), la fecha de medición o instalación y el vencimiento, y lleva a la ficha con un toque.
@@ -94,7 +96,8 @@ La página no modifica ningún endpoint existente: para crear la ficha usa `tabl
 
 Exigencia del dueño (16/11/2026): **Relación-Contrato se tiene que poder eliminar completa sin afectar el tablero ni el calendario.**
 
-- La dependencia va en un solo sentido: Relación-Contrato **lee** del tablero. El tablero, el calendario, el hub y la calculadora **nunca** leen ni escriben nada de contratos.
+- Relación-Contrato **lee** del tablero y de `clientes/`. El calendario, el hub y la calculadora **nunca** leen ni escriben nada de contratos.
+- **Única excepción, a prueba de ausencia:** al borrar una ficha, el tablero llama a `contratos.php` (`?enlace=` para avisar y `borrar_enlazado` para borrar el contrato). Si el archivo no existe, la llamada falla en silencio y el tablero borra la ficha igual. Probado el 16/11/2026 con Relación-Contrato borrada.
 - Ningún archivo existente llama a `contratos.php`, `contratos-adjunto.php` ni `_contratos.php`, ni abre `bs-data/contratos/`. Relación-Contrato sí lee `clientes/` (para saber si un N° existe) y el tablero, sin modificarlos. Lo único que la nombra desde afuera es el link de la pestaña en la barra de páginas.
 - Las fichas creadas con "Cargar en Por medir" son fichas comunes del tablero: siguen ahí, con su fecha y su seña, aunque el contrato desaparezca.
 - Verificado el 16/11/2026 (dos veces, la segunda con los adjuntos ya hechos): con la página, el endpoint y los datos borrados, pasaron la regresión completa del tablero y las pruebas del calendario.

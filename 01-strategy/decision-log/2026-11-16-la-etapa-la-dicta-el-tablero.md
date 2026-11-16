@@ -10,6 +10,10 @@
 - **Es deseable que todo cliente tenga N° de presupuesto**, pero no es bloqueante.
 - **Mes archivado:** el dueño le va a pedir al equipo que lo imprima y lo guarde en carpeta. No está definido cuánto tiempo se conservan los contratos en el sistema ("lo vamos viendo").
 
+- **Eliminar un presupuesto no elimina la ficha, ni el calendario, ni el contrato.** Una obra viva sale de la pestaña Presupuestos (a mano o a los 180 días) y sigue en el tablero.
+- **Presupuestos no mueve obras vivas:** se sacaron de esa pestaña los botones de estado de los aprobados (Entregado / volver a Enviado). Queda "En el tablero →".
+- **Enlazados, la ficha se borra en los dos lados** (tablero y Relación-Contrato). Archivar no es borrar.
+
 ## Por qué
 
 - Dos lugares que dicen en qué etapa está una obra terminan diciendo cosas distintas. Se elige uno: el tablero.
@@ -26,7 +30,8 @@
 
 ## Known unknowns
 
-- Qué hacer con los botones de estado de la pestaña Presupuestos (Enviado / Aprobado / Entregado / Perdido). Propuesta: sacar los que pisan al tablero (Aprobado y Entregado) y mostrar ahí la etapa del tablero, solo lectura; dejar Enviado y Perdido, que son de la venta y no de la obra. Falta el visto bueno del dueño.
+- ~~Qué hacer con los botones de estado de Presupuestos.~~ Resuelto el 16/11/2026: los aprobados ya no tienen botones de estado. Siguen Borrador / Enviado / Perdido y "→ Aprobado", que es la puerta de entrada al tablero. Falta decidir si esa puerta también se saca (hoy una obra entra por tres lados: aprobar un presupuesto, "Cargar obra" y Relación-Contrato).
+- Un presupuesto marcado `fuera_de_presupuestos` no se puede volver a ver en la pestaña; si hiciera falta recuperarlo, hay que hacerlo a mano.
 - Si el reloj de 180 días del presupuesto debe contar desde que se creó o desde su último cambio (hoy: último cambio de estado; y no vence mientras el cliente tenga una obra entregada hace menos de 180 días).
 - Cuánto tiempo se guardan los contratos y sus adjuntos, y si se archivan por mes.
 - Si la limpieza nocturna está efectivamente programada en Hostinger (el archivo dice 03:00; no se pudo verificar desde acá).

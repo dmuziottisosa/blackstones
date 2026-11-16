@@ -14,6 +14,14 @@
 //   - Si el cliente.json queda con 0 cotizaciones → borra el archivo entero.
 //
 // Response: { "ok": true, "cliente_borrado": true|false }
+//
+// Regla del dueño (16/11/2026): ELIMINAR UN PRESUPUESTO NO ELIMINA LA FICHA.
+// Si esa cotización es una obra viva en el tablero (estado "aprobado"), no se
+// borra: se marca "fuera_de_presupuestos" y deja de verse en la pestaña
+// Presupuestos, pero la ficha, el calendario y el contrato siguen igual.
+//   Response en ese caso: { "ok": true, "cliente_borrado": false, "oculto": true }
+// La ficha solo se borra desde el tablero ("Borrar ficha"), que manda
+// "desde_tablero": true; ahí sí se borra de verdad.
 // ============================================================
 
 require_once __DIR__ . '/_config.php';
@@ -31,6 +39,7 @@ if (!is_array($body)) bs_error('Body JSON inválido');
 
 $cliente_nro = str_pad((string)intval($body['cliente_nro'] ?? ''), 4, '0', STR_PAD_LEFT);
 $sub = intval($body['sub'] ?? 0);
+$desde_tablero = !empty($body['desde_tablero']);
 
 if (intval($cliente_nro) <= 0) bs_error('cliente_nro inválido');
 if ($sub <= 0) bs_error('sub inválido');
@@ -46,6 +55,23 @@ try {
     if (!$cliente_obj) {
         bs_lock_release($fp);
         bs_error('Cliente no encontrado', 404);
+    }
+
+    // Obra viva en el tablero: sale de Presupuestos, la ficha no se toca.
+    if (!$desde_tablero) {
+        foreach ($cliente_obj['cotizaciones'] as $i => $cot) {
+            if (intval($cot['sub']) !== $sub || ($cot['estado'] ?? '') !== 'aprobado') continue;
+            if (empty($cot['fuera_de_presupuestos'])) {
+                $cliente_obj['cotizaciones'][$i]['fuera_de_presupuestos'] = date('c');
+                $cliente_obj['ultima_actualizacion'] = date('c');
+                if (!bs_write_json_atomic($cliente_path, $cliente_obj)) {
+                    bs_lock_release($fp);
+                    bs_error('No se pudo escribir el cliente', 500);
+                }
+            }
+            bs_lock_release($fp);
+            bs_ok(['cliente_borrado' => false, 'oculto' => true]);
+        }
     }
 
     $kept = [];

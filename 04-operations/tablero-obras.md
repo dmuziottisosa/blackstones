@@ -190,6 +190,10 @@ Botón "Editar obra" en "Más" (también desde el calendario, que muestra la mis
 
 ## Borrar una ficha
 
+- **Borrar el presupuesto no borra la ficha (16/11/2026).** Si alguien elimina en Presupuestos el presupuesto de una obra que está en el tablero, o le llegan los 180 días, el presupuesto sale de esa pestaña y la ficha sigue igual, con sus fotos. La ficha solo se borra con "Borrar ficha", acá.
+- **Presupuestos ya no cambia la etapa de una obra viva:** en esa pestaña, un presupuesto aprobado muestra "En el tablero →" en lugar de los botones de estado.
+- **Si la ficha está enlazada con un contrato, se borran los dos.** El aviso lo dice antes, con cuántos pagos tiene y si tiene el presupuesto adjunto.
+
 En "Más" → **Borrar ficha**. Siempre pide confirmación y dice qué se pierde; Enter no confirma, hay que tocar el botón rojo.
 
 - Se borran los tildes, fechas, datos y adjuntos de esa obra. No se puede deshacer.

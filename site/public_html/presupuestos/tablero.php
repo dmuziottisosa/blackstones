@@ -2188,16 +2188,37 @@ function pedirPersonas(c,clave){
   }));
 }
 
+// Relación-Contrato es opcional: si no existe (se puede borrar entera), estas dos llamadas
+// fallan en silencio y el tablero sigue igual. Es la ÚNICA vez que el tablero le habla a contratos.
+const API_CONTRATOS='/calculadora/api/contratos.php';
+async function contratoDe(c){ // el contrato enlazado con esta ficha, o null
+  try{
+    const r=await fetch(API_CONTRATOS+'?enlace='+encodeURIComponent(c.cliente_nro+'-'+c.sub),{credentials:'same-origin',cache:'no-store'});
+    const j=await r.json();
+    return j&&j.ok?j.contrato:null;
+  }catch(e){return null;}
+}
+async function borrarContratoDe(c){
+  try{
+    const r=await fetch(API_CONTRATOS,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'borrar_enlazado',cliente_nro:c.cliente_nro,sub:c.sub})});
+    const j=await r.json();
+    return !!(j&&j.ok&&j.borrado);
+  }catch(e){return false;}
+}
+
 // Borrar ficha: siempre pide confirmación y dice exactamente qué se pierde.
-function pedirBorrar(c){
+// Si la ficha está enlazada con un contrato, se borran los dos (regla del dueño, 16/11/2026).
+async function pedirBorrar(c){
   const quien=c.cliente_nro+'-'+c.sub+' · '+(nombreCorto(c.nombre)||'Sin nombre');
   const n=c.adjuntos.length;
+  const ct=await contratoDe(c);
   abrirModal('¿Borrar la ficha '+c.cliente_nro+'-'+c.sub+'?',
     '<p><b>'+esc(quien)+'</b></p>'+
     '<p>Se borran sus tildes, fechas y datos'+(n?', y '+(n===1?'el archivo adjunto':'los '+n+' archivos adjuntos'):'')+'.</p>'+
     (c.manual
       ?'<p>Es una obra cargada a mano: se borra completa.</p>'
       :'<p>El presupuesto no se borra: vuelve a <b>Enviado</b> en Presupuestos.</p>')+
+    (ct?'<p class="ojo">Está enlazada con un contrato de Relación-Contrato: <b>también se borra el contrato</b>'+(ct.pagos||ct.archivo?', con '+[ct.pagos?(ct.pagos===1?'su pago':'sus '+ct.pagos+' pagos'):'',ct.archivo?'su presupuesto adjunto':''].filter(Boolean).join(' y '):'')+'.</p>':'')+
     '<p class="ojo">No se puede deshacer.</p>',
     'Borrar ficha',
     async()=>{
@@ -2207,10 +2228,12 @@ function pedirBorrar(c){
       try{
         // 1) la ficha del tablero (tildes, datos, adjuntos)  2) el presupuesto
         await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'borrar'});
-        if(c.manual)await pedir(API_BORRAR,{cliente_nro:c.cliente_nro,sub:c.sub});
-        else await pedir(API_ESTADO,{cliente_nro:c.cliente_nro,sub:c.sub,nuevo_estado:'enviado'});
+        if(c.manual)await pedir(API_BORRAR,{cliente_nro:c.cliente_nro,sub:c.sub,desde_tablero:true});
+        else await pedir(API_ESTADO,{cliente_nro:c.cliente_nro,sub:c.sub,nuevo_estado:'enviado',desde_tablero:true});
+        // 3) su contrato enlazado, si lo tiene
+        const conContrato=ct?await borrarContratoDe(c):false;
         if(abierta===c.key)abierta='';
-        toast('Ficha '+c.cliente_nro+'-'+c.sub+' borrada',true);
+        toast('Ficha '+c.cliente_nro+'-'+c.sub+' borrada'+(conContrato?', con su contrato':''),true);
       }catch(e){
         toast(e.message);
       }
@@ -2231,7 +2254,7 @@ function pedirArchivar(c){
       ocupado=true;
       cerrarModal();
       try{
-        await pedir(API_ESTADO,{cliente_nro:c.cliente_nro,sub:c.sub,nuevo_estado:'entregado',conservar_hermanas:true});
+        await pedir(API_ESTADO,{cliente_nro:c.cliente_nro,sub:c.sub,nuevo_estado:'entregado',conservar_hermanas:true,desde_tablero:true});
       }catch(e){
         toast(e.message);
       }

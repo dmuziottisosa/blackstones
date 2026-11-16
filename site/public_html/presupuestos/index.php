@@ -745,10 +745,13 @@ const ESTADOS_LABELS = {
   perdido: 'Perdido'
 };
 
+// Un presupuesto "aprobado" es una obra viva en el tablero: su etapa la dicta el tablero
+// (regla del dueño, 16/11/2026). Desde acá no se entrega ni se vuelve atrás: se archiva o
+// se borra la ficha en el tablero. El servidor (state.php) también lo rechaza.
 const TRANSICIONES = {
   borrador: ['enviado', 'perdido'],
   enviado: ['aprobado', 'perdido'],
-  aprobado: ['entregado'],
+  aprobado: [],
   entregado: [],
   perdido: []
 };
@@ -758,7 +761,6 @@ const TRANSICIONES = {
 // recupera a enviado. entregado se devuelve a aprobado desde el Reporte.
 const TRANSICIONES_BACK = {
   enviado: 'borrador',
-  aprobado: 'enviado',
   perdido: 'enviado'
 };
 
@@ -876,7 +878,9 @@ async function cargarActivos() {
     }
     _activosCache = d.results;
     const rows = d.results.map(r => {
-      const transitions = (TRANSICIONES[r.estado] || []).map(t =>
+      const transitions = r.estado === 'aprobado'
+        ? `<a class="act-util" href="/presupuestos/tablero.php?q=${r.cliente_nro}-${r.sub}" title="La etapa de esta obra se ve y se cambia en el tablero">En el tablero →</a>`
+        : (TRANSICIONES[r.estado] || []).map(t =>
         `<button class="act-trans act-trans-${t}" onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${t}')">→ ${ESTADOS_LABELS[t]}</button>`
       ).join('');
       const back = TRANSICIONES_BACK[r.estado]
@@ -980,7 +984,7 @@ async function ejecutarCambioEstado(nro, sub, nuevo) {
 function confirmarBorrar(nro, sub, nombre) {
   abrirModal(
     'Eliminar presupuesto',
-    `¿Eliminar el presupuesto <b>${nro}-${sub}</b> de <b>${nombre}</b>?<br><br>Esta acción no se puede deshacer.`,
+    `¿Eliminar el presupuesto <b>${nro}-${sub}</b> de <b>${nombre}</b>?<br><br>Esta acción no se puede deshacer.<br><span style="color:var(--text2)">Si la obra está en el tablero, la ficha no se borra: solo sale de Presupuestos.</span>`,
     async () => {
       cerrarModal();
       try {
@@ -992,7 +996,7 @@ function confirmarBorrar(nro, sub, nombre) {
         });
         const d = await r.json();
         if (!d.ok) { toast(d.error, 'error', { title: 'Error al eliminar' }); return; }
-        toast('Presupuesto eliminado.', 'success');
+        toast(d.oculto ? 'Salió de Presupuestos. La ficha sigue en el tablero.' : 'Presupuesto eliminado.', 'success');
         refrescarVista();
       } catch (e) {
         toast(e.message, 'error', { title: 'Error de red' });
@@ -1708,10 +1712,10 @@ function borrarSeleccionados() {
   if (!items.length) return;
   abrirModal(
     'Eliminar seleccionados',
-    `¿Eliminar <b>${items.length}</b> presupuesto(s) seleccionado(s)?<br><br>Esta acción no se puede deshacer.`,
+    `¿Eliminar <b>${items.length}</b> presupuesto(s) seleccionado(s)?<br><br>Esta acción no se puede deshacer.<br><span style="color:var(--text2)">Los que son obras en el tablero no pierden la ficha: solo salen de Presupuestos.</span>`,
     async () => {
       cerrarModal();
-      let ok = 0, fail = 0;
+      let ok = 0, fail = 0, enTablero = 0;
       for (const it of items) {
         try {
           const r = await fetch('/calculadora/api/delete.php', {
@@ -1720,11 +1724,12 @@ function borrarSeleccionados() {
             body: JSON.stringify({ cliente_nro: it.nro, sub: it.sub })
           });
           const d = await r.json();
-          if (d.ok) ok++; else fail++;
+          if (d.ok) { ok++; if (d.oculto) enTablero++; } else fail++;
         } catch (e) { fail++; }
       }
       _selActivos.clear();
-      if (fail === 0) toast(`${ok} presupuesto(s) eliminado(s).`, 'success', { title: 'Listo' });
+      const nota = enTablero ? ` ${enTablero} ${enTablero === 1 ? 'sigue' : 'siguen'} en el tablero.` : '';
+      if (fail === 0) toast(`${ok} presupuesto(s) eliminado(s).${nota}`, 'success', { title: 'Listo' });
       else toast(`${ok} eliminado(s), ${fail} con error.`, fail && !ok ? 'error' : 'success', { title: 'Borrado parcial' });
       refrescarVista();
     },

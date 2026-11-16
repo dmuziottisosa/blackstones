@@ -27,6 +27,13 @@
 //   desenlazar     { id }
 //   prueba         {}                                 (carga 3 renglones de prueba)
 // GET ?verificar=0042 → { ok, presup }  (¿existe ese N° en Presupuestos? solo informa)
+// GET ?enlace=0042-1  → { ok, contrato }  (el contrato enlazado con esa ficha del tablero, o null)
+//   borrar_enlazado { cliente_nro, sub }              (borra el contrato enlazado con esa ficha)
+//
+// Enlazados, la ficha se borra en los dos lados (regla del dueño, 16/11/2026): borrar el
+// contrato borra la ficha del tablero (lo hace la página) y borrar la ficha del tablero
+// borra el contrato (el tablero llama a borrar_enlazado; si Relación-Contrato no existe,
+// esa llamada falla y el tablero sigue como si nada).
 //
 // El PDF o Excel del presupuesto se sube y se baja por contratos-adjunto.php.
 // Un contrato queda VERIFICADO solo cuando tiene ese archivo adjunto.
@@ -194,6 +201,8 @@ function bs_contrato_presup($nro) {
     if (!is_array($cots) || !$cots) return $no;
     $cot = null;
     foreach ($cots as $x) {
+        // eliminado de Presupuestos (a mano o por los 180 días): para Presupuestos ya no existe
+        if (!empty($x['fuera_de_presupuestos']) && ($x['estado'] ?? '') !== 'entregado') continue;
         $s = intval($x['sub'] ?? 0);
         if ($pedido ? $s === $pedido : ($cot === null || $s > intval($cot['sub'] ?? 0))) $cot = $x;
     }
@@ -211,6 +220,16 @@ function bs_contrato_presup($nro) {
     ];
 }
 
+/** El contrato enlazado con esa ficha del tablero: su clave en el archivo, o null. */
+function bs_contrato_de_ficha($d, $nro, $sub) {
+    $n = str_pad((string)intval($nro), 4, '0', STR_PAD_LEFT);
+    foreach ($d['contratos'] as $k => $c) {
+        $e = $c['enlace'] ?? null;
+        if (is_array($e) && (string)($e['cliente_nro'] ?? '') === $n && intval($e['sub'] ?? 0) === intval($sub)) return $k;
+    }
+    return null;
+}
+
 function bs_contrato_id() {
     return 'c' . date('ymdHis') . bin2hex(random_bytes(3));
 }
@@ -225,6 +244,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         bs_ok(['presup' => bs_contrato_presup(intval($m[1]) . (isset($m[2]) ? '-' . intval($m[2]) : ''))]);
     }
     $d = bs_contratos_leer();
+    if (isset($_GET['enlace'])) {
+        if (!preg_match('/^(\d{1,6})-(\d{1,3})$/', (string)$_GET['enlace'], $m)) bs_error('enlace inválido');
+        $k = bs_contrato_de_ficha($d, intval($m[1]), intval($m[2]));
+        $c = $k === null ? null : $d['contratos'][$k];
+        bs_ok(['contrato' => $c === null ? null : [
+            'id'      => (string)$c['id'],
+            'cliente' => (string)($c['cliente'] ?? ''),
+            'pagos'   => count(is_array($c['pagos'] ?? null) ? $c['pagos'] : []) + (is_array($c['sena'] ?? null) ? 1 : 0),
+            'archivo' => bs_contrato_archivo($c) !== null,
+        ]]);
+    }
     $lista = array_map('bs_contrato_salida', array_values($d['contratos']));
     usort($lista, function ($a, $b) { return strcmp($b['creado'], $a['creado']) ?: strcmp($b['id'], $a['id']); });
     bs_ok(['hoy' => date('Y-m-d'), 'vendedores' => $BS_CONTRATO_VENDEDORES, 'procedencias' => $BS_CONTRATO_PROCEDENCIAS, 'contratos' => $lista]);
@@ -235,13 +265,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') bs_error('Solo GET o POST', 405);
 $body = json_decode(@file_get_contents('php://input'), true);
 if (!is_array($body)) bs_error('Body JSON inválido');
 $accion = (string)($body['accion'] ?? '');
-$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
+$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'borrar_enlazado', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
 if (!in_array($accion, $acciones, true)) bs_error('accion inválida');
 
 // Todo lo que puede fallar por datos mal cargados se valida ANTES de tomar el lock.
 $campos = in_array($accion, ['crear', 'editar'], true) ? bs_contrato_campos($body) : null;
 $id = (string)($body['id'] ?? '');
-if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
+if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
 
 $sena_nueva = null;
 if ($accion === 'sena') $sena_nueva = bs_contrato_sena($body['monto'] ?? 0, $body['moneda'] ?? '', $body['fecha'] ?? '');
@@ -327,6 +357,16 @@ try {
             $id = bs_contrato_id() . $i;
             // 'creado' escalonado para que queden en este orden en la lista
             $d['contratos'][$id] = array_merge($p, ['id' => $id, 'creado' => date('c', time() - $i), 'actualizado' => $ahora, 'prueba' => true, 'enlace' => null]);
+        }
+
+    } elseif ($accion === 'borrar_enlazado') {
+        // Lo llama el tablero al borrar una ficha: si tenía un contrato enlazado, se va con ella.
+        $k = bs_contrato_de_ficha($d, intval($body['cliente_nro'] ?? 0), intval($body['sub'] ?? 0));
+        $extra['borrado'] = $k !== null;
+        if ($k !== null) {
+            $id = (string)$k;
+            $borrar_adj[] = $id;
+            unset($d['contratos'][$k]);
         }
 
     } elseif ($accion === 'borrar_prueba') {

@@ -83,6 +83,10 @@ if (is_dir(BS_CLIENTES_DIR)) {
         $cliente_nro = $cliente_obj['cliente_nro'] ?? '';
 
         foreach ($cliente_obj['cotizaciones'] ?? [] as $cot) {
+            // Eliminado de Presupuestos (a mano o por los 180 días) mientras la obra sigue en el
+            // tablero: acá no aparece más. Los entregados sí, porque son las ventas del reporte.
+            if (!empty($cot['fuera_de_presupuestos']) && ($cot['estado'] ?? '') !== 'entregado') continue;
+
             // Filtro estado
             if ($estado_filter !== '' && ($cot['estado'] ?? '') !== $estado_filter) continue;
 

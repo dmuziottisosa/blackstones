@@ -16,6 +16,8 @@
 //         16/11/2026): sale de ahí cuando se archiva (pasa a "entregado" y recién
 //         entonces empieza a correr su reloj) o cuando alguien borra la ficha.
 //         Antes se borraba a los 180 días de aprobada, con sus fotos y planos.
+//         A los 180 días se la marca "fuera_de_presupuestos": deja de verse en la
+//         pestaña Presupuestos, y la ficha sigue en el tablero.
 //       Si estado != "entregado" Y NO existe ningún entregado en este cliente
 //          Y (now - última_modificación) > 180 días:
 //         Borrar la cotización del array.
@@ -52,6 +54,7 @@ $stats = [
     'clientes_borrados'     => 0,
     'zips_borrados'         => 0,
     'obras_tablero_borradas' => 0,
+    'ocultos'               => 0,
     'errores'               => [],
 ];
 
@@ -84,6 +87,7 @@ if (is_dir(BS_CLIENTES_DIR)) {
 
         // Filtrar cotizaciones que sobreviven
         $kept = [];
+        $ocultos_cliente = 0;
         foreach ($cliente['cotizaciones'] ?? [] as $cot) {
             $estado = $cot['estado'] ?? '';
             if ($estado === 'entregado') {
@@ -99,7 +103,20 @@ if (is_dir(BS_CLIENTES_DIR)) {
                 }
                 $kept[] = $cot;
             } elseif ($estado === 'aprobado') {
-                // Obra viva en el tablero: no vence por antigüedad (ver arriba).
+                // Obra viva en el tablero: no vence por antigüedad (ver arriba). A los 180 días
+                // el PRESUPUESTO sale de la pestaña Presupuestos, pero la ficha queda donde está.
+                if (empty($cot['fuera_de_presupuestos'])) {
+                    $last_mod = strtotime($cot['fecha'] ?? '');
+                    if (!empty($cot['transiciones']) && is_array($cot['transiciones'])) {
+                        $last_t = end($cot['transiciones']);
+                        if ($last_t && !empty($last_t['at'])) $last_mod = max($last_mod, strtotime($last_t['at']));
+                    }
+                    if ($last_mod && ($now - $last_mod) > $retention_seconds) {
+                        $cot['fuera_de_presupuestos'] = date('c');
+                        $stats['ocultos']++;
+                        $ocultos_cliente++;
+                    }
+                }
                 $kept[] = $cot;
             } else {
                 // No-entregado: si no hay entregado activo Y no se modificó hace >180 días → borrar
@@ -125,7 +142,7 @@ if (is_dir(BS_CLIENTES_DIR)) {
             // Cliente vacío → borrar archivo entero
             @unlink($path);
             $stats['clientes_borrados']++;
-        } elseif (count($kept) !== count($cliente['cotizaciones'] ?? [])) {
+        } elseif (count($kept) !== count($cliente['cotizaciones'] ?? []) || $ocultos_cliente > 0) {
             // Cambió el array → reescribir
             $cliente['cotizaciones'] = $kept;
             $cliente['ultima_actualizacion'] = date('c');
@@ -197,12 +214,13 @@ if (is_array($vivas) && is_dir(BS_TABLERO_DIR)) {
 // ============================================================
 
 $log_line = sprintf(
-    "[%s] cleanup: cotizaciones=%d clientes=%d zips=%d obras_tablero=%d errores=%d\n",
+    "[%s] cleanup: cotizaciones=%d clientes=%d zips=%d obras_tablero=%d fuera_de_presupuestos=%d errores=%d\n",
     date('c'),
     $stats['cotizaciones_borradas'],
     $stats['clientes_borrados'],
     $stats['zips_borrados'],
     $stats['obras_tablero_borradas'],
+    $stats['ocultos'],
     count($stats['errores'])
 );
 @file_put_contents(BS_REGISTRO_CRON_LOG, $log_line, FILE_APPEND | LOCK_EX);

@@ -98,6 +98,14 @@ try {
         if (intval($cot['sub']) === $sub) {
             $estado_anterior = $cot['estado'];
 
+            // La etapa la dicta el tablero (regla del dueño, 16/11/2026): una obra viva
+            // ("aprobado") no se saca del tablero cambiándole el estado desde Presupuestos.
+            // Se archiva o se borra desde el tablero, que manda "desde_tablero": true.
+            if ($estado_anterior === 'aprobado' && empty($body['desde_tablero'])) {
+                bs_lock_release($fp);
+                bs_error('Esa obra está en el tablero: la etapa se cambia desde ahí (se archiva o se borra la ficha en el tablero).', 409);
+            }
+
             // Validar transición
             $allowed_from = $ALLOWED[$estado_anterior] ?? [];
             if (!in_array($nuevo_estado, $allowed_from, true)) {
