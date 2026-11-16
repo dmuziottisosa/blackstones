@@ -93,8 +93,8 @@ button{font-family:inherit;color:inherit}
   .header .h-right{gap:8px}
 }
 
-/* El calendario usa todo el ancho de la pantalla: cuanto más ancho el mes, menos se cortan los nombres. */
-.wrap{max-width:2200px;margin:0 auto;padding:20px 20px 60px}
+/* El calendario es más ancho que el resto de las páginas (tope 1600 px): con más lugar por día se cortan menos nombres. */
+.wrap{max-width:1600px;margin:0 auto;padding:20px 20px 60px}
 .aviso{color:var(--text2);font-size:13.5px;padding:40px 16px;text-align:center;line-height:1.6}
 
 /* === COLOR POR TIPO (los mismos de las columnas del tablero) === */
