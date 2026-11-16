@@ -598,6 +598,12 @@ function armar(){
 function chip(ev,largo){
   const c=ev.c;
   const nom='<b>'+esc(c.cliente_nro)+'</b> '+esc(nombreCorto(c.nombre)||'Sin nombre');
+  if(ev.prev&&previsto(c)<HOY){
+    // La entrega estimada ya pasó: los días corrieron igual desde la medición agendada, esté o no
+    // tildado "Medido". Se muestra como vencida, igual que las demás.
+    const t='Venció el '+fechaCorta(previsto(c))+': la medición estaba agendada para el '+fechaCorta(c.fecha)+' ('+c.plazo_dias+' días corridos). Todavía no figura como medida.';
+    return '<button type="button" class="ev vence vencida" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" title="'+esc(t)+'">Venció · '+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+' · sin marcar medida</span>':'')+'</button>';
+  }
   if(ev.prev){
     const t='Si se mide el '+fechaCorta(c.fecha)+', el plazo vence el '+fechaCorta(previsto(c))+' ('+c.plazo_dias+' días corridos)';
     return '<button type="button" class="ev vence prev" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" title="'+esc(t)+'">Entrega estimada · '+nom+(largo?' <span>· todavía sin medir</span>':'')+'</button>';
@@ -664,8 +670,10 @@ function dibujar(){
   // Pendientes: plazo vencido, turnos que se pasaron de fecha y lo que todavía no tiene día.
   let p='<h3>Pendientes</h3><div class="ayuda">Tocá una obra para ponerle día, o arrastrala al calendario.</div>',hay=false;
   // Lo urgente primero, y siempre a la vista aunque caiga en otro mes.
-  const ven=CARDS.filter(c=>estadoPlazo(c)==='vencida').sort((x,z)=>x.limite<z.limite?-1:1);
-  if(ven.length){hay=true;p+='<h4 class="rojo">Plazo vencido <b>'+ven.length+'</b></h4>'+ven.map(c=>chip({tipo:'vence',c:c},true)).join('');}
+  // Cuenta también la entrega estimada que ya pasó (medición agendada, sin tildar "Medido").
+  const venDia=c=>c.limite||previsto(c);
+  const ven=CARDS.filter(c=>estadoPlazo(c)==='vencida'||(previsto(c)&&previsto(c)<HOY)).sort((x,z)=>venDia(x)<venDia(z)?-1:1);
+  if(ven.length){hay=true;p+='<h4 class="rojo">Plazo vencido <b>'+ven.length+'</b></h4>'+ven.map(c=>chip({tipo:'vence',c:c,prev:!c.limite},true)).join('');}
   const atr=CARDS.filter(atrasada).sort((x,z)=>x.fecha<z.fecha?-1:1);
   if(atr.length){hay=true;p+='<h4 class="rojo">Atrasadas <b>'+atr.length+'</b></h4>'+atr.map(c=>chip({tipo:c.etapa,c:c},true)).join('');}
   ETAPAS.filter(e=>e.fecha).forEach(e=>{
