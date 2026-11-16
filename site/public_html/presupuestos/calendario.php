@@ -111,19 +111,58 @@ button{font-family:inherit;color:inherit}
 .mes button{height:34px;min-width:34px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:16px;font-weight:700;color:var(--text2);cursor:pointer}
 @media(hover:hover){.mes button:hover{border-color:var(--gd);color:var(--text)}}
 .mes .hoy-b{font-size:13px;margin-left:4px}
-.ley{display:flex;flex-wrap:wrap;gap:6px}
-.ley button{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12.5px;font-weight:700;color:var(--text3);cursor:pointer}
-.ley button::before{content:'';width:10px;height:10px;border-radius:3px;background:var(--border)}
-.ley button b{font-variant-numeric:tabular-nums;opacity:.75}
+/* === FILTROS: casilleros a la izquierda del mes ===
+   Arriba, qué ver (mediciones, instalaciones, entregas, vencimientos). Abajo, los bloques de medición
+   que existen: marcar uno o más deja en pantalla solo lo de esos bloques, para seguirlos de cerca. */
+.filtros{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 12px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto}
+.filtros h4{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);margin:14px 2px 4px}
+.filtros h4:first-child{margin-top:0}
+.f-tit{display:none}
+.ley{display:flex;flex-direction:column}
+.ley button{display:flex;align-items:center;gap:9px;width:100%;padding:6px 2px;border:none;background:none;font-size:13px;font-weight:600;color:var(--text2);text-align:left;cursor:pointer;border-radius:var(--radius-sm)}
+.ley button::before{content:'';flex-shrink:0;width:16px;height:16px;border-radius:4px;border:1.5px solid var(--text3);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;line-height:1;color:#fff}
 .ley button.on{color:var(--text)}
-.ley button.on::before{background:var(--et,var(--red))}
-.ley button.on[data-ver="vence"]::before{background:none;border:1.5px dashed var(--text3)}
-.ley button:not(.on){text-decoration:line-through}
+.ley button.on::before{content:'✓';background:var(--fc,var(--dk));border-color:var(--fc,var(--dk))}
+[data-theme="dark"] .ley button.on::before{color:#14110D;background:var(--fc,var(--gd));border-color:var(--fc,var(--gd))}
+.ley button b{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text3)}
+.ley button[class*="et-"]{--fc:var(--et)}
+.ley button[data-ver="entrega"]{--fc:var(--gd)}
+.ley button[data-ver="vence"]{--fc:var(--amb)}
+.ley button.vencida b{color:var(--red)}
+.ley button.cerca b{color:var(--amb)}
+.ley .nada{font-size:12.5px;color:var(--text3);padding:4px 2px}
+.f-todo{display:block;width:100%;margin-top:12px;padding:8px;border:1px solid var(--dk);border-radius:var(--radius-sm);background:var(--dk);color:var(--cr);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+[data-theme="dark"] .f-todo{background:var(--gd);border-color:var(--gd);color:#1A1816}
+.f-todo[hidden],.foco-b[hidden]{display:none}
+/* Con un bloque en foco: su medición y su entrega, en un renglón, con el salto al mes de cada una. */
+.foco-b{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-bottom:10px;padding:10px 14px;border:1px solid var(--border);border-left:4px solid var(--dk);border-radius:var(--radius);background:var(--card);font-size:13px;color:var(--text2)}
+[data-theme="dark"] .foco-b{border-left-color:var(--gd)}
+.foco-b b{color:var(--text);font-weight:700}
+.foco-b .rojo{color:var(--red);font-weight:700}
+.foco-b .amb{color:var(--amb);font-weight:700}
+.foco-b button{padding:6px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-family:inherit;font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer}
+.foco-b .fin{margin-left:auto;display:flex;gap:6px}
+@media(hover:hover){.ley button:hover{background:var(--card-alt)}}
 .hoy{margin-left:auto;font-size:14px;color:var(--text2);white-space:nowrap}
 .hoy b{font-weight:700;color:var(--text)}
 
 /* === PLANO: el mes + lo que falta agendar === */
-.plano{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}
+.plano{display:grid;grid-template-columns:190px minmax(0,1fr) 280px;gap:16px;align-items:start}
+/* Pantallas medianas: los filtros van arriba del mes, plegados detrás de un botón. */
+@media(max-width:1359px){
+  .plano{grid-template-columns:minmax(0,1fr) 280px}
+  .filtros{grid-column:1/-1;position:static;max-height:none;padding:0;border:none;background:none;box-shadow:none}
+  .f-tit{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer}
+  .f-tit::after{content:'';width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+  .f-tit[aria-expanded="true"]::after{transform:translateY(2px) rotate(-135deg)}
+  .f-tit.activo{border-color:var(--dk);color:var(--text)}
+  .f-cuerpo{display:none;margin-top:10px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .filtros.abierto .f-cuerpo{display:block}
+  .ley{flex-direction:row;flex-wrap:wrap;gap:2px 18px}
+  .ley button{width:auto;padding:7px 4px}
+  .ley button b{margin-left:2px}
+  .f-todo{width:auto;padding:8px 16px}
+}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
 .cal .dh{padding:8px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);background:var(--card-alt);border-bottom:1px solid var(--border)}
 .dia{min-height:124px;padding:6px 6px 8px;border-right:1px solid var(--border-soft);border-bottom:1px solid var(--border-soft);min-width:0}
@@ -182,14 +221,13 @@ button{font-family:inherit;color:inherit}
 .blq s,.blq u{text-decoration:none}
 .blq s{display:none}
 /* Celdas angostas (tablet, notebook chica): el rótulo de medición se acorta para que entre entero. */
-@media(max-width:1279px){
+@media(max-width:1599px){
   .blq.med{padding:0 5px}
   .blq.med u,.blq.med i{display:none}
   .blq.med s{display:inline}
 }
 [data-theme="dark"] .blq.med i{color:#14110D}
 .ev.blq-ag.med{background:var(--et-soft);color:var(--et);font-weight:700}
-.ley button.on[data-ver="entrega"]::before{width:18px;height:9px;border-radius:2px;background:color-mix(in srgb,var(--gd) 40%,var(--card));border:1px solid var(--gd)}
 .blq.est{border-top-style:dashed;border-bottom-style:dashed;--bq-soft:color-mix(in srgb,var(--gd) 11%,var(--card));font-style:italic;font-weight:600;color:var(--text2)}
 .blq.cerca{--bq:var(--amb);--bq-soft:var(--amb-soft);--bq-t:var(--amb)}
 .blq.vencida{--bq:var(--red);--bq-soft:var(--red-soft);--bq-t:var(--red)}
@@ -208,6 +246,7 @@ button{font-family:inherit;color:inherit}
 .pend{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto}
 .pend h3{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin-bottom:2px}
 .pend .ayuda{font-size:12px;color:var(--text3);margin-bottom:6px}
+.pend .ayuda.foco{color:var(--text);font-weight:700;padding:6px 9px;border-radius:var(--radius-sm);background:var(--card-alt)}
 .pend h4{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);margin:14px 0 2px;display:flex;align-items:center;gap:6px}
 .pend h4.rojo{color:var(--red)}
 .pend h4 b{font-variant-numeric:tabular-nums;opacity:.7}
@@ -259,7 +298,9 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 /* === PANTALLAS TÁCTILES: lo que se toca mide lo que mide un dedo === */
 @media(max-width:1100px),(pointer:coarse){
   .mes button{height:42px;min-width:42px}
-  .ley button{padding:9px 13px;font-size:13px}
+  .ley button{padding:9px 4px;font-size:13.5px}
+  .ley button::before{width:18px;height:18px}
+  .f-tit{padding:10px 16px}
   .ev{padding:7px 8px}
   .agenda .ev,.pend .ev{padding:11px 12px;font-size:13.5px}
   .modal .btns button{padding:11px 18px;font-size:14px}
@@ -278,6 +319,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
   .h-tabs a{padding:12px 12px}
   .wrap{padding:14px max(20px,env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left))}
   .plano{grid-template-columns:minmax(0,1fr)}
+  .filtros{order:-2}
   .pend{order:-1;position:static;max-height:none;margin-bottom:10px}
   /* Con muchos pendientes el mes quedaba muy abajo: se muestran los primeros y un botón para ver todos. */
   .pend.corto{max-height:272px;overflow:hidden;position:relative}
@@ -338,11 +380,21 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
       <button type="button" id="mesSig" aria-label="Mes siguiente">›</button>
       <button type="button" class="hoy-b" id="mesHoy">Hoy</button>
     </div>
-    <div class="ley" id="ley"></div>
     <div class="hoy" id="hoyTxt"></div>
   </div>
   <div class="plano">
+    <aside class="filtros" id="filtros">
+      <button type="button" class="f-tit" id="fTit" aria-expanded="false">Filtros</button>
+      <div class="f-cuerpo">
+        <h4>Qué ver</h4>
+        <div class="ley" id="ley"></div>
+        <h4>Bloque de medición</h4>
+        <div class="ley" id="fBloques"></div>
+        <button type="button" class="f-todo" id="fTodo" hidden>Ver todo</button>
+      </div>
+    </aside>
     <div>
+      <div class="foco-b" id="focoB" hidden></div>
       <div class="cal" id="cal"><div class="aviso" style="grid-column:1/-1">Cargando…</div></div>
       <div class="agenda" id="agenda"></div>
     </div>
@@ -486,10 +538,17 @@ async function cargar(){
 // Las obras siguen teniendo su cartelito "Vence" el día 20: la franja da la idea de la semana.
 let VENTANA=15;
 let MEDIR=''; // id de la etapa donde se mide ("medir")
+// Foco por bloque: los días de medición marcados en el panel de filtros. Vacío = se ve todo.
+// No se guarda entre visitas: es para seguir un bloque en el momento, no para dejarlo escondido.
+const selB=new Set();
+// A qué bloque pertenece una obra: el día en que se midió o, si falta medir, el día agendado.
+const bloqueDe=c=>c.medido_at||(c.etapa===MEDIR&&c.fecha&&!cumplida(c)?c.fecha:'');
+const enFoco=c=>!selB.size||selB.has(bloqueDe(c));
 const diaMes=iso=>(+iso.slice(8,10))+'-'+MESES[+iso.slice(5,7)-1].slice(0,3);
-function bloques(){
+function bloques(todos){
   const m={};
   CARDS.forEach(c=>{
+    if(!todos&&!enFoco(c))return;
     if(c.etapa==='archivar'||c.plazo_manual)return; // ya instalada, o con un plazo propio puesto a mano
     // medida: cuenta el día en que se midió; todavía no: el día agendado (bloque estimado)
     const dia=c.medido_at||(previsto(c)?c.fecha:'');
@@ -533,10 +592,10 @@ function franjas(iso,L,col){
 // Bloque de MEDICIÓN: las obras que se miden (o se midieron) un mismo día. No es la entrega:
 // es el día de la tanda, y va en el color de Por medir.
 function obrasMedicion(dia){
-  return CARDS.filter(c=>c.medido_at?c.medido_at===dia:(c.etapa===MEDIR&&c.fecha===dia&&!cumplida(c)));
+  return CARDS.filter(c=>bloqueDe(c)===dia);
 }
 function tiraMedicion(iso,largo){
-  const l=obrasMedicion(iso);
+  const l=selB.size&&!selB.has(iso)?[]:obrasMedicion(iso);
   if(!l.length||!MEDIR)return '';
   const n=l.length,h=l.filter(c=>c.medido_at).length;
   const estado=h===n?(n===1?'hecha':'hechas'):(h?h+' de '+n+' hechas':'');
@@ -577,7 +636,7 @@ function armar(){
   const sumar=(d,ev)=>{(dias[d]=dias[d]||[]).push(ev);};
   CARDS.forEach(c=>{
     const e=etapaDe(c.etapa);
-    if(!e)return;
+    if(!e||!enFoco(c))return;
     if(e.fecha&&c.fecha&&!cumplida(c)&&ver[c.etapa]!==false)sumar(c.fecha,{tipo:c.etapa,c:c});
     // La medición ya hecha queda marcada en su día, esté la obra en la etapa que esté: es el día
     // que le da nombre a su bloque y desde el que corre el plazo.
@@ -631,11 +690,34 @@ function dibujar(){
   const y=+mes.slice(0,4),m=+mes.slice(5,7);
   $('mesTxt').textContent=MESES[m-1].replace(/^./,x=>x.toUpperCase())+' '+y;
 
-  // Leyenda: qué es cada color, cuántos hay este mes, y tocarla lo oculta o lo muestra.
-  const tipos=ETAPAS.filter(e=>e.fecha).map(e=>({id:e.id,txt:PLURAL[e.fecha]||e.fecha,n:CARDS.filter(c=>c.etapa===e.id&&c.fecha&&c.fecha.slice(0,7)===mes&&!cumplida(c)).length}));
+  // Filtros, primer grupo: qué ver. Cada casillero lleva el color de lo que prende y cuántos hay este mes.
+  const F=CARDS.filter(enFoco);
+  const tipos=ETAPAS.filter(e=>e.fecha).map(e=>({id:e.id,txt:PLURAL[e.fecha]||e.fecha,n:F.filter(c=>c.etapa===e.id&&c.fecha&&c.fecha.slice(0,7)===mes&&!cumplida(c)).length}));
   tipos.push({id:'entrega',txt:'Entregas',n:bloques().filter(b=>b.desde.slice(0,7)===mes||b.hasta.slice(0,7)===mes).length});
-  tipos.push({id:'vence',txt:'Vencimientos',n:CARDS.filter(c=>(c.limite&&c.etapa!=='archivar'&&c.limite.slice(0,7)===mes)||previsto(c).slice(0,7)===mes).length});
-  $('ley').innerHTML=tipos.map(t=>'<button type="button" class="'+(t.id==='vence'||t.id==='entrega'?'':'et-'+esc(t.id))+(ver[t.id]!==false?' on':'')+'" data-ver="'+esc(t.id)+'" aria-pressed="'+(ver[t.id]!==false)+'">'+esc(t.txt)+' <b>'+t.n+'</b></button>').join('');
+  tipos.push({id:'vence',txt:'Vencimientos',n:F.filter(c=>(c.limite&&c.etapa!=='archivar'&&c.limite.slice(0,7)===mes)||previsto(c).slice(0,7)===mes).length});
+  $('ley').innerHTML=tipos.map(t=>'<button type="button" class="'+(t.id==='vence'||t.id==='entrega'?'':'et-'+esc(t.id))+(ver[t.id]!==false?' on':'')+'" data-ver="'+esc(t.id)+'" role="checkbox" aria-checked="'+(ver[t.id]!==false)+'">'+esc(t.txt)+' <b>'+t.n+'</b></button>').join('');
+  // Segundo grupo: los bloques de medición que existen hoy en el tablero (solo datos reales).
+  const todosB=bloques(true),dB={};
+  CARDS.forEach(c=>{const d=bloqueDe(c);if(d)dB[d]=(dB[d]||0)+1;});
+  [...selB].forEach(d=>{if(!dB[d])selB.delete(d);}); // un bloque que ya no existe deja de filtrar
+  const diasB=Object.keys(dB).sort();
+  $('fBloques').innerHTML=diasB.length?diasB.map(d=>{
+    const b=todosB.find(x=>x.dia===d),est=b?b.estado:'';
+    return '<button type="button" class="'+(selB.has(d)?'on ':'')+est+'" data-fbloque="'+d+'" role="checkbox" aria-checked="'+selB.has(d)+'" title="'+esc('Medición del '+fechaCorta(d)+(b?' · entrega del '+fechaCorta(b.desde)+' al '+fechaCorta(b.hasta):''))+'">'+esc(diaMes(d))+' <b>'+dB[d]+'</b></button>';
+  }).join(''):'<div class="nada">Todavía no hay mediciones.</div>';
+  const nApag=tipos.filter(t=>ver[t.id]===false).length,nFil=nApag+selB.size;
+  $('fTodo').hidden=!nFil;
+  // Resumen del foco: con un solo bloque marcado, su medición y su entrega juntas (suelen caer en meses distintos).
+  let fo='';
+  if(selB.size===1){
+    const d=[...selB][0],b=todosB.find(x=>x.dia===d),l=obrasMedicion(d),hm=l.filter(c=>c.medido_at).length;
+    fo='<span><b>Bloque '+esc(diaMes(d))+'</b></span><span>Medición: <b>'+esc(fechaCorta(d))+'</b> · '+l.length+(l.length===1?' obra':' obras')+(hm===l.length?' · todas medidas':' · '+hm+' medidas, '+(l.length-hm)+' sin medir')+'</span>'
+      +(b?'<span>'+(b.est?'Entrega estimada':'Entrega')+': <b>'+esc(fechaCorta(b.desde))+' al '+esc(fechaCorta(b.hasta))+'</b>'+(b.estado==='vencida'?' <span class="rojo">· vencida</span>':(b.estado==='cerca'?' <span class="amb">· en curso</span>':''))+'</span>':'')
+      +'<span class="fin">'+(d.slice(0,7)!==mes?'<button type="button" data-ir="'+d.slice(0,7)+'">Ver la medición</button>':'')+(b&&b.desde.slice(0,7)!==mes&&b.hasta.slice(0,7)!==mes?'<button type="button" data-ir="'+b.desde.slice(0,7)+'">Ver la entrega</button>':'')+'</span>';
+  }else if(selB.size>1)fo='<span><b>'+selB.size+' bloques en foco:</b> '+[...selB].sort().map(d=>esc(diaMes(d))).join(', ')+'</span>';
+  $('focoB').innerHTML=fo;$('focoB').hidden=!fo;
+  $('fTit').textContent=nFil?'Filtros · '+nFil:'Filtros';
+  $('fTit').classList.toggle('activo',nFil>0);
 
   const dias=armar();
   const L=ver.entrega!==false?bloques():[]; // franjas de entrega: tienen su propio botón en la leyenda
@@ -672,12 +754,13 @@ function dibujar(){
   // Lo urgente primero, y siempre a la vista aunque caiga en otro mes.
   // Cuenta también la entrega estimada que ya pasó (medición agendada, sin tildar "Medido").
   const venDia=c=>c.limite||previsto(c);
-  const ven=CARDS.filter(c=>estadoPlazo(c)==='vencida'||(previsto(c)&&previsto(c)<HOY)).sort((x,z)=>venDia(x)<venDia(z)?-1:1);
+  if(selB.size)p+='<div class="ayuda foco">Solo '+(selB.size===1?'el bloque '+esc(diaMes([...selB][0])):'los '+selB.size+' bloques marcados')+'.</div>';
+  const ven=F.filter(c=>estadoPlazo(c)==='vencida'||(previsto(c)&&previsto(c)<HOY)).sort((x,z)=>venDia(x)<venDia(z)?-1:1);
   if(ven.length){hay=true;p+='<h4 class="rojo">Plazo vencido <b>'+ven.length+'</b></h4>'+ven.map(c=>chip({tipo:'vence',c:c,prev:!c.limite},true)).join('');}
-  const atr=CARDS.filter(atrasada).sort((x,z)=>x.fecha<z.fecha?-1:1);
+  const atr=F.filter(atrasada).sort((x,z)=>x.fecha<z.fecha?-1:1);
   if(atr.length){hay=true;p+='<h4 class="rojo">Atrasadas <b>'+atr.length+'</b></h4>'+atr.map(c=>chip({tipo:c.etapa,c:c},true)).join('');}
   ETAPAS.filter(e=>e.fecha).forEach(e=>{
-    const l=CARDS.filter(c=>c.etapa===e.id&&!c.fecha&&!cumplida(c)).sort((x,z)=>x.desde<z.desde?-1:(x.desde>z.desde?1:0));
+    const l=F.filter(c=>c.etapa===e.id&&!c.fecha&&!cumplida(c)).sort((x,z)=>x.desde<z.desde?-1:(x.desde>z.desde?1:0));
     if(!l.length)return;
     hay=true;
     p+='<h4>'+esc('Sin '+(e.exige_fecha?'turno':'fecha')+' de '+e.fecha.toLowerCase())+' <b>'+l.length+'</b></h4>'+l.map(c=>chip({tipo:c.etapa,c:c},false)).join('');
@@ -813,6 +896,25 @@ document.addEventListener('click',ev=>{
   if(q){abrirBloque(q.dataset.bloque,q.dataset.origen||'');return;}
   const b=ev.target.closest('.ev[data-key]');
   if(b){const c=cardDe(b.dataset.key);if(c)abrir(c,'',b.dataset.tipo==='vence'?'plazo':'');return;}
+  const fb=ev.target.closest('[data-fbloque]');
+  if(fb){
+    const d=fb.dataset.fbloque;
+    if(selB.has(d))selB.delete(d);else selB.add(d);
+    // Al enfocar un solo bloque, si en el mes a la vista no hay nada suyo, el calendario va a donde está.
+    if(selB.size===1&&selB.has(d))irAlBloque(d);
+    dibujar();
+    return;
+  }
+  const ir=ev.target.closest('[data-ir]');
+  if(ir){mes=ir.dataset.ir;dibujar();return;}
+  if(ev.target.closest('#fTodo')){
+    selB.clear();ver={};
+    try{localStorage.setItem('bs-cal-ver','{}');}catch(e){}
+    dibujar();
+    return;
+  }
+  const ft=ev.target.closest('#fTit');
+  if(ft){const ab=$('filtros').classList.toggle('abierto');ft.setAttribute('aria-expanded',ab);return;}
   const v=ev.target.closest('[data-ver]');
   if(v){
     ver[v.dataset.ver]=ver[v.dataset.ver]===false;
@@ -820,6 +922,16 @@ document.addEventListener('click',ev=>{
     dibujar();
   }
 });
+// Lleva el calendario al mes donde está el bloque, si en el mes a la vista no aparece nada suyo.
+function irAlBloque(d){
+  const b=bloques(true).find(x=>x.dia===d);
+  const y=+mes.slice(0,4),m=+mes.slice(5,7),ini=new Date(y,m-1,1),fin=new Date(y,m,0);
+  ini.setDate(1-((ini.getDay()+6)%7));fin.setDate(fin.getDate()+((7-fin.getDay())%7));
+  const a=isoDe(ini),z=isoDe(fin),seVe=x=>x>=a&&x<=z;
+  if(seVe(d)||(b&&b.desde<=z&&b.hasta>=a))return;
+  // si ya se midió, lo que queda por seguir es la entrega; si no, la medición
+  mes=(b&&!b.est?b.desde:d).slice(0,7);
+}
 function moverMes(n){const d=new Date(+mes.slice(0,4),+mes.slice(5,7)-1+n,1);mes=isoDe(d).slice(0,7);dibujar();}
 // En pantallas angostas la barra de páginas se desliza de costado: la página actual queda a la vista.
 (function(){
