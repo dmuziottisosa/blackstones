@@ -28,6 +28,13 @@
 //   prueba         {}                                 (carga 3 renglones de prueba)
 // GET ?verificar=0042 → { ok, presup }  (¿existe ese N° en Presupuestos? solo informa)
 // GET ?enlace=0042-1  → { ok, contrato }  (el contrato enlazado con esa ficha del tablero, o null)
+// GET ?papelera=1     → { ok, dias, contratos }  (los borrados que todavía se pueden recuperar)
+//   restaurar          { id }                         (saca un contrato de la papelera)
+//   restaurar_enlazado { cliente_nro, sub }           (ídem, por la ficha con la que estaba enlazado)
+//
+// PAPELERA (30 días, decisión del dueño 16/11/2026): borrar un contrato no lo destruye. Pasa a
+// "papelera" dentro del mismo archivo, con sus pagos, y su presupuesto adjunto queda en disco.
+// A los 30 días se borra de verdad. Los renglones de prueba no pasan por la papelera.
 //   borrar_enlazado { cliente_nro, sub }              (borra el contrato enlazado con esa ficha)
 //
 // Enlazados, la ficha se borra en los dos lados (regla del dueño, 16/11/2026): borrar el
@@ -203,6 +210,7 @@ function bs_contrato_presup($nro) {
     foreach ($cots as $x) {
         // eliminado de Presupuestos (a mano o por los 180 días): para Presupuestos ya no existe
         if (!empty($x['fuera_de_presupuestos']) && ($x['estado'] ?? '') !== 'entregado') continue;
+        if (($x['estado'] ?? '') === 'papelera') continue; // ficha en la papelera del tablero
         $s = intval($x['sub'] ?? 0);
         if ($pedido ? $s === $pedido : ($cot === null || $s > intval($cot['sub'] ?? 0))) $cot = $x;
     }
@@ -230,6 +238,30 @@ function bs_contrato_de_ficha($d, $nro, $sub) {
     return null;
 }
 
+/** Papelera: saca del archivo (y del disco) lo que lleva más de 30 días borrado. Devuelve si cambió algo. */
+function bs_contratos_purgar_papelera(&$d) {
+    if (!isset($d['papelera']) || !is_array($d['papelera'])) { $d['papelera'] = []; return false; }
+    $limite = time() - BS_CONTRATOS_PAPELERA_DIAS * 86400;
+    $cambio = false;
+    foreach ($d['papelera'] as $k => $c) {
+        $at = strtotime((string)($c['borrado_at'] ?? ''));
+        if ($at && $at >= $limite) continue;
+        bs_contrato_adj_borrar((string)$k);
+        unset($d['papelera'][$k]);
+        $cambio = true;
+    }
+    return $cambio;
+}
+
+/** Manda un contrato a la papelera (se llama con el lock tomado). */
+function bs_contrato_a_papelera(&$d, $k) {
+    if (!isset($d['papelera']) || !is_array($d['papelera'])) $d['papelera'] = [];
+    $c = $d['contratos'][$k];
+    $c['borrado_at'] = date('c');
+    $d['papelera'][$k] = $c;
+    unset($d['contratos'][$k]);
+}
+
 function bs_contrato_id() {
     return 'c' . date('ymdHis') . bin2hex(random_bytes(3));
 }
@@ -255,9 +287,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'archivo' => bs_contrato_archivo($c) !== null,
         ]]);
     }
+    if (isset($_GET['papelera'])) {
+        $pap = [];
+        $limite = time() - BS_CONTRATOS_PAPELERA_DIAS * 86400;
+        foreach ((array)($d['papelera'] ?? []) as $c) {
+            $at = strtotime((string)($c['borrado_at'] ?? '')) ?: time();
+            if ($at < $limite) continue; // vencido: lo borra la próxima escritura
+            $s = bs_contrato_salida($c);
+            $s['borrado'] = date('Y-m-d', $at);
+            $s['quedan'] = max(0, BS_CONTRATOS_PAPELERA_DIAS - intval(floor((time() - $at) / 86400)));
+            $pap[] = $s;
+        }
+        usort($pap, function ($a, $b) { return strcmp($b['borrado'], $a['borrado']); });
+        bs_ok(['dias' => BS_CONTRATOS_PAPELERA_DIAS, 'contratos' => $pap]);
+    }
     $lista = array_map('bs_contrato_salida', array_values($d['contratos']));
     usort($lista, function ($a, $b) { return strcmp($b['creado'], $a['creado']) ?: strcmp($b['id'], $a['id']); });
-    bs_ok(['hoy' => date('Y-m-d'), 'vendedores' => $BS_CONTRATO_VENDEDORES, 'procedencias' => $BS_CONTRATO_PROCEDENCIAS, 'contratos' => $lista]);
+    $en_papelera = 0;
+    foreach ((array)($d['papelera'] ?? []) as $c) {
+        if ((strtotime((string)($c['borrado_at'] ?? '')) ?: time()) >= time() - BS_CONTRATOS_PAPELERA_DIAS * 86400) $en_papelera++;
+    }
+    bs_ok(['hoy' => date('Y-m-d'), 'papelera' => $en_papelera, 'vendedores' => $BS_CONTRATO_VENDEDORES, 'procedencias' => $BS_CONTRATO_PROCEDENCIAS, 'contratos' => $lista]);
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') bs_error('Solo GET o POST', 405);
@@ -265,13 +315,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') bs_error('Solo GET o POST', 405);
 $body = json_decode(@file_get_contents('php://input'), true);
 if (!is_array($body)) bs_error('Body JSON inválido');
 $accion = (string)($body['accion'] ?? '');
-$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'borrar_enlazado', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
+$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'borrar_enlazado', 'restaurar', 'restaurar_enlazado', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
 if (!in_array($accion, $acciones, true)) bs_error('accion inválida');
 
 // Todo lo que puede fallar por datos mal cargados se valida ANTES de tomar el lock.
 $campos = in_array($accion, ['crear', 'editar'], true) ? bs_contrato_campos($body) : null;
 $id = (string)($body['id'] ?? '');
-if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
+if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado', 'restaurar_enlazado'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
 
 $sena_nueva = null;
 if ($accion === 'sena') $sena_nueva = bs_contrato_sena($body['monto'] ?? 0, $body['moneda'] ?? '', $body['fecha'] ?? '');
@@ -312,7 +362,8 @@ try {
     $d = bs_contratos_leer();
     $ahora = date('c');
     $extra = [];
-    $borrar_adj = []; // contratos borrados: su PDF o Excel se va con ellos
+    $borrar_adj = []; // contratos borrados DEFINITIVAMENTE: su PDF o Excel se va con ellos
+    bs_contratos_purgar_papelera($d); // lo que venció en la papelera sale con esta escritura
 
     // Vendedor y procedencia salen de las listas. Un contrato viejo conserva lo que ya tenía
     // (por si un nombre se saca de la lista), pero no se le puede poner otro valor de afuera.
@@ -365,8 +416,36 @@ try {
         $extra['borrado'] = $k !== null;
         if ($k !== null) {
             $id = (string)$k;
-            $borrar_adj[] = $id;
-            unset($d['contratos'][$k]);
+            if (!empty($d['contratos'][$k]['prueba'])) { $borrar_adj[] = $id; unset($d['contratos'][$k]); }
+            else bs_contrato_a_papelera($d, $k);
+        }
+
+    } elseif ($accion === 'restaurar' || $accion === 'restaurar_enlazado') {
+        // De la papelera a la lista, con sus pagos y su adjunto.
+        $k = null;
+        if ($accion === 'restaurar') {
+            $k = isset($d['papelera'][$id]) ? $id : null;
+        } else {
+            $n = str_pad((string)intval($body['cliente_nro'] ?? 0), 4, '0', STR_PAD_LEFT);
+            foreach ((array)$d['papelera'] as $kk => $c) {
+                $e = $c['enlace'] ?? null;
+                if (is_array($e) && (string)($e['cliente_nro'] ?? '') === $n && intval($e['sub'] ?? 0) === intval($body['sub'] ?? 0)) $k = (string)$kk;
+            }
+        }
+        $extra['restaurado'] = $k !== null;
+        if ($k === null) {
+            if ($accion === 'restaurar') bs_contratos_salir($fp, 'Ese contrato ya no está en la papelera.', 404);
+        } else {
+            $c = $d['papelera'][$k];
+            unset($c['borrado_at']);
+            // si mientras tanto esa ficha se enlazó con otro contrato, este vuelve suelto
+            $e = $c['enlace'] ?? null;
+            if (is_array($e) && bs_contrato_de_ficha($d, intval($e['cliente_nro'] ?? 0), intval($e['sub'] ?? 0)) !== null) $c['enlace'] = null;
+            $c['actualizado'] = $ahora;
+            $d['contratos'][$k] = $c;
+            unset($d['papelera'][$k]);
+            $id = $k;
+            $extra['enlace'] = is_array($c['enlace'] ?? null) ? ['cliente_nro' => $c['enlace']['cliente_nro'], 'sub' => $c['enlace']['sub']] : null;
         }
 
     } elseif ($accion === 'borrar_prueba') {
@@ -408,8 +487,9 @@ try {
         }
 
         if ($accion === 'borrar') {
-            $borrar_adj[] = $id;
-            unset($d['contratos'][$id]);
+            // A la papelera (30 días). Los de prueba, o con "definitivo", se borran de verdad.
+            if (!empty($c['prueba']) || !empty($body['definitivo'])) { $borrar_adj[] = $id; unset($d['contratos'][$id]); }
+            else bs_contrato_a_papelera($d, $id);
         } else {
             $c['actualizado'] = $ahora;
             $d['contratos'][$id] = $c;

@@ -20,6 +20,8 @@ define('BS_TABLERO_FILE',     BS_TABLERO_DIR . '/obras.json');
 define('BS_TABLERO_LOCK',     BS_TABLERO_DIR . '/.write.lock');
 define('BS_TABLERO_ADJ_DIR',  BS_TABLERO_DIR . '/adjuntos');
 define('BS_TABLERO_NOTA_MAX', 300);
+// Papelera: una ficha borrada se puede recuperar durante estos días (decisión del dueño, 16/11/2026).
+define('BS_PAPELERA_DIAS', 30);
 
 // Adjuntos: qué se puede colgar de una obra y cuánto.
 define('BS_TABLERO_ADJ_MAX_BYTES',    10 * 1024 * 1024); // por archivo
@@ -305,6 +307,79 @@ function bs_tablero_adj_carpeta($key) {
 }
 
 /** Borra todos los archivos adjuntos de una obra (la usa la purga). */
+/**
+ * Papelera del tablero — borrado definitivo de lo que ya venció.
+ *
+ * Una ficha borrada no se pierde en el momento: su cotización pasa de "aprobado" a
+ * "papelera" (deja de verse en el tablero, el calendario y Presupuestos) y su registro,
+ * sus tildes y sus adjuntos quedan donde estaban. Pasados BS_PAPELERA_DIAS se borra:
+ *   - obra cargada a mano  → se va entera (como hacía "Borrar ficha" antes);
+ *   - vino de la calculadora → el presupuesto vuelve a "enviado" y se va solo la ficha.
+ * Lo llaman tablero-papelera.php (cada vez que se mira la papelera) y la limpieza nocturna.
+ * Devuelve cuántas fichas borró.
+ */
+function bs_tablero_papelera_purgar() {
+    if (!is_dir(BS_CLIENTES_DIR)) return 0;
+    $limite = time() - BS_PAPELERA_DIAS * 86400;
+    $vencidas = [];
+    $fp = bs_lock_acquire(BS_CLIENTES_DIR . '/.write.lock');
+    if (!$fp) return 0;
+    foreach (scandir(BS_CLIENTES_DIR) as $f) {
+        if (!preg_match('/^(\d{4,})\.json$/', $f)) continue;
+        $path = BS_CLIENTES_DIR . '/' . $f;
+        $cli = bs_read_json($path);
+        if (!$cli) continue;
+        $nro = (string)($cli['cliente_nro'] ?? '');
+        $kept = [];
+        $cambio = false;
+        foreach ($cli['cotizaciones'] ?? [] as $cot) {
+            if (($cot['estado'] ?? '') === 'papelera') {
+                $at = strtotime((string)($cot['papelera']['at'] ?? ''));
+                if ($at && $at < $limite) {
+                    $vencidas[] = $nro . '-' . intval($cot['sub'] ?? 0);
+                    $cambio = true;
+                    if (!empty($cot['manual'])) {
+                        if (!empty($cot['zip_path']) && file_exists(BS_DATA_DIR . '/' . $cot['zip_path'])) @unlink(BS_DATA_DIR . '/' . $cot['zip_path']);
+                        continue;
+                    }
+                    $cot['estado'] = 'enviado';
+                    $cot['transiciones'][] = ['estado' => 'enviado', 'at' => date('c')];
+                    unset($cot['papelera']);
+                }
+            }
+            $kept[] = $cot;
+        }
+        if (!$cambio) continue;
+        if (!count($kept)) {
+            @unlink($path);
+            // el número no se recicla (mismo criterio que delete.php)
+            $idx = bs_read_json(BS_CLIENTES_INDEX);
+            if (!is_array($idx)) $idx = [];
+            $idx[$nro] = ['deleted_at' => date('c'), 'reason' => 'papelera'];
+            bs_write_json_atomic(BS_CLIENTES_INDEX, $idx);
+        } else {
+            $cli['cotizaciones'] = $kept;
+            $cli['ultima_actualizacion'] = date('c');
+            bs_write_json_atomic($path, $cli);
+        }
+    }
+    bs_lock_release($fp);
+
+    if ($vencidas && is_dir(BS_TABLERO_DIR)) {
+        $fp = bs_lock_acquire(BS_TABLERO_LOCK);
+        if ($fp) {
+            $tablero = bs_tablero_leer();
+            foreach ($vencidas as $key) {
+                bs_tablero_borrar_carpeta($key);
+                unset($tablero['obras'][$key]);
+            }
+            bs_write_json_atomic(BS_TABLERO_FILE, $tablero);
+            bs_lock_release($fp);
+        }
+    }
+    return count($vencidas);
+}
+
 function bs_tablero_borrar_carpeta($key) {
     if (!preg_match('/^\d{4,}-\d+$/', $key)) return;
     $dir = bs_tablero_adj_carpeta($key);

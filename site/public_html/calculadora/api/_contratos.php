@@ -17,6 +17,8 @@ define('BS_CONTRATOS_LOCK', BS_CONTRATOS_DIR . '/.write.lock');
 define('BS_CONTRATOS_MAX',  5000);
 define('BS_CONTRATOS_ADJ_DIR', BS_CONTRATOS_DIR . '/adjuntos');
 define('BS_CONTRATOS_ADJ_MAX_BYTES', 10 * 1024 * 1024);
+// Papelera: un contrato borrado se puede recuperar durante estos días.
+define('BS_CONTRATOS_PAPELERA_DIAS', 30);
 
 // Quién vende y de dónde llega el cliente: listas cerradas (las dictó el dueño, 16/11/2026).
 // Para sumar o sacar un nombre se toca solo acá; la página las recibe con el GET.

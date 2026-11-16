@@ -177,6 +177,7 @@ function bs_tablero_zona($cot) {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $tablero = bs_tablero_leer();
     $cards = [];
+    $en_papelera = 0; // fichas borradas que todavía se pueden recuperar
 
     if (is_dir(BS_CLIENTES_DIR)) {
         foreach (scandir(BS_CLIENTES_DIR) as $f) {
@@ -189,6 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $cots = $cliente_obj['cotizaciones'] ?? [];
 
             foreach ($cots as $cot) {
+                if (($cot['estado'] ?? '') === 'papelera') $en_papelera++;
                 if (($cot['estado'] ?? '') !== 'aprobado') continue;
 
                 $sub = intval($cot['sub'] ?? 0);
@@ -282,7 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'oculta' => !empty($def['oculta']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'avisa_fecha' => !empty($def['avisa_fecha']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'pendientes' => (string)($def['pendientes'] ?? ''), 'urge' => array_values((array)($def['urge'] ?? [])), 'en_manos' => array_values((array)($def['en_manos'] ?? [])), 'hecha_txt' => array_values((array)($def['hecha_txt'] ?? [])), 'urge_txt' => (string)($def['urge_txt'] ?? ''), 'urge_ok_txt' => (string)($def['urge_ok_txt'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
     }
 
-    bs_ok(['hoy' => date('Y-m-d'), 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
+    bs_ok(['hoy' => date('Y-m-d'), 'papelera' => $en_papelera, 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
 }
 
 // ============================================================

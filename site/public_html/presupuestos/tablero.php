@@ -166,6 +166,15 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
   .board .col::-webkit-scrollbar{width:8px}
   .board .col::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
 }
+/* Papelera: lista de fichas borradas, cada una con su botón para recuperarla */
+.pap{margin-top:12px;border:1px solid var(--border);border-radius:var(--radius-sm);max-height:52vh;overflow-y:auto}
+.pap-f{display:flex;align-items:center;gap:12px;padding:10px 12px;border-top:1px solid var(--border-soft)}
+.pap-f:first-child{border-top:none}
+.pap-f>div{flex:1;min-width:0}
+.pap-f b{display:block;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pap-f small{display:block;margin-top:2px;font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pap-f button{flex-shrink:0;padding:8px 14px;border:1px solid var(--gr);border-radius:999px;background:var(--card);font-family:inherit;font-size:13px;font-weight:700;color:var(--gr);cursor:pointer}
+.pap-f button:disabled{opacity:.6;cursor:default}
 /* Plegar una etapa: se cierra hacia arriba y queda solo su título, con el contador (y un "!" si
    tiene algo por avanzar). No cambia de ancho ni mueve a las demás. Solo en computadora: en tablet
    y celular ya se ve de a una etapa por vez. */
@@ -611,6 +620,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
       <div class="tope-b">
         <button type="button" class="vista-b" id="vistaB"></button>
         <button type="button" class="vista-b" id="exportB" title="Baja todas las obras del tablero en un archivo CSV (se abre con Excel)">Exportar<span class="sob"> tablero</span></button>
+        <button type="button" class="vista-b" id="papB" title="Fichas borradas: se pueden recuperar durante 30 días" hidden></button>
       </div>
       <div class="hoy" id="hoyTxt"></div>
     </div>
@@ -656,6 +666,7 @@ const API_ADJ='/calculadora/api/tablero-adjunto.php';
 const API_CARGAR='/calculadora/api/tablero-cargar.php';
 const API_EDITAR='/calculadora/api/tablero-editar.php';
 const API_BORRAR='/calculadora/api/delete.php';
+const API_PAPELERA='/calculadora/api/tablero-papelera.php';
 const ADJ={bacha:'Bacha',plano:'Plano',entrega:'Entrega'}; // tipos de adjunto
 const ADJ_L={bacha:'Foto de la bacha',plano:'Plano',entrega:'Foto de entrega'}; // cómo se nombran en ventanas y avisos
 const ADJ_OK={bacha:'Foto de bacha guardada',plano:'Plano guardado',entrega:'Foto de entrega guardada'};
@@ -786,7 +797,8 @@ async function cargar(){
   try{
     const j=await pedir(API);
     if(drag)return; // no redibujar con una tarjeta en el aire
-    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];MEDIDORES=j.medidores||[];
+    ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;
+    $('papB').hidden=!j.papelera;$('papB').textContent='Papelera · '+(j.papelera||0);INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];MEDIDORES=j.medidores||[];
     dibujar();
   }catch(e){
     if(!CARDS.length)$('board').innerHTML='<div class="aviso" style="grid-column:1/-1">'+esc(e.message)+'</div>';
@@ -2214,26 +2226,21 @@ async function pedirBorrar(c){
   const ct=await contratoDe(c);
   abrirModal('¿Borrar la ficha '+c.cliente_nro+'-'+c.sub+'?',
     '<p><b>'+esc(quien)+'</b></p>'+
-    '<p>Se borran sus tildes, fechas y datos'+(n?', y '+(n===1?'el archivo adjunto':'los '+n+' archivos adjuntos'):'')+'.</p>'+
-    (c.manual
-      ?'<p>Es una obra cargada a mano: se borra completa.</p>'
-      :'<p>El presupuesto no se borra: vuelve a <b>Enviado</b> en Presupuestos.</p>')+
+    '<p>Sale del tablero y del calendario, con sus tildes, fechas y datos'+(n?', y '+(n===1?'su archivo adjunto':'sus '+n+' archivos adjuntos'):'')+'.</p>'+
     (ct?'<p class="ojo">Está enlazada con un contrato de Relación-Contrato: <b>también se borra el contrato</b>'+(ct.pagos||ct.archivo?', con '+[ct.pagos?(ct.pagos===1?'su pago':'sus '+ct.pagos+' pagos'):'',ct.archivo?'su presupuesto adjunto':''].filter(Boolean).join(' y '):'')+'.</p>':'')+
-    '<p class="ojo">No se puede deshacer.</p>',
+    '<p>Va a la <b>papelera</b>: se puede recuperar durante 30 días'+(ct?', junto con su contrato':'')+'. Después se borra de verdad.</p>',
     'Borrar ficha',
     async()=>{
       if(ocupado)return;
       ocupado=true;
       cerrarModal();
       try{
-        // 1) la ficha del tablero (tildes, datos, adjuntos)  2) el presupuesto
-        await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'borrar'});
-        if(c.manual)await pedir(API_BORRAR,{cliente_nro:c.cliente_nro,sub:c.sub,desde_tablero:true});
-        else await pedir(API_ESTADO,{cliente_nro:c.cliente_nro,sub:c.sub,nuevo_estado:'enviado',desde_tablero:true});
-        // 3) su contrato enlazado, si lo tiene
+        // 1) la ficha va a la papelera (no se destruye nada: 30 días para recuperarla)
+        await pedir(API_PAPELERA,{accion:'tirar',cliente_nro:c.cliente_nro,sub:c.sub});
+        // 2) su contrato enlazado, si lo tiene, va a su propia papelera
         const conContrato=ct?await borrarContratoDe(c):false;
         if(abierta===c.key)abierta='';
-        toast('Ficha '+c.cliente_nro+'-'+c.sub+' borrada'+(conContrato?', con su contrato':''),true);
+        toast('Ficha '+c.cliente_nro+'-'+c.sub+' en la papelera'+(conContrato?', con su contrato':'')+'. Se puede recuperar 30 días.',true);
       }catch(e){
         toast(e.message);
       }
@@ -2243,6 +2250,39 @@ async function pedirBorrar(c){
   $('mOk').classList.add('peligro');
   $('mCancelar').focus(); // el foco queda en Cancelar: Enter no borra por accidente
 }
+
+// Papelera: las fichas borradas en los últimos 30 días, con el botón para recuperarlas.
+// Restaurar deja la ficha como estaba (etapa, tildes, fechas, fotos) y, si tenía un contrato
+// enlazado que se fue con ella, también lo trae de vuelta.
+async function pedirPapelera(){
+  let j;
+  try{j=await pedir(API_PAPELERA);}catch(e){toast(e.message);return;}
+  const filas=j.fichas.map(f=>'<div class="pap-f"><div><b>'+esc(f.key)+' · '+esc(nombreCorto(f.nombre)||'Sin nombre')+'</b><small>'+esc(f.etapa_titulo)+(f.material?' · '+esc(f.material):'')+(f.adjuntos?' · '+f.adjuntos+(f.adjuntos===1?' adjunto':' adjuntos'):'')+'</small><small>Borrada el '+esc(fechaCorta(f.borrada))+' · '+(f.quedan<=0?'se borra hoy':(f.quedan===1?'queda 1 día':'quedan '+f.quedan+' días'))+'</small></div><button type="button" data-restaurar="'+esc(f.key)+'">Restaurar</button></div>').join('');
+  abrirModal('Papelera',
+    (filas?'<p>Fichas borradas. Se pueden recuperar durante '+j.dias+' días; después se borran de verdad.</p><div class="pap">'+filas+'</div>':'<p>La papelera está vacía.</p>'),
+    'Cerrar',cerrarModal);
+  $('mCancelar').style.display='none';
+}
+async function restaurarFicha(key,btn){
+  if(ocupado)return;
+  ocupado=true;btn.disabled=true;btn.textContent='Un momento…';
+  const p=key.split('-'),c={cliente_nro:p[0],sub:+p[1]};
+  try{
+    await pedir(API_PAPELERA,{accion:'restaurar',cliente_nro:c.cliente_nro,sub:c.sub});
+    // su contrato, si se había ido con ella (Relación-Contrato es opcional: si no existe, no pasa nada)
+    let conContrato=false;
+    try{
+      const r=await fetch(API_CONTRATOS,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'restaurar_enlazado',cliente_nro:c.cliente_nro,sub:c.sub})});
+      const jj=await r.json();conContrato=!!(jj&&jj.ok&&jj.restaurado);
+    }catch(e){}
+    toast('Ficha '+key+' restaurada'+(conContrato?', con su contrato':''),true);
+  }catch(e){toast(e.message);}
+  ocupado=false;
+  await cargar();
+  if($('papB').hidden)cerrarModal();else pedirPapelera();
+}
+$('papB').addEventListener('click',pedirPapelera);
+$('mCuerpo').addEventListener('click',ev=>{const b=ev.target.closest('[data-restaurar]');if(b)restaurarFicha(b.dataset.restaurar,b);});
 
 // Archivar: el presupuesto pasa a "Entregado" en el hub. No borra nada.
 function pedirArchivar(c){

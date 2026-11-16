@@ -197,6 +197,14 @@ button{font-family:inherit;color:inherit}
 .menu button:disabled{color:var(--text3);cursor:default}
 .menu .sep{height:1px;margin:5px 4px;background:var(--border-soft)}
 .menu .pel{color:var(--red)}
+/* Papelera: lista de contratos borrados, cada uno con su botón para recuperarlo */
+.pap{margin-top:4px;border:1px solid var(--border);border-radius:var(--radius-sm);max-height:52vh;overflow-y:auto}
+.pap-f{display:flex;align-items:center;gap:12px;padding:10px 12px;border-top:1px solid var(--border-soft)}
+.pap-f:first-child{border-top:none}
+.pap-f>div{flex:1;min-width:0}
+.pap-f b{display:block;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pap-f small{display:block;margin-top:2px;font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pap-f .btn{flex-shrink:0;border-color:var(--gr);color:var(--gr)}
 /* Pie de la planilla: la suma de lo que se está viendo, debajo de cada columna */
 .pie{border-top:2px solid var(--border);border-radius:0 0 var(--radius) var(--radius);background:var(--card-alt);font-size:13px;color:var(--text2)}
 .pie .q{grid-column:1/5;font-weight:700;color:var(--text)}
@@ -445,6 +453,7 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
     </div>
     <div class="acc">
       <div class="buscar"><input type="search" id="buscar" placeholder="Buscar en todos los meses" autocomplete="off" aria-label="Buscar cliente, N° o material en todos los meses"></div>
+      <button type="button" class="btn" id="papB" data-papelera title="Contratos borrados: se pueden recuperar durante 30 días" hidden></button>
       <button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button>
     </div>
   </div>
@@ -469,9 +478,10 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 // Un renglón por contrato. Lo operativo (cliente, dirección, material, pileta, seña) lo manda el
 // tablero cuando el contrato está enlazado; la plata (total y pagos) vive acá.
 const $=id=>document.getElementById(id);
-const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php',API_ADJ='/calculadora/api/contratos-adjunto.php';
+const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php',API_ADJ='/calculadora/api/contratos-adjunto.php',API_PAP_T='/calculadora/api/tablero-papelera.php';
 let CONTRATOS=[],CARDS={},ETAPAS={},HOY='',TABLERO_OK=false,q='';
-let VENDEDORES=[],PROCEDENCIAS=[]; // listas cerradas: las manda el servidor (se editan en contratos.php)
+let VENDEDORES=[],PROCEDENCIAS=[];
+let EN_PAPELERA=0; // contratos borrados que todavía se pueden recuperar (30 días) // listas cerradas: las manda el servidor (se editan en contratos.php)
 let mes=''; // mes a la vista, 'YYYY-MM' (por la fecha del contrato)
 let filtro='todos',orden='fecha',ordenAsc=false; // qué se mira y cómo se ordena la planilla
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -589,7 +599,8 @@ const bachaTxt=v=>v.bacha?BACHA[v.bacha]+(v.bacha==='nuestra'&&v.bacha_modelo?' 
 async function cargar(){
   try{
     const [a,t]=await Promise.all([pedir(API),pedir(API_T).catch(()=>null)]);
-    CONTRATOS=a.contratos;HOY=a.hoy;VENDEDORES=a.vendedores||[];PROCEDENCIAS=a.procedencias||[];
+    CONTRATOS=a.contratos;HOY=a.hoy;VENDEDORES=a.vendedores||[];PROCEDENCIAS=a.procedencias||[];EN_PAPELERA=a.papelera||0;
+    $('papB').hidden=!EN_PAPELERA;$('papB').textContent='Papelera · '+EN_PAPELERA;
     if(!mes)mes=HOY.slice(0,7);
     TABLERO_OK=!!t;CARDS={};ETAPAS={};
     if(t){t.cards.forEach(k=>{CARDS[k.key]=k;});t.etapas.forEach(e=>{ETAPAS[e.id]=e.titulo;});}
@@ -978,17 +989,17 @@ async function copiar(txt,que){
   toast(COPIADO[que]+': '+txt);
 }
 
-// Borrar un contrato. Si está enlazado con una ficha que sigue en el tablero, se borran los dos
-// (regla del dueño, 16/11/2026): la ficha se borra igual que con "Borrar ficha" del tablero.
+// Borrar un contrato: va a la papelera y se puede recuperar durante 30 días. Si está enlazado con
+// una ficha que sigue en el tablero, la ficha va a la papelera del tablero (regla del dueño,
+// 16/11/2026: enlazados, se borra en los dos lados). Restaurar trae de vuelta a los dos.
 function pedirBorrar(id){
   const c=CONTRATOS.find(x=>x.id===(id||(F&&F.id)));if(!c)return;
   id=c.id;
   const k=cardDe(c),nAdj=k&&k.adjuntos?k.adjuntos.length:0;
-  abrirModal('<h3>Borrar contrato</h3><div class="bajada">Se borra el contrato de <b>'+esc(ver(c).cliente)+'</b> con sus pagos'+(c.archivo?' y su presupuesto adjunto':'')+'.'
-    +(k?'<br><br><b>También se borra su ficha del tablero</b> ('+esc(k.key)+', en '+esc(ETAPAS[k.etapa]||k.etapa)+'): sus tildes, fechas y datos'+(nAdj?', y '+(nAdj===1?'su archivo adjunto':'sus '+nAdj+' archivos adjuntos'):'')+'. '
-      +(k.manual?'Es una obra cargada a mano: se borra completa.':'El presupuesto no se borra: vuelve a Enviado en Presupuestos.')
+  abrirModal('<h3>Borrar contrato</h3><div class="bajada">El contrato de <b>'+esc(ver(c).cliente)+'</b> va a la papelera, con sus pagos'+(c.archivo?' y su presupuesto adjunto':'')+'.'
+    +(k?'<br><br><b>También sale del tablero su ficha</b> ('+esc(k.key)+', en '+esc(ETAPAS[k.etapa]||k.etapa)+'), con sus tildes, fechas y datos'+(nAdj?', y '+(nAdj===1?'su archivo adjunto':'sus '+nAdj+' archivos adjuntos'):'')+'.'
       :(c.enlace?'<br>La ficha del tablero ya no está (archivada o borrada): no se toca nada más.':''))
-    +'<br><br>No se puede deshacer.</div><div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar data-foco>Cancelar</button><button type="button" class="ok peligro" data-confirmar-borrar="'+esc(id)+'">'+(k?'Borrar contrato y ficha':'Borrar')+'</button></div>',true,false);
+    +'<br><br>'+(c.prueba?'Es un renglón de prueba: se borra de verdad, sin papelera.':'Se puede recuperar durante 30 días desde "Papelera". Después se borra de verdad.')+'</div><div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar data-foco>Cancelar</button><button type="button" class="ok peligro" data-confirmar-borrar="'+esc(id)+'">'+(k?'Borrar contrato y ficha':'Borrar')+'</button></div>',true,false);
 }
 async function borrarContrato(id){
   const c=CONTRATOS.find(x=>x.id===id);if(!c)return;
@@ -996,14 +1007,38 @@ async function borrarContrato(id){
   // primero la ficha del tablero: si eso falla, el contrato no se toca
   if(k){
     const base={cliente_nro:k.cliente_nro,sub:k.sub};
-    await pedir(API_T,Object.assign({accion:'borrar'},base));
-    if(k.manual)await pedir(API_DEL,Object.assign({desde_tablero:true},base));
-    else await pedir('/calculadora/api/state.php',Object.assign({nuevo_estado:'enviado',desde_tablero:true},base));
+    if(c.prueba){ // los de prueba no pasan por la papelera
+      await pedir(API_T,Object.assign({accion:'borrar'},base));
+      if(k.manual)await pedir(API_DEL,Object.assign({desde_tablero:true},base));
+      else await pedir('/calculadora/api/state.php',Object.assign({nuevo_estado:'enviado',desde_tablero:true},base));
+    }else await pedir(API_PAP_T,Object.assign({accion:'tirar'},base));
   }
   await pedir(API,{accion:'borrar',id:id});
   cerrarModal();
-  toast(k?'Contrato y ficha del tablero borrados.':'Contrato borrado.');
+  toast(c.prueba?'Renglón de prueba borrado.':(k?'Contrato y ficha en la papelera. Se pueden recuperar 30 días.':'Contrato en la papelera. Se puede recuperar 30 días.'));
   await cargar();
+}
+// Papelera de contratos: los borrados en los últimos 30 días, con el botón para recuperarlos.
+async function pedirPapelera(){
+  let j;
+  try{j=await pedir(API+'?papelera=1');}catch(e){toast(e.message);return;}
+  const filas=j.contratos.map(c=>{
+    const n=cuentas(c,c),tot=partes(n.tot).join(' + ');
+    return '<div class="pap-f"><div><b>'+esc(c.cliente)+(c.nro?' · N° '+esc(c.nro):'')+'</b><small>'+[tot?'Total '+tot:'',(c.pagos.length+(c.sena?1:0))?((c.pagos.length+(c.sena?1:0))===1?'1 cobro':(c.pagos.length+(c.sena?1:0))+' cobros'):'',c.archivo?'presupuesto adjunto':'',c.enlace?'enlazado con '+esc(c.enlace.cliente_nro+'-'+c.enlace.sub):''].filter(Boolean).join(' · ')+'</small><small>Borrado el '+esc(fch(c.borrado))+' · '+(c.quedan<=0?'se borra hoy':(c.quedan===1?'queda 1 día':'quedan '+c.quedan+' días'))+'</small></div><button type="button" class="btn chico" data-restaurar="'+esc(c.id)+'">Restaurar</button></div>';
+  }).join('');
+  abrirModal('<h3>Papelera</h3><div class="bajada">'+(filas?'Contratos borrados. Se pueden recuperar durante '+j.dias+' días; después se borran de verdad. Si el contrato estaba enlazado con una ficha que también está en la papelera del tablero, vuelven los dos.':'La papelera está vacía.')+'</div>'+(filas?'<div class="pap">'+filas+'</div>':'')
+    +'<div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar data-foco>Cerrar</button></div>',false,false);
+}
+async function restaurar(id){
+  const r=await pedir(API,{accion:'restaurar',id:id});
+  // su ficha del tablero, si se había ido con él
+  let conFicha=false;
+  if(r.enlace){
+    try{await pedir(API_PAP_T,{accion:'restaurar',cliente_nro:r.enlace.cliente_nro,sub:r.enlace.sub});conFicha=true;}catch(e){}
+  }
+  toast('Contrato restaurado'+(conFicha?', con su ficha del tablero.':'.'));
+  await cargar();
+  if(EN_PAPELERA)await pedirPapelera();else cerrarModal();
 }
 async function borrarPrueba(){
   const r=await pedir(API,{accion:'borrar_prueba'});
@@ -1035,6 +1070,8 @@ document.addEventListener('click',ev=>{
   }
   let b;
   if((b=t.closest('[data-confirmar-prueba]'))){conBoton(b,borrarPrueba);return;}
+  if(t.closest('[data-papelera]')){pedirPapelera();return;}
+  if((b=t.closest('[data-restaurar]'))){conBoton(b,()=>restaurar(b.dataset.restaurar));return;}
   if((b=t.closest('[data-enviar]'))){pedirEnviar(b.dataset.enviar);return;}
   if((b=t.closest('[data-enlazar]'))){pedirEnlazar(b.dataset.enlazar);return;}
   if((b=t.closest('[data-confirmar-enlazar]'))){conBoton(b,()=>enlazar(b.dataset.confirmarEnlazar));return;}

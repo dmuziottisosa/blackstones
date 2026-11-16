@@ -59,6 +59,12 @@ $stats = [
 ];
 
 // ============================================================
+// Papelera del tablero: lo que lleva más de 30 días borrado se va de verdad.
+// Antes que nada, así lo que queda en clientes/ ya está al día.
+// ============================================================
+$stats['papelera'] = bs_tablero_papelera_purgar();
+
+// ============================================================
 // Cleanup de clientes/
 // ============================================================
 
@@ -117,6 +123,9 @@ if (is_dir(BS_CLIENTES_DIR)) {
                         $ocultos_cliente++;
                     }
                 }
+                $kept[] = $cot;
+            } elseif ($estado === 'papelera') {
+                // En la papelera del tablero: la maneja bs_tablero_papelera_purgar() (30 días).
                 $kept[] = $cot;
             } else {
                 // No-entregado: si no hay entregado activo Y no se modificó hace >180 días → borrar
@@ -214,13 +223,14 @@ if (is_array($vivas) && is_dir(BS_TABLERO_DIR)) {
 // ============================================================
 
 $log_line = sprintf(
-    "[%s] cleanup: cotizaciones=%d clientes=%d zips=%d obras_tablero=%d fuera_de_presupuestos=%d errores=%d\n",
+    "[%s] cleanup: cotizaciones=%d clientes=%d zips=%d obras_tablero=%d fuera_de_presupuestos=%d papelera=%d errores=%d\n",
     date('c'),
     $stats['cotizaciones_borradas'],
     $stats['clientes_borrados'],
     $stats['zips_borrados'],
     $stats['obras_tablero_borradas'],
     $stats['ocultos'],
+    $stats['papelera'],
     count($stats['errores'])
 );
 @file_put_contents(BS_REGISTRO_CRON_LOG, $log_line, FILE_APPEND | LOCK_EX);

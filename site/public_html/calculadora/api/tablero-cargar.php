@@ -92,6 +92,8 @@ if ($nro_txt !== '') {
                 bs_lock_release($fp);
                 bs_error('El ' . $nro . '-' . $sub_pedido . ' ya figura como entregado.', 409);
             }
+            // (si estaba en la papelera del tablero, esto la restaura con todo lo que tenía)
+            unset($cot['papelera']);
             $cot['estado'] = 'aprobado';
             $cot['transiciones'][] = ['estado' => 'aprobado', 'at' => $now];
         }
