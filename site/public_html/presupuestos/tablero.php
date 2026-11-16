@@ -1696,10 +1696,10 @@ function pedirEditar(c){
     campo('edCel','Teléfono',c.celular,'maxlength="40" inputmode="tel"')+
     campo('edDir','Dirección',c.direccion,'maxlength="200"')+
     '<label class="campo mat-wrap">Material y color (del catálogo de la calculadora)<input type="text" id="edMat" autocomplete="off" maxlength="200" value="'+esc(c.material)+'"><div class="mat-caja" id="edMatCaja"></div></label>'+
-    // La nota de la ficha (lo que la frena, lo que hay que saber): se edita acá junto con lo demás.
-    campo('edNota','Nota',c.nota,'maxlength="300" placeholder="Ej: falta la bacha, llamar antes de ir"')+
     // El modelo de la bacha se puede cargar o corregir en cualquier etapa (el tilde solo vive en Por medir).
     (conBacha?campo('edBacha','Modelo de la bacha ('+BACHA[c.bacha]+')',c.bacha_modelo||'','maxlength="80" placeholder="Ej: Johnson E37, 37 × 34"'):'')+
+    // La nota de la ficha (lo que la frena, lo que hay que saber) va última.
+    campo('edNota','Nota',c.nota,'maxlength="300" placeholder="Ej: falta la bacha, llamar antes de ir"')+
     '<p class="m-error" id="edError" hidden></p>',
     'Guardar',
     async()=>{
