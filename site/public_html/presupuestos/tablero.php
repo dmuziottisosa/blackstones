@@ -155,7 +155,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 [data-theme="dark"] .et-retiro{--et:#4FC4C4;--et-soft:rgba(79,196,196,.13)}
 
 .col-tabs{display:none}
-.board{display:grid;grid-template-columns:var(--tpl,repeat(var(--ncols,5),minmax(200px,1fr)));gap:14px;align-items:start;overflow-x:auto;padding-bottom:4px}
+.board{display:grid;grid-template-columns:repeat(var(--ncols,5),minmax(200px,1fr));gap:14px;align-items:start;overflow-x:auto;padding-bottom:4px}
 .col{background:var(--card-alt);border:1px solid var(--border);border-top:4px solid var(--et);border-radius:var(--radius);padding:12px;min-height:120px;transition:background .15s,opacity .15s}
 .col-h{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 12px}
 .col .card:last-child{margin-bottom:0}
@@ -166,21 +166,20 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
   .board .col::-webkit-scrollbar{width:8px}
   .board .col::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
 }
-/* Plegar una etapa: queda como una tira angosta con su nombre y su contador, y las demás ganan
-   el lugar. Solo en computadora: en tablet y celular ya se ve de a una etapa por vez. */
+/* Plegar una etapa: se cierra hacia arriba y queda solo su título, con el contador (y un "!" si
+   tiene algo por avanzar). No cambia de ancho ni mueve a las demás. Solo en computadora: en tablet
+   y celular ya se ve de a una etapa por vez. */
 .col-pl,.col-al{display:none}
 @media(min-width:1100px){
   .col-h{gap:8px}
   .col-h h2{flex:1;min-width:0}
   .col-pl{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin-right:-4px;border:none;border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;flex-shrink:0}
-  .col-pl svg{width:15px;height:15px}
+  .col-pl svg{width:16px;height:16px}
   .col-pl:focus-visible{outline:2px solid var(--gd);outline-offset:1px}
-  .board .col.cerrada{padding:0;min-height:0;overflow:hidden;cursor:pointer;align-self:stretch}
+  .board .col.cerrada{min-height:0;padding-bottom:0;overflow:hidden;cursor:pointer}
   .board .col.cerrada>:not(.col-h){display:none}
-  .board .col.cerrada .col-h{position:static;margin:0;padding:8px 0 16px;flex-direction:column;gap:10px;border-radius:0}
-  .board .col.cerrada .col-pl{order:-1;margin:0}
-  .board .col.cerrada h2{flex:none;writing-mode:vertical-rl;white-space:nowrap;font-size:15px}
-  .board .col.cerrada .col-al{display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;font-style:normal;font-size:11px;font-weight:800}
+  .board .col.cerrada .col-h{position:static;padding-bottom:14px}
+  .board .col.cerrada .col-al{display:flex;align-items:center;justify-content:center;width:18px;height:18px;flex-shrink:0;border-radius:50%;background:var(--red);color:#fff;font-style:normal;font-size:11px;font-weight:800}
 }
 @media(min-width:1100px) and (hover:hover){
   .col-pl:hover{background:var(--card);color:var(--text)}
@@ -705,12 +704,12 @@ const SOLO=(()=>{const k=new URLSearchParams(location.search).get('solo')||'';re
 if(SOLO)document.documentElement.classList.add('solo');
 // Los filtros de cada columna vienen guardados detrás del botón "Filtrar", para que el encabezado no
 // se coma la columna. Lo que se abre queda recordado; un filtro prendido siempre se ve.
-// Etapas plegadas (solo se ven plegadas en computadora). Se recuerda en este navegador.
+// Etapas plegadas hacia arriba (solo en computadora). Se recuerda en este navegador.
 let colCerr={};
 try{(JSON.parse(localStorage.getItem('bs-tablero-cerradas')||'[]')||[]).forEach(k=>{colCerr[k]=true;});}catch(e){}
 const ESCRITORIO=window.matchMedia('(min-width:1100px)');
-const ICO_PLEGAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>';
-const ICO_DESPLEGAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 17 11 12 6 7"/><polyline points="13 17 18 12 13 7"/></svg>';
+const ICO_PLEGAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg>';
+const ICO_DESPLEGAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
 let filtrosAb={};
 try{(JSON.parse(localStorage.getItem('bs-tablero-filtros')||'[]')||[]).forEach(k=>{filtrosAb[k]=true;});}catch(e){}
 const falta={}; // filtros "le falta…" encendidos: plano, foto de bacha y fecha (Por medir), turno (Por instalar)
@@ -1259,7 +1258,6 @@ function dibujar(){
   $('buscarN').textContent=buscado.length?(visibles.length?visibles.length+(visibles.length===1?' obra':' obras'):'Sin resultados'):'';
 
   let tabs='',cols='',aparte='';
-  const anchos=[];
   const ultima=columnas().length-1;
   ETAPAS.forEach(e=>{
     const esPrimera=columnas().indexOf(e)===0;
@@ -1293,7 +1291,6 @@ function dibujar(){
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2><span class="col-n">'+lista.length+'</span>'
       +(nSinF||nUrg||nPisan?'<i class="col-al" title="Tiene obras por avanzar o sin fecha">!</i>':'')
       +(e.aparte||SOLO?'':'<button type="button" class="col-pl" data-plegar="'+esc(e.id)+'" aria-expanded="'+!cerr+'" title="'+(cerr?'Desplegar ':'Plegar ')+esc(e.titulo)+'" aria-label="'+(cerr?'Desplegar ':'Plegar ')+esc(e.titulo)+'">'+(cerr?ICO_DESPLEGAR:ICO_PLEGAR)+'</button>')+'</div>';
-    if(!e.aparte)anchos.push(cerr?'54px':'minmax(200px,520px)'); // con tope: una etapa sola no se estira a todo el ancho
     if(nSinF||nUrg||nPisan){
       h+='<div class="col-avisos">';
       if(nUrg)h+='<button type="button" class="col-aviso" data-falta="cont_'+esc(e.id)+'">'+nUrg+' por avanzar</button>';
@@ -1336,8 +1333,6 @@ function dibujar(){
     if(e.aparte)aparte+=h;else cols+=h;
   });
   $('board').style.setProperty('--ncols',columnas().length);
-  // una etapa plegada ocupa una tira; las demás se reparten el resto
-  if(anchos.some(a=>a==='54px'))$('board').style.setProperty('--tpl',anchos.join(' '));else $('board').style.removeProperty('--tpl');
   $('colTabs').innerHTML=tabs;
   // cada columna se desplaza por dentro: al redibujar, queda donde estaba
   const sc={};
@@ -1442,7 +1437,7 @@ $('colTabs').addEventListener('click',ev=>{
 });
 
 wrap.addEventListener('click',ev=>{
-  // Plegar / desplegar una etapa: con su botón, o tocando la tira en cualquier lado.
+  // Plegar / desplegar una etapa: con su botón, o tocando el título de la etapa plegada.
   const bpl=ev.target.closest('[data-plegar]'),tira=!bpl&&ESCRITORIO.matches?ev.target.closest('#board .col.cerrada'):null;
   if(bpl||tira){
     const k=bpl?bpl.dataset.plegar:tira.dataset.col;

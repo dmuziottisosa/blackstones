@@ -26,7 +26,7 @@ Para que el tablero no sea una página infinita (decisión del dueño, 2026-11-1
 - **Cómo se ve un filtro (16/11/2026):** apagado, todos iguales (fondo blanco, borde gris). Si adentro hay algo urgente ("Necesitan continuar", "Sin fecha", "Sin turno", "Se pisan"), lo marca solo **el número en rojo**. Prendido, relleno en el color de la etapa, igual para todos. Antes los urgentes iban pintados de rojo aunque estuvieran apagados y parecían ya seleccionados (lo marcó el dueño). Los avisos rojos con "!" quedan solo arriba de la columna y arriba del tablero.
 - **Filtros detrás de "Filtrar":** los filtros de cada columna se muestran al tocar ese botón (queda recordado). Un filtro prendido siempre se ve, y cerrar "Filtrar" los apaga. Los avisos rojos de arriba de la columna siguen prendiendo su filtro con un toque.
 - Plegada o abierta, la ficha se arrastra igual.
-- **Etapas plegables (16/11/2026, computadora):** cada etapa tiene un botón «‹‹» al lado del contador. Plegada queda como una tira angosta con su nombre, su contador y un "!" rojo si tiene algo por avanzar o sin fecha; las demás etapas se reparten el lugar (hasta 520 px cada una, para que una sola no se estire a todo el ancho). Se despliega tocando la tira en cualquier lado. Se puede soltar una ficha sobre una tira plegada. Queda recordado en ese navegador (`bs-tablero-cerradas`). En tablet y celular no aplica: ya se ve de a una etapa por vez.
+- **Etapas plegables (16/11/2026, computadora):** cada etapa tiene una flechita al lado del contador. Se pliega **hacia arriba**: queda solo el título con su contador y un "!" rojo si tiene algo por avanzar o sin fecha; no cambia de ancho ni mueve a las demás. Se despliega tocando el título en cualquier lado. Se puede soltar una ficha sobre una etapa plegada. Queda recordado en ese navegador (`bs-tablero-cerradas`). En tablet y celular no aplica: ya se ve de a una etapa por vez. (La primera versión plegaba hacia el costado, como una tira; el dueño pidió que sea hacia arriba.)
 
 ## Pantallas: celular, tablet y computadora
 
@@ -237,6 +237,8 @@ Es un traspaso: la planilla se adapta a los campos del tablero, no al revés. Lo
 - **Avisos en el turno ("!"):** atrasado, falta la hora, se pisa con otra instalación, o la instalación quedó después del plazo.
 - **Celular:** en vez de la grilla, la lista del mes día por día (solo los días que tienen algo, más hoy).
 - **"Ver la ficha en el tablero":** abre `tablero.php?q=0042-1` con esa obra ya buscada.
+
+- **Con un bloque marcado el calendario no se recorta (16/11/2026):** arranca en la semana de la medición y muestra semanas enteras hasta el vencimiento (nunca menos de 5), sin días apagados. Las flechas siguen andando: corren la vista de a 4 semanas con el filtro puesto, y "Hoy" trae la semana actual. Si te alejaste, "Ir al bloque" vuelve al tramo de ese bloque; "Volver al mes" saca el filtro. Antes, con filtro, las flechas desaparecían y la grilla terminaba en el vencimiento.
 
 ## Dónde vive
 

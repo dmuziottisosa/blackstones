@@ -139,9 +139,8 @@ button{font-family:inherit;color:inherit}
 .f-todo{display:block;width:100%;margin-top:12px;padding:8px;border:1px solid var(--dk);border-radius:var(--radius-sm);background:var(--dk);color:var(--cr);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
 [data-theme="dark"] .f-todo{background:var(--gd);border-color:var(--gd);color:#1A1816}
 .f-todo[hidden],.foco-b[hidden]{display:none}
-/* Con un bloque en foco se ve su tramo completo, no un mes: las flechas de mes no aplican. */
-.barra.foco .mes button{display:none}
-.barra.foco .mes h2{min-width:0;text-align:left}
+/* Con un bloque en foco el calendario arranca en la semana de su medición y se sigue navegando
+   con las mismas flechas (de a 4 semanas). No se recorta nada. */
 /* Con un bloque en foco: su medición y su entrega, en un renglón, con el salto al mes de cada una. */
 .foco-b{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-bottom:10px;padding:10px 14px;border:1px solid var(--border);border-left:4px solid var(--dk);border-radius:var(--radius);background:var(--card);font-size:13px;color:var(--text2)}
 [data-theme="dark"] .foco-b{border-left-color:var(--gd)}
@@ -449,6 +448,8 @@ let ETAPAS=[];   // definición de etapas (viene del server)
 let CARDS=[];    // las obras del tablero
 let HOY='';      // YYYY-MM-DD según el server
 let mes='';      // mes a la vista, 'YYYY-MM'
+let vIni='';     // con bloques en foco: lunes donde arranca lo que se ve, si se navegó ('' = pegado al bloque)
+let vAhora='';   // lunes donde arranca lo que se está viendo ahora (lo deja dibujar)
 let ocupado=false;
 let arrastre=null; // {key,tipo} del evento que se está arrastrando
 let ver={};      // tipos apagados en la leyenda: {vence:false}
@@ -712,13 +713,21 @@ function dibujar(){
   todosMarcados=selB.size>0&&selB.size>=new Set(CARDS.map(bloqueDe).filter(Boolean)).size;
   const foco=selB.size>0;
   let vDesde=isoDe(new Date(y,m-1,1)),vHasta=isoDe(new Date(y,m,0));
+  const lunesDe=iso=>masDias(iso,-((partes(iso).getDay()+6)%7));
+  let ancla='';
   if(foco){
     const sel=[...selB].sort(),tb=bloques(true);
-    vDesde=sel[0];
-    vHasta=sel.map(d=>{const b=tb.find(x=>x.dia===d);return b?b.hasta:masDias(d,20);}).sort().pop();
+    let rHasta=sel.map(d=>{const b=tb.find(x=>x.dia===d);return b?b.hasta:masDias(d,20);}).sort().pop();
     // y todo lo que ya tienen agendado esas obras (por ejemplo una instalación más adelante)
-    CARDS.filter(enFoco).forEach(c=>{[c.fecha,c.limite].forEach(f=>{if(f&&f>vHasta)vHasta=f;});});
+    CARDS.filter(enFoco).forEach(c=>{[c.fecha,c.limite].forEach(f=>{if(f&&f>rHasta)rHasta=f;});});
+    // Se ven semanas enteras: las que hacen falta para la historia completa (medición → vencimiento),
+    // nunca menos de 5. Es un calendario corrido, sin recortes: con las flechas se sigue para atrás y adelante.
+    ancla=lunesDe(sel[0]);
+    const sem=Math.max(5,Math.ceil((Math.round((partes(rHasta)-partes(ancla))/864e5)+1)/7));
+    vDesde=vIni||ancla;
+    vHasta=masDias(vDesde,sem*7-1);
   }
+  vAhora=vDesde;
   const enVista=iso=>!!iso&&iso>=vDesde&&iso<=vHasta;
   const diaTxt=iso=>(+iso.slice(8,10))+' '+MESES[+iso.slice(5,7)-1].slice(0,3);
   $('mesTxt').textContent=foco?diaTxt(vDesde)+' – '+diaTxt(vHasta):MESES[m-1].replace(/^./,x=>x.toUpperCase())+' '+y;
@@ -748,7 +757,9 @@ function dibujar(){
     fo='<span><b>Bloque '+esc(diaMes(d))+'</b></span><span>Medición: <b>'+esc(fechaCorta(d))+'</b> · '+l.length+(l.length===1?' obra':' obras')+(hm===l.length?' · todas medidas':' · '+hm+(hm===1?' medida, ':' medidas, ')+(l.length-hm)+' sin medir')+'</span>'
       +(b?'<span>'+(b.est?'Entrega estimada':'Entrega')+': <b>'+esc(fechaCorta(b.desde))+' al '+esc(fechaCorta(b.hasta))+'</b>'+(b.estado==='vencida'?' <span class="rojo">· vencida</span>':(b.estado==='cerca'?' <span class="amb">· en curso</span>':''))+'</span>':'');
   }else if(selB.size>1)fo='<span><b>'+selB.size+' bloques en foco:</b> '+[...selB].sort().map(d=>esc(diaMes(d))).join(', ')+'</span>';
-  if(fo)fo+='<span class="fin"><button type="button" data-salir>Volver al mes</button></span>';
+  if(fo)fo+='<span class="fin">'+(vIni&&vIni!==ancla?'<button type="button" data-ancla>Ir al bloque</button>':'')+'<button type="button" data-salir>Volver al mes</button></span>';
+  $('mesAnt').setAttribute('aria-label',foco?'4 semanas antes':'Mes anterior');
+  $('mesSig').setAttribute('aria-label',foco?'4 semanas después':'Mes siguiente');
   $('focoB').innerHTML=fo;$('focoB').hidden=!fo;
   $('fTit').textContent=nFil?'Filtros · '+nFil:'Filtros';
   $('fTit').classList.toggle('activo',nFil>0);
@@ -941,15 +952,20 @@ document.addEventListener('click',ev=>{
   if(fb){
     const d=fb.dataset.fbloque;
     if(selB.has(d))selB.delete(d);else selB.add(d);
+    vIni=''; // al cambiar el filtro, la vista vuelve a pegarse al bloque
     dibujar();
     return;
   }
-  if(ev.target.closest('[data-salir]')){selB.clear();dibujar();return;}
-  if(ev.target.closest('#fTodo')){selB.clear();dibujar();return;}
+  if(ev.target.closest('[data-ancla]')){vIni='';dibujar();return;}
+  if(ev.target.closest('[data-salir]')){selB.clear();vIni='';dibujar();return;}
+  if(ev.target.closest('#fTodo')){selB.clear();vIni='';dibujar();return;}
   const ft=ev.target.closest('#fTit');
   if(ft){const ab=$('filtros').classList.toggle('abierto');ft.setAttribute('aria-expanded',ab);return;}
 });
-function moverMes(n){const d=new Date(+mes.slice(0,4),+mes.slice(5,7)-1+n,1);mes=isoDe(d).slice(0,7);dibujar();}
+function moverMes(n){
+  // con bloques en foco no hay "mes": la vista corre de a 4 semanas, con el filtro puesto
+  if(selB.size){vIni=masDias(vAhora,n*28);dibujar();return;}
+  const d=new Date(+mes.slice(0,4),+mes.slice(5,7)-1+n,1);mes=isoDe(d).slice(0,7);dibujar();}
 // En pantallas angostas la barra de páginas se desliza de costado: la página actual queda a la vista.
 (function(){
   const a=document.querySelector('.h-tabs a.active'),n=a&&a.parentElement;
@@ -957,7 +973,11 @@ function moverMes(n){const d=new Date(+mes.slice(0,4),+mes.slice(5,7)-1+n,1);mes
 })();
 $('mesAnt').addEventListener('click',()=>moverMes(-1));
 $('mesSig').addEventListener('click',()=>moverMes(1));
-$('mesHoy').addEventListener('click',()=>{mes=HOY.slice(0,7);dibujar();});
+$('mesHoy').addEventListener('click',()=>{
+  mes=HOY.slice(0,7);
+  if(selB.size)vIni=masDias(HOY,-((partes(HOY).getDay()+6)%7)-7); // con filtro: la semana pasada arriba, hoy a la vista
+  dibujar();
+});
 
 // ---------- Arrastrar a un día (computadora) ----------
 document.addEventListener('dragstart',ev=>{
