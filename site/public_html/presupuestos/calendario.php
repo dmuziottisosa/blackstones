@@ -180,6 +180,10 @@ button{font-family:inherit;color:inherit}
 .dia.finde{background:var(--card-alt)}
 .dia.pasado .n{color:var(--text3);font-weight:600}
 .dia.otro{opacity:.4}
+/* Cambio de mes: nombre del mes en el día 1 y una línea que marca el borde entre los dos meses */
+.dia .mes-n{margin-left:6px;padding:2px 8px;border-radius:999px;background:var(--gd);color:#1A1816;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.dia.m-arr{border-top:2px solid var(--gd)}
+.dia.m-izq{border-left:2px solid var(--gd)}
 .dia.es-hoy{box-shadow:inset 0 0 0 2px var(--gd)}
 .dia.es-hoy .n{background:var(--dk);color:var(--cr)}
 [data-theme="dark"] .dia.es-hoy .n{background:var(--gd);color:#1A1816}
@@ -759,9 +763,13 @@ function dibujar(){
   let va=0;
   while(d<=ultimo||d.getDay()!==1){
     const iso=isoDe(d),fuera=!enVista(iso);
-    // en foco el tramo cruza meses: el número lleva el mes al empezar y cada día 1
-    const num=d.getDate()+(foco&&(va===0||d.getDate()===1)?' '+MESES[d.getMonth()].slice(0,3):'');va++;
-    g+='<div class="dia'+(fuera?' otro':'')+(iso===HOY?' es-hoy':'')+(iso<HOY?' pasado':'')+(d.getDay()===0||d.getDay()===6?' finde':'')+'" data-dia="'+iso+'"><div class="n">'+num+'</div>'
+    // Dónde cambia el mes: el día 1 (y el primer casillero) llevan el nombre del mes, y una línea
+    // dorada dibuja el borde entre un mes y otro. Es solo visual: no cambia qué se muestra ni los filtros.
+    const dd=d.getDate(),col=(d.getDay()+6)%7;
+    const num=dd,mesN=dd===1||va===0?'<span class="mes-n">'+MESES[d.getMonth()]+'</span>':'';
+    // m-arr: el casillero de arriba es del mes anterior; m-izq: el de la izquierda lo es
+    const borde=(va>=7&&dd<=7?' m-arr':'')+(va>0&&dd===1&&col>0?' m-izq':'');va++;
+    g+='<div class="dia'+borde+(fuera?' otro':'')+(iso===HOY?' es-hoy':'')+(iso<HOY?' pasado':'')+(d.getDay()===0||d.getDay()===6?' finde':'')+'" data-dia="'+iso+'"><div class="n">'+num+'</div>'+mesN
       +franjas(iso,L,(d.getDay()+6)%7)+(conMed?tiraMedicion(iso,false):'')+(dias[iso]||[]).map(ev=>chip(ev,false)).join('')+'</div>';
     d.setDate(d.getDate()+1);
   }

@@ -120,6 +120,13 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 @media(hover:hover){.vista-b:hover{border-color:var(--gd);color:var(--text)}}
 .hoy{font-size:14px;color:var(--text2);white-space:nowrap}
 .hoy b{font-weight:700;color:var(--text)}
+/* Fecha de hoy y semana en curso: versión larga en pantallas anchas, corta en celular. */
+.hoy .f-c,.hoy .s-c{display:none}
+.hoy .sem{color:var(--text2);font-weight:600}
+@media(max-width:699px){
+  .hoy .f-l,.hoy .s-l{display:none}
+  .hoy .f-c,.hoy .s-c{display:inline}
+}
 .buscar{display:flex;align-items:center;gap:10px;flex:1;min-width:0;position:relative}
 .buscar input{width:100%;max-width:380px;padding:10px 38px 10px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--text);font-family:inherit;font-size:14px;outline:none;-webkit-appearance:none;appearance:none}
 .buscar input::-webkit-search-cancel-button{display:none}
@@ -263,6 +270,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 [data-theme="dark"] .c-hecho.listo{color:#04220F}
 .c-hecho.listo::before{content:'✓  '}
 .col-sep{margin:16px 2px 10px;padding-top:12px;border-top:2px dashed var(--border);font-size:11.5px;font-weight:700;color:var(--text3);letter-spacing:.02em}
+/* el primer título de la columna (lo ya hecho que espera control) no lleva la línea de arriba */
+.col-sep.arriba{margin-top:2px;padding-top:0;border-top:none;color:var(--gr)}
 /* AVISO "!" en rojo: la obra no tiene fecha (Por medir) o turno (Por instalar). Sin fecha no hay
    plazo, y lo que no tiene plazo se queda olvidado: se marca igual de fuerte que lo atrasado. */
 .c-fecha.aviso{background:var(--red-soft);border:1.5px solid var(--red);color:var(--red);font-weight:700}
@@ -515,8 +524,9 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .header{padding:14px 20px}
   .h-tabs{padding:0 12px}
   .h-tabs a{font-size:.68rem;padding:12px 14px}
-  .tope{flex-direction:row;align-items:center;gap:14px;margin:16px 0 0}
-  .buscar input{max-width:360px}
+  /* como en celular: botones y fecha arriba, el buscador en su propio renglón (con la semana ya no entran en uno) */
+  .tope{margin:16px 0 0}
+  .buscar input{max-width:420px}
   .hoy .sob{display:none}
   .avisos-g{margin:12px -20px 0;padding:0 20px}
   .col-tabs{gap:8px;padding:12px 0}
@@ -675,6 +685,14 @@ const DIAS=['dom','lun','mar','mié','jue','vie','sáb'];
 function partes(iso){const p=iso.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]);}
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DIAS_L=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+// La semana en curso, de lunes a viernes: "Semana 16-20 de noviembre" (o "Semana 30 nov - 4 dic" si cruza de mes).
+function semanaTxt(iso,corto){
+  const l=partes(iso);l.setDate(l.getDate()-((l.getDay()+6)%7));
+  const v=new Date(l);v.setDate(l.getDate()+4);
+  const m=d=>MESES[d.getMonth()],mismo=l.getMonth()===v.getMonth();
+  if(corto)return 'Sem '+l.getDate()+(mismo?'':' '+m(l).slice(0,3))+'-'+v.getDate()+(mismo?'':' '+m(v).slice(0,3));
+  return 'Semana '+(mismo?l.getDate()+'-'+v.getDate()+' de '+m(l):l.getDate()+' '+m(l).slice(0,3)+' - '+v.getDate()+' '+m(v).slice(0,3));
+}
 function fechaLarga(iso){const d=partes(iso);return DIAS_L[d.getDay()]+' '+d.getDate()+' de '+MESES[d.getMonth()];}
 function ddmm(iso){const p=iso.split('-');return p[2]+'/'+p[1];}
 function fechaCorta(iso){return DIAS[partes(iso).getDay()]+' '+ddmm(iso);}
@@ -975,8 +993,15 @@ function prepararColas(){
 }
 function ordenCola(a,b){
   const ha=hecho(a),hb=hecho(b);
-  if(ha!==hb)return ha?1:-1;                             // lo que falta hacer, arriba
-  if(ha&&a.boton_at!==b.boton_at)return a.boton_at<b.boton_at?-1:1; // ya hechas: la más vieja primero
+  // Lo ya hecho (medida, cortada, fabricada) que sigue en la columna espera el control del gerente:
+  // es lo que frena el paso a la etapa siguiente, así que va ARRIBA de la cola. Entre ellas,
+  // primero la que vence antes (una vencida no puede quedar esperando al fondo) y después la más vieja.
+  if(ha!==hb)return ha?-1:1;
+  if(ha){
+    const la=a.limite||'9999',lb=b.limite||'9999';
+    if(la!==lb)return la<lb?-1:1;
+    if(a.boton_at!==b.boton_at)return a.boton_at<b.boton_at?-1:1;
+  }
   if(!!a.fecha!==!!b.fecha)return a.fecha?-1:1;          // con turno primero
   if(a.fecha!==b.fecha)return a.fecha<b.fecha?-1:1;      // el turno más próximo arriba
   if(a.hora!==b.hora){                                   // mismo día: el más temprano; sin hora, al final
@@ -1167,7 +1192,9 @@ function dibujar(){
 
   numerarColas();
   calcularChoques();
-  $('hoyTxt').innerHTML=HOY?'<span class="sob">Hoy · </span><b>'+esc(fechaLarga(HOY))+'</b>':'';
+  // Hoy y la semana en curso (lunes a viernes). En celular, la versión corta: "Lun 16 nov · Sem 16-20".
+  $('hoyTxt').innerHTML=HOY?'<span class="sob">Hoy · </span><b class="f-l">'+esc(fechaLarga(HOY))+'</b><b class="f-c">'+esc(DIAS_L[partes(HOY).getDay()].slice(0,3)+' '+partes(HOY).getDate()+' '+MESES[partes(HOY).getMonth()].slice(0,3))+'</b>'
+    +'<span class="sem s-l"> · '+esc(semanaTxt(HOY,false))+'</span><span class="sem s-c"> · '+esc(semanaTxt(HOY,true))+'</span>':'';
   // Avisos de todo el tablero: el plazo prometido. Se cuentan sobre todas las fichas, en cualquier columna.
   const nVen=CARDS.filter(c=>plazo(c)==='vencida').length,nCer=CARDS.filter(c=>plazo(c)==='cerca').length;
   // Atrasadas: tenían fecha (medición, instalación o retiro), la fecha pasó y siguen sin hacerse.
@@ -1239,10 +1266,9 @@ function dibujar(){
     }
     if(verF)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+((f[0].indexOf('turno_')===0||f[0].indexOf('pisa_')===0)&&deEtapa.some(f[2])?' avi':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
     // Separador entre lo que falta hacer y lo ya hecho (Por medir: "Ya medidas").
-    // El separador va antes del bloque final de fichas ya hechas.
-    let corte=lista.length;
-    while(e.boton&&corte>0&&hecho(lista[corte-1]))corte--;
-    const nHechas=lista.length-corte;
+    // Las ya hechas van primero, con su título; después la cola de lo que falta hacer.
+    let nHechas=0;
+    while(e.boton&&nHechas<lista.length&&hecho(lista[nHechas]))nHechas++;
     // En las etapas sin turno, un renglón marca dónde empieza cada semana de entrega: se entiende el orden.
     const conSemanas=!e.fecha&&!e.aparte&&columnas().indexOf(e)<ultima;
     const sem=c=>{
@@ -1250,8 +1276,9 @@ function dibujar(){
       const fin=masDias(c.semana,6);
       return 'Entrega: semana del '+ddmm(c.semana)+(fin<HOY?' · vencida':(c.semana<=HOY?' · esta semana':''));
     };
-    const cards=lista.map((c,i)=>(nHechas&&i===corte?'<div class="col-sep">'+esc(e.hecho)+' ('+nHechas+')</div>':'')
-      +(conSemanas&&i<corte&&(i===0||(lista[i-1].semana||'')!==(c.semana||''))?'<div class="col-sem'+(c.semana&&masDias(c.semana,6)<HOY?' rojo':'')+'">'+esc(sem(c))+'</div>':'')+htmlCard(c)).join('');
+    const cards=lista.map((c,i)=>(nHechas&&i===0?'<div class="col-sep arriba">'+esc(e.hecho)+' ('+nHechas+')</div>':'')
+      +(nHechas&&i===nHechas?'<div class="col-sep">'+esc(e.pendientes||'En cola')+' ('+(lista.length-nHechas)+')</div>':'')
+      +(conSemanas&&i>=nHechas&&(i===nHechas||(lista[i-1].semana||'')!==(c.semana||''))?'<div class="col-sem'+(c.semana&&masDias(c.semana,6)<HOY?' rojo':'')+'">'+esc(sem(c))+'</div>':'')+htmlCard(c)).join('');
     if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(filtrando?'Sin resultados':'Nadie retira por el local')+'</div>';
     else h+=lista.length?cards:'<div class="col-vacia">'+(filtrando?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
     h+='</section>';
