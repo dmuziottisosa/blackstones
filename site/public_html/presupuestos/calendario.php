@@ -93,7 +93,8 @@ button{font-family:inherit;color:inherit}
   .header .h-right{gap:8px}
 }
 
-.wrap{max-width:1480px;margin:0 auto;padding:20px 20px 60px}
+/* El calendario usa todo el ancho de la pantalla: cuanto más ancho el mes, menos se cortan los nombres. */
+.wrap{max-width:2200px;margin:0 auto;padding:20px 20px 60px}
 .aviso{color:var(--text2);font-size:13.5px;padding:40px 16px;text-align:center;line-height:1.6}
 
 /* === COLOR POR TIPO (los mismos de las columnas del tablero) === */
@@ -114,7 +115,7 @@ button{font-family:inherit;color:inherit}
 /* === FILTROS: casilleros a la izquierda del mes ===
    Arriba, qué ver (mediciones, instalaciones, entregas, vencimientos). Abajo, los bloques de medición
    que existen: marcar uno o más deja en pantalla solo lo de esos bloques, para seguirlos de cerca. */
-.filtros{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 12px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto}
+.filtros{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 10px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto}
 .filtros h4{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);margin:14px 2px 4px}
 .filtros h4:first-child{margin-top:0}
 .f-tit{display:none}
@@ -154,10 +155,10 @@ button{font-family:inherit;color:inherit}
 .hoy b{font-weight:700;color:var(--text)}
 
 /* === PLANO: el mes + lo que falta agendar === */
-.plano{display:grid;grid-template-columns:190px minmax(0,1fr) 280px;gap:16px;align-items:start}
+.plano{display:grid;grid-template-columns:164px minmax(0,1fr) 250px;gap:14px;align-items:start}
 /* Pantallas medianas: los filtros van arriba del mes, plegados detrás de un botón. */
 @media(max-width:1359px){
-  .plano{grid-template-columns:minmax(0,1fr) 280px}
+  .plano{grid-template-columns:minmax(0,1fr) 250px}
   .filtros{grid-column:1/-1;position:static;max-height:none;padding:0;border:none;background:none;box-shadow:none}
   .f-tit{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer}
   .f-tit::after{content:'';width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg)}
