@@ -112,6 +112,14 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 - **Botón de etapa:** "Marcar medido" y "Marcar cortado" son lo más visible de la ficha; hechos, quedan en verde ("Ya medido", "Ya cortado").
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.
 
+## Exportar tablero
+
+Arriba a la derecha, **Exportar tablero** baja un archivo `tablero-blackstones-AAAA-MM-DD.csv` con **todas** las obras del tablero (no solo las que deja ver el buscador o un filtro), una por fila, ordenadas por etapa. Se abre con Excel: separador `;`, con acentos.
+
+Columnas: N°, cliente, teléfono, dirección, zona, material, trabajo, etapa, turno (qué, día, hora), atrasada, medido el, plazo de entrega y su estado, seña, bacha (de quién, modelo, si la tenemos), cómo sube, quién mide / corta / fabrica / instala, qué falta en la etapa, cantidad de fotos de bacha y de planos, y la nota.
+
+Sirve para corroborar contra la planilla o para pasarle el estado del tablero a alguien que no entra al sistema. **El archivo tiene nombres, teléfonos y direcciones de clientes: no se sube al repo** (es público) ni se manda por canales abiertos. No incluye las obras archivadas: esas están en Presupuestos · Entregados.
+
 ## Retiro en local
 
 > **Desactivado por ahora (15/11/2026, decisión del dueño).** No aparece el cuadro de abajo, ni el botón "Retira en el local", ni los retiros en el calendario, y el servidor rechaza mover una obra ahí. Si alguna obra ya estaba en Retiro, el cuadro se sigue mostrando solo para esa obra hasta que se la devuelva a las columnas. Para volver a activarlo: borrar la línea `'oculta' => true` de la etapa `retiro` en `site/public_html/calculadora/api/_tablero.php` y subir ese archivo. Lo que sigue describe cómo funciona cuando está activo.

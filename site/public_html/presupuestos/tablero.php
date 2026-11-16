@@ -102,6 +102,7 @@ button{font-family:inherit;color:inherit}
 /* === BUSCADOR === */
 .tope{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
 .tope-d{display:flex;align-items:center;gap:16px}
+.tope-b{display:flex;align-items:center;gap:8px}
 .vista-b{padding:7px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap}
 .vista-b:hover{border-color:var(--gd);color:var(--text)}
 .hoy{font-size:14px;color:var(--text2);white-space:nowrap}
@@ -387,7 +388,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .h-tabs a{padding:9px 12px;font-size:.62rem;letter-spacing:.06em}
   .wrap{padding:0 12px 60px}
   .tope{flex-direction:column-reverse;align-items:stretch;gap:10px;margin:10px 0 0}
-  .tope-d{justify-content:space-between}
+  .tope-d{justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .tope-d .hoy{order:-1;flex-basis:100%}
   .card{padding:14px}
   .modal{--mp:20px}
   .avisos-g{margin:10px 0 0}
@@ -454,7 +456,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
       <span id="buscarN"></span>
     </div>
     <div class="tope-d">
-      <button type="button" class="vista-b" id="vistaB"></button>
+      <div class="tope-b">
+        <button type="button" class="vista-b" id="vistaB"></button>
+        <button type="button" class="vista-b" id="exportB" title="Baja todas las obras del tablero en un archivo CSV (se abre con Excel)">Exportar tablero</button>
+      </div>
       <div class="hoy" id="hoyTxt"></div>
     </div>
   </div>
@@ -1753,6 +1758,61 @@ function libre(){
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&libre())cargar();});
 setInterval(()=>{if(!document.hidden&&libre())cargar();},60000);
+
+// ============================================================
+// Exportar tablero: todas las obras a un CSV (se abre con Excel)
+// ============================================================
+// Sale del mismo dato que dibuja el tablero, así que no pide nada nuevo al server.
+// Separador ";" y BOM: es lo que Excel en español abre bien, con acentos y columnas.
+function exportarCSV(){
+  if(!CARDS.length){toast('No hay obras para exportar.');return;}
+  const dia=iso=>iso?iso.slice(8,10)+'/'+iso.slice(5,7)+'/'+iso.slice(0,4):'';
+  const orden=ETAPAS.map(e=>e.id);
+  const filas=CARDS.slice().sort((a,b)=>(orden.indexOf(a.etapa)-orden.indexOf(b.etapa))||a.key.localeCompare(b.key,undefined,{numeric:true}));
+  const cols=[
+    ['N°',c=>c.cliente_nro+'-'+c.sub],
+    ['Cliente',c=>c.nombre],
+    ['Teléfono',c=>c.celular],
+    ['Dirección',c=>c.direccion],
+    ['Zona',c=>c.zona],
+    ['Material',c=>c.material],
+    ['Trabajo',c=>c.concepto],
+    ['Etapa',c=>etapaDe(c.etapa).titulo],
+    ['Turno (qué)',c=>etapaDe(c.etapa).fecha||''],
+    ['Turno (día)',c=>dia(c.fecha)],
+    ['Turno (hora)',c=>c.hora],
+    ['Atrasada',c=>atrasada(c)?'SI':''],
+    ['Medido el',c=>dia(c.medido_at)],
+    ['Plazo de entrega',c=>dia(c.limite)],
+    ['Estado del plazo',c=>({vencida:'VENCIDO',cerca:'vence en 6 días o menos'})[plazo(c)]||''],
+    ['Seña',c=>c.sena?plataSena(c.sena):''],
+    ['Bacha',c=>c.bacha?BACHA[c.bacha]:''],
+    ['Modelo de bacha',c=>c.bacha_modelo],
+    ['Tenemos la bacha',c=>c.bacha==='no'?'no lleva':(c.checks.bacha?'SI':'')],
+    ['Cómo sube',c=>c.acceso?textoAcceso(c.acceso):''],
+    ['Mide',c=>c.medidor.join(', ')],
+    ['Corta',c=>c.cortador.join(', ')],
+    ['Fabrica',c=>c.fabrica.join(', ')],
+    ['Instala',c=>c.equipo.join(', ')],
+    ['Falta en esta etapa',c=>faltanDe(c,etapaDe(c.etapa)).join(', ')],
+    ['Fotos de bacha',c=>c.adjuntos.filter(a=>a.tipo==='bacha').length||''],
+    ['Planos',c=>c.adjuntos.filter(a=>a.tipo==='plano').length||''],
+    ['Nota',c=>c.nota],
+  ];
+  const celda=v=>{
+    let t=String(v==null?'':v).replace(/\r?\n/g,' ').trim();
+    if(/^[=+\-@]/.test(t))t="'"+t; // que Excel no lo tome como fórmula
+    return /[";]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t;
+  };
+  const csv='\uFEFF'+[cols.map(k=>celda(k[0])).join(';')].concat(filas.map(c=>cols.map(k=>celda(k[1](c))).join(';'))).join('\r\n')+'\r\n';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='tablero-blackstones-'+HOY+'.csv';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast('Exportadas '+filas.length+(filas.length===1?' obra':' obras')+' · '+a.download,true);
+}
+$('exportB').addEventListener('click',exportarCSV);
 
 $('vistaB').addEventListener('click',()=>{
   vistaTodas=!vistaTodas;
