@@ -51,6 +51,7 @@ Cuatro tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
 - **Trajo la seña:** el monto, en $ o USD. Al escribirlo se va separando en miles (1.000 · 10.000 · 100.000 · 1.000.000). Es el bloqueante de salida de Por medir: la trae el medidor, o el cliente señó antes.
 - **Tenemos la bacha:** de quién es (nuestra, del cliente, o no lleva) y **qué modelo es**. El modelo es obligatorio **solo si la bacha es nuestra** (la proveemos nosotros, así que sabemos cuál es). Si es del cliente se anota si se sabe, y no frena el tilde; si no lleva bacha, no aplica. Queda a la vista en la ficha y en las etapas siguientes. *(Cambiado 15/11/2026 por pedido del dueño: antes obligaba también con bacha del cliente.)* Tocar el tilde ya puesto abre la ventana para corregirlo o quitarlo. El buscador encuentra la obra por el modelo.
   - **Se puede anotar al cargar la obra** (15/11/2026): en "Cargar obra" hay un renglón opcional **Bacha: Nuestra · Del cliente · No lleva**, con el modelo si ya se sabe. Eso anota de quién es, **no tilda** "Tenemos la bacha": la pastilla queda sin tildar y dice "Bacha del cliente" o "Bacha nuestra · modelo", y el tilde se pone a mano cuando la bacha está en el taller (ahí se exige el modelo si es nuestra). La excepción es "No lleva": queda tildado, porque no hay nada que esperar. Si se anotó mal, la ventana de la pastilla tiene "Borrar el dato".
+  - **Después de Por medir** (16/11/2026): la pastilla ya no está a la vista, así que el modelo se carga o corrige desde "Más" → **Editar obra**, que muestra el campo "Modelo de la bacha" en cualquier etapa si la obra tiene bacha anotada.
 - **Piso y ascensor:** cómo sube la pieza. Planta baja, por ascensor o por escalera con cuántos pisos ($30.000 por piso si no entra en el ascensor).
 - **Instaladores** (en Por instalar, no en Por medir): quiénes van, uno o varios de la lista (Negro, Espinola, Cesar, David, Jostin). La lista se edita en `$BS_INSTALADORES`, en `calculadora/api/_tablero.php`.
 
@@ -77,11 +78,18 @@ Al avanzar, la ficha no pierde lo que ya pasó:
 
 Las fechas de los tildes se guardan desde que existe el historial. Lo tildado antes, o lo que vino del traspaso de la planilla, figura sin fecha (salvo la medición, que sí la tiene).
 
-## Foto de bacha y plano
+## Foto de bacha, plano y foto de entrega
 
-En Por medir cada tarjeta tiene dos botones: **+ Foto bacha** y **+ Plano**. La foto de la bacha también se puede adjuntar desde el cuadro donde se marca de quién es (nuestra, del cliente, no lleva).
+En Por medir cada tarjeta tiene dos botones: **+ Foto bacha** y **+ Plano**. En Por instalar y Por archivar aparece **+ Foto entrega** (no es obligatoria). La foto de la bacha también se puede subir desde el cuadro donde se marca de quién es (nuestra, del cliente, no lleva).
 
-- La bacha acepta fotos. El plano acepta fotos o PDF. Hasta 6 archivos de cada uno por obra, 10 MB por archivo.
+Al tocar cualquiera de los tres botones se abre una ventana con dos caminos (16/11/2026, pedido del dueño):
+
+- **Subir desde este dispositivo:** elige el archivo de la computadora o del celular, como antes.
+- **Pegar el link de Drive:** el archivo queda en Drive y el tablero guarda solo el link. En la ficha se ve un cuadrito "Drive"; al tocarlo, "Abrir en Drive" lo abre en otra pestaña. No ocupa lugar en el servidor, que era la preocupación con las fotos de entrega. Quien lo abra tiene que tener permiso en Drive: el tablero no cambia los permisos ni mira el archivo. Solo se aceptan links `https` de Google (Drive, Docs, Fotos); el mismo link no se puede cargar dos veces en la obra.
+
+Un link cuenta igual que un archivo: saca a la obra de los filtros "Sin plano" / "Sin foto de bacha" y entra en el máximo de 6.
+
+- La bacha y la entrega aceptan fotos. El plano acepta fotos o PDF. Hasta 6 de cada tipo por obra (entre archivos y links), 10 MB por archivo.
 - Las fotos se achican solas antes de subir (el plano queda más grande, para que se lea la letra chica).
 - Las miniaturas quedan en la tarjeta en todas las etapas: el taller ve el plano y la bacha al controlar la pieza.
 - Tocar una miniatura la abre; desde ahí se puede ver en grande o borrar (pide confirmar).
@@ -116,7 +124,7 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 
 Arriba a la derecha, **Exportar tablero** baja un archivo `tablero-blackstones-AAAA-MM-DD.csv` con **todas** las obras del tablero (no solo las que deja ver el buscador o un filtro), una por fila, ordenadas por etapa. Se abre con Excel: separador `;`, con acentos.
 
-Columnas: N°, cliente, teléfono, dirección, zona, material, trabajo, etapa, turno (qué, día, hora), atrasada, medido el, plazo de entrega y su estado, seña, bacha (de quién, modelo, si la tenemos), cómo sube, quién mide / corta / fabrica / instala, qué falta en la etapa, cantidad de fotos de bacha y de planos, y la nota.
+Columnas: N°, cliente, teléfono, dirección, zona, material, trabajo, etapa, turno (qué, día, hora), atrasada, medido el, plazo de entrega y su estado, seña, bacha (de quién, modelo, si la tenemos), cómo sube, quién mide / corta / fabrica / instala, qué falta en la etapa, cantidad de fotos de bacha, de planos y de fotos de entrega, los links de Drive cargados, y la nota.
 
 Sirve para corroborar contra la planilla o para pasarle el estado del tablero a alguien que no entra al sistema. **El archivo tiene nombres, teléfonos y direcciones de clientes: no se sube al repo** (es público) ni se manda por canales abiertos. No incluye las obras archivadas: esas están en Presupuestos · Entregados.
 

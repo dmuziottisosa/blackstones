@@ -1,15 +1,21 @@
 <?php
 // ============================================================
-// tablero-adjunto.php — Fotos de bacha y planos de una obra
+// tablero-adjunto.php — Fotos de bacha, planos y fotos de entrega de una obra
 // BlackStones Marmolería · Registry de Presupuestos
 // ============================================================
 // GET  ?nro=0042&sub=1&id=<id>[&t=1]
 //   Devuelve el archivo (o su miniatura con t=1). Solo con sesión.
 //
 // POST multipart/form-data  → subir
-//   cliente_nro, sub, tipo ("bacha" | "plano"), archivo, [mini]
+//   cliente_nro, sub, tipo ("bacha" | "plano" | "entrega"), archivo, [mini]
 //   "archivo": JPG / PNG / WEBP / PDF, hasta 10 MB. El tablero achica las
 //   fotos antes de mandarlas; "mini" es la miniatura JPG que arma él mismo.
+//
+// POST JSON → colgar un link de Drive en vez de subir el archivo
+//   { "cliente_nro": "0042", "sub": 1, "accion": "link", "tipo": "plano",
+//     "url": "https://drive.google.com/file/d/…/view" }
+//   Solo links https de Google (Drive, Docs, Fotos). El servidor no los abre:
+//   los guarda y el tablero los muestra como un botón que lleva a Drive.
 //
 // POST JSON → borrar
 //   { "cliente_nro": "0042", "sub": 1, "accion": "borrar", "id": "<id>" }
@@ -56,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     foreach (bs_tablero_adjuntos($tablero['obras'][$key] ?? []) as $a) {
         if ($a['id'] === $id) { $adj = $a; break; }
     }
-    if (!$adj) { http_response_code(404); exit('No existe'); }
+    if (!$adj || $adj['ext'] === 'link') { http_response_code(404); exit('No existe'); }
 
     $dir = bs_tablero_adj_carpeta($key);
     $path = $dir . '/' . $adj['id'] . '.' . $adj['ext'];
@@ -91,7 +97,7 @@ if ($es_subida) {
     $in = json_decode(@file_get_contents('php://input'), true);
     if (!is_array($in)) bs_error('Body JSON inválido');
     $accion = (string)($in['accion'] ?? '');
-    if ($accion !== 'borrar') bs_error('accion inválida');
+    if (!in_array($accion, ['borrar', 'link'], true)) bs_error('accion inválida');
 }
 
 list($cliente_nro, $sub, $key) = bs_adj_key($in['cliente_nro'] ?? '', $in['sub'] ?? '');
@@ -106,7 +112,13 @@ foreach ($cliente_obj['cotizaciones'] ?? [] as $cot) {
 if (!$aprobada) bs_error('Esa obra ya no está aprobada. Actualizá el tablero.', 409);
 
 // ---- Validar el archivo ANTES de tomar el lock ----
-$tmp_archivo = null; $ext = ''; $tmp_mini = null; $tipo = '';
+$tmp_archivo = null; $ext = ''; $tmp_mini = null; $tipo = ''; $link = '';
+if ($accion === 'link') {
+    $tipo = (string)($in['tipo'] ?? '');
+    if (!isset($BS_TABLERO_ADJ_TIPOS[$tipo])) bs_error('tipo inválido');
+    $link = bs_tablero_link_valido($in['url'] ?? '');
+    if ($link === '') bs_error('Ese link no sirve. Tiene que ser un link de Google Drive (empieza con https://drive.google.com/).');
+}
 if ($accion === 'subir') {
     $tipo = (string)($in['tipo'] ?? '');
     if (!isset($BS_TABLERO_ADJ_TIPOS[$tipo])) bs_error('tipo inválido');
@@ -123,7 +135,7 @@ if ($accion === 'subir') {
     if (!isset($BS_TABLERO_ADJ_MIMES[$mime])) bs_error('Tiene que ser una foto (JPG, PNG, WEBP) o un PDF.');
     $ext = $BS_TABLERO_ADJ_MIMES[$mime];
     if ($ext !== 'pdf' && @getimagesize($f['tmp_name']) === false) bs_error('La imagen está dañada.');
-    if ($ext === 'pdf' && $tipo === 'bacha') bs_error('La foto de la bacha tiene que ser una imagen.');
+    if ($ext === 'pdf' && $tipo !== 'plano') bs_error($tipo === 'bacha' ? 'La foto de la bacha tiene que ser una imagen.' : 'La foto de entrega tiene que ser una imagen.');
     $tmp_archivo = $f['tmp_name'];
 
     // Miniatura (opcional): JPG chico armado por el tablero.
@@ -148,13 +160,26 @@ try {
     $adjuntos = bs_tablero_adjuntos($obra);
     $dir = bs_tablero_adj_carpeta($key);
 
-    if ($accion === 'subir') {
+    if ($accion === 'subir' || $accion === 'link') {
         $del_tipo = 0;
-        foreach ($adjuntos as $a) if ($a['tipo'] === $tipo) $del_tipo++;
+        foreach ($adjuntos as $a) {
+            if ($a['tipo'] !== $tipo) continue;
+            $del_tipo++;
+            if ($accion === 'link' && $a['ext'] === 'link' && $a['url'] === $link) {
+                bs_lock_release($fp);
+                bs_error('Ese link ya está cargado en esta obra.');
+            }
+        }
         if ($del_tipo >= BS_TABLERO_ADJ_MAX_POR_TIPO) {
             bs_lock_release($fp);
             bs_error('Ya hay ' . BS_TABLERO_ADJ_MAX_POR_TIPO . ' archivos de ese tipo. Borrá uno para sumar otro.');
         }
+    }
+    if ($accion === 'link') {
+        $id = bin2hex(random_bytes(8));
+        $adjuntos[] = ['id' => $id, 'tipo' => $tipo, 'ext' => 'link', 'url' => $link, 'at' => date('c')];
+
+    } elseif ($accion === 'subir') {
         if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
             bs_lock_release($fp);
             bs_error('No se pudo crear la carpeta de adjuntos', 500);
@@ -178,8 +203,10 @@ try {
             bs_lock_release($fp);
             bs_error('Ese archivo ya no existe. Actualizá el tablero.', 404);
         }
-        @unlink($dir . '/' . $borrado['id'] . '.' . $borrado['ext']);
-        @unlink($dir . '/' . $borrado['id'] . '.t.jpg');
+        if ($borrado['ext'] !== 'link') { // un link no tiene archivo en el servidor
+            @unlink($dir . '/' . $borrado['id'] . '.' . $borrado['ext']);
+            @unlink($dir . '/' . $borrado['id'] . '.t.jpg');
+        }
         $adjuntos = $quedan;
     }
 

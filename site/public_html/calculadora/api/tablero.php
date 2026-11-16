@@ -29,6 +29,8 @@
 //     accion "bacha" → { "origen": "nuestra" | "cliente" | "no", "modelo": "Johnson E37" }
 //                      Anota de quién es la bacha SIN tildar "Tenemos la bacha"
 //                      (lo usa "Cargar obra"). Con "no" sí queda tildado.
+//                      Vale en cualquier etapa: "Editar obra" lo usa para
+//                      cargar o corregir el modelo después de Por medir.
 //     accion "borrar" → borra la ficha: tildes, datos y adjuntos de la obra
 //     accion "mover" → { "a": "fabricar" }  (arrastre: etapa de destino)
 //                      { "hacia": "adelante" | "atras" | "retiro" }  (botones)
@@ -258,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'cortador'    => array_values(array_intersect($BS_CORTADORES, (array)($obra['cortador'] ?? []))),
                     'medidor'     => array_values(array_intersect($BS_MEDIDORES, (array)($obra['medidor'] ?? []))),
                     'adjuntos'    => array_map(function ($a) {
-                        return ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf'];
+                        return ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf', 'link' => $a['ext'] === 'link' ? $a['url'] : ''];
                     }, bs_tablero_adjuntos($obra)),
                     'semana'      => $semana,
                     'limite'      => $limite_dia,
@@ -500,10 +502,8 @@ try {
         // tilde: "Tenemos la bacha" se sigue tildando a mano cuando la bacha
         // está en el taller (ahí se exige el modelo si es nuestra). La única
         // excepción es "no lleva": no hay nada que esperar, queda tildado.
-        if (!isset($BS_ETAPAS[$etapa]['checks']['bacha'])) {
-            bs_lock_release($fp);
-            bs_error('La bacha se anota en Por medir. Actualizá el tablero.', 409);
-        }
+        // Vale en cualquier etapa: el modelo se puede cargar o corregir
+        // cuando la obra ya salió de Por medir (lo usa "Editar obra").
         $origen = (string)($body['origen'] ?? '');
         if (!in_array($origen, ['nuestra', 'cliente', 'no'], true)) {
             bs_lock_release($fp);
@@ -521,7 +521,7 @@ try {
         }
         $obra['bacha'] = $origen;
         $obra['bacha_modelo'] = $modelo;
-        if ($origen === 'no') {
+        if ($origen === 'no' && isset($BS_ETAPAS[$etapa]['checks']['bacha'])) {
             $obra['checks']['bacha'] = true;
             if (!is_array($obra['tildes_at'] ?? null)) $obra['tildes_at'] = [];
             $obra['tildes_at']['bacha'] = $hoy;

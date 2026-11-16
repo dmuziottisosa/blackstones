@@ -370,7 +370,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .adj:hover{border-color:var(--et)}
 .adj img{width:100%;height:100%;object-fit:cover;display:block}
 .adj span{position:absolute;left:0;right:0;bottom:0;background:rgba(20,17,13,.74);color:#fff;font-size:9.5px;font-weight:700;line-height:1.6;text-align:center;letter-spacing:.02em}
-.adj.pdf{font-size:13px;font-weight:800;color:var(--text2);padding-bottom:14px}
+.adj.pdf,.adj.link{font-size:13px;font-weight:800;color:var(--text2);padding-bottom:14px}
+.adj.link{font-size:12px;color:var(--gdd)}
+[data-theme="dark"] .adj.link{color:var(--gd)}
+.visor-link{margin:0 0 14px;padding:12px;border-radius:var(--radius-sm);background:var(--card-alt);font-size:13px;color:var(--text2);word-break:break-all}
+.modal .adjuntar.subir{margin-top:0;border-style:solid;color:var(--text)}
+.modal .adj-o{margin:14px 0;text-align:center;font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em}
 .adj.mas{border:1.5px dashed var(--et);background:var(--et-soft);color:var(--et);font-size:10.5px;font-weight:700;line-height:1.25;padding:3px}
 .visor img{display:block;max-width:100%;max-height:60vh;margin:0 auto 12px;border-radius:6px;background:var(--card-alt)}
 .visor .acciones{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13.5px}
@@ -504,7 +509,19 @@ const API_ADJ='/calculadora/api/tablero-adjunto.php';
 const API_CARGAR='/calculadora/api/tablero-cargar.php';
 const API_EDITAR='/calculadora/api/tablero-editar.php';
 const API_BORRAR='/calculadora/api/delete.php';
-const ADJ={bacha:'Bacha',plano:'Plano'}; // tipos de adjunto
+const ADJ={bacha:'Bacha',plano:'Plano',entrega:'Entrega'}; // tipos de adjunto
+const ADJ_L={bacha:'Foto de la bacha',plano:'Plano',entrega:'Foto de entrega'}; // cómo se nombran en ventanas y avisos
+const ADJ_OK={bacha:'Foto de bacha guardada',plano:'Plano guardado',entrega:'Foto de entrega guardada'};
+// Links que se aceptan en vez de subir el archivo (misma lista que el server).
+const LINK_HOSTS=['drive.google.com','docs.google.com','photos.app.goo.gl','photos.google.com'];
+function linkValido(t){
+  t=String(t||'').trim();
+  if(!t||t.length>600||/[\s"'<>\\]/.test(t))return '';
+  let u=null;
+  try{u=new URL(t);}catch(e){return '';}
+  if(u.protocol!=='https:'||u.username||u.password||u.port||LINK_HOSTS.indexOf(u.hostname.toLowerCase())<0)return '';
+  return t;
+}
 
 let ETAPAS=[];      // definición de etapas (viene del server)
 let INSTALADORES=[];// quiénes instalan (viene del server)
@@ -703,15 +720,19 @@ function faltaPara(c,destino){
 }
 
 const urlAdj=(c,a)=>API_ADJ+'?nro='+encodeURIComponent(c.cliente_nro)+'&sub='+c.sub+'&id='+a.id;
-function htmlAdjuntos(c,puedeSumar){
+function htmlAdjuntos(c,desplegada){
   let h='';
   c.adjuntos.forEach(a=>{
-    h+='<button type="button" class="adj'+(a.pdf?' pdf':'')+'" data-act="ver" data-id="'+esc(a.id)+'" title="'+ADJ[a.tipo]+'">'+
-      (a.pdf?'PDF':'<img loading="lazy" alt="" src="'+esc(urlAdj(c,a))+'&t=1">')+'<span>'+ADJ[a.tipo]+'</span></button>';
+    h+='<button type="button" class="adj'+(a.pdf?' pdf':'')+(a.link?' link':'')+'" data-act="ver" data-id="'+esc(a.id)+'" title="'+ADJ[a.tipo]+(a.link?' (link de Drive)':'')+'">'+
+      (a.link?'Drive':(a.pdf?'PDF':'<img loading="lazy" alt="" src="'+esc(urlAdj(c,a))+'&t=1">'))+'<span>'+ADJ[a.tipo]+'</span></button>';
   });
-  if(puedeSumar){
+  // Bacha y plano se suman en Por medir (o desde "Más"); la foto de entrega, cuando se instala.
+  if(c.etapa==='medir'||desplegada){
     h+='<button type="button" class="adj mas" data-act="adjuntar" data-tipo="bacha">+ Foto bacha</button>';
     h+='<button type="button" class="adj mas" data-act="adjuntar" data-tipo="plano">+ Plano</button>';
+  }
+  if(c.etapa==='instalar'||c.etapa==='archivar'){
+    h+='<button type="button" class="adj mas" data-act="adjuntar" data-tipo="entrega">+ Foto entrega</button>';
   }
   return h?'<div class="c-adj">'+h+'</div>':'';
 }
@@ -854,7 +875,7 @@ function htmlCard(c){
   }
   if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
   // Foto de bacha y plano: se suman en Por medir (o desde "Más") y quedan a la vista después.
-  h+=htmlAdjuntos(c,c.etapa==='medir'||abierta===c.key);
+  h+=htmlAdjuntos(c,abierta===c.key);
 
   h+='<div class="c-checks">';
   e.checks.forEach(k=>{
@@ -1163,7 +1184,7 @@ wrap.addEventListener('click',ev=>{
   }else if(act==='borrar'){
     pedirBorrar(c);
   }else if(act==='adjuntar'){
-    elegirArchivo(c,b.dataset.tipo);
+    pedirAdjunto(c,b.dataset.tipo);
   }else if(act==='ver'){
     verAdjunto(c,b.dataset.id);
   }else if(act==='archivar'){
@@ -1409,6 +1430,7 @@ function pedirEditar(c){
   const propio=c.cliente_nro+'-'+c.sub;
   // Una obra cargada a mano no tiene presupuesto: el campo arranca vacío, para poner el número cuando exista.
   const nro0=c.manual?'':propio;
+  const conBacha=c.bacha==='nuestra'||c.bacha==='cliente';
   abrirModal('Editar obra '+propio,
     campo('edNro','N° de presupuesto',nro0,'maxlength="12" inputmode="numeric" placeholder="'+(c.manual?'Todavía sin presupuesto':'Ej: 0042 o 0042-2')+'"')+
     '<p>'+(c.manual?'Esta obra se cargó a mano. Cuando el presupuesto esté hecho, poné acá su número.':'Cambialo para pasar la ficha a otro presupuesto.')+' La ficha conserva sus tildes, fechas y fotos.</p>'+
@@ -1417,6 +1439,8 @@ function pedirEditar(c){
     campo('edDir','Dirección',c.direccion,'maxlength="200"')+
     campo('edMat','Material y color',c.material,'maxlength="200"')+
     campo('edCon','Trabajo',c.concepto,'maxlength="200"')+
+    // El modelo de la bacha se puede cargar o corregir en cualquier etapa (el tilde solo vive en Por medir).
+    (conBacha?campo('edBacha','Modelo de la bacha ('+BACHA[c.bacha]+')',c.bacha_modelo||'','maxlength="80" placeholder="Ej: Johnson E37, 37 × 34"'):'')+
     '<p class="m-error" id="edError" hidden></p>',
     'Guardar',
     async()=>{
@@ -1428,18 +1452,28 @@ function pedirEditar(c){
         // solo viaja lo que cambió
         [['nombre','edNombre',c.nombre],['celular','edCel',c.celular],['direccion','edDir',c.direccion],['material','edMat',c.material],['concepto','edCon',c.concepto]]
           .forEach(x=>{if(v(x[1])!==String(x[2]||'').trim())body[x[0]]=v(x[1]);});
-        if(Object.keys(body).length===2){cerrarModal();return;} // no cambió nada
         if(body.nombre===''){$('edNombre').focus();toast('El nombre no puede quedar vacío.');return;}
       }
+      const modelo=conBacha?v('edBacha').replace(/\s+/g,' '):'';
+      const cambiaBacha=conBacha&&modelo!==(c.bacha_modelo||'');
+      const cambiaDatos=cambiaNro||Object.keys(body).length>2;
+      if(!cambiaDatos&&!cambiaBacha){cerrarModal();return;} // no cambió nada
+      if(cambiaBacha&&!modelo&&c.bacha==='nuestra'&&c.checks.bacha){$('edBacha').focus();toast('Poné el modelo de la bacha.');return;}
       if(ocupado)return;
       ocupado=true;
       // Igual que al cargar: la ventana no se cierra hasta que el server confirma.
       const b=$('mOk'),rotulo=b.textContent;
       b.disabled=true;b.textContent='Guardando…';
       $('edError').hidden=true;
-      let j=null;
+      let j={cliente_nro:c.cliente_nro,sub:c.sub};
       try{
-        j=await pedir(API_EDITAR,body);
+        // Primero la bacha (va con la ficha aunque después cambie de número); si algo falla,
+        // lo que ya se guardó no se vuelve a mandar al reintentar.
+        if(cambiaBacha&&modelo!==(c.bacha_modelo||'')){
+          await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'bacha',origen:c.bacha,modelo:modelo});
+          c.bacha_modelo=modelo;c._txt='';
+        }
+        if(cambiaDatos)j=await pedir(API_EDITAR,body);
       }catch(e){
         ocupado=false;
         b.disabled=false;b.textContent=rotulo;
@@ -1461,8 +1495,9 @@ function pedirEditar(c){
       await cargar();
     });
   // con algo modificado, tocar afuera no cierra la ventana
-  const ini=['edNro','edNombre','edCel','edDir','edMat','edCon'].map(id=>$(id).value);
-  modalProtegido=()=>['edNro','edNombre','edCel','edDir','edMat','edCon'].some((id,i)=>$(id)&&$(id).value!==ini[i]);
+  const ids=['edNro','edNombre','edCel','edDir','edMat','edCon'].concat(conBacha?['edBacha']:[]);
+  const ini=ids.map(id=>$(id).value);
+  modalProtegido=()=>ids.some((id,i)=>$(id)&&$(id).value!==ini[i]);
   $(c.manual?'edNro':'edNombre').focus();
 }
 
@@ -1586,10 +1621,47 @@ fileAdj.type='file';fileAdj.style.display='none';
 document.body.appendChild(fileAdj);
 let adjPara=null,subiendo=false;
 
+// Sumar una foto o un plano: se sube desde el dispositivo, o se pega el link de Drive donde ya está.
+function pedirAdjunto(c,tipo){
+  abrirModal(ADJ_L[tipo]+' · '+c.cliente_nro+'-'+c.sub,
+    '<button type="button" class="adjuntar subir" id="adjSubir">Subir desde este dispositivo</button>'+
+    '<div class="adj-o">o</div>'+
+    '<label class="campo">Pegar el link de Drive<input type="url" id="adjLink" autocomplete="off" inputmode="url" placeholder="https://drive.google.com/…"></label>'+
+    '<p>El archivo queda en Drive y acá se guarda solo el link. Compartilo con quienes tengan que verlo.</p>'+
+    '<p class="m-error" id="adjError" hidden></p>',
+    'Guardar link',
+    async()=>{
+      const escrito=$('adjLink').value.trim();
+      if(!escrito){$('adjLink').focus();toast('Pegá el link de Drive, o tocá "Subir desde este dispositivo".');return;}
+      const url=linkValido(escrito);
+      if(!url){$('adjLink').focus();$('adjError').textContent='Ese link no sirve. Tiene que ser un link de Google Drive (empieza con https://drive.google.com/).';$('adjError').hidden=false;return;}
+      if(ocupado)return;
+      ocupado=true;
+      const b=$('mOk'),rotulo=b.textContent;
+      b.disabled=true;b.textContent='Guardando…';
+      $('adjError').hidden=true;
+      try{
+        await pedir(API_ADJ,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'link',tipo:tipo,url:url});
+      }catch(e){
+        ocupado=false;
+        b.disabled=false;b.textContent=rotulo;
+        $('adjError').textContent=e.message;$('adjError').hidden=false;
+        return;
+      }
+      b.disabled=false;
+      cerrarModal();
+      ocupado=false;
+      toast(ADJ_OK[tipo]+' (link de Drive)',true);
+      await cargar();
+    });
+  modalProtegido=()=>!!($('adjLink')&&$('adjLink').value.trim());
+  $('adjSubir').addEventListener('click',()=>{cerrarModal();elegirArchivo(c,tipo);});
+}
+
 function elegirArchivo(c,tipo){
   if(subiendo)return;
   adjPara={nro:c.cliente_nro,sub:c.sub,tipo:tipo};
-  fileAdj.accept=tipo==='bacha'?'image/*':'image/*,application/pdf'; // el plano también puede ser PDF
+  fileAdj.accept=tipo==='plano'?'image/*,application/pdf':'image/*'; // el plano también puede ser PDF
   fileAdj.value='';
   fileAdj.click();
 }
@@ -1621,7 +1693,7 @@ function achicar(file,lado,calidad){
 async function subir(para,file){
   if(subiendo)return;
   subiendo=true;
-  toast(para.tipo==='bacha'?'Subiendo la foto de la bacha…':'Subiendo el plano…',true);
+  toast('Subiendo: '+ADJ_L[para.tipo].toLowerCase()+'…',true);
   try{
     const fd=new FormData();
     fd.append('cliente_nro',para.nro);fd.append('sub',para.sub);fd.append('tipo',para.tipo);
@@ -1641,7 +1713,7 @@ async function subir(para,file){
     let j=null;
     try{j=await r.json();}catch(e){}
     if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo subir el archivo');
-    toast(para.tipo==='bacha'?'Foto de bacha guardada':'Plano guardado',true);
+    toast(ADJ_OK[para.tipo],true);
   }catch(e){
     toast(e.message);
   }
@@ -1652,10 +1724,10 @@ async function subir(para,file){
 function verAdjunto(c,id){
   const a=c.adjuntos.find(x=>x.id===id);
   if(!a)return;
-  const url=urlAdj(c,a);
+  const url=a.link||urlAdj(c,a);
   abrirModal(ADJ[a.tipo]+' · '+c.cliente_nro+'-'+c.sub,
-    '<div class="visor">'+(a.pdf?'':'<img src="'+esc(url)+'" alt="">')+
-    '<div class="acciones"><a href="'+esc(url)+'" target="_blank" rel="noopener">'+(a.pdf?'Abrir el PDF':'Abrir en grande')+'</a>'+
+    '<div class="visor">'+(a.link?'<p class="visor-link">Está en Drive: '+esc(a.link.replace(/^https:\/\//,'').slice(0,60))+(a.link.length>68?'…':'')+'</p>':(a.pdf?'':'<img src="'+esc(url)+'" alt="">'))+
+    '<div class="acciones"><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(a.link?'Abrir en Drive':(a.pdf?'Abrir el PDF':'Abrir en grande'))+'</a>'+
     '<button type="button" class="borrar" id="adjBorrar">Borrar</button></div></div>',
     'Cerrar',cerrarModal);
   $('mCancelar').style.display='none';
@@ -1797,6 +1869,8 @@ function exportarCSV(){
     ['Falta en esta etapa',c=>faltanDe(c,etapaDe(c.etapa)).join(', ')],
     ['Fotos de bacha',c=>c.adjuntos.filter(a=>a.tipo==='bacha').length||''],
     ['Planos',c=>c.adjuntos.filter(a=>a.tipo==='plano').length||''],
+    ['Fotos de entrega',c=>c.adjuntos.filter(a=>a.tipo==='entrega').length||''],
+    ['Links de Drive',c=>c.adjuntos.filter(a=>a.link).map(a=>ADJ[a.tipo]+': '+a.link).join(' | ')],
     ['Nota',c=>c.nota],
   ];
   const celda=v=>{

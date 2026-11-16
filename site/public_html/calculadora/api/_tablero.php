@@ -24,7 +24,24 @@ define('BS_TABLERO_NOTA_MAX', 300);
 // Adjuntos: qué se puede colgar de una obra y cuánto.
 define('BS_TABLERO_ADJ_MAX_BYTES',    10 * 1024 * 1024); // por archivo
 define('BS_TABLERO_ADJ_MAX_POR_TIPO', 6);
-$BS_TABLERO_ADJ_TIPOS = ['bacha' => 'Bacha', 'plano' => 'Plano'];
+$BS_TABLERO_ADJ_TIPOS = ['bacha' => 'Bacha', 'plano' => 'Plano', 'entrega' => 'Entrega'];
+// Un adjunto también puede ser un link (la foto o el plano viven en Drive):
+// no ocupa lugar en el servidor. Solo se aceptan links https de Google.
+define('BS_TABLERO_LINK_MAX', 600);
+$BS_TABLERO_LINK_HOSTS = ['drive.google.com', 'docs.google.com', 'photos.app.goo.gl', 'photos.google.com'];
+
+/** Link de Drive ya validado, o '' si no sirve. El server nunca lo abre: solo lo guarda. */
+function bs_tablero_link_valido($url) {
+    global $BS_TABLERO_LINK_HOSTS;
+    $url = trim((string)$url);
+    if ($url === '' || strlen($url) > BS_TABLERO_LINK_MAX) return '';
+    if (preg_match('/[\s"\'<>\\\\\x00-\x1f\x7f]/', $url)) return '';
+    $p = parse_url($url);
+    if (!is_array($p) || strtolower((string)($p['scheme'] ?? '')) !== 'https') return '';
+    if (isset($p['user']) || isset($p['pass']) || isset($p['port'])) return '';
+    if (!in_array(strtolower((string)($p['host'] ?? '')), $BS_TABLERO_LINK_HOSTS, true)) return '';
+    return $url;
+}
 // mime real del archivo → extensión con la que se guarda
 $BS_TABLERO_ADJ_MIMES = [
     'image/jpeg'      => 'jpg',
@@ -252,7 +269,7 @@ function bs_tablero_obra_vacia() {
     return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'plazo' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'bacha_modelo' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'fabricado_at' => '', 'tildes_at' => [], 'adjuntos' => [], 'desde' => '', 'hist' => []];
 }
 
-/** Adjuntos de una obra, ya validados: [{id, tipo, ext}]. */
+/** Adjuntos de una obra, ya validados: [{id, tipo, ext}] (los links traen además "url", con ext "link"). */
 function bs_tablero_adjuntos($obra) {
     global $BS_TABLERO_ADJ_TIPOS, $BS_TABLERO_ADJ_MIMES;
     $out = [];
@@ -262,7 +279,14 @@ function bs_tablero_adjuntos($obra) {
         $tipo = (string)($a['tipo'] ?? '');
         $ext = (string)($a['ext'] ?? '');
         if (!preg_match('/^[a-f0-9]{16}$/', $id)) continue;
-        if (!isset($BS_TABLERO_ADJ_TIPOS[$tipo]) || !in_array($ext, $BS_TABLERO_ADJ_MIMES, true)) continue;
+        if (!isset($BS_TABLERO_ADJ_TIPOS[$tipo])) continue;
+        if ($ext === 'link') {
+            $url = bs_tablero_link_valido($a['url'] ?? '');
+            if ($url === '') continue;
+            $out[] = ['id' => $id, 'tipo' => $tipo, 'ext' => 'link', 'url' => $url, 'at' => (string)($a['at'] ?? '')];
+            continue;
+        }
+        if (!in_array($ext, $BS_TABLERO_ADJ_MIMES, true)) continue;
         $out[] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => (string)($a['at'] ?? '')];
     }
     return $out;
