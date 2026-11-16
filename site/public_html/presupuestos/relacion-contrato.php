@@ -130,10 +130,19 @@ button{font-family:inherit;color:inherit}
 
 .aviso-p{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:8px 14px;border:1px dashed var(--amb);border-radius:var(--radius);background:var(--amb-soft);color:var(--amb);font-size:13px;font-weight:600}
 .aviso-p[hidden]{display:none}
+.aviso-s{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);color:var(--text2);font-size:13px}
+.aviso-s b{color:var(--text)}
+.aviso-s .btn{margin-left:auto}
+.aviso-s[hidden]{display:none}
+.m-chk{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:12px;color:var(--text3)}
+.m-chk span::before{content:'';display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;border:1.5px solid var(--text3);vertical-align:1px}
+.m-chk span.si{color:var(--gr)}
+.m-chk span.si::before{background:var(--gr);border-color:var(--gr)}
+.res .v small{display:block;margin-top:1px;font-size:11.5px;font-weight:500;color:var(--text3)}
 .aviso-p .btn{margin-left:auto;border-color:var(--amb);color:var(--amb);background:transparent}
 
 /* === PLANILLA: un renglón por contrato, columnas fijas, números alineados === */
-.lista{--cols:74px 58px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 172px minmax(0,1.25fr) 30px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 172px minmax(0,1.25fr) 30px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
 .fila,.cab,.pie{display:grid;grid-template-columns:var(--cols);gap:0 14px;align-items:center;padding:9px 16px}
 .cab{position:sticky;top:0;z-index:5;padding-top:9px;padding-bottom:9px;background:var(--card-alt);border-bottom:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
 .cab>div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -148,6 +157,7 @@ button{font-family:inherit;color:inherit}
 .c-fec small{display:block;font-size:11px;font-weight:500;color:var(--text3);text-transform:capitalize}
 .c-nro{font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .c-nro .falta{font-size:11.5px;color:var(--amb)}
+.c-nro small{display:block;font-size:11px;font-weight:500;color:var(--text3)}
 .f-nom{font-size:14px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .f-sub{font-size:11.5px;color:var(--text3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .f-sub .tel{color:var(--text2);font-weight:600;text-decoration:none;font-variant-numeric:tabular-nums}
@@ -280,6 +290,10 @@ button{font-family:inherit;color:inherit}
 .campo input:focus,.campo select:focus,.campo textarea:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
 .campo input[readonly]{background:var(--card-alt);color:var(--text2)}
 .campo[hidden]{display:none}
+.campo.cot input{max-width:220px}
+.pista{margin-top:8px;font-size:12.5px;color:var(--text3)}
+.pista.baja{color:var(--amb);font-weight:600}
+.pista[hidden]{display:none}
 .dos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 12px}
 .tres{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.9fr) minmax(0,1.2fr);gap:0 12px}
 .opc{display:flex;gap:8px;margin-top:6px}
@@ -307,6 +321,7 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .modal .btns .ok{background:var(--gd);color:#1A1816;border-color:var(--gd)}
 .modal .btns .ok.peligro,[data-theme="dark"] .modal .btns .ok.peligro{background:var(--red);border-color:var(--red);color:#fff}
 .modal .btns .izq{margin-right:auto;border-color:transparent;color:var(--red);padding-left:4px;padding-right:4px}
+.modal .btns .izq-n{margin-right:auto}
 .modal .btns button:disabled{opacity:.6;cursor:default}
 .m-err{margin-top:12px;padding:9px 12px;border-radius:var(--radius-sm);background:var(--red-soft);color:var(--red);font-size:13px;font-weight:600}
 .m-err[hidden]{display:none}
@@ -350,12 +365,12 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 /* Pantallas medianas: primero se va la columna de notas (queda un punto al lado del nombre),
    después factura / muebles / pileta. Todo sigue estando en la ficha. */
 @media(max-width:1519px){
-  .lista{--cols:74px 58px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 172px 30px}
+  .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 172px 30px}
   .c-not,.cab .h-not{display:none}
   .nota-i{display:inline-block;width:7px;height:7px;margin-left:7px;border-radius:50%;background:var(--amb);vertical-align:middle}
 }
 @media(max-width:1199px){
-  .lista{--cols:70px 54px minmax(0,1.6fr) minmax(0,1.3fr) 100px 100px 106px 172px 30px}
+  .lista{--cols:70px 68px minmax(0,1.6fr) minmax(0,1.3fr) 100px 100px 106px 172px 30px}
   .c-sn,.cab .h-sn{display:none}
   .fila,.cab,.pie{gap:0 12px;padding-left:14px;padding-right:14px}
 }
@@ -460,6 +475,7 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   <div class="res" id="res" hidden></div>
   <div class="filtros" id="filtros" hidden></div>
   <div class="aviso-p" id="avisoP" hidden></div>
+  <div class="aviso-s" id="avisoS" hidden></div>
   <div class="lista" id="lista"><div class="vacio">Cargando…</div></div>
 </div>
 
@@ -567,16 +583,34 @@ function ver(c){
   return Object.assign({},c,{
     cliente:k.nombre||c.cliente,telefono:telLindo(k.celular)||c.telefono,direccion:k.direccion||c.direccion,material:k.material||c.material,
     bacha:k.bacha||c.bacha,bacha_modelo:k.bacha?k.bacha_modelo:c.bacha_modelo,
-    sena:k.sena?{monto:k.sena.monto,moneda:k.sena.moneda,fecha:(c.sena&&c.sena.fecha)||HOY}:c.sena
+    // la seña del tablero no trae cotización: se usa la que el contrato tenga anotada para esa moneda
+    sena:k.sena?Object.assign({},c.sena&&c.sena.moneda===k.sena.moneda?{cotizacion:c.sena.cotizacion,aplica:c.sena.aplica}:{},{monto:k.sena.monto,moneda:k.sena.moneda,fecha:(c.sena&&c.sena.fecha)||HOY}):c.sena
   });
 }
+// Un cobro se descuenta del total de su misma moneda, salvo que tenga cotización: ahí se
+// convierte y se descuenta del total en la otra (lo habitual: contrato en pesos, pago en dólares).
+function aplicar(p,x){
+  if(x.aplica&&x.aplica!==x.moneda&&x.cotizacion>0)p[x.aplica]+=x.moneda==='USD'?x.monto*x.cotizacion:x.monto/x.cotizacion;
+  else p[x.moneda]+=x.monto;
+}
+// tot: el contrato · pag: lo que entró de verdad, en cada moneda · sal: lo que falta, ya convertido
 function cuentas(c,v){
   v=v||ver(c);
-  const p={USD:0,ARS:0},r=x=>Math.round(x*100)/100;
-  if(v.sena)p[v.sena.moneda]+=v.sena.monto;
-  (c.pagos||[]).forEach(x=>{p[x.moneda]+=x.monto;});
-  return {tot:{USD:v.total_usd,ARS:v.total_ars},pag:{USD:r(p.USD),ARS:r(p.ARS)},sal:{USD:r(v.total_usd-p.USD),ARS:r(v.total_ars-p.ARS)}};
+  const p={USD:0,ARS:0},a={USD:0,ARS:0},r=x=>Math.round(x*100)/100;
+  (v.sena?[v.sena]:[]).concat(c.pagos||[]).forEach(x=>{p[x.moneda]+=x.monto;aplicar(a,x);});
+  return {tot:{USD:v.total_usd,ARS:v.total_ars},pag:{USD:r(p.USD),ARS:r(p.ARS)},sal:{USD:r(v.total_usd-a.USD),ARS:r(v.total_ars-a.ARS)}};
 }
+// De qué total se descuenta un cobro en esa moneda: del suyo si todavía hay saldo ahí;
+// si no, del otro (y entonces hace falta la cotización).
+function destino(moneda,tot,sal){
+  const otra=moneda==='USD'?'ARS':'USD';
+  if(tot[moneda]>0&&(sal[moneda]>0.004||!(tot[otra]>0)))return moneda;
+  return tot[otra]>0?otra:moneda;
+}
+// El dólar del día, el mismo que usa la calculadora: es solo el valor que se propone; se puede cambiar.
+let DOLAR=0;
+fetch('/calculadora/dolar.php',{cache:'no-store'}).then(r=>r.json()).then(j=>{DOLAR=Math.round(+j.venta||0);if(F)pintarPagos();}).catch(()=>{});
+const cambioTxt=x=>x.aplica&&x.aplica!==x.moneda&&x.cotizacion>0?' · a $ '+NF.format(x.cotizacion)+' = '+plata(x.moneda==='USD'?x.monto*x.cotizacion:x.monto/x.cotizacion,x.aplica):'';
 const partes=o=>['USD','ARS'].filter(m=>Math.abs(o[m])>0.004).map(m=>plata(o[m],m));
 // Saldo: lo que falta cobrar en cada moneda. Si se cobró de más en una, queda "a favor".
 function saldoTxt(n){
@@ -617,23 +651,30 @@ function espejarSenas(){
     if(!k||!k.sena)return;
     if(c.sena&&c.sena.monto===k.sena.monto&&c.sena.moneda===k.sena.moneda)return;
     const f=(c.sena&&c.sena.fecha)||HOY;
-    c.sena={monto:k.sena.monto,moneda:k.sena.moneda,fecha:f};
+    c.sena=Object.assign({},c.sena&&c.sena.moneda===k.sena.moneda?{cotizacion:c.sena.cotizacion,aplica:c.sena.aplica}:{},{monto:k.sena.monto,moneda:k.sena.moneda,fecha:f});
     pedir(API,{accion:'sena',id:c.id,monto:k.sena.monto,moneda:k.sena.moneda,fecha:f}).catch(()=>{});
   });
 }
 
+// Obras vivas en el tablero que no tienen contrato acá. Con el tablero sin leer, no se sabe: ninguna.
+const sinContrato=()=>{const con={};CONTRATOS.forEach(c=>{if(c.enlace)con[keyDe(c)]=1;});return Object.keys(CARDS).map(k=>CARDS[k]).filter(k=>!con[k.key]).sort((a,b)=>llano(a.nombre)<llano(b.nombre)?-1:1);};
+// Un contrato cierra limpio con las tres cosas: N°, presupuesto adjunto y enlazado con el tablero.
+const completo=c=>!!(c.nro&&c.archivo&&c.enlace);
 const sumar=(l)=>{const s={tot:{USD:0,ARS:0},pag:{USD:0,ARS:0},deb:{USD:0,ARS:0},conSaldo:0};l.forEach(c=>{const n=cuentas(c);let debe=false;['USD','ARS'].forEach(m=>{s.tot[m]+=n.tot[m];s.pag[m]+=n.pag[m];if(n.sal[m]>0.004){s.deb[m]+=n.sal[m];debe=true;}});if(debe)s.conSaldo++;});return s;};
 const debe=c=>{const n=cuentas(c);return n.sal.USD>0.004||n.sal.ARS>0.004;};
 const pagado=c=>{const n=cuentas(c);return (n.tot.USD>0||n.tot.ARS>0)&&!debe(c);};
 // Filtros de control: lo que hay que perseguir.
-const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro]];
-const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':'<span class="sn">—</span>');
+const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['completos','Completos',completo]];
+const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':(v==='cf'?'<span class="sn si" title="Factura a consumidor final">CF</span>':'<span class="sn">—</span>'));
 const PIL={nuestra:'Nuestra',cliente:'Cliente',no:'No'};
 
 function dibujar(){
   const pr=CONTRATOS.filter(c=>c.prueba).length;
   $('avisoP').hidden=!pr;
   if(pr)$('avisoP').innerHTML='<span>'+(pr===1?'Hay 1 renglón de prueba.':'Hay '+pr+' renglones de prueba.')+' No son contratos reales y cuentan en los números hasta que los borres.</span><button type="button" class="btn chico" data-borrar-prueba>Borrar los de prueba</button>';
+  const sc=sinContrato();
+  $('avisoS').hidden=!sc.length;
+  if(sc.length)$('avisoS').innerHTML='<span>'+(sc.length===1?'Hay <b>1 obra</b> en el tablero sin contrato.':'Hay <b>'+sc.length+' obras</b> en el tablero sin contrato.')+'</span><button type="button" class="btn chico" data-sin-contrato>Verlas</button>';
   const t=llano(q).trim(),buscando=!!t;
   const qTel=/^[\d\s+()\-.\u2010-\u2015\u200e\u200f\u202a-\u202e\u00a0]+$/.test(q.trim())&&telDigitos(q).length>=6?telDigitos(q):'';
   $('mesTxt').textContent=buscando?'Todos los meses':mesTxt(mes);
@@ -656,7 +697,7 @@ function dibujar(){
   const base=delMes,s=sumar(base),todo=sumar(CONTRATOS),hayDeuda=partes(s.deb).length>0;
   const linea=o=>partes(o).join(' + ');
   $('res').hidden=false;
-  $('res').innerHTML='<div><div class="t">Contratos</div><div class="v">'+base.length+'</div></div>'
+  $('res').innerHTML='<div><div class="t">Contratos</div><div class="v">'+base.length+(base.length?'<small title="Completo: con N°, presupuesto adjunto y enlazado con el tablero">'+base.filter(completo).length+' de '+base.length+' completos</small>':'')+'</div></div>'
     +'<div><div class="t">Contratado</div><div class="v'+(linea(s.tot)?'':' nada')+'">'+(linea(s.tot)||'—')+'</div></div>'
     +'<div class="cobr"><div class="t">Cobrado</div><div class="v'+(linea(s.pag)?'':' nada')+'">'+(linea(s.pag)||'—')+'</div></div>'
     +'<div class="debe'+(hayDeuda?'':' cero')+'"><div class="t">Por cobrar</div><div class="v'+(hayDeuda||base.length?'':' nada')+'">'+(linea(s.deb)||(base.length?'Nada':'—'))+'</div></div>'
@@ -680,13 +721,13 @@ function dibujar(){
     return;
   }
   const fl=k=>orden===k?(ordenAsc?' ↑':' ↓'):'';
-  let h='<div class="cab"><div><button type="button" data-orden="fecha" class="'+(orden==='fecha'?'on':'')+'" title="Ordenar por fecha">Fecha'+fl('fecha')+'</button></div><div>N°</div><div><button type="button" data-orden="cliente" class="'+(orden==='cliente'?'on':'')+'" title="Ordenar por cliente">Cliente'+fl('cliente')+'</button></div><div>Material</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div class="cen h-sn" title="Factura">Fact.</div><div class="cen h-sn" title="Muebles colocados">Mueb.</div><div class="h-sn">Pileta</div><div>Tablero</div><div class="h-not">Notas</div><div></div></div>';
+  let h='<div class="cab"><div><button type="button" data-orden="fecha" class="'+(orden==='fecha'?'on':'')+'" title="Ordenar por fecha">Fecha'+fl('fecha')+'</button></div><div title="Contrato: N° de la calculadora. Debajo, el contrato paralelo.">Contrato</div><div><button type="button" data-orden="cliente" class="'+(orden==='cliente'?'on':'')+'" title="Ordenar por cliente">Cliente'+fl('cliente')+'</button></div><div>Material</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div class="cen h-sn" title="Factura">Fact.</div><div class="cen h-sn" title="Muebles colocados">Mueb.</div><div class="h-sn">Pileta</div><div>Tablero</div><div class="h-not">Notas</div><div></div></div>';
   h+=lista.map(c=>{
     const v=ver(c),n=cuentas(c,v),k=cardDe(c),s=saldoTxt(n);
     const p=(c.fecha||'').split('-').map(Number),dt=p.length===3?new Date(p[0],p[1]-1,p[2]):null;
     const fecha=dt?String(p[2]).padStart(2,'0')+'/'+String(p[1]).padStart(2,'0')+(p[0]!==+HOY.slice(0,4)?'/'+String(p[0]).slice(2):''):'';
     // debajo del nombre: en la planilla, vendedor y procedencia; en tarjeta se suman N° y fecha
-    const sub='<span class="solo-t">'+(c.nro?'N° '+esc(c.nro):'<span class="falta">Sin N°</span>')+(fecha?' · '+esc(fch(c.fecha)):'')+([v.telefono,c.vendedor,c.procedencia].some(Boolean)?' · ':'')+'</span>'
+    const sub='<span class="solo-t">'+(c.nro?'N° '+esc(c.nro):'<span class="falta">Sin N°</span>')+(c.contrato_paralelo?' · ctto '+esc(c.contrato_paralelo):'')+(fecha?' · '+esc(fch(c.fecha)):'')+([v.telefono,c.vendedor,c.procedencia].some(Boolean)?' · ':'')+'</span>'
       +[v.telefono?(waLink(v.telefono)?'<a class="tel" href="'+esc(waLink(v.telefono))+'" target="_blank" rel="noopener" title="Abrir WhatsApp">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'',esc(c.vendedor),esc(c.procedencia)].filter(Boolean).join(' · ');
     const tot=partes(n.tot),pag=partes(n.pag);
     let tab;
@@ -696,10 +737,10 @@ function dibujar(){
     else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><small'+(d.rojo?' class="rojo"':'')+'><span class="enl" title="Enlazado con el tablero y el calendario">'+ICO_ENL+'Enlazado</span>'+(d.t?' · '+esc(d.t):'')+'</small>';}
     else tab='<div class="fila-e"><span class="etapa fuera">'+(TABLERO_OK?'Fuera del tablero':'Sin datos del tablero')+'</span></div><small>'+(TABLERO_OK?'Archivada o borrada':'No se pudo leer el tablero')+'</small>';
     const nota=(c.nota||'').replace(/\s+/g,' ').trim();
-    const obra=[c.factura?'Factura <b>'+(c.factura==='si'?'sí':'no')+'</b>':'',c.muebles?'Muebles <b>'+(c.muebles==='si'?'sí':'no')+'</b>':'',v.bacha?'Pileta <b>'+esc(PIL[v.bacha].toLowerCase())+'</b>':''].filter(Boolean).join(' · ');
+    const obra=[c.factura?'Factura <b>'+(c.factura==='si'?'sí':(c.factura==='cf'?'cons. final':'no'))+'</b>':'',c.muebles?'Muebles <b>'+(c.muebles==='si'?'sí':'no')+'</b>':'',v.bacha?'Pileta <b>'+esc(PIL[v.bacha].toLowerCase())+'</b>':''].filter(Boolean).join(' · ');
     return '<div class="fila'+(k?' enlazada':'')+'" data-id="'+esc(c.id)+'" tabindex="0" role="button" aria-label="Abrir el contrato de '+esc(v.cliente)+'">'
       +'<div class="c-fec">'+esc(fecha)+(dt?'<small>'+DIAS[dt.getDay()]+'</small>':'')+'</div>'
-      +'<div class="c-nro">'+(c.nro?esc(c.nro)+(c.presup&&!c.presup.existe?'<span class="duda" title="Ese N° no está en Presupuestos: o está mal escrito, o ya se borró (los presupuestos duran 180 días).'+(c.archivo?' El contrato conserva el presupuesto adjunto.':'')+'">?</span>':''):'<span class="falta">Sin N°</span>')+'</div>'
+      +'<div class="c-nro">'+(c.nro?esc(c.nro)+(c.presup&&!c.presup.existe?'<span class="duda" title="Ese N° no está en Presupuestos: o está mal escrito, o ya se borró (los presupuestos duran 180 días).'+(c.archivo?' El contrato conserva el presupuesto adjunto.':'')+'">?</span>':''):'<span class="falta">Sin N°</span>')+(c.contrato_paralelo?'<small title="Contrato paralelo">ctto '+esc(c.contrato_paralelo)+'</small>':'')+'</div>'
       +'<div class="c-cli"><div class="f-nom">'+esc(v.cliente)+(c.archivo?'<span class="ver" title="Verificado: tiene adjunto el presupuesto ('+esc(c.archivo.ext.toUpperCase())+')">'+ICO_VER+'</span>':'')+(c.prueba?'<span class="prueba-t">PRUEBA</span>':'')+(nota?'<span class="nota-i" title="'+esc(nota)+'"></span>':'')+'</div>'+(sub.replace(/<[^>]+>/g,'').trim()?'<div class="f-sub">'+sub+'</div>':'')+'</div>'
       +'<div class="c-mat"><div class="f-mat">'+(esc(v.material)||'<span style="color:var(--text3)">Sin material</span>')+'</div>'+(c.medidas?'<div class="f-sub">'+esc(c.medidas)+'</div>':'')+'</div>'
       +'<div class="der"><span class="rot">Total</span><div class="plata'+(tot.length?'':' nada')+'">'+(tot.length?tot.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
@@ -750,9 +791,9 @@ function abrirFicha(id){
   const senaFija=!!(k&&k.sena);
   F={id:c?c.id:'',factura:c?c.factura:'',muebles:c?c.muebles:'',bacha:c?v.bacha:'',pagos:c?(c.pagos||[]).slice():[],fijo:fijo,senaFija:senaFija,
      empujarSena:!!(k&&!k.sena&&k.etapa==='medir'),key:k?k.key:'',
-     archivo:c?c.archivo:null,archivoNuevo:null,quitarArchivo:false,presup:c?c.presup:null,nroMal:'',buscando:false};
+     contrato:c?c.contrato:'',enlazado:!!(c&&c.enlace),archivo:c?c.archivo:null,archivoNuevo:null,quitarArchivo:false,presup:c?c.presup:null,nroMal:'',buscando:false};
   const val=x=>esc(x==null?'':x);
-  let h='<div class="m-cab"><div><h3>'+(c?esc(v.cliente):'Nuevo contrato')+'<span class="ver" id="hVer" hidden title="Tiene adjunto el presupuesto">'+ICO_VER+'Verificado</span></h3>'+(c?'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de presupuesto',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>':'')+'</div>'
+  let h='<div class="m-cab"><div><h3>'+(c?esc(v.cliente):'Nuevo contrato')+'<span class="ver" id="hVer" hidden title="Tiene adjunto el presupuesto">'+ICO_VER+'Verificado</span></h3>'+(c?'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de contrato',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>':'')+'<div class="m-chk" id="mChk"></div></div>'
     +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
   h+='<div class="m-res"><div><div class="t">Total</div><b id="rTot"></b></div><div><div class="t">Cobrado</div><b id="rCob"></b></div><div><div class="t">Saldo</div><b id="rSal"></b></div></div>';
   if(k)h+='<div class="nota-t"><span class="enl">'+ICO_ENL+'Enlazado con el tablero y el calendario</span><br>'+(etapaDet(k).t?esc(etapaDet(k).t)+'. ':'')+'Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div>';
@@ -763,15 +804,14 @@ function abrirFicha(id){
     +'<div class="dos"><label class="campo">Teléfono <i id="fWaI" hidden>· <a id="fWa" href="#" target="_blank" rel="noopener">abrir WhatsApp</a></i><input id="fTel" value="'+val(telLindo(v.telefono))+'" inputmode="tel" autocomplete="off" placeholder="11 5555-1234"'+ro+'></label>'
     +'<label class="campo">Dirección<input id="fDir" value="'+val(v.direccion)+'" autocomplete="off"'+ro+'></label></div>';
   h+='<h4>Contrato</h4>'
-    +'<div class="dos"><label class="campo">N° de presupuesto <i>· si lo tiene</i><input id="fNro" value="'+val(c&&c.nro)+'" placeholder="0042" inputmode="numeric" autocomplete="off"></label>'
-    +'<label class="campo">Fecha del contrato<input id="fFecha" type="date" value="'+val(c?c.fecha:(mes===HOY.slice(0,7)?HOY:mes+'-01'))+'"></label></div>'
+    +'<div class="dos"><label class="campo">Contrato <i>· N° de la calculadora</i><input id="fNro" value="'+val(c&&c.nro)+'" placeholder="0042" inputmode="numeric" autocomplete="off"></label>'
+    +'<label class="campo">Ctto paralelo<input id="fCttoP" value="'+val(c&&c.contrato_paralelo)+'" placeholder="0815" autocomplete="off"></label></div>'
     +'<div class="pres"><div><span class="t">Enlace con Presupuestos</span><div class="lin" id="pEst"></div></div><div><span class="t">Presupuesto adjunto</span><div class="lin" id="pArch"></div></div></div>'
     +'<input type="file" id="fArchivo" accept=".pdf,.xlsx,.xls,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>'
-    +'<div class="dos"><label class="campo">Vendedor'+selHtml('fVend',VENDEDORES,c?c.vendedor:'')+'</label>'
-    +'<label class="campo">Procedencia'+selHtml('fProc',PROCEDENCIAS,c?c.procedencia:'')+'</label></div>'
-    +'<div class="dos"><label class="campo">Contrato<input id="fCtto" value="'+val(c&&c.contrato)+'" autocomplete="off"></label>'
-    +'<label class="campo">Contrato paralelo<input id="fCttoP" value="'+val(c&&c.contrato_paralelo)+'" autocomplete="off"></label></div>'
-    +'<label class="campo">Material<input id="fMat" value="'+val(v.material)+'" list="catalogo" autocomplete="off"'+ro+'></label>'
+    +'<div class="dos"><label class="campo">Fecha del contrato<input id="fFecha" type="date" value="'+val(c?c.fecha:(mes===HOY.slice(0,7)?HOY:mes+'-01'))+'"></label>'
+    +'<label class="campo">Vendedor'+selHtml('fVend',VENDEDORES,c?c.vendedor:'')+'</label></div>'
+    +'<div class="dos"><label class="campo">Procedencia'+selHtml('fProc',PROCEDENCIAS,c?c.procedencia:'')+'</label>'
+    +'<label class="campo">Material<input id="fMat" value="'+val(v.material)+'" list="catalogo" autocomplete="off"'+ro+'></label></div>'
     +'<label class="campo">Medidas<input id="fMed" value="'+val(c&&c.medidas)+'" placeholder="2,40 x 0,62 + isla 1,80 x 0,90" autocomplete="off"></label>'
     ;
   h+='<h4>Plata</h4>'
@@ -780,14 +820,17 @@ function abrirFicha(id){
     +'<div class="tres"><label class="campo">Seña recibida<input id="fSen" value="'+enCampo(v.sena&&v.sena.monto)+'" inputmode="decimal" placeholder="0" autocomplete="off"'+(senaFija?' readonly':'')+'></label>'
     +'<label class="campo">Moneda<select id="fSenM"'+(senaFija?' disabled':'')+'><option value="ARS"'+(v.sena&&v.sena.moneda==='USD'?'':' selected')+'>Pesos</option><option value="USD"'+(v.sena&&v.sena.moneda==='USD'?' selected':'')+'>Dólares</option></select></label>'
     +'<label class="campo">Fecha de la seña<input id="fSenF" type="date" value="'+val((v.sena&&v.sena.fecha)||'')+'"></label></div>'
+    +'<label class="campo cot" id="cSenC" hidden>Cotización del dólar para la seña <i id="fSenCI"></i><input id="fSenC" value="'+enCampo(v.sena&&v.sena.cotizacion)+'" inputmode="decimal" placeholder="1.575" autocomplete="off"></label>'
+    +'<div class="pista" id="fSenP" hidden></div>'
     +(senaFija?'<div class="nota-t">La seña se cargó en el tablero ("Trajo la seña"). Para cambiar el monto, se cambia ahí.</div>':(F.empujarSena?'<div class="nota-t">Al guardar, la seña queda tildada también en el tablero ("Trajo la seña").</div>':''));
   if(c)h+='<div id="fPagos"></div>'
     +'<div class="tres"><label class="campo">Nuevo pago<input id="pMonto" inputmode="decimal" placeholder="Monto" autocomplete="off"></label>'
     +'<label class="campo">Cómo<select id="pComo"><option value="efectivo|ARS">Efectivo $</option><option value="efectivo|USD">Efectivo USD</option><option value="transferencia|ARS">Transferencia</option></select></label>'
     +'<label class="campo">Fecha<input id="pFecha" type="date" value="'+val(HOY)+'"></label></div>'
+    +'<label class="campo cot" id="cPagC" hidden>Cotización del dólar para este pago <i id="pCotI"></i><input id="pCot" inputmode="decimal" placeholder="1.575" autocomplete="off"></label>'
     +'<div style="margin-top:10px"><button type="button" class="btn chico" data-pago>Agregar pago</button></div>';
   h+='<h4>Obra</h4>'
-    +'<div class="dos"><div class="campo">Factura'+opcHtml('factura',[['si','Sí'],['no','No']],F.factura)+'</div>'
+    +'<div class="dos"><div class="campo">Factura'+opcHtml('factura',[['si','Sí'],['no','No'],['cf','Cons. final']],F.factura)+'</div>'
     +'<div class="campo">Muebles colocados'+opcHtml('muebles',[['si','Sí'],['no','No']],F.muebles)+'</div></div>'
     +'<div class="campo">Pileta'+opcHtml('bacha',[['nuestra','Nuestra'],['cliente','Del cliente'],['no','No lleva']],F.bacha,fijo)+'</div>'
     +'<label class="campo" id="cModelo"'+(F.bacha==='nuestra'?'':' hidden')+'>Modelo de pileta<input id="fModelo" value="'+val(v.bacha_modelo)+'" autocomplete="off"'+ro+'></label>'
@@ -802,8 +845,9 @@ function abrirFicha(id){
 function datosForm(){
   const g=id=>$(id)?$(id).value.trim():'';
   return {nro:g('fNro'),fecha:g('fFecha'),cliente:g('fCliente'),telefono:telLindo(g('fTel')),direccion:g('fDir'),vendedor:g('fVend'),procedencia:g('fProc'),
-    contrato:g('fCtto'),contrato_paralelo:g('fCttoP'),material:g('fMat'),medidas:g('fMed'),total_usd:num(g('fTotU')),total_ars:num(g('fTotA')),
-    sena_monto:num(g('fSen')),sena_moneda:g('fSenM')||'ARS',sena_fecha:g('fSenF'),factura:F.factura,muebles:F.muebles,bacha:F.bacha,
+    contrato:F.contrato||'',contrato_paralelo:g('fCttoP'),material:g('fMat'),medidas:g('fMed'),total_usd:num(g('fTotU')),total_ars:num(g('fTotA')),
+    sena_monto:num(g('fSen')),sena_moneda:g('fSenM')||'ARS',sena_fecha:g('fSenF'),
+    sena_aplica:destino(g('fSenM')||'ARS',{USD:num(g('fTotU')),ARS:num(g('fTotA'))},{USD:num(g('fTotU')),ARS:num(g('fTotA'))}),sena_cotizacion:num(g('fSenC'))||'',factura:F.factura,muebles:F.muebles,bacha:F.bacha,
     bacha_modelo:F.bacha==='nuestra'?g('fModelo'):'',medicion:g('fMedicion'),nota:g('fNota')};
 }
 // El presupuesto del contrato. Tres casos: vacío (no pasa nada), con N° (queda enlazado con
@@ -811,6 +855,9 @@ function datosForm(){
 function pintarPres(){
   if(!F||!$('pEst'))return;
   const nro=$('fNro').value.trim(),p=F.presup;
+  // las tres cosas con las que el contrato cierra limpio
+  const hayArch=!!F.archivoNuevo||(!!F.archivo&&!F.quitarArchivo);
+  $('mChk').innerHTML=[[!!nro,'N° de contrato'],[hayArch,'Presupuesto adjunto'],[F.enlazado,'Enlazado con el tablero']].map(x=>'<span class="'+(x[0]?'si':'')+'">'+x[1]+'</span>').join('');
   let e;
   if(!nro)e='<span class="gris">Sin N°. Si lo ponés, el contrato queda enlazado con ese presupuesto.</span>';
   else if(F.nroMal)e='<span class="amb">'+esc(F.nroMal)+'</span>';
@@ -867,14 +914,36 @@ function crecerNota(){const t=$('fNota');if(!t)return;t.style.height='auto';t.st
 // Pagos y saldo de la ventana: se recalculan con lo que está escrito, sin guardar.
 function pintarPagos(){
   if(!F)return;
-  const d=datosForm(),p={USD:0,ARS:0},r=x=>Math.round(x*100)/100;
-  if(d.sena_monto)p[d.sena_moneda==='USD'?'USD':'ARS']+=d.sena_monto;
-  F.pagos.forEach(x=>{p[x.moneda]+=x.monto;});
-  const tot={USD:d.total_usd,ARS:d.total_ars},s=saldoTxt({tot:tot,sal:{USD:r(d.total_usd-p.USD),ARS:r(d.total_ars-p.ARS)}});
+  const d=datosForm(),p={USD:0,ARS:0},a={USD:0,ARS:0},r=x=>Math.round(x*100)/100;
+  const tot={USD:d.total_usd,ARS:d.total_ars};
+  // la seña: si se cobró en una moneda y el contrato está en la otra, pide la cotización
+  const sm=d.sena_moneda==='USD'?'USD':'ARS',conCambio=d.sena_monto>0&&d.sena_aplica!==sm;
+  $('cSenC').hidden=!conCambio;
+  if(conCambio&&!$('fSenC').value&&DOLAR&&document.activeElement!==$('fSenC'))$('fSenC').value=enCampo(DOLAR);
+  const sena=d.sena_monto?{monto:d.sena_monto,moneda:sm,aplica:d.sena_aplica,cotizacion:conCambio?num($('fSenC').value):0}:null;
+  $('fSenCI').textContent=sena&&conCambio&&sena.cotizacion?'· '+plata(sena.monto,sm)+' = '+plata(sm==='USD'?sena.monto*sena.cotizacion:sena.monto/sena.cotizacion,sena.aplica):'· '+(sm==='USD'?'se cobró en dólares y el contrato está en pesos':'se cobró en pesos y el contrato está en dólares');
+  (sena?[sena]:[]).concat(F.pagos).forEach(x=>{p[x.moneda]+=x.monto;aplicar(a,x);});
+  const sal={USD:r(tot.USD-a.USD),ARS:r(tot.ARS-a.ARS)},s=saldoTxt({tot:tot,sal:sal});
   const pon=(id,l,cls)=>{$(id).className=l.length?cls:'nada';$(id).innerHTML=l.length?l.map(esc).join('<br>'):'—';};
   pon('rTot',partes(tot),'');pon('rCob',partes({USD:r(p.USD),ARS:r(p.ARS)}),'');
   $('rSal').className=s.cls;$('rSal').innerHTML=s.l.map(esc).join('<br>');
-  if($('fPagos'))$('fPagos').innerHTML='<div class="pagos">'+(F.pagos.length?F.pagos.map(x=>'<div class="pago"><span class="q"><b>'+esc(fch(x.fecha))+'</b> · '+(x.medio==='transferencia'?'Transferencia':'Efectivo')+(x.nota?' · '+esc(x.nota):'')+'</span><span class="m">'+plata(x.monto,x.moneda)+'</span><button type="button" data-borrar-pago="'+esc(x.id)+'" title="Borrar este pago" aria-label="Borrar este pago">×</button></div>').join(''):'<div class="nada">Sin pagos cargados, aparte de la seña.</div>')+'</div>';
+  // Qué parte del total es la seña. Lo habitual es 50%, o 75% si no hay muebles; es un dato para mirar, no una regla.
+  const ps=$('fSenP');
+  if(sena){
+    const ap={USD:0,ARS:0};aplicar(ap,sena);
+    const m=ap.USD>0?'USD':'ARS',pct=tot[m]>0?ap[m]/tot[m]*100:null,esp=F.muebles==='no'?75:50;
+    ps.hidden=pct===null;
+    if(pct!==null){ps.textContent='La seña es el '+NF.format(Math.round(pct))+'% del total. Lo habitual: 50%, o 75% si no hay muebles.';ps.classList.toggle('baja',pct<esp-0.5);}
+  }else ps.hidden=true;
+  // el pago nuevo: ¿hace falta cotización?
+  if($('pComo')){
+    const pm=$('pComo').value.split('|')[1],dst=destino(pm,tot,sal),cc=dst!==pm;
+    $('cPagC').hidden=!cc;$('cPagC').dataset.aplica=dst;
+    if(cc&&!$('pCot').value&&DOLAR&&document.activeElement!==$('pCot'))$('pCot').value=enCampo(DOLAR);
+    const pmon=num($('pMonto').value),pc=num($('pCot').value);
+    $('pCotI').textContent=cc&&pmon&&pc?'· '+plata(pmon,pm)+' = '+plata(pm==='USD'?pmon*pc:pmon/pc,dst):'· '+(pm==='USD'?'entra en dólares y se descuenta de los pesos':'entra en pesos y se descuenta de los dólares');
+  }
+  if($('fPagos'))$('fPagos').innerHTML='<div class="pagos">'+(F.pagos.length?F.pagos.map(x=>'<div class="pago"><span class="q"><b>'+esc(fch(x.fecha))+'</b> · '+(x.medio==='transferencia'?'Transferencia':(x.medio==='efectivo'?'Efectivo':'Cobro'))+esc(cambioTxt(x))+(x.nota?' · '+esc(x.nota):'')+'</span><span class="m">'+plata(x.monto,x.moneda)+'</span><button type="button" data-borrar-pago="'+esc(x.id)+'" title="Borrar este pago" aria-label="Borrar este pago">×</button></div>').join(''):'<div class="nada">Sin pagos cargados, aparte de la seña.</div>')+'</div>';
 }
 async function guardar(){
   const d=datosForm(),id=F.id,empujar=F.empujarSena&&d.sena_monto>0,key=F.key;
@@ -954,7 +1023,7 @@ async function enlazar(id){
   await cargar();
 }
 // --- los puntitos de cada renglón ---
-let menuDe='';
+let menuDe='',menuAt=0;
 function cerrarMenu(){
   if(!menuDe)return;
   menuDe='';$('menu').hidden=true;
@@ -974,7 +1043,8 @@ function abrirMenu(btn){
   const r=btn.getBoundingClientRect(),w=m.offsetWidth,h=m.offsetHeight;
   m.style.left=Math.max(8,Math.min(r.right-w,window.innerWidth-w-8))+'px';
   m.style.top=(r.bottom+h+8>window.innerHeight&&r.top-h-6>0?r.top-h-6:r.bottom+6)+'px';
-  const f=m.querySelector('button:not(:disabled)');if(f)f.focus();
+  menuAt=Date.now();
+  const f=m.querySelector('button:not(:disabled)');if(f)f.focus({preventScroll:true});
 }
 const COPIADO={nro:'N° de presupuesto copiado',tel:'Teléfono copiado',dir:'Dirección copiada'};
 async function copiar(txt,que){
@@ -1019,6 +1089,36 @@ async function borrarContrato(id){
   await cargar();
 }
 // Papelera de contratos: los borrados en los últimos 30 días, con el botón para recuperarlos.
+// --- obras en el tablero sin contrato ---
+function pedirSinContrato(){
+  const l=sinContrato();
+  const filas=l.map(k=>'<div class="pap-f"><div><b>'+esc(k.nombre||'Sin nombre')+' · '+esc(k.key)+'</b><small>'+[esc(ETAPAS[k.etapa]||k.etapa),esc(k.material)].filter(Boolean).join(' · ')+'</small></div><button type="button" class="btn chico" data-crear-de="'+esc(k.key)+'">Crear contrato</button></div>').join('');
+  abrirModal('<h3>Obras en el tablero sin contrato</h3><div class="bajada">'+(filas?'Cada obra del tablero tendría que tener su contrato acá. Al crearlo queda enlazado, con el cliente, el teléfono, la dirección, el material y la seña que ya están en la ficha. Después se le cargan el total y los pagos.':'Todas las obras del tablero tienen su contrato.')+'</div>'+(filas?'<div class="pap">'+filas+'</div>':'')
+    +'<div class="m-err" id="mErr" hidden></div><div class="btns">'+(l.length>1?'<button type="button" class="izq-n" data-crear-todos>Crear los '+l.length+'</button>':'')+'<button type="button" data-cerrar data-foco>Cerrar</button></div>',false,false);
+}
+// El contrato de una ficha: nace enlazado. Lo operativo lo sigue mandando el tablero.
+function crearDeFicha(k){
+  return pedir(API,{accion:'crear',cliente:k.nombre||('Obra '+k.key),telefono:telLindo(k.celular),direccion:k.direccion,material:k.material,
+    nro:k.manual?'':k.cliente_nro+(k.sub>1?'-'+k.sub:''),fecha:HOY,bacha:k.bacha,bacha_modelo:k.bacha==='nuestra'?k.bacha_modelo:'',
+    sena_monto:k.sena?k.sena.monto:0,sena_moneda:k.sena?k.sena.moneda:'ARS',enlace:{cliente_nro:k.cliente_nro,sub:k.sub}});
+}
+async function crearUno(key){
+  const k=CARDS[key];
+  if(!k)throw new Error('Esa obra ya no está en el tablero. Actualizá la página.');
+  const r=await crearDeFicha(k);
+  if(!llano(q).trim())mes=HOY.slice(0,7);
+  await cargar();
+  toast('Contrato creado y enlazado. Falta cargarle el total.');
+  abrirFicha(r.id);
+}
+async function crearTodos(){
+  const l=sinContrato();let ok=0,mal='';
+  for(const k of l){try{await crearDeFicha(k);ok++;}catch(e){mal=e.message;}}
+  cerrarModal();
+  if(!llano(q).trim())mes=HOY.slice(0,7);
+  await cargar();
+  toast((ok===1?'Se creó 1 contrato.':'Se crearon '+ok+' contratos.')+(mal?' Alguno no se pudo: '+mal:'')+' Quedaron con fecha de hoy.');
+}
 async function pedirPapelera(){
   let j;
   try{j=await pedir(API+'?papelera=1');}catch(e){toast(e.message);return;}
@@ -1071,6 +1171,9 @@ document.addEventListener('click',ev=>{
   let b;
   if((b=t.closest('[data-confirmar-prueba]'))){conBoton(b,borrarPrueba);return;}
   if(t.closest('[data-papelera]')){pedirPapelera();return;}
+  if(t.closest('[data-sin-contrato]')){pedirSinContrato();return;}
+  if((b=t.closest('[data-crear-de]'))){conBoton(b,()=>crearUno(b.dataset.crearDe));return;}
+  if((b=t.closest('[data-crear-todos]'))){conBoton(b,crearTodos);return;}
   if((b=t.closest('[data-restaurar]'))){conBoton(b,()=>restaurar(b.dataset.restaurar));return;}
   if((b=t.closest('[data-enviar]'))){pedirEnviar(b.dataset.enviar);return;}
   if((b=t.closest('[data-enlazar]'))){pedirEnlazar(b.dataset.enlazar);return;}
@@ -1086,11 +1189,13 @@ document.addEventListener('click',ev=>{
     conBoton(b,async()=>{
       const m=num($('pMonto').value),como=$('pComo').value.split('|');
       if(!m)throw new Error('Cargá el monto del pago.');
+      const conCambio=!$('cPagC').hidden,cot=conCambio?num($('pCot').value):0;
+      if(conCambio&&!cot)throw new Error('Poné la cotización del dólar de ese pago.');
       errModal('');
-      await pedir(API,{accion:'pago',id:F.id,monto:m,moneda:como[1],medio:como[0],fecha:$('pFecha').value});
+      await pedir(API,Object.assign({accion:'pago',id:F.id,monto:m,moneda:como[1],medio:como[0],fecha:$('pFecha').value},conCambio?{cotizacion:cot,aplica:$('cPagC').dataset.aplica}:{}));
       const a=await pedir(API);CONTRATOS=a.contratos;
       const c=CONTRATOS.find(x=>x.id===F.id);if(c)F.pagos=(c.pagos||[]).slice();
-      $('pMonto').value='';pintarPagos();dibujar();
+      $('pMonto').value='';$('pCot').value='';pintarPagos();dibujar();
       b.disabled=false;b.textContent='Agregar pago';
     });
     return;
@@ -1110,6 +1215,7 @@ document.addEventListener('click',ev=>{
     F[campo]=F[campo]===v?'':v; // tocar de nuevo lo deja sin marcar
     b.parentElement.querySelectorAll('button').forEach(x=>{const on=x.dataset.v===F[campo];x.classList.toggle('on',on);x.setAttribute('aria-pressed',on);});
     if(campo==='bacha')$('cModelo').hidden=F.bacha!=='nuestra';
+    if(campo==='muebles')pintarPagos(); // el porcentaje habitual de seña depende de si hay muebles
     return;
   }
   if(t===$('modalBg')&&!protegida){cerrarModal();return;}
@@ -1117,16 +1223,17 @@ document.addEventListener('click',ev=>{
   const f=t.closest('.fila');
   if(f)abrirFicha(f.dataset.id);
 });
-window.addEventListener('scroll',cerrarMenu,true);
+// Recién abierto no lo cierra el scroll: en el celular la página puede venir todavía en movimiento.
+window.addEventListener('scroll',()=>{if(Date.now()-menuAt>350)cerrarMenu();},true);
 window.addEventListener('resize',cerrarMenu);
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape'&&menuDe){const b=document.querySelector('.mas[aria-expanded="true"]');cerrarMenu();if(b)b.focus();return;}
   if(ev.key==='Escape'&&$('modalBg').classList.contains('show')&&!protegida){cerrarModal();return;}
   if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList&&ev.target.classList.contains('fila')){ev.preventDefault();abrirFicha(ev.target.dataset.id);}
 });
-$('modal').addEventListener('input',ev=>{if(ev.target.id==='fNota'){crecerNota();return;}if(ev.target.id==='fNro'){buscarNro();return;}if(F&&['fTotU','fTotA','fSen','fSenM'].indexOf(ev.target.id)>=0)pintarPagos();});
+$('modal').addEventListener('input',ev=>{if(ev.target.id==='fNota'){crecerNota();return;}if(ev.target.id==='fNro'){buscarNro();return;}if(F&&['fTotU','fTotA','fSen','fSenM','fSenC','pMonto','pCot'].indexOf(ev.target.id)>=0)pintarPagos();});
 $('modal').addEventListener('change',ev=>{
-  if(F&&ev.target.id==='fSenM')pintarPagos();
+  if(F&&(ev.target.id==='fSenM'||ev.target.id==='pComo'))pintarPagos();
   if(ev.target.id==='fTel')pintarTel(true);
   if(F&&ev.target.id==='fArchivo'){
     const f=ev.target.files[0];

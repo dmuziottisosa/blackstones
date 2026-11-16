@@ -197,9 +197,9 @@ Botón "Editar obra" en "Más" (también desde el calendario, que muestra la mis
 
 En "Más" → **Borrar ficha**. Siempre pide confirmación y dice qué se pierde; Enter no confirma, hay que tocar el botón rojo.
 
-- Se borran los tildes, fechas, datos y adjuntos de esa obra. No se puede deshacer.
-- Si la obra vino de un presupuesto de la calculadora, el presupuesto **no** se borra: vuelve a Enviado en Presupuestos. Si se aprueba de nuevo, la ficha reaparece en blanco.
-- Si la obra se cargó a mano con "Cargar obra", se borra completa.
+- **Va a la papelera (16/11/2026).** La ficha sale del tablero y del calendario con sus tildes, fechas, datos y adjuntos, y se puede recuperar durante 30 días desde el botón "Papelera" del tablero; vuelve a la etapa en la que estaba. Pasados los 30 días se borra de verdad (lo hace la limpieza diaria, y también cada vez que se abre la papelera).
+- Al vencer la papelera: si la obra vino de un presupuesto de la calculadora, el presupuesto **no** se borra, vuelve a Enviado en Presupuestos; si se cargó a mano con "Cargar obra", se borra completa.
+- Mientras está en la papelera no aparece en Presupuestos ni cuenta en el reporte.
 
 ## Carga masiva (traspaso de una planilla)
 
@@ -261,6 +261,7 @@ Es un traspaso: la planilla se adapta a los campos del tablero, no al revés. Lo
 | Cargar obra (a mano o por N° de presupuesto) | `site/public_html/calculadora/api/tablero-cargar.php` |
 | Editar obra / cambiar N° de presupuesto | `site/public_html/calculadora/api/tablero-editar.php` |
 | Carga masiva | `site/public_html/calculadora/api/tablero-importar.php` |
+| Papelera (tirar, restaurar, listar) | `site/public_html/calculadora/api/tablero-papelera.php`. Los 30 días se definen en `_tablero.php` (`BS_PAPELERA_DIAS`) |
 | Datos | `bs-data/tablero/obras.json`, aparte de `clientes/`. Si falta, el hub y la calculadora siguen igual |
 | Archivar | `state.php` con `conservar_hermanas: true` |
 

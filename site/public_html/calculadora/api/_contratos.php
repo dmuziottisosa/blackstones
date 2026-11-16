@@ -4,7 +4,7 @@
 // BlackStones Marmolería
 // ============================================================
 // Dónde viven los datos, las listas cerradas y los adjuntos.
-// Lo usan contratos.php y contratos-adjunto.php; nadie más.
+// Lo usan contratos.php, contratos-adjunto.php y contratos-importar.php; nadie más.
 // (El tablero, el calendario y el hub NO incluyen este archivo:
 //  Relación-Contrato se tiene que poder borrar entera sin que se caiga nada.)
 // ============================================================
@@ -23,7 +23,8 @@ define('BS_CONTRATOS_PAPELERA_DIAS', 30);
 // Quién vende y de dónde llega el cliente: listas cerradas (las dictó el dueño, 16/11/2026).
 // Para sumar o sacar un nombre se toca solo acá; la página las recibe con el GET.
 $BS_CONTRATO_VENDEDORES  = ['Laura', 'Sol', 'Diego', 'Jose', 'Lara', 'Dioge'];
-$BS_CONTRATO_PROCEDENCIAS = ['Alberdi', 'Publicación/WhatsApp', 'Publicación/Alberdi'];
+// "Alberdi viejo" y "Publicación" se sumaron porque así figuran en la planilla del equipo (16/11/2026).
+$BS_CONTRATO_PROCEDENCIAS = ['Alberdi', 'Alberdi viejo', 'Publicación', 'Publicación/WhatsApp', 'Publicación/Alberdi'];
 
 function bs_contratos_leer() {
     $d = bs_read_json(BS_CONTRATOS_FILE);
@@ -54,4 +55,25 @@ function bs_contrato_adj_borrar($id) {
     if (!is_dir($dir)) return;
     foreach (['pdf', 'xlsx', 'xls'] as $e) @unlink($dir . '/presupuesto.' . $e);
     @rmdir($dir);
+}
+
+function bs_contrato_fecha_ok($f) {
+    if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', (string)$f, $m)) return false;
+    return checkdate(intval($m[2]), intval($m[3]), intval($m[1]));
+}
+
+// Teléfono: valen "+54 9 11 5555-1234" (como se copia de WhatsApp) y "1155551234".
+// Son el mismo número; se guarda "11 5555-1234". Lo que no se reconoce queda como vino.
+function bs_contrato_tel($txt) {
+    $d = preg_replace('/\D/', '', (string)$txt);
+    if (strlen($d) === 13 && strpos($d, '549') === 0) $d = substr($d, 3);
+    elseif (strlen($d) === 12 && strpos($d, '54') === 0) $d = substr($d, 2);
+    elseif (strlen($d) === 11 && $d[0] === '0') $d = substr($d, 1);
+    if (strlen($d) === 12 && strpos($d, '1115') === 0) $d = '11' . substr($d, 4);
+    if (strlen($d) === 10) {
+        return strpos($d, '11') === 0
+            ? '11 ' . substr($d, 2, 4) . '-' . substr($d, 6)
+            : substr($d, 0, 3) . ' ' . substr($d, 3, 3) . '-' . substr($d, 6);
+    }
+    return trim(preg_replace('/\s+/', ' ', preg_replace('/[^\d+()\-\s]/u', '', (string)$txt)));
 }

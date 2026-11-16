@@ -54,31 +54,10 @@ bs_require_auth();
 bs_check_csrf();
 bs_ensure_dirs();
 
-function bs_contrato_fecha_ok($f) {
-    if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', (string)$f, $m)) return false;
-    return checkdate(intval($m[2]), intval($m[3]), intval($m[1]));
-}
-
 function bs_contrato_texto($body, $campo, $max, $etiqueta) {
     $v = trim(preg_replace('/\s+/u', ' ', (string)($body[$campo] ?? '')));
     if (mb_strlen($v) > $max) bs_error($etiqueta . ' demasiado largo');
     return $v;
-}
-
-// Teléfono: valen "+54 9 11 5555-1234" (como se copia de WhatsApp) y "1155551234".
-// Son el mismo número; se guarda "11 5555-1234". Lo que no se reconoce queda como vino.
-function bs_contrato_tel($txt) {
-    $d = preg_replace('/\D/', '', (string)$txt);
-    if (strlen($d) === 13 && strpos($d, '549') === 0) $d = substr($d, 3);
-    elseif (strlen($d) === 12 && strpos($d, '54') === 0) $d = substr($d, 2);
-    elseif (strlen($d) === 11 && $d[0] === '0') $d = substr($d, 1);
-    if (strlen($d) === 12 && strpos($d, '1115') === 0) $d = '11' . substr($d, 4);
-    if (strlen($d) === 10) {
-        return strpos($d, '11') === 0
-            ? '11 ' . substr($d, 2, 4) . '-' . substr($d, 6)
-            : substr($d, 0, 3) . ' ' . substr($d, 3, 3) . '-' . substr($d, 6);
-    }
-    return trim(preg_replace('/\s+/', ' ', preg_replace('/[^\d+()\-\s]/u', '', (string)$txt)));
 }
 
 function bs_contrato_monto($body, $campo, $etiqueta) {
@@ -107,10 +86,10 @@ function bs_contrato_campos($body) {
     $c['contrato_paralelo'] = bs_contrato_texto($body, 'contrato_paralelo', 80, 'Contrato paralelo');
     $c['procedencia'] = bs_contrato_texto($body, 'procedencia', 80, 'Procedencia');
     $c['medidas']   = bs_contrato_texto($body, 'medidas', 300, 'Medidas');
-    foreach (['factura', 'muebles'] as $k) {
-        $v = (string)($body[$k] ?? '');
-        $c[$k] = in_array($v, ['si', 'no'], true) ? $v : '';
-    }
+    $v = (string)($body['factura'] ?? '');
+    $c['factura'] = in_array($v, ['si', 'no', 'cf'], true) ? $v : ''; // cf = consumidor final
+    $v = (string)($body['muebles'] ?? '');
+    $c['muebles'] = in_array($v, ['si', 'no'], true) ? $v : '';
     // Fecha del contrato: si no viene, hoy.
     $f = trim((string)($body['fecha'] ?? ''));
     if ($f === '') $f = date('Y-m-d');
@@ -138,11 +117,26 @@ function bs_contrato_campos($body) {
 
     $c['total_usd'] = bs_contrato_monto($body, 'total_usd', 'Total en dólares');
     $c['total_ars'] = bs_contrato_monto($body, 'total_ars', 'Total en pesos');
-    $c['sena'] = bs_contrato_sena($body['sena_monto'] ?? 0, $body['sena_moneda'] ?? '', $body['sena_fecha'] ?? '');
+    $c['sena'] = bs_contrato_sena($body['sena_monto'] ?? 0, $body['sena_moneda'] ?? '', $body['sena_fecha'] ?? '', $body['sena_cotizacion'] ?? '', $body['sena_aplica'] ?? '');
     return $c;
 }
 
-function bs_contrato_sena($monto, $moneda, $fecha) {
+/**
+ * Cotización de un cobro. Hace falta cuando se cobra en una moneda y se descuenta de un total
+ * en la otra (lo habitual: contrato en pesos, pago en dólares). "aplica" es de qué total se
+ * descuenta; si es la misma moneda del cobro, no hay conversión.
+ * Devuelve ['cotizacion' => float|0, 'aplica' => 'USD'|'ARS'].
+ */
+function bs_contrato_cambio($moneda, $cotizacion, $aplica, $etiqueta) {
+    $aplica = ($aplica === 'USD' || $aplica === 'ARS') ? $aplica : $moneda;
+    if ($aplica === $moneda) return ['cotizacion' => 0, 'aplica' => $moneda];
+    if ($cotizacion === '' || $cotizacion === null || !is_numeric($cotizacion)) bs_error($etiqueta . ': falta la cotización del dólar.');
+    $cot = round(floatval($cotizacion), 2);
+    if ($cot < 1 || $cot > 1000000) bs_error($etiqueta . ': la cotización del dólar no parece correcta.');
+    return ['cotizacion' => $cot, 'aplica' => $aplica];
+}
+
+function bs_contrato_sena($monto, $moneda, $fecha, $cotizacion = '', $aplica = '') {
     if ($monto === '' || $monto === null) $monto = 0;
     if (!is_numeric($monto)) bs_error('Seña: tiene que ser un número');
     $monto = round(floatval($monto), 2);
@@ -150,7 +144,8 @@ function bs_contrato_sena($monto, $moneda, $fecha) {
     if ($monto <= 0) return null;
     $fecha = trim((string)$fecha);
     if ($fecha === '' || !bs_contrato_fecha_ok($fecha)) $fecha = date('Y-m-d');
-    return ['monto' => $monto, 'moneda' => ($moneda === 'USD') ? 'USD' : 'ARS', 'fecha' => $fecha];
+    $moneda = ($moneda === 'USD') ? 'USD' : 'ARS';
+    return array_merge(['monto' => $monto, 'moneda' => $moneda, 'fecha' => $fecha], bs_contrato_cambio($moneda, $cotizacion, $aplica, 'Seña'));
 }
 
 function bs_contrato_salida($c) {
@@ -324,7 +319,7 @@ $id = (string)($body['id'] ?? '');
 if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado', 'restaurar_enlazado'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
 
 $sena_nueva = null;
-if ($accion === 'sena') $sena_nueva = bs_contrato_sena($body['monto'] ?? 0, $body['moneda'] ?? '', $body['fecha'] ?? '');
+if ($accion === 'sena') $sena_nueva = bs_contrato_sena($body['monto'] ?? 0, $body['moneda'] ?? '', $body['fecha'] ?? '', $body['cotizacion'] ?? '', $body['aplica'] ?? '');
 
 $pago = null;
 if ($accion === 'pago') {
@@ -342,12 +337,16 @@ if ($accion === 'pago') {
         'medio'  => in_array($medio, ['efectivo', 'transferencia'], true) ? $medio : '',
         'nota'   => bs_contrato_texto($body, 'nota', 200, 'Nota del pago'),
     ];
+    $pago = array_merge($pago, bs_contrato_cambio($pago['moneda'], $body['cotizacion'] ?? '', $body['aplica'] ?? '', 'Pago'));
 }
 
+// Enlazar con una ficha del tablero. "crear" también puede traer el enlace: es el contrato que
+// se arma desde "Obras en el tablero sin contrato", que nace enlazado.
 $enlace = null;
-if ($accion === 'enlazar') {
-    $nro = intval($body['cliente_nro'] ?? 0);
-    $sub = intval($body['sub'] ?? 0);
+$crear_enlazado = $accion === 'crear' && is_array($body['enlace'] ?? null);
+if ($accion === 'enlazar' || $crear_enlazado) {
+    $nro = intval($crear_enlazado ? ($body['enlace']['cliente_nro'] ?? 0) : ($body['cliente_nro'] ?? 0));
+    $sub = intval($crear_enlazado ? ($body['enlace']['sub'] ?? 0) : ($body['sub'] ?? 0));
     if ($nro <= 0 || $sub <= 0) bs_error('Falta a qué ficha del tablero enlazar.');
     $enlace = ['cliente_nro' => str_pad((string)$nro, 4, '0', STR_PAD_LEFT), 'sub' => $sub, 'at' => date('c')];
 }
@@ -377,8 +376,11 @@ try {
 
     if ($accion === 'crear') {
         if (count($d['contratos']) >= BS_CONTRATOS_MAX) bs_contratos_salir($fp, 'Se llegó al máximo de contratos.', 507);
+        if ($enlace !== null && ($k = bs_contrato_de_ficha($d, intval($enlace['cliente_nro']), $enlace['sub'])) !== null) {
+            bs_contratos_salir($fp, 'Esa obra del tablero ya tiene contrato (' . ($d['contratos'][$k]['cliente'] ?? '') . ').', 409);
+        }
         $id = bs_contrato_id();
-        $d['contratos'][$id] = array_merge($campos, ['id' => $id, 'creado' => $ahora, 'actualizado' => $ahora, 'pagos' => [], 'prueba' => false, 'enlace' => null]);
+        $d['contratos'][$id] = array_merge($campos, ['id' => $id, 'creado' => $ahora, 'actualizado' => $ahora, 'pagos' => [], 'prueba' => false, 'enlace' => $enlace]);
 
     } elseif ($accion === 'prueba') {
         foreach ($d['contratos'] as $c) {
@@ -466,6 +468,14 @@ try {
         if ($accion === 'editar') {
             $c = array_merge($c, $campos);
         } elseif ($accion === 'sena') {
+            // El tablero no sabe de cotizaciones: si la seña llega de ahí sin cambio de moneda,
+            // se conserva la cotización que el contrato ya tenía anotada.
+            $vieja = is_array($c['sena'] ?? null) ? $c['sena'] : null;
+            if ($sena_nueva && $vieja && empty($sena_nueva['cotizacion']) && !isset($body['aplica'])
+                && ($vieja['moneda'] ?? '') === $sena_nueva['moneda'] && !empty($vieja['cotizacion'])) {
+                $sena_nueva['cotizacion'] = $vieja['cotizacion'];
+                $sena_nueva['aplica'] = $vieja['aplica'] ?? $sena_nueva['moneda'];
+            }
             $c['sena'] = $sena_nueva;
         } elseif ($accion === 'pago') {
             if (!is_array($c['pagos'] ?? null)) $c['pagos'] = [];

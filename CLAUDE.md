@@ -162,8 +162,11 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **Eliminar un presupuesto NO elimina la ficha, ni el calendario, ni el contrato.** Si la obra está viva en el tablero, borrar su presupuesto (a mano o por los 180 días) solo lo saca de la pestaña Presupuestos (marca `fuera_de_presupuestos`). La ficha solo se borra desde el tablero, que manda `desde_tablero: true`. Desde Presupuestos tampoco se puede cambiar el estado de una obra viva (`state.php` lo rechaza).
 - **Enlazados, la ficha se borra en los dos lados.** Borrar la ficha del tablero borra su contrato enlazado, y borrar el contrato borra su ficha. Los dos avisan antes. Archivar no es borrar: el contrato queda.
 - **Relación-Contrato se tiene que poder borrar entera sin que se caiga nada.** Contratos lee del tablero y de `clientes/`; el calendario, el hub y la calculadora **nunca** leen ni escriben nada de contratos. Única excepción: al borrar una ficha, el tablero le pregunta a `contratos.php` si tiene contrato enlazado y le pide borrarlo; si Relación-Contrato no existe, esas llamadas fallan en silencio y el tablero sigue igual (probado). → `04-operations/relacion-contrato.md`
+- **Nada se borra de una: papelera de 30 días.** Borrar una ficha del tablero o un contrato los manda a la papelera (con tildes, adjuntos y pagos) y se recuperan desde "Papelera". A los 30 días se borran de verdad. Enlazados, van y vuelven juntos.
 - **"Verificado" = presupuesto adjunto.** Un contrato lleva el sello solo si tiene el PDF o Excel adjunto. El N° de presupuesto enlaza, pero no verifica (deja de existir a los 180 días).
+- **Un contrato está completo con tres cosas:** N° puesto, presupuesto adjunto y enlazado con el tablero. Cada obra viva del tablero tendría que tener su contrato; Relación-Contrato avisa las que no.
 - **Enlazado, manda el tablero en lo operativo y Relación-Contrato en la plata.** La seña es un solo dato: se refleja en los dos sentidos.
+- **Cobro en una moneda, contrato en la otra: lleva cotización.** Cada seña o pago guarda la suya (se propone el dólar del día, se puede cambiar). "Cobrado" es lo que entró de verdad; "Saldo", lo que falta ya convertido.
 - **El calendario lee del tablero.** Lo que se enlaza con el tablero queda enlazado con el calendario.
 - **Plazo de entrega en el sistema: 20 días corridos desde la medición**, para todos los materiales; ventana de entrega del día 15 al 20. En Por cortar y Por fabricar la cola va por semana de entrega y, dentro de la semana, mismo color junto. → `04-operations/tablero-obras.md`
 - **Vendedores y procedencias son listas cerradas** (`_contratos.php`). No inventar nombres en datos de prueba.
@@ -206,4 +209,4 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ---
 
-*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis). Próxima revisión obligatoria: febrero 2027.*
+*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización y contrato completo). Próxima revisión obligatoria: febrero 2027.*
