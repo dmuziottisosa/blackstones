@@ -428,6 +428,7 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 const $=id=>document.getElementById(id);
 const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php';
 let CONTRATOS=[],CARDS={},ETAPAS={},HOY='',TABLERO_OK=false,q='';
+let VENDEDORES=[],PROCEDENCIAS=[]; // listas cerradas: las manda el servidor (se editan en contratos.php)
 let mes=''; // mes a la vista, 'YYYY-MM' (por la fecha del contrato)
 let filtro='todos',orden='fecha',ordenAsc=false; // qué se mira y cómo se ordena la planilla
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -531,7 +532,7 @@ const bachaTxt=v=>v.bacha?BACHA[v.bacha]+(v.bacha==='nuestra'&&v.bacha_modelo?' 
 async function cargar(){
   try{
     const [a,t]=await Promise.all([pedir(API),pedir(API_T).catch(()=>null)]);
-    CONTRATOS=a.contratos;HOY=a.hoy;
+    CONTRATOS=a.contratos;HOY=a.hoy;VENDEDORES=a.vendedores||[];PROCEDENCIAS=a.procedencias||[];
     if(!mes)mes=HOY.slice(0,7);
     TABLERO_OK=!!t;CARDS={};ETAPAS={};
     if(t){t.cards.forEach(k=>{CARDS[k.key]=k;});t.etapas.forEach(e=>{ETAPAS[e.id]=e.titulo;});}
@@ -666,7 +667,8 @@ async function conBoton(b,fn){
 }
 
 const opcHtml=(campo,ops,val,fijo)=>'<div class="opc" data-opc="'+campo+'">'+ops.map(o=>'<button type="button" data-v="'+o[0]+'" class="'+(val===o[0]?'on':'')+'" aria-pressed="'+(val===o[0])+'"'+(fijo?' disabled':'')+'>'+o[1]+'</button>').join('')+'</div>';
-const usados=campo=>[...new Set(CONTRATOS.map(c=>c[campo]).filter(Boolean))].sort().map(x=>'<option value="'+esc(x)+'">').join('');
+// Lista cerrada. Si el contrato tiene un valor que ya no está en la lista, se conserva como una opción más.
+const selHtml=(id,ops,val)=>'<select id="'+id+'"><option value="">Sin asignar</option>'+ops.concat(val&&ops.indexOf(val)<0?[val]:[]).map(o=>'<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
 
 function abrirFicha(id){
   const c=id?CONTRATOS.find(x=>x.id===id):null;
@@ -691,13 +693,13 @@ function abrirFicha(id){
   h+='<h4>Contrato</h4>'
     +'<div class="dos"><label class="campo">N° de presupuesto <i>· si lo tiene</i><input id="fNro" value="'+val(c&&c.nro)+'" placeholder="0042" inputmode="numeric" autocomplete="off"></label>'
     +'<label class="campo">Fecha del contrato<input id="fFecha" type="date" value="'+val(c?c.fecha:(mes===HOY.slice(0,7)?HOY:mes+'-01'))+'"></label></div>'
-    +'<div class="dos"><label class="campo">Vendedor<input id="fVend" value="'+val(c&&c.vendedor)+'" list="lVend" autocomplete="off"></label>'
-    +'<label class="campo">Procedencia<input id="fProc" value="'+val(c&&c.procedencia)+'" list="lProc" placeholder="Instagram, recomendación…" autocomplete="off"></label></div>'
+    +'<div class="dos"><label class="campo">Vendedor'+selHtml('fVend',VENDEDORES,c?c.vendedor:'')+'</label>'
+    +'<label class="campo">Procedencia'+selHtml('fProc',PROCEDENCIAS,c?c.procedencia:'')+'</label></div>'
     +'<div class="dos"><label class="campo">Contrato<input id="fCtto" value="'+val(c&&c.contrato)+'" autocomplete="off"></label>'
     +'<label class="campo">Contrato paralelo<input id="fCttoP" value="'+val(c&&c.contrato_paralelo)+'" autocomplete="off"></label></div>'
     +'<label class="campo">Material<input id="fMat" value="'+val(v.material)+'" list="catalogo" autocomplete="off"'+ro+'></label>'
     +'<label class="campo">Medidas<input id="fMed" value="'+val(c&&c.medidas)+'" placeholder="2,40 x 0,62 + isla 1,80 x 0,90" autocomplete="off"></label>'
-    +'<datalist id="lVend">'+usados('vendedor')+'</datalist><datalist id="lProc">'+usados('procedencia')+'</datalist>';
+    ;
   h+='<h4>Plata</h4>'
     +'<div class="dos"><label class="campo">Total en dólares<input id="fTotU" value="'+enCampo(c&&c.total_usd)+'" inputmode="decimal" placeholder="0" autocomplete="off"></label>'
     +'<label class="campo">Total en pesos<input id="fTotA" value="'+enCampo(c&&c.total_ars)+'" inputmode="decimal" placeholder="0" autocomplete="off"></label></div>'

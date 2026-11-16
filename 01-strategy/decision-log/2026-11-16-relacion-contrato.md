@@ -31,7 +31,7 @@
 - Qué va exactamente en "Contrato" y "Contrato paralelo" (hoy son texto libre, `status: hypothesis`).
 - Cómo se registra un pago en pesos contra un total en dólares (¿a qué cotización?).
 - Si "Pileta sí/no" de la planilla alcanza o hace falta saber de quién es (se dejó Nuestra / Del cliente / No lleva para que coincida con el tablero).
-- Si Vendedor y Procedencia deben ser listas cerradas.
+- ~~Si Vendedor y Procedencia deben ser listas cerradas.~~ Resuelto el 16/11/2026: sí, las dos (lista en el doc operativo). Queda confirmar si "Dioge" es otra persona o "Diego" repetido.
 - Si conviene que el presupuesto Aprobado cree solo el renglón del contrato.
 
 ## Unknown unknowns

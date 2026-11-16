@@ -14,7 +14,9 @@ Los definió el dueño (16/11/2026), sobre la planilla que ya usaba:
 | Campo | Notas |
 |---|---|
 | N° de presupuesto | No es obligatorio, pero debería estar: sin N° el renglón muestra "Sin N°" en ámbar |
-| Vendedor, Fecha del contrato, Procedencia | Texto libre; vendedor y procedencia sugieren lo ya usado |
+| Fecha del contrato | Define en qué mes aparece |
+| Vendedor | Lista cerrada (dueño, 16/11/2026): Laura, Sol, Diego, Jose, Lara, Dioge. Se edita en `$BS_CONTRATO_VENDEDORES`, en `contratos.php` |
+| Procedencia | Lista cerrada: Alberdi, Publicación/WhatsApp, Publicación/Alberdi. Se edita en `$BS_CONTRATO_PROCEDENCIAS` |
 | Cliente, Teléfono, Dirección | El teléfono vale pegado de WhatsApp ("+54 9 11 5555-1234", incluso con los caracteres invisibles que agrega) o como diez dígitos ("1155551234"). Son el mismo número: se guarda y se muestra "11 5555-1234". Se ve debajo del nombre y abre WhatsApp con un toque. El buscador lo encuentra en cualquiera de los dos formatos |
 | Contrato, Contrato paralelo | Texto libre (`status: hypothesis`: falta que el dueño defina qué va en cada uno) |
 | Material | Sugiere del catálogo de la calculadora ("Marca · Color") |

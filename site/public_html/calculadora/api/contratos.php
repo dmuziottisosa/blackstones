@@ -41,6 +41,11 @@ define('BS_CONTRATOS_FILE', BS_CONTRATOS_DIR . '/contratos.json');
 define('BS_CONTRATOS_LOCK', BS_CONTRATOS_DIR . '/.write.lock');
 define('BS_CONTRATOS_MAX',  5000);
 
+// Quién vende y de dónde llega el cliente: listas cerradas (las dictó el dueño, 16/11/2026).
+// Para sumar o sacar un nombre se toca solo acá; la página las recibe con el GET.
+$BS_CONTRATO_VENDEDORES  = ['Laura', 'Sol', 'Diego', 'Jose', 'Lara', 'Dioge'];
+$BS_CONTRATO_PROCEDENCIAS = ['Alberdi', 'Publicación/WhatsApp', 'Publicación/Alberdi'];
+
 function bs_contratos_leer() {
     $d = bs_read_json(BS_CONTRATOS_FILE);
     if (!is_array($d) || !isset($d['contratos']) || !is_array($d['contratos'])) $d = ['version' => 1, 'contratos' => []];
@@ -187,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $d = bs_contratos_leer();
     $lista = array_map('bs_contrato_salida', array_values($d['contratos']));
     usort($lista, function ($a, $b) { return strcmp($b['creado'], $a['creado']) ?: strcmp($b['id'], $a['id']); });
-    bs_ok(['hoy' => date('Y-m-d'), 'contratos' => $lista]);
+    bs_ok(['hoy' => date('Y-m-d'), 'vendedores' => $BS_CONTRATO_VENDEDORES, 'procedencias' => $BS_CONTRATO_PROCEDENCIAS, 'contratos' => $lista]);
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') bs_error('Solo GET o POST', 405);
@@ -243,6 +248,16 @@ try {
     $ahora = date('c');
     $extra = [];
 
+    // Vendedor y procedencia salen de las listas. Un contrato viejo conserva lo que ya tenía
+    // (por si un nombre se saca de la lista), pero no se le puede poner otro valor de afuera.
+    if ($campos !== null) {
+        $viejo = ($accion === 'editar' && isset($d['contratos'][$id])) ? $d['contratos'][$id] : [];
+        foreach ([['vendedor', $BS_CONTRATO_VENDEDORES, 'Elegí el vendedor de la lista.'], ['procedencia', $BS_CONTRATO_PROCEDENCIAS, 'Elegí la procedencia de la lista.']] as $r) {
+            $v = $campos[$r[0]];
+            if ($v !== '' && !in_array($v, $r[1], true) && $v !== (string)($viejo[$r[0]] ?? '')) bs_contratos_salir($fp, $r[2]);
+        }
+    }
+
     if ($accion === 'crear') {
         if (count($d['contratos']) >= BS_CONTRATOS_MAX) bs_contratos_salir($fp, 'Se llegó al máximo de contratos.', 507);
         $id = bs_contrato_id();
@@ -255,17 +270,17 @@ try {
         $hoy = date('Y-m-d');
         $pruebas = [
             ['cliente' => 'PRUEBA · Cocina en L', 'telefono' => '11 5550-0001', 'direccion' => 'Calle de prueba 123, CABA', 'nro' => '',
-             'fecha' => $hoy, 'vendedor' => 'Prueba', 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => 'Instagram', 'medidas' => '2,40 x 0,62 + 1,60 x 0,62', 'factura' => 'si', 'muebles' => 'si',
+             'fecha' => $hoy, 'vendedor' => $BS_CONTRATO_VENDEDORES[0], 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => $BS_CONTRATO_PROCEDENCIAS[1], 'medidas' => '2,40 x 0,62 + 1,60 x 0,62', 'factura' => 'si', 'muebles' => 'si',
              'material' => 'Granito Nacional · Negro Boreal', 'bacha' => 'nuestra', 'bacha_modelo' => '403-E',
              'medicion' => date('Y-m-d', strtotime('+3 days')), 'total_usd' => 1200, 'total_ars' => 0,
              'sena' => ['monto' => 500, 'moneda' => 'USD', 'fecha' => $hoy], 'pagos' => [], 'nota' => 'Renglón de prueba: se puede borrar.'],
             ['cliente' => 'PRUEBA · Baño doble', 'telefono' => '11 5550-0002', 'direccion' => 'Calle de prueba 456, Lanús', 'nro' => '',
-             'fecha' => $hoy, 'vendedor' => 'Prueba', 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => 'Recomendación', 'medidas' => '1,20 x 0,50', 'factura' => 'no', 'muebles' => 'no',
+             'fecha' => $hoy, 'vendedor' => $BS_CONTRATO_VENDEDORES[1], 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => $BS_CONTRATO_PROCEDENCIAS[0], 'medidas' => '1,20 x 0,50', 'factura' => 'no', 'muebles' => 'no',
              'material' => 'Purastone · Blanco Paloma (N y J)', 'bacha' => 'cliente', 'bacha_modelo' => '',
              'medicion' => '', 'total_usd' => 0, 'total_ars' => 850000,
              'sena' => null, 'pagos' => [], 'nota' => 'Renglón de prueba: sin seña y sin medición coordinada.'],
             ['cliente' => 'PRUEBA · Isla y mesada', 'telefono' => '11 5550-0003', 'direccion' => 'Calle de prueba 789, Quilmes', 'nro' => '',
-             'fecha' => $hoy, 'vendedor' => 'Prueba', 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => 'Local', 'medidas' => 'Isla 1,80 x 0,90 + mesada 3,10 x 0,62', 'factura' => '', 'muebles' => 'si',
+             'fecha' => $hoy, 'vendedor' => $BS_CONTRATO_VENDEDORES[2], 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => $BS_CONTRATO_PROCEDENCIAS[2], 'medidas' => 'Isla 1,80 x 0,90 + mesada 3,10 x 0,62', 'factura' => '', 'muebles' => 'si',
              'material' => 'Silestone · Blanco Zeus', 'bacha' => 'no', 'bacha_modelo' => '',
              'medicion' => date('Y-m-d', strtotime('+7 days')), 'total_usd' => 2100, 'total_ars' => 300000,
              'sena' => ['monto' => 300000, 'moneda' => 'ARS', 'fecha' => $hoy],
