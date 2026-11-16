@@ -269,18 +269,16 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-hecho.listo{background:var(--gr);border-color:var(--gr);color:#fff}
 [data-theme="dark"] .c-hecho.listo{color:#04220F}
 .c-hecho.listo::before{content:'✓  '}
-/* Títulos de sección dentro de una columna: qué grupo es y cuántas fichas tiene.
-   Dos niveles: la sección (banda con contador) y, adentro, la semana (rótulo chico con una raya). */
-.col-sep{display:flex;align-items:center;gap:9px;margin:16px 0 10px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-size:12.5px;font-weight:700;color:var(--text);line-height:1.3}
-.col-sep .t{flex:1;min-width:0}
-.col-sep small{display:block;margin-top:1px;font-size:11px;font-weight:600;color:var(--text3)}
-.col-sep b{flex-shrink:0;min-width:24px;padding:2px 8px;border-radius:999px;background:var(--card-alt);color:var(--text2);font-size:12px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums}
-/* Lo ya hecho que espera control: verde, con tilde. Va primero en la columna. */
-.col-sep.arriba{margin-top:2px;background:var(--gr-soft);border-color:color-mix(in srgb,var(--gr) 35%,var(--card));color:var(--gr)}
+/* Títulos de sección dentro de una columna.
+   Lo que falta hacer: texto gris con una línea punteada arriba (separa sin gritar). */
+.col-sep{margin:16px 2px 10px;padding-top:12px;border-top:2px dashed var(--border);font-size:11.5px;font-weight:700;color:var(--text3);letter-spacing:.02em}
+/* Lo ya hecho que espera control: banda verde con tilde y contador. Va primero en la columna. */
+.col-sep.arriba{display:flex;align-items:center;gap:9px;margin:2px 0 10px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--gr) 35%,var(--card));border-radius:var(--radius-sm);background:var(--gr-soft);font-size:12.5px;color:var(--gr);letter-spacing:0;line-height:1.3}
 .col-sep.arriba::before{content:'✓';flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--gr);color:#fff;font-size:12px;font-weight:800}
 [data-theme="dark"] .col-sep.arriba::before{color:#04220F}
-.col-sep.arriba small{color:var(--gr);opacity:.8}
-.col-sep.arriba b{background:var(--gr);color:#fff}
+.col-sep.arriba .t{flex:1;min-width:0}
+.col-sep.arriba small{display:block;margin-top:1px;font-size:11px;font-weight:600;color:var(--gr);opacity:.8}
+.col-sep.arriba b{flex-shrink:0;min-width:24px;padding:2px 8px;border-radius:999px;background:var(--gr);color:#fff;font-size:12px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums}
 [data-theme="dark"] .col-sep.arriba b{color:#04220F}
 /* AVISO "!" en rojo: la obra no tiene fecha (Por medir) o turno (Por instalar). Sin fecha no hay
    plazo, y lo que no tiene plazo se queda olvidado: se marca igual de fuerte que lo atrasado. */
@@ -409,11 +407,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .mat-item i{font-style:normal;font-size:11px;font-weight:700;color:var(--text2);background:var(--card-alt);padding:2px 8px;border-radius:999px;white-space:nowrap}
 .mat-nada{padding:10px 12px;font-size:12.5px;font-weight:500;color:var(--text3)}
 /* Dónde empieza cada semana de entrega, en las colas sin turno */
-.col-sem{display:flex;align-items:center;gap:8px;margin:14px 2px 8px;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
-.col-sem::after{content:'';flex:1;height:1px;background:var(--border)}
+.col-sem{margin:14px 2px 8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
 .col-sem.rojo{color:var(--red)}
-.col-sem.rojo::after{background:color-mix(in srgb,var(--red) 35%,var(--card))}
-.col-sep+.col-sem{margin-top:4px}
 
 /* Filtros de Por medir: fichas sin plano / sin foto de bacha */
 .col-filtros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
@@ -548,8 +543,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .col.on{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
   .col.on>*{grid-column:1/-1;margin-bottom:0}
   .col.on>.card{grid-column:auto}
-  .col.on>.col-sep{margin:8px 0 0}
-  .col.on>.col-sem{margin:6px 2px 0}
+  .col.on>.col-sep{margin:8px 2px 0}
+  .col.on>.col-sep.arriba{margin:8px 0 0}
   .col-acc{max-width:420px}
 }
 @media(min-width:960px) and (max-width:1099px){
@@ -1288,12 +1283,12 @@ function dibujar(){
     const sem=c=>{
       if(!c.semana)return 'Sin plazo todavía';
       const fin=masDias(c.semana,6);
-      return 'Semana del '+ddmm(c.semana)+(fin<HOY?' · vencida':(c.semana<=HOY?' · esta semana':''));
+      return 'Entrega: semana del '+ddmm(c.semana)+(fin<HOY?' · vencida':(c.semana<=HOY?' · esta semana':''));
     };
-    // título de sección: "Ya cortadas" + lo que esperan, y el contador a la derecha
+    // título de lo ya hecho: "Ya cortadas" + lo que esperan, y el contador a la derecha
     const seccion=(txt,n,cls)=>{const p=String(txt).split(' · ');return '<div class="col-sep'+cls+'"><span class="t">'+esc(p[0])+(p.length>1?'<small>'+esc(p.slice(1).join(' · ').replace(/^./,x=>x.toUpperCase()))+'</small>':'')+'</span><b>'+n+'</b></div>';};
     const cards=lista.map((c,i)=>(nHechas&&i===0?seccion(e.hecho,nHechas,' arriba'):'')
-      +(nHechas&&i===nHechas?seccion(e.pendientes||'En cola',lista.length-nHechas,''):'')
+      +(nHechas&&i===nHechas?'<div class="col-sep">'+esc(e.pendientes||'En cola')+' ('+(lista.length-nHechas)+')</div>':'')
       +(conSemanas&&i>=nHechas&&(i===nHechas||(lista[i-1].semana||'')!==(c.semana||''))?'<div class="col-sem'+(c.semana&&masDias(c.semana,6)<HOY?' rojo':'')+'">'+esc(sem(c))+'</div>':'')+htmlCard(c)).join('');
     if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(filtrando?'Sin resultados':'Nadie retira por el local')+'</div>';
     else h+=lista.length?cards:'<div class="col-vacia">'+(filtrando?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
