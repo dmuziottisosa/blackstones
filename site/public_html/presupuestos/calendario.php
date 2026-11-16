@@ -125,15 +125,22 @@ button{font-family:inherit;color:inherit}
 .ley button.on::before{content:'✓';background:var(--fc,var(--dk));border-color:var(--fc,var(--dk))}
 [data-theme="dark"] .ley button.on::before{color:#14110D;background:var(--fc,var(--gd));border-color:var(--fc,var(--gd))}
 .ley button b{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text3)}
-.ley button[class*="et-"]{--fc:var(--et)}
-.ley button[data-ver="entrega"]{--fc:var(--gd)}
-.ley button[data-ver="vence"]{--fc:var(--amb)}
+/* Referencias de colores (no se tocan) */
+.refs{display:flex;flex-direction:column}
+.ref{display:flex;align-items:center;gap:9px;padding:5px 2px;font-size:12.5px;font-weight:600;color:var(--text2)}
+.ref::before{content:'';flex-shrink:0;width:14px;height:14px;border-radius:3px;background:var(--et);margin:0 1px}
+.ref.entrega::before{height:8px;border-radius:2px;background:color-mix(in srgb,var(--gd) 40%,var(--card));border:1px solid var(--gd)}
+.ref.vence::before{background:none;border:1.5px dashed var(--text3)}
+.ref b{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text3)}
 .ley button.vencida b{color:var(--red)}
 .ley button.cerca b{color:var(--amb)}
 .ley .nada{font-size:12.5px;color:var(--text3);padding:4px 2px}
 .f-todo{display:block;width:100%;margin-top:12px;padding:8px;border:1px solid var(--dk);border-radius:var(--radius-sm);background:var(--dk);color:var(--cr);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
 [data-theme="dark"] .f-todo{background:var(--gd);border-color:var(--gd);color:#1A1816}
 .f-todo[hidden],.foco-b[hidden]{display:none}
+/* Con un bloque en foco se ve su tramo completo, no un mes: las flechas de mes no aplican. */
+.barra.foco .mes button{display:none}
+.barra.foco .mes h2{min-width:0;text-align:left}
 /* Con un bloque en foco: su medición y su entrega, en un renglón, con el salto al mes de cada una. */
 .foco-b{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-bottom:10px;padding:10px 14px;border:1px solid var(--border);border-left:4px solid var(--dk);border-radius:var(--radius);background:var(--card);font-size:13px;color:var(--text2)}
 [data-theme="dark"] .foco-b{border-left-color:var(--gd)}
@@ -158,7 +165,8 @@ button{font-family:inherit;color:inherit}
   .f-tit.activo{border-color:var(--dk);color:var(--text)}
   .f-cuerpo{display:none;margin-top:10px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
   .filtros.abierto .f-cuerpo{display:block}
-  .ley{flex-direction:row;flex-wrap:wrap;gap:2px 18px}
+  .ley,.refs{flex-direction:row;flex-wrap:wrap;gap:2px 18px}
+  .ref b{margin-left:2px}
   .ley button{width:auto;padding:7px 4px}
   .ley button b{margin-left:2px}
   .f-todo{width:auto;padding:8px 16px}
@@ -386,11 +394,11 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
     <aside class="filtros" id="filtros">
       <button type="button" class="f-tit" id="fTit" aria-expanded="false">Filtros</button>
       <div class="f-cuerpo">
-        <h4>Qué ver</h4>
-        <div class="ley" id="ley"></div>
         <h4>Bloque de medición</h4>
         <div class="ley" id="fBloques"></div>
         <button type="button" class="f-todo" id="fTodo" hidden>Ver todo</button>
+        <h4>Referencias</h4>
+        <div class="refs" id="ley"></div>
       </div>
     </aside>
     <div>
@@ -438,7 +446,9 @@ let mes='';      // mes a la vista, 'YYYY-MM'
 let ocupado=false;
 let arrastre=null; // {key,tipo} del evento que se está arrastrando
 let ver={};      // tipos apagados en la leyenda: {vence:false}
-try{ver=JSON.parse(localStorage.getItem('bs-cal-ver')||'{}')||{};}catch(e){ver={};}
+// Ya no se apaga nada por tipo: el único filtro son los bloques de medición. Se limpia lo que
+// hubiera quedado guardado de la versión anterior, para que nada siga escondido.
+try{localStorage.removeItem('bs-cal-ver');}catch(e){}
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -543,7 +553,9 @@ let MEDIR=''; // id de la etapa donde se mide ("medir")
 const selB=new Set();
 // A qué bloque pertenece una obra: el día en que se midió o, si falta medir, el día agendado.
 const bloqueDe=c=>c.medido_at||(c.etapa===MEDIR&&c.fecha&&!cumplida(c)?c.fecha:'');
-const enFoco=c=>!selB.size||selB.has(bloqueDe(c));
+// Con TODOS los bloques marcados se ve todo, también las obras que todavía no tienen fecha de medición.
+let todosMarcados=false;
+const enFoco=c=>!selB.size||selB.has(bloqueDe(c))||(todosMarcados&&!bloqueDe(c));
 const diaMes=iso=>(+iso.slice(8,10))+'-'+MESES[+iso.slice(5,7)-1].slice(0,3);
 function bloques(todos){
   const m={};
@@ -688,33 +700,49 @@ function dibujar(){
   calcularChoques();
   $('hoyTxt').innerHTML='Hoy · <b>'+esc(fechaLarga(HOY))+'</b>';
   const y=+mes.slice(0,4),m=+mes.slice(5,7);
-  $('mesTxt').textContent=MESES[m-1].replace(/^./,x=>x.toUpperCase())+' '+y;
+  // Lo que se ve: normalmente un mes. Con bloques en foco, la HISTORIA COMPLETA de esos bloques:
+  // desde el día de la medición hasta el día en que vence la entrega, aunque cruce de un mes a otro.
+  [...selB].forEach(d=>{if(!CARDS.some(c=>bloqueDe(c)===d))selB.delete(d);}); // un bloque que ya no existe deja de filtrar
+  todosMarcados=selB.size>0&&selB.size>=new Set(CARDS.map(bloqueDe).filter(Boolean)).size;
+  const foco=selB.size>0;
+  let vDesde=isoDe(new Date(y,m-1,1)),vHasta=isoDe(new Date(y,m,0));
+  if(foco){
+    const sel=[...selB].sort(),tb=bloques(true);
+    vDesde=sel[0];
+    vHasta=sel.map(d=>{const b=tb.find(x=>x.dia===d);return b?b.hasta:masDias(d,20);}).sort().pop();
+    // y todo lo que ya tienen agendado esas obras (por ejemplo una instalación más adelante)
+    CARDS.filter(enFoco).forEach(c=>{[c.fecha,c.limite].forEach(f=>{if(f&&f>vHasta)vHasta=f;});});
+  }
+  const enVista=iso=>!!iso&&iso>=vDesde&&iso<=vHasta;
+  const diaTxt=iso=>(+iso.slice(8,10))+' '+MESES[+iso.slice(5,7)-1].slice(0,3);
+  $('mesTxt').textContent=foco?diaTxt(vDesde)+' – '+diaTxt(vHasta):MESES[m-1].replace(/^./,x=>x.toUpperCase())+' '+y;
+  document.querySelector('.barra').classList.toggle('foco',foco);
 
-  // Filtros, primer grupo: qué ver. Cada casillero lleva el color de lo que prende y cuántos hay este mes.
+  // Referencias: qué es cada color y cuántos hay a la vista. No son interruptores.
   const F=CARDS.filter(enFoco);
-  const tipos=ETAPAS.filter(e=>e.fecha).map(e=>({id:e.id,txt:PLURAL[e.fecha]||e.fecha,n:F.filter(c=>c.etapa===e.id&&c.fecha&&c.fecha.slice(0,7)===mes&&!cumplida(c)).length}));
-  tipos.push({id:'entrega',txt:'Entregas',n:bloques().filter(b=>b.desde.slice(0,7)===mes||b.hasta.slice(0,7)===mes).length});
-  tipos.push({id:'vence',txt:'Vencimientos',n:F.filter(c=>(c.limite&&c.etapa!=='archivar'&&c.limite.slice(0,7)===mes)||previsto(c).slice(0,7)===mes).length});
-  $('ley').innerHTML=tipos.map(t=>'<button type="button" class="'+(t.id==='vence'||t.id==='entrega'?'':'et-'+esc(t.id))+(ver[t.id]!==false?' on':'')+'" data-ver="'+esc(t.id)+'" role="checkbox" aria-checked="'+(ver[t.id]!==false)+'">'+esc(t.txt)+' <b>'+t.n+'</b></button>').join('');
-  // Segundo grupo: los bloques de medición que existen hoy en el tablero (solo datos reales).
+  const tipos=ETAPAS.filter(e=>e.fecha).map(e=>({id:e.id,txt:PLURAL[e.fecha]||e.fecha,n:F.filter(c=>c.etapa===e.id&&enVista(c.fecha)&&!cumplida(c)).length}));
+  tipos.push({id:'entrega',txt:'Entregas',n:bloques().filter(b=>b.desde<=vHasta&&b.hasta>=vDesde).length});
+  tipos.push({id:'vence',txt:'Vencimientos',n:F.filter(c=>(c.limite&&c.etapa!=='archivar'&&enVista(c.limite))||enVista(previsto(c))).length});
+  $('ley').innerHTML=tipos.map(t=>'<div class="ref '+(t.id==='vence'||t.id==='entrega'?t.id:'et-'+esc(t.id))+'">'+esc(t.txt)+' <b>'+t.n+'</b></div>').join('');
+  // El filtro: los bloques de medición que existen hoy en el tablero (solo datos reales). Marcar uno
+  // muestra su par completo: la medición y su entrega con el vencimiento.
   const todosB=bloques(true),dB={};
   CARDS.forEach(c=>{const d=bloqueDe(c);if(d)dB[d]=(dB[d]||0)+1;});
-  [...selB].forEach(d=>{if(!dB[d])selB.delete(d);}); // un bloque que ya no existe deja de filtrar
   const diasB=Object.keys(dB).sort();
   $('fBloques').innerHTML=diasB.length?diasB.map(d=>{
     const b=todosB.find(x=>x.dia===d),est=b?b.estado:'';
     return '<button type="button" class="'+(selB.has(d)?'on ':'')+est+'" data-fbloque="'+d+'" role="checkbox" aria-checked="'+selB.has(d)+'" title="'+esc('Medición del '+fechaCorta(d)+(b?' · entrega del '+fechaCorta(b.desde)+' al '+fechaCorta(b.hasta):''))+'">'+esc(diaMes(d))+' <b>'+dB[d]+'</b></button>';
   }).join(''):'<div class="nada">Todavía no hay mediciones.</div>';
-  const nApag=tipos.filter(t=>ver[t.id]===false).length,nFil=nApag+selB.size;
+  const nFil=selB.size;
   $('fTodo').hidden=!nFil;
-  // Resumen del foco: con un solo bloque marcado, su medición y su entrega juntas (suelen caer en meses distintos).
+  // Resumen del foco, arriba de la grilla: qué se está siguiendo y cómo salir.
   let fo='';
   if(selB.size===1){
     const d=[...selB][0],b=todosB.find(x=>x.dia===d),l=obrasMedicion(d),hm=l.filter(c=>c.medido_at).length;
-    fo='<span><b>Bloque '+esc(diaMes(d))+'</b></span><span>Medición: <b>'+esc(fechaCorta(d))+'</b> · '+l.length+(l.length===1?' obra':' obras')+(hm===l.length?' · todas medidas':' · '+hm+' medidas, '+(l.length-hm)+' sin medir')+'</span>'
-      +(b?'<span>'+(b.est?'Entrega estimada':'Entrega')+': <b>'+esc(fechaCorta(b.desde))+' al '+esc(fechaCorta(b.hasta))+'</b>'+(b.estado==='vencida'?' <span class="rojo">· vencida</span>':(b.estado==='cerca'?' <span class="amb">· en curso</span>':''))+'</span>':'')
-      +'<span class="fin">'+(d.slice(0,7)!==mes?'<button type="button" data-ir="'+d.slice(0,7)+'">Ver la medición</button>':'')+(b&&b.desde.slice(0,7)!==mes&&b.hasta.slice(0,7)!==mes?'<button type="button" data-ir="'+b.desde.slice(0,7)+'">Ver la entrega</button>':'')+'</span>';
+    fo='<span><b>Bloque '+esc(diaMes(d))+'</b></span><span>Medición: <b>'+esc(fechaCorta(d))+'</b> · '+l.length+(l.length===1?' obra':' obras')+(hm===l.length?' · todas medidas':' · '+hm+(hm===1?' medida, ':' medidas, ')+(l.length-hm)+' sin medir')+'</span>'
+      +(b?'<span>'+(b.est?'Entrega estimada':'Entrega')+': <b>'+esc(fechaCorta(b.desde))+' al '+esc(fechaCorta(b.hasta))+'</b>'+(b.estado==='vencida'?' <span class="rojo">· vencida</span>':(b.estado==='cerca'?' <span class="amb">· en curso</span>':''))+'</span>':'');
   }else if(selB.size>1)fo='<span><b>'+selB.size+' bloques en foco:</b> '+[...selB].sort().map(d=>esc(diaMes(d))).join(', ')+'</span>';
+  if(fo)fo+='<span class="fin"><button type="button" data-salir>Volver al mes</button></span>';
   $('focoB').innerHTML=fo;$('focoB').hidden=!fo;
   $('fTit').textContent=nFil?'Filtros · '+nFil:'Filtros';
   $('fTit').classList.toggle('activo',nFil>0);
@@ -723,13 +751,16 @@ function dibujar(){
   const L=ver.entrega!==false?bloques():[]; // franjas de entrega: tienen su propio botón en la leyenda
   const conMed=ver[MEDIR]!==false;       // el bloque de medición se apaga junto con las mediciones
 
-  // Grilla del mes: semanas de lunes a domingo.
-  const primero=new Date(y,m-1,1),ultimo=new Date(y,m,0);
-  const d=new Date(primero);d.setDate(1-((primero.getDay()+6)%7));
+  // Grilla: semanas de lunes a domingo, del primer al último día a la vista (un mes, o el tramo en foco).
+  const primero=partes(vDesde),ultimo=partes(vHasta);
+  const d=new Date(primero);d.setDate(d.getDate()-((primero.getDay()+6)%7));
   let g=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(x=>'<div class="dh">'+x+'</div>').join('');
+  let va=0;
   while(d<=ultimo||d.getDay()!==1){
-    const iso=isoDe(d),fuera=d.getMonth()!==m-1;
-    g+='<div class="dia'+(fuera?' otro':'')+(iso===HOY?' es-hoy':'')+(iso<HOY?' pasado':'')+(d.getDay()===0||d.getDay()===6?' finde':'')+'" data-dia="'+iso+'"><div class="n">'+d.getDate()+'</div>'
+    const iso=isoDe(d),fuera=!enVista(iso);
+    // en foco el tramo cruza meses: el número lleva el mes al empezar y cada día 1
+    const num=d.getDate()+(foco&&(va===0||d.getDate()===1)?' '+MESES[d.getMonth()].slice(0,3):'');va++;
+    g+='<div class="dia'+(fuera?' otro':'')+(iso===HOY?' es-hoy':'')+(iso<HOY?' pasado':'')+(d.getDay()===0||d.getDay()===6?' finde':'')+'" data-dia="'+iso+'"><div class="n">'+num+'</div>'
       +franjas(iso,L,(d.getDay()+6)%7)+(conMed?tiraMedicion(iso,false):'')+(dias[iso]||[]).map(ev=>chip(ev,false)).join('')+'</div>';
     d.setDate(d.getDate()+1);
   }
@@ -737,8 +768,8 @@ function dibujar(){
 
   // Agenda (celular): los días del mes que tienen algo, más hoy.
   let a='';
-  for(let n=1;n<=ultimo.getDate();n++){
-    const iso=mes+'-'+String(n).padStart(2,'0'),l=dias[iso]||[];
+  for(let iso=vDesde;iso<=vHasta;iso=masDias(iso,1)){
+    const l=dias[iso]||[];
     // En la lista, cada bloque aparece dos veces: el día que empieza su ventana y el día que vence.
     const bq=L.filter(b=>b.desde===iso||b.hasta===iso).map(b=>'<button type="button" class="ev blq-ag'+(b.est?' est':'')+(b.estado?' '+b.estado:'')+'" data-bloque="'+b.dia+'">'
       +(b.hasta===iso?(b.estado==='vencida'?'Venció la entrega':'Vence la entrega')+' · '+esc(b.de):(b.est?'Empieza la entrega estimada':'Empieza la entrega')+' · '+esc(b.de)+'<br><span>Hasta el '+esc(fechaCorta(b.hasta))+'</span>')+'</button>').join('')
@@ -900,38 +931,14 @@ document.addEventListener('click',ev=>{
   if(fb){
     const d=fb.dataset.fbloque;
     if(selB.has(d))selB.delete(d);else selB.add(d);
-    // Al enfocar un solo bloque, si en el mes a la vista no hay nada suyo, el calendario va a donde está.
-    if(selB.size===1&&selB.has(d))irAlBloque(d);
     dibujar();
     return;
   }
-  const ir=ev.target.closest('[data-ir]');
-  if(ir){mes=ir.dataset.ir;dibujar();return;}
-  if(ev.target.closest('#fTodo')){
-    selB.clear();ver={};
-    try{localStorage.setItem('bs-cal-ver','{}');}catch(e){}
-    dibujar();
-    return;
-  }
+  if(ev.target.closest('[data-salir]')){selB.clear();dibujar();return;}
+  if(ev.target.closest('#fTodo')){selB.clear();dibujar();return;}
   const ft=ev.target.closest('#fTit');
   if(ft){const ab=$('filtros').classList.toggle('abierto');ft.setAttribute('aria-expanded',ab);return;}
-  const v=ev.target.closest('[data-ver]');
-  if(v){
-    ver[v.dataset.ver]=ver[v.dataset.ver]===false;
-    try{localStorage.setItem('bs-cal-ver',JSON.stringify(ver));}catch(e){}
-    dibujar();
-  }
 });
-// Lleva el calendario al mes donde está el bloque, si en el mes a la vista no aparece nada suyo.
-function irAlBloque(d){
-  const b=bloques(true).find(x=>x.dia===d);
-  const y=+mes.slice(0,4),m=+mes.slice(5,7),ini=new Date(y,m-1,1),fin=new Date(y,m,0);
-  ini.setDate(1-((ini.getDay()+6)%7));fin.setDate(fin.getDate()+((7-fin.getDay())%7));
-  const a=isoDe(ini),z=isoDe(fin),seVe=x=>x>=a&&x<=z;
-  if(seVe(d)||(b&&b.desde<=z&&b.hasta>=a))return;
-  // si ya se midió, lo que queda por seguir es la entrega; si no, la medición
-  mes=(b&&!b.est?b.desde:d).slice(0,7);
-}
 function moverMes(n){const d=new Date(+mes.slice(0,4),+mes.slice(5,7)-1+n,1);mes=isoDe(d).slice(0,7);dibujar();}
 // En pantallas angostas la barra de páginas se desliza de costado: la página actual queda a la vista.
 (function(){
