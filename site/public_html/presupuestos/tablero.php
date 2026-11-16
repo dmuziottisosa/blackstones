@@ -1103,7 +1103,10 @@ function htmlPlegada(c,e,cls,estilo,pos){
       if(e.exige_fecha&&e.pide_hora&&!c.hora&&!atrasada(c))et('Falta la hora','rojo');
     }
   }
+  // El paso urgente de la etapa (Por cortar / Por fabricar: entregarle la obra a quien la hace) se ve
+  // sin abrir la ficha, esté o no: "Sin entregar" en rojo o "Entregado" en verde.
   if(!hecho(c)&&(e.urge||[]).some(k=>!c.checks[k]))et((e.urge_txt||'sin empezar').replace(/^./,x=>x.toUpperCase()),'rojo');
+  else if(!hecho(c)&&(e.urge||[]).length&&e.urge_ok_txt)et(e.urge_ok_txt,'ok');
   if(sePisa(c))et('Se pisa','rojo');
   const pl=plazo(c);
   if(pl==='vencida')et('Plazo vencido','rojo');

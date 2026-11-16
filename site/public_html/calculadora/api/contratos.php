@@ -26,31 +26,19 @@
 //   enlazar        { id, cliente_nro, sub }           (la ficha ya existe en el tablero)
 //   desenlazar     { id }
 //   prueba         {}                                 (carga 3 renglones de prueba)
+// GET ?verificar=0042 → { ok, presup }  (¿existe ese N° en Presupuestos? solo informa)
+//
+// El PDF o Excel del presupuesto se sube y se baja por contratos-adjunto.php.
+// Un contrato queda VERIFICADO solo cuando tiene ese archivo adjunto.
 //   borrar_prueba  {}                                 (borra todos los de prueba)
 // ============================================================
 
-require_once __DIR__ . '/_config.php';
+require_once __DIR__ . '/_contratos.php';
 require_once __DIR__ . '/_auth.php';
 
 bs_require_auth();
 bs_check_csrf();
 bs_ensure_dirs();
-
-define('BS_CONTRATOS_DIR',  BS_DATA_DIR . '/contratos');
-define('BS_CONTRATOS_FILE', BS_CONTRATOS_DIR . '/contratos.json');
-define('BS_CONTRATOS_LOCK', BS_CONTRATOS_DIR . '/.write.lock');
-define('BS_CONTRATOS_MAX',  5000);
-
-// Quién vende y de dónde llega el cliente: listas cerradas (las dictó el dueño, 16/11/2026).
-// Para sumar o sacar un nombre se toca solo acá; la página las recibe con el GET.
-$BS_CONTRATO_VENDEDORES  = ['Laura', 'Sol', 'Diego', 'Jose', 'Lara', 'Dioge'];
-$BS_CONTRATO_PROCEDENCIAS = ['Alberdi', 'Publicación/WhatsApp', 'Publicación/Alberdi'];
-
-function bs_contratos_leer() {
-    $d = bs_read_json(BS_CONTRATOS_FILE);
-    if (!is_array($d) || !isset($d['contratos']) || !is_array($d['contratos'])) $d = ['version' => 1, 'contratos' => []];
-    return $d;
-}
 
 function bs_contrato_fecha_ok($f) {
     if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', (string)$f, $m)) return false;
@@ -185,6 +173,41 @@ function bs_contrato_salida($c) {
         'nota'         => (string)($c['nota'] ?? ''),
         'prueba'       => !empty($c['prueba']),
         'enlace'       => is_array($c['enlace'] ?? null) ? $c['enlace'] : null,
+        // El presupuesto adjunto: con archivo, el contrato está verificado.
+        'archivo'      => bs_contrato_archivo($c),
+        // Si el N° existe en Presupuestos (solo informa; no verifica).
+        'presup'       => bs_contrato_presup((string)($c['nro'] ?? '')),
+    ];
+}
+
+/**
+ * ¿Existe ese N° en Presupuestos? Solo lee clientes/NNNN.json; no lo modifica.
+ * Devuelve null si no hay N°; si no, ['existe', 'cliente_nro', 'sub', 'cliente', 'total_usd', 'total_ars', 'versiones', 'detalle'].
+ */
+function bs_contrato_presup($nro) {
+    if (!preg_match('/^(\d{1,6})(?:-(\d{1,3}))?$/', $nro, $m)) return null;
+    $n = str_pad((string)intval($m[1]), 4, '0', STR_PAD_LEFT);
+    $pedido = isset($m[2]) ? intval($m[2]) : 0;
+    $no = ['existe' => false, 'cliente_nro' => $n, 'sub' => $pedido];
+    $cli = bs_read_json(BS_CLIENTES_DIR . '/' . $n . '.json');
+    $cots = is_array($cli) ? ($cli['cotizaciones'] ?? []) : [];
+    if (!is_array($cots) || !$cots) return $no;
+    $cot = null;
+    foreach ($cots as $x) {
+        $s = intval($x['sub'] ?? 0);
+        if ($pedido ? $s === $pedido : ($cot === null || $s > intval($cot['sub'] ?? 0))) $cot = $x;
+    }
+    if ($cot === null) return $no;
+    $tot = $cot['presupuesto']['totales'] ?? [];
+    return [
+        'existe'      => true,
+        'cliente_nro' => $n,
+        'sub'         => intval($cot['sub'] ?? 0),
+        'cliente'     => (string)($cli['cliente']['nombre'] ?? ''),
+        'total_usd'   => floatval($tot['usd'] ?? 0),
+        'total_ars'   => floatval($tot['ars'] ?? 0),
+        'versiones'   => count($cots),
+        'detalle'     => empty($cot['manual']) && isset($cot['presupuesto']) && is_array($cot['presupuesto']),
     ];
 }
 
@@ -196,6 +219,11 @@ function bs_contrato_id() {
 // GET — la lista
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (isset($_GET['verificar'])) {
+        $nro = trim((string)$_GET['verificar']);
+        if (!preg_match('/^#?\s*(\d{1,6})(?:\s*-\s*(\d{1,3}))?$/', $nro, $m)) bs_error('El N° de presupuesto va como 0042, o 0042-2 si tiene versiones.');
+        bs_ok(['presup' => bs_contrato_presup(intval($m[1]) . (isset($m[2]) ? '-' . intval($m[2]) : ''))]);
+    }
     $d = bs_contratos_leer();
     $lista = array_map('bs_contrato_salida', array_values($d['contratos']));
     usort($lista, function ($a, $b) { return strcmp($b['creado'], $a['creado']) ?: strcmp($b['id'], $a['id']); });
@@ -213,7 +241,7 @@ if (!in_array($accion, $acciones, true)) bs_error('accion inválida');
 // Todo lo que puede fallar por datos mal cargados se valida ANTES de tomar el lock.
 $campos = in_array($accion, ['crear', 'editar'], true) ? bs_contrato_campos($body) : null;
 $id = (string)($body['id'] ?? '');
-if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba'], true) && !preg_match('/^c[0-9a-f]{6,40}$/', $id)) bs_error('id inválido');
+if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
 
 $sena_nueva = null;
 if ($accion === 'sena') $sena_nueva = bs_contrato_sena($body['monto'] ?? 0, $body['moneda'] ?? '', $body['fecha'] ?? '');
@@ -254,6 +282,7 @@ try {
     $d = bs_contratos_leer();
     $ahora = date('c');
     $extra = [];
+    $borrar_adj = []; // contratos borrados: su PDF o Excel se va con ellos
 
     // Vendedor y procedencia salen de las listas. Un contrato viejo conserva lo que ya tenía
     // (por si un nombre se saca de la lista), pero no se le puede poner otro valor de afuera.
@@ -306,6 +335,7 @@ try {
         foreach ($d['contratos'] as $k => $c) {
             if (empty($c['prueba'])) continue;
             if (is_array($c['enlace'] ?? null)) $enlaces[] = ['cliente_nro' => $c['enlace']['cliente_nro'], 'sub' => $c['enlace']['sub']];
+            $borrar_adj[] = (string)$k;
             unset($d['contratos'][$k]);
         }
         $extra['enlaces'] = $enlaces;
@@ -338,6 +368,7 @@ try {
         }
 
         if ($accion === 'borrar') {
+            $borrar_adj[] = $id;
             unset($d['contratos'][$id]);
         } else {
             $c['actualizado'] = $ahora;
@@ -346,6 +377,7 @@ try {
     }
 
     if (!bs_write_json_atomic(BS_CONTRATOS_FILE, $d)) bs_contratos_salir($fp, 'No se pudo guardar', 500);
+    foreach ($borrar_adj as $k) bs_contrato_adj_borrar($k);
     bs_lock_release($fp);
     bs_ok(array_merge(['id' => $id], $extra));
 

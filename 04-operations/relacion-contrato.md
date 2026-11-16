@@ -15,7 +15,7 @@ Los definió el dueño (16/11/2026), sobre la planilla que ya usaba:
 |---|---|
 | N° de presupuesto | No es obligatorio, pero debería estar: sin N° el renglón muestra "Sin N°" en ámbar |
 | Fecha del contrato | Define en qué mes aparece |
-| Vendedor | Lista cerrada (dueño, 16/11/2026): Laura, Sol, Diego, Jose, Lara, Dioge. Se edita en `$BS_CONTRATO_VENDEDORES`, en `contratos.php` |
+| Vendedor | Lista cerrada (dueño, 16/11/2026): Laura, Sol, Diego, Jose, Lara, Dioge. Se edita en `$BS_CONTRATO_VENDEDORES`, en `_contratos.php` |
 | Procedencia | Lista cerrada: Alberdi, Publicación/WhatsApp, Publicación/Alberdi. Se edita en `$BS_CONTRATO_PROCEDENCIAS` |
 | Cliente, Teléfono, Dirección | El teléfono vale pegado de WhatsApp ("+54 9 11 5555-1234", incluso con los caracteres invisibles que agrega) o como diez dígitos ("1155551234"). Son el mismo número: se guarda y se muestra "11 5555-1234". Se ve debajo del nombre y abre WhatsApp con un toque. El buscador lo encuentra en cualquiera de los dos formatos |
 | Contrato, Contrato paralelo | Texto libre (`status: hypothesis`: falta que el dueño defina qué va en cada uno) |
@@ -42,9 +42,25 @@ Criterio del dueño (16/11/2026): **no es un tablero de indicadores, es un centr
 - **Un número no contradice a otro:** resumen, filtros y pie cuentan los mismos renglones. Los de prueba cuentan mientras existan, y el cartel lo dice.
 - En pantallas medianas se ocultan primero Notas (queda un punto ámbar al lado del nombre) y después Factura / Muebles / Pileta; todo sigue en la ficha. Por debajo de 1100 px cada contrato es una tarjeta.
 
+## El presupuesto del contrato: tres casos
+
+Definido por el dueño (16/11/2026):
+
+1. **Vacío:** no pasa nada. El renglón dice "Sin N°".
+2. **Con N° de presupuesto:** el contrato queda enlazado con ese presupuesto de Presupuestos. La ficha lo busca mientras se escribe y muestra de quién es y su total, con el link para verlo; si el N° no existe, lo avisa (y en la planilla queda un "?" al lado del número).
+3. **Con el PDF o Excel del presupuesto adjunto:** el contrato queda **VERIFICADO** (sello dorado al lado del nombre, en la planilla y en la ficha).
+
+**Solo el archivo adjunto verifica.** El N° enlaza, pero no pone el sello. Un archivo por contrato (PDF, .xlsx o .xls, hasta 10 MB); subir otro reemplaza al anterior. El filtro "Sin verificar" muestra los que no lo tienen. Al borrar el contrato se borra su archivo.
+
+## Los puntitos de cada renglón
+
+Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, listo para pegar en WhatsApp), copiar dirección y borrar contrato. Lo que el renglón no tiene sale apagado.
+
 ## Enlace con el tablero
 
 - **Por defecto el renglón está suelto**: no toca el tablero.
+- Hay **dos formas de enlazar**: crear el contrato y usar "Cargar en Por medir", o ponerle al contrato el N° de un presupuesto que **ya está** en el tablero.
+- En ese segundo caso el renglón muestra **"Enlazar con el tablero"** en vez de "Cargar en Por medir", y al guardar la ficha se ofrece enlazar ahí mismo. Enlazar no crea ni cambia nada en el tablero.
 - **"Cargar en Por medir"** crea la ficha en el tablero y copia solo lo que el tablero ya tiene: cliente, teléfono, dirección, material, pileta, fecha de medición y seña. Total, pagos y el resto quedan acá.
 - Si el renglón tiene **N° de presupuesto**, en vez de crear una ficha aprueba ese presupuesto (mismo camino que "Cargar obra" con número). Si ese presupuesto ya estaba en el tablero, solo se enlaza.
 - Una ficha del tablero se enlaza con un solo contrato.
@@ -64,7 +80,9 @@ Con la lista vacía aparece "Cargar 3 de prueba". Quedan marcados PRUEBA, no cue
 |---|---|
 | Página | `site/public_html/presupuestos/relacion-contrato.php` |
 | Endpoint | `site/public_html/calculadora/api/contratos.php` |
-| Datos | `bs-data/contratos/contratos.json`, aparte de `clientes/` y `tablero/` |
+| Subir y bajar el presupuesto adjunto | `site/public_html/calculadora/api/contratos-adjunto.php` |
+| Listas, rutas y lo compartido | `site/public_html/calculadora/api/_contratos.php` (vendedores y procedencias se editan ahí) |
+| Datos | `bs-data/contratos/contratos.json` y `bs-data/contratos/adjuntos/`, aparte de `clientes/` y `tablero/` |
 
 La página no modifica ningún endpoint existente: para crear la ficha usa `tablero-cargar.php` y `tablero.php`, los mismos que usa el tablero.
 
@@ -73,13 +91,13 @@ La página no modifica ningún endpoint existente: para crear la ficha usa `tabl
 Exigencia del dueño (16/11/2026): **Relación-Contrato se tiene que poder eliminar completa sin afectar el tablero ni el calendario.**
 
 - La dependencia va en un solo sentido: Relación-Contrato **lee** del tablero. El tablero, el calendario, el hub y la calculadora **nunca** leen ni escriben nada de contratos.
-- Ningún archivo existente llama a `contratos.php` ni abre `bs-data/contratos/`. Lo único que la nombra desde afuera es el link de la pestaña en la barra de páginas.
+- Ningún archivo existente llama a `contratos.php`, `contratos-adjunto.php` ni `_contratos.php`, ni abre `bs-data/contratos/`. Relación-Contrato sí lee `clientes/` (para saber si un N° existe) y el tablero, sin modificarlos. Lo único que la nombra desde afuera es el link de la pestaña en la barra de páginas.
 - Las fichas creadas con "Cargar en Por medir" son fichas comunes del tablero: siguen ahí, con su fecha y su seña, aunque el contrato desaparezca.
-- Verificado el 16/11/2026: con la página, el endpoint y los datos borrados, pasaron la regresión completa del tablero y las pruebas del calendario.
+- Verificado el 16/11/2026 (dos veces, la segunda con los adjuntos ya hechos): con la página, el endpoint y los datos borrados, pasaron la regresión completa del tablero y las pruebas del calendario.
 
 **Para quien toque esto después:** no agregar en `tablero.php`, `calendario.php` ni en sus endpoints nada que dependa de contratos. Si algún día el tablero necesita mostrar algo del contrato, tiene que tolerar que no exista.
 
-Para eliminarla: borrar `presupuestos/relacion-contrato.php`, `calculadora/api/contratos.php` y la carpeta `bs-data/contratos/`, y sacar el link de la pestaña de las cinco páginas que lo tienen (calculadora, presupuestos, tablero, calendario, stock). Si el link queda, lleva a una página que no existe; nada más.
+Para eliminarla: borrar `presupuestos/relacion-contrato.php`, los tres archivos de `calculadora/api/` (`contratos.php`, `contratos-adjunto.php`, `_contratos.php`) y la carpeta `bs-data/contratos/`, y sacar el link de la pestaña de las cinco páginas que lo tienen (calculadora, presupuestos, tablero, calendario, stock). Si el link queda, lleva a una página que no existe; nada más.
 
 ## Lo que esta versión deja afuera a propósito
 

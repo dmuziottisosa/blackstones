@@ -112,6 +112,8 @@ $BS_ETAPAS = [
         'urge'        => ['entregado_corte'],
         // urge_txt: el nombre de ese caso en el detalle del aviso.
         'urge_txt'    => 'sin entregar',
+        // urge_ok_txt: la marca de la ficha plegada cuando ese paso YA está (se ve sin abrirla).
+        'urge_ok_txt' => 'Entregado',
         // en_manos: [tilde, texto del filtro]. Fichas que ya tienen ese tilde y
         // todavía no están hechas: lo que el cortador tiene hoy para cortar.
         'en_manos'    => ['entregado_corte', 'Con el cortador'],
@@ -150,6 +152,8 @@ $BS_ETAPAS = [
         // terminar es su lista de trabajo ("Con el fabricador").
         'urge'        => ['entregado_fab'],
         'urge_txt'    => 'sin entregar',
+        // urge_ok_txt: la marca de la ficha plegada cuando ese paso YA está (se ve sin abrirla).
+        'urge_ok_txt' => 'Entregado',
         'en_manos'    => ['entregado_fab', 'Con el fabricador'],
         // Igual que "Corte aprobado": su fecha queda a la vista en las etapas siguientes.
         'hitos'       => ['qc_fab'],

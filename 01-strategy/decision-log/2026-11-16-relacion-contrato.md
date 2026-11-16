@@ -15,6 +15,9 @@
 
 - **Crítico:** Relación-Contrato se puede eliminar entera sin que se caiga nada del tablero ni del calendario. La dependencia es de un solo sentido (contratos lee del tablero, nunca al revés).
 
+- **Verificado = presupuesto adjunto.** El N° de presupuesto enlaza el contrato con Presupuestos; solo el PDF o Excel adjunto le pone el sello de verificado.
+- Dos formas de enlazar con el tablero: "Cargar en Por medir" desde el contrato, o poner el N° de una obra que ya está en el tablero ("Enlazar con el tablero").
+
 ## Por qué
 
 - No romper lo que ya funciona: datos aparte, y la ficha se crea con los endpoints existentes.

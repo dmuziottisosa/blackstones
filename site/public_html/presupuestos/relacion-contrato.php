@@ -133,7 +133,7 @@ button{font-family:inherit;color:inherit}
 .aviso-p .btn{margin-left:auto;border-color:var(--amb);color:var(--amb);background:transparent}
 
 /* === PLANILLA: un renglón por contrato, columnas fijas, números alineados === */
-.lista{--cols:74px 58px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 168px minmax(0,1.25fr);background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.lista{--cols:74px 58px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 172px minmax(0,1.25fr) 30px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
 .fila,.cab,.pie{display:grid;grid-template-columns:var(--cols);gap:0 14px;align-items:center;padding:9px 16px}
 .cab{position:sticky;top:0;z-index:5;padding-top:9px;padding-bottom:9px;background:var(--card-alt);border-bottom:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
 .cab>div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -172,6 +172,8 @@ button{font-family:inherit;color:inherit}
 .tab small{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tab small.rojo{color:var(--red);font-weight:700}
 .tab .btn.chico{padding:5px 11px;font-size:12px}
+.btn.enl-b{display:inline-flex;align-items:center;gap:6px;border-color:var(--gr);color:var(--gr)}
+.btn.enl-b svg{width:13px;height:13px}
 .et-medir{--et:#2F6DB5;--et-soft:rgba(47,109,181,.11)}
 .et-cortar{--et:#4B5563;--et-soft:rgba(75,85,99,.12)}
 .et-fabricar{--et:#B5680A;--et-soft:rgba(181,104,10,.12)}
@@ -184,10 +186,42 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .et-instalar{--et:#B594E6;--et-soft:rgba(181,148,230,.14)}
 [data-theme="dark"] .et-archivar{--et:#34D670;--et-soft:rgba(52,214,112,.13)}
 [data-theme="dark"] .et-retiro{--et:#4FC4C4;--et-soft:rgba(79,196,196,.13)}
+/* Los puntitos de cada renglón: copiar el N°, el teléfono o la dirección, y borrar. */
+.mas{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:none;border-radius:50%;background:transparent;color:var(--text3);cursor:pointer}
+.mas svg{width:18px;height:18px}
+.mas[aria-expanded="true"]{background:var(--card-alt);color:var(--text)}
+.menu{position:fixed;z-index:800;min-width:232px;max-width:calc(100vw - 16px);padding:6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow-lg)}
+.menu[hidden]{display:none}
+.menu button{display:flex;align-items:baseline;justify-content:space-between;gap:14px;width:100%;padding:9px 11px;border:none;border-radius:var(--radius-sm);background:none;font-size:13.5px;font-weight:600;color:var(--text);text-align:left;cursor:pointer}
+.menu button small{font-size:12px;font-weight:500;color:var(--text3);font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px}
+.menu button:disabled{color:var(--text3);cursor:default}
+.menu .sep{height:1px;margin:5px 4px;background:var(--border-soft)}
+.menu .pel{color:var(--red)}
 /* Pie de la planilla: la suma de lo que se está viendo, debajo de cada columna */
 .pie{border-top:2px solid var(--border);border-radius:0 0 var(--radius) var(--radius);background:var(--card-alt);font-size:13px;color:var(--text2)}
 .pie .q{grid-column:1/5;font-weight:700;color:var(--text)}
 .pie .plata{font-weight:700}
+/* Sello de VERIFICADO: el contrato tiene adjunto el PDF o Excel del presupuesto. Dorado, como un sello. */
+.ver{display:inline-flex;align-items:center;gap:5px;color:var(--gdd);font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;vertical-align:middle}
+[data-theme="dark"] .ver{color:var(--gd)}
+.ver svg{width:16px;height:16px;flex-shrink:0}
+.ver .tilde{fill:none;stroke:var(--card);stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.ver[hidden]{display:none}
+.f-nom .ver{margin-left:6px;vertical-align:-3px}
+.m-cab h3 .ver{margin-left:8px;font-family:'Manrope',sans-serif;vertical-align:2px}
+.m-cab h3 .ver svg{width:19px;height:19px}
+.c-nro .duda{margin-left:4px;color:var(--amb);font-weight:800;cursor:help}
+/* El presupuesto del contrato: el N° lo enlaza con Presupuestos; el archivo lo verifica. */
+.pres{margin-top:14px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card-alt);font-size:13px;color:var(--text2);line-height:1.5}
+.pres>div+div{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.pres .t{display:block;margin-bottom:3px;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
+.pres b{color:var(--text);font-weight:700;overflow-wrap:anywhere}
+.pres a{color:var(--text);font-weight:700}
+.pres .gris{color:var(--text3)}
+.pres .amb{color:var(--amb);font-weight:600}
+.pres .lin{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
+.pres .lnk{padding:0;border:none;background:none;font:inherit;font-weight:700;color:var(--red);cursor:pointer}
+.pres .btn.chico{background:var(--card)}
 /* Distintivo: este contrato ya está enlazado con el tablero (y por eso también con el calendario). */
 .enl{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gr);white-space:nowrap}
 .enl svg{width:12px;height:12px;flex-shrink:0}
@@ -232,7 +266,7 @@ button{font-family:inherit;color:inherit}
 .campo{display:block;margin-top:14px;font-size:12px;font-weight:700;color:var(--text2)}
 .campo i{font-style:normal;font-weight:500;color:var(--text3)}
 .campo i a{color:var(--gr);font-weight:700;text-decoration:none}
-.campo i a[hidden]{display:none}
+.campo i[hidden]{display:none}
 .campo input,.campo select,.campo textarea{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
 .campo textarea{resize:vertical;min-height:64px;line-height:1.45}
 .campo input:focus,.campo select:focus,.campo textarea:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
@@ -273,6 +307,9 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .toast{background:var(--gd);color:#1A1816}
 @media(hover:hover){
   .fila:hover{background:var(--gd-soft)}
+  .mas:hover{background:var(--card-alt);color:var(--text)}
+  .menu button:not(:disabled):hover{background:var(--card-alt)}
+  .menu .pel:hover{background:var(--red-soft)}
   .btn:hover,.mes button:not(:disabled):hover,.filtros button:not(.on):hover{border-color:var(--gd)}
   .cab button:hover{color:var(--text)}
   .f-sub .tel:hover{color:var(--gr);text-decoration:underline}
@@ -305,12 +342,12 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 /* Pantallas medianas: primero se va la columna de notas (queda un punto al lado del nombre),
    después factura / muebles / pileta. Todo sigue estando en la ficha. */
 @media(max-width:1519px){
-  .lista{--cols:74px 58px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 168px}
+  .lista{--cols:74px 58px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 172px 30px}
   .c-not,.cab .h-not{display:none}
   .nota-i{display:inline-block;width:7px;height:7px;margin-left:7px;border-radius:50%;background:var(--amb);vertical-align:middle}
 }
 @media(max-width:1199px){
-  .lista{--cols:70px 54px minmax(0,1.6fr) minmax(0,1.3fr) 100px 100px 106px 162px}
+  .lista{--cols:70px 54px minmax(0,1.6fr) minmax(0,1.3fr) 100px 100px 106px 172px 30px}
   .c-sn,.cab .h-sn{display:none}
   .fila,.cab,.pie{gap:0 12px;padding-left:14px;padding-right:14px}
 }
@@ -329,6 +366,11 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   .lista>.vacio{grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
   .fila{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;align-items:start;min-height:0;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
   .fila>.c-fec,.fila>.c-nro,.fila>.c-sn,.fila>.c-not{display:none}
+  .fila{position:relative}
+  .fila>.c-mas{position:absolute;top:8px;right:8px}
+  .mas{width:40px;height:40px}
+  .fila>.c-cli{padding-right:36px}
+  .menu button{padding:12px 12px;font-size:14.5px}
   .solo-t{display:inline}
   .nota-i{display:none}
   .fila>.c-cli,.fila>.c-mat,.fila>.c-tab,.f-nota,.fila>.c-obra{grid-column:1/-1}
@@ -413,6 +455,7 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 </div>
 
 <div class="modal-bg" id="modalBg"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="menu" id="menu" role="menu" hidden></div>
 <div class="toast" id="toast" role="status"></div>
 <datalist id="catalogo"></datalist>
 
@@ -426,13 +469,17 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 // Un renglón por contrato. Lo operativo (cliente, dirección, material, pileta, seña) lo manda el
 // tablero cuando el contrato está enlazado; la plata (total y pagos) vive acá.
 const $=id=>document.getElementById(id);
-const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php';
+const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php',API_ADJ='/calculadora/api/contratos-adjunto.php';
 let CONTRATOS=[],CARDS={},ETAPAS={},HOY='',TABLERO_OK=false,q='';
 let VENDEDORES=[],PROCEDENCIAS=[]; // listas cerradas: las manda el servidor (se editan en contratos.php)
 let mes=''; // mes a la vista, 'YYYY-MM' (por la fecha del contrato)
 let filtro='todos',orden='fecha',ordenAsc=false; // qué se mira y cómo se ordena la planilla
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const mesTxt=m=>MESES[+m.slice(5,7)-1].replace(/^./,x=>x.toUpperCase())+' '+m.slice(0,4);
+// Sello de verificado: una roseta con tilde.
+const ICO_VER='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.6l2.5 1.9 3.1-.4 1.2 2.9 2.9 1.2-.4 3.1 1.9 2.5-1.9 2.5.4 3.1-2.9 1.2-1.2 2.9-3.1-.4-2.5 1.9-2.5-1.9-3.1.4-1.2-2.9-2.9-1.2.4-3.1L.8 12.8l1.9-2.5-.4-3.1 2.9-1.2 1.2-2.9 3.1.4z"/><path class="tilde" d="M7.9 12.6l2.8 2.8 5.5-5.9"/></svg>';
+const kb=n=>n>=1048576?(n/1048576).toFixed(1).replace('.',',')+' MB':Math.max(1,Math.round(n/1024))+' KB';
+const ICO_MAS='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg>';
 const ICO_ENL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>';
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const llano=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
@@ -493,6 +540,16 @@ function waLink(s){
 // --- enlace con el tablero ---
 const keyDe=c=>c.enlace?c.enlace.cliente_nro+'-'+c.enlace.sub:'';
 const cardDe=c=>c.enlace?(CARDS[keyDe(c)]||null):null;
+// ¿Ese N° de presupuesto ya está cargado en el tablero? Devuelve su ficha si hay una sola
+// y no está enlazada con otro contrato. Con eso el renglón ofrece "Enlazar con el tablero".
+function cardDeNro(nro,exceptoId){
+  const m=/^(\d{1,6})(?:-(\d{1,3}))?$/.exec(String(nro||'').trim());
+  if(!m)return null;
+  const n=String(+m[1]).padStart(4,'0'),s=m[2]?+m[2]:0;
+  const l=Object.keys(CARDS).map(k=>CARDS[k]).filter(k=>k.cliente_nro===n&&(!s||k.sub===s));
+  if(l.length!==1)return null;
+  return CONTRATOS.some(c=>c.id!==exceptoId&&c.enlace&&keyDe(c)===l[0].key)?null:l[0];
+}
 // Cómo se ve un contrato: enlazado y con la ficha en el tablero, lo operativo sale de la ficha.
 function ver(c){
   const k=cardDe(c);
@@ -558,7 +615,7 @@ const sumar=(l)=>{const s={tot:{USD:0,ARS:0},pag:{USD:0,ARS:0},deb:{USD:0,ARS:0}
 const debe=c=>{const n=cuentas(c);return n.sal.USD>0.004||n.sal.ARS>0.004;};
 const pagado=c=>{const n=cuentas(c);return (n.tot.USD>0||n.tot.ARS>0)&&!debe(c);};
 // Filtros de control: lo que hay que perseguir.
-const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinnro','Sin N°',c=>!c.nro]];
+const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro]];
 const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':'<span class="sn">—</span>');
 const PIL={nuestra:'Nuestra',cliente:'Cliente',no:'No'};
 
@@ -612,7 +669,7 @@ function dibujar(){
     return;
   }
   const fl=k=>orden===k?(ordenAsc?' ↑':' ↓'):'';
-  let h='<div class="cab"><div><button type="button" data-orden="fecha" class="'+(orden==='fecha'?'on':'')+'" title="Ordenar por fecha">Fecha'+fl('fecha')+'</button></div><div>N°</div><div><button type="button" data-orden="cliente" class="'+(orden==='cliente'?'on':'')+'" title="Ordenar por cliente">Cliente'+fl('cliente')+'</button></div><div>Material</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div class="cen h-sn" title="Factura">Fact.</div><div class="cen h-sn" title="Muebles colocados">Mueb.</div><div class="h-sn">Pileta</div><div>Tablero</div><div class="h-not">Notas</div></div>';
+  let h='<div class="cab"><div><button type="button" data-orden="fecha" class="'+(orden==='fecha'?'on':'')+'" title="Ordenar por fecha">Fecha'+fl('fecha')+'</button></div><div>N°</div><div><button type="button" data-orden="cliente" class="'+(orden==='cliente'?'on':'')+'" title="Ordenar por cliente">Cliente'+fl('cliente')+'</button></div><div>Material</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div class="cen h-sn" title="Factura">Fact.</div><div class="cen h-sn" title="Muebles colocados">Mueb.</div><div class="h-sn">Pileta</div><div>Tablero</div><div class="h-not">Notas</div><div></div></div>';
   h+=lista.map(c=>{
     const v=ver(c),n=cuentas(c,v),k=cardDe(c),s=saldoTxt(n);
     const p=(c.fecha||'').split('-').map(Number),dt=p.length===3?new Date(p[0],p[1]-1,p[2]):null;
@@ -622,15 +679,17 @@ function dibujar(){
       +[v.telefono?(waLink(v.telefono)?'<a class="tel" href="'+esc(waLink(v.telefono))+'" target="_blank" rel="noopener" title="Abrir WhatsApp">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'',esc(c.vendedor),esc(c.procedencia)].filter(Boolean).join(' · ');
     const tot=partes(n.tot),pag=partes(n.pag);
     let tab;
-    if(!c.enlace)tab='<button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
+    const kn=!c.enlace&&c.nro?cardDeNro(c.nro,c.id):null; // su N° ya está en el tablero: se enlaza, no se carga de nuevo
+    if(kn)tab='<button type="button" class="btn chico enl-b" data-enlazar="'+esc(c.id)+'">'+ICO_ENL+'Enlazar con el tablero</button><small>Ya está en el tablero: '+esc(ETAPAS[kn.etapa]||kn.etapa)+'</small>';
+    else if(!c.enlace)tab='<button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
     else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><small'+(d.rojo?' class="rojo"':'')+'><span class="enl" title="Enlazado con el tablero y el calendario">'+ICO_ENL+'Enlazado</span>'+(d.t?' · '+esc(d.t):'')+'</small>';}
     else tab='<div class="fila-e"><span class="etapa fuera">'+(TABLERO_OK?'Fuera del tablero':'Sin datos del tablero')+'</span></div><small>'+(TABLERO_OK?'Archivada o borrada':'No se pudo leer el tablero')+'</small>';
     const nota=(c.nota||'').replace(/\s+/g,' ').trim();
     const obra=[c.factura?'Factura <b>'+(c.factura==='si'?'sí':'no')+'</b>':'',c.muebles?'Muebles <b>'+(c.muebles==='si'?'sí':'no')+'</b>':'',v.bacha?'Pileta <b>'+esc(PIL[v.bacha].toLowerCase())+'</b>':''].filter(Boolean).join(' · ');
     return '<div class="fila'+(k?' enlazada':'')+'" data-id="'+esc(c.id)+'" tabindex="0" role="button" aria-label="Abrir el contrato de '+esc(v.cliente)+'">'
       +'<div class="c-fec">'+esc(fecha)+(dt?'<small>'+DIAS[dt.getDay()]+'</small>':'')+'</div>'
-      +'<div class="c-nro">'+(c.nro?esc(c.nro):'<span class="falta">Sin N°</span>')+'</div>'
-      +'<div class="c-cli"><div class="f-nom">'+esc(v.cliente)+(c.prueba?'<span class="prueba-t">PRUEBA</span>':'')+(nota?'<span class="nota-i" title="'+esc(nota)+'"></span>':'')+'</div>'+(sub.replace(/<[^>]+>/g,'').trim()?'<div class="f-sub">'+sub+'</div>':'')+'</div>'
+      +'<div class="c-nro">'+(c.nro?esc(c.nro)+(c.presup&&!c.presup.existe?'<span class="duda" title="Ese N° no existe en Presupuestos">?</span>':''):'<span class="falta">Sin N°</span>')+'</div>'
+      +'<div class="c-cli"><div class="f-nom">'+esc(v.cliente)+(c.archivo?'<span class="ver" title="Verificado: tiene adjunto el presupuesto ('+esc(c.archivo.ext.toUpperCase())+')">'+ICO_VER+'</span>':'')+(c.prueba?'<span class="prueba-t">PRUEBA</span>':'')+(nota?'<span class="nota-i" title="'+esc(nota)+'"></span>':'')+'</div>'+(sub.replace(/<[^>]+>/g,'').trim()?'<div class="f-sub">'+sub+'</div>':'')+'</div>'
       +'<div class="c-mat"><div class="f-mat">'+(esc(v.material)||'<span style="color:var(--text3)">Sin material</span>')+'</div>'+(c.medidas?'<div class="f-sub">'+esc(c.medidas)+'</div>':'')+'</div>'
       +'<div class="der"><span class="rot">Total</span><div class="plata'+(tot.length?'':' nada')+'">'+(tot.length?tot.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
       +'<div class="der"><span class="rot">Cobrado</span><div class="plata'+(pag.length?'':' nada')+'">'+(pag.length?pag.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
@@ -639,6 +698,7 @@ function dibujar(){
       +(obra?'<div class="c-obra">'+obra+'</div>':'')
       +'<div class="c-tab"><div class="tab">'+tab+'</div></div>'
       +'<div class="c-not" title="'+esc(nota)+'">'+esc(nota)+'</div>'
+      +'<div class="c-mas"><button type="button" class="mas" data-menu="'+esc(c.id)+'" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de '+esc(v.cliente)+'" title="Más acciones">'+ICO_MAS+'</button></div>'
       +(nota?'<div class="f-nota">'+esc(nota)+'</div>':'')+'</div>';
   }).join('');
   if(!lista.length)h+='<div class="vacio">Ningún contrato de '+(buscando?'la búsqueda':'este mes')+' entra en ese filtro.</div>';
@@ -678,9 +738,10 @@ function abrirFicha(id){
   const fijo=!!k,ro=fijo?' readonly':'';
   const senaFija=!!(k&&k.sena);
   F={id:c?c.id:'',factura:c?c.factura:'',muebles:c?c.muebles:'',bacha:c?v.bacha:'',pagos:c?(c.pagos||[]).slice():[],fijo:fijo,senaFija:senaFija,
-     empujarSena:!!(k&&!k.sena&&k.etapa==='medir'),key:k?k.key:''};
+     empujarSena:!!(k&&!k.sena&&k.etapa==='medir'),key:k?k.key:'',
+     archivo:c?c.archivo:null,archivoNuevo:null,quitarArchivo:false,presup:c?c.presup:null,nroMal:'',buscando:false};
   const val=x=>esc(x==null?'':x);
-  let h='<div class="m-cab"><div><h3>'+(c?esc(v.cliente):'Nuevo contrato')+'</h3>'+(c?'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de presupuesto',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>':'')+'</div>'
+  let h='<div class="m-cab"><div><h3>'+(c?esc(v.cliente):'Nuevo contrato')+'<span class="ver" id="hVer" hidden title="Tiene adjunto el presupuesto">'+ICO_VER+'Verificado</span></h3>'+(c?'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de presupuesto',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>':'')+'</div>'
     +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
   h+='<div class="m-res"><div><div class="t">Total</div><b id="rTot"></b></div><div><div class="t">Cobrado</div><b id="rCob"></b></div><div><div class="t">Saldo</div><b id="rSal"></b></div></div>';
   if(k)h+='<div class="nota-t"><span class="enl">'+ICO_ENL+'Enlazado con el tablero y el calendario</span><br>'+(etapaDet(k).t?esc(etapaDet(k).t)+'. ':'')+'Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div>';
@@ -688,11 +749,13 @@ function abrirFicha(id){
   h+='<label class="campo notas">Notas<textarea id="fNota" rows="4" maxlength="4000" placeholder="Acá van los detalles: qué se acordó, aclaraciones de medidas, forma de pago, lo que haya que acordarse.">'+val(c&&c.nota)+'</textarea></label>';
   h+='<h4>Cliente</h4>'
     +'<label class="campo">Nombre<input id="fCliente" value="'+val(v.cliente)+'" autocomplete="off"'+ro+(c?'':' data-foco')+'></label>'
-    +'<div class="dos"><label class="campo">Teléfono <i>· <a id="fWa" href="#" target="_blank" rel="noopener" hidden>abrir WhatsApp</a></i><input id="fTel" value="'+val(telLindo(v.telefono))+'" inputmode="tel" autocomplete="off" placeholder="11 5555-1234"'+ro+'></label>'
+    +'<div class="dos"><label class="campo">Teléfono <i id="fWaI" hidden>· <a id="fWa" href="#" target="_blank" rel="noopener">abrir WhatsApp</a></i><input id="fTel" value="'+val(telLindo(v.telefono))+'" inputmode="tel" autocomplete="off" placeholder="11 5555-1234"'+ro+'></label>'
     +'<label class="campo">Dirección<input id="fDir" value="'+val(v.direccion)+'" autocomplete="off"'+ro+'></label></div>';
   h+='<h4>Contrato</h4>'
     +'<div class="dos"><label class="campo">N° de presupuesto <i>· si lo tiene</i><input id="fNro" value="'+val(c&&c.nro)+'" placeholder="0042" inputmode="numeric" autocomplete="off"></label>'
     +'<label class="campo">Fecha del contrato<input id="fFecha" type="date" value="'+val(c?c.fecha:(mes===HOY.slice(0,7)?HOY:mes+'-01'))+'"></label></div>'
+    +'<div class="pres"><div><span class="t">Enlace con Presupuestos</span><div class="lin" id="pEst"></div></div><div><span class="t">Presupuesto adjunto</span><div class="lin" id="pArch"></div></div></div>'
+    +'<input type="file" id="fArchivo" accept=".pdf,.xlsx,.xls,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>'
     +'<div class="dos"><label class="campo">Vendedor'+selHtml('fVend',VENDEDORES,c?c.vendedor:'')+'</label>'
     +'<label class="campo">Procedencia'+selHtml('fProc',PROCEDENCIAS,c?c.procedencia:'')+'</label></div>'
     +'<div class="dos"><label class="campo">Contrato<input id="fCtto" value="'+val(c&&c.contrato)+'" autocomplete="off"></label>'
@@ -723,6 +786,7 @@ function abrirFicha(id){
   pintarPagos();
   crecerNota();
   pintarTel(false);
+  pintarPres();
 }
 function datosForm(){
   const g=id=>$(id)?$(id).value.trim():'';
@@ -731,12 +795,61 @@ function datosForm(){
     sena_monto:num(g('fSen')),sena_moneda:g('fSenM')||'ARS',sena_fecha:g('fSenF'),factura:F.factura,muebles:F.muebles,bacha:F.bacha,
     bacha_modelo:F.bacha==='nuestra'?g('fModelo'):'',medicion:g('fMedicion'),nota:g('fNota')};
 }
+// El presupuesto del contrato. Tres casos: vacío (no pasa nada), con N° (queda enlazado con
+// Presupuestos) y con el PDF o Excel adjunto. Solo el archivo adjunto lo deja VERIFICADO.
+function pintarPres(){
+  if(!F||!$('pEst'))return;
+  const nro=$('fNro').value.trim(),p=F.presup;
+  let e;
+  if(!nro)e='<span class="gris">Sin N°. Si lo ponés, el contrato queda enlazado con ese presupuesto.</span>';
+  else if(F.nroMal)e='<span class="amb">'+esc(F.nroMal)+'</span>';
+  else if(F.buscando||!p)e='<span class="gris">Buscando el N° en Presupuestos…</span>';
+  else if(p.existe){
+    const tot=partes({USD:p.total_usd,ARS:p.total_ars}).join(' + ');
+    e='<span class="enl">'+ICO_ENL+'Enlazado</span><span>N° <b>'+esc(p.cliente_nro+'-'+p.sub)+'</b>'+(p.cliente?' · '+esc(p.cliente):'')+(tot?' · '+tot:'')+'</span>'
+      +'<a href="'+(p.detalle?'/calculadora/api/render-pdf.php?nro='+encodeURIComponent(p.cliente_nro)+'&sub='+p.sub:'/presupuestos/?tab=activos')+'" target="_blank" rel="noopener">'+(p.detalle?'Ver presupuesto':'Ir a Presupuestos')+'</a>';
+  }else e='<span class="amb">No hay ningún presupuesto N° '+esc(p.cliente_nro+(p.sub?'-'+p.sub:''))+' en Presupuestos.</span>';
+  $('pEst').innerHTML=e;
+  const a=F.archivoNuevo?{nombre:F.archivoNuevo.name,bytes:F.archivoNuevo.size,nuevo:true}:(F.quitarArchivo?null:F.archivo);
+  $('pArch').innerHTML=a
+    ?'<span class="ver">'+ICO_VER+'Verificado</span><span><b>'+esc(a.nombre)+'</b> · '+kb(a.bytes)+(a.nuevo?' · se sube al guardar':'')+'</span>'
+      +(a.nuevo?'':'<a href="'+API_ADJ+'?id='+encodeURIComponent(F.id)+'" target="_blank" rel="noopener">Abrir</a>')
+      +'<button type="button" class="lnk" data-quitar-archivo>Quitar</button>'
+    :'<button type="button" class="btn chico" data-elegir-archivo>Subir PDF o Excel</button><span class="gris">'+(F.quitarArchivo?'Se quita al guardar: el contrato deja de estar verificado.':'Con el presupuesto adjunto, el contrato queda verificado.')+'</span>';
+  $('hVer').hidden=!a;
+}
+// Busca el N° en Presupuestos mientras se escribe (con una pausa, para no preguntar en cada tecla).
+let tNro=null;
+function buscarNro(){
+  if(!F)return;
+  clearTimeout(tNro);
+  const nro=$('fNro').value.trim();
+  F.presup=null;F.nroMal='';F.buscando=false;
+  if(nro&&!/^#?\s*\d{1,6}(\s*-\s*\d{1,3})?$/.test(nro))F.nroMal='El N° va como 0042, o 0042-2 si tiene versiones.';
+  else if(nro){
+    F.buscando=true;
+    tNro=setTimeout(async()=>{
+      let r=null;try{r=await pedir(API+'?verificar='+encodeURIComponent(nro));}catch(e){}
+      if(!F||$('fNro').value.trim()!==nro)return; // ya se escribió otra cosa
+      F.buscando=false;F.presup=r?r.presup:{existe:false,cliente_nro:nro,sub:0};
+      pintarPres();
+    },350);
+  }
+  pintarPres();
+}
+async function subirArchivo(id,file){
+  const fd=new FormData();fd.append('id',id);fd.append('archivo',file);
+  const r=await fetch(API_ADJ,{method:'POST',body:fd,credentials:'same-origin'});
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo subir el archivo.');
+  return j;
+}
 // El teléfono se acomoda al salir del campo (o al pegar) y muestra el link a WhatsApp si es un número completo.
 function pintarTel(acomodar){
   const i=$('fTel'),a=$('fWa');if(!i)return;
   if(acomodar&&!i.readOnly&&i.value.trim())i.value=telLindo(i.value);
   const w=waLink(i.value);
-  if(a){a.hidden=!w;if(w)a.href=w;}
+  if(a){$('fWaI').hidden=!w;if(w)a.href=w;}
 }
 // La caja de notas crece con lo que se escribe (hasta un tope, después se desplaza por dentro).
 function crecerNota(){const t=$('fNota');if(!t)return;t.style.height='auto';t.style.height=Math.min(320,Math.max(104,t.scrollHeight+2))+'px';}
@@ -754,9 +867,15 @@ function pintarPagos(){
 }
 async function guardar(){
   const d=datosForm(),id=F.id,empujar=F.empujarSena&&d.sena_monto>0,key=F.key;
+  const nuevo=F.archivoNuevo,quitar=F.quitarArchivo&&!!F.archivo&&!nuevo;
   if(!d.cliente)throw new Error('Falta el nombre del cliente.');
   const r=await pedir(API,Object.assign({accion:id?'editar':'crear'},id?{id:id}:{},d));
   let aviso='';
+  // El presupuesto adjunto va después de guardar: un contrato nuevo recién ahí tiene dónde colgarlo.
+  try{
+    if(nuevo)await subirArchivo(r.id,nuevo);
+    else if(quitar)await pedir(API_ADJ,{accion:'borrar',id:r.id});
+  }catch(e){aviso=' El archivo no se pudo '+(nuevo?'subir':'quitar')+': '+e.message;}
   if(empujar){
     const p=key.split('-');
     try{await pedir(API_T,{cliente_nro:p[0],sub:+p[1],accion:'check',clave:'sena',valor:true,monto:d.sena_monto,moneda:d.sena_moneda});}
@@ -764,8 +883,10 @@ async function guardar(){
   }
   cerrarModal();
   if(/^\d{4}-\d{2}/.test(d.fecha||'')&&!llano(q).trim())mes=d.fecha.slice(0,7);
-  toast((id?'Contrato guardado.':'Contrato cargado.')+aviso);
+  toast((id?'Contrato guardado.':'Contrato cargado.')+(nuevo&&!aviso?' Quedó verificado.':'')+aviso);
   await cargar();
+  const cg=CONTRATOS.find(x=>x.id===r.id);
+  if(cg&&!cg.enlace&&cg.nro&&cardDeNro(cg.nro,cg.id))pedirEnlazar(cg.id);
   return r;
 }
 
@@ -804,10 +925,63 @@ async function enviar(id){
   toast(yaEstaba?'Ya estaba en el tablero: quedó enlazada con el tablero y el calendario.':('Cargada en Por medir: quedó enlazada con el tablero y el calendario.'+(falto.length?' Faltó copiar '+falto.join(', ')+': cargalo en el tablero.':'')));
   await cargar();
 }
-function pedirBorrar(){
-  const c=CONTRATOS.find(x=>x.id===F.id);if(!c)return;
-  const id=c.id;
-  abrirModal('<h3>Borrar contrato</h3><div class="bajada">Se borra el contrato de <b>'+esc(ver(c).cliente)+'</b> con sus pagos. No se puede deshacer.'+(c.enlace?'<br>La ficha del tablero no se toca.':'')+'</div><div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar>Cancelar</button><button type="button" class="ok peligro" data-confirmar-borrar="'+esc(id)+'">Borrar</button></div>',true,false);
+// El N° del contrato ya está cargado en el tablero: se enlaza con esa ficha (no se crea ni se cambia nada allá).
+function pedirEnlazar(id){
+  const c=CONTRATOS.find(x=>x.id===id),k=c?cardDeNro(c.nro,c.id):null;
+  if(!c||!k)return;
+  const li=(a,b)=>b?'<li><span>'+a+'</span><b>'+esc(b)+'</b></li>':'',d=etapaDet(k);
+  abrirModal('<h3>Enlazar con el tablero</h3><div class="bajada">El presupuesto <b>N° '+esc(c.nro)+'</b> ya está cargado en el tablero. Al enlazarlo, este contrato muestra la etapa de esa obra y queda conectado con el tablero y el calendario. En el tablero no se crea ni se cambia nada.</div>'
+    +'<ul class="lista-c">'+li('Obra',k.key)+li('Cliente',k.nombre)+li('Etapa',(ETAPAS[k.etapa]||k.etapa)+(d.t?' · '+d.t:''))+li('Material',k.material)+'</ul>'
+    +'<div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar>Ahora no</button><button type="button" class="ok" data-foco data-confirmar-enlazar="'+esc(c.id)+'">Enlazar con el tablero</button></div>',true,false);
+}
+async function enlazar(id){
+  const c=CONTRATOS.find(x=>x.id===id),k=c?cardDeNro(c.nro,c.id):null;
+  if(!c||!k)throw new Error('Esa obra ya no está en el tablero. Actualizá la página.');
+  await pedir(API,{accion:'enlazar',id:c.id,cliente_nro:k.cliente_nro,sub:k.sub});
+  cerrarModal();
+  toast('Enlazado con el tablero y el calendario.');
+  await cargar();
+}
+// --- los puntitos de cada renglón ---
+let menuDe='';
+function cerrarMenu(){
+  if(!menuDe)return;
+  menuDe='';$('menu').hidden=true;
+  document.querySelectorAll('.mas[aria-expanded="true"]').forEach(b=>b.setAttribute('aria-expanded','false'));
+}
+function abrirMenu(btn){
+  const id=btn.dataset.menu,c=CONTRATOS.find(x=>x.id===id);
+  if(!c||menuDe===id){cerrarMenu();return;}
+  cerrarMenu();
+  const v=ver(c),tel=telDigitos(v.telefono)||String(v.telefono||'').trim();
+  const it=(que,txt,valor)=>'<button type="button" role="menuitem" data-copiar="'+que+'"'+(valor?' data-valor="'+esc(valor)+'"':' disabled')+'>'+txt+'<small>'+esc(valor||'no tiene')+'</small></button>';
+  const m=$('menu');
+  m.innerHTML=it('nro','Copiar N° de presupuesto',c.nro)+it('tel','Copiar teléfono',tel)+it('dir','Copiar dirección',v.direccion)
+    +'<div class="sep"></div><button type="button" role="menuitem" class="pel" data-menu-borrar="'+esc(id)+'">Borrar contrato</button>';
+  m.hidden=false;menuDe=id;btn.setAttribute('aria-expanded','true');
+  // debajo del botón, pegado a su borde derecho; si no entra abajo, arriba
+  const r=btn.getBoundingClientRect(),w=m.offsetWidth,h=m.offsetHeight;
+  m.style.left=Math.max(8,Math.min(r.right-w,window.innerWidth-w-8))+'px';
+  m.style.top=(r.bottom+h+8>window.innerHeight&&r.top-h-6>0?r.top-h-6:r.bottom+6)+'px';
+  const f=m.querySelector('button:not(:disabled)');if(f)f.focus();
+}
+const COPIADO={nro:'N° de presupuesto copiado',tel:'Teléfono copiado',dir:'Dirección copiada'};
+async function copiar(txt,que){
+  try{await navigator.clipboard.writeText(txt);}
+  catch(e){ // navegadores viejos o sin permiso: el camino de antes
+    const ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);ta.select();
+    let ok=false;try{ok=document.execCommand('copy');}catch(x){}
+    ta.remove();
+    if(!ok){toast('No se pudo copiar. El dato es: '+txt);return;}
+  }
+  toast(COPIADO[que]+': '+txt);
+}
+
+function pedirBorrar(id){
+  const c=CONTRATOS.find(x=>x.id===(id||(F&&F.id)));if(!c)return;
+  id=c.id;
+  abrirModal('<h3>Borrar contrato</h3><div class="bajada">Se borra el contrato de <b>'+esc(ver(c).cliente)+'</b> con sus pagos'+(c.archivo?' y su presupuesto adjunto':'')+'. No se puede deshacer.'+(c.enlace?'<br>La ficha del tablero no se toca.':'')+'</div><div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar>Cancelar</button><button type="button" class="ok peligro" data-confirmar-borrar="'+esc(id)+'">Borrar</button></div>',true,false);
 }
 async function borrarPrueba(){
   const r=await pedir(API,{accion:'borrar_prueba'});
@@ -820,6 +994,14 @@ async function borrarPrueba(){
 
 document.addEventListener('click',ev=>{
   const t=ev.target;
+  // los puntitos: abrir, elegir una acción, o cerrar al tocar afuera
+  const bm=t.closest('[data-menu]');
+  if(bm){abrirMenu(bm);return;}
+  const bc=t.closest('#menu [data-copiar]');
+  if(bc){const v=bc.dataset.valor,q2=bc.dataset.copiar;cerrarMenu();if(v)copiar(v,q2);return;}
+  const bb=t.closest('#menu [data-menu-borrar]');
+  if(bb){const idb=bb.dataset.menuBorrar;cerrarMenu();pedirBorrar(idb);return;}
+  if(menuDe){cerrarMenu();if(!t.closest('.modal'))return;}
   if(t.closest('[data-nuevo]')){abrirFicha('');return;}
   if(t.closest('[data-ir-mes]')){mes=t.closest('[data-ir-mes]').dataset.irMes;dibujar();return;}
   if(t.closest('[data-filtro]')){filtro=t.closest('[data-filtro]').dataset.filtro;dibujar();return;}
@@ -832,11 +1014,15 @@ document.addEventListener('click',ev=>{
   let b;
   if((b=t.closest('[data-confirmar-prueba]'))){conBoton(b,borrarPrueba);return;}
   if((b=t.closest('[data-enviar]'))){pedirEnviar(b.dataset.enviar);return;}
+  if((b=t.closest('[data-enlazar]'))){pedirEnlazar(b.dataset.enlazar);return;}
+  if((b=t.closest('[data-confirmar-enlazar]'))){conBoton(b,()=>enlazar(b.dataset.confirmarEnlazar));return;}
   if((b=t.closest('[data-confirmar-enviar]'))){conBoton(b,()=>enviar(b.dataset.confirmarEnviar));return;}
   if((b=t.closest('[data-confirmar-borrar]'))){conBoton(b,async()=>{await pedir(API,{accion:'borrar',id:b.dataset.confirmarBorrar});cerrarModal();toast('Contrato borrado.');await cargar();});return;}
   if(t.closest('[data-cerrar]')){cerrarModal();return;}
   if((b=t.closest('[data-guardar]'))){conBoton(b,guardar);return;}
-  if(t.closest('[data-borrar]')){pedirBorrar();return;}
+  if(t.closest('[data-borrar]')){pedirBorrar('');return;}
+  if(t.closest('[data-elegir-archivo]')){$('fArchivo').click();return;}
+  if(t.closest('[data-quitar-archivo]')&&F){if(F.archivoNuevo)F.archivoNuevo=null;else F.quitarArchivo=true;$('fArchivo').value='';pintarPres();return;}
   if((b=t.closest('[data-pago]'))){
     conBoton(b,async()=>{
       const m=num($('pMonto').value),como=$('pComo').value.split('|');
@@ -872,12 +1058,26 @@ document.addEventListener('click',ev=>{
   const f=t.closest('.fila');
   if(f)abrirFicha(f.dataset.id);
 });
+window.addEventListener('scroll',cerrarMenu,true);
+window.addEventListener('resize',cerrarMenu);
 document.addEventListener('keydown',ev=>{
+  if(ev.key==='Escape'&&menuDe){const b=document.querySelector('.mas[aria-expanded="true"]');cerrarMenu();if(b)b.focus();return;}
   if(ev.key==='Escape'&&$('modalBg').classList.contains('show')&&!protegida){cerrarModal();return;}
   if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList&&ev.target.classList.contains('fila')){ev.preventDefault();abrirFicha(ev.target.dataset.id);}
 });
-$('modal').addEventListener('input',ev=>{if(ev.target.id==='fNota'){crecerNota();return;}if(F&&['fTotU','fTotA','fSen','fSenM'].indexOf(ev.target.id)>=0)pintarPagos();});
-$('modal').addEventListener('change',ev=>{if(F&&ev.target.id==='fSenM')pintarPagos();if(ev.target.id==='fTel')pintarTel(true);});
+$('modal').addEventListener('input',ev=>{if(ev.target.id==='fNota'){crecerNota();return;}if(ev.target.id==='fNro'){buscarNro();return;}if(F&&['fTotU','fTotA','fSen','fSenM'].indexOf(ev.target.id)>=0)pintarPagos();});
+$('modal').addEventListener('change',ev=>{
+  if(F&&ev.target.id==='fSenM')pintarPagos();
+  if(ev.target.id==='fTel')pintarTel(true);
+  if(F&&ev.target.id==='fArchivo'){
+    const f=ev.target.files[0];
+    if(!f)return;
+    errModal('');
+    if(!/\.(pdf|xlsx|xls)$/i.test(f.name)){errModal('Tiene que ser el presupuesto en PDF o en Excel (.xlsx o .xls).');ev.target.value='';return;}
+    if(f.size>10*1024*1024){errModal('El archivo es demasiado grande (máximo 10 MB).');ev.target.value='';return;}
+    F.archivoNuevo=f;F.quitarArchivo=false;pintarPres();
+  }
+});
 $('modal').addEventListener('paste',ev=>{if(ev.target.id==='fTel')setTimeout(()=>pintarTel(true),0);});
 $('buscar').addEventListener('input',()=>{q=$('buscar').value;if(mes)dibujar();});
 $('mesAnt').addEventListener('click',()=>moverMes(-1));
