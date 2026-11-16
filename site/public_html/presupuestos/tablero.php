@@ -418,7 +418,9 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .adjuntar.subir{margin-top:0;border-style:solid;color:var(--text)}
 .modal .adj-o{margin:14px 0;text-align:center;font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em}
 .adj.mas{border:1.5px dashed var(--et);background:var(--et-soft);color:var(--et);font-size:10.5px;font-weight:700;line-height:1.25;padding:3px}
-.visor img{display:block;max-width:100%;max-height:60vh;margin:0 auto 12px;border-radius:6px;background:var(--card-alt)}
+.visor img,.visor canvas{display:block;max-width:100%;max-height:60vh;margin:0 auto 12px;border-radius:6px;background:var(--card-alt)}
+.visor .girar{border:1px solid var(--border);border-radius:999px;background:var(--card);padding:6px 14px;font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer}
+.visor .girar::before{content:'↻';margin-right:6px;font-size:14px}
 .visor .acciones{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13.5px}
 .visor a{color:var(--gdd);font-weight:700}
 [data-theme="dark"] .visor a{color:var(--gd)}
@@ -1993,13 +1995,73 @@ async function subir(para,file){
 function verAdjunto(c,id){
   const a=c.adjuntos.find(x=>x.id===id);
   if(!a)return;
-  const url=a.link||urlAdj(c,a);
+  const url=a.link||urlAdj(c,a),foto=!a.link&&!a.pdf;
   abrirModal(ADJ[a.tipo]+' · '+c.cliente_nro+'-'+c.sub,
-    '<div class="visor">'+(a.link?'<p class="visor-link">Está en Drive: '+esc(a.link.replace(/^https:\/\//,'').slice(0,60))+(a.link.length>68?'…':'')+'</p>':(a.pdf?'':'<img src="'+esc(url)+'" alt="">'))+
+    '<div class="visor">'+(a.link?'<p class="visor-link">Está en Drive: '+esc(a.link.replace(/^https:\/\//,'').slice(0,60))+(a.link.length>68?'…':'')+'</p>':(a.pdf?'':'<div class="lienzo" id="adjLienzo"><img src="'+esc(url)+'" alt="" id="adjImg"></div>'))+
     '<div class="acciones"><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(a.link?'Abrir en Drive':(a.pdf?'Abrir el PDF':'Abrir en grande'))+'</a>'+
+    (foto?'<button type="button" class="girar" id="adjGirar" title="Gira la foto un cuarto de vuelta">Girar</button>':'')+
     '<button type="button" class="borrar" id="adjBorrar">Borrar</button></div></div>',
     'Cerrar',cerrarModal);
   $('mCancelar').style.display='none';
+  // Girar: cada toque es un cuarto de vuelta, y se ve al instante. Recién al tocar "Guardar así" la
+  // foto girada reemplaza a la original, para todos (también la miniatura de la ficha).
+  let giro=0,fuente=null;
+  const dibujarGirada=(lado,calidad)=>new Promise(res=>{
+    const w=fuente.naturalWidth,h=fuente.naturalHeight,k=Math.min(1,lado/Math.max(w,h));
+    const cw=Math.max(1,Math.round(w*k)),ch=Math.max(1,Math.round(h*k)),cv=document.createElement('canvas');
+    cv.width=giro%180?ch:cw;cv.height=giro%180?cw:ch;
+    const g=cv.getContext('2d');
+    g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
+    g.translate(cv.width/2,cv.height/2);g.rotate(giro*Math.PI/180);g.drawImage(fuente,-cw/2,-ch/2,cw,ch);
+    if(calidad)cv.toBlob(b=>res(b),'image/jpeg',calidad);else res(cv);
+  });
+  if(foto)$('adjGirar').addEventListener('click',async()=>{
+    if(ocupado)return;
+    if(!fuente){
+      const img=$('adjImg');
+      if(!img||!img.complete||!img.naturalWidth){toast('La foto todavía se está cargando.');return;}
+      fuente=img;
+    }
+    giro=(giro+90)%360;
+    const cv=await dibujarGirada(1400,0);
+    cv.id='adjVista';
+    const l=$('adjLienzo');
+    [...l.children].forEach(x=>{if(x!==fuente)x.remove();});
+    fuente.style.display=giro?'none':'';
+    if(giro)l.appendChild(cv);
+    // el botón principal pasa a guardar el giro; sin giro vuelve a ser "Cerrar"
+    $('mOk').textContent=giro?'Guardar así':'Cerrar';
+    $('mCancelar').style.display=giro?'':'none';
+    modalOk=giro?guardarGiro:cerrarModal;
+    modalProtegido=()=>giro>0; // con un giro sin guardar, tocar afuera no cierra la ventana
+  });
+  const guardarGiro=async()=>{
+    if(ocupado||!giro)return;
+    ocupado=true;
+    const b=$('mOk');
+    b.disabled=true;b.textContent='Guardando…';
+    try{
+      const grande=await dibujarGirada(a.tipo==='plano'?2400:1600,.9),mini=await dibujarGirada(260,.72);
+      if(!grande)throw new Error('No se pudo girar la foto.');
+      const fd=new FormData();
+      fd.append('cliente_nro',c.cliente_nro);fd.append('sub',c.sub);fd.append('tipo',a.tipo);fd.append('reemplaza',a.id);
+      fd.append('archivo',grande,'foto.jpg');
+      if(mini)fd.append('mini',mini,'mini.jpg');
+      const r=await fetch(API_ADJ,{method:'POST',body:fd,credentials:'same-origin'});
+      if(r.status===401){location.href='/calculadora/login.php';return;}
+      let j=null;
+      try{j=await r.json();}catch(e){}
+      if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo guardar la foto girada');
+      b.disabled=false;
+      cerrarModal();
+      toast('Foto girada y guardada',true);
+    }catch(e){
+      b.disabled=false;b.textContent='Guardar así';
+      toast(e.message);
+    }
+    ocupado=false;
+    await cargar();
+  };
   let seguro=false;
   $('adjBorrar').addEventListener('click',async()=>{
     if(!seguro){seguro=true;$('adjBorrar').textContent='¿Seguro? Tocá de nuevo para borrar';return;}

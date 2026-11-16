@@ -115,6 +115,7 @@ Un link cuenta igual que un archivo: saca a la obra de los filtros "Sin plano" /
 - Las fotos se achican solas antes de subir (el plano queda más grande, para que se lea la letra chica).
 - Las miniaturas quedan en la tarjeta en todas las etapas: el taller ve el plano y la bacha al controlar la pieza.
 - Tocar una miniatura la abre; desde ahí se puede ver en grande o borrar (pide confirmar).
+- **Girar una foto (16/11/2026):** en esa misma ventana, el botón "Girar" da un cuarto de vuelta por toque (en el sentido del reloj) y se ve al instante. Con "Guardar así" la foto girada reemplaza a la original para todos, incluida la miniatura de la ficha; "Cancelar" la deja como estaba. Sirve para las fotos de planos que quedan de costado. Solo fotos: los PDF y los links de Drive no se giran.
 - Fuera de Por medir, los botones para sumar aparecen al abrir "Más".
 - Adjuntar no es obligatorio para avanzar.
 

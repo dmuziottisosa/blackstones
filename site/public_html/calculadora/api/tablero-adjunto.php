@@ -10,6 +10,9 @@
 //   cliente_nro, sub, tipo ("bacha" | "plano" | "entrega"), archivo, [mini]
 //   "archivo": JPG / PNG / WEBP / PDF, hasta 10 MB. El tablero achica las
 //   fotos antes de mandarlas; "mini" es la miniatura JPG que arma él mismo.
+//   Con "reemplaza" = id de una foto ya cargada, la nueva ocupa su lugar y
+//   la vieja se borra (lo usa "Girar": el tablero gira la foto y la vuelve
+//   a subir). Solo fotos del mismo tipo; no cuenta para el máximo.
 //
 // POST JSON → colgar un link de Drive en vez de subir el archivo
 //   { "cliente_nro": "0042", "sub": 1, "accion": "link", "tipo": "plano",
@@ -113,6 +116,8 @@ if (!$aprobada) bs_error('Esa obra ya no está aprobada. Actualizá el tablero.'
 
 // ---- Validar el archivo ANTES de tomar el lock ----
 $tmp_archivo = null; $ext = ''; $tmp_mini = null; $tipo = ''; $link = '';
+$reemplaza = ($accion === 'subir') ? (string)($in['reemplaza'] ?? '') : '';
+if ($reemplaza !== '' && !preg_match('/^[a-f0-9]{16}$/', $reemplaza)) bs_error('Foto inválida');
 if ($accion === 'link') {
     $tipo = (string)($in['tipo'] ?? '');
     if (!isset($BS_TABLERO_ADJ_TIPOS[$tipo])) bs_error('tipo inválido');
@@ -160,7 +165,23 @@ try {
     $adjuntos = bs_tablero_adjuntos($obra);
     $dir = bs_tablero_adj_carpeta($key);
 
-    if ($accion === 'subir' || $accion === 'link') {
+    // Reemplazo (foto girada): la original tiene que existir, ser una foto y del mismo tipo.
+    $pos_reemplazo = -1;
+    if ($reemplaza !== '') {
+        foreach ($adjuntos as $i => $a) {
+            if ($a['id'] === $reemplaza) { $pos_reemplazo = $i; break; }
+        }
+        if ($pos_reemplazo < 0) {
+            bs_lock_release($fp);
+            bs_error('Esa foto ya no existe. Actualizá el tablero.', 404);
+        }
+        $vieja = $adjuntos[$pos_reemplazo];
+        if ($vieja['tipo'] !== $tipo || in_array($vieja['ext'], ['pdf', 'link'], true) || $ext === 'pdf') {
+            bs_lock_release($fp);
+            bs_error('Solo se pueden girar las fotos.');
+        }
+    }
+    if (($accion === 'subir' && $pos_reemplazo < 0) || $accion === 'link') {
         $del_tipo = 0;
         foreach ($adjuntos as $a) {
             if ($a['tipo'] !== $tipo) continue;
@@ -191,7 +212,15 @@ try {
         }
         @chmod($dir . '/' . $id . '.' . $ext, 0644);
         if ($tmp_mini) @move_uploaded_file($tmp_mini, $dir . '/' . $id . '.t.jpg');
-        $adjuntos[] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => date('c')];
+        if ($pos_reemplazo >= 0) {
+            // misma posición y misma fecha de carga; id nuevo para que el navegador no muestre la vieja guardada
+            $vieja = $adjuntos[$pos_reemplazo];
+            $adjuntos[$pos_reemplazo] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => $vieja['at'] !== '' ? $vieja['at'] : date('c')];
+            @unlink($dir . '/' . $vieja['id'] . '.' . $vieja['ext']);
+            @unlink($dir . '/' . $vieja['id'] . '.t.jpg');
+        } else {
+            $adjuntos[] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => date('c')];
+        }
 
     } else { // borrar
         $id = (string)($in['id'] ?? '');
