@@ -246,7 +246,7 @@ Es un traspaso: la planilla se adapta a los campos del tablero, no al revés. Lo
 |---|---|
 | Página | `site/public_html/presupuestos/tablero.php` |
 | Calendario | `site/public_html/presupuestos/calendario.php` |
-| Relación-Contrato (en construcción) | `site/public_html/presupuestos/relacion-contrato.php`: página reservada, igual que `stock.php`. La pestaña está en las seis páginas internas |
+| Relación-Contrato | `site/public_html/presupuestos/relacion-contrato.php`. Tiene su propio doc: `relacion-contrato.md` |
 | Endpoint de las tarjetas | `site/public_html/calculadora/api/tablero.php` |
 | Definición de etapas, tildes y listas de personas | `site/public_html/calculadora/api/_tablero.php` (array `$BS_ETAPAS`: para cambiar un tilde o un título se toca solo ahí) |
 | Adjuntos (subir, ver, borrar) | `site/public_html/calculadora/api/tablero-adjunto.php` |
