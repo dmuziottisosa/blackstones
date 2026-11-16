@@ -153,6 +153,24 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ---
 
+## 5 bis. Reglas duras del sistema interno (tablero, calendario, contratos)
+
+> Fijadas por el dueño el 16/11/2026. Si vas a tocar algo de `site/public_html/presupuestos/` o `calculadora/api/`, leelas antes. El detalle y el porqué están en los docs que se citan.
+
+- **La etapa de una obra la dicta el tablero.** Los estados del presupuesto ya no mandan. Por dentro, una obra del tablero es una cotización "aprobado"; archivarla la pasa a "entregado" (el reporte mensual depende de eso). → `01-strategy/decision-log/2026-11-16-la-etapa-la-dicta-el-tablero.md`
+- **El presupuesto dura 180 días** en la pestaña Presupuestos y después se borra solo (`cleanup-retention.php`). **Una obra viva en el tablero no vence nunca**; su reloj empieza cuando se archiva. No tocar esa limpieza sin probarla con datos envejecidos.
+- **Relación-Contrato se tiene que poder borrar entera sin que se caiga nada.** Dependencia en un solo sentido: contratos lee del tablero y de `clientes/`; el tablero, el calendario, el hub y la calculadora **nunca** leen ni escriben nada de contratos. → `04-operations/relacion-contrato.md`
+- **"Verificado" = presupuesto adjunto.** Un contrato lleva el sello solo si tiene el PDF o Excel adjunto. El N° de presupuesto enlaza, pero no verifica (deja de existir a los 180 días).
+- **Enlazado, manda el tablero en lo operativo y Relación-Contrato en la plata.** La seña es un solo dato: se refleja en los dos sentidos.
+- **El calendario lee del tablero.** Lo que se enlaza con el tablero queda enlazado con el calendario.
+- **Plazo de entrega en el sistema: 20 días corridos desde la medición**, para todos los materiales; ventana de entrega del día 15 al 20. En Por cortar y Por fabricar la cola va por semana de entrega y, dentro de la semana, mismo color junto. → `04-operations/tablero-obras.md`
+- **Vendedores y procedencias son listas cerradas** (`_contratos.php`). No inventar nombres en datos de prueba.
+- **Datos de clientes reales nunca van al repo** (nombres, teléfonos, direcciones, planillas exportadas). Tampoco como ejemplo en comentarios o pruebas: usar ficticios (`11 5555-1234`).
+- **No se puede ver ni tocar la base de producción desde acá.** Lo que el dueño ve en pantalla solo se conoce por lo que pega o exporta ("Exportar tablero"). No comparar ni actualizar datos reales salvo que lo pida.
+- **Cada cambio se prueba antes de entregar** (regresión del tablero, pruebas del calendario y de contratos, en computadora, tablet y celular) y se entrega con su bloque de deploy.
+
+---
+
 ## 6. Estado actual del negocio (snapshot mayo 2026)
 
 - **+1.000 mesadas colocadas** en CABA y GBA. *(Actualizado jun 2026 — dato directo del dueño; el snapshot de mayo decía +500.)*
@@ -162,6 +180,7 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **Funnel actual:** ad → click WhatsApp → cotización 24 hs → cierre.
 - **Sitio web:** `blackstones.com.ar` en Hostinger, dominio en donweb.
 - **Calculadora interna:** `blackstones.com.ar/calculadora/` (auth con HMAC, password compartido con equipo).
+- **Sistema interno (nov 2026), misma contraseña del equipo:** Presupuestos (`/presupuestos/`), Tablero de obras (`/presupuestos/tablero.php`), Calendario (`/presupuestos/calendario.php`), Relación-Contrato (`/presupuestos/relacion-contrato.php`) y Stock (en construcción). Docs: `04-operations/tablero-obras.md` y `04-operations/relacion-contrato.md`.
 
 ---
 
@@ -185,4 +204,4 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ---
 
-*Última actualización: mayo 2026. Próxima revisión obligatoria: agosto 2026.*
+*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis). Próxima revisión obligatoria: febrero 2027.*
