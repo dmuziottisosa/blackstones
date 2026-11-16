@@ -152,6 +152,13 @@ function bs_contrato_sena($monto, $moneda, $fecha) {
 }
 
 function bs_contrato_salida($c) {
+    global $BS_CONTRATO_VENDEDORES, $BS_CONTRATO_PROCEDENCIAS;
+    // Los renglones de prueba cargados antes de que existieran las listas traían el vendedor
+    // "Prueba" y procedencias inventadas: no son de la lista, así que salen vacíos.
+    if (!empty($c['prueba'])) {
+        if (!in_array((string)($c['vendedor'] ?? ''), $BS_CONTRATO_VENDEDORES, true)) $c['vendedor'] = '';
+        if (!in_array((string)($c['procedencia'] ?? ''), $BS_CONTRATO_PROCEDENCIAS, true)) $c['procedencia'] = '';
+    }
     return [
         'id'           => (string)$c['id'],
         'creado'       => (string)($c['creado'] ?? ''),
