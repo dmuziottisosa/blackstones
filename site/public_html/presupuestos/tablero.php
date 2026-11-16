@@ -274,6 +274,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .avisos-g:empty{display:none}
 .aviso-g{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--red);font-family:inherit;cursor:pointer;padding:6px 14px 6px 6px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700;white-space:nowrap}
 .aviso-g.on{background:var(--red);color:var(--card)}
+/* Limpiar filtros: oscuro, para que no se confunda con un aviso rojo ni con un filtro. */
+.limpiar-f{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;border:1.5px solid var(--dk);font-family:inherit;cursor:pointer;padding:6px 14px 6px 10px;border-radius:999px;background:var(--dk);color:var(--cr);font-size:13px;font-weight:700;white-space:nowrap}
+.limpiar-f::before{content:'×';font-size:18px;line-height:.8;font-weight:600}
+[data-theme="dark"] .limpiar-f{background:var(--gd);border-color:var(--gd);color:#1A1816}
 .aviso-g.on::before{background:var(--card);color:var(--red)}
 .aviso-g.cerca{border-color:var(--amb);background:var(--amb-soft);color:var(--amb)}
 .aviso-g.cerca::before{background:var(--amb)}
@@ -433,6 +437,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .col-filtros button{padding:8px 13px;font-size:12.5px}
   .col-aviso{padding:6px 12px 6px 5px;font-size:12px}
   .aviso-g{padding:8px 15px 8px 7px}
+  .limpiar-f{padding:8px 15px 8px 11px}
   .modal .btns button{padding:11px 18px;font-size:14px}
   .modal .lnk,.visor .borrar,.visor a{padding:8px 0;display:inline-block}
   /* Con menos de 16 px, el iPhone y el iPad hacen zoom solos al tocar un campo. */
@@ -1027,7 +1032,10 @@ function dibujar(){
   // Es lo más urgente del tablero: va primero, y cuenta todas las columnas.
   const nAtr=CARDS.filter(atrasada).length;
   if((plazoF==='vencida'&&!nVen)||(plazoF==='cerca'&&!nCer)||(plazoF==='atrasada'&&!nAtr))plazoF='';
-  $('avisosG').innerHTML=(nAtr?'<button type="button" class="aviso-g'+(plazoF==='atrasada'?' on':'')+'" data-plazo="atrasada" aria-pressed="'+(plazoF==='atrasada')+'">'+nAtr+(nAtr===1?' atrasada':' atrasadas')+'</button>':'')
+  // "Limpiar filtros": aparece solo cuando algo está filtrando (buscador, un aviso de arriba o un
+  // filtro de columna) y va primero en la fila, para que siempre quede a la vista.
+  const nFil=(buscado.length?1:0)+(plazoF?1:0)+Object.keys(falta).filter(k=>falta[k]).length;
+  $('avisosG').innerHTML=(nFil&&!SOLO?'<button type="button" class="limpiar-f" data-limpiar title="Saca el buscador y todos los filtros">Limpiar filtros'+(nFil>1?' · '+nFil:'')+'</button>':'')+(nAtr?'<button type="button" class="aviso-g'+(plazoF==='atrasada'?' on':'')+'" data-plazo="atrasada" aria-pressed="'+(plazoF==='atrasada')+'">'+nAtr+(nAtr===1?' atrasada':' atrasadas')+'</button>':'')
     +(nVen?'<button type="button" class="aviso-g'+(plazoF==='vencida'?' on':'')+'" data-plazo="vencida" aria-pressed="'+(plazoF==='vencida')+'">'+nVen+' con plazo vencido</button>':'')
     +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'">'+nCer+(nCer===1?' vence en 7 días':' vencen en 7 días')+'</button>':'');
   const filtrando=buscado.length>0||!!plazoF||!!SOLO;
@@ -1181,6 +1189,19 @@ $('buscar').addEventListener('keydown',ev=>{
 });
 const wrap=document.querySelector('.wrap');
 
+// Vuelve el tablero a lo normal: sin búsqueda, sin aviso prendido y sin filtros de columna.
+// Los paneles "Filtrar" quedan como estaban: abrirlos no es filtrar.
+function limpiarFiltros(){
+  buscado=[];
+  $('buscar').value='';
+  $('buscar').classList.remove('activo');
+  $('buscarX').hidden=true;
+  plazoF='';
+  Object.keys(falta).forEach(k=>{falta[k]=false;});
+  dibujar();
+  toast('Filtros limpios: se ven todas las obras',true);
+}
+
 $('colTabs').addEventListener('click',ev=>{
   const b=ev.target.closest('button[data-col]');
   if(!b)return;
@@ -1192,6 +1213,7 @@ $('colTabs').addEventListener('click',ev=>{
 
 wrap.addEventListener('click',ev=>{
   if(ev.target.closest('[data-cargar]')){pedirCargar();return;}
+  if(ev.target.closest('[data-limpiar]')){limpiarFiltros();return;}
   const bp=ev.target.closest('[data-plazo]');
   if(bp){plazoF=plazoF===bp.dataset.plazo?'':bp.dataset.plazo;dibujar();return;}
   const bfi=ev.target.closest('[data-filtros]');

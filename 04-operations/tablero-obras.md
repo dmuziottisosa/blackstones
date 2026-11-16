@@ -141,6 +141,10 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 - **Botón de etapa:** "Marcar medido" y "Marcar cortado" son lo más visible de la ficha; hechos, quedan en verde ("Ya medido", "Ya cortado").
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.
 
+## Limpiar filtros
+
+Cuando algo está filtrando el tablero (el buscador, un aviso de arriba prendido o un filtro de columna), aparece **Limpiar filtros** primero en la fila de avisos, con la cantidad de filtros si hay más de uno. Un toque saca todo y vuelven a verse todas las obras. Sin nada filtrando, el botón no está. Los paneles "Filtrar" abiertos quedan como estaban: abrirlos no es filtrar. *(Agregado 16/11/2026: el dueño marcó que faltaba una forma de volver todo a lo normal.)*
+
 ## Exportar tablero
 
 Arriba a la derecha, **Exportar tablero** baja un archivo `tablero-blackstones-AAAA-MM-DD.csv` con **todas** las obras del tablero (no solo las que deja ver el buscador o un filtro), una por fila, ordenadas por etapa. Se abre con Excel: separador `;`, con acentos.
