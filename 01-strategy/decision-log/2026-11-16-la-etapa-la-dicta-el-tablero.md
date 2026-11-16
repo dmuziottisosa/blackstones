@@ -14,6 +14,9 @@
 - **Presupuestos no mueve obras vivas:** se sacaron de esa pestaña los botones de estado de los aprobados (Entregado / volver a Enviado). Queda "En el tablero →".
 - **Enlazados, la ficha se borra en los dos lados** (tablero y Relación-Contrato). Archivar no es borrar.
 
+- **La etapa se ve y se filtra en Presupuestos**, aunque no se cambie desde ahí (aclaración del dueño, 16/11/2026).
+- **Las obras archivadas se siguen borrando a los 180 días de archivadas** (esto ya era así). Es coherente con guardar en físico el mes archivado: hay unos seis meses de margen para imprimirlo. Los resúmenes mensuales de ventas (`registro/by-month/`) y los contratos no se borran.
+
 ## Por qué
 
 - Dos lugares que dicen en qué etapa está una obra terminan diciendo cosas distintas. Se elige uno: el tablero.

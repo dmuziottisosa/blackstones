@@ -494,9 +494,17 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       <option value="">Todos los estados</option>
       <option value="borrador">Borrador</option>
       <option value="enviado">Enviado</option>
-      <option value="aprobado">Aprobado</option>
-      <option value="entregado">Entregado</option>
       <option value="perdido">Perdido</option>
+      <option value="entregado">Entregado</option>
+      <!-- La etapa la dicta el tablero, pero acá se puede filtrar por ella (dueño, 16/11/2026). -->
+      <optgroup label="En el tablero">
+        <option value="aprobado">Todas las etapas</option>
+        <option value="aprobado:medir">Por medir</option>
+        <option value="aprobado:cortar">Por cortar</option>
+        <option value="aprobado:fabricar">Por fabricar</option>
+        <option value="aprobado:instalar">Por instalar</option>
+        <option value="aprobado:archivar">Por archivar</option>
+      </optgroup>
     </select>
     <select id="filter-origen" title="Filtrar por origen del presupuesto">
       <option value="">Todos los orígenes</option>
@@ -830,7 +838,7 @@ function exportarExcel() {
     r.cliente_dni || '',
     r.cliente_celular || '',
     r.concepto || '',
-    ESTADOS_LABELS[r.estado] || r.estado || '',
+    r.etapa_titulo || ESTADOS_LABELS[r.estado] || r.estado || '',
     r.monto_usd || 0,
     r.monto_ars || 0,
     (r.fecha_efectiva || r.fecha || '').substring(0, 10)
@@ -860,7 +868,7 @@ async function cargarActivos() {
   const origen = document.getElementById('filter-origen').value;
   const url = `/calculadora/api/list.php?page=${_activosPage}&per_page=${_activosPerPage}` +
               (q ? '&q=' + encodeURIComponent(q) : '') +
-              (estado ? '&estado=' + estado : '') +
+              (estado ? '&estado=' + estado.split(':')[0] + (estado.split(':')[1] ? '&etapa=' + estado.split(':')[1] : '') : '') +
               (origen ? '&origen=' + origen : '');
   try {
     const r = await fetch(url, { credentials: 'same-origin' });
@@ -907,7 +915,7 @@ async function cargarActivos() {
           <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
           <td><span class="cliente-nombre" contenteditable="true" data-nro="${r.cliente_nro}" data-orig="${escapeHtml(cliNombre)}" onblur="onClienteNombreBlur(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el nombre">${cliNombre ? escapeHtml(cliNombre) : '—'}</span>${r.cliente_dni ? `<span class="cliente-dni">DNI ${escapeHtml(r.cliente_dni)}</span>` : ''}</td>
           <td>${r.cliente_celular ? `<span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : '<span class="muted">—</span>'}</td>
-          <td><span class="estado est-${r.estado}">${ESTADOS_LABELS[r.estado] || r.estado}</span></td>
+          <td><span class="estado est-${r.estado}"${r.etapa_titulo ? ' title="Etapa en el tablero"' : ''}>${r.etapa_titulo || ESTADOS_LABELS[r.estado] || r.estado}</span></td>
           <td><button type="button" class="origen-cell ${origenCls}" data-origen="${origenVal}" onclick="toggleOrigen(this, '${r.cliente_nro}', ${r.sub})" title="Click para alternar Publicidad / Sin publicidad"><span class="od"></span>${origenLabel}</button></td>
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>
@@ -1257,7 +1265,7 @@ function abrirModalEditar(nro, sub) {
 
   document.getElementById('me-id-label').innerText = `${r.cliente_nro}-${r.sub}`;
   document.getElementById('me-state-sub').innerHTML =
-    `Estado: <b>${ESTADOS_LABELS[r.estado] || r.estado}</b>` +
+    `Estado: <b>${r.etapa_titulo ? 'En el tablero · ' + r.etapa_titulo : (ESTADOS_LABELS[r.estado] || r.estado)}</b>` +
     (r.ajuste_manual ? ' <span class="badge-manual">Ajuste manual</span>' : '') +
     (r.efectivo ? ' <span class="badge-efectivo">Efectivo −20%</span>' : '');
   setMeEfectivo(!!r.efectivo);

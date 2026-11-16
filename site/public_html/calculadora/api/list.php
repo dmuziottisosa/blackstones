@@ -29,8 +29,16 @@
 
 require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
+require_once __DIR__ . '/_tablero.php';
 
 bs_require_auth();
+
+// La etapa de una obra la dicta el tablero, pero en Presupuestos se ve y se puede filtrar:
+// cada cotización "aprobado" (obra viva) sale con su etapa del tablero ("etapa", "etapa_titulo"),
+// y ?etapa=cortar deja solo las que están ahí. Solo se LEE el tablero; no se toca.
+$etapa_filter = (string)($_GET['etapa'] ?? '');
+if ($etapa_filter !== '' && !isset($BS_ETAPAS[$etapa_filter])) $etapa_filter = '';
+$bs_obras_tablero = bs_tablero_leer()['obras'] ?? [];
 
 $estado_filter = $_GET['estado'] ?? '';
 $origen_filter = $_GET['origen'] ?? ''; // 'publicidad' | 'local' | ''
@@ -90,6 +98,14 @@ if (is_dir(BS_CLIENTES_DIR)) {
             // Filtro estado
             if ($estado_filter !== '' && ($cot['estado'] ?? '') !== $estado_filter) continue;
 
+            // Etapa del tablero (solo las obras vivas la tienen). Sin registro todavía: Por medir.
+            $etapa = '';
+            if (($cot['estado'] ?? '') === 'aprobado') {
+                $e = (string)($bs_obras_tablero[$cliente_nro . '-' . intval($cot['sub'] ?? 0)]['etapa'] ?? '');
+                $etapa = isset($BS_ETAPAS[$e]) ? $e : 'medir';
+            }
+            if ($etapa_filter !== '' && $etapa !== $etapa_filter) continue;
+
             // Filtro origen (publicidad / local; 'organico' es alias historico)
             if ($origen_filter !== '') {
                 $cot_origen = ($cot['origen'] ?? 'local');
@@ -147,6 +163,8 @@ if (is_dir(BS_CLIENTES_DIR)) {
                 'material_final'    => $cot['material_final'] ?? '',
                 'notas'             => $cot['notas'] ?? '',
                 'estado'            => $cot['estado'] ?? '',
+                'etapa'             => $etapa,
+                'etapa_titulo'      => $etapa !== '' ? (string)$BS_ETAPAS[$etapa]['titulo'] : '',
                 'monto_usd'         => $monto_usd,
                 'monto_ars'         => $monto_ars,
                 'm2'                => $m2,
