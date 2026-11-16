@@ -236,11 +236,12 @@ foreach ($BS_ETAPAS as $id => $def) {
     if (empty($def['aparte'])) $BS_ETAPA_IDS[] = $id;
 }
 
-// Plazo que se le dice al cliente, en días corridos desde la medición.
-// Regla del negocio: granito 15, todo lo demás 20. En el tablero se muestra
-// como SEMANA estimada de entrega: es guía, el orden lo da la cola.
-define('BS_PLAZO_GRANITO', 15);
-define('BS_PLAZO_RESTO',   20);
+// Plazo de entrega, en días corridos desde la medición.
+// Estándar único: 20 días para todo (decisión del dueño, 16/11/2026; antes el
+// granito llevaba 15). El día 20 vence. La entrega se espera entre el día 15 y
+// el 20: esa "ventana" es la franja de cada bloque de medición en el calendario.
+define('BS_PLAZO_DIAS',    20);
+define('BS_PLAZO_VENTANA', 15);
 
 function bs_tablero_hora_valida($h) {
     return is_string($h) && preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $h) === 1;

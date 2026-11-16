@@ -63,7 +63,6 @@ date_default_timezone_set('America/Argentina/Buenos_Aires');
 function bs_tablero_material($cot) {
     $colores = [];
     $hay_items = false;
-    $solo_granito = true;
 
     $secciones = $cot['presupuesto']['secciones'] ?? [];
     if (is_array($secciones)) {
@@ -75,7 +74,6 @@ function bs_tablero_material($cot) {
                 $mat   = trim((string)($it['mat'] ?? ''));
                 if ($color === '' && $mat === '') continue;
                 $hay_items = true;
-                if (strpos($mat, 'Granito') !== 0) $solo_granito = false;
                 if ($color !== '' && !in_array($color, $colores, true)) $colores[] = $color;
             }
         }
@@ -87,8 +85,8 @@ function bs_tablero_material($cot) {
         if (count($colores) > 2) $texto .= ' …';
     }
 
-    $plazo = ($hay_items && $solo_granito) ? BS_PLAZO_GRANITO : BS_PLAZO_RESTO;
-    return [$texto, $plazo];
+    // El plazo es el mismo para todos los materiales (ver BS_PLAZO_DIAS).
+    return [$texto, BS_PLAZO_DIAS];
 }
 
 /** Cuándo se aprobó el presupuesto: es el momento en que la obra entró al tablero. */
@@ -284,7 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'oculta' => !empty($def['oculta']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'avisa_fecha' => !empty($def['avisa_fecha']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'pendientes' => (string)($def['pendientes'] ?? ''), 'urge' => array_values((array)($def['urge'] ?? [])), 'en_manos' => array_values((array)($def['en_manos'] ?? [])), 'hecha_txt' => array_values((array)($def['hecha_txt'] ?? [])), 'urge_txt' => (string)($def['urge_txt'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
     }
 
-    bs_ok(['hoy' => date('Y-m-d'), 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
+    bs_ok(['hoy' => date('Y-m-d'), 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
 }
 
 // ============================================================
@@ -481,7 +479,7 @@ try {
 
     } elseif ($accion === 'plazo') {
         // Plazo de entrega fijado a mano. Vacío = volver al calculado
-        // (medición + 15/20 días corridos).
+        // (medición + 20 días corridos).
         $fecha = trim((string)($body['fecha'] ?? ''));
         if ($fecha !== '' && !bs_tablero_fecha_valida($fecha)) {
             bs_lock_release($fp);
