@@ -176,6 +176,20 @@ button{font-family:inherit;color:inherit}
 .blq span{overflow:hidden;text-overflow:ellipsis;min-width:0}
 .blq.rot:not(.ult):not(.fin) span{overflow:visible}
 .blq i{font-style:normal;margin-left:auto;flex-shrink:0;padding:2px 6px;border-radius:999px;background:var(--bq);color:#1A1816;font-size:10px;font-weight:800;letter-spacing:.02em}
+/* Bloque de MEDICIÓN: un solo día, en el color de Por medir. No se confunde con la entrega. */
+.blq.med{--bq:var(--et);--bq-soft:var(--et-soft);--bq-t:var(--et);border:1px solid var(--bq);border-left:3px solid var(--bq)}
+.blq.med i{color:#fff;padding:1px 5px}
+.blq s,.blq u{text-decoration:none}
+.blq s{display:none}
+/* Celdas angostas (tablet, notebook chica): el rótulo de medición se acorta para que entre entero. */
+@media(max-width:1279px){
+  .blq.med{padding:0 5px}
+  .blq.med u,.blq.med i{display:none}
+  .blq.med s{display:inline}
+}
+[data-theme="dark"] .blq.med i{color:#14110D}
+.ev.blq-ag.med{background:var(--et-soft);color:var(--et);font-weight:700}
+.ley button.on[data-ver="entrega"]::before{width:18px;height:9px;border-radius:2px;background:color-mix(in srgb,var(--gd) 40%,var(--card));border:1px solid var(--gd)}
 .blq.est{border-top-style:dashed;border-bottom-style:dashed;--bq-soft:color-mix(in srgb,var(--gd) 11%,var(--card));font-style:italic;font-weight:600;color:var(--text2)}
 .blq.cerca{--bq:var(--amb);--bq-soft:var(--amb-soft);--bq-t:var(--amb)}
 .blq.vencida{--bq:var(--red);--bq-soft:var(--red-soft);--bq-t:var(--red)}
@@ -490,8 +504,10 @@ function bloques(){
     b.hasta=masDias(b.dia,b.dias);
     b.estado=b.hasta<HOY?'vencida':(b.desde<=HOY?'cerca':'');
     const n=b.obras.length;
-    b.txt='Bloque '+diaMes(b.dia)+' · '+(n===1?(nombreCorto(b.obras[0].nombre)||b.obras[0].cliente_nro):n+' obras');
-    b.tit='Bloque de medición del '+fechaCorta(b.dia)+' · '+n+(n===1?' obra':' obras')+' · '+(b.est?'entrega estimada':'entrega')+' del '+fechaCorta(b.desde)+' al '+fechaCorta(b.hasta);
+    // "Entrega": así se distingue del bloque de MEDICIÓN, que va marcado en azul en el día en que se mide.
+    b.de='medidas el '+diaMes(b.dia)+' · '+(n===1?(nombreCorto(b.obras[0].nombre)||b.obras[0].cliente_nro):n+' obras');
+    b.txt=(b.est?'Entrega estimada · ':'Entrega · ')+b.de;
+    b.tit=(b.est?'Entrega estimada':'Entrega')+' del bloque medido el '+fechaCorta(b.dia)+' · '+n+(n===1?' obra':' obras')+' · del '+fechaCorta(b.desde)+' al '+fechaCorta(b.hasta)+' (vence)';
     return b;
   });
   // Carriles: dos bloques cuyas ventanas se pisan van uno debajo del otro, siempre en el mismo renglón.
@@ -510,24 +526,44 @@ function franjas(iso,L,col){
     if(!b){h+='<div class="blq hueco"></div>';continue;}
     const ini=iso===b.desde,fin=iso===b.hasta,rot=ini||col===0; // el rótulo va al empezar y al arrancar cada semana
     h+='<div class="blq'+(ini?' ini':'')+(fin?' fin':'')+(rot?' rot':'')+(col===6?' ult':'')+(b.est?' est':'')+(b.estado?' '+b.estado:'')+'" role="button" tabindex="0" data-bloque="'+b.dia+'" title="'+esc(b.tit)+'">'
-      +(rot?'<span>'+esc(b.txt)+'</span>':'')+(fin?'<i>'+(b.estado==='vencida'?'Venció':'Vence')+'</i>':'')+'</div>';
+      +(rot?'<span>'+esc(col===6?(b.est?'Estimada · ':'Entrega · ')+diaMes(b.dia):b.txt)+'</span>':'')+(fin?'<i>'+(b.estado==='vencida'?'Venció':'Vence')+'</i>':'')+'</div>';
   }
   return h;
 }
-// El bloque, obra por obra: desde acá se abre cada ficha.
-function abrirBloque(dia){
-  const b=bloques().find(x=>x.dia===dia);
-  if(!b)return;
-  const n=b.obras.length,orden=ETAPAS.map(e=>e.id);
-  let h='<p class="sub estado">'+(b.est?'Entrega estimada':'Entrega')+': del '+esc(fechaCorta(b.desde))+' al '+esc(fechaCorta(b.hasta))+'</p>'
-    +'<p class="sub">'+(b.estado==='vencida'?'El plazo venció el '+esc(fechaCorta(b.hasta))+' y '+(n===1?'queda 1 obra':'quedan '+n+' obras')+' sin entregar.'
-      :n+(n===1?' obra':' obras')+(b.est?' con medición agendada':' medidas')+' ese día. La ventana va del día '+Math.min(VENTANA,b.dias)+' al '+b.dias+' desde la medición; el '+esc(fechaCorta(b.hasta))+' vence.')+'</p><div class="lista">';
-  b.obras.slice().sort((x,z)=>(orden.indexOf(x.etapa)-orden.indexOf(z.etapa))||(x.key<z.key?-1:1)).forEach(c=>{
-    h+='<button type="button" class="ev et-'+esc(c.etapa)+'" data-key="'+esc(c.key)+'" data-tipo="vence"><b>'+esc(c.cliente_nro)+'</b> '+esc(nombreCorto(c.nombre)||'Sin nombre')
-      +' <span>· '+esc(etapaDe(c.etapa).titulo)+(c.medido_at?'':' · todavía sin medir')+'</span></button>';
+// Bloque de MEDICIÓN: las obras que se miden (o se midieron) un mismo día. No es la entrega:
+// es el día de la tanda, y va en el color de Por medir.
+function obrasMedicion(dia){
+  return CARDS.filter(c=>c.medido_at?c.medido_at===dia:(c.etapa===MEDIR&&c.fecha===dia&&!cumplida(c)));
+}
+function tiraMedicion(iso,largo){
+  const l=obrasMedicion(iso);
+  if(!l.length||!MEDIR)return '';
+  const n=l.length,h=l.filter(c=>c.medido_at).length;
+  const estado=h===n?(n===1?'hecha':'hechas'):(h?h+' de '+n+' hechas':'');
+  const t='Bloque de medición del '+fechaCorta(iso)+' · '+n+(n===1?' obra':' obras')+(h===n?' · todas medidas':(h?' · '+h+' medidas':' · sin medir todavía'));
+  if(largo)return '<button type="button" class="ev blq-ag med et-'+esc(MEDIR)+'" data-bloque="'+iso+'" data-origen="med">Bloque de medición · '+n+(n===1?' obra':' obras')+(estado?' <span>· '+estado+'</span>':'')+'</button>';
+  return '<div class="blq med ini fin et-'+esc(MEDIR)+(h===n?' ok':'')+'" role="button" tabindex="0" data-bloque="'+iso+'" data-origen="med" title="'+esc(t)+'"><span>'+(h===n?'<s>✓ </s>':'')+'Medición · '+n+'<u>'+(n===1?' obra':' obras')+'</u></span>'+(h===n?'<i>✓</i>':'')+'</div>';
+}
+// La ventana del bloque: se abre desde el bloque de medición (azul) o desde su entrega (franja).
+// Dice las dos cosas por separado, y lista las obras para abrir cada ficha.
+function abrirBloque(dia,origen){
+  const obras=obrasMedicion(dia),b=bloques().find(x=>x.dia===dia);
+  if(!obras.length&&!b)return;
+  const lista=obras.length?obras:b.obras,n=lista.length,hechas=lista.filter(c=>c.medido_at).length,orden=ETAPAS.map(e=>e.id);
+  let h='<p class="sub estado">Medición: '+esc(fechaCorta(dia))+' · '+n+(n===1?' obra':' obras')+(hechas===n?' · todas medidas':(hechas?' · '+hechas+' medidas, '+(n-hechas)+' sin medir':' · todavía sin medir'))+'</p>';
+  if(b){
+    const m=b.obras.length;
+    h+='<p class="sub estado">'+(b.est?'Entrega estimada':'Entrega')+': del '+esc(fechaCorta(b.desde))+' al '+esc(fechaCorta(b.hasta))+'</p>'
+      +'<p class="sub">'+(b.estado==='vencida'?'El plazo venció el '+esc(fechaCorta(b.hasta))+' y '+(m===1?'queda 1 obra':'quedan '+m+' obras')+' sin entregar.'
+        :'La entrega va del día '+Math.min(VENTANA,b.dias)+' al '+b.dias+' desde la medición; el '+esc(fechaCorta(b.hasta))+' vence.'+(b.est?' Es estimada hasta que se marquen medidas.':''))+'</p>';
+  }else h+='<p class="sub">Sin franja de entrega: estas obras tienen el plazo puesto a mano o ya están instaladas.</p>';
+  h+='<div class="lista">';
+  lista.slice().sort((x,z)=>(orden.indexOf(x.etapa)-orden.indexOf(z.etapa))||(x.key<z.key?-1:1)).forEach(c=>{
+    h+='<button type="button" class="ev et-'+esc(c.etapa)+'" data-key="'+esc(c.key)+'" data-tipo="'+(origen==='med'?'medida':'vence')+'"><b>'+esc(c.cliente_nro)+'</b> '+esc(nombreCorto(c.nombre)||'Sin nombre')
+      +' <span>· '+esc(etapaDe(c.etapa).titulo)+(c.medido_at?'':' · todavía sin medir')+(c.plazo_manual?' · plazo propio':'')+'</span></button>';
   });
   h+='</div>';
-  $('mTitulo').textContent='Bloque de medición del '+fechaCorta(b.dia);
+  $('mTitulo').textContent=(origen==='med'?'Bloque de medición del ':'Entrega del bloque medido el ')+fechaCorta(dia);
   $('mCuerpo').innerHTML=h;
   document.querySelector('.modal').classList.add('angosta');
   $('mOk').hidden=true;
@@ -591,11 +627,13 @@ function dibujar(){
 
   // Leyenda: qué es cada color, cuántos hay este mes, y tocarla lo oculta o lo muestra.
   const tipos=ETAPAS.filter(e=>e.fecha).map(e=>({id:e.id,txt:PLURAL[e.fecha]||e.fecha,n:CARDS.filter(c=>c.etapa===e.id&&c.fecha&&c.fecha.slice(0,7)===mes&&!cumplida(c)).length}));
+  tipos.push({id:'entrega',txt:'Entregas',n:bloques().filter(b=>b.desde.slice(0,7)===mes||b.hasta.slice(0,7)===mes).length});
   tipos.push({id:'vence',txt:'Vencimientos',n:CARDS.filter(c=>(c.limite&&c.etapa!=='archivar'&&c.limite.slice(0,7)===mes)||previsto(c).slice(0,7)===mes).length});
-  $('ley').innerHTML=tipos.map(t=>'<button type="button" class="'+(t.id==='vence'?'':'et-'+esc(t.id))+(ver[t.id]!==false?' on':'')+'" data-ver="'+esc(t.id)+'" aria-pressed="'+(ver[t.id]!==false)+'">'+esc(t.txt)+' <b>'+t.n+'</b></button>').join('');
+  $('ley').innerHTML=tipos.map(t=>'<button type="button" class="'+(t.id==='vence'||t.id==='entrega'?'':'et-'+esc(t.id))+(ver[t.id]!==false?' on':'')+'" data-ver="'+esc(t.id)+'" aria-pressed="'+(ver[t.id]!==false)+'">'+esc(t.txt)+' <b>'+t.n+'</b></button>').join('');
 
   const dias=armar();
-  const L=ver.vence!==false?bloques():[]; // las franjas se apagan junto con los vencimientos
+  const L=ver.entrega!==false?bloques():[]; // franjas de entrega: tienen su propio botón en la leyenda
+  const conMed=ver[MEDIR]!==false;       // el bloque de medición se apaga junto con las mediciones
 
   // Grilla del mes: semanas de lunes a domingo.
   const primero=new Date(y,m-1,1),ultimo=new Date(y,m,0);
@@ -604,7 +642,7 @@ function dibujar(){
   while(d<=ultimo||d.getDay()!==1){
     const iso=isoDe(d),fuera=d.getMonth()!==m-1;
     g+='<div class="dia'+(fuera?' otro':'')+(iso===HOY?' es-hoy':'')+(iso<HOY?' pasado':'')+(d.getDay()===0||d.getDay()===6?' finde':'')+'" data-dia="'+iso+'"><div class="n">'+d.getDate()+'</div>'
-      +franjas(iso,L,(d.getDay()+6)%7)+(dias[iso]||[]).map(ev=>chip(ev,false)).join('')+'</div>';
+      +franjas(iso,L,(d.getDay()+6)%7)+(conMed?tiraMedicion(iso,false):'')+(dias[iso]||[]).map(ev=>chip(ev,false)).join('')+'</div>';
     d.setDate(d.getDate()+1);
   }
   $('cal').innerHTML=g;
@@ -615,7 +653,8 @@ function dibujar(){
     const iso=mes+'-'+String(n).padStart(2,'0'),l=dias[iso]||[];
     // En la lista, cada bloque aparece dos veces: el día que empieza su ventana y el día que vence.
     const bq=L.filter(b=>b.desde===iso||b.hasta===iso).map(b=>'<button type="button" class="ev blq-ag'+(b.est?' est':'')+(b.estado?' '+b.estado:'')+'" data-bloque="'+b.dia+'">'
-      +(b.hasta===iso?(b.estado==='vencida'?'Venció el ':'Vence el ')+esc(b.txt.replace(/^B/,'b')):'Empieza la entrega del '+esc(b.txt.replace(/^B/,'b'))+'<br><span>Hasta el '+esc(fechaCorta(b.hasta))+'</span>')+'</button>').join('');
+      +(b.hasta===iso?(b.estado==='vencida'?'Venció la entrega':'Vence la entrega')+' · '+esc(b.de):(b.est?'Empieza la entrega estimada':'Empieza la entrega')+' · '+esc(b.de)+'<br><span>Hasta el '+esc(fechaCorta(b.hasta))+'</span>')+'</button>').join('')
+      +(conMed?tiraMedicion(iso,true):'');
     if(!l.length&&!bq&&iso!==HOY)continue;
     a+='<div class="ag-dia'+(iso===HOY?' es-hoy':'')+(iso<HOY?' pasado':'')+'" data-dia="'+iso+'"><div class="n">'+esc(fechaLarga(iso))+(iso===HOY?' · hoy':'')+'</div>'
       +bq+(l.length?l.map(ev=>chip(ev,true)).join(''):(bq?'':'<div class="nada">Nada agendado.</div>'))+'</div>';
@@ -759,11 +798,11 @@ document.addEventListener('keydown',ev=>{
 // ---------- Tocar ----------
 document.addEventListener('keydown',ev=>{
   const q=ev.target.closest&&ev.target.closest('.blq[data-bloque]');
-  if(q&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();abrirBloque(q.dataset.bloque);}
+  if(q&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();abrirBloque(q.dataset.bloque,q.dataset.origen||'');}
 });
 document.addEventListener('click',ev=>{
   const q=ev.target.closest('[data-bloque]');
-  if(q){abrirBloque(q.dataset.bloque);return;}
+  if(q){abrirBloque(q.dataset.bloque,q.dataset.origen||'');return;}
   const b=ev.target.closest('.ev[data-key]');
   if(b){const c=cardDe(b.dataset.key);if(c)abrir(c,'',b.dataset.tipo==='vence'?'plazo':'');return;}
   const v=ev.target.closest('[data-ver]');
