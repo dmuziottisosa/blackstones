@@ -104,7 +104,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 /* === MODO UNA FICHA (embebida en el calendario): sin encabezado, sin columnas, solo la ficha === */
 .solo body{background:var(--card)}
 .solo .header,.solo .h-tabs,.solo .gold-line,.solo .tope,.solo .avisos-g,.solo .col-tabs,
-.solo .col-h,.solo .col-avisos,.solo .col-sub,.solo .col-acc,.solo .col-filtros,.solo .col-sep,.solo .c-prox{display:none!important}
+.solo .col-h,.solo .col-avisos,.solo .col-sub,.solo .col-acc,.solo .col-filtros,.solo .col-sep,.solo .col-sem,.solo .c-prox{display:none!important}
 .solo .board .col{max-height:none;overflow:visible}
 .solo .wrap{padding:0;max-width:none}
 .solo .board{display:block;overflow:visible;padding:0}
@@ -378,6 +378,20 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .campo+p{margin:-10px 0 16px;font-size:12px}
 .modal .campo input{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
 .modal .campo input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
+
+/* Sugerencias de material (catálogo de la calculadora) */
+.modal .mat-wrap{position:relative}
+.mat-caja{display:none;position:absolute;left:0;right:0;top:100%;z-index:60;margin-top:4px;max-height:232px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg)}
+.mat-caja.open{display:block}
+.mat-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;font-size:13.5px;font-weight:600;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border-soft)}
+.mat-item:last-child{border-bottom:none}
+.mat-item.active{background:var(--gd-soft)}
+@media(hover:hover){.mat-item:hover{background:var(--gd-soft)}}
+.mat-item i{font-style:normal;font-size:11px;font-weight:700;color:var(--text2);background:var(--card-alt);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.mat-nada{padding:10px 12px;font-size:12.5px;font-weight:500;color:var(--text3)}
+/* Dónde empieza cada semana de entrega, en las colas sin turno */
+.col-sem{margin:14px 2px 8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.col-sem.rojo{color:var(--red)}
 
 /* Filtros de Por medir: fichas sin plano / sin foto de bacha */
 .col-filtros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
@@ -840,7 +854,123 @@ function sinAdjunto(c,tipo){
   return !c.adjuntos.some(a=>a.tipo===tipo);
 }
 
+// ============================================================
+// Material y color: el catálogo de la calculadora
+// ============================================================
+// calc.html es la única fuente de los colores; /api/colors-db.php los sirve (lo mismo que usa
+// Presupuestos). Acá sirve para dos cosas: sugerir el material al cargar o editar una obra, con el
+// formato "Marca · Color", y reconocer el color de cada ficha aunque esté escrito a mano
+// ("Negro Boreal Pulido", "gris mara granito"), para poder juntar en la cola las del mismo color.
+let CATALOGO=[];
+const suelto=t=>String(t==null?'':t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+async function cargarCatalogo(){
+  try{
+    const r=await fetch('/calculadora/api/colors-db.php',{credentials:'same-origin'});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||'colors-db');
+    d.colors.forEach(c=>{
+      c._h=suelto(c.full);
+      c._n=suelto(String(c.n).replace(/\([^)]*\)/g,' ').replace(/\*/g,' ')); // "Blanco Cana 24 (N y J)" → "blanco cana 24"
+      c._m=suelto(c.marca_label);
+    });
+    CATALOGO=d.colors.filter(c=>c._n);
+    MATCACHE={};
+    if(CARDS.length)dibujar(); // con el catálogo ya se puede agrupar por color
+  }catch(e){CATALOGO=[];} // sin catálogo no hay sugerencias; el texto se guarda igual
+}
+// El color de catálogo que corresponde a un texto de material: {c: entrada del catálogo, marca: true
+// si la marca es segura}, o null si no se reconoce. Es una lectura del texto, no cambia la ficha.
+// La marca importa: "Taj Mahal" existe en cuarcita y en Suprastone, y no son la misma placa.
+let MATCACHE={};
+function colorDe(texto){
+  const t=suelto(texto);
+  if(!t)return null;
+  if(t in MATCACHE)return MATCACHE[t];
+  const p=' '+t+' ';
+  const nombra=x=>p.indexOf(' '+x._m+' ')>=0||(x._m==='suprastone'&&p.indexOf(' supra ')>=0); // el texto dice la marca
+  let l=CATALOGO.filter(c=>c._h===t),exacto=l.length>0;          // 1) elegido de la lista: "Marca · Color"
+  if(!l.length){
+    // 2) el texto nombra un color del catálogo ("negro boreal pulido" → Negro Boreal): gana el nombre más largo
+    const c=CATALOGO.filter(x=>p.indexOf(' '+x._n+' ')>=0).sort((x,y)=>y._n.length-x._n.length);
+    if(c.length)l=c.filter(x=>x._n===c[0]._n);
+  }
+  if(!l.length&&t.length>=4){
+    // 3) el texto es parte de un solo color ("suggar" → Blanco Suggar)
+    const c=CATALOGO.filter(x=>(' '+x._n+' ').indexOf(' '+t+' ')>=0);
+    if(c.length&&c.every(x=>x._n===c[0]._n))l=c;
+  }
+  let r=null;
+  if(l.length){
+    const dicha=l.filter(nombra);
+    // la marca es segura si se eligió de la lista, si el color existe en una sola marca, o si el texto la nombra
+    r=exacto||l.length===1?{c:l[0],marca:true}:(dicha.length===1?{c:dicha[0],marca:true}:{c:l[0],marca:false});
+    // si el texto nombra OTRA marca que la del catálogo, la marca no es segura
+    if(!exacto&&r.marca&&!nombra(r.c)&&CATALOGO.some(nombra))r.marca=false;
+  }
+  return MATCACHE[t]=r;
+}
+// Clave para juntar fichas del mismo color. Con marca segura, color + marca; si no, solo el color
+// (se junta con las otras del mismo nombre que tampoco dicen la marca). Sin reconocer, el texto tal cual.
+const claveColor=c=>{const k=colorDe(c.material);return k?k.c._n+'|'+(k.marca?k.c._m:'?'):suelto(c.material);};
+
+// Sugerencias de material en un campo de texto (Cargar obra, Editar obra).
+function conCatalogo(idInput,idCaja){
+  const input=$(idInput),caja=$(idCaja);
+  if(!input||!caja)return;
+  const pintar=()=>{
+    if(!CATALOGO.length){caja.classList.remove('open');return;}
+    const q=suelto(input.value);
+    const l=(q?CATALOGO.filter(c=>c._h.indexOf(q)>=0):CATALOGO).slice(0,12);
+    caja.innerHTML=l.length?l.map((c,i)=>'<div class="mat-item'+(i===0?' active':'')+'" data-full="'+esc(c.full)+'"><span>'+esc(c.n)+'</span><i>'+esc(c.marca_label)+'</i></div>').join('')
+      :'<div class="mat-nada">No está en el catálogo de la calculadora. Se guarda igual, como lo escribiste.</div>';
+    caja.classList.add('open');
+  };
+  const elegir=el=>{input.value=el.dataset.full;caja.classList.remove('open');};
+  input.addEventListener('focus',pintar);
+  input.addEventListener('input',pintar);
+  input.addEventListener('keydown',ev=>{
+    if(!caja.classList.contains('open'))return;
+    const items=[...caja.querySelectorAll('.mat-item')];
+    if(!items.length)return;
+    let i=items.findIndex(x=>x.classList.contains('active'));
+    if(ev.key==='ArrowDown'||ev.key==='ArrowUp'){
+      ev.preventDefault();
+      if(i>=0)items[i].classList.remove('active');
+      i=ev.key==='ArrowDown'?(i+1)%items.length:(i<=0?items.length-1:i-1);
+      items[i].classList.add('active');items[i].scrollIntoView({block:'nearest'});
+    }else if(ev.key==='Enter'&&i>=0&&suelto(input.value)){ev.preventDefault();ev.stopPropagation();elegir(items[i]);}
+    else if(ev.key==='Escape'){ev.stopPropagation();caja.classList.remove('open');}
+  });
+  // pointerdown: sirve igual con mouse y con dedo, y llega antes de que el campo pierda el foco
+  caja.addEventListener('pointerdown',ev=>{const it=ev.target.closest('.mat-item');if(it){ev.preventDefault();elegir(it);}});
+  input.addEventListener('blur',()=>setTimeout(()=>caja.classList.remove('open'),180));
+}
+// Lo escrito, llevado al formato del catálogo cuando se reconoce sin dudas (mismo texto que una opción).
+function materialNormal(texto){
+  const t=suelto(texto);
+  if(!t)return '';
+  const c=CATALOGO.find(x=>x._h===t)||(()=>{const l=CATALOGO.filter(x=>x._n===t);return l.length===1?l[0]:null;})();
+  return c?c.full:String(texto).trim().replace(/\s+/g,' ');
+}
+
 // Orden de la cola dentro de una etapa.
+// En las etapas con turno (medir, instalar) manda la fecha. En las que no tienen turno (cortar,
+// fabricar) manda la semana en que hay que entregar, y dentro de la semana van juntas las del mismo
+// color: así dos Negro Boreal de la misma semana se cortan una atrás de la otra.
+let GRUPO={}; // key de ficha → {lim, des}: el vencimiento y la llegada más tempranos de su grupo (semana + color)
+function prepararColas(){
+  GRUPO={};
+  const g={};
+  CARDS.forEach(c=>{
+    const e=etapaDe(c.etapa);
+    if(!e||e.fecha||hecho(c))return;
+    const k=c.etapa+'|'+(c.semana||'')+'|'+claveColor(c);
+    const x=g[k]=g[k]||{lim:'9999',des:'9999'};
+    if(c.limite&&c.limite<x.lim)x.lim=c.limite;
+    if(c.desde&&c.desde<x.des)x.des=c.desde;
+    GRUPO[c.key]=x;
+  });
+}
 function ordenCola(a,b){
   const ha=hecho(a),hb=hecho(b);
   if(ha!==hb)return ha?1:-1;                             // lo que falta hacer, arriba
@@ -852,6 +982,19 @@ function ordenCola(a,b){
     if(!b.hora)return -1;
     return a.hora<b.hora?-1:1;
   }
+  if(!ha&&!etapaDe(a.etapa).fecha){                      // sin turno: semana de entrega → color → vencimiento
+    const sa=a.semana||'9999',sb=b.semana||'9999';
+    if(sa!==sb)return sa<sb?-1:1;                        // la semana que vence antes, arriba
+    const ga=GRUPO[a.key],gb=GRUPO[b.key];
+    if(ga&&gb&&ga!==gb){                                 // otro color: primero el grupo que vence antes
+      if(ga.lim!==gb.lim)return ga.lim<gb.lim?-1:1;
+      if(ga.des!==gb.des)return ga.des<gb.des?-1:1;
+      const ka=claveColor(a),kb=claveColor(b);
+      if(ka!==kb)return ka<kb?-1:1;
+    }
+    const la=a.limite||'9999',lb=b.limite||'9999';
+    if(la!==lb)return la<lb?-1:1;                        // mismo color: la que vence antes
+  }
   if(a.desde!==b.desde)return a.desde<b.desde?-1:1;      // después, la cola: el que entró antes
   return a.key<b.key?-1:1;
 }
@@ -860,6 +1003,7 @@ function ordenCola(a,b){
 // Las ya hechas (ya medidas, ya cortadas) no llevan número: esperan el control.
 let POS={};
 function numerarColas(){
+  prepararColas();
   POS={};
   ETAPAS.forEach(e=>{
     CARDS.filter(c=>c.etapa===e.id&&!hecho(c)).sort(ordenCola).forEach((c,i)=>{POS[c.key]=i+1;});
@@ -1082,7 +1226,7 @@ function dibujar(){
       if(nPisan)h+='<button type="button" class="col-aviso" data-falta="pisa_'+esc(e.id)+'">'+nPisan+' se pisan</button>';
       h+='</div>';
     }
-    if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">En orden de llegada</div>';
+    if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">Por semana de entrega · mismo color junto</div>';
     // Fila de acciones: cargar (solo la primera columna) y el botón que muestra u oculta los filtros.
     const nAct=filtros.filter(f=>falta[f[0]]).length,verF=filtros.length>0&&(!!filtrosAb[e.id]||nAct>0);
     if(esPrimera||filtros.length){
@@ -1097,7 +1241,15 @@ function dibujar(){
     let corte=lista.length;
     while(e.boton&&corte>0&&hecho(lista[corte-1]))corte--;
     const nHechas=lista.length-corte;
-    const cards=lista.map((c,i)=>(nHechas&&i===corte?'<div class="col-sep">'+esc(e.hecho)+' ('+nHechas+')</div>':'')+htmlCard(c)).join('');
+    // En las etapas sin turno, un renglón marca dónde empieza cada semana de entrega: se entiende el orden.
+    const conSemanas=!e.fecha&&!e.aparte&&columnas().indexOf(e)<ultima;
+    const sem=c=>{
+      if(!c.semana)return 'Sin plazo todavía';
+      const fin=masDias(c.semana,6);
+      return 'Entrega: semana del '+ddmm(c.semana)+(fin<HOY?' · vencida':(c.semana<=HOY?' · esta semana':''));
+    };
+    const cards=lista.map((c,i)=>(nHechas&&i===corte?'<div class="col-sep">'+esc(e.hecho)+' ('+nHechas+')</div>':'')
+      +(conSemanas&&i<corte&&(i===0||(lista[i-1].semana||'')!==(c.semana||''))?'<div class="col-sem'+(c.semana&&masDias(c.semana,6)<HOY?' rojo':'')+'">'+esc(sem(c))+'</div>':'')+htmlCard(c)).join('');
     if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(filtrando?'Sin resultados':'Nadie retira por el local')+'</div>';
     else h+=lista.length?cards:'<div class="col-vacia">'+(filtrando?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
     h+='</section>';
@@ -1543,7 +1695,7 @@ function pedirEditar(c){
     campo('edNombre','Cliente',c.nombre,'maxlength="120"')+
     campo('edCel','Teléfono',c.celular,'maxlength="40" inputmode="tel"')+
     campo('edDir','Dirección',c.direccion,'maxlength="200"')+
-    campo('edMat','Material y color',c.material,'maxlength="200"')+
+    '<label class="campo mat-wrap">Material y color (del catálogo de la calculadora)<input type="text" id="edMat" autocomplete="off" maxlength="200" value="'+esc(c.material)+'"><div class="mat-caja" id="edMatCaja"></div></label>'+
     campo('edCon','Trabajo',c.concepto,'maxlength="200"')+
     // El modelo de la bacha se puede cargar o corregir en cualquier etapa (el tilde solo vive en Por medir).
     (conBacha?campo('edBacha','Modelo de la bacha ('+BACHA[c.bacha]+')',c.bacha_modelo||'','maxlength="80" placeholder="Ej: Johnson E37, 37 × 34"'):'')+
@@ -1557,7 +1709,10 @@ function pedirEditar(c){
       else{
         // solo viaja lo que cambió
         [['nombre','edNombre',c.nombre],['celular','edCel',c.celular],['direccion','edDir',c.direccion],['material','edMat',c.material],['concepto','edCon',c.concepto]]
-          .forEach(x=>{if(v(x[1])!==String(x[2]||'').trim())body[x[0]]=v(x[1]);});
+          .forEach(x=>{
+            if(v(x[1])===String(x[2]||'').trim())return;          // no se tocó: queda exactamente como estaba
+            body[x[0]]=x[0]==='material'?materialNormal(v(x[1])):v(x[1]);
+          });
         if(body.nombre===''){$('edNombre').focus();toast('El nombre no puede quedar vacío.');return;}
       }
       const modelo=conBacha?v('edBacha').replace(/\s+/g,' '):'';
@@ -1604,6 +1759,7 @@ function pedirEditar(c){
   const ids=['edNro','edNombre','edCel','edDir','edMat','edCon'].concat(conBacha?['edBacha']:[]);
   const ini=ids.map(id=>$(id).value);
   modalProtegido=()=>ids.some((id,i)=>$(id)&&$(id).value!==ini[i]);
+  conCatalogo('edMat','edMatCaja');
   $(c.manual?'edNro':'edNombre').focus();
 }
 
@@ -1617,7 +1773,7 @@ function pedirCargar(){
     campo('cgNombre','Cliente','maxlength="120" placeholder="Nombre y apellido"')+
     campo('cgCel','Teléfono','maxlength="40" inputmode="tel"')+
     campo('cgDir','Dirección','maxlength="200"')+
-    campo('cgMat','Material y color','maxlength="200" placeholder="Ej: Blanco Suggar"')+
+    '<label class="campo mat-wrap">Material y color (del catálogo de la calculadora)<input type="text" id="cgMat" autocomplete="off" maxlength="200" placeholder="Escribí y elegí: Negro Boreal, Blanco Suggar…"><div class="mat-caja" id="cgMatCaja"></div></label>'+
     // De quién es la bacha, si ya se sabe: queda anotado en la ficha. No tilda "Tenemos la bacha".
     '<label class="campo aire" for="cgBachaMod">Bacha (opcional)</label><div class="sena" id="cgBacha"><button type="button" data-op="nuestra">Nuestra</button><button type="button" data-op="cliente">Del cliente</button><button type="button" data-op="no">No lleva</button></div>'+
     '<label class="campo" id="cgBachaModL" hidden>Modelo de la bacha (si ya se sabe)<input type="text" id="cgBachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34"></label>'+
@@ -1633,7 +1789,7 @@ function pedirCargar(){
       if(ocupado)return;
       ocupado=true;
       const bModelo=bacha&&bacha!=='no'?$('cgBachaMod').value.trim().replace(/\s+/g,' '):'';
-      const datos={nro:nro,nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:$('cgMat').value};
+      const datos={nro:nro,nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:materialNormal($('cgMat').value)};
       // La ventana NO se cierra hasta que el server confirma: si el número no existe (o falla
       // cualquier cosa), queda abierta con todo lo escrito y el motivo a la vista.
       const b=$('mOk'),rotulo=b.textContent;
@@ -1679,6 +1835,7 @@ function pedirCargar(){
     $('cgBachaModL').hidden=!bacha||bacha==='no';
     if(bacha&&bacha!=='no')$('cgBachaMod').focus();
   }));
+  conCatalogo('cgMat','cgMatCaja');
   $('cgNro').focus();
 }
 
@@ -1954,6 +2111,7 @@ function exportarCSV(){
     ['Dirección',c=>c.direccion],
     ['Zona',c=>c.zona],
     ['Material',c=>c.material],
+    ['Color reconocido',c=>{const k=colorDe(c.material);return k?k.c.n+' ('+(k.marca?k.c.marca_label:'marca sin definir')+')':'';}],
     ['Trabajo',c=>c.concepto],
     ['Etapa',c=>etapaDe(c.etapa).titulo],
     ['Turno (qué)',c=>etapaDe(c.etapa).fecha||''],
@@ -2014,6 +2172,7 @@ $('vistaB').addEventListener('click',()=>{
 })();
 
 cargar();
+cargarCatalogo();
 </script>
 </body>
 </html>

@@ -180,6 +180,8 @@ $BS_ETAPAS = [
         'pide_hora'   => true,
         'checks' => [
             'avisado' => 'Se avisó al cliente',
+            // Antes de mandar al equipo: confirmar con el cliente a qué dirección se va.
+            'dir_ok'  => 'Dirección confirmada',
             'equipo'  => 'Instaladores',
             // Cierre de la instalación: la mesada quedó colocada y el cliente
             // dio el visto bueno. Sin esto no pasa a Por archivar.
