@@ -384,16 +384,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-filtros button{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer}
 .col-filtros button i{font-style:normal;opacity:.7;font-variant-numeric:tabular-nums}
 .col-filtros button.on{background:var(--et);border-color:var(--et);color:var(--et-on)}
-/* "Necesitan continuar" con fichas adentro: es un pendiente urgente, se nota */
-.col-filtros button.urg{border-color:var(--red);color:var(--red);background:var(--red-soft)}
-.col-filtros button.urg i{opacity:1}
-.col-filtros button.urg.on{background:var(--red);border-color:var(--red);color:#fff}
-/* "Sin fecha" / "Sin turno" con fichas adentro: mismo aviso rojo con "!" que llevan esas fichas */
-.col-filtros button.avi{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--red);color:var(--red);background:var(--red-soft)}
-.col-filtros button.avi::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--red);color:var(--card);font-size:11px;font-weight:800;line-height:1;flex-shrink:0}
-.col-filtros button.avi i{opacity:1}
-.col-filtros button.avi.on{background:var(--red);color:var(--card)}
-.col-filtros button.avi.on::before{background:var(--card);color:var(--red)}
+/* Filtros con algo urgente adentro ("Necesitan continuar", "Sin fecha", "Sin turno", "Se pisan"):
+   sin prender se ven igual que los demás, y lo urgente lo marca solo el número en rojo. Antes iban
+   pintados de rojo y parecían ya seleccionados. Prendido hay un solo aspecto para todos: relleno
+   en el color de la etapa. */
+.col-filtros button.urg i,.col-filtros button.avi i{opacity:1;color:var(--red);font-weight:800}
+.col-filtros button.on i,.col-filtros button.urg.on i,.col-filtros button.avi.on i{color:inherit;opacity:.85}
 
 /* === ADJUNTOS: foto de bacha y plano === */
 .c-adj{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
