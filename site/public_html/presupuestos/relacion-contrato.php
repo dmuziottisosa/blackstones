@@ -688,7 +688,7 @@ function dibujar(){
     const obra=[c.factura?'Factura <b>'+(c.factura==='si'?'sí':'no')+'</b>':'',c.muebles?'Muebles <b>'+(c.muebles==='si'?'sí':'no')+'</b>':'',v.bacha?'Pileta <b>'+esc(PIL[v.bacha].toLowerCase())+'</b>':''].filter(Boolean).join(' · ');
     return '<div class="fila'+(k?' enlazada':'')+'" data-id="'+esc(c.id)+'" tabindex="0" role="button" aria-label="Abrir el contrato de '+esc(v.cliente)+'">'
       +'<div class="c-fec">'+esc(fecha)+(dt?'<small>'+DIAS[dt.getDay()]+'</small>':'')+'</div>'
-      +'<div class="c-nro">'+(c.nro?esc(c.nro)+(c.presup&&!c.presup.existe?'<span class="duda" title="Ese N° no existe en Presupuestos">?</span>':''):'<span class="falta">Sin N°</span>')+'</div>'
+      +'<div class="c-nro">'+(c.nro?esc(c.nro)+(c.presup&&!c.presup.existe?'<span class="duda" title="Ese N° no está en Presupuestos: o está mal escrito, o ya se borró (los presupuestos duran 180 días).'+(c.archivo?' El contrato conserva el presupuesto adjunto.':'')+'">?</span>':''):'<span class="falta">Sin N°</span>')+'</div>'
       +'<div class="c-cli"><div class="f-nom">'+esc(v.cliente)+(c.archivo?'<span class="ver" title="Verificado: tiene adjunto el presupuesto ('+esc(c.archivo.ext.toUpperCase())+')">'+ICO_VER+'</span>':'')+(c.prueba?'<span class="prueba-t">PRUEBA</span>':'')+(nota?'<span class="nota-i" title="'+esc(nota)+'"></span>':'')+'</div>'+(sub.replace(/<[^>]+>/g,'').trim()?'<div class="f-sub">'+sub+'</div>':'')+'</div>'
       +'<div class="c-mat"><div class="f-mat">'+(esc(v.material)||'<span style="color:var(--text3)">Sin material</span>')+'</div>'+(c.medidas?'<div class="f-sub">'+esc(c.medidas)+'</div>':'')+'</div>'
       +'<div class="der"><span class="rot">Total</span><div class="plata'+(tot.length?'':' nada')+'">'+(tot.length?tot.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
@@ -808,7 +808,7 @@ function pintarPres(){
     const tot=partes({USD:p.total_usd,ARS:p.total_ars}).join(' + ');
     e='<span class="enl">'+ICO_ENL+'Enlazado</span><span>N° <b>'+esc(p.cliente_nro+'-'+p.sub)+'</b>'+(p.cliente?' · '+esc(p.cliente):'')+(tot?' · '+tot:'')+'</span>'
       +'<a href="'+(p.detalle?'/calculadora/api/render-pdf.php?nro='+encodeURIComponent(p.cliente_nro)+'&sub='+p.sub:'/presupuestos/?tab=activos')+'" target="_blank" rel="noopener">'+(p.detalle?'Ver presupuesto':'Ir a Presupuestos')+'</a>';
-  }else e='<span class="amb">No hay ningún presupuesto N° '+esc(p.cliente_nro+(p.sub?'-'+p.sub:''))+' en Presupuestos.</span>';
+  }else e='<span class="amb">No hay ningún presupuesto N° '+esc(p.cliente_nro+(p.sub?'-'+p.sub:''))+' en Presupuestos.</span><span class="gris">O está mal escrito, o ya se borró: los presupuestos duran 180 días. Lo que queda para siempre es el archivo adjunto.</span>';
   $('pEst').innerHTML=e;
   const a=F.archivoNuevo?{nombre:F.archivoNuevo.name,bytes:F.archivoNuevo.size,nuevo:true}:(F.quitarArchivo?null:F.archivo);
   $('pArch').innerHTML=a

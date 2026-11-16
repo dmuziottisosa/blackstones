@@ -52,6 +52,10 @@ Definido por el dueño (16/11/2026):
 
 **Solo el archivo adjunto verifica.** El N° enlaza, pero no pone el sello. Un archivo por contrato (PDF, .xlsx o .xls, hasta 10 MB); subir otro reemplaza al anterior. El filtro "Sin verificar" muestra los que no lo tienen. Al borrar el contrato se borra su archivo.
 
+### Por qué solo el archivo verifica
+
+El presupuesto dura **180 días** en la pestaña Presupuestos y después se borra (regla del dueño, 16/11/2026; ver `01-strategy/decision-log/2026-11-16-la-etapa-la-dicta-el-tablero.md`). Pasado ese tiempo el N° deja de existir: la planilla muestra un "?" al lado del número y la ficha lo explica. El archivo adjunto no se borra: es lo que queda del presupuesto. Los contratos y sus adjuntos no se borran solos.
+
 ## Los puntitos de cada renglón
 
 Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, listo para pegar en WhatsApp), copiar dirección y borrar contrato. Lo que el renglón no tiene sale apagado.

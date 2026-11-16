@@ -11,6 +11,11 @@
 //     Para cada cotización:
 //       Si estado == "entregado" Y (now - entregado_at) > 180 días:
 //         Borrar la cotización del array.
+//       Si estado == "aprobado": NO se borra nunca por antigüedad. Es una obra
+//         viva en el tablero, y la etapa la dicta el tablero (regla del dueño,
+//         16/11/2026): sale de ahí cuando se archiva (pasa a "entregado" y recién
+//         entonces empieza a correr su reloj) o cuando alguien borra la ficha.
+//         Antes se borraba a los 180 días de aprobada, con sus fotos y planos.
 //       Si estado != "entregado" Y NO existe ningún entregado en este cliente
 //          Y (now - última_modificación) > 180 días:
 //         Borrar la cotización del array.
@@ -92,6 +97,9 @@ if (is_dir(BS_CLIENTES_DIR)) {
                     $stats['cotizaciones_borradas']++;
                     continue;
                 }
+                $kept[] = $cot;
+            } elseif ($estado === 'aprobado') {
+                // Obra viva en el tablero: no vence por antigüedad (ver arriba).
                 $kept[] = $cot;
             } else {
                 // No-entregado: si no hay entregado activo Y no se modificó hace >180 días → borrar

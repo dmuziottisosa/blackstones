@@ -173,6 +173,8 @@ Desde "Más" → **Retira en el local**, o arrastrando la tarjeta al cuadro de a
 
 Si un presupuesto se devuelve a Activos desde el hub, la tarjeta vuelve al tablero con sus tildes.
 
+- **Una obra viva no vence (16/11/2026):** la limpieza nocturna de 180 días ya no toca las obras que están en el tablero. Antes las borraba, con sus fotos, a los 180 días de aprobadas. El reloj de 180 días empieza al archivar.
+
 ## Editar una obra y cambiarle el N° de presupuesto
 
 Botón "Editar obra" en "Más" (también desde el calendario, que muestra la misma ficha). Se puede en cualquier etapa.
