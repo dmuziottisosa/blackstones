@@ -53,6 +53,19 @@ Con la lista vacía aparece "Cargar 3 de prueba". Quedan marcados PRUEBA, no cue
 
 La página no modifica ningún endpoint existente: para crear la ficha usa `tablero-cargar.php` y `tablero.php`, los mismos que usa el tablero.
 
+## Regla crítica: se puede borrar entero sin que se caiga nada
+
+Exigencia del dueño (16/11/2026): **Relación-Contrato se tiene que poder eliminar completa sin afectar el tablero ni el calendario.**
+
+- La dependencia va en un solo sentido: Relación-Contrato **lee** del tablero. El tablero, el calendario, el hub y la calculadora **nunca** leen ni escriben nada de contratos.
+- Ningún archivo existente llama a `contratos.php` ni abre `bs-data/contratos/`. Lo único que la nombra desde afuera es el link de la pestaña en la barra de páginas.
+- Las fichas creadas con "Cargar en Por medir" son fichas comunes del tablero: siguen ahí, con su fecha y su seña, aunque el contrato desaparezca.
+- Verificado el 16/11/2026: con la página, el endpoint y los datos borrados, pasaron la regresión completa del tablero y las pruebas del calendario.
+
+**Para quien toque esto después:** no agregar en `tablero.php`, `calendario.php` ni en sus endpoints nada que dependa de contratos. Si algún día el tablero necesita mostrar algo del contrato, tiene que tolerar que no exista.
+
+Para eliminarla: borrar `presupuestos/relacion-contrato.php`, `calculadora/api/contratos.php` y la carpeta `bs-data/contratos/`, y sacar el link de la pestaña de las cinco páginas que lo tienen (calculadora, presupuestos, tablero, calendario, stock). Si el link queda, lleva a una página que no existe; nada más.
+
 ## Lo que esta versión deja afuera a propósito
 
 - Pago en una moneda de un total en otra (pesos contra un total en dólares): no hay conversión; queda como saldo en una moneda y "a favor" en la otra.

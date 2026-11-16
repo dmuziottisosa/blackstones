@@ -13,6 +13,8 @@
 - N° de presupuesto: debería estar, pero no es bloqueante.
 - Todo el equipo ve la plata, por ahora.
 
+- **Crítico:** Relación-Contrato se puede eliminar entera sin que se caiga nada del tablero ni del calendario. La dependencia es de un solo sentido (contratos lee del tablero, nunca al revés).
+
 ## Por qué
 
 - No romper lo que ya funciona: datos aparte, y la ficha se crea con los endpoints existentes.
