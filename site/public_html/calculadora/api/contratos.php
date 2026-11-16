@@ -58,6 +58,22 @@ function bs_contrato_texto($body, $campo, $max, $etiqueta) {
     return $v;
 }
 
+// Teléfono: valen "+54 9 11 5555-1234" (como se copia de WhatsApp) y "1155551234".
+// Son el mismo número; se guarda "11 5555-1234". Lo que no se reconoce queda como vino.
+function bs_contrato_tel($txt) {
+    $d = preg_replace('/\D/', '', (string)$txt);
+    if (strlen($d) === 13 && strpos($d, '549') === 0) $d = substr($d, 3);
+    elseif (strlen($d) === 12 && strpos($d, '54') === 0) $d = substr($d, 2);
+    elseif (strlen($d) === 11 && $d[0] === '0') $d = substr($d, 1);
+    if (strlen($d) === 12 && strpos($d, '1115') === 0) $d = '11' . substr($d, 4);
+    if (strlen($d) === 10) {
+        return strpos($d, '11') === 0
+            ? '11 ' . substr($d, 2, 4) . '-' . substr($d, 6)
+            : substr($d, 0, 3) . ' ' . substr($d, 3, 3) . '-' . substr($d, 6);
+    }
+    return trim(preg_replace('/\s+/', ' ', preg_replace('/[^\d+()\-\s]/u', '', (string)$txt)));
+}
+
 function bs_contrato_monto($body, $campo, $etiqueta) {
     $v = $body[$campo] ?? 0;
     if ($v === '' || $v === null) $v = 0;
@@ -71,7 +87,7 @@ function bs_contrato_monto($body, $campo, $etiqueta) {
 function bs_contrato_campos($body) {
     $c = [];
     $c['cliente']   = bs_contrato_texto($body, 'cliente', 120, 'Cliente');
-    $c['telefono']  = bs_contrato_texto($body, 'telefono', 40, 'Teléfono');
+    $c['telefono']  = bs_contrato_tel(bs_contrato_texto($body, 'telefono', 60, 'Teléfono'));
     $c['direccion'] = bs_contrato_texto($body, 'direccion', 200, 'Dirección');
     $c['material']  = bs_contrato_texto($body, 'material', 200, 'Material');
     // La nota es el lugar de los detalles: larga y con sus renglones.
@@ -238,17 +254,17 @@ try {
         }
         $hoy = date('Y-m-d');
         $pruebas = [
-            ['cliente' => 'PRUEBA · Cocina en L', 'telefono' => '11 0000-0001', 'direccion' => 'Calle de prueba 123, CABA', 'nro' => '',
+            ['cliente' => 'PRUEBA · Cocina en L', 'telefono' => '11 5550-0001', 'direccion' => 'Calle de prueba 123, CABA', 'nro' => '',
              'fecha' => $hoy, 'vendedor' => 'Prueba', 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => 'Instagram', 'medidas' => '2,40 x 0,62 + 1,60 x 0,62', 'factura' => 'si', 'muebles' => 'si',
              'material' => 'Granito Nacional · Negro Boreal', 'bacha' => 'nuestra', 'bacha_modelo' => '403-E',
              'medicion' => date('Y-m-d', strtotime('+3 days')), 'total_usd' => 1200, 'total_ars' => 0,
              'sena' => ['monto' => 500, 'moneda' => 'USD', 'fecha' => $hoy], 'pagos' => [], 'nota' => 'Renglón de prueba: se puede borrar.'],
-            ['cliente' => 'PRUEBA · Baño doble', 'telefono' => '11 0000-0002', 'direccion' => 'Calle de prueba 456, Lanús', 'nro' => '',
+            ['cliente' => 'PRUEBA · Baño doble', 'telefono' => '11 5550-0002', 'direccion' => 'Calle de prueba 456, Lanús', 'nro' => '',
              'fecha' => $hoy, 'vendedor' => 'Prueba', 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => 'Recomendación', 'medidas' => '1,20 x 0,50', 'factura' => 'no', 'muebles' => 'no',
              'material' => 'Purastone · Blanco Paloma (N y J)', 'bacha' => 'cliente', 'bacha_modelo' => '',
              'medicion' => '', 'total_usd' => 0, 'total_ars' => 850000,
              'sena' => null, 'pagos' => [], 'nota' => 'Renglón de prueba: sin seña y sin medición coordinada.'],
-            ['cliente' => 'PRUEBA · Isla y mesada', 'telefono' => '11 0000-0003', 'direccion' => 'Calle de prueba 789, Quilmes', 'nro' => '',
+            ['cliente' => 'PRUEBA · Isla y mesada', 'telefono' => '11 5550-0003', 'direccion' => 'Calle de prueba 789, Quilmes', 'nro' => '',
              'fecha' => $hoy, 'vendedor' => 'Prueba', 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => 'Local', 'medidas' => 'Isla 1,80 x 0,90 + mesada 3,10 x 0,62', 'factura' => '', 'muebles' => 'si',
              'material' => 'Silestone · Blanco Zeus', 'bacha' => 'no', 'bacha_modelo' => '',
              'medicion' => date('Y-m-d', strtotime('+7 days')), 'total_usd' => 2100, 'total_ars' => 300000,

@@ -150,6 +150,7 @@ button{font-family:inherit;color:inherit}
 .c-nro .falta{font-size:11.5px;color:var(--amb)}
 .f-nom{font-size:14px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .f-sub{font-size:11.5px;color:var(--text3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f-sub .tel{color:var(--text2);font-weight:600;text-decoration:none;font-variant-numeric:tabular-nums}
 .f-mat{color:var(--text2);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .plata{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.35}
 .plata span{display:block;white-space:nowrap}
@@ -230,6 +231,8 @@ button{font-family:inherit;color:inherit}
 .modal h4{margin:24px 0 0;padding-top:18px;border-top:1px solid var(--border-soft);font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--text)}
 .campo{display:block;margin-top:14px;font-size:12px;font-weight:700;color:var(--text2)}
 .campo i{font-style:normal;font-weight:500;color:var(--text3)}
+.campo i a{color:var(--gr);font-weight:700;text-decoration:none}
+.campo i a[hidden]{display:none}
 .campo input,.campo select,.campo textarea{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
 .campo textarea{resize:vertical;min-height:64px;line-height:1.45}
 .campo input:focus,.campo select:focus,.campo textarea:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
@@ -272,6 +275,7 @@ button{font-family:inherit;color:inherit}
   .fila:hover{background:var(--gd-soft)}
   .btn:hover,.mes button:not(:disabled):hover,.filtros button:not(.on):hover{border-color:var(--gd)}
   .cab button:hover{color:var(--text)}
+  .f-sub .tel:hover{color:var(--gr);text-decoration:underline}
   .pago button:hover{background:var(--red-soft);color:var(--red)}
 }
 a,button,.toggle{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
@@ -461,6 +465,30 @@ function fch(iso){
   return DIAS[d.getDay()]+' '+String(p[2]).padStart(2,'0')+'/'+String(p[1]).padStart(2,'0')+(HOY&&p[0]!==+HOY.slice(0,4)?'/'+String(p[0]).slice(2):'');
 }
 
+// --- teléfonos ---
+// Valen los dos formatos: "+54 9 11 5555-1234" (como se copia de WhatsApp, a veces con caracteres
+// invisibles) y "1155551234". Los dos son el mismo número: se guarda y se muestra "11 5555-1234".
+function telDigitos(s){
+  let d=String(s||'').replace(/\D/g,'');
+  if(d.length===13&&d.indexOf('549')===0)d=d.slice(3);       // +54 9 11 5555-1234
+  else if(d.length===12&&d.indexOf('54')===0)d=d.slice(2);   // +54 11 5555-1234
+  else if(d.length===11&&d[0]==='0')d=d.slice(1);            // 011 5555-1234
+  if(d.length===12&&d.indexOf('1115')===0)d='11'+d.slice(4); // 11 15 5555-1234
+  return d;
+}
+function telLindo(s){
+  const d=telDigitos(s);
+  if(d.length===10)return d.indexOf('11')===0?'11 '+d.slice(2,6)+'-'+d.slice(6):d.slice(0,3)+' '+d.slice(3,6)+'-'+d.slice(6);
+  // no se reconoce (interno, de otro país, incompleto): queda como se escribió, sin caracteres raros
+  return String(s||'').replace(/[^\d+()\-\s]/g,'').replace(/\s+/g,' ').trim();
+}
+function waLink(s){
+  const d=telDigitos(s);
+  if(d.length===10)return 'https://wa.me/549'+d;
+  const t=String(s||'').replace(/\D/g,'');
+  return /^\s*\+/.test(String(s||''))&&t.length>=10?'https://wa.me/'+t:'';
+}
+
 // --- enlace con el tablero ---
 const keyDe=c=>c.enlace?c.enlace.cliente_nro+'-'+c.enlace.sub:'';
 const cardDe=c=>c.enlace?(CARDS[keyDe(c)]||null):null;
@@ -469,7 +497,7 @@ function ver(c){
   const k=cardDe(c);
   if(!k)return c;
   return Object.assign({},c,{
-    cliente:k.nombre||c.cliente,telefono:k.celular||c.telefono,direccion:k.direccion||c.direccion,material:k.material||c.material,
+    cliente:k.nombre||c.cliente,telefono:telLindo(k.celular)||c.telefono,direccion:k.direccion||c.direccion,material:k.material||c.material,
     bacha:k.bacha||c.bacha,bacha_modelo:k.bacha?k.bacha_modelo:c.bacha_modelo,
     sena:k.sena?{monto:k.sena.monto,moneda:k.sena.moneda,fecha:(c.sena&&c.sena.fecha)||HOY}:c.sena
   });
@@ -538,6 +566,7 @@ function dibujar(){
   $('avisoP').hidden=!pr;
   if(pr)$('avisoP').innerHTML='<span>'+(pr===1?'Hay 1 renglón de prueba.':'Hay '+pr+' renglones de prueba.')+' No son contratos reales y cuentan en los números hasta que los borres.</span><button type="button" class="btn chico" data-borrar-prueba>Borrar los de prueba</button>';
   const t=llano(q).trim(),buscando=!!t;
+  const qTel=/^[\d\s+()\-.\u2010-\u2015\u200e\u200f\u202a-\u202e\u00a0]+$/.test(q.trim())&&telDigitos(q).length>=6?telDigitos(q):'';
   $('mesTxt').textContent=buscando?'Todos los meses':mesTxt(mes);
   $('mesAnt').disabled=$('mesSig').disabled=buscando;
   $('mesHoy').hidden=buscando||mes===HOY.slice(0,7);
@@ -550,6 +579,7 @@ function dibujar(){
   const delMes=CONTRATOS.filter(c=>{
     if(!buscando)return (c.fecha||'').slice(0,7)===mes;
     const v=ver(c);
+    if(qTel&&telDigitos(v.telefono).indexOf(qTel)>=0)return true; // el teléfono, pegado como venga
     return llano([v.cliente,c.nro,keyDe(c),v.material,c.vendedor,c.procedencia,v.telefono,v.direccion,c.contrato,c.contrato_paralelo,c.nota].join(' ')).indexOf(t)>=0;
   });
   // Lo que se ve es lo que se suma: arriba, en los filtros y en el pie. Los de prueba cuentan
@@ -587,7 +617,8 @@ function dibujar(){
     const p=(c.fecha||'').split('-').map(Number),dt=p.length===3?new Date(p[0],p[1]-1,p[2]):null;
     const fecha=dt?String(p[2]).padStart(2,'0')+'/'+String(p[1]).padStart(2,'0')+(p[0]!==+HOY.slice(0,4)?'/'+String(p[0]).slice(2):''):'';
     // debajo del nombre: en la planilla, vendedor y procedencia; en tarjeta se suman N° y fecha
-    const sub='<span class="solo-t">'+(c.nro?'N° '+esc(c.nro):'<span class="falta">Sin N°</span>')+(fecha?' · '+esc(fch(c.fecha)):'')+([c.vendedor,c.procedencia].some(Boolean)?' · ':'')+'</span>'+[c.vendedor,c.procedencia].filter(Boolean).map(esc).join(' · ');
+    const sub='<span class="solo-t">'+(c.nro?'N° '+esc(c.nro):'<span class="falta">Sin N°</span>')+(fecha?' · '+esc(fch(c.fecha)):'')+([v.telefono,c.vendedor,c.procedencia].some(Boolean)?' · ':'')+'</span>'
+      +[v.telefono?(waLink(v.telefono)?'<a class="tel" href="'+esc(waLink(v.telefono))+'" target="_blank" rel="noopener" title="Abrir WhatsApp">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'',esc(c.vendedor),esc(c.procedencia)].filter(Boolean).join(' · ');
     const tot=partes(n.tot),pag=partes(n.pag);
     let tab;
     if(!c.enlace)tab='<button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
@@ -655,7 +686,7 @@ function abrirFicha(id){
   h+='<label class="campo notas">Notas<textarea id="fNota" rows="4" maxlength="4000" placeholder="Acá van los detalles: qué se acordó, aclaraciones de medidas, forma de pago, lo que haya que acordarse.">'+val(c&&c.nota)+'</textarea></label>';
   h+='<h4>Cliente</h4>'
     +'<label class="campo">Nombre<input id="fCliente" value="'+val(v.cliente)+'" autocomplete="off"'+ro+(c?'':' data-foco')+'></label>'
-    +'<div class="dos"><label class="campo">Teléfono<input id="fTel" value="'+val(v.telefono)+'" inputmode="tel" autocomplete="off"'+ro+'></label>'
+    +'<div class="dos"><label class="campo">Teléfono <i>· <a id="fWa" href="#" target="_blank" rel="noopener" hidden>abrir WhatsApp</a></i><input id="fTel" value="'+val(telLindo(v.telefono))+'" inputmode="tel" autocomplete="off" placeholder="11 5555-1234"'+ro+'></label>'
     +'<label class="campo">Dirección<input id="fDir" value="'+val(v.direccion)+'" autocomplete="off"'+ro+'></label></div>';
   h+='<h4>Contrato</h4>'
     +'<div class="dos"><label class="campo">N° de presupuesto <i>· si lo tiene</i><input id="fNro" value="'+val(c&&c.nro)+'" placeholder="0042" inputmode="numeric" autocomplete="off"></label>'
@@ -689,13 +720,21 @@ function abrirFicha(id){
   abrirModal(h,false,true);
   pintarPagos();
   crecerNota();
+  pintarTel(false);
 }
 function datosForm(){
   const g=id=>$(id)?$(id).value.trim():'';
-  return {nro:g('fNro'),fecha:g('fFecha'),cliente:g('fCliente'),telefono:g('fTel'),direccion:g('fDir'),vendedor:g('fVend'),procedencia:g('fProc'),
+  return {nro:g('fNro'),fecha:g('fFecha'),cliente:g('fCliente'),telefono:telLindo(g('fTel')),direccion:g('fDir'),vendedor:g('fVend'),procedencia:g('fProc'),
     contrato:g('fCtto'),contrato_paralelo:g('fCttoP'),material:g('fMat'),medidas:g('fMed'),total_usd:num(g('fTotU')),total_ars:num(g('fTotA')),
     sena_monto:num(g('fSen')),sena_moneda:g('fSenM')||'ARS',sena_fecha:g('fSenF'),factura:F.factura,muebles:F.muebles,bacha:F.bacha,
     bacha_modelo:F.bacha==='nuestra'?g('fModelo'):'',medicion:g('fMedicion'),nota:g('fNota')};
+}
+// El teléfono se acomoda al salir del campo (o al pegar) y muestra el link a WhatsApp si es un número completo.
+function pintarTel(acomodar){
+  const i=$('fTel'),a=$('fWa');if(!i)return;
+  if(acomodar&&!i.readOnly&&i.value.trim())i.value=telLindo(i.value);
+  const w=waLink(i.value);
+  if(a){a.hidden=!w;if(w)a.href=w;}
 }
 // La caja de notas crece con lo que se escribe (hasta un tope, después se desplaza por dentro).
 function crecerNota(){const t=$('fNota');if(!t)return;t.style.height='auto';t.style.height=Math.min(320,Math.max(104,t.scrollHeight+2))+'px';}
@@ -733,7 +772,7 @@ function pedirEnviar(id){
   const li=(a,b)=>b?'<li><span>'+a+'</span><b>'+esc(b)+'</b></li>':'';
   let h='<h3>Cargar en Por medir</h3>';
   if(c.nro)h+='<div class="bajada">Se aprueba el presupuesto <b>N° '+esc(c.nro)+'</b> y la obra aparece en Por medir del tablero, con los datos de ese presupuesto. Si ya está en el tablero, solo se enlaza.</div><ul class="lista-c">'+li('Pileta',bachaTxt(c))+li('Medición',fch(c.medicion))+li('Seña',c.sena?plata(c.sena.monto,c.sena.moneda):'')+'</ul>';
-  else h+='<div class="bajada">Se crea la ficha en Por medir del tablero con estos datos. El total, los pagos y lo demás del contrato quedan acá.</div><ul class="lista-c">'+li('Cliente',c.cliente)+li('Teléfono',c.telefono)+li('Dirección',c.direccion)+li('Material',c.material)+li('Pileta',bachaTxt(c))+li('Medición',fch(c.medicion))+li('Seña',c.sena?plata(c.sena.monto,c.sena.moneda):'')+'</ul>';
+  else h+='<div class="bajada">Se crea la ficha en Por medir del tablero con estos datos. El total, los pagos y lo demás del contrato quedan acá.</div><ul class="lista-c">'+li('Cliente',c.cliente)+li('Teléfono',telLindo(c.telefono))+li('Dirección',c.direccion)+li('Material',c.material)+li('Pileta',bachaTxt(c))+li('Medición',fch(c.medicion))+li('Seña',c.sena?plata(c.sena.monto,c.sena.moneda):'')+'</ul>';
   h+='<div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar>Cancelar</button><button type="button" class="ok" data-foco data-confirmar-enviar="'+esc(c.id)+'">Cargar en Por medir</button></div>';
   abrirModal(h,true,false);
 }
@@ -741,7 +780,7 @@ async function enviar(id){
   const c=CONTRATOS.find(x=>x.id===id);if(!c)return;
   let nro,sub,yaEstaba=false;
   try{
-    const r=await pedir(API_CARGAR,c.nro?{nro:c.nro}:{nombre:c.cliente,celular:c.telefono,direccion:c.direccion,material:c.material});
+    const r=await pedir(API_CARGAR,c.nro?{nro:c.nro}:{nombre:c.cliente,celular:telLindo(c.telefono),direccion:c.direccion,material:c.material});
     nro=r.cliente_nro;sub=r.sub;
   }catch(e){
     // El presupuesto ya estaba aprobado: la ficha existe, solo falta enlazarla.
@@ -836,7 +875,8 @@ document.addEventListener('keydown',ev=>{
   if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList&&ev.target.classList.contains('fila')){ev.preventDefault();abrirFicha(ev.target.dataset.id);}
 });
 $('modal').addEventListener('input',ev=>{if(ev.target.id==='fNota'){crecerNota();return;}if(F&&['fTotU','fTotA','fSen','fSenM'].indexOf(ev.target.id)>=0)pintarPagos();});
-$('modal').addEventListener('change',ev=>{if(F&&ev.target.id==='fSenM')pintarPagos();});
+$('modal').addEventListener('change',ev=>{if(F&&ev.target.id==='fSenM')pintarPagos();if(ev.target.id==='fTel')pintarTel(true);});
+$('modal').addEventListener('paste',ev=>{if(ev.target.id==='fTel')setTimeout(()=>pintarTel(true),0);});
 $('buscar').addEventListener('input',()=>{q=$('buscar').value;if(mes)dibujar();});
 $('mesAnt').addEventListener('click',()=>moverMes(-1));
 $('mesSig').addEventListener('click',()=>moverMes(1));

@@ -15,7 +15,7 @@ Los definió el dueño (16/11/2026), sobre la planilla que ya usaba:
 |---|---|
 | N° de presupuesto | No es obligatorio, pero debería estar: sin N° el renglón muestra "Sin N°" en ámbar |
 | Vendedor, Fecha del contrato, Procedencia | Texto libre; vendedor y procedencia sugieren lo ya usado |
-| Cliente, Teléfono, Dirección | |
+| Cliente, Teléfono, Dirección | El teléfono vale pegado de WhatsApp ("+54 9 11 5555-1234", incluso con los caracteres invisibles que agrega) o como diez dígitos ("1155551234"). Son el mismo número: se guarda y se muestra "11 5555-1234". Se ve debajo del nombre y abre WhatsApp con un toque. El buscador lo encuentra en cualquiera de los dos formatos |
 | Contrato, Contrato paralelo | Texto libre (`status: hypothesis`: falta que el dueño defina qué va en cada uno) |
 | Material | Sugiere del catálogo de la calculadora ("Marca · Color") |
 | Medidas | Texto libre |
