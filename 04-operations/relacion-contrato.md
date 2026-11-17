@@ -51,7 +51,7 @@ Definido por el dueño (16/11/2026):
 2. **Con N° de presupuesto:** el contrato queda enlazado con ese presupuesto de Presupuestos. La ficha lo busca mientras se escribe y muestra de quién es y su total, con el link para verlo; si el N° no existe, lo avisa (y en la planilla queda un "?" al lado del número).
 3. **Con el PDF o Excel del presupuesto adjunto:** el contrato queda **VERIFICADO** (sello dorado al lado del nombre, en la planilla y en la ficha).
 
-**Solo el archivo adjunto verifica.** El N° enlaza, pero no pone el sello. Un archivo por contrato (PDF, .xlsx o .xls, hasta 10 MB); subir otro reemplaza al anterior. El filtro "Sin verificar" muestra los que no lo tienen. El archivo acompaña al contrato a la papelera y se borra con él a los 30 días.
+**Solo el archivo adjunto verifica.** El N° enlaza, pero no pone el sello. Un archivo por contrato (PDF, .xlsx o .xls, hasta 10 MB); subir otro reemplaza al anterior. El límite de Hostinger no es problema: `uploadMaxFilesize` y `postMaxSize` están en 1024M (verificado por el dueño en el panel, 17/11/2026). El filtro "Sin verificar" muestra los que no lo tienen. El archivo acompaña al contrato a la papelera y se borra con él a los 30 días.
 
 ### Por qué solo el archivo verifica
 
