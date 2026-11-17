@@ -693,6 +693,8 @@ let INSTALADORES=[];// quiénes instalan (viene del server)
 let FABRICADORES=[];// quiénes fabrican (viene del server)
 let CORTADORES=[];  // quiénes cortan (viene del server)
 let MEDIDORES=[];   // quiénes miden (viene del server)
+let APROB=[];       // tildes que son aprobaciones: muestran quién las dio (viene del server)
+let PUEDE_APROBAR=false; // si el que mira puede dar aprobaciones
 // Tildes que piden elegir personas: uno o varios nombres de una lista.
 const PERSONAS={
   medidor:{campo:'medidor',lista:()=>MEDIDORES,titulo:'Medidor',pregunta:'¿Quién va a medir?',rotulo:'Mide: '},
@@ -826,7 +828,7 @@ async function cargar(){
     ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;
     cargarEnlaces(); // aparte y sin esperar: el tablero no depende de esto
     $('papB').hidden=!j.papelera;$('papB').textContent='Papelera · '+(j.papelera||0);
-    $('archB').hidden=!j.archivadas;$('archB').textContent='Archivadas · '+(j.archivadas||0);INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];MEDIDORES=j.medidores||[];
+    $('archB').hidden=!j.archivadas;$('archB').textContent='Archivadas · '+(j.archivadas||0);INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];APROB=j.aprobaciones||[];PUEDE_APROBAR=!!j.puede_aprobar;MEDIDORES=j.medidores||[];
     dibujar();
   }catch(e){
     if(!CARDS.length)$('board').innerHTML='<div class="aviso" style="grid-column:1/-1">'+esc(e.message)+'</div>';
@@ -1137,8 +1139,10 @@ function htmlPlegada(c,e,cls,estilo,pos){
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
   if(mat)h+='<div class="c-mat">'+esc(mat)+'</div>';
   const r=[],et=(txt,tipo)=>r.push('<span class="r'+(tipo?' '+tipo:'')+'">'+esc(txt)+'</span>');
-  if(hecho(c))et(e.boton_listo+(c.boton_at?' · '+fechaCorta(c.boton_at):''),'ok');
-  else if(e.fecha){
+  if(hecho(c)){
+    et(e.boton_listo+(c.boton_at?' · '+fechaCorta(c.boton_at):''),'ok');
+    if(e.exige_fecha&&sinTurno(c))et(!c.fecha?'Sin turno':'Falta la hora','rojo'); // instalada sin el turno completo: se ve sin abrirla
+  }else if(e.fecha){
     if(!c.fecha){if(e.exige_fecha||e.avisa_fecha)et(e.exige_fecha?'Sin turno':'Sin fecha','rojo');}
     else{
       et((c.fecha===HOY?'Hoy':fechaCorta(c.fecha))+(c.hora?' · '+c.hora:'')+(atrasada(c)?' · atrasada':''),atrasada(c)?'rojo':(c.fecha===HOY?'hoy':''));
@@ -1190,7 +1194,9 @@ function htmlCard(c){
       ?'<button type="button" class="c-hecho listo" data-act="check" data-clave="'+esc(e.boton)+'" title="Tocar para desmarcar">'+esc(e.boton_listo)+(c.boton_at?' · '+esc(fechaCorta(c.boton_at)):'')+'</button>'
       :'<button type="button" class="c-hecho" data-act="check" data-clave="'+esc(e.boton)+'">'+esc(e.boton_txt)+'</button>';
   }
-  if(e.fecha&&!hecho(c)){
+  // Ya hecha, la fecha no se muestra; salvo que la etapa exija el turno y esté incompleto (Por instalar:
+  // instalada pero sin día u hora cargados): sin eso no puede pasar de etapa, así que tiene que poder cargarse.
+  if(e.fecha&&(!hecho(c)||(e.exige_fecha&&sinTurno(c)))){
     let cls='',txt;
     const hora=c.hora?' · '+c.hora+' hs':(e.pide_hora&&e.exige_fecha?' · falta la hora':'');
     if(!c.fecha&&(e.exige_fecha||e.avisa_fecha)){cls=' aviso';txt='Falta fecha '+(e.exige_fecha&&e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}
@@ -1220,7 +1226,7 @@ function htmlCard(c){
     if(c.equipo.length&&!e.checks.some(k=>k.id==='equipo'))datos.push('Instalan: '+c.equipo.join(', '));
     if(datos.length)h+='<div class="c-promesa">'+esc(datos.join(' · '))+'</div>';
     // Lo que ya pasó, con su fecha: se ve acá sin tener que volver la ficha atrás.
-    if(c.hitos.length)h+='<div class="c-hitos">'+c.hitos.map(x=>'<span>'+esc(x.txt)+(x.fecha?' <b>'+esc(ddmm(x.fecha))+'</b>':'')+'</span>').join('')+'</div>';
+    if(c.hitos.length)h+='<div class="c-hitos">'+c.hitos.map(x=>'<span'+(x.por?' title="Aprobó: '+esc(x.por)+'"':'')+'>'+esc(x.txt)+(x.fecha?' <b>'+esc(ddmm(x.fecha))+'</b>':'')+'</span>').join('')+'</div>';
   }
   if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
   // Foto de bacha y plano: se suman en Por medir (o desde "Más") y quedan a la vista después.
@@ -1237,6 +1243,7 @@ function htmlCard(c){
     // sin tilde dice solo de quién es ("Bacha del cliente"); con tilde, "Tenemos la bacha · …"
     if(k.id==='bacha'&&c.bacha&&(on||c.bacha!=='no'))label=c.bacha==='no'?'No lleva bacha':(on?'Tenemos la bacha · ':'Bacha ')+BACHA[c.bacha]+(c.bacha_modelo?' · '+c.bacha_modelo:(c.bacha==='nuestra'?' · falta el modelo':''));
     if(PERSONAS[k.id]&&on&&c[PERSONAS[k.id].campo].length)label=PERSONAS[k.id].rotulo+c[PERSONAS[k.id].campo].join(', ');
+    if(on&&c.por&&c.por[k.id])label+=' · '+c.por[k.id]; // las aprobaciones dicen quién las dio
     h+='<button type="button" class="chk'+(on?' on':'')+'" data-act="check" data-clave="'+esc(k.id)+'" aria-pressed="'+on+'">'+esc(label)+'</button>';
   });
   h+='</div>';
@@ -1546,14 +1553,17 @@ wrap.addEventListener('click',ev=>{
     if(clave==='acceso'&&valor){pedirAcceso(c);return;}
     if(clave==='bacha'){pedirBacha(c);return;} // tildada o no: abre la ventana para cargar o corregir
     if(PERSONAS[clave]){pedirPersonas(c,clave);return;} // tildado o no, abre la lista para elegir o cambiar
+    if(APROB.indexOf(clave)>=0&&!PUEDE_APROBAR){toast('Tu usuario no puede dar aprobaciones.');return;}
     guardar(c,{accion:'check',clave:clave,valor:valor},()=>{
       if(valor)c.checks[clave]=true;else delete c.checks[clave];
+      // la aprobación queda a nombre de quien la da (el servidor lo confirma al recargar)
+      if(APROB.indexOf(clave)>=0){c.por=c.por||{};if(valor&&YO.nombre&&!YO.viejo)c.por[clave]=YO.nombre;else delete c.por[clave];}
       if(clave==='sena')c.sena=null;
       if(clave==='acceso')c.acceso=null;
       if(clave==='bacha')c.bacha='';
       // Medido / Cortado: los botones de etapa guardan el día. No dependen de ningún otro tilde.
       if(clave==='medido'){c.medido_at=valor?((c.fecha&&c.fecha<=HOY)?c.fecha:HOY):'';c.boton_at=c.medido_at;}
-      if(clave==='cortado'||clave==='fabricado')c.boton_at=valor?HOY:'';
+      if(clave==='cortado'||clave==='fabricado'||clave==='instalado')c.boton_at=valor?HOY:'';
     });
   }else if(act==='avanzar'){
     mover(c,cols[idx+1].id);

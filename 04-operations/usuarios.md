@@ -10,6 +10,7 @@
 | Adjuntar foto de bacha, plano y entrega | Sí | Sí | Sí |
 | Borrar o girar una foto, también las que subió otro | Sí | Sí | Sí |
 | Anotar de quién es la bacha y su modelo | Sí | Sí | Sí |
+| Dar aprobaciones (Medición, Corte, Fabricación e Instalación aprobada) | Sí | Sí | No |
 | Cargar, mover, tildar, editar, archivar y borrar obras; papelera | Sí | Sí | No |
 | Ver la seña de la ficha | Sí | Sí | No |
 | Calculadora, Presupuestos, Calendario, Stock | Sí | Sí | No entra |

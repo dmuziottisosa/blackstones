@@ -109,7 +109,12 @@ $BS_ETAPAS = [
             'bacha'  => 'Tenemos la bacha',
             'placa'  => 'Tenemos la placa',
             'acceso' => 'Piso y ascensor',
+            // Cierre de la medición (dueño, 17/11/2026): alguien revisa que la medición
+            // esté bien y la aprueba. Queda quién la aprobó. Sin esto no pasa a Por cortar.
+            'qc_medicion' => 'Medición aprobada',
         ],
+        // Su fecha queda a la vista en las etapas siguientes, como "Corte aprobado".
+        'hitos' => ['qc_medicion'],
     ],
     // Sin fecha a propósito: se corta en el orden en que entró (la cola).
     'cortar' => [
@@ -192,23 +197,37 @@ $BS_ETAPAS = [
     ],
     'instalar' => [
         'titulo' => 'Por instalar',
-        // Sin tilde de cierre: instalada = se pasa a "Por archivar". Si la
-        // fecha de instalación pasó y sigue acá, se marca atrasada.
+        // Si la fecha de instalación pasó y todavía no está "Instalado", se marca atrasada.
         // exige_fecha: sin fecha de instalación cargada no sale de la columna.
         // pide_hora: el turno lleva día y hora, y la hora también es obligatoria.
         'fecha'  => 'Instalación',
-        'cierra' => '',
+        // "Instalado" es el botón de la etapa (dueño, 17/11/2026), igual que Medido, Cortado y
+        // Fabricado: avisa que la mesada ya se colocó. La ficha NO avanza sola: baja a
+        // "Ya instaladas" y espera el conforme del cliente y la aprobación.
+        // cierra: con "Instalado" puesto, una fecha de instalación pasada ya no cuenta como atrasada.
+        'cierra' => 'instalado',
         'exige_fecha' => true,
         'pide_hora'   => true,
+        'boton'       => 'instalado',
+        'boton_txt'   => 'Marcar instalado',
+        'boton_listo' => 'Ya instalado',
+        'hecho'       => 'Ya instaladas · falta la aprobación',
+        'pendientes'  => 'Necesitan instalarse',
+        'hecha_txt'   => ['ya instalada', 'ya instaladas'],
         'checks' => [
             'avisado' => 'Se avisó al cliente',
             // Antes de mandar al equipo: confirmar con el cliente a qué dirección se va.
             'dir_ok'  => 'Dirección confirmada',
             'equipo'  => 'Instaladores',
+            'instalado' => 'Instalado',
             // Cierre de la instalación: la mesada quedó colocada y el cliente
             // dio el visto bueno. Sin esto no pasa a Por archivar.
             'conforme' => 'Entregado y conforme',
+            // Cierre de la etapa (dueño, 17/11/2026): alguien da por buena la instalación.
+            // Queda quién la aprobó. Sin esto no pasa a Por archivar.
+            'qc_instalacion' => 'Instalación aprobada',
         ],
+        'hitos' => ['qc_instalacion'],
     ],
     'archivar' => [
         'titulo' => 'Por archivar',
@@ -254,6 +273,24 @@ $BS_TILDES_PERSONAS = [
     'fabrica' => [$BS_FABRICADORES, 'fabrica'],
 ];
 
+// Tildes que son una APROBACIÓN: alguien da por bueno el trabajo de la etapa. De estos se
+// guarda y se muestra quién los tildó (en la ficha y en el historial), y los puede tildar
+// quien tiene el permiso 'tablero_aprobar'.
+// 'pide': el tilde que tiene que estar antes (no se aprueba lo que todavía no se hizo);
+// si ese tilde se saca, la aprobación se cae sola.
+$BS_TILDES_APROBACION = [
+    'qc_medicion'    => ['pide' => 'medido',   'falta' => 'Primero marcá la obra como medida.'],
+    'qc_corte'       => ['pide' => '',         'falta' => ''],
+    'qc_fab'         => ['pide' => '',         'falta' => ''],
+    'qc_instalacion' => ['pide' => 'instalado', 'falta' => 'Primero marcá la obra como instalada.'],
+];
+
+/** Quién tildó ese tilde (nombre), o ''. Solo se guarda desde que hay usuarios. */
+function bs_tablero_tilde_por($obra, $clave) {
+    $p = $obra['tildes_por'][$clave] ?? null;
+    return is_array($p) ? trim((string)($p['n'] ?? '')) : '';
+}
+
 // Las columnas, en orden. "retiro" queda afuera de la secuencia.
 $BS_ETAPA_IDS = [];
 foreach ($BS_ETAPAS as $id => $def) {
@@ -291,7 +328,7 @@ function bs_tablero_leer() {
 }
 
 function bs_tablero_obra_vacia() {
-    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'plazo' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'bacha_modelo' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'fabricado_at' => '', 'tildes_at' => [], 'adjuntos' => [], 'desde' => '', 'hist' => []];
+    return ['etapa' => 'medir', 'fecha' => '', 'hora' => '', 'plazo' => '', 'checks' => [], 'nota' => '', 'medido_at' => '', 'sena' => null, 'acceso' => null, 'bacha' => '', 'bacha_modelo' => '', 'equipo' => [], 'fabrica' => [], 'medidor' => [], 'cortador' => [], 'cortado_at' => '', 'fabricado_at' => '', 'instalado_at' => '', 'tildes_at' => [], 'tildes_por' => [], 'adjuntos' => [], 'desde' => '', 'hist' => []];
 }
 
 /** Adjuntos de una obra, ya validados: [{id, tipo, ext}] (los links traen además "url", con ext "link"). */

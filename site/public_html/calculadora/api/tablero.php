@@ -120,7 +120,7 @@ function bs_tablero_sena($obra) {
  * Las fechas de tildes existen desde que se guardan (tildes_at); lo anterior figura sin fecha.
  */
 function bs_tablero_historia($obra) {
-    global $BS_ETAPAS, $BS_ETAPA_IDS, $BS_TILDES_PERSONAS;
+    global $BS_ETAPAS, $BS_ETAPA_IDS, $BS_TILDES_PERSONAS, $BS_TILDES_APROBACION;
     $historia = []; $hitos = [];
     $actual = array_search($obra['etapa'], $BS_ETAPA_IDS, true);
     if ($actual === false) return [$historia, $hitos];
@@ -150,8 +150,11 @@ function bs_tablero_historia($obra) {
             } elseif ($cid === 'acceso' && ($a = bs_tablero_acceso($obra))) {
                 $txt .= ': ' . ($a['modo'] === 'pb' ? 'planta baja' : ($a['modo'] === 'ascensor' ? 'por ascensor' : 'por escalera, ' . $a['pisos'] . ($a['pisos'] === 1 ? ' piso' : ' pisos')));
             }
-            $items[] = ['txt' => $txt, 'fecha' => $fecha];
-            if ($cid === $boton || in_array($cid, (array)($def['hitos'] ?? []), true)) $hitos[] = ['txt' => $label, 'fecha' => $fecha];
+            // Las aprobaciones dicen quién las dio.
+            $por = isset($BS_TILDES_APROBACION[$cid]) ? bs_tablero_tilde_por($obra, $cid) : '';
+            if ($por !== '') $txt .= ' · ' . $por;
+            $items[] = ['txt' => $txt, 'fecha' => $fecha, 'por' => $por];
+            if ($cid === $boton || in_array($cid, (array)($def['hitos'] ?? []), true)) $hitos[] = ['txt' => $label, 'fecha' => $fecha, 'por' => $por];
         }
         // Día en que salió de esa etapa (el último, si pasó más de una vez).
         $salio = '';
@@ -264,10 +267,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     // Día en que se cumplió el botón de la etapa actual (medido / cortado).
                     'boton_at'    => (function ($o) use ($BS_ETAPAS) {
                         $b = (string)($BS_ETAPAS[$o['etapa']]['boton'] ?? '');
-                        $at = in_array($b, ['medido', 'cortado', 'fabricado'], true) ? ($o[$b . '_at'] ?? '') : '';
+                        $at = in_array($b, ['medido', 'cortado', 'fabricado', 'instalado'], true) ? ($o[$b . '_at'] ?? '') : '';
                         return bs_tablero_fecha_valida((string)$at) ? $at : '';
                     })($obra),
                     // La nota es texto libre y a veces lleva plata ("Saldo $ …"): a quien no la ve se le tapa el monto.
+                    // Quién dio cada aprobación que está tildada: { qc_medicion: "Nombre", … }
+                    'por'         => (object)array_filter(array_map(function ($cid) use ($obra) {
+                        return empty($obra['checks'][$cid]) ? '' : bs_tablero_tilde_por($obra, $cid);
+                    }, array_combine(array_keys($BS_TILDES_APROBACION), array_keys($BS_TILDES_APROBACION)))),
                     'nota'        => auth_puede('tablero_plata') ? (string)$obra['nota'] : auth_tapar_plata((string)$obra['nota']),
                     'historia'    => $historia,
                     'hitos'       => $hitos,
@@ -312,7 +319,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         usort($archivadas, function ($a, $b) { return strcmp($b['archivada'], $a['archivada']); });
         bs_ok(['dias' => BS_RETENTION_DAYS, 'obras' => $archivadas]);
     }
-    bs_ok(['hoy' => date('Y-m-d'), 'papelera' => auth_puede('tablero_operar') ? $en_papelera : 0, 'archivadas' => auth_puede('tablero_operar') ? count($archivadas) : 0, 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
+    bs_ok(['hoy' => date('Y-m-d'), 'papelera' => auth_puede('tablero_operar') ? $en_papelera : 0, 'archivadas' => auth_puede('tablero_operar') ? count($archivadas) : 0, 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES,
+        // Los tildes que son aprobaciones (muestran quién los dio) y si el que mira puede darlas.
+        'aprobaciones' => array_keys($BS_TILDES_APROBACION), 'puede_aprobar' => auth_puede('tablero_aprobar'), 'cards' => $cards]);
 }
 
 // ============================================================
@@ -381,6 +390,19 @@ try {
             bs_lock_release($fp);
             bs_error('Ese tilde no es de esta etapa. Actualizá el tablero.', 409);
         }
+        // Las aprobaciones: las da quien tiene el permiso, y no se aprueba lo que todavía no se hizo.
+        if (isset($BS_TILDES_APROBACION[$clave])) {
+            if (!auth_puede('tablero_aprobar')) {
+                bs_lock_release($fp);
+                bs_error('Tu usuario no puede dar aprobaciones.', 403);
+            }
+            $pide = $BS_TILDES_APROBACION[$clave]['pide'];
+            if ($valor && $pide !== '' && empty($obra['checks'][$pide])) {
+                bs_lock_release($fp);
+                bs_error($BS_TILDES_APROBACION[$clave]['falta']);
+            }
+        }
+
         // La seña es el bloqueante de salida de "Por medir": no alcanza con
         // tildar, hay que cargar cuánto se cobró.
         if ($clave === 'sena') {
@@ -471,6 +493,22 @@ try {
         if ($valor) $obra['tildes_at'][$clave] = $hoy;
         else unset($obra['tildes_at'][$clave]);
 
+        // Quién lo tildó (desde que hay usuarios). Se muestra en las aprobaciones.
+        if (!is_array($obra['tildes_por'] ?? null)) $obra['tildes_por'] = [];
+        $bs_yo = auth_usuario();
+        if ($valor && $bs_yo && empty($bs_yo['viejo'])) $obra['tildes_por'][$clave] = ['u' => $bs_yo['usuario'], 'n' => $bs_yo['nombre']];
+        else unset($obra['tildes_por'][$clave]);
+
+        // Si se saca el tilde del que depende una aprobación, la aprobación se cae con él:
+        // sacar "Medido" deja sin efecto "Medición aprobada".
+        if (!$valor) {
+            foreach ($BS_TILDES_APROBACION as $ap => $regla) {
+                if ($regla['pide'] === $clave && !empty($obra['checks'][$ap])) {
+                    unset($obra['checks'][$ap], $obra['tildes_at'][$ap], $obra['tildes_por'][$ap]);
+                }
+            }
+        }
+
         // "Medido", "Cortado" y "Fabricado" son los botones de etapa: guardan el día en
         // que se hicieron. Son independientes de los demás tildes: tildar
         // "Medidas y planos listos" NO marca la obra como medida, ni
@@ -486,7 +524,7 @@ try {
                 $obra['medido_at'] = '';
             }
         }
-        if ($clave === 'cortado' || $clave === 'fabricado') {
+        if ($clave === 'cortado' || $clave === 'fabricado' || $clave === 'instalado') {
             $obra[$clave . '_at'] = $valor ? $hoy : '';
         }
 

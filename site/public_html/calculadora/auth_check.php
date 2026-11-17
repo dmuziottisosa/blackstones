@@ -33,6 +33,7 @@ const AUTH_PERMISOS = [
     'presupuestos'      => ['admin', 'operador'],
     'tablero'           => ['admin', 'operador', 'planos'], // ver el tablero y abrir fichas
     'tablero_operar'    => ['admin', 'operador'],           // cargar, mover, tildar, editar, archivar, borrar, papelera
+    'tablero_aprobar'   => ['admin', 'operador'],           // tildar las aprobaciones: Medición, Corte, Fabricación e Instalación aprobada
     'tablero_adjuntar'  => ['admin', 'operador', 'planos'], // subir foto de bacha, plano y entrega
     'tablero_bacha'     => ['admin', 'operador', 'planos'], // anotar o corregir de quién es la bacha y su modelo (dueño, 17/11/2026: también planos)
     'tablero_adj_ajeno' => ['admin', 'operador', 'planos'], // borrar o girar un adjunto que subió otro (dueño, 17/11/2026: también planos)

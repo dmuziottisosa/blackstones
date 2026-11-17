@@ -226,6 +226,7 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
       <tr><td>Ver el tablero</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
       <tr><td>Adjuntar y borrar fotos de bacha, plano y entrega</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
       <tr><td>Anotar de quién es la bacha y su modelo</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
+      <tr><td>Dar aprobaciones (medición, corte, fabricación, instalación)</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Cargar, mover, editar, archivar y borrar obras</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Ver la seña de la ficha</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Calculadora, Presupuestos y Calendario</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>

@@ -66,12 +66,26 @@ Los colores se cambian en un solo lugar: las clases `.et-*` al principio del CSS
 
 | Columna | Fecha de la tarjeta | Para salir hace falta |
 |---|---|---|
-| **Por medir** | Medición | Medidor · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor |
+| **Por medir** | Medición | Medidor · Medido (botón) · Medidas y planos listos · Trajo la seña · Tenemos la bacha · Tenemos la placa · Piso y ascensor · Medición aprobada |
 | **Por cortar** | (sin fecha: por semana de entrega, con el mismo color junto) | Cortador · Entregado al cortador · Cortado (botón) · Medida de mesada correcta · Medida de zócalos correcta · Color de mesada correcto · Traforos / agujeros correctos · Corte aprobado |
 | **Por fabricar** | (sin fecha: por semana de entrega, con el mismo color junto) | Fabricadores · Entregado al fabricador · Fabricado (botón) · Medida y color correctos · Inglete y zócalos · Es la bacha correcta · Bacha hacia el lado correcto · Fabricación aprobada |
-| **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Dirección confirmada · Instaladores · Entregado y conforme |
+| **Por instalar** | Instalación, con día y hora (**obligatorios**) | Fecha y hora de instalación · Se avisó al cliente · Dirección confirmada · Instaladores · Instalado (botón) · Entregado y conforme · Instalación aprobada |
 | **Por archivar** | — | Saldo cobrado |
 | **Retiro en local** (cuadro aparte, abajo) | Retiro | Seña cobrada · Pieza terminada · Se avisó al cliente · Retirada · Saldo cobrado |
+
+### Las aprobaciones (17/11/2026)
+
+Cada etapa de trabajo cierra con una aprobación: **Medición aprobada**, **Corte aprobado**, **Fabricación aprobada** e **Instalación aprobada**. Las dos de las puntas se sumaron el 17/11/2026, cuando el sistema pasó a tener usuarios.
+
+- **Queda quién la dio.** En la ficha el tilde dice "Medición aprobada · Nombre", y en el historial aparece con su fecha. Vale para las cuatro; las que se tildaron antes de que hubiera usuarios no tienen nombre.
+- **No se aprueba lo que no se hizo.** "Medición aprobada" pide "Medido" e "Instalación aprobada" pide "Instalado". Si se saca ese tilde, la aprobación se cae sola.
+- **Sin la aprobación la ficha no pasa de etapa**, como con cualquier otro tilde.
+- **Las da quien tiene el permiso `tablero_aprobar`** (hoy, Administrador y Operador). → `usuarios.md`
+- La lista está en `$BS_TILDES_APROBACION` (`_tablero.php`).
+
+### "Marcar instalado" (17/11/2026)
+
+Por instalar tiene su botón de etapa, igual que Medido, Cortado y Fabricado. Al tocarlo la ficha baja a "Ya instaladas · falta la aprobación" y queda el día. Con "Instalado" puesto, una fecha de instalación que ya pasó deja de marcarse como atrasada. Si la obra se marca instalada sin el día o la hora del turno, la fecha sigue a la vista para completarla: sin el turno completo no pasa a Por archivar.
 
 Cuatro tildes de Por medir piden un dato y lo dejan escrito en la tarjeta:
 
