@@ -284,6 +284,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .fantasma .c-prox{display:none}
 .c-id b{font-weight:700;font-variant-numeric:tabular-nums}
 .c-id .zona{color:var(--text3);font-weight:500}
+.c-id b.sin-nro{color:var(--text3);font-weight:700}
 .c-mat{color:var(--text2);font-size:13px;margin-top:3px;overflow-wrap:anywhere}
 .c-contrato{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:3px 0;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gr);text-decoration:none;white-space:nowrap}
 .c-contrato svg{width:12px;height:12px;flex-shrink:0}
@@ -699,6 +700,9 @@ const PERSONAS={
 let CARDS=[];       // tarjetas
 let HOY='';         // YYYY-MM-DD según el server
 let abierta='';     // key de la tarjeta con el detalle abierto
+// El N° que se muestra es el del presupuesto. Una ficha cargada a mano no tiene presupuesto:
+// dice "Sin N°" (su número interno no se muestra) hasta que se le ponga uno desde "Editar obra".
+const nroB=c=>c.manual?'<b class="sin-nro" title="Cargada a mano: todavía no tiene presupuesto. Se le pone desde Más → Editar obra.">Sin N°</b>':'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b>';
 // Qué fichas tienen contrato en Relación-Contrato (ficha → contrato). Lo dice Relación-Contrato;
 // si no existe o no contesta, queda vacío y la ficha simplemente no muestra la marca.
 let ENLACES={};
@@ -1120,7 +1124,7 @@ function desplegada(c){
 function htmlPlegada(c,e,cls,estilo,pos){
   let h='<article class="'+cls+' plegada"'+estilo+' data-key="'+esc(c.key)+'" data-act="abrir" title="Tocar para abrir la ficha">';
   if(pos===1)h+='<div class="c-prox">Próxima</div>';
-  h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b> · '+esc(nombreCorto(c.nombre)||'Sin nombre');
+  h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+nroB(c)+' · '+esc(nombreCorto(c.nombre)||'Sin nombre');
   if(c.zona)h+=' <span class="zona">· '+esc(c.zona)+'</span>';
   h+='</div>';
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
@@ -1165,7 +1169,7 @@ function htmlCard(c){
   if(!SOLO)h+='<button type="button" class="c-plegar" data-act="plegar" aria-label="Plegar la ficha" title="Plegar"></button>';
 
   if(pos===1)h+='<div class="c-prox">Próxima</div>';
-  h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b> · '+esc(nombreCorto(c.nombre)||'Sin nombre');
+  h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+nroB(c)+' · '+esc(nombreCorto(c.nombre)||'Sin nombre');
   if(c.zona)h+=' <span class="zona">· '+esc(c.zona)+'</span>';
   h+='</div>';
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
@@ -2277,7 +2281,7 @@ async function pedirBorrar(c){
 async function pedirPapelera(){
   let j;
   try{j=await pedir(API_PAPELERA);}catch(e){toast(e.message);return;}
-  const filas=j.fichas.map(f=>'<div class="pap-f"><div><b>'+esc(f.key)+' · '+esc(nombreCorto(f.nombre)||'Sin nombre')+'</b><small>'+esc(f.etapa_titulo)+(f.material?' · '+esc(f.material):'')+(f.adjuntos?' · '+f.adjuntos+(f.adjuntos===1?' adjunto':' adjuntos'):'')+'</small><small>Borrada el '+esc(fechaCorta(f.borrada))+' · '+(f.quedan<=0?'se borra hoy':(f.quedan===1?'queda 1 día':'quedan '+f.quedan+' días'))+'</small></div><button type="button" data-restaurar="'+esc(f.key)+'">Restaurar</button></div>').join('');
+  const filas=j.fichas.map(f=>'<div class="pap-f"><div><b>'+(f.manual?'':esc(f.key)+' · ')+esc(nombreCorto(f.nombre)||'Sin nombre')+'</b><small>'+esc(f.etapa_titulo)+(f.material?' · '+esc(f.material):'')+(f.adjuntos?' · '+f.adjuntos+(f.adjuntos===1?' adjunto':' adjuntos'):'')+'</small><small>Borrada el '+esc(fechaCorta(f.borrada))+' · '+(f.quedan<=0?'se borra hoy':(f.quedan===1?'queda 1 día':'quedan '+f.quedan+' días'))+'</small></div><button type="button" data-restaurar="'+esc(f.key)+'">Restaurar</button></div>').join('');
   abrirModal('Papelera',
     (filas?'<p>Fichas borradas. Se pueden recuperar durante '+j.dias+' días; después se borran de verdad.</p><div class="pap">'+filas+'</div>':'<p>La papelera está vacía.</p>'),
     'Cerrar',cerrarModal);
@@ -2343,7 +2347,7 @@ function exportarCSV(){
   const orden=ETAPAS.map(e=>e.id);
   const filas=CARDS.slice().sort((a,b)=>(orden.indexOf(a.etapa)-orden.indexOf(b.etapa))||a.key.localeCompare(b.key,undefined,{numeric:true}));
   const cols=[
-    ['N°',c=>c.cliente_nro+'-'+c.sub],
+    ['N°',c=>c.manual?'':c.cliente_nro+'-'+c.sub], // N° de presupuesto: la ficha a mano no tiene
     ['Cliente',c=>c.nombre],
     ['Teléfono',c=>c.celular],
     ['Dirección',c=>c.direccion],
@@ -2374,6 +2378,7 @@ function exportarCSV(){
     ['Fotos de entrega',c=>c.adjuntos.filter(a=>a.tipo==='entrega').length||''],
     ['Links de Drive',c=>c.adjuntos.filter(a=>a.link).map(a=>ADJ[a.tipo]+': '+a.link).join(' | ')],
     ['Nota',c=>c.nota],
+    ['Ficha (número interno)',c=>c.key],
   ];
   const celda=v=>{
     let t=String(v==null?'':v).replace(/\r?\n/g,' ').trim();

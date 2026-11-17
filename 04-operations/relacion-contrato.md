@@ -139,13 +139,19 @@ Cómo se pasó la plata de la planilla (16/11/2026):
 
 ## Los puntitos de cada renglón
 
-Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, listo para pegar en WhatsApp), copiar dirección y borrar contrato (va a la papelera). Lo que el renglón no tiene sale apagado.
+Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, listo para pegar en WhatsApp), copiar dirección, **desenlazar del tablero** y borrar contrato (va a la papelera). Lo que el renglón no tiene sale apagado.
+
+**Desenlazar (17/11/2026)** no borra nada: el contrato queda suelto, con su total y sus pagos, y la ficha sigue en el tablero y en el calendario. Antes de soltarlo, el contrato se queda con los datos que venían de la ficha (cliente, teléfono, dirección, material). Se puede volver a enlazar.
 
 ## Enlace con el tablero
 
 - **Por defecto el renglón está suelto**: no toca el tablero.
-- Hay **dos formas de enlazar**: crear el contrato y usar "Cargar en Por medir", o ponerle al contrato el N° de un presupuesto que **ya está** en el tablero.
-- En ese segundo caso el renglón muestra **"Enlazar con el tablero"** en vez de "Cargar en Por medir", y al guardar la ficha se ofrece enlazar ahí mismo. Enlazar no crea ni cambia nada en el tablero.
+- Hay **tres formas de enlazar**, todas desde acá:
+  1. Crear el contrato y usar **"Cargar en Por medir"**: crea la ficha, ya enlazada.
+  2. **"Enlazar con el tablero"**: aparece sola en el renglón cuando la obra de ese contrato ya está en el tablero. La reconoce por el **N° de presupuesto** o, si no, por el **teléfono** (los diez dígitos iguales y una sola ficha sin contrato con ese teléfono). Muestra la obra antes de enlazar, y al guardar la ficha del contrato se ofrece ahí mismo. No crea ni cambia nada en el tablero.
+  3. **"Obras en el tablero sin contrato" → "Crear contrato"**: el camino inverso, desde la ficha.
+- **Una ficha cargada a mano no tiene N° de presupuesto** (17/11/2026): por número no se la busca, aunque el N° del contrato coincida con su número interno. Se enlaza por teléfono o por la vía 3.
+- El enlace es un dato aparte del N°: sacarle o corregirle el N° a un contrato no lo desenlaza. Para eso está "Desenlazar".
 - **"Cargar en Por medir"** crea la ficha en el tablero y copia solo lo que el tablero ya tiene: cliente, teléfono, dirección, material, pileta, fecha de medición y seña. Total, pagos y el resto quedan acá.
 - Si el renglón tiene **N° de presupuesto**, en vez de crear una ficha aprueba ese presupuesto (mismo camino que "Cargar obra" con número). Si ese presupuesto ya estaba en el tablero, solo se enlaza.
 - Una ficha del tablero se enlaza con un solo contrato.
@@ -156,7 +162,10 @@ Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, list
 - **Del otro lado también se ve (17/11/2026):** en el tablero, la ficha abierta de una obra con contrato muestra la marca "Con contrato", que lleva directo a ese contrato (`relacion-contrato.php?contrato=<id>` lo abre en su mes). Solo en la ficha abierta, no en la plegada.
 - El renglón muestra **la etapa** de la obra (Por medir, Por cortar…), la fecha de medición o instalación y el vencimiento, y lleva a la ficha con un toque.
 - **Seña, un solo dato:** si se carga acá y la obra está en Por medir, queda tildada en el tablero ("Trajo la seña"). Si se carga en el tablero, aparece acá sola. Cuando el tablero ya tiene la seña, acá es de solo lectura.
-- Si la ficha sale del tablero (archivada o borrada) el renglón dice "Fuera del tablero" y conserva la última seña.
+- **Enlazado con una ficha que ya no está entre las obras vivas, se dice por qué** (17/11/2026). El contrato conserva la última seña.
+  - **Archivada:** la obra se entregó. Es lo normal; el contrato queda.
+  - **En la papelera:** su ficha está en la papelera del tablero.
+  - **No existe en el tablero:** la ficha se borró o le cambiaron el N° de presupuesto desde "Editar obra". Es un enlace roto: el renglón lo marca en rojo con el botón **Desenlazar**, y la ficha del contrato lo dice arriba ("Esta ficha no existe en el tablero"). Desenlazado, si la obra sigue en el tablero con otro número, el renglón vuelve a ofrecer "Enlazar con el tablero".
 
 ## Renglones de prueba
 

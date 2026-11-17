@@ -244,14 +244,8 @@ try {
         $tablero['obras'] = [];
     }
 
-    // 2) Próximo número (max de archivos + índice de borrados)
-    $max = 0;
-    foreach (@scandir(BS_CLIENTES_DIR) ?: [] as $archivo) {
-        if (preg_match('/^(\d{4,})\.json$/', $archivo, $mm)) $max = max($max, intval($mm[1]));
-    }
-    $idx = bs_read_json(BS_CLIENTES_INDEX);
-    if (is_array($idx)) foreach ($idx as $nro_str => $_v) $max = max($max, intval($nro_str));
-    if ($max + count($filas) > 9999) throw new Exception('No entran: se pasa del número 9999.');
+    // 2) Próximo número: la serie interna de las fichas a mano (no son presupuestos)
+    $max = intval(bs_tablero_nro_ficha_manual()) - 1;
 
     // 3) Crear las fichas
     $base = time();

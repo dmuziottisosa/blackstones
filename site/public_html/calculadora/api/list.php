@@ -94,6 +94,9 @@ if (is_dir(BS_CLIENTES_DIR)) {
             // Eliminado de Presupuestos (a mano o por los 180 días) mientras la obra sigue en el
             // tablero: acá no aparece más. Los entregados sí, porque son las ventas del reporte.
             if (!empty($cot['fuera_de_presupuestos']) && ($cot['estado'] ?? '') !== 'entregado') continue;
+            // Ficha cargada a mano en el tablero: no es un presupuesto, no se lista (dueño, 17/11/2026).
+            // Archivada sí: pasa a ser una entrega del reporte, como cualquier alta manual.
+            if (!empty($cot['manual']) && ($cot['estado'] ?? '') === 'aprobado') continue;
             // Ficha borrada, en la papelera del tablero (30 días): tampoco se lista.
             if (($cot['estado'] ?? '') === 'papelera') continue;
 

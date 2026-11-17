@@ -9,7 +9,11 @@ Dónde está cada obra y qué le falta para avanzar. Vive en `blackstones.com.ar
 - Una obra aparece sola cuando su presupuesto se marca **Aprobado** en Presupuestos.
 - La columna Por medir tiene el botón **+ Cargar obra**, con dos usos:
   - **Con N° de presupuesto** (`0042`, o `0042-2` si tiene versiones): busca ese presupuesto de la calculadora y lo aprueba. La ficha queda atada al presupuesto real.
-  - **Sin número** (cliente, teléfono, dirección, material; el renglón "Trabajo" se sacó de esta ventana el 15/11/2026 para aliviarla, y se sigue pudiendo cargar desde "Editar obra"): para obras que no pasaron por la calculadora. Crea un presupuesto aprobado en el hub, con importe en 0: administración lo completa desde Presupuestos.
+  - **Sin número** (cliente, teléfono, dirección, material; el renglón "Trabajo" se sacó de esta ventana el 15/11/2026 para aliviarla, y se sigue pudiendo cargar desde "Editar obra"): para obras que no pasaron por la calculadora. **No crea un presupuesto** (dueño, 17/11/2026): la ficha no aparece en la pestaña Presupuestos, no se lleva un N° de la calculadora y en el tablero y el calendario dice **"Sin N°"**. Cuando el presupuesto exista, se le pone su número desde "Editar obra".
+    - Antes creaba un presupuesto aprobado en $ 0 con el siguiente número de la calculadora. Eso hacía que el N° de la ficha no coincidiera con el del contrato y que en Presupuestos aparecieran presupuestos que nunca se hicieron.
+    - Por dentro la ficha necesita un número para existir: sale de una serie aparte, de 90001 en adelante (`BS_NRO_FICHA_MANUAL_DESDE`, `bs_tablero_nro_ficha_manual()` en `_tablero.php`). No se muestra. La numeración de presupuestos (`next-nro.php`, `save.php`, `add-manual.php`) ignora esa serie.
+    - Las fichas a mano que ya existían conservan su número interno viejo; como están marcadas `manual`, también dicen "Sin N°" y salen de Presupuestos.
+    - Archivada, la obra pasa a ser una entrega del reporte, como cualquier alta manual.
 - En Por medir hay dos filtros, **Sin plano** y **Sin foto de bacha**, con la cantidad de fichas a las que les falta cada uno. Las obras que no llevan bacha no cuentan como faltantes. En Por instalar hay un filtro igual, **Sin turno**, para ver solo las que no tienen día u hora de instalación.
 - **Buscador** arriba del tablero: por cliente, N°, material, zona, teléfono, dirección o instalador. En celular salta solo a la pestaña donde está la obra.
 - La tarjeta se identifica con el código del presupuesto: N° de cliente + versión (`0042-1`).

@@ -23,6 +23,10 @@
 require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
 
+// Las fichas cargadas a mano en el tablero NO son presupuestos: llevan un número interno de
+// otra serie (90001 en adelante) y no cuentan para el próximo N° de presupuesto.
+if (!defined('BS_NRO_FICHA_MANUAL_DESDE')) define('BS_NRO_FICHA_MANUAL_DESDE', 90000);
+
 bs_require_auth();
 bs_check_csrf();
 bs_ensure_dirs();
@@ -70,6 +74,7 @@ try {
             foreach (scandir(BS_CLIENTES_DIR) as $f) {
                 if (preg_match('/^(\d{4,})\.json$/', $f, $m)) {
                     $n = intval($m[1]);
+                    if ($n >= BS_NRO_FICHA_MANUAL_DESDE) continue; // ficha a mano: no es un presupuesto
                     if ($n > $max) $max = $n;
                 }
             }
@@ -78,6 +83,7 @@ try {
         if (is_array($idx)) {
             foreach ($idx as $nro_str => $_v) {
                 $n = intval($nro_str);
+            if ($n >= BS_NRO_FICHA_MANUAL_DESDE) continue;
                 if ($n > $max) $max = $n;
             }
         }

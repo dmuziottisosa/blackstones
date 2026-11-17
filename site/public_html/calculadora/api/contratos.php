@@ -182,6 +182,8 @@ function bs_contrato_salida($c) {
         'nota'         => (string)($c['nota'] ?? ''),
         'prueba'       => !empty($c['prueba']),
         'enlace'       => is_array($c['enlace'] ?? null) ? $c['enlace'] : null,
+        // Qué pasó con la ficha enlazada: 'viva', 'archivada', 'papelera' o 'no_existe' ('' si no hay enlace).
+        'ficha'        => bs_contrato_ficha_estado($c['enlace'] ?? null),
         // El presupuesto adjunto: con archivo, el contrato está verificado.
         'archivo'      => bs_contrato_archivo($c),
         // Si el N° existe en Presupuestos (solo informa; no verifica).
@@ -206,6 +208,7 @@ function bs_contrato_presup($nro) {
         // eliminado de Presupuestos (a mano o por los 180 días): para Presupuestos ya no existe
         if (!empty($x['fuera_de_presupuestos']) && ($x['estado'] ?? '') !== 'entregado') continue;
         if (($x['estado'] ?? '') === 'papelera') continue; // ficha en la papelera del tablero
+        if (!empty($x['manual']) && ($x['estado'] ?? '') === 'aprobado') continue; // ficha a mano: no es un presupuesto
         $s = intval($x['sub'] ?? 0);
         if ($pedido ? $s === $pedido : ($cot === null || $s > intval($cot['sub'] ?? 0))) $cot = $x;
     }
@@ -221,6 +224,24 @@ function bs_contrato_presup($nro) {
         'versiones'   => count($cots),
         'detalle'     => empty($cot['manual']) && isset($cot['presupuesto']) && is_array($cot['presupuesto']),
     ];
+}
+
+/**
+ * Dónde está hoy la ficha con la que el contrato está enlazado. Solo lee clientes/NNNN.json.
+ * 'viva' (en el tablero) · 'archivada' (entregada) · 'papelera' · 'no_existe' (borrada, o le cambiaron el N°).
+ */
+function bs_contrato_ficha_estado($enlace) {
+    if (!is_array($enlace)) return '';
+    $cli = bs_read_json(BS_CLIENTES_DIR . '/' . str_pad((string)intval($enlace['cliente_nro'] ?? 0), 4, '0', STR_PAD_LEFT) . '.json');
+    foreach ((array)(is_array($cli) ? ($cli['cotizaciones'] ?? []) : []) as $x) {
+        if (intval($x['sub'] ?? 0) !== intval($enlace['sub'] ?? 0)) continue;
+        $e = (string)($x['estado'] ?? '');
+        if ($e === 'aprobado') return 'viva';
+        if ($e === 'entregado') return 'archivada';
+        if ($e === 'papelera') return 'papelera';
+        return 'no_existe'; // el presupuesto existe, pero ya no es una obra del tablero
+    }
+    return 'no_existe';
 }
 
 /** El contrato enlazado con esa ficha del tablero: su clave en el archivo, o null. */

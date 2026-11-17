@@ -491,7 +491,8 @@ async function pedir(url,body){
 
 const etapaDe=id=>ETAPAS.find(e=>e.id===id);
 const cardDe=key=>CARDS.find(c=>c.key===key);
-const quien=c=>c.cliente_nro+' '+(nombreCorto(c.nombre)||'Sin nombre');
+// La ficha cargada a mano no tiene N° de presupuesto: se nombra sola.
+const quien=c=>(c.manual?'':c.cliente_nro+' ')+(nombreCorto(c.nombre)||'Sin nombre');
 
 // Mismas reglas que el tablero.
 function cumplida(c){const e=etapaDe(c.etapa);return !!(e&&e.cierra&&c.checks[e.cierra]);} // ya se midió / ya se retiró
@@ -583,7 +584,7 @@ function bloques(todos){
     b.estado=b.hasta<HOY?'vencida':(b.desde<=HOY?'cerca':'');
     const n=b.obras.length;
     // "Entrega": así se distingue del bloque de MEDICIÓN, que va marcado en azul en el día en que se mide.
-    b.de='medidas el '+diaMes(b.dia)+' · '+(n===1?(nombreCorto(b.obras[0].nombre)||b.obras[0].cliente_nro):n+' obras');
+    b.de='medidas el '+diaMes(b.dia)+' · '+(n===1?(nombreCorto(b.obras[0].nombre)||(b.obras[0].manual?'Sin nombre':b.obras[0].cliente_nro)):n+' obras');
     b.txt=(b.est?'Entrega estimada · ':'Entrega · ')+b.de;
     b.tit=(b.est?'Entrega estimada':'Entrega')+' del bloque medido el '+fechaCorta(b.dia)+' · '+n+(n===1?' obra':' obras')+' · del '+fechaCorta(b.desde)+' al '+fechaCorta(b.hasta)+' (vence)';
     return b;
@@ -637,7 +638,7 @@ function abrirBloque(dia,origen){
   }else h+='<p class="sub">Sin franja de entrega: estas obras tienen el plazo puesto a mano o ya están instaladas.</p>';
   h+='<div class="lista">';
   lista.slice().sort((x,z)=>(orden.indexOf(x.etapa)-orden.indexOf(z.etapa))||(x.key<z.key?-1:1)).forEach(c=>{
-    h+='<button type="button" class="ev et-'+esc(c.etapa)+'" data-key="'+esc(c.key)+'" data-tipo="'+(origen==='med'?'medida':'vence')+'"><b>'+esc(c.cliente_nro)+'</b> '+esc(nombreCorto(c.nombre)||'Sin nombre')
+    h+='<button type="button" class="ev et-'+esc(c.etapa)+'" data-key="'+esc(c.key)+'" data-tipo="'+(origen==='med'?'medida':'vence')+'">'+(c.manual?'':'<b>'+esc(c.cliente_nro)+'</b> ')+esc(nombreCorto(c.nombre)||'Sin nombre')
       +' <span>· '+esc(etapaDe(c.etapa).titulo)+(c.medido_at?'':' · todavía sin medir')+(c.plazo_manual?' · plazo propio':'')+'</span></button>';
   });
   h+='</div>';
@@ -675,7 +676,7 @@ function armar(){
 // largo=true: dice también qué es ("Medición · …"). En la grilla alcanza con el color.
 function chip(ev,largo){
   const c=ev.c;
-  const nom='<b>'+esc(c.cliente_nro)+'</b> '+esc(nombreCorto(c.nombre)||'Sin nombre');
+  const nom=(c.manual?'':'<b>'+esc(c.cliente_nro)+'</b> ')+esc(nombreCorto(c.nombre)||'Sin nombre');
   if(ev.prev&&previsto(c)<HOY){
     // La entrega estimada ya pasó: los días corrieron igual desde la medición agendada, esté o no
     // tildado "Medido". Se muestra como vencida, igual que las demás.
@@ -886,7 +887,7 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
   h+='<a class="ir" href="/presupuestos/tablero.php?q='+encodeURIComponent(c.cliente_nro+'-'+c.sub)+'">Ver en el tablero →</a>';
   // La ficha del tablero, entera y editable (tildes, seña, bacha, fotos, nota): es la misma página en modo "una ficha".
   h='<div class="dos"><div>'+h+'</div><div><div class="ficha-t">Ficha</div><iframe class="ficha" id="fFicha" title="Ficha de la obra" src="/presupuestos/tablero.php?solo='+encodeURIComponent(c.key)+'"></iframe></div></div>';
-  $('mTitulo').textContent=c.cliente_nro+'-'+c.sub+' · '+(nombreCorto(c.nombre)||'Sin nombre');
+  $('mTitulo').textContent=(c.manual?'Sin N°':c.cliente_nro+'-'+c.sub)+' · '+(nombreCorto(c.nombre)||'Sin nombre');
   document.querySelector('.modal').classList.remove('angosta');
   $('mOk').hidden=false;
   $('mCuerpo').innerHTML=h;

@@ -23,6 +23,22 @@ define('BS_TABLERO_NOTA_MAX', 300);
 // Papelera: una ficha borrada se puede recuperar durante estos días (decisión del dueño, 16/11/2026).
 define('BS_PAPELERA_DIAS', 30);
 
+// Una ficha cargada a mano NO es un presupuesto (dueño, 17/11/2026): no aparece en la pestaña
+// Presupuestos ni se lleva un N° de la calculadora. Por dentro necesita un número para existir;
+// sale de una serie aparte, de 90001 en adelante, que no se muestra como N° de presupuesto.
+if (!defined('BS_NRO_FICHA_MANUAL_DESDE')) define('BS_NRO_FICHA_MANUAL_DESDE', 90000);
+
+/** Próximo número interno para una ficha cargada a mano (se llama con el lock de clientes tomado). */
+function bs_tablero_nro_ficha_manual() {
+    $max = BS_NRO_FICHA_MANUAL_DESDE;
+    foreach (@scandir(BS_CLIENTES_DIR) ?: [] as $f) {
+        if (preg_match('/^(\d{4,})\.json$/', $f, $m)) $max = max($max, intval($m[1]));
+    }
+    $idx = bs_read_json(BS_CLIENTES_INDEX);
+    if (is_array($idx)) foreach ($idx as $nro => $_v) $max = max($max, intval($nro));
+    return (string)($max + 1);
+}
+
 // Adjuntos: qué se puede colgar de una obra y cuánto.
 define('BS_TABLERO_ADJ_MAX_BYTES',    10 * 1024 * 1024); // por archivo
 define('BS_TABLERO_ADJ_MAX_POR_TIPO', 6);

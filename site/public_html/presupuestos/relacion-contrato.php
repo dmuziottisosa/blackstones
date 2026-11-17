@@ -179,6 +179,8 @@ button{font-family:inherit;color:inherit}
 .etapa{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:4px 11px;border-radius:999px;background:var(--et-soft);color:var(--et);font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
 .etapa::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--et);flex-shrink:0}
 .etapa.fuera{--et:var(--text3);--et-soft:var(--card-alt)}
+.etapa.rota{--et:var(--red);--et-soft:var(--red-soft,rgba(176,58,58,.1))}
+.tab [data-desenlazar]{margin-top:6px}
 .tab small{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tab small.rojo{color:var(--red);font-weight:700}
 .tab .btn.chico{padding:5px 11px;font-size:12px}
@@ -245,6 +247,8 @@ button{font-family:inherit;color:inherit}
 .enl svg{width:12px;height:12px;flex-shrink:0}
 .tab small .enl{vertical-align:-1px}
 .enl.roto{color:var(--text3)}
+.nota-t.rota .enl.roto{color:var(--red)}
+.nota-t .lnk{border:none;background:none;padding:0;font:inherit;font-weight:700;color:var(--red);text-decoration:underline;cursor:pointer}
 .nota-t .enl{white-space:normal;margin-bottom:3px}
 .tab .fila-e{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;max-width:100%}
 .fila.enlazada{box-shadow:inset 3px 0 0 var(--gr)}
@@ -401,7 +405,8 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   .f-sub{font-size:12.5px;margin-top:3px}
   .f-mat{font-size:14px}
   .plata{font-size:14.5px}
-  .fila .der{text-align:left}
+  .plata span{white-space:normal}
+  .fila .der{text-align:left;min-width:0}
   .rot{display:block;margin-bottom:2px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3)}
   .c-obra{font-size:12.5px;color:var(--text3)}
   .c-obra b{font-weight:700;color:var(--text2)}
@@ -568,14 +573,31 @@ const keyDe=c=>c.enlace?c.enlace.cliente_nro+'-'+c.enlace.sub:'';
 const cardDe=c=>c.enlace?(CARDS[keyDe(c)]||null):null;
 // ¿Ese N° de presupuesto ya está cargado en el tablero? Devuelve su ficha si hay una sola
 // y no está enlazada con otro contrato. Con eso el renglón ofrece "Enlazar con el tablero".
+// Las fichas cargadas a mano no tienen N° de presupuesto: por número no se buscan.
+const conContrato=(key,exceptoId)=>CONTRATOS.some(c=>c.id!==exceptoId&&c.enlace&&keyDe(c)===key);
 function cardDeNro(nro,exceptoId){
   const m=/^(\d{1,6})(?:-(\d{1,3}))?$/.exec(String(nro||'').trim());
   if(!m)return null;
   const n=String(+m[1]).padStart(4,'0'),s=m[2]?+m[2]:0;
-  const l=Object.keys(CARDS).map(k=>CARDS[k]).filter(k=>k.cliente_nro===n&&(!s||k.sub===s));
+  const l=Object.keys(CARDS).map(k=>CARDS[k]).filter(k=>!k.manual&&k.cliente_nro===n&&(!s||k.sub===s));
   if(l.length!==1)return null;
-  return CONTRATOS.some(c=>c.id!==exceptoId&&c.enlace&&keyDe(c)===l[0].key)?null:l[0];
+  return conContrato(l[0].key,exceptoId)?null:l[0];
 }
+// La ficha de un contrato suelto: por su N° de presupuesto o, si no, por el teléfono (los diez
+// dígitos iguales y una sola ficha sin contrato con ese teléfono). Devuelve {k, por} o null.
+function fichaPara(c){
+  if(!c||c.enlace)return null;
+  const kn=c.nro?cardDeNro(c.nro,c.id):null;
+  if(kn)return {k:kn,por:'nro'};
+  const t=telDigitos(c.telefono);
+  if(t.length!==10)return null;
+  const l=Object.keys(CARDS).map(k=>CARDS[k]).filter(k=>telDigitos(k.celular)===t&&!conContrato(k.key,c.id));
+  return l.length===1?{k:l[0],por:'tel'}:null;
+}
+// Cómo se nombra una obra del tablero: por su N° de presupuesto, o "cargada a mano" si no tiene.
+const obraTxt=k=>k.manual?'cargada a mano, sin N° de presupuesto':k.key;
+// La ficha con la que estaba enlazado un contrato y que ya no está. Los números de 90001 en adelante son internos (fichas a mano).
+const fichaIda=c=>+c.enlace.cliente_nro>=90000?'una ficha cargada a mano':'la ficha '+keyDe(c);
 // Cómo se ve un contrato: enlazado y con la ficha en el tablero, lo operativo sale de la ficha.
 function ver(c){
   const k=cardDe(c);
@@ -618,6 +640,15 @@ function saldoTxt(n){
   const l=['USD','ARS'].filter(m=>Math.abs(n.sal[m])>0.004).map(m=>n.sal[m]>0?plata(n.sal[m],m):plata(-n.sal[m],m)+' a favor');
   if(!l.length)return {cls:'ok',l:['Pagado']};
   return {cls:['USD','ARS'].some(m=>n.sal[m]>0.004)?'debe':'ok',l:l};
+}
+// Enlazado, pero la ficha no está entre las obras vivas del tablero. Se dice por qué.
+// Archivada es lo normal al terminar la obra; "no existe" es un enlace roto y se puede desenlazar.
+const FUERA={archivada:['Archivada','Obra entregada. El contrato queda.'],papelera:['En la papelera','Su ficha está en la papelera del tablero.']};
+function sinFichaHtml(c){
+  if(!TABLERO_OK)return '<div class="fila-e"><span class="etapa fuera">Sin datos del tablero</span></div><small>No se pudo leer el tablero</small>';
+  const f=FUERA[c.ficha];
+  if(f)return '<div class="fila-e"><span class="etapa fuera">'+f[0]+'</span></div><small>'+f[1]+'</small>';
+  return '<div class="fila-e"><span class="etapa rota">No existe en el tablero</span></div><small class="rojo">'+(+c.enlace.cliente_nro>=90000?'Era una ficha cargada a mano':'La ficha '+esc(keyDe(c))+' ya no está')+'</small><button type="button" class="btn chico" data-desenlazar="'+esc(c.id)+'">Desenlazar</button>';
 }
 function etapaDet(k){
   let t='';
@@ -731,11 +762,11 @@ function dibujar(){
       +[v.telefono?(waLink(v.telefono)?'<a class="tel" href="'+esc(waLink(v.telefono))+'" target="_blank" rel="noopener" title="Abrir WhatsApp">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'',esc(c.vendedor),esc(c.procedencia)].filter(Boolean).join(' · ');
     const tot=partes(n.tot),pag=partes(n.pag);
     let tab;
-    const kn=!c.enlace&&c.nro?cardDeNro(c.nro,c.id):null; // su N° ya está en el tablero: se enlaza, no se carga de nuevo
-    if(kn)tab='<button type="button" class="btn chico enl-b" data-enlazar="'+esc(c.id)+'">'+ICO_ENL+'Enlazar con el tablero</button><small>Ya está en el tablero: '+esc(ETAPAS[kn.etapa]||kn.etapa)+'</small>';
+    const fp=fichaPara(c),kn=fp?fp.k:null; // su obra ya está en el tablero (mismo N° o mismo teléfono): se enlaza, no se carga de nuevo
+    if(kn)tab='<button type="button" class="btn chico enl-b" data-enlazar="'+esc(c.id)+'">'+ICO_ENL+'Enlazar con el tablero</button><small>'+(fp.por==='tel'?'Mismo teléfono que una obra del tablero: ':'Ya está en el tablero: ')+esc(ETAPAS[kn.etapa]||kn.etapa)+'</small>';
     else if(!c.enlace)tab='<button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
     else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><small'+(d.rojo?' class="rojo"':'')+'><span class="enl" title="Enlazado con el tablero y el calendario">'+ICO_ENL+'Enlazado</span>'+(d.t?' · '+esc(d.t):'')+'</small>';}
-    else tab='<div class="fila-e"><span class="etapa fuera">'+(TABLERO_OK?'Fuera del tablero':'Sin datos del tablero')+'</span></div><small>'+(TABLERO_OK?'Archivada o borrada':'No se pudo leer el tablero')+'</small>';
+    else tab=sinFichaHtml(c);
     const nota=(c.nota||'').replace(/\s+/g,' ').trim();
     const obra=[c.factura?'Factura <b>'+(c.factura==='si'?'sí':(c.factura==='cf'?'cons. final':'no'))+'</b>':'',c.muebles?'Muebles <b>'+(c.muebles==='si'?'sí':'no')+'</b>':'',v.bacha?'Pileta <b>'+esc(PIL[v.bacha].toLowerCase())+'</b>':''].filter(Boolean).join(' · ');
     return '<div class="fila'+(k?' enlazada':'')+'" data-id="'+esc(c.id)+'" tabindex="0" role="button" aria-label="Abrir el contrato de '+esc(v.cliente)+'">'
@@ -797,7 +828,10 @@ function abrirFicha(id){
     +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
   h+='<div class="m-res"><div><div class="t">Total</div><b id="rTot"></b></div><div><div class="t">Cobrado</div><b id="rCob"></b></div><div><div class="t">Saldo</div><b id="rSal"></b></div></div>';
   if(k)h+='<div class="nota-t"><span class="enl">'+ICO_ENL+'Enlazado con el tablero y el calendario</span><br>'+(etapaDet(k).t?esc(etapaDet(k).t)+'. ':'')+'Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div>';
-  else if(c&&c.enlace)h+='<div class="nota-t"><span class="enl roto">'+ICO_ENL+'Enlace sin ficha</span><br>Se cargó en el tablero como '+esc(keyDe(c))+', pero esa ficha ya no está ahí (archivada o borrada).</div>';
+  else if(c&&c.enlace&&TABLERO_OK){
+    if(FUERA[c.ficha])h+='<div class="nota-t"><span class="enl roto">'+ICO_ENL+FUERA[c.ficha][0]+'</span><br>'+FUERA[c.ficha][1]+'</div>';
+    else h+='<div class="nota-t rota"><span class="enl roto">'+ICO_ENL+'Esta ficha no existe en el tablero</span><br>El contrato está enlazado con '+esc(fichaIda(c))+' que ya no está: se borró o le cambiaron el N° de presupuesto. <button type="button" class="lnk" data-desenlazar="'+esc(c.id)+'">Desenlazar</button></div>';
+  }
   h+='<label class="campo notas">Notas<textarea id="fNota" rows="4" maxlength="4000" placeholder="Acá van los detalles: qué se acordó, aclaraciones de medidas, forma de pago, lo que haya que acordarse.">'+val(c&&c.nota)+'</textarea></label>';
   h+='<h4>Cliente</h4>'
     +'<label class="campo">Nombre<input id="fCliente" value="'+val(v.cliente)+'" autocomplete="off"'+ro+(c?'':' data-foco')+'></label>'
@@ -966,7 +1000,7 @@ async function guardar(){
   toast((id?'Contrato guardado.':'Contrato cargado.')+(nuevo&&!aviso?' Quedó verificado.':'')+aviso);
   await cargar();
   const cg=CONTRATOS.find(x=>x.id===r.id);
-  if(cg&&!cg.enlace&&cg.nro&&cardDeNro(cg.nro,cg.id))pedirEnlazar(cg.id);
+  if(cg&&fichaPara(cg))pedirEnlazar(cg.id);
   return r;
 }
 
@@ -1005,21 +1039,45 @@ async function enviar(id){
   toast(yaEstaba?'Ya estaba en el tablero: quedó enlazada con el tablero y el calendario.':('Cargada en Por medir: quedó enlazada con el tablero y el calendario.'+(falto.length?' Faltó copiar '+falto.join(', ')+': cargalo en el tablero.':'')));
   await cargar();
 }
-// El N° del contrato ya está cargado en el tablero: se enlaza con esa ficha (no se crea ni se cambia nada allá).
+// La obra de este contrato ya está en el tablero (mismo N° de presupuesto o mismo teléfono):
+// se enlaza con esa ficha. En el tablero no se crea ni se cambia nada.
 function pedirEnlazar(id){
-  const c=CONTRATOS.find(x=>x.id===id),k=c?cardDeNro(c.nro,c.id):null;
-  if(!c||!k)return;
-  const li=(a,b)=>b?'<li><span>'+a+'</span><b>'+esc(b)+'</b></li>':'',d=etapaDet(k);
-  abrirModal('<h3>Enlazar con el tablero</h3><div class="bajada">El presupuesto <b>N° '+esc(c.nro)+'</b> ya está cargado en el tablero. Al enlazarlo, este contrato muestra la etapa de esa obra y queda conectado con el tablero y el calendario. En el tablero no se crea ni se cambia nada.</div>'
-    +'<ul class="lista-c">'+li('Obra',k.key)+li('Cliente',k.nombre)+li('Etapa',(ETAPAS[k.etapa]||k.etapa)+(d.t?' · '+d.t:''))+li('Material',k.material)+'</ul>'
+  const c=CONTRATOS.find(x=>x.id===id),fp=fichaPara(c);
+  if(!c||!fp)return;
+  const k=fp.k,li=(a,b)=>b?'<li><span>'+a+'</span><b>'+esc(b)+'</b></li>':'',d=etapaDet(k);
+  abrirModal('<h3>Enlazar con el tablero</h3><div class="bajada">'+(fp.por==='tel'?'En el tablero hay una obra con el <b>mismo teléfono</b> que este contrato. Fijate que sea la misma.':'El presupuesto <b>N° '+esc(c.nro)+'</b> ya está cargado en el tablero.')+' Al enlazarlo, este contrato muestra la etapa de esa obra y queda conectado con el tablero y el calendario. En el tablero no se crea ni se cambia nada.</div>'
+    +'<ul class="lista-c">'+li('Obra',obraTxt(k))+li('Cliente',k.nombre)+li('Teléfono',telLindo(k.celular))+li('Dirección',k.direccion)+li('Etapa',(ETAPAS[k.etapa]||k.etapa)+(d.t?' · '+d.t:''))+li('Material',k.material)+'</ul>'
     +'<div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar>Ahora no</button><button type="button" class="ok" data-foco data-confirmar-enlazar="'+esc(c.id)+'">Enlazar con el tablero</button></div>',true,false);
 }
 async function enlazar(id){
-  const c=CONTRATOS.find(x=>x.id===id),k=c?cardDeNro(c.nro,c.id):null;
-  if(!c||!k)throw new Error('Esa obra ya no está en el tablero. Actualizá la página.');
-  await pedir(API,{accion:'enlazar',id:c.id,cliente_nro:k.cliente_nro,sub:k.sub});
+  const c=CONTRATOS.find(x=>x.id===id),fp=fichaPara(c);
+  if(!c||!fp)throw new Error('Esa obra ya no está en el tablero. Actualizá la página.');
+  await pedir(API,{accion:'enlazar',id:c.id,cliente_nro:fp.k.cliente_nro,sub:fp.k.sub});
   cerrarModal();
   toast('Enlazado con el tablero y el calendario.');
+  await cargar();
+}
+// Desenlazar: el contrato deja de estar unido a su ficha. No se borra nada en ningún lado.
+function pedirDesenlazar(id){
+  const c=CONTRATOS.find(x=>x.id===id);
+  if(!c||!c.enlace)return;
+  const k=cardDe(c),v=ver(c);
+  abrirModal('<h3>Desenlazar del tablero</h3><div class="bajada">El contrato de <b>'+esc(v.cliente)+'</b> deja de estar unido a '+(k?'su ficha del tablero ('+esc(obraTxt(k))+', en '+esc(ETAPAS[k.etapa]||k.etapa)+')':esc(fichaIda(c))+' que ya no está en el tablero')+'.<br><br><b>No se borra nada:</b> el contrato queda suelto, con su total y sus pagos'+(k?', y la ficha sigue en el tablero y en el calendario':'')+'. Después se puede volver a enlazar.</div>'
+    +'<div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar data-foco>Cancelar</button><button type="button" class="ok" data-confirmar-desenlazar="'+esc(c.id)+'">Desenlazar</button></div>',true,false);
+}
+async function desenlazar(id){
+  // lo operativo que venía de la ficha (cliente, teléfono, dirección, material) queda copiado en el contrato
+  const c=CONTRATOS.find(x=>x.id===id),k=c?cardDe(c):null;
+  if(c&&k){
+    const v=ver(c);
+    await pedir(API,{accion:'editar',id:c.id,nro:c.nro,fecha:c.fecha,cliente:v.cliente,telefono:telLindo(v.telefono),direccion:v.direccion,vendedor:c.vendedor,procedencia:c.procedencia,
+      contrato:c.contrato,contrato_paralelo:c.contrato_paralelo,material:v.material,medidas:c.medidas,total_usd:c.total_usd,total_ars:c.total_ars,
+      sena_monto:v.sena?v.sena.monto:0,sena_moneda:v.sena?v.sena.moneda:'ARS',sena_fecha:v.sena?v.sena.fecha:'',sena_cotizacion:(v.sena&&v.sena.cotizacion)||'',sena_aplica:(v.sena&&v.sena.aplica)||'',
+      factura:c.factura,muebles:c.muebles,bacha:v.bacha,bacha_modelo:v.bacha==='nuestra'?v.bacha_modelo:'',medicion:c.medicion,nota:c.nota}).catch(()=>{});
+  }
+  await pedir(API,{accion:'desenlazar',id:id});
+  cerrarModal();
+  toast('Desenlazado. El contrato quedó suelto; no se borró nada.');
   await cargar();
 }
 // --- los puntitos de cada renglón ---
@@ -1037,7 +1095,8 @@ function abrirMenu(btn){
   const it=(que,txt,valor)=>'<button type="button" role="menuitem" data-copiar="'+que+'"'+(valor?' data-valor="'+esc(valor)+'"':' disabled')+'>'+txt+'<small>'+esc(valor||'no tiene')+'</small></button>';
   const m=$('menu');
   m.innerHTML=it('nro','Copiar N° de presupuesto',c.nro)+it('tel','Copiar teléfono',tel)+it('dir','Copiar dirección',v.direccion)
-    +'<div class="sep"></div><button type="button" role="menuitem" class="pel" data-menu-borrar="'+esc(id)+'">Borrar contrato</button>';
+    +'<div class="sep"></div><button type="button" role="menuitem" data-menu-desenlazar="'+esc(id)+'"'+(c.enlace?'':' disabled')+'>Desenlazar del tablero<small>'+(c.enlace?'no borra nada':'no está enlazado')+'</small></button>'
+    +'<button type="button" role="menuitem" class="pel" data-menu-borrar="'+esc(id)+'">Borrar contrato</button>';
   m.hidden=false;menuDe=id;btn.setAttribute('aria-expanded','true');
   // debajo del botón, pegado a su borde derecho; si no entra abajo, arriba
   const r=btn.getBoundingClientRect(),w=m.offsetWidth,h=m.offsetHeight;
@@ -1067,7 +1126,7 @@ function pedirBorrar(id){
   id=c.id;
   const k=cardDe(c),nAdj=k&&k.adjuntos?k.adjuntos.length:0;
   abrirModal('<h3>Borrar contrato</h3><div class="bajada">El contrato de <b>'+esc(ver(c).cliente)+'</b> va a la papelera, con sus pagos'+(c.archivo?' y su presupuesto adjunto':'')+'.'
-    +(k?'<br><br><b>También sale del tablero su ficha</b> ('+esc(k.key)+', en '+esc(ETAPAS[k.etapa]||k.etapa)+'), con sus tildes, fechas y datos'+(nAdj?', y '+(nAdj===1?'su archivo adjunto':'sus '+nAdj+' archivos adjuntos'):'')+'.'
+    +(k?'<br><br><b>También sale del tablero su ficha</b> ('+esc(obraTxt(k))+', en '+esc(ETAPAS[k.etapa]||k.etapa)+'), con sus tildes, fechas y datos'+(nAdj?', y '+(nAdj===1?'su archivo adjunto':'sus '+nAdj+' archivos adjuntos'):'')+'.'
       :(c.enlace?'<br>La ficha del tablero ya no está (archivada o borrada): no se toca nada más.':''))
     +'<br><br>'+(c.prueba?'Es un renglón de prueba: se borra de verdad, sin papelera.':'Se puede recuperar durante 30 días desde "Papelera". Después se borra de verdad.')+'</div><div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar data-foco>Cancelar</button><button type="button" class="ok peligro" data-confirmar-borrar="'+esc(id)+'">'+(k?'Borrar contrato y ficha':'Borrar')+'</button></div>',true,false);
 }
@@ -1092,13 +1151,13 @@ async function borrarContrato(id){
 // --- obras en el tablero sin contrato ---
 function pedirSinContrato(){
   const l=sinContrato();
-  const filas=l.map(k=>'<div class="pap-f"><div><b>'+esc(k.nombre||'Sin nombre')+' · '+esc(k.key)+'</b><small>'+[esc(ETAPAS[k.etapa]||k.etapa),esc(k.material)].filter(Boolean).join(' · ')+'</small></div><button type="button" class="btn chico" data-crear-de="'+esc(k.key)+'">Crear contrato</button></div>').join('');
+  const filas=l.map(k=>'<div class="pap-f"><div><b>'+esc(k.nombre||'Sin nombre')+(k.manual?'':' · '+esc(k.key))+'</b><small>'+[esc(ETAPAS[k.etapa]||k.etapa),esc(k.material)].filter(Boolean).join(' · ')+'</small></div><button type="button" class="btn chico" data-crear-de="'+esc(k.key)+'">Crear contrato</button></div>').join('');
   abrirModal('<h3>Obras en el tablero sin contrato</h3><div class="bajada">'+(filas?'Cada obra del tablero tendría que tener su contrato acá. Al crearlo queda enlazado, con el cliente, el teléfono, la dirección, el material y la seña que ya están en la ficha. Después se le cargan el total y los pagos.':'Todas las obras del tablero tienen su contrato.')+'</div>'+(filas?'<div class="pap">'+filas+'</div>':'')
     +'<div class="m-err" id="mErr" hidden></div><div class="btns">'+(l.length>1?'<button type="button" class="izq-n" data-crear-todos>Crear los '+l.length+'</button>':'')+'<button type="button" data-cerrar data-foco>Cerrar</button></div>',false,false);
 }
 // El contrato de una ficha: nace enlazado. Lo operativo lo sigue mandando el tablero.
 function crearDeFicha(k){
-  return pedir(API,{accion:'crear',cliente:k.nombre||('Obra '+k.key),telefono:telLindo(k.celular),direccion:k.direccion,material:k.material,
+  return pedir(API,{accion:'crear',cliente:k.nombre||'Sin nombre',telefono:telLindo(k.celular),direccion:k.direccion,material:k.material,
     nro:k.manual?'':k.cliente_nro+(k.sub>1?'-'+k.sub:''),fecha:HOY,bacha:k.bacha,bacha_modelo:k.bacha==='nuestra'?k.bacha_modelo:'',
     sena_monto:k.sena?k.sena.monto:0,sena_moneda:k.sena?k.sena.moneda:'ARS',enlace:{cliente_nro:k.cliente_nro,sub:k.sub}});
 }
@@ -1156,6 +1215,8 @@ document.addEventListener('click',ev=>{
   if(bm){abrirMenu(bm);return;}
   const bc=t.closest('#menu [data-copiar]');
   if(bc){const v=bc.dataset.valor,q2=bc.dataset.copiar;cerrarMenu();if(v)copiar(v,q2);return;}
+  const bd=t.closest('#menu [data-menu-desenlazar]');
+  if(bd){const idd=bd.dataset.menuDesenlazar;cerrarMenu();pedirDesenlazar(idd);return;}
   const bb=t.closest('#menu [data-menu-borrar]');
   if(bb){const idb=bb.dataset.menuBorrar;cerrarMenu();pedirBorrar(idb);return;}
   if(menuDe){cerrarMenu();if(!t.closest('.modal'))return;}
@@ -1178,6 +1239,8 @@ document.addEventListener('click',ev=>{
   if((b=t.closest('[data-enviar]'))){pedirEnviar(b.dataset.enviar);return;}
   if((b=t.closest('[data-enlazar]'))){pedirEnlazar(b.dataset.enlazar);return;}
   if((b=t.closest('[data-confirmar-enlazar]'))){conBoton(b,()=>enlazar(b.dataset.confirmarEnlazar));return;}
+  if((b=t.closest('[data-desenlazar]'))){pedirDesenlazar(b.dataset.desenlazar);return;}
+  if((b=t.closest('[data-confirmar-desenlazar]'))){conBoton(b,()=>desenlazar(b.dataset.confirmarDesenlazar));return;}
   if((b=t.closest('[data-confirmar-enviar]'))){conBoton(b,()=>enviar(b.dataset.confirmarEnviar));return;}
   if((b=t.closest('[data-confirmar-borrar]'))){conBoton(b,()=>borrarContrato(b.dataset.confirmarBorrar));return;}
   if(t.closest('[data-cerrar]')){cerrarModal();return;}

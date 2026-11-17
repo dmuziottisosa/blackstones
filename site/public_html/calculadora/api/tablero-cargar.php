@@ -32,6 +32,7 @@
 
 require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
+require_once __DIR__ . '/_tablero.php';
 
 bs_require_auth();
 bs_check_csrf();
@@ -128,28 +129,9 @@ $fp = bs_lock_acquire($lockfile);
 if (!$fp) bs_error('No se pudo adquirir lock', 500);
 
 try {
-    // Próximo nro: mismo criterio que next-nro.php y add-manual.php (max de
-    // archivos + max del índice de borrados, para no reciclar números).
-    $max = 0;
-    foreach (@scandir(BS_CLIENTES_DIR) ?: [] as $f) {
-        if (preg_match('/^(\d{4,})\.json$/', $f, $mm)) {
-            $n = intval($mm[1]);
-            if ($n > $max) $max = $n;
-        }
-    }
-    $idx = bs_read_json(BS_CLIENTES_INDEX);
-    if (is_array($idx)) {
-        foreach ($idx as $nro_str => $_v) {
-            $n = intval($nro_str);
-            if ($n > $max) $max = $n;
-        }
-    }
-    $next = $max + 1;
-    if ($next > 9999) {
-        bs_lock_release($fp);
-        bs_error('Límite de 9999 clientes alcanzado.', 507);
-    }
-    $target_nro = str_pad((string)$next, 4, '0', STR_PAD_LEFT);
+    // Una obra cargada a mano no es un presupuesto: su número sale de la serie interna de
+    // fichas (90001 en adelante) y no toca la numeración de la calculadora.
+    $target_nro = bs_tablero_nro_ficha_manual();
     $cliente_path = BS_CLIENTES_DIR . '/' . $target_nro . '.json';
 
     $cliente_obj = [
