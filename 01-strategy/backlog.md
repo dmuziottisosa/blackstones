@@ -14,10 +14,10 @@
   - **Colocación** — por m² y/o por trabajo, con y sin escalera, con angulos especiales
   - **Otros**: pulido especial, biselado, leather/brushed, perforaciones extra, terminaciones (chamfered, ojiva, etc.), zócalos
   - **Por qué importa**: la calc hoy estima estos costos en `COSTOS_FIJOS` y constantes hardcodeadas — sin lista oficial actualizada, el "presupuesto cerrado por escrito en 24hs" (disparador #1 de Carolina) puede tener desviaciones reales, generando el dolor #4 ("extras al colocar")
-- [ ] **Verificar AMBOS crons** *(17/11/2026: `health.php` informa cada tarea por separado, `cron_limpieza_horas` y `cron_reporte_horas`; ese día el log tenía 22,7 hs, o sea que al menos la de las 03:00 corre. Falta leerlo con el health nuevo desplegado.)* activos en panel Hostinger (al menos uno está corriendo según `health.php` `cron_recent: true`):
-  - `cleanup-retention.php` → 03:00 ART diario
-  - `monthly-report.php` → 02:00 ART diario
-  - Validación: `cat bs-data/registro/_cron-log.txt` → ver entradas con `cleanup:` Y `monthly-report:`
+- [x] ~~**Verificar AMBOS crons**~~ — verificado el 17/11/2026 con la pantalla de Cron Jobs del panel de Hostinger (captura del dueño). Los dos están cargados, con la ruta correcta:
+  - `0 2 * * *` → `monthly-report.php`
+  - `0 3 * * *` → `cleanup-retention.php`
+  - Ese mismo día el chequeo de salud público mostró el log con 22,7 horas. La hora es la del servidor, no necesariamente la de Argentina. `health.php` informa cada tarea por separado (`cron_limpieza_horas`, `cron_reporte_horas`).
 - [ ] **Backup automático nocturno** de `bs-data/` → Google Drive / Dropbox / S3. Sin esto, un problema de Hostinger = todo perdido
 - [x] ~~Health check endpoint (`api/health.php`)~~ — deployado 2026-05-06, falta solo conectar UptimeRobot (ping cada 5 min)
 
