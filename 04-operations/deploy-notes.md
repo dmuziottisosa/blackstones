@@ -27,6 +27,42 @@
 
 ---
 
+## 1 bis. Panel de Hostinger: qué hay configurado y cómo verlo
+
+> Verificado por el dueño en el panel el 17/11/2026 (capturas de pantalla). Si algo de esto cambia, se actualiza acá con fecha.
+
+**Cómo entrar.** `hpanel.hostinger.com`, con el mail de la cuenta del dueño. Ni el mail ni la clave están en este repo, y no tienen que estar.
+
+- Si no te acordás el mail: buscá "Hostinger" en tus casillas. El mail que recibe las facturas y los avisos de renovación es el de la cuenta.
+- Si no te acordás la clave: "¿Olvidaste tu contraseña?" manda un link a ese mail. Probá también "Continuar con Google".
+- No es el usuario del FTP (ese es el de `D:\blackstones\.env` y solo sirve para subir archivos) ni la cuenta de DonWeb (ahí está el dominio).
+
+**Tareas automáticas (Cron Jobs).** Están en el sitio → Avanzado → Cron Jobs. Hay dos, y las dos tienen que estar:
+
+| Cuándo | Comando | Qué hace |
+|---|---|---|
+| `0 2 * * *` | `/usr/bin/php /home/u144473384/domains/blackstones.com.ar/public_html/calculadora/api/monthly-report.php` | Genera el reporte de cada mes cerrado |
+| `0 3 * * *` | `/usr/bin/php /home/u144473384/domains/blackstones.com.ar/public_html/calculadora/api/cleanup-retention.php` | Borra presupuestos a los 180 días y vacía la papelera a los 30 |
+
+- La hora es la del servidor, no necesariamente la de Argentina.
+- **No borrarlas.** Sin la segunda, nada vence ni se limpia; sin la primera, el reporte de un mes viejo se puede perder cuando sus presupuestos se borran.
+- **Para ver si corren sin entrar al panel:** `blackstones.com.ar/calculadora/api/health.php`. `cron_limpieza_horas` y `cron_reporte_horas` dicen hace cuántas horas escribió cada una; por debajo de 36 están bien. Desde el panel, "Ver resultado" muestra la última corrida.
+
+**Límites de PHP.** Están en Avanzado → Configuración PHP → Opciones de PHP.
+
+| Opción | Valor | Para qué importa |
+|---|---|---|
+| `uploadMaxFilesize` | 1024M | Subir fotos, planos y presupuestos adjuntos. El sistema se limita solo a 10 MB por archivo |
+| `postMaxSize` | 1024M | Lo mismo; tiene que ser igual o mayor que el anterior |
+| `memoryLimit` | 1024M | |
+| `maxExecutionTime` / `maxInputTime` | 360 | |
+| `maxInputVars` | 5000 | |
+| `maxFileUploads` | 20 | |
+
+No hace falta tocar ninguno.
+
+**Lo que sigue pendiente en el panel** (17/11/2026): cambiar la clave del FTP, que quedó expuesta al armar el proyecto. Se cambia en "Cuentas FTP", y después hay que actualizar `FTP_PASS` en `D:\blackstones\.env` o los bloques de deploy dejan de subir.
+
 ## 2. Setup inicial (una sola vez)
 
 ### Crear `.env` en `D:\blackstones\.env` (no dentro del repo — el repo no vive en local)

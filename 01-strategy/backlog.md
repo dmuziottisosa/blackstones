@@ -17,6 +17,7 @@
 - [x] ~~**Verificar AMBOS crons**~~ — verificado el 17/11/2026 con la pantalla de Cron Jobs del panel de Hostinger (captura del dueño). Los dos están cargados, con la ruta correcta:
   - `0 2 * * *` → `monthly-report.php`
   - `0 3 * * *` → `cleanup-retention.php`
+  - Detalle y cómo volver a verlo: `04-operations/deploy-notes.md`, sección 1 bis.
   - Ese mismo día el chequeo de salud público mostró el log con 22,7 horas. La hora es la del servidor, no necesariamente la de Argentina. `health.php` informa cada tarea por separado (`cron_limpieza_horas`, `cron_reporte_horas`).
 - [ ] **Backup automático nocturno** de `bs-data/` → Google Drive / Dropbox / S3. Sin esto, un problema de Hostinger = todo perdido
 - [x] ~~Health check endpoint (`api/health.php`)~~ — deployado 2026-05-06, falta solo conectar UptimeRobot (ping cada 5 min)
