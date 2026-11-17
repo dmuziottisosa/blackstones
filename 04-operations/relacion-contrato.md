@@ -167,6 +167,17 @@ Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, list
   - **En la papelera:** su ficha está en la papelera del tablero.
   - **No existe en el tablero:** la ficha se borró o le cambiaron el N° de presupuesto desde "Editar obra". Es un enlace roto: el renglón lo marca en rojo con el botón **Desenlazar**, y la ficha del contrato lo dice arriba ("Esta ficha no existe en el tablero"). Desenlazado, si la obra sigue en el tablero con otro número, el renglón vuelve a ofrecer "Enlazar con el tablero".
 
+## El N° del contrato en la ficha del tablero (17/11/2026)
+
+Una ficha cargada a mano dice "Sin N°". Si está enlazada con un contrato que tiene N°, **muestra ese número** en el tablero y en el calendario, y se la encuentra buscándolo.
+
+- **El dueño del dato es el contrato.** Se le pasa a la ficha al guardar el contrato, al enlazarlo y cada vez que alguien que puede editar contratos abre Relación-Contrato. Cambiar el N° en el contrato lo cambia en la ficha.
+- **Si el contrato se desenlaza, se borra o se queda sin N°, la ficha vuelve a "Sin N°".**
+- **No muda la ficha a ningún presupuesto.** Es solo el número que se muestra: sirve aunque ese presupuesto ya no exista en la calculadora. Atar la ficha al presupuesto real sigue siendo "Editar obra" en el tablero.
+- **Una ficha que viene de un presupuesto no lo lleva:** ya tiene su número.
+- El contrato paralelo ("ctto") no se pasa; es un dato solo del contrato.
+- Cómo está hecho: la página de Relación-Contrato llama a `tablero.php` con la acción `nro_contrato` (`pasarNros()`), y el número queda guardado en la ficha. El tablero y el calendario no leen nada de contratos: si Relación-Contrato se borra, las fichas conservan el último número que tenían.
+
 ## Renglones de prueba
 
 Con la lista vacía aparece "Cargar 3 de prueba". Quedan marcados PRUEBA, no cuentan en "Por cobrar" y se borran juntos con "Borrar los de prueba" (si alguno se cargó en el tablero, esa ficha de prueba también se borra).

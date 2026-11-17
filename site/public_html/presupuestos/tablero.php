@@ -707,7 +707,10 @@ let HOY='';         // YYYY-MM-DD según el server
 let abierta='';     // key de la tarjeta con el detalle abierto
 // El N° que se muestra es el del presupuesto. Una ficha cargada a mano no tiene presupuesto:
 // dice "Sin N°" (su número interno no se muestra) hasta que se le ponga uno desde "Editar obra".
-const nroB=c=>c.manual?'<b class="sin-nro" title="Cargada a mano: todavía no tiene presupuesto. Se le pone desde Más → Editar obra.">Sin N°</b>':'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b>';
+// Si está enlazada con un contrato que tiene N°, muestra ese (lo escribe Relación-Contrato).
+const nroB=c=>!c.manual?'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b>'
+  :(c.nro_contrato?'<b title="N° de su contrato en Relación-Contrato. La ficha se cargó a mano.">'+esc(c.nro_contrato)+'</b>'
+  :'<b class="sin-nro" title="Cargada a mano: todavía no tiene presupuesto ni contrato con N°.">Sin N°</b>');
 // Qué fichas tienen contrato en Relación-Contrato (ficha → contrato). Lo dice Relación-Contrato;
 // si no existe o no contesta, queda vacío y la ficha simplemente no muestra la marca.
 let ENLACES={};
@@ -946,7 +949,7 @@ function htmlAdjuntos(c,desplegada){
 const plano=t=>String(t==null?'':t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function coincide(c){
   if(!buscado.length)return true;
-  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.bacha_modelo,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' '),c.cortador.join(' ')].join(' '));
+  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nro_contrato||'',c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.bacha_modelo,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' '),c.cortador.join(' ')].join(' '));
   return buscado.every(w=>c._txt.indexOf(w)>=0);
 }
 
@@ -2396,7 +2399,7 @@ function exportarCSV(){
   const orden=ETAPAS.map(e=>e.id);
   const filas=CARDS.slice().sort((a,b)=>(orden.indexOf(a.etapa)-orden.indexOf(b.etapa))||a.key.localeCompare(b.key,undefined,{numeric:true}));
   const cols=[
-    ['N°',c=>c.manual?'':c.cliente_nro+'-'+c.sub], // N° de presupuesto: la ficha a mano no tiene
+    ['N°',c=>c.manual?(c.nro_contrato||''):c.cliente_nro+'-'+c.sub], // N° de presupuesto; la ficha a mano, el de su contrato si tiene
     ['Cliente',c=>c.nombre],
     ['Teléfono',c=>c.celular],
     ['Dirección',c=>c.direccion],

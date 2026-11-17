@@ -258,6 +258,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'zona'        => bs_tablero_zona($cot),
                     // Las obras cargadas a mano no tienen presupuesto detallado para abrir.
                     'manual'      => !empty($cot['manual']), // cargada a mano desde el tablero
+                    // El N° de su contrato enlazado, para mostrar en vez de "Sin N°" (solo fichas a mano).
+                    'nro_contrato' => !empty($cot['manual']) ? (string)($obra['nro_contrato'] ?? '') : '',
                     'tiene_detalle' => empty($cot['manual']) && isset($cot['presupuesto']) && is_array($cot['presupuesto']),
                     'etapa'       => $obra['etapa'],
                     'fecha'       => bs_tablero_fecha_valida($obra['fecha']) ? $obra['fecha'] : '',
@@ -340,15 +342,15 @@ $accion = (string)($body['accion'] ?? '');
 
 if (intval($cliente_nro) <= 0) bs_error('cliente_nro inválido');
 if ($sub <= 0) bs_error('sub inválido');
-if (!in_array($accion, ['check', 'fecha', 'plazo', 'nota', 'bacha', 'mover', 'borrar'], true)) bs_error('accion inválida');
+if (!in_array($accion, ['check', 'fecha', 'plazo', 'nota', 'bacha', 'nro_contrato', 'mover', 'borrar'], true)) bs_error('accion inválida');
 
 // La obra tiene que existir como cotización aprobada: el tablero no crea
 // obras, solo acompaña a las que el hub ya aprobó.
 $cliente_obj = bs_read_json(BS_CLIENTES_DIR . '/' . $cliente_nro . '.json');
 if (!$cliente_obj) bs_error('Cliente no encontrado', 404);
-$aprobada = false;
+$aprobada = false; $es_manual = false;
 foreach ($cliente_obj['cotizaciones'] ?? [] as $cot) {
-    if (intval($cot['sub'] ?? 0) === $sub && ($cot['estado'] ?? '') === 'aprobado') { $aprobada = true; break; }
+    if (intval($cot['sub'] ?? 0) === $sub && ($cot['estado'] ?? '') === 'aprobado') { $aprobada = true; $es_manual = !empty($cot['manual']); break; }
 }
 if (!$aprobada) bs_error('Esa obra ya no está aprobada. Actualizá el tablero.', 409);
 
@@ -562,6 +564,22 @@ try {
             bs_error('La nota es muy larga (máximo ' . BS_TABLERO_NOTA_MAX . ' caracteres)');
         }
         $obra['nota'] = $nota;
+
+    } elseif ($accion === 'nro_contrato') {
+        // El N° que se ve en una ficha cargada a mano: el de su contrato enlazado (dueño, 17/11/2026).
+        // Lo escribe Relación-Contrato cuando el contrato tiene N°; vacío lo borra. No muda la ficha a
+        // ningún presupuesto ni cambia su clave: es solo el número que se muestra en vez de "Sin N°".
+        // Una ficha que viene de un presupuesto ya tiene su número y no lo lleva.
+        $nro = trim((string)($body['nro'] ?? ''));
+        if ($nro !== '' && !preg_match('/^\d{1,6}(?:-\d{1,3})?$/', $nro)) {
+            bs_lock_release($fp);
+            bs_error('El N° va como 0042, o 0042-2 si tiene versiones.');
+        }
+        if (!$es_manual) {
+            bs_lock_release($fp);
+            bs_error('Esa ficha viene de un presupuesto: ya tiene su N°.', 409);
+        }
+        $obra['nro_contrato'] = $nro;
 
     } elseif ($accion === 'bacha') {
         // De quién es la bacha, anotado al cargar la obra. Es un dato, no el

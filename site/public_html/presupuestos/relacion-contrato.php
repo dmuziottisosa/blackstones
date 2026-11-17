@@ -682,7 +682,28 @@ async function cargar(){
     if(t){t.cards.forEach(k=>{CARDS[k.key]=k;});t.etapas.forEach(e=>{ETAPAS[e.id]=e.titulo;});}
     $('err').hidden=true;
     dibujar();
+    pasarNros();
   }catch(e){$('err').textContent=e.message;$('err').hidden=false;$('lista').innerHTML='<div class="vacio">No se pudo cargar la lista.</div>';}
+}
+// El N° del contrato se ve también en su ficha del tablero (dueño, 17/11/2026). Una ficha cargada a mano
+// dice "Sin N°"; si está enlazada con un contrato que tiene N°, pasa a mostrar ese, en el tablero y en el
+// calendario. El dueño del dato es el contrato: se le pasa al guardar, al enlazar y al abrir esta página;
+// si el contrato se desenlaza, se borra o pierde el N°, la ficha vuelve a "Sin N°".
+// No muda la ficha a ningún presupuesto (eso se sigue haciendo desde "Editar obra" en el tablero).
+// Solo lo hace quien puede editar contratos; si el tablero no contesta, no pasa nada.
+let pasandoNros=false;
+async function pasarNros(){
+  if(!EDITA||!TABLERO_OK||pasandoNros)return;
+  const nroDe=c=>/^\d{1,6}(-\d{1,3})?$/.test(String(c.nro||'').trim())?String(c.nro).trim():'';
+  const cambios=[],con={};
+  CONTRATOS.forEach(c=>{const k=cardDe(c);if(k&&k.manual){con[k.key]=1;if((k.nro_contrato||'')!==nroDe(c))cambios.push([k,nroDe(c)]);}});
+  Object.keys(CARDS).forEach(key=>{const k=CARDS[key];if(k.manual&&k.nro_contrato&&!con[key])cambios.push([k,'']);});
+  if(!cambios.length)return;
+  pasandoNros=true;
+  for(const x of cambios){
+    try{await pedir(API_T,{cliente_nro:x[0].cliente_nro,sub:x[0].sub,accion:'nro_contrato',nro:x[1]});x[0].nro_contrato=x[1];}catch(e){}
+  }
+  pasandoNros=false;
 }
 // La seña del tablero y la del contrato no se pisan nunca (dueño, 17/11/2026): si difieren, se avisa.
 // No es diferencia que sea la misma plata dicha de otra forma: la seña en dólares con su cotización
