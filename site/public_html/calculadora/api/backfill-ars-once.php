@@ -23,7 +23,7 @@
 require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
 
-bs_require_auth();
+bs_require_permiso('mantenimiento');
 
 if (($_GET['confirm'] ?? '') !== 'YES') {
     bs_error('Backfill requiere ?confirm=YES. Para evitar accidentes.', 400);

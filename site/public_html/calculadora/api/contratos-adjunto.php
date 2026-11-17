@@ -24,7 +24,7 @@
 require_once __DIR__ . '/_contratos.php';
 require_once __DIR__ . '/_auth.php';
 
-bs_require_auth();
+bs_require_permiso((($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') ? 'contratos' : 'contratos_editar');
 bs_check_csrf();
 bs_ensure_dirs();
 

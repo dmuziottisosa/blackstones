@@ -177,6 +177,9 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **Vendedores y procedencias son listas cerradas** (`_contratos.php`). No inventar nombres en datos de prueba.
 - **Datos de clientes reales nunca van al repo** (nombres, teléfonos, direcciones, planillas exportadas). Tampoco como ejemplo en comentarios o pruebas: usar ficticios (`11 5555-1234`).
 - **No se puede ver ni tocar la base de producción desde acá.** Lo que el dueño ve en pantalla solo se conoce por lo que pega o exporta ("Exportar tablero"). No comparar ni actualizar datos reales salvo que lo pida.
+- **Cada persona entra con su usuario; hay tres roles (17/11/2026).** Administrador (todo), Operador (todo menos la plata de los contratos y los usuarios; Relación-Contrato solo la mira) y Planos y bacha (solo el tablero, solo adjuntar fotos). Qué puede cada rol está en un solo lugar: `AUTH_PERMISOS` en `calculadora/auth_check.php`. → `04-operations/usuarios.md`
+- **El permiso lo controla el servidor, no la pantalla.** Todo archivo de `calculadora/api/` empieza con `bs_require_permiso('<permiso>')` y toda página con `auth_exigir_pagina()`. Lo que un rol no puede ver (seña, montos de contratos) no sale del servidor. Un endpoint nuevo sin su permiso queda cerrado a administradores.
+- **Los usuarios viven en `bs-data/usuarios/`, fuera del repo.** Las contraseñas nunca van al repo, a un chat ni a un ejemplo.
 - **Cada cambio se prueba antes de entregar** (regresión del tablero, pruebas del calendario y de contratos, en computadora, tablet y celular) y se entrega con su bloque de deploy.
 
 ---
@@ -189,8 +192,8 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **Leads de hoy:** ~25 buenos por WhatsApp.
 - **Funnel actual:** ad → click WhatsApp → cotización 24 hs → cierre.
 - **Sitio web:** `blackstones.com.ar` en Hostinger, dominio en donweb.
-- **Calculadora interna:** `blackstones.com.ar/calculadora/` (auth con HMAC, password compartido con equipo).
-- **Sistema interno (nov 2026), misma contraseña del equipo:** Presupuestos (`/presupuestos/`), Tablero de obras (`/presupuestos/tablero.php`), Calendario (`/presupuestos/calendario.php`), Relación-Contrato (`/presupuestos/relacion-contrato.php`) y Stock (en construcción). Docs: `04-operations/tablero-obras.md` y `04-operations/relacion-contrato.md`.
+- **Calculadora interna:** `blackstones.com.ar/calculadora/` (cada persona con su usuario desde nov 2026; antes, contraseña compartida).
+- **Sistema interno (nov 2026), con usuarios y roles:** Presupuestos (`/presupuestos/`), Tablero de obras (`/presupuestos/tablero.php`), Calendario (`/presupuestos/calendario.php`), Relación-Contrato (`/presupuestos/relacion-contrato.php`) y Stock (en construcción). Docs: `04-operations/tablero-obras.md`, `04-operations/relacion-contrato.md` y `04-operations/usuarios.md`.
 
 ---
 
@@ -214,4 +217,4 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ---
 
-*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días; sin pestaña Reporte). Próxima revisión obligatoria: febrero 2027.*
+*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días; sin pestaña Reporte; usuarios y roles). Próxima revisión obligatoria: febrero 2027.*

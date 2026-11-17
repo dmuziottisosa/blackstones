@@ -30,7 +30,7 @@ require_once __DIR__ . '/_auth.php';
 // otra serie (90001 en adelante) y no cuentan para el próximo N° de presupuesto.
 if (!defined('BS_NRO_FICHA_MANUAL_DESDE')) define('BS_NRO_FICHA_MANUAL_DESDE', 90000);
 
-bs_require_auth();
+bs_require_permiso('presupuestos');
 bs_check_csrf();
 bs_ensure_dirs();
 

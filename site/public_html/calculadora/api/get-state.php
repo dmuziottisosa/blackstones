@@ -19,7 +19,7 @@
 require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
 
-bs_require_auth();
+bs_require_permiso('calculadora');
 
 $nro = str_pad((string)intval($_GET['nro'] ?? ''), 4, '0', STR_PAD_LEFT);
 $sub = intval($_GET['sub'] ?? 0);

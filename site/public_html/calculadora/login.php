@@ -3,18 +3,43 @@ require_once __DIR__ . '/auth_check.php';
 
 // Si ya está autenticado, redirigir a la calculadora
 if (auth_is_valid()) {
-    header('Location: index.php');
+    header('Location: ' . auth_inicio());
     exit;
 }
+
+// Con usuarios creados se entra con usuario y contraseña; antes, con la contraseña compartida.
+$db = auth_db();
+$con_usuarios = $db !== null;
+$usuario_tipeado = '';
 
 $error = '';
 $lockoutSeconds = auth_check_lockout();
 
 // Procesar form POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockoutSeconds === 0) {
-    $password = $_POST['password'] ?? '';
+    $password = (string)($_POST['password'] ?? '');
+    $usuario_tipeado = trim((string)($_POST['usuario'] ?? ''));
 
-    if (auth_check_password($password)) {
+    if ($con_usuarios) {
+        $id = auth_entrar($usuario_tipeado, $password);
+        if ($id !== '') {
+            auth_reset_attempts();
+            auth_login($id);
+            // Último acceso (si no se puede anotar, se entra igual).
+            $fp = auth_db_candado();
+            if ($fp) {
+                $db = auth_db(true);
+                if (isset($db['usuarios'][$id])) { $db['usuarios'][$id]['ultimo'] = date('c'); auth_db_guardar($db); }
+                flock($fp, LOCK_UN); fclose($fp);
+            }
+            $rol = (string)($db['usuarios'][$id]['rol'] ?? '');
+            header('Location: ' . (in_array($rol, AUTH_PERMISOS['calculadora'], true) ? '/calculadora/' : '/presupuestos/tablero.php'));
+            exit;
+        }
+        auth_record_failure();
+        $error = !empty($db['roto']) ? 'No se pudo leer la lista de usuarios. Avisale al administrador.' : 'Usuario o contraseña incorrectos.';
+        $lockoutSeconds = auth_check_lockout();
+    } elseif (auth_check_password($password)) {
         auth_reset_attempts();
         auth_login();
         header('Location: index.php');
@@ -109,7 +134,7 @@ $lockoutMinutes = $lockoutSeconds > 0 ? ceil($lockoutSeconds / 60) : 0;
     letter-spacing:.1em;
     margin-bottom:8px;
   }
-  input[type=password]{
+  input[type=password],input[type=text]{
     width:100%;
     font-family:'Manrope',sans-serif;
     font-size:1rem;
@@ -123,7 +148,8 @@ $lockoutMinutes = $lockoutSeconds > 0 ? ceil($lockoutSeconds / 60) : 0;
     transition:border-color .15s,box-shadow .15s;
     letter-spacing:.04em;
   }
-  input[type=password]:focus{
+  input[type=text]{margin-bottom:16px}
+  input[type=password]:focus,input[type=text]:focus{
     border-color:#C4A77D;
     box-shadow:0 0 0 3px rgba(196,167,125,.18);
   }
@@ -186,12 +212,28 @@ $lockoutMinutes = $lockoutSeconds > 0 ? ceil($lockoutSeconds / 60) : 0;
   <div class="auth-brand-sub">Acceso interno</div>
 
   <form class="auth-card" method="POST" autocomplete="off">
+<?php if ($con_usuarios): ?>
+    <label for="usuario">Usuario</label>
+    <input
+      type="text"
+      name="usuario"
+      id="usuario"
+      value="<?= htmlspecialchars($usuario_tipeado) ?>"
+      <?= $usuario_tipeado === '' ? 'autofocus' : '' ?>
+      required
+      autocomplete="username"
+      autocapitalize="none"
+      autocorrect="off"
+      spellcheck="false"
+      <?= $lockoutSeconds > 0 ? 'disabled' : '' ?>
+    >
+<?php endif; ?>
     <label for="password">Contraseña</label>
     <input
       type="password"
       name="password"
       id="password"
-      autofocus
+      <?= (!$con_usuarios || $usuario_tipeado !== '') ? 'autofocus' : '' ?>
       required
       autocomplete="current-password"
       <?= $lockoutSeconds > 0 ? 'disabled' : '' ?>

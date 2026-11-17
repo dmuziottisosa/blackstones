@@ -12,6 +12,7 @@ Cómo se ejecuta el día a día: proceso de venta-fabricación-colocación, rute
 | `ftp-map.md` ⭐ | Mapa mental del FTP de Hostinger: dónde aterriza el user, dónde está el web root, mapeo local↔remoto |
 | `deploy-snippets.md` ⭐ | Bloques de PowerShell copy-paste para uso diario (subir 1 archivo, sync carpeta, listar, borrar, backup) |
 | `tablero-obras.md` | Tablero de obras del hub: columnas, tildes, reglas para avanzar, retiro en local y archivado |
+| `usuarios.md` | Usuarios y roles del sistema interno: qué puede cada rol, arranque, cómo está hecho y qué hacer si alguien pierde la contraseña |
 
 ## Reglas
 

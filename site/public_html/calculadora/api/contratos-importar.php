@@ -50,10 +50,7 @@ require_once __DIR__ . '/_contratos.php';
 require_once __DIR__ . '/_tablero.php';
 require_once __DIR__ . '/_auth.php';
 
-if (!auth_is_valid()) {
-    header('Location: /calculadora/login.php');
-    exit;
-}
+auth_exigir_pagina('mantenimiento');
 bs_check_csrf();
 bs_ensure_dirs();
 

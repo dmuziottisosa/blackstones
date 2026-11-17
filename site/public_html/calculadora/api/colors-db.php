@@ -25,7 +25,7 @@
 require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
 
-bs_require_auth();
+bs_require_permiso('tablero');
 
 $calc_path  = realpath(__DIR__ . '/../calc.html');
 $cache_path = BS_DATA_DIR . '/.colors-db.cache.json';

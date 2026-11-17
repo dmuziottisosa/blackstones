@@ -31,7 +31,7 @@ require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
 require_once __DIR__ . '/_tablero.php';
 
-bs_require_auth();
+bs_require_permiso('presupuestos');
 
 // La etapa de una obra la dicta el tablero, pero en Presupuestos se ve y se puede filtrar:
 // cada cotización "aprobado" (obra viva) sale con su etapa del tablero ("etapa", "etapa_titulo"),

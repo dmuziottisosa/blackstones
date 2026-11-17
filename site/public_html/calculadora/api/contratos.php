@@ -50,7 +50,16 @@
 require_once __DIR__ . '/_contratos.php';
 require_once __DIR__ . '/_auth.php';
 
-bs_require_auth();
+// Ver: administradores y operadores. Cambiar: solo administradores, salvo lo que el tablero
+// dispara al borrar o recuperar una ficha enlazada (borrar_enlazado / restaurar_enlazado),
+// que lo puede quien opera el tablero.
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+    bs_require_permiso('contratos');
+} else {
+    $bs_pre = json_decode((string)@file_get_contents('php://input'), true);
+    $bs_acc = is_array($bs_pre) ? (string)($bs_pre['accion'] ?? '') : '';
+    bs_require_permiso(in_array($bs_acc, ['borrar_enlazado', 'restaurar_enlazado'], true) ? 'tablero_operar' : 'contratos_editar');
+}
 bs_check_csrf();
 bs_ensure_dirs();
 
@@ -156,7 +165,7 @@ function bs_contrato_salida($c) {
         if (!in_array((string)($c['vendedor'] ?? ''), $BS_CONTRATO_VENDEDORES, true)) $c['vendedor'] = '';
         if (!in_array((string)($c['procedencia'] ?? ''), $BS_CONTRATO_PROCEDENCIAS, true)) $c['procedencia'] = '';
     }
-    return [
+    $s = [
         'id'           => (string)$c['id'],
         'creado'       => (string)($c['creado'] ?? ''),
         'fecha'        => (string)($c['fecha'] ?? substr((string)($c['creado'] ?? ''), 0, 10)),
@@ -189,6 +198,13 @@ function bs_contrato_salida($c) {
         // Si el N° existe en Presupuestos (solo informa; no verifica).
         'presup'       => bs_contrato_presup((string)($c['nro'] ?? '')),
     ];
+    // Sin permiso para ver la plata, los montos no salen del servidor.
+    if (!auth_puede('contratos_plata')) {
+        $s['total_usd'] = 0; $s['total_ars'] = 0; $s['sena'] = null; $s['pagos'] = [];
+        $s['nota'] = auth_tapar_plata($s['nota']); // la nota es texto libre: se le tapan los montos
+        if (is_array($s['presup'])) { $s['presup']['total_usd'] = 0; $s['presup']['total_ars'] = 0; }
+    }
+    return $s;
 }
 
 /**
@@ -287,6 +303,7 @@ function bs_contrato_id() {
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (isset($_GET['verificar'])) {
+        bs_require_permiso('contratos_editar');
         $nro = trim((string)$_GET['verificar']);
         if (!preg_match('/^#?\s*(\d{1,6})(?:\s*-\s*(\d{1,3}))?$/', $nro, $m)) bs_error('El N° de presupuesto va como 0042, o 0042-2 si tiene versiones.');
         bs_ok(['presup' => bs_contrato_presup(intval($m[1]) . (isset($m[2]) ? '-' . intval($m[2]) : ''))]);
@@ -312,6 +329,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         ]]);
     }
     if (isset($_GET['papelera'])) {
+        bs_require_permiso('contratos_editar');
         $pap = [];
         $limite = time() - BS_CONTRATOS_PAPELERA_DIAS * 86400;
         foreach ((array)($d['papelera'] ?? []) as $c) {

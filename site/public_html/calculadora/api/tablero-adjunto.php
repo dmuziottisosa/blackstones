@@ -31,8 +31,9 @@
 require_once __DIR__ . '/_tablero.php';
 require_once __DIR__ . '/_auth.php';
 
-bs_require_auth();
+bs_require_permiso((($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') ? 'tablero' : 'tablero_adjuntar');
 bs_check_csrf();
+$bs_por = (string)(auth_usuario()['usuario'] ?? '');
 bs_ensure_dirs();
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
@@ -176,6 +177,10 @@ try {
             bs_error('Esa foto ya no existe. Actualizá el tablero.', 404);
         }
         $vieja = $adjuntos[$pos_reemplazo];
+        if (!bs_tablero_adj_mio($vieja)) {
+            bs_lock_release($fp);
+            bs_error('Solo podés girar las fotos que subiste vos.', 403);
+        }
         if ($vieja['tipo'] !== $tipo || in_array($vieja['ext'], ['pdf', 'link'], true) || $ext === 'pdf') {
             bs_lock_release($fp);
             bs_error('Solo se pueden girar las fotos.');
@@ -198,7 +203,7 @@ try {
     }
     if ($accion === 'link') {
         $id = bin2hex(random_bytes(8));
-        $adjuntos[] = ['id' => $id, 'tipo' => $tipo, 'ext' => 'link', 'url' => $link, 'at' => date('c')];
+        $adjuntos[] = ['id' => $id, 'tipo' => $tipo, 'ext' => 'link', 'url' => $link, 'at' => date('c'), 'por' => $bs_por];
 
     } elseif ($accion === 'subir') {
         if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
@@ -215,11 +220,11 @@ try {
         if ($pos_reemplazo >= 0) {
             // misma posición y misma fecha de carga; id nuevo para que el navegador no muestre la vieja guardada
             $vieja = $adjuntos[$pos_reemplazo];
-            $adjuntos[$pos_reemplazo] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => $vieja['at'] !== '' ? $vieja['at'] : date('c')];
+            $adjuntos[$pos_reemplazo] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => $vieja['at'] !== '' ? $vieja['at'] : date('c'), 'por' => (string)($vieja['por'] ?? '')];
             @unlink($dir . '/' . $vieja['id'] . '.' . $vieja['ext']);
             @unlink($dir . '/' . $vieja['id'] . '.t.jpg');
         } else {
-            $adjuntos[] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => date('c')];
+            $adjuntos[] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => date('c'), 'por' => $bs_por];
         }
 
     } else { // borrar
@@ -231,6 +236,10 @@ try {
         if (!$borrado) {
             bs_lock_release($fp);
             bs_error('Ese archivo ya no existe. Actualizá el tablero.', 404);
+        }
+        if (!bs_tablero_adj_mio($borrado)) {
+            bs_lock_release($fp);
+            bs_error('Solo podés borrar los archivos que subiste vos.', 403);
         }
         if ($borrado['ext'] !== 'link') { // un link no tiene archivo en el servidor
             @unlink($dir . '/' . $borrado['id'] . '.' . $borrado['ext']);

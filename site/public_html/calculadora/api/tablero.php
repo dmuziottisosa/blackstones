@@ -50,7 +50,7 @@
 require_once __DIR__ . '/_tablero.php';
 require_once __DIR__ . '/_auth.php';
 
-bs_require_auth();
+bs_require_permiso((($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') ? 'tablero' : 'tablero_operar');
 bs_check_csrf();
 bs_ensure_dirs();
 
@@ -135,7 +135,7 @@ function bs_tablero_historia($obra) {
             if (isset($BS_TILDES_PERSONAS[$cid])) {
                 $quienes = array_values(array_intersect($BS_TILDES_PERSONAS[$cid][0], (array)($obra[$BS_TILDES_PERSONAS[$cid][1]] ?? [])));
                 if ($quienes) $txt .= ': ' . implode(', ', $quienes);
-            } elseif ($cid === 'sena' && ($s = bs_tablero_sena($obra))) {
+            } elseif ($cid === 'sena' && auth_puede('tablero_plata') && ($s = bs_tablero_sena($obra))) { // el monto, solo a quien puede verlo
                 $txt .= ': ' . ($s['moneda'] === 'USD' ? 'USD ' : '$ ') . number_format($s['monto'], 0, ',', '.');
             } elseif ($cid === 'bacha' && in_array($obra['bacha'] ?? '', ['nuestra', 'cliente', 'no'], true)) {
                 $txt = ['nuestra' => 'Bacha nuestra', 'cliente' => 'Bacha del cliente', 'no' => 'No lleva bacha'][$obra['bacha']];
@@ -260,10 +260,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $at = in_array($b, ['medido', 'cortado', 'fabricado'], true) ? ($o[$b . '_at'] ?? '') : '';
                         return bs_tablero_fecha_valida((string)$at) ? $at : '';
                     })($obra),
-                    'nota'        => (string)$obra['nota'],
+                    // La nota es texto libre y a veces lleva plata ("Saldo $ …"): a quien no la ve se le tapa el monto.
+                    'nota'        => auth_puede('tablero_plata') ? (string)$obra['nota'] : auth_tapar_plata((string)$obra['nota']),
                     'historia'    => $historia,
                     'hitos'       => $hitos,
-                    'sena'        => bs_tablero_sena($obra),
+                    // La seña solo la ve quien tiene permiso; al resto no le sale del servidor.
+                    'sena'        => auth_puede('tablero_plata') ? bs_tablero_sena($obra) : null,
                     'acceso'      => bs_tablero_acceso($obra),
                     'bacha'       => in_array($obra['bacha'], ['nuestra', 'cliente', 'no'], true) ? $obra['bacha'] : '',
                     'bacha_modelo' => (string)($obra['bacha_modelo'] ?? ''),
@@ -272,7 +274,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'cortador'    => array_values(array_intersect($BS_CORTADORES, (array)($obra['cortador'] ?? []))),
                     'medidor'     => array_values(array_intersect($BS_MEDIDORES, (array)($obra['medidor'] ?? []))),
                     'adjuntos'    => array_map(function ($a) {
-                        return ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf', 'link' => $a['ext'] === 'link' ? $a['url'] : ''];
+                        return ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf', 'link' => $a['ext'] === 'link' ? $a['url'] : '',
+                            // ¿lo puede borrar o girar el que está mirando? (los suyos siempre; los ajenos, con permiso)
+                            'mio' => bs_tablero_adj_mio($a)];
                     }, bs_tablero_adjuntos($obra)),
                     'semana'      => $semana,
                     'limite'      => $limite_dia,
@@ -297,10 +301,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     if (isset($_GET['archivadas'])) {
+        bs_require_permiso('tablero_operar');
         usort($archivadas, function ($a, $b) { return strcmp($b['archivada'], $a['archivada']); });
         bs_ok(['dias' => BS_RETENTION_DAYS, 'obras' => $archivadas]);
     }
-    bs_ok(['hoy' => date('Y-m-d'), 'papelera' => $en_papelera, 'archivadas' => count($archivadas), 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
+    bs_ok(['hoy' => date('Y-m-d'), 'papelera' => auth_puede('tablero_operar') ? $en_papelera : 0, 'archivadas' => auth_puede('tablero_operar') ? count($archivadas) : 0, 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
 }
 
 // ============================================================

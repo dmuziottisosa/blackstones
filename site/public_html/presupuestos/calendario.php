@@ -11,15 +11,13 @@
 // acá es el mismo dato del tablero: no hay nada duplicado.
 // Datos y reglas: /calculadora/api/tablero.php
 //
-// Auth: reusa HMAC cookie de la calc (auth_check.php).
+// Acceso: sesión de auth_check.php + permiso 'calendario' (ver AUTH_PERMISOS).
 // ============================================================
 
 require_once __DIR__ . '/../calculadora/auth_check.php';
 
-if (!auth_is_valid()) {
-    header('Location: /calculadora/login.php');
-    exit;
-}
+// Sin sesión va al login; con sesión pero sin permiso, a la primera pantalla de su rol.
+auth_exigir_pagina('calendario');
 
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Content-Type: text/html; charset=UTF-8');
@@ -367,21 +365,14 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
     <div><h1>BlackStones</h1><span>Calendario de obras</span></div>
   </div>
   <div class="h-right">
-    <span>blackstones.com.ar</span>
+    <?= auth_quien_html() ?>
     <div class="toggle" onclick="toggleTheme()" title="Modo claro / oscuro"></div>
     <a href="/calculadora/logout.php" class="logout-link" title="Cerrar sesión" aria-label="Cerrar sesión">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </a>
   </div>
 </div>
-<nav class="h-tabs">
-  <a href="/calculadora/">Calculadora</a>
-  <a href="/presupuestos/">Presupuestos</a>
-  <a href="/presupuestos/tablero.php">Tablero</a>
-  <a href="/presupuestos/calendario.php" class="active">Calendario</a>
-  <a href="/presupuestos/relacion-contrato.php">Relación-Contrato</a>
-  <a href="/presupuestos/stock.php">Stock</a>
-</nav>
+<?= auth_nav_html('calendario') ?>
 <div class="gold-line"></div>
 
 <div class="wrap">

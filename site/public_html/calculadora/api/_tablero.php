@@ -308,13 +308,25 @@ function bs_tablero_adjuntos($obra) {
         if ($ext === 'link') {
             $url = bs_tablero_link_valido($a['url'] ?? '');
             if ($url === '') continue;
-            $out[] = ['id' => $id, 'tipo' => $tipo, 'ext' => 'link', 'url' => $url, 'at' => (string)($a['at'] ?? '')];
+            $out[] = ['id' => $id, 'tipo' => $tipo, 'ext' => 'link', 'url' => $url, 'at' => (string)($a['at'] ?? ''), 'por' => (string)($a['por'] ?? '')];
             continue;
         }
         if (!in_array($ext, $BS_TABLERO_ADJ_MIMES, true)) continue;
-        $out[] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => (string)($a['at'] ?? '')];
+        $out[] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => (string)($a['at'] ?? ''), 'por' => (string)($a['por'] ?? '')];
     }
     return $out;
+}
+
+/**
+ * ¿El que entró puede borrar o girar este adjunto? Los que subió él, siempre.
+ * Los de otro (o los de antes de que hubiera usuarios, que no dicen de quién son),
+ * solo con el permiso 'tablero_adj_ajeno'. Necesita auth_check.php cargado.
+ */
+function bs_tablero_adj_mio($a) {
+    if (!function_exists('auth_usuario')) return true;
+    if (auth_puede('tablero_adj_ajeno')) return true;
+    $u = auth_usuario();
+    return $u && $u['usuario'] !== '' && (string)($a['por'] ?? '') === $u['usuario'];
 }
 
 /** Carpeta de adjuntos de una obra. $key ya validada ("0042-1"). */

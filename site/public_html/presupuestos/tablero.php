@@ -7,15 +7,13 @@
 // una columna a otra, o se avanza con el botón Siguiente.
 // Datos y reglas: /calculadora/api/tablero.php
 //
-// Auth: reusa HMAC cookie de la calc (auth_check.php).
+// Acceso: sesión de auth_check.php + permiso 'tablero' (ver AUTH_PERMISOS).
 // ============================================================
 
 require_once __DIR__ . '/../calculadora/auth_check.php';
 
-if (!auth_is_valid()) {
-    header('Location: /calculadora/login.php');
-    exit;
-}
+// Sin sesión va al login; con sesión pero sin permiso, a la primera pantalla de su rol.
+auth_exigir_pagina('tablero');
 
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Content-Type: text/html; charset=UTF-8');
@@ -585,9 +583,14 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 @media(min-width:960px) and (max-width:1099px){
   .col.on{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+/* Rol que solo adjunta fotos: la ficha se ve entera pero no se cambia. */
+.solo-fotos .c-hecho,.solo-fotos .c-fecha,.solo-fotos .chk{pointer-events:none}
+.solo-fotos .c-avanzar,.solo-fotos input[data-nota],.solo-fotos .c-det .acciones,.solo-fotos .col-cargar,.solo-fotos #exportB,.solo-fotos .c-fecha.vacia{display:none}
+.solo-fotos .card{cursor:default}
+.solo-fotos .card.plegada{cursor:pointer}
 </style>
 </head>
-<body>
+<body<?= auth_puede('tablero_operar') ? '' : ' class="solo-fotos"' ?>>
 
 <div class="header">
   <div style="display:flex;align-items:center;gap:12px">
@@ -595,21 +598,14 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
     <div><h1>BlackStones</h1><span>Tablero de obras</span></div>
   </div>
   <div class="h-right">
-    <span>blackstones.com.ar</span>
+    <?= auth_quien_html() ?>
     <div class="toggle" onclick="toggleTheme()" title="Modo claro / oscuro"></div>
     <a href="/calculadora/logout.php" class="logout-link" title="Cerrar sesión" aria-label="Cerrar sesión">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </a>
   </div>
 </div>
-<nav class="h-tabs">
-  <a href="/calculadora/">Calculadora</a>
-  <a href="/presupuestos/">Presupuestos</a>
-  <a href="/presupuestos/tablero.php" class="active">Tablero</a>
-  <a href="/presupuestos/calendario.php">Calendario</a>
-  <a href="/presupuestos/relacion-contrato.php">Relación-Contrato</a>
-  <a href="/presupuestos/stock.php">Stock</a>
-</nav>
+<?= auth_nav_html('tablero') ?>
 <div class="gold-line"></div>
 
 <div class="wrap">
@@ -664,6 +660,9 @@ function toggleTheme(){
 // ============================================================
 // Tablero de obras
 // ============================================================
+// Quién entró y qué puede (el servidor igual rechaza lo que el rol no puede).
+const YO=<?= auth_permisos_js() ?>;
+const OPERA=!!YO.puede.tablero_operar; // sin esto la ficha solo se mira y se le adjuntan fotos
 const API='/calculadora/api/tablero.php';
 const API_ESTADO='/calculadora/api/state.php';
 const API_ADJ='/calculadora/api/tablero-adjunto.php';
@@ -708,6 +707,7 @@ const nroB=c=>c.manual?'<b class="sin-nro" title="Cargada a mano: todavía no ti
 let ENLACES={};
 const ICO_ENL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>';
 async function cargarEnlaces(){
+  if(!YO.puede.contratos)return; // sin acceso a Relación-Contrato no hay marca que mostrar
   let n={};
   try{
     const r=await fetch('/calculadora/api/contratos.php?enlaces=1',{credentials:'same-origin',cache:'no-store'});
@@ -924,7 +924,7 @@ function htmlAdjuntos(c,desplegada){
       (a.link?'Drive':(a.pdf?'PDF':'<img loading="lazy" alt="" src="'+esc(urlAdj(c,a))+'&t=1">'))+'<span>'+ADJ[a.tipo]+'</span></button>';
   });
   // Bacha y plano se suman en Por medir (o desde "Más"); la foto de entrega, cuando se instala.
-  if(c.etapa==='medir'||desplegada){
+  if(c.etapa==='medir'||desplegada||!OPERA){ // quien solo adjunta los tiene siempre a mano
     h+='<button type="button" class="adj mas" data-act="adjuntar" data-tipo="bacha">+ Foto bacha</button>';
     h+='<button type="button" class="adj mas" data-act="adjuntar" data-tipo="plano">+ Plano</button>';
   }
@@ -1395,6 +1395,7 @@ window.addEventListener('resize',ajustarAlto);
 
 // Guarda un cambio: primero lo aplica en pantalla, después lo confirma el server.
 async function guardar(c,body,aplicar){
+  if(!OPERA){toast('Tu usuario no puede cambiar las fichas.');return;}
   if(ocupado)return;
   ocupado=true;
   // Si el cambio le mueve el lugar en la cola (fecha, hora, Medido, Cortado), la pantalla
@@ -1486,7 +1487,7 @@ wrap.addEventListener('click',ev=>{
     dibujar();
     return;
   }
-  if(ev.target.closest('[data-cargar]')){pedirCargar();return;}
+  if(ev.target.closest('[data-cargar]')){if(OPERA)pedirCargar();return;}
   if(ev.target.closest('[data-limpiar]')){limpiarFiltros();return;}
   const bp=ev.target.closest('[data-plazo]');
   if(bp){plazoF=plazoF===bp.dataset.plazo?'':bp.dataset.plazo;dibujar();return;}
@@ -1516,6 +1517,7 @@ wrap.addEventListener('click',ev=>{
   const c=art&&cardDe(art.dataset.key);
   if(!c)return;
   const act=b.dataset.act;
+  if(!OPERA&&!['abrir','plegar','mas','adjuntar','ver'].includes(act))return; // solo mira y adjunta
   if(act==='abrir'||act==='plegar'){
     if(Date.now()-ultimoArrastre<400)return;
     VISTA[c.key]=act==='abrir';
@@ -1689,6 +1691,7 @@ function dragSoltar(cancelar){
 }
 
 wrap.addEventListener('pointerdown',ev=>{
+  if(!OPERA)return; // sin permiso no se arrastra
   if(SOLO||drag||ocupado||(ev.pointerType==='mouse'&&ev.button!==0))return;
   const art=ev.target.closest('.card');
   if(!art||ev.target.closest('button,a,input,.c-det'))return;
@@ -2123,8 +2126,8 @@ function verAdjunto(c,id){
   abrirModal(ADJ[a.tipo]+' · '+c.cliente_nro+'-'+c.sub,
     '<div class="visor">'+(a.link?'<p class="visor-link">Está en Drive: '+esc(a.link.replace(/^https:\/\//,'').slice(0,60))+(a.link.length>68?'…':'')+'</p>':(a.pdf?'':'<div class="lienzo" id="adjLienzo"><img src="'+esc(url)+'" alt="" id="adjImg"></div>'))+
     '<div class="acciones"><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(a.link?'Abrir en Drive':(a.pdf?'Abrir el PDF':'Abrir en grande'))+'</a>'+
-    (foto?'<button type="button" class="girar" id="adjGirar" title="Gira la foto un cuarto de vuelta">Girar</button>':'')+
-    '<button type="button" class="borrar" id="adjBorrar">Borrar</button></div></div>',
+    (foto&&a.mio!==false?'<button type="button" class="girar" id="adjGirar" title="Gira la foto un cuarto de vuelta">Girar</button>':'')+
+    (a.mio!==false?'<button type="button" class="borrar" id="adjBorrar">Borrar</button>':'')+'</div></div>',
     'Cerrar',cerrarModal);
   $('mCancelar').style.display='none';
   // Girar: cada toque es un cuarto de vuelta, y se ve al instante. Recién al tocar "Guardar así" la
@@ -2139,7 +2142,7 @@ function verAdjunto(c,id){
     g.translate(cv.width/2,cv.height/2);g.rotate(giro*Math.PI/180);g.drawImage(fuente,-cw/2,-ch/2,cw,ch);
     if(calidad)cv.toBlob(b=>res(b),'image/jpeg',calidad);else res(cv);
   });
-  if(foto)$('adjGirar').addEventListener('click',async()=>{
+  if(foto&&$('adjGirar'))$('adjGirar').addEventListener('click',async()=>{
     if(ocupado)return;
     if(!fuente){
       const img=$('adjImg');
@@ -2187,7 +2190,7 @@ function verAdjunto(c,id){
     await cargar();
   };
   let seguro=false;
-  $('adjBorrar').addEventListener('click',async()=>{
+  if($('adjBorrar'))$('adjBorrar').addEventListener('click',async()=>{
     if(!seguro){seguro=true;$('adjBorrar').textContent='¿Seguro? Tocá de nuevo para borrar';return;}
     if(ocupado)return;
     ocupado=true;

@@ -4,15 +4,13 @@
 // ============================================================
 // Lo administrativo de cada obra: el contrato, su total y lo cobrado.
 // Datos propios (api/contratos.php); se enlaza con el tablero con un botón.
-// Auth: reusa HMAC cookie de la calc (auth_check.php).
+// Acceso: sesión de auth_check.php + permiso 'contratos' (ver AUTH_PERMISOS).
 // ============================================================
 
 require_once __DIR__ . '/../calculadora/auth_check.php';
 
-if (!auth_is_valid()) {
-    header('Location: /calculadora/login.php');
-    exit;
-}
+// Sin sesión va al login; con sesión pero sin permiso, a la primera pantalla de su rol.
+auth_exigir_pagina('contratos');
 
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Content-Type: text/html; charset=UTF-8');
@@ -437,9 +435,22 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   .m-res b{font-size:15.5px}
   .m-res>div{padding:10px 10px 11px}
 }
+/* Sin permiso para ver la plata: no hay columnas de montos ni resumen. */
+.sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 42px 42px 64px 172px minmax(0,1.25fr) 30px}
+.sin-plata .fila>.der,.sin-plata .cab>.der,.sin-plata .pie>.der,.sin-plata .res>div:not(:first-child){display:none}
+.sin-plata .res>div:first-child{flex:1 1 auto}
+@media(max-width:1519px){.sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 42px 42px 64px 172px 30px}}
+@media(max-width:1199px){.sin-plata .lista{--cols:70px 68px minmax(0,1.6fr) minmax(0,1.3fr) 172px 30px}}
+/* Solo mirar: sin botones que cambien algo. */
+.solo-ver [data-nuevo],.solo-ver [data-prueba],.solo-ver [data-borrar-prueba],.solo-ver [data-sin-contrato],.solo-ver [data-enviar],.solo-ver [data-enlazar],.solo-ver [data-desenlazar],.solo-ver #papB{display:none!important}
+.lec{display:grid;grid-template-columns:120px minmax(0,1fr);gap:7px 14px;font-size:14px;margin-top:4px}
+.lec>span{color:var(--text3);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding-top:2px}
+.lec>div{min-width:0;overflow-wrap:anywhere}
+.lec .nt{white-space:pre-wrap}
+@media(max-width:560px){.lec{grid-template-columns:minmax(0,1fr);gap:2px 0}.lec>div{margin-bottom:8px}}
 </style>
 </head>
-<body>
+<body class="<?= auth_puede('contratos_plata') ? '' : 'sin-plata' ?> <?= auth_puede('contratos_editar') ? '' : 'solo-ver' ?>">
 
 <div class="header">
   <div style="display:flex;align-items:center;gap:12px">
@@ -447,21 +458,14 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
     <div><h1>BlackStones</h1><span>Relación-Contrato</span></div>
   </div>
   <div class="h-right">
-    <span>blackstones.com.ar</span>
+    <?= auth_quien_html() ?>
     <div class="toggle" onclick="toggleTheme()" title="Modo claro / oscuro"></div>
     <a href="/calculadora/logout.php" class="logout-link" title="Cerrar sesión" aria-label="Cerrar sesión">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </a>
   </div>
 </div>
-<nav class="h-tabs">
-  <a href="/calculadora/">Calculadora</a>
-  <a href="/presupuestos/">Presupuestos</a>
-  <a href="/presupuestos/tablero.php">Tablero</a>
-  <a href="/presupuestos/calendario.php">Calendario</a>
-  <a href="/presupuestos/relacion-contrato.php" class="active">Relación-Contrato</a>
-  <a href="/presupuestos/stock.php">Stock</a>
-</nav>
+<?= auth_nav_html('contratos') ?>
 <div class="gold-line"></div>
 
 <div class="wrap">
@@ -501,6 +505,9 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 // Un renglón por contrato. Lo operativo (cliente, dirección, material, pileta, seña) lo manda el
 // tablero cuando el contrato está enlazado; la plata (total y pagos) vive acá.
 const $=id=>document.getElementById(id);
+// Quién entró y qué puede. Sin 'contratos_plata' los montos ni llegan del servidor;
+// sin 'contratos_editar' la página es solo para mirar (el servidor rechaza los cambios).
+const YO=<?= auth_permisos_js() ?>,PLATA=!!YO.puede.contratos_plata,EDITA=!!YO.puede.contratos_editar;
 const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php',API_ADJ='/calculadora/api/contratos-adjunto.php',API_PAP_T='/calculadora/api/tablero-papelera.php';
 let CONTRATOS=[],CARDS={},ETAPAS={},HOY='',TABLERO_OK=false,q='';
 let VENDEDORES=[],PROCEDENCIAS=[];
@@ -679,6 +686,7 @@ async function cargar(){
 // contra la del tablero en pesos, o el tablero con todo lo cobrado anotado como seña.
 // Devuelve null si coinciden, o {t: la del tablero, s: la del contrato, txt}.
 function senaDif(c){
+  if(!PLATA)return null; // sin ver la plata no hay nada que comparar
   const k=cardDe(c);
   if(!k)return null;
   const t=k.sena||null,s=c.sena||null,igual=(a,b)=>Math.abs(a-b)<1;
@@ -704,7 +712,7 @@ const sumar=(l)=>{const s={tot:{USD:0,ARS:0},pag:{USD:0,ARS:0},deb:{USD:0,ARS:0}
 const debe=c=>{const n=cuentas(c);return n.sal.USD>0.004||n.sal.ARS>0.004;};
 const pagado=c=>{const n=cuentas(c);return (n.tot.USD>0||n.tot.ARS>0)&&!debe(c);};
 // Filtros de control: lo que hay que perseguir.
-const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['completos','Completos',completo],['sena','Seña distinta',c=>!!senaDif(c),true]];
+const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['completos','Completos',completo],['sena','Seña distinta',c=>!!senaDif(c),true]].filter(f=>PLATA||['saldo','pagados','sena'].indexOf(f[0])<0);
 const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':(v==='cf'?'<span class="sn si" title="Factura a consumidor final">CF</span>':'<span class="sn">—</span>'));
 const PIL={nuestra:'Nuestra',cliente:'Cliente',no:'No'};
 
@@ -722,7 +730,7 @@ function dibujar(){
   $('mesHoy').hidden=buscando||mes===HOY.slice(0,7);
   if(!CONTRATOS.length){
     $('res').hidden=$('filtros').hidden=true;
-    $('lista').innerHTML='<div class="vacio"><h2>Todavía no hay contratos</h2>Acá va un renglón por cada cliente que contrata: el total, la seña y lo que falta cobrar.<br>Desde cada renglón se puede cargar la obra en Por medir del tablero.<div class="btns-v"><button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button><button type="button" class="btn" data-prueba>Cargar 3 de prueba</button></div></div>';
+    $('lista').innerHTML='<div class="vacio"><h2>Todavía no hay contratos</h2>'+(EDITA?'Acá va un renglón por cada cliente que contrata: el total, la seña y lo que falta cobrar.<br>Desde cada renglón se puede cargar la obra en Por medir del tablero.':'Acá va un renglón por cada cliente que contrata.')+'<div class="btns-v"><button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button><button type="button" class="btn" data-prueba>Cargar 3 de prueba</button></div></div>';
     return;
   }
   // El mes (por la fecha del contrato). Buscando, todos los meses.
@@ -823,9 +831,39 @@ const opcHtml=(campo,ops,val,fijo)=>'<div class="opc" data-opc="'+campo+'">'+ops
 // Lista cerrada. Si el contrato tiene un valor que ya no está en la lista, se conserva como una opción más.
 const selHtml=(id,ops,val)=>'<select id="'+id+'"><option value="">Sin asignar</option>'+ops.concat(val&&ops.indexOf(val)<0?[val]:[]).map(o=>'<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
 
+// Solo mirar: los datos del contrato sin formulario y sin plata.
+function verFicha(c){
+  const v=ver(c),k=cardDe(c);
+  const fila=(t,x)=>x?'<span>'+t+'</span><div>'+x+'</div>':'';
+  const wa=waLink(v.telefono);
+  let h='<div class="m-cab"><div><h3>'+esc(v.cliente)+(c.archivo?'<span class="ver" title="Tiene adjunto el presupuesto">'+ICO_VER+'Verificado</span>':'')+'</h3>'
+    +'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de contrato',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>'
+    +'<div class="m-chk">'+[[!!c.nro,'N° de contrato'],[!!c.archivo,'Presupuesto adjunto'],[!!c.enlace,'Enlazado con el tablero']].map(x=>'<span class="'+(x[0]?'si':'')+'">'+x[1]+'</span>').join('')+'</div></div>'
+    +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
+  if(k)h+='<div class="nota-t"><span class="enl">'+ICO_ENL+'Enlazado con el tablero y el calendario</span>'+(etapaDet(k).t?'<br>'+esc(etapaDet(k).t)+'.':'')+'</div>';
+  else if(c.enlace&&TABLERO_OK)h+='<div class="nota-t'+(FUERA[c.ficha]?'':' rota')+'"><span class="enl roto">'+ICO_ENL+(FUERA[c.ficha]?FUERA[c.ficha][0]:'Esta ficha no existe en el tablero')+'</span>'+(FUERA[c.ficha]?'<br>'+FUERA[c.ficha][1]:'')+'</div>';
+  h+='<div class="lec">'
+    +fila('Teléfono',v.telefono?(wa?'<a href="'+esc(wa)+'" target="_blank" rel="noopener">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'')
+    +fila('Dirección',esc(v.direccion))
+    +fila('Material',esc(v.material))
+    +fila('Medidas',esc(c.medidas))
+    +fila('Pileta',v.bacha?esc(bachaTxt(v)):'')
+    +fila('Factura',c.factura?(c.factura==='si'?'Sí':(c.factura==='cf'?'Consumidor final':'No')):'')
+    +fila('Muebles',c.muebles?(c.muebles==='si'?'Colocados':'Sin colocar'):'')
+    +fila('Ctto paralelo',esc(c.contrato_paralelo))
+    +fila('Vendedor',esc(c.vendedor))
+    +fila('Procedencia',esc(c.procedencia))
+    +fila('Medición',!c.enlace&&c.medicion?esc(fch(c.medicion)):'')
+    +fila('Presupuesto',c.archivo?'<a href="'+API_ADJ+'?id='+encodeURIComponent(c.id)+'" target="_blank" rel="noopener">Abrir el adjunto</a> · '+esc(c.archivo.nombre):'')
+    +fila('Notas',c.nota?'<div class="nt">'+esc(c.nota)+'</div>':'')
+    +'</div>';
+  h+='<div class="btns"><button type="button" class="ok" data-cerrar>Cerrar</button></div>';
+  abrirModal(h,false,false);
+}
 function abrirFicha(id){
   const c=id?CONTRATOS.find(x=>x.id===id):null;
   if(id&&!c)return;
+  if(!EDITA){if(c)verFicha(c);return;}
   const v=c?ver(c):{},k=c?cardDe(c):null;
   // Enlazado y con la ficha a la vista: lo operativo se edita en el tablero (un solo lugar por dato).
   const fijo=!!k,ro=fijo?' readonly':'';
@@ -1106,8 +1144,8 @@ function abrirMenu(btn){
   const it=(que,txt,valor)=>'<button type="button" role="menuitem" data-copiar="'+que+'"'+(valor?' data-valor="'+esc(valor)+'"':' disabled')+'>'+txt+'<small>'+esc(valor||'no tiene')+'</small></button>';
   const m=$('menu');
   m.innerHTML=it('nro','Copiar N° de presupuesto',c.nro)+it('tel','Copiar teléfono',tel)+it('dir','Copiar dirección',v.direccion)
-    +'<div class="sep"></div><button type="button" role="menuitem" data-menu-desenlazar="'+esc(id)+'"'+(c.enlace?'':' disabled')+'>Desenlazar del tablero<small>'+(c.enlace?'no borra nada':'no está enlazado')+'</small></button>'
-    +'<button type="button" role="menuitem" class="pel" data-menu-borrar="'+esc(id)+'">Borrar contrato</button>';
+    +(EDITA?'<div class="sep"></div><button type="button" role="menuitem" data-menu-desenlazar="'+esc(id)+'"'+(c.enlace?'':' disabled')+'>Desenlazar del tablero<small>'+(c.enlace?'no borra nada':'no está enlazado')+'</small></button>'
+    +'<button type="button" role="menuitem" class="pel" data-menu-borrar="'+esc(id)+'">Borrar contrato</button>':'');
   m.hidden=false;menuDe=id;btn.setAttribute('aria-expanded','true');
   // debajo del botón, pegado a su borde derecho; si no entra abajo, arriba
   const r=btn.getBoundingClientRect(),w=m.offsetWidth,h=m.offsetHeight;

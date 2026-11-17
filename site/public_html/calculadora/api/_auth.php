@@ -4,23 +4,52 @@
 // BlackStones Marmolería · Registry de Presupuestos v1
 // ============================================================
 //
-// Reutiliza el HMAC cookie auth de la calc (auth_check.php).
-// Cualquier endpoint que requiera auth empieza con:
+// Reutiliza la sesión de la calc (auth_check.php).
+// Cualquier endpoint empieza con:
 //   require_once __DIR__ . '/_auth.php';
-//   bs_require_auth();
+//   bs_require_permiso('<permiso>');   // ver AUTH_PERMISOS en auth_check.php
 //
-// Si no autenticado → 401, exit. Si OK → continúa.
+// Sin sesión → 401. Sin permiso → 403. Si OK → continúa.
 // ============================================================
 
 require_once __DIR__ . '/../auth_check.php';
 
-function bs_require_auth() {
+/**
+ * Exige sesión Y permiso (ver AUTH_PERMISOS en auth_check.php).
+ * Sin sesión → 401. Con sesión pero sin permiso → 403.
+ * Los cambios (todo lo que no sea GET) quedan anotados con el usuario.
+ */
+function bs_require_permiso($permiso) {
     if (!auth_is_valid()) {
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['ok' => false, 'error' => 'No autenticado'], JSON_UNESCAPED_UNICODE);
         exit;
     }
+    if (!auth_puede($permiso)) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'error' => 'Tu usuario no tiene permiso para esto.', 'sin_permiso' => $permiso], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+        $in = json_decode((string)@file_get_contents('php://input'), true);
+        if (!is_array($in)) $in = $_POST;
+        $d = [];
+        foreach (['cliente_nro', 'sub', 'id', 'accion', 'etapa', 'nuevo_estado', 'tipo'] as $k) {
+            if (isset($in[$k]) && is_scalar($in[$k])) $d[$k] = $in[$k];
+        }
+        auth_registrar($permiso, $d);
+    }
+}
+
+/**
+ * Un endpoint que solo pide "estar adentro" no dice qué rol puede usarlo.
+ * Por las dudas queda cerrado a administradores: todo endpoint tiene que
+ * llamar a bs_require_permiso() con su permiso.
+ */
+function bs_require_auth() {
+    bs_require_permiso('mantenimiento');
 }
 
 /**

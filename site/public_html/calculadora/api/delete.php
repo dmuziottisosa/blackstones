@@ -27,7 +27,10 @@
 require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
 
-bs_require_auth();
+// Lo que viene del tablero (borrar la ficha, archivar, devolver) pide permiso del tablero;
+// lo demás, de Presupuestos.
+$bs_pre = json_decode((string)@file_get_contents('php://input'), true);
+bs_require_permiso((is_array($bs_pre) && (!empty($bs_pre['desde_tablero']) || !empty($bs_pre['conservar_hermanas']))) ? 'tablero_operar' : 'presupuestos');
 bs_check_csrf();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
