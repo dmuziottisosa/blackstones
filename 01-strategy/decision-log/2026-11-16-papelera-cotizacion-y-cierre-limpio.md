@@ -13,7 +13,9 @@ Después de revisar los huecos del sistema (16/11/2026), el dueño resolvió cua
 1. **Papelera de 30 días, "no hay excusa".** Borrar una ficha del tablero o un contrato ya no es definitivo: van a la papelera y se recuperan durante 30 días. Enlazados, van y vuelven juntos.
 2. **Cotización del dólar en la seña y en cada pago.** Se cobra en pesos o en dólares; si el cobro es en una moneda y el contrato está en la otra, se guarda la cotización. Se propone el dólar del día que ya trae la calculadora.
 3. **Un contrato cierra limpio** cuando tiene N° puesto, presupuesto adjunto y está enlazado con el tablero. Y cada obra del tablero tiene que tener su contrato: la página avisa las que no y deja crearlo.
-4. **La planilla del equipo se carga en Relación-Contrato, solo los clientes que están en el tablero.** El sistema toma el formato de la planilla ("ajustalo a nuestro formato, no nosotros ajustarnos").
+4. **Se cargan en Relación-Contrato los que están en el tablero.** Se parte del tablero: cada ficha recibe su contrato, con los datos de la planilla del equipo cuando está ahí. El sistema toma el formato de la planilla ("ajustalo a nuestro formato, no nosotros ajustarnos").
+
+**Corrección del 17/11 (dueño):** la primera versión recorría la planilla y buscaba fichas; el dueño no la corrió porque "iba a cargar de más". Se dio vuelta: manda el tablero, y **las dudas se resuelven con la fecha de medición**.
 
 ## Por qué
 
@@ -25,7 +27,8 @@ Después de revisar los huecos del sistema (16/11/2026), el dueño resolvió cua
 
 - La seña habitual es 50% del total, o 75% si no hay muebles (dueño). La página lo informa y no bloquea: "no podemos confiar ciegamente".
 - La planilla de octubre y noviembre 2026 tiene 79 contratos, todos con total en pesos. En 57 el detalle de cobros suma exactamente lo cobrado (17 de ellos con dólares, a cotizaciones de 1530 a 1570 que salen de la propia planilla). En 17 no suma y en 5 no hay detalle.
-- Probado en local contra una copia del tablero del 14/11: de 79 filas, 32 encuentran su ficha (21 por teléfono, 7 por nombre, 4 por nombre parecido).
+- Entre el contrato y la medición pasan pocos días: en las 21 fichas que coinciden por teléfono, de 29 días antes a 4 días después. Por eso la fecha de medición sirve para desempatar.
+- Probado en local contra una copia del tablero del 14/11 (34 fichas): 26 reciben los datos de la planilla (21 por teléfono, 5 por nombre confirmadas por la fecha), 2 quedan en duda y 6 no están en la planilla.
 - Probado: tirar y restaurar fichas y contratos, vencimiento de la papelera, regresión del tablero, calendario, y el tablero funcionando con Relación-Contrato borrada.
 
 ## Known unknowns
@@ -33,6 +36,7 @@ Después de revisar los huecos del sistema (16/11/2026), el dueño resolvió cua
 - **Qué son las cuatro columnas de montos en pesos de la planilla** (no vinieron los encabezados): el medio de cada cobro queda sin marcar.
 - En las 17 filas donde el detalle no suma lo cobrado, cuál de los dos números es el bueno. Se cargó lo cobrado y quedó una nota en cada contrato.
 - Cuántas fichas del tablero de hoy coinciden con la planilla: la prueba fue contra una copia de hace dos días; la vista previa del importador da el número real.
+- Si la ventana de 35 días antes y 7 después alcanza para obras más viejas que octubre.
 - Si el dólar que se propone tiene que ser el oficial (lo que trae hoy la calculadora) o el blue.
 - Sigue sin haber respaldo automático diario de los datos.
 

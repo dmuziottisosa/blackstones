@@ -90,15 +90,27 @@ Decisión del dueño (16/11/2026): nada se borra de una.
 - Si estaba enlazado, su ficha va a la papelera del tablero y vuelven los dos juntos al restaurar cualquiera.
 - Los renglones de prueba no pasan por la papelera.
 
-## Carga de la planilla del equipo
+## Carga de los contratos de las fichas del tablero
 
-Para pasar de una vez la planilla de contratos (la que el equipo llevaba en Excel). Regla del dueño (16/11/2026): **se cargan solo los que están en el tablero**, y el sistema se adapta al formato de la planilla, no al revés.
+Regla del dueño (16 y 17/11/2026): **se parte del tablero.** Cada ficha viva recibe su contrato; los datos salen de la planilla que el equipo llevaba en Excel cuando esa ficha está ahí. Las filas de la planilla sin ficha en el tablero **no se cargan**. El sistema se adapta al formato de la planilla, no al revés.
 
-1. Se sube por FTP `bs-data/contratos/importar.json` (fuera de `public_html`; los datos de clientes no pasan por el repo).
-2. Se abre `/calculadora/api/contratos-importar.php` con sesión iniciada. Muestra qué fila va con qué ficha y por qué. No toca nada.
-3. Se tilda, se confirma y recién ahí se cargan. El archivo se renombra a `importar-hecho-<fecha>.json`.
+La primera versión hacía el camino inverso (recorría la planilla y buscaba fichas) y el dueño la frenó antes de correrla: "iba a cargar de más".
 
-Cómo encuentra la ficha de cada fila, en orden: por N° de presupuesto, por teléfono, por nombre igual y por nombre parecido ("Marta" con "Marta Ejemplo"). **Nombre parecido queda sin tildar**: se mira y se tilda a mano. Si dos filas van a la misma ficha, tampoco se tildan solas. El tablero solo se lee.
+1. Se sube por FTP `bs-data/contratos/importar.json` (fuera de `public_html`; los datos de clientes no pasan por el repo). Es solo la fuente donde se busca.
+2. Se abre `/calculadora/api/contratos-importar.php` con sesión iniciada. Muestra, ficha por ficha, qué contrato le toca y por qué. No toca nada.
+3. Se confirma y recién ahí se cargan, enlazados. El archivo subido **se borra**: lo que no tenía ficha no queda en ningún lado.
+
+Cómo encuentra el contrato de cada ficha, en orden: por N° de presupuesto, por teléfono, por nombre igual y por nombre parecido ("Marta" con "Marta Ejemplo").
+
+**Las dudas las resuelve la fecha de medición** (dueño, 17/11/2026). El contrato se firma cerca de la medición: en la planilla de octubre y noviembre, los que coinciden por teléfono van de 29 días antes a 4 días después. La ventana que se acepta es de 35 días antes a 7 después.
+
+- Dos filas posibles para una ficha: va la de fecha más cercana a la medición.
+- Nombre igual pero teléfono distinto: se acepta si la fecha acompaña.
+- Nombre parecido: se acepta solo si la fecha acompaña y el teléfono no lo contradice.
+- Lo que sigue en duda queda **sin tildar**, con el motivo escrito. Una ficha que compite por una fila en duda tampoco se tilda sola.
+- **Ficha que no está en la planilla:** el contrato se arma con lo que tiene la ficha (cliente, teléfono, dirección, material, pileta, seña), con la fecha de la medición y sin total. Queda una nota en el contrato.
+
+El tablero solo se lee.
 
 Cómo se pasó la plata de la planilla (16/11/2026):
 

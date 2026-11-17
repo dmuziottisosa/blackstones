@@ -3,24 +3,28 @@
 // contratos-importar.php — Pasar la planilla de contratos a Relación-Contrato
 // BlackStones Marmolería
 // ============================================================
-// Carga de una sola vez los contratos de la planilla del equipo, pero SOLO
-// los de clientes que hoy tienen su ficha en el tablero. Cada contrato nace
-// enlazado con su ficha. Lo que no está en el tablero no se carga.
+// Se parte del TABLERO: por cada ficha viva se arma su contrato, con los
+// datos de la planilla del equipo cuando esa ficha está en la planilla.
+// Las filas de la planilla que no tienen ficha en el tablero no se cargan.
+// Cada contrato nace enlazado con su ficha.
 //
 // 1) Subir por FTP el archivo  bs-data/contratos/importar.json  (FUERA de
 //    public_html: tiene nombres, teléfonos, direcciones y montos; no va al
 //    repo ni queda accesible por web).
 // 2) Abrir, con sesión iniciada:
 //      https://blackstones.com.ar/calculadora/api/contratos-importar.php
-//    Muestra qué fila va con qué ficha y por qué. No toca nada.
-// 3) Tildar o destildar y confirmar. Recién ahí se cargan.
+//    Muestra, ficha por ficha, qué contrato le toca y por qué. No toca nada.
+// 3) Confirmar. Recién ahí se cargan.
 //
-// Cómo se busca la ficha de cada fila, en este orden:
+// Cómo se busca en la planilla el contrato de cada ficha:
 //   a) por N° de presupuesto (si la obra vino de la calculadora)
 //   b) por teléfono (los 10 dígitos)
 //   c) por nombre igual
-//   d) por nombre parecido ("Marta" con "Marta Ejemplo") → queda SIN tildar:
-//      se mira y se tilda a mano
+//   d) por nombre parecido ("Marta" con "Marta Ejemplo")
+// Las dudas las resuelve la FECHA DE MEDICIÓN de la ficha: el contrato se
+// firma cerca de la medición (entre 7 días después y 35 días antes). Si hay
+// dos filas posibles, va la de fecha más cercana; un nombre parecido solo se
+// acepta si la fecha acompaña. Lo que sigue en duda queda SIN tildar.
 // Una ficha lleva un solo contrato. No se toca el tablero: solo se lee.
 //
 // Formato de importar.json:
@@ -35,8 +39,8 @@
 //       "pagos": [ { "fecha": "...", "monto": 0, "moneda": "ARS|USD", "medio": "", "nota": "", "cotizacion": 0, "aplica": "ARS" } ]
 //   } ] }
 //
-// Al terminar, importar.json se renombra a importar-hecho-<fecha>.json
-// para que no se pueda correr dos veces.
+// Al terminar, importar.json se BORRA del servidor: las filas que no tenían
+// ficha no quedan cargadas en ningún lado, y no se puede correr dos veces.
 // ============================================================
 
 require_once __DIR__ . '/_contratos.php';
@@ -94,7 +98,7 @@ function bs_imp_tel10($t) {
 // ------------------------------------------------------------
 $plan = bs_read_json(BS_CONTRATOS_IMPORT);
 if (!is_array($plan) || empty($plan['contratos']) || !is_array($plan['contratos'])) {
-    bs_imp_pagina('Cargar la planilla de contratos', '<div class="caja">No hay nada para cargar. Falta subir el archivo <b>importar.json</b> a <code>bs-data/contratos/</code>, o ya se cargó.</div><p><a class="btn" href="/presupuestos/relacion-contrato.php">Ir a Relación-Contrato</a></p>');
+    bs_imp_pagina('Contratos de las fichas del tablero', '<div class="caja">No hay nada para cargar. Falta subir el archivo <b>importar.json</b> a <code>bs-data/contratos/</code>, o ya se cargó.</div><p><a class="btn" href="/presupuestos/relacion-contrato.php">Ir a Relación-Contrato</a></p>');
 }
 
 $filas = [];
@@ -188,6 +192,13 @@ foreach (@scandir(BS_CLIENTES_DIR) ?: [] as $archivo) {
             'manual' => !empty($cot['manual']),
             'etapa' => isset($BS_ETAPAS[$etapa]) ? $BS_ETAPAS[$etapa]['titulo'] : $etapa,
             'sena' => $sena,
+            'direccion' => (string)($cli['cliente']['direccion'] ?? ''),
+            'material' => (string)($cot['material_final'] ?? ''),
+            'bacha' => in_array($obra['bacha'] ?? '', ['nuestra', 'cliente', 'no'], true) ? $obra['bacha'] : '',
+            'bacha_modelo' => (string)($obra['bacha_modelo'] ?? ''),
+            // Cuándo se midió; si todavía no, el turno de medición que tiene dado
+            'medicion' => bs_tablero_fecha_valida($obra['medido_at'] ?? '') ? $obra['medido_at']
+                : (($etapa === 'medir' && bs_tablero_fecha_valida($obra['fecha'] ?? '')) ? $obra['fecha'] : ''),
         ];
     }
 }
@@ -198,69 +209,119 @@ foreach ($contratos['contratos'] as $c) {
 }
 
 // ------------------------------------------------------------
-// Emparejar cada fila con su ficha
+// A cada ficha, su fila de la planilla
 // ------------------------------------------------------------
 // nivel: 1 N° de presupuesto · 2 teléfono · 3 nombre igual · 4 nombre parecido
 $NIVEL = [1 => 'N° de presupuesto', 2 => 'Teléfono', 3 => 'Nombre', 4 => 'Nombre parecido'];
-$uno = function ($l) { return count($l) === 1 ? $l[0] : null; };
-foreach ($filas as $i => $f) {
-    $filas[$i]['ficha'] = null; $filas[$i]['nivel'] = 0; $filas[$i]['motivo'] = 'No está en el tablero';
-    $pal = bs_imp_palabras($f['cliente']);
-    $cand = null; $nivel = 0;
-    // a) N° de presupuesto: la obra que vino de ese presupuesto de la calculadora
-    if ($f['nro'] !== '') {
-        $p = explode('-', $f['nro']);
-        $l = [];
-        foreach ($fichas as $k => $x) if (!$x['manual'] && $x['cliente_nro'] === $p[0] && (!isset($p[1]) || $x['sub'] === intval($p[1]))) $l[] = $k;
-        if (($cand = $uno($l)) !== null) $nivel = 1;
-    }
-    // b) teléfono
-    $t = bs_imp_tel10($f['telefono']);
-    if ($cand === null && $t !== '') {
-        $l = [];
-        foreach ($fichas as $k => $x) if ($x['tel10'] === $t) $l[] = $k;
-        if (($cand = $uno($l)) !== null) $nivel = 2;
-        elseif (count($l) > 1) $filas[$i]['motivo'] = 'Ese teléfono está en ' . count($l) . ' fichas del tablero (' . implode(', ', $l) . ')';
-    }
-    // c) nombre igual · d) nombre parecido (todas las palabras del más corto están en el otro)
-    if ($cand === null && $pal) {
-        $igual = []; $parecido = [];
-        foreach ($fichas as $k => $x) {
-            $px = bs_imp_palabras($x['nombre']);
-            if (!$px) continue;
-            if ($px === $pal || (count($px) === count($pal) && !array_diff($px, $pal))) $igual[] = $k;
-            elseif (!array_diff($px, $pal) || !array_diff($pal, $px)) $parecido[] = $k;
+// El contrato se firma cerca de la medición: hasta 35 días antes y hasta 7 después
+// (en la planilla de oct-nov 2026, los que coinciden por teléfono van de 29 antes a 4 después).
+define('BS_IMP_ANTES', 35);
+define('BS_IMP_DESPUES', 7);
+function bs_imp_dm($f) { return preg_match('/^\d{4}-(\d{2})-(\d{2})$/', (string)$f, $m) ? $m[2] . '/' . $m[1] : ''; }
+
+$pares = [];
+foreach ($fichas as $k => $x) {
+    if (isset($con_contrato[$k])) continue;
+    $px = bs_imp_palabras($x['nombre']);
+    foreach ($filas as $i => $f) {
+        $t = bs_imp_tel10($f['telefono']);
+        $pf = bs_imp_palabras($f['cliente']);
+        $nivel = 0;
+        if ($f['nro'] !== '' && !$x['manual']) {
+            $p = explode('-', $f['nro']);
+            if ($x['cliente_nro'] === $p[0] && (!isset($p[1]) || $x['sub'] === intval($p[1]))) $nivel = 1;
         }
-        if (($cand = $uno($igual)) !== null) $nivel = 3;
-        elseif (!$igual && ($cand = $uno($parecido)) !== null) $nivel = 4;
-        elseif (count($igual) + count($parecido) > 1 && $filas[$i]['motivo'] === 'No está en el tablero') {
-            $filas[$i]['motivo'] = 'Hay ' . (count($igual) + count($parecido)) . ' fichas con ese nombre (' . implode(', ', array_merge($igual, $parecido)) . '): se enlaza a mano';
+        if (!$nivel && $t !== '' && $t === $x['tel10']) $nivel = 2;
+        if (!$nivel && $px && $pf) {
+            if (count($px) === count($pf) && !array_diff($px, $pf)) $nivel = 3;
+            elseif (!array_diff($px, $pf) || !array_diff($pf, $px)) $nivel = 4;
         }
-    }
-    if ($cand !== null) { $filas[$i]['ficha'] = $cand; $filas[$i]['nivel'] = $nivel; $filas[$i]['motivo'] = ''; }
-}
-// Una ficha, un contrato. Si dos filas van a la misma ficha, gana la que la encontró con más
-// certeza; a igual certeza, ninguna queda tildada (se elige a mano).
-$por_ficha = [];
-foreach ($filas as $i => $f) if ($f['ficha'] !== null) $por_ficha[$f['ficha']][] = $i;
-foreach ($filas as $i => $f) {
-    $filas[$i]['tildada'] = false; $filas[$i]['aviso'] = [];
-    if ($f['ficha'] === null) continue;
-    if (isset($con_contrato[$f['ficha']])) {
-        $filas[$i]['motivo'] = 'Su ficha (' . $f['ficha'] . ') ya tiene contrato';
-        $filas[$i]['ficha'] = null;
-        continue;
-    }
-    $otras = array_values(array_diff($por_ficha[$f['ficha']], [$i]));
-    $mejor = min(array_map(function ($j) use ($filas) { return $filas[$j]['nivel']; }, $por_ficha[$f['ficha']]));
-    $empate = count(array_filter($por_ficha[$f['ficha']], function ($j) use ($filas, $mejor) { return $filas[$j]['nivel'] === $mejor; })) > 1;
-    if ($otras) $filas[$i]['aviso'][] = 'La misma ficha también coincide con la fila ' . implode(', ', array_map(function ($j) use ($filas) { return $filas[$j]['fila']; }, $otras)) . ': va una sola';
-    $filas[$i]['tildada'] = $f['nivel'] < 4 && $f['nivel'] === $mejor && !$empate;
-    $x = $fichas[$f['ficha']];
-    if ($x['sena'] && (!$f['sena'] || $f['sena']['moneda'] !== $x['sena']['moneda'] || abs($f['sena']['monto'] - $x['sena']['monto']) > 0.5)) {
-        $filas[$i]['aviso'][] = 'En el tablero la seña figura ' . bs_imp_plata($x['sena']['monto'], $x['sena']['moneda']) . ': enlazado, se muestra esa';
+        if (!$nivel) continue;
+        // por nombre, con los dos teléfonos a la vista y distintos: puede ser otra persona
+        $tel_dist = $nivel >= 3 && $t !== '' && $x['tel10'] !== '' && $t !== $x['tel10'];
+        // días entre el contrato y la medición (positivo: el contrato es anterior)
+        $dias = $x['medicion'] !== '' ? intval(round((strtotime($x['medicion']) - strtotime($f['fecha'])) / 86400)) : null;
+        $en_fecha = $dias !== null && $dias >= -BS_IMP_DESPUES && $dias <= BS_IMP_ANTES;
+        $pares[] = ['k' => $k, 'i' => $i, 'nivel' => $nivel, 'tel_dist' => $tel_dist, 'dias' => $dias, 'en_fecha' => $en_fecha,
+                    // mejor = número más chico: primero la certeza, después que la fecha acompañe
+                    'rango' => $nivel * 10 + ($tel_dist ? 5 : 0) + ($en_fecha ? 0 : ($dias === null ? 1 : 2)),
+                    'lejos' => $dias === null ? 9999 : abs($dias)];
     }
 }
+usort($pares, function ($a, $b) { return ($a['rango'] <=> $b['rango']) ?: ($a['lejos'] <=> $b['lejos']) ?: ($a['i'] <=> $b['i']); });
+$de_ficha = []; $de_fila = [];
+foreach ($pares as $n => $p) {
+    if (isset($de_ficha[$p['k']]) || isset($de_fila[$p['i']])) continue;
+    $de_ficha[$p['k']] = $n; $de_fila[$p['i']] = $n;
+}
+
+// Una línea por ficha del tablero: su fila (si la hay), por qué, y si queda tildada.
+$lineas = [];
+$en_disputa = []; // fichas que compiten por una fila que quedó en duda
+foreach ($fichas as $k => $x) {
+    if (isset($con_contrato[$k])) continue;
+    $l = ['ficha' => $x, 'fila' => null, 'por' => '', 'aviso' => [], 'tildada' => true, 'nivel' => 0];
+    if (isset($de_ficha[$k])) {
+        $p = $pares[$de_ficha[$k]];
+        $f = $filas[$p['i']];
+        // ¿Había otra fila (u otra ficha) igual de posible? Solo cuenta si quedó libre o peor ubicada.
+        $rival = [];
+        foreach ($pares as $n => $q) {
+            if ($n === $de_ficha[$k] || ($q['k'] !== $k && $q['i'] !== $p['i'])) continue;
+            if ($q['rango'] !== $p['rango'] || abs($q['lejos'] - $p['lejos']) >= 3) continue;
+            $otro_n = $q['k'] === $k ? ($de_fila[$q['i']] ?? null) : ($de_ficha[$q['k']] ?? null);
+            if ($otro_n !== null && $pares[$otro_n]['rango'] < $q['rango']) continue;
+            if ($q['k'] !== $k) $en_disputa[$q['k']] = 'Podría ser la fila ' . $filas[$p['i']]['fila'] . ' (' . $filas[$p['i']]['cliente'] . '), que quedó en duda con la ficha ' . $k;
+            $rival[] = $q['k'] === $k ? 'la fila ' . $filas[$q['i']]['fila'] . ' (' . $filas[$q['i']]['cliente'] . ')' : 'la ficha ' . $q['k'] . ' (' . $fichas[$q['k']]['nombre'] . ')';
+        }
+        $l['fila'] = $f; $l['nivel'] = $p['nivel'];
+        $l['por'] = $NIVEL[$p['nivel']];
+        if ($p['dias'] !== null) {
+            $l['por'] .= ' · contrato ' . ($p['dias'] === 0 ? 'el día de la medición' : (abs($p['dias']) === 1 ? '1 día ' : abs($p['dias']) . ' días ') . ($p['dias'] > 0 ? 'antes de la medición' : 'después de la medición'));
+        }
+        if ($rival) { $l['tildada'] = false; $l['aviso'][] = 'También podría ser ' . implode(' o ', array_unique($rival)) . ': la fecha de medición no alcanza para decidir'; }
+        if ($p['nivel'] === 3) {
+            if ($p['tel_dist'] && !$p['en_fecha']) { $l['tildada'] = false; $l['aviso'][] = 'El teléfono es otro y la fecha de medición no lo confirma'; }
+            elseif ($p['tel_dist']) $l['aviso'][] = 'El teléfono es otro; lo confirma la fecha de medición';
+        } elseif ($p['nivel'] === 4) {
+            // un nombre parecido solo se acepta si la fecha de medición acompaña y el teléfono no lo contradice
+            if ($p['dias'] === null) { $l['tildada'] = false; $l['aviso'][] = 'La ficha no tiene fecha de medición para confirmarlo'; }
+            elseif (!$p['en_fecha']) { $l['tildada'] = false; $l['aviso'][] = 'La fecha del contrato queda lejos de la medición'; }
+            elseif ($p['tel_dist']) { $l['tildada'] = false; $l['aviso'][] = 'La fecha acompaña, pero el teléfono es otro'; }
+            else $l['aviso'][] = 'Lo confirma la fecha de medición';
+        } elseif ($p['dias'] !== null && !$p['en_fecha']) {
+            $l['aviso'][] = 'La fecha del contrato queda lejos de la medición (se carga igual: coincide el ' . ($p['nivel'] === 1 ? 'N°' : 'teléfono') . ')';
+        }
+        if ($x['sena'] && (!$f['sena'] || $f['sena']['moneda'] !== $x['sena']['moneda'] || abs($f['sena']['monto'] - $x['sena']['monto']) > 0.5)) {
+            $l['aviso'][] = 'En el tablero la seña figura ' . bs_imp_plata($x['sena']['monto'], $x['sena']['moneda']) . ': enlazado, se muestra esa';
+        }
+    } else {
+        // No está en la planilla: el contrato se arma con lo que tiene la ficha.
+        $l['por'] = 'No está en la planilla';
+        $l['fila'] = [
+            'fila' => 0, 'cliente' => $x['nombre'], 'telefono' => bs_contrato_tel($x['celular']), 'direccion' => $x['direccion'],
+            'material' => $x['material'], 'medidas' => '', 'vendedor' => '', 'procedencia' => '', 'contrato_paralelo' => '',
+            'nro' => $x['manual'] ? '' : $x['cliente_nro'] . ($x['sub'] > 1 ? '-' . $x['sub'] : ''),
+            'fecha' => $x['medicion'] !== '' ? $x['medicion'] : date('Y-m-d'),
+            'factura' => '', 'muebles' => '', 'bacha' => $x['bacha'], 'bacha_modelo' => $x['bacha'] === 'nuestra' ? $x['bacha_modelo'] : '',
+            'total_usd' => 0, 'total_ars' => 0,
+            'sena' => $x['sena'] ? ['fecha' => date('Y-m-d'), 'monto' => $x['sena']['monto'], 'moneda' => $x['sena']['moneda'], 'cotizacion' => 0, 'aplica' => $x['sena']['moneda']] : null,
+            'pagos' => [],
+            'nota' => 'Creado desde la ficha del tablero: no estaba en la planilla. Falta el total.' . ($x['medicion'] !== '' ? ' La fecha es la de la medición.' : ''),
+        ];
+    }
+    $lineas[$k] = $l;
+}
+// Una ficha sin fila propia que compite por una fila en duda tampoco se tilda sola.
+foreach ($en_disputa as $k => $txt) {
+    if (isset($lineas[$k]) && $lineas[$k]['nivel'] === 0) { $lineas[$k]['tildada'] = false; $lineas[$k]['aviso'][] = $txt; }
+}
+// Primero lo que hay que mirar; después por nombre.
+uasort($lineas, function ($a, $b) {
+    return ($a['tildada'] <=> $b['tildada']) ?: (($a['nivel'] === 0) <=> ($b['nivel'] === 0)) ?: strcmp(bs_imp_llano($a['ficha']['nombre']), bs_imp_llano($b['ficha']['nombre']));
+});
+$sin_ficha = [];
+foreach ($filas as $i => $f) if (!isset($de_fila[$i])) $sin_ficha[] = $f;
 
 /** Cuentas de una fila: total, cobrado (lo que entró en cada moneda) y saldo ya convertido. */
 function bs_imp_cuentas($f) {
@@ -274,9 +335,6 @@ function bs_imp_cuentas($f) {
     return [$j(['USD' => $f['total_usd'], 'ARS' => $f['total_ars']]), $j($pag), $j(['USD' => round($f['total_usd'] - $apl['USD'], 2), 'ARS' => round($f['total_ars'] - $apl['ARS'], 2)])];
 }
 
-$con_ficha = array_values(array_filter($filas, function ($f) { return $f['ficha'] !== null; }));
-$sin_ficha = array_values(array_filter($filas, function ($f) { return $f['ficha'] === null; }));
-
 // ============================================================
 // GET — vista previa (no toca nada)
 // ============================================================
@@ -287,62 +345,55 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         foreach ($errores as $e) $c .= '<li>' . h($e) . '</li>';
         $c .= '</ul></div>';
     }
-    $tildadas = count(array_filter($con_ficha, function ($f) { return $f['tildada']; }));
-    $c .= '<div class="caja">La planilla trae <b>' . count($filas) . '</b> contratos y en el tablero hay <b>' . count($fichas) . '</b> fichas.'
-        . '<br><b>' . count($con_ficha) . '</b> tienen su ficha en el tablero: ' . $tildadas . ' ya tildados' . (count($con_ficha) - $tildadas ? ' y <span class="amb">' . (count($con_ficha) - $tildadas) . ' para revisar</span> (marcados en amarillo, sin tildar)' : '') . '.'
-        . '<br><b>' . count($sin_ficha) . '</b> no se cargan (abajo dice por qué).'
-        . '<br><span class="gris">Se cargan solo los tildados. Cada contrato queda enlazado con su ficha. En el tablero no se cambia nada.</span></div>';
+    $con = count(array_filter($lineas, function ($l) { return $l['nivel'] > 0; }));
+    $dudas = count(array_filter($lineas, function ($l) { return !$l['tildada']; }));
+    $c .= '<div class="caja">En el tablero hay <b>' . count($fichas) . '</b> fichas' . ($con_contrato ? ' (' . count($con_contrato) . ' ya tienen contrato y no se tocan)' : '') . '. Cada una recibe su contrato:'
+        . '<br><b>' . $con . '</b> con los datos de la planilla' . ($dudas ? ', de las cuales <span class="amb">' . $dudas . ' quedan en duda</span> (en amarillo y sin tildar: miralas y tildá las que estén bien)' : '') . '.'
+        . '<br><b>' . (count($lineas) - $con) . '</b> no están en la planilla: el contrato se arma con lo que tiene la ficha, y el total se carga después.'
+        . '<br><span class="gris">Se cargan solo las tildadas. Cada contrato queda enlazado con su ficha. En el tablero no se cambia nada. De la planilla no se carga ninguna fila que no tenga ficha.</span></div>';
 
     $c .= '<form method="post">';
-    $c .= '<h2>Con ficha en el tablero</h2><div class="caja" style="overflow-x:auto"><table><tr><th></th><th>Planilla</th><th>Ficha del tablero</th><th>Coincide por</th><th class="num">Total</th><th class="num">Cobrado</th><th class="num">Saldo</th></tr>';
-    foreach ($con_ficha as $f) {
-        $x = $fichas[$f['ficha']];
+    $c .= '<h2>Fichas del tablero</h2><div class="caja" style="overflow-x:auto"><table><tr><th></th><th>Ficha del tablero</th><th>Contrato en la planilla</th><th>Cómo se encontró</th><th class="num">Total</th><th class="num">Cobrado</th><th class="num">Saldo</th></tr>';
+    foreach ($lineas as $k => $l) {
+        $x = $l['ficha']; $f = $l['fila'];
         list($tot, $cob, $sal) = bs_imp_cuentas($f);
-        $c .= '<tr' . ($f['tildada'] ? '' : ' class="rev"') . '><td><input type="checkbox" name="filas[]" value="' . intval($f['fila']) . '"' . ($f['tildada'] ? ' checked' : '') . ' aria-label="Cargar la fila ' . intval($f['fila']) . '"></td>'
-            . '<td><b>' . h($f['cliente']) . '</b><br><span class="gris">' . h($f['telefono']) . ($f['telefono'] !== '' && $f['direccion'] !== '' ? ' · ' : '') . h($f['direccion']) . '<br>Fila ' . intval($f['fila']) . ' · ' . h($f['fecha']) . ($f['nro'] !== '' ? ' · N° ' . h($f['nro']) : '') . '</span></td>'
-            . '<td><b>' . h($x['nombre']) . '</b><br><span class="gris">' . h($x['key']) . ' · ' . h($x['etapa']) . ($x['celular'] !== '' ? '<br>' . h(bs_contrato_tel($x['celular'])) : '') . '</span></td>'
-            . '<td>' . ($f['nivel'] === 4 ? '<span class="amb">Nombre parecido: revisar</span>' : h($NIVEL[$f['nivel']]));
-        foreach ($f['aviso'] as $a) $c .= '<br><span class="amb">' . h($a) . '</span>';
+        $c .= '<tr' . ($l['tildada'] ? '' : ' class="rev"') . '><td><input type="checkbox" name="fichas[]" value="' . h($k) . '"' . ($l['tildada'] ? ' checked' : '') . ' aria-label="Cargar el contrato de la ficha ' . h($k) . '"></td>'
+            . '<td><b>' . h($x['nombre']) . '</b><br><span class="gris">' . h($k) . ' · ' . h($x['etapa']) . ($x['medicion'] !== '' ? ' · medición ' . h(bs_imp_dm($x['medicion'])) : ' · sin fecha de medición') . ($x['celular'] !== '' ? '<br>' . h(bs_contrato_tel($x['celular'])) : '') . '</span></td>';
+        if ($l['nivel'] > 0) {
+            $c .= '<td><b>' . h($f['cliente']) . '</b><br><span class="gris">Fila ' . intval($f['fila']) . ' · contrato del ' . h(bs_imp_dm($f['fecha'])) . ($f['nro'] !== '' ? ' · N° ' . h($f['nro']) : '') . ($f['telefono'] !== '' ? '<br>' . h($f['telefono']) : '') . ($f['direccion'] !== '' ? '<br>' . h($f['direccion']) : '') . '</span></td>';
+        } else {
+            $c .= '<td class="gris">No está en la planilla.<br>Se arma con los datos de la ficha.</td>';
+        }
+        $c .= '<td>' . ($l['nivel'] > 0 ? h($l['por']) : ($l['aviso'] ? '' : '—'));
+        foreach ($l['aviso'] as $n => $a) $c .= ($n || $l['nivel'] > 0 ? '<br>' : '') . '<span class="amb">' . h($a) . '</span>';
         $c .= '</td><td class="num">' . h($tot) . '</td><td class="num">' . h($cob) . '</td><td class="num">' . h($sal) . '</td></tr>';
     }
-    if (!$con_ficha) $c .= '<tr><td colspan="7" class="gris">Ninguna fila de la planilla coincide con una ficha del tablero.</td></tr>';
+    if (!$lineas) $c .= '<tr><td colspan="7" class="gris">Todas las fichas del tablero ya tienen su contrato.</td></tr>';
     $c .= '</table></div>';
 
-    if ($con_ficha && !$errores) {
-        $c .= '<div class="caja"><label><input type="checkbox" name="confirmo" value="SI" required> Revisé la lista y quiero cargar los contratos tildados.</label><br><br>'
+    if ($lineas && !$errores) {
+        $c .= '<div class="caja"><label><input type="checkbox" name="confirmo" value="SI" required> Revisé la lista y quiero cargar los contratos de las fichas tildadas.</label><br><br>'
             . '<button type="submit">Cargar los tildados</button> &nbsp; <a href="/presupuestos/relacion-contrato.php">Cancelar</a></div>';
     }
     $c .= '</form>';
 
-    $c .= '<h2>No se cargan (' . count($sin_ficha) . ')</h2><div class="caja" style="overflow-x:auto"><table><tr><th>Planilla</th><th>Por qué</th></tr>';
-    foreach ($sin_ficha as $f) {
-        $c .= '<tr><td><b>' . h($f['cliente']) . '</b> <span class="gris">· fila ' . intval($f['fila']) . ' · ' . h($f['fecha']) . ($f['telefono'] !== '' ? ' · ' . h($f['telefono']) : '') . '</span></td><td>' . h($f['motivo']) . '</td></tr>';
-    }
-    if (!$sin_ficha) $c .= '<tr><td colspan="2" class="gris">Todas las filas tienen su ficha.</td></tr>';
-    $c .= '</table></div>';
-
-    // Fichas del tablero que la planilla no nombra: después de cargar, siguen sin contrato.
-    $tomadas = [];
-    foreach ($con_ficha as $f) $tomadas[$f['ficha']] = true;
-    $huerfanas = array_filter($fichas, function ($x) use ($tomadas, $con_contrato) { return !isset($tomadas[$x['key']]) && !isset($con_contrato[$x['key']]); });
-    if ($huerfanas) {
-        $c .= '<h2>Fichas del tablero que no están en la planilla (' . count($huerfanas) . ')</h2><div class="caja"><span class="gris">Quedan sin contrato. Después se les crea desde Relación-Contrato, en "Obras en el tablero sin contrato".</span><br>'
-            . h(implode(' · ', array_map(function ($x) { return $x['nombre'] . ' (' . $x['key'] . ')'; }, $huerfanas))) . '</div>';
-    }
-    bs_imp_pagina('Cargar la planilla de contratos', $c);
+    $c .= '<h2>Filas de la planilla sin ficha en el tablero: no se cargan (' . count($sin_ficha) . ')</h2><div class="caja"><span class="gris">'
+        . h(implode(' · ', array_map(function ($f) { return $f['cliente'] . ' (fila ' . $f['fila'] . ', ' . bs_imp_dm($f['fecha']) . ')'; }, $sin_ficha)) ?: 'Ninguna.') . '</span></div>';
+    bs_imp_pagina('Contratos de las fichas del tablero', $c);
 }
 
 // ============================================================
 // POST — cargar los tildados
 // ============================================================
-if ($errores) bs_imp_pagina('Cargar la planilla de contratos', '<div class="caja rojo">El archivo tiene errores. No se cargó nada.</div>');
-if (($_POST['confirmo'] ?? '') !== 'SI') bs_imp_pagina('Cargar la planilla de contratos', '<div class="caja rojo">Falta tildar la confirmación. No se cargó nada.</div><p><a class="btn" href="">Volver</a></p>');
-$elegidas = array_map('intval', (array)($_POST['filas'] ?? []));
-if (!$elegidas) bs_imp_pagina('Cargar la planilla de contratos', '<div class="caja rojo">No hay ninguna fila tildada. No se cargó nada.</div><p><a class="btn" href="">Volver</a></p>');
+$T = 'Contratos de las fichas del tablero';
+if ($errores) bs_imp_pagina($T, '<div class="caja rojo">El archivo tiene errores. No se cargó nada.</div>');
+if (($_POST['confirmo'] ?? '') !== 'SI') bs_imp_pagina($T, '<div class="caja rojo">Falta tildar la confirmación. No se cargó nada.</div><p><a class="btn" href="">Volver</a></p>');
+$elegidas = array_map('strval', (array)($_POST['fichas'] ?? []));
+if (!$elegidas) bs_imp_pagina($T, '<div class="caja rojo">No hay ninguna ficha tildada. No se cargó nada.</div><p><a class="btn" href="">Volver</a></p>');
 
-if (!is_dir(BS_CONTRATOS_DIR) && !@mkdir(BS_CONTRATOS_DIR, 0755, true)) bs_imp_pagina('Cargar la planilla de contratos', '<div class="caja rojo">No se pudo crear la carpeta de contratos.</div>');
+if (!is_dir(BS_CONTRATOS_DIR) && !@mkdir(BS_CONTRATOS_DIR, 0755, true)) bs_imp_pagina($T, '<div class="caja rojo">No se pudo crear la carpeta de contratos.</div>');
 $fp = bs_lock_acquire(BS_CONTRATOS_LOCK);
-if (!$fp) bs_imp_pagina('Cargar la planilla de contratos', '<div class="caja rojo">No se pudo tomar el control del archivo. Probá de nuevo.</div>');
+if (!$fp) bs_imp_pagina($T, '<div class="caja rojo">No se pudo tomar el control del archivo. Probá de nuevo.</div>');
 
 try {
     $d = bs_contratos_leer();
@@ -351,20 +402,22 @@ try {
         if (is_array($c['enlace'] ?? null)) $ya[$c['enlace']['cliente_nro'] . '-' . intval($c['enlace']['sub'])] = true;
     }
     $ahora = date('c');
-    $base = time() - count($filas);
-    $cargados = []; $salteados = [];
-    foreach ($filas as $i => $f) {
-        if ($f['ficha'] === null || !in_array($f['fila'], $elegidas, true)) continue;
-        if (isset($ya[$f['ficha']])) { $salteados[] = $f['cliente'] . ' (fila ' . $f['fila'] . '): la ficha ' . $f['ficha'] . ' ya quedó con otro contrato'; continue; }
+    $base = time() - count($filas) - 1;
+    $con_planilla = 0; $solo_ficha = 0; $salteados = [];
+    $n = 0;
+    foreach ($lineas as $k => $l) {
+        $n++;
+        if (!in_array((string)$k, $elegidas, true)) continue;
+        $x = $l['ficha']; $f = $l['fila'];
+        if (isset($ya[$k])) { $salteados[] = $x['nombre'] . ' (' . $k . '): ya tenía contrato'; continue; }
         if (count($d['contratos']) >= BS_CONTRATOS_MAX) throw new Exception('Se llegó al máximo de contratos.');
-        $x = $fichas[$f['ficha']];
-        $id = 'c' . date('ymdHis') . bin2hex(random_bytes(3)) . dechex($i);
+        $id = 'c' . date('ymdHis') . bin2hex(random_bytes(3)) . dechex($n);
         $pagos = [];
         foreach ($f['pagos'] as $p) $pagos[] = array_merge(['id' => 'p' . bin2hex(random_bytes(4))], $p);
         $d['contratos'][$id] = [
             'id' => $id,
             // 'creado' escalonado: a igual fecha, la lista respeta el orden de la planilla
-            'creado' => date('c', $base + $i), 'actualizado' => $ahora,
+            'creado' => date('c', $base + intval($f['fila'])), 'actualizado' => $ahora,
             'fecha' => $f['fecha'], 'cliente' => $f['cliente'], 'telefono' => $f['telefono'], 'direccion' => $f['direccion'],
             'vendedor' => $f['vendedor'], 'procedencia' => $f['procedencia'], 'contrato' => '', 'contrato_paralelo' => $f['contrato_paralelo'],
             'nro' => $f['nro'], 'material' => $f['material'], 'medidas' => $f['medidas'],
@@ -372,27 +425,31 @@ try {
             'medicion' => '', 'total_usd' => $f['total_usd'], 'total_ars' => $f['total_ars'],
             'sena' => $f['sena'], 'pagos' => $pagos, 'nota' => $f['nota'], 'prueba' => false,
             'enlace' => ['cliente_nro' => $x['cliente_nro'], 'sub' => $x['sub'], 'at' => $ahora],
-            'importado' => ['at' => $ahora, 'fila' => $f['fila']],
+            'importado' => ['at' => $ahora, 'fila' => intval($f['fila'])],
         ];
-        $ya[$f['ficha']] = true;
-        $cargados[] = $f['cliente'];
+        $ya[$k] = true;
+        if ($l['nivel'] > 0) $con_planilla++; else $solo_ficha++;
     }
+    $cargados = $con_planilla + $solo_ficha;
     if ($cargados && !bs_write_json_atomic(BS_CONTRATOS_FILE, $d)) throw new Exception('No se pudo guardar');
 
-    // Que no se pueda correr dos veces
-    if ($cargados) @rename(BS_CONTRATOS_IMPORT, BS_CONTRATOS_DIR . '/importar-hecho-' . date('Ymd-His') . '.json');
+    // La planilla subida se borra: lo que no tenía ficha no queda cargado en ningún lado,
+    // y la carga no se puede correr dos veces.
+    if ($cargados) @unlink(BS_CONTRATOS_IMPORT);
     bs_lock_release($fp);
 
-    $c = '<div class="caja"><b>Listo.</b> Se cargaron ' . count($cargados) . ' contratos, cada uno enlazado con su ficha del tablero.';
+    $c = '<div class="caja"><b>Listo.</b> Se cargaron ' . $cargados . ' contratos, cada uno enlazado con su ficha del tablero: ' . $con_planilla . ' con los datos de la planilla y ' . $solo_ficha . ' solo con los de la ficha (a esos les falta el total).';
+    $faltan = count($lineas) - $cargados - count($salteados);
+    if ($faltan > 0) $c .= '<br>' . $faltan . ' fichas quedaron sin contrato. Se les crea desde Relación-Contrato, en "Obras en el tablero sin contrato".';
     if ($salteados) {
         $c .= '<br><span class="amb">No se cargaron:</span><ul>';
         foreach ($salteados as $s) $c .= '<li>' . h($s) . '</li>';
         $c .= '</ul>';
     }
     $c .= '</div><p><a class="btn" href="/presupuestos/relacion-contrato.php">Ir a Relación-Contrato</a></p>';
-    bs_imp_pagina('Planilla cargada', $c);
+    bs_imp_pagina('Contratos cargados', $c);
 
 } catch (Throwable $e) {
     bs_lock_release($fp);
-    bs_imp_pagina('Cargar la planilla de contratos', '<div class="caja rojo">Se interrumpió: ' . h($e->getMessage()) . '</div><p>No se cargó nada. Avisá antes de volver a correrlo.</p><p><a class="btn" href="/presupuestos/relacion-contrato.php">Ir a Relación-Contrato</a></p>');
+    bs_imp_pagina($T, '<div class="caja rojo">Se interrumpió: ' . h($e->getMessage()) . '</div><p>No se cargó nada. Avisá antes de volver a correrlo.</p><p><a class="btn" href="/presupuestos/relacion-contrato.php">Ir a Relación-Contrato</a></p>');
 }
