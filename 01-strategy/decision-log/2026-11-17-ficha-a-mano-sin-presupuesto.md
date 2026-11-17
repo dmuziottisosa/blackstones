@@ -28,7 +28,7 @@ Sobre desenlazar, el dueño propuso que alcanzara con sacar el N° del contrato.
 ## Knowns
 
 - La ficha a mano sigue necesitando un número para existir (todo el sistema guarda las obras por número). Sale de una serie aparte, de 90001 en adelante, que no se muestra.
-- La numeración de presupuestos ignora esa serie. Probado: con tres fichas a mano cargadas, la calculadora siguió numerando 0086, 0087 y 0088.
+- La numeración de presupuestos ignora esa serie. Probado: con tres fichas a mano cargadas, la calculadora guardó dos presupuestos nuevos como 0086 y 0087, y el siguiente quedó en 0088.
 - Las fichas a mano que ya existían no cambian de número: como están marcadas `manual`, también dicen "Sin N°" y salen de Presupuestos.
 - Siguen andando "Cargar obra" con N°, y pasar una ficha a mano a su presupuesto real desde "Editar obra".
 - Probado con la regresión del tablero, el calendario, contratos, papelera, y el tablero con Relación-Contrato borrada.
