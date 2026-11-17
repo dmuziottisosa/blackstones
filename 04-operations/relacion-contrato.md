@@ -98,17 +98,29 @@ La primera versión hacía el camino inverso (recorría la planilla y buscaba fi
 
 1. Se sube por FTP `bs-data/contratos/importar.json` (fuera de `public_html`; los datos de clientes no pasan por el repo). Es solo la fuente donde se busca.
 2. Se abre `/calculadora/api/contratos-importar.php` con sesión iniciada. Muestra, ficha por ficha, qué contrato le toca y por qué. No toca nada.
-3. Se confirma y recién ahí se cargan, enlazados. El archivo subido **se borra**: lo que no tenía ficha no queda en ningún lado.
+3. Se confirma y recién ahí se cargan, enlazados. El archivo subido **se borra** del servidor.
 
-Cómo encuentra el contrato de cada ficha, en orden: por N° de presupuesto, por teléfono, por nombre igual y por nombre parecido ("Marta" con "Marta Ejemplo").
+Cómo encuentra el contrato de cada ficha, en orden: por N° de presupuesto, por teléfono y por nombre.
 
-**Las dudas las resuelve la fecha de medición** (dueño, 17/11/2026). El contrato se firma cerca de la medición: en la planilla de octubre y noviembre, los que coinciden por teléfono van de 29 días antes a 4 días después. La ventana que se acepta es de 35 días antes a 7 después.
+**Un nombre solo no alcanza** (17/11/2026). En la planilla y en el tablero los clientes figuran casi siempre con el nombre de pila, y hay varios iguales. Para aceptar una coincidencia por nombre tiene que acompañarla algo más:
 
-- Dos filas posibles para una ficha: va la de fecha más cercana a la medición.
-- Nombre igual pero teléfono distinto: se acepta si la fecha acompaña.
-- Nombre parecido: se acepta solo si la fecha acompaña y el teléfono no lo contradice.
-- Lo que sigue en duda queda **sin tildar**, con el motivo escrito. Una ficha que compite por una fila en duda tampoco se tilda sola.
-- **Ficha que no está en la planilla:** el contrato se arma con lo que tiene la ficha (cliente, teléfono, dirección, material, pileta, seña), con la fecha de la medición y sin total. Queda una nota en el contrato.
+- el **teléfono casi igual** (diez dígitos con hasta dos cambiados: error de tipeo),
+- la **misma dirección** (comparten la altura y una palabra de la calle), o
+- la **misma seña** (lo cobrado según la planilla, en pesos, con hasta $ 1.000 de diferencia).
+
+Si nada de eso coincide, la ficha se toma como "no está en la planilla" y la vista previa nombra al homónimo que descartó. Se llegó a esta regla simulando la carga contra el tablero exportado el 16/11: con nombre y fecha solos, una ficha quedaba enlazada con el contrato de otro cliente del mismo nombre.
+
+**La fecha de medición desempata** (dueño, 17/11/2026). El contrato se firma cerca de la medición: en la planilla de octubre y noviembre, de 33 días antes a 5 días después. Entre dos filas posibles va la de fecha más cercana; si no alcanza para decidir, queda **sin tildar** con el motivo escrito.
+
+**Ficha que no está en la planilla:** el contrato se arma con lo que tiene la ficha (cliente, teléfono, dirección, material, pileta, seña), con la fecha de la medición y sin total. Queda una nota en el contrato.
+
+**La seña, alineada con el tablero.** Enlazado, la seña que se ve es la del tablero. Para que la plata no se cuente dos veces ni cambie sola al abrir la página, el contrato se guarda ya alineado:
+
+- Si la seña del tablero es todo lo cobrado según la planilla (la misma plata puesta en pesos), el contrato queda con esa seña y sin pagos, y el detalle original ("USD 600 a $ 1.560") va a la nota.
+- Si difiere por poco (un dígito), queda la del tablero y una nota para revisar cuál es.
+- Si no coincide, se carga igual, con una nota que dice los dos números.
+
+**Antes de subir la planilla, se recorta.** Con el tablero exportado se simula la carga en local y al servidor viajan solo las filas que resultaron ser de una ficha. Las demás no salen de la máquina.
 
 El tablero solo se lee.
 

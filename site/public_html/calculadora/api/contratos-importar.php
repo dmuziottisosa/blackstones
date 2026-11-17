@@ -21,10 +21,13 @@
 //   b) por teléfono (los 10 dígitos)
 //   c) por nombre igual
 //   d) por nombre parecido ("Marta" con "Marta Ejemplo")
-// Las dudas las resuelve la FECHA DE MEDICIÓN de la ficha: el contrato se
-// firma cerca de la medición (entre 7 días después y 35 días antes). Si hay
-// dos filas posibles, va la de fecha más cercana; un nombre parecido solo se
-// acepta si la fecha acompaña. Lo que sigue en duda queda SIN tildar.
+// Un nombre solo NO alcanza (hay varios con el mismo nombre): tiene que acompañarlo el
+// teléfono casi igual (error de tipeo), la misma dirección o la misma seña.
+// Si no, la ficha se toma como "no está en la planilla" y su contrato se arma
+// con los datos de la ficha. Entre dos filas posibles decide la FECHA DE
+// MEDICIÓN: va la de contrato más cercano. Lo que sigue en duda queda SIN tildar.
+// Enlazado, la seña que se ve es la del tablero: el contrato se guarda ya
+// alineado con ella, y si la plata no coincide queda una nota para revisar.
 // Una ficha lleva un solo contrato. No se toca el tablero: solo se lee.
 //
 // Formato de importar.json:
@@ -219,7 +222,46 @@ define('BS_IMP_ANTES', 35);
 define('BS_IMP_DESPUES', 7);
 function bs_imp_dm($f) { return preg_match('/^\d{4}-(\d{2})-(\d{2})$/', (string)$f, $m) ? $m[2] . '/' . $m[1] : ''; }
 
+/** Lo que ya entró según la fila, llevado a la moneda del contrato: [todo, el primer cobro]. */
+function bs_imp_cobrado($f) {
+    $todo = 0; $primero = null;
+    foreach (array_merge($f['sena'] ? [$f['sena']] : [], $f['pagos']) as $c) {
+        $v = ($c['aplica'] !== $c['moneda'] && $c['cotizacion'] > 0) ? ($c['moneda'] === 'USD' ? $c['monto'] * $c['cotizacion'] : $c['monto'] / $c['cotizacion']) : $c['monto'];
+        if ($primero === null) $primero = $v;
+        $todo += $v;
+    }
+    return [$todo, $primero ?? 0];
+}
+/** Dos teléfonos que son el mismo con un error de tipeo: 10 dígitos y hasta 2 distintos (o dos invertidos). */
+function bs_imp_tel_casi($a, $b) {
+    if (strlen($a) !== 10 || strlen($b) !== 10 || $a === $b) return false;
+    $dif = 0;
+    for ($i = 0; $i < 10; $i++) if ($a[$i] !== $b[$i]) $dif++;
+    return $dif <= 2;
+}
+/** Misma dirección: comparten la altura (3 cifras o más) y una palabra de la calle. */
+function bs_imp_misma_dir($a, $b) {
+    $sin = ['piso', 'dpto', 'depto', 'dto', 'caba', 'calle', 'entre', 'esquina', 'timbre', 'casa'];
+    $pa = array_diff(explode(' ', bs_imp_llano($a)), $sin); $pb = array_diff(explode(' ', bs_imp_llano($b)), $sin);
+    $altura = false; $calle = false;
+    foreach (array_intersect($pa, $pb) as $t) {
+        if (preg_match('/^\d{3,}$/', $t)) $altura = true;
+        elseif (preg_match('/^[a-z]{3,}$/', $t)) $calle = true;
+    }
+    return $altura && $calle;
+}
+/** La seña del tablero es la plata que dice la fila: lo cobrado (o el primer cobro) en pesos, con hasta $ 1.000 de diferencia. */
+function bs_imp_misma_sena($sena, $f) {
+    if (!$sena) return false;
+    if ($sena['moneda'] === 'ARS' && $f['total_ars'] > 0) {
+        list($todo, $primero) = bs_imp_cobrado($f);
+        return $todo > 0 && (abs($sena['monto'] - $todo) <= 1000 || abs($sena['monto'] - $primero) <= 1000);
+    }
+    return false; // "USD 600" lo pagan muchos: no alcanza para reconocer a nadie
+}
+
 $pares = [];
+$homonimos = []; // mismo nombre en la planilla, pero nada más coincide: no se usa
 foreach ($fichas as $k => $x) {
     if (isset($con_contrato[$k])) continue;
     $px = bs_imp_palabras($x['nombre']);
@@ -237,14 +279,21 @@ foreach ($fichas as $k => $x) {
             elseif (!array_diff($px, $pf) || !array_diff($pf, $px)) $nivel = 4;
         }
         if (!$nivel) continue;
-        // por nombre, con los dos teléfonos a la vista y distintos: puede ser otra persona
-        $tel_dist = $nivel >= 3 && $t !== '' && $x['tel10'] !== '' && $t !== $x['tel10'];
+        // Un nombre solo no alcanza (hay varios con el mismo nombre). Tiene que acompañarlo algo más:
+        // el teléfono casi igual (error de tipeo), la misma dirección o la misma seña.
+        $prueba = [];
+        if ($nivel >= 3) {
+            if (bs_imp_tel_casi($t, $x['tel10'])) $prueba[] = 'el teléfono (con un dígito cambiado)';
+            if (bs_imp_misma_dir($f['direccion'], $x['direccion'])) $prueba[] = 'la dirección';
+            if (bs_imp_misma_sena($x['sena'], $f)) $prueba[] = 'la seña';
+            if (!$prueba) { $homonimos[$k][$i] = 'fila ' . $f['fila'] . ' (' . $f['cliente'] . ', contrato del ' . bs_imp_dm($f['fecha']) . ')'; continue; }
+        }
         // días entre el contrato y la medición (positivo: el contrato es anterior)
         $dias = $x['medicion'] !== '' ? intval(round((strtotime($x['medicion']) - strtotime($f['fecha'])) / 86400)) : null;
         $en_fecha = $dias !== null && $dias >= -BS_IMP_DESPUES && $dias <= BS_IMP_ANTES;
-        $pares[] = ['k' => $k, 'i' => $i, 'nivel' => $nivel, 'tel_dist' => $tel_dist, 'dias' => $dias, 'en_fecha' => $en_fecha,
+        $pares[] = ['k' => $k, 'i' => $i, 'nivel' => $nivel, 'prueba' => $prueba, 'dias' => $dias, 'en_fecha' => $en_fecha,
                     // mejor = número más chico: primero la certeza, después que la fecha acompañe
-                    'rango' => $nivel * 10 + ($tel_dist ? 5 : 0) + ($en_fecha ? 0 : ($dias === null ? 1 : 2)),
+                    'rango' => $nivel * 10 - min(count($prueba), 3) + ($en_fecha ? 0 : ($dias === null ? 4 : 5)),
                     'lejos' => $dias === null ? 9999 : abs($dias)];
     }
 }
@@ -255,6 +304,32 @@ foreach ($pares as $n => $p) {
     $de_ficha[$p['k']] = $n; $de_fila[$p['i']] = $n;
 }
 
+/**
+ * Enlazado, la seña que se ve es la del tablero. Para que la plata no se cuente dos veces ni
+ * cambie sola, el contrato se guarda ya alineado con esa seña. Devuelve [fila, avisos].
+ */
+function bs_imp_alinear_sena($f, $sena) {
+    if (!$sena) return [$f, []];
+    $cobros = array_merge($f['sena'] ? [$f['sena']] : [], $f['pagos']);
+    $p = $cobros[0] ?? null;
+    if ($p && $p['moneda'] === $sena['moneda'] && abs($p['monto'] - $sena['monto']) < 1) return [$f, []];
+    $detalle = implode(' + ', array_map(function ($c) {
+        return bs_imp_plata($c['monto'], $c['moneda']) . (($c['aplica'] !== $c['moneda'] && $c['cotizacion'] > 0) ? ' a $ ' . number_format($c['cotizacion'], 0, ',', '.') : '');
+    }, $cobros));
+    list($todo, ) = bs_imp_cobrado($f);
+    $en_tablero = bs_imp_plata($sena['monto'], $sena['moneda']);
+    if ($sena['moneda'] === 'ARS' && $f['total_ars'] > 0 && $todo > 0 && abs($sena['monto'] - $todo) <= 1000) {
+        // La seña del tablero ES todo lo cobrado según la planilla (misma plata, puesta en pesos).
+        $f['sena'] = ['fecha' => $p['fecha'], 'monto' => $sena['monto'], 'moneda' => 'ARS', 'cotizacion' => 0, 'aplica' => 'ARS'];
+        $f['pagos'] = [];
+        $exacta = abs($sena['monto'] - $todo) < 1;
+        $f['nota'] = trim($f['nota'] . "\n" . 'Cobros según la planilla: ' . $detalle . '.' . ($exacta ? '' : ' Suma ' . bs_imp_plata($todo) . '; en el tablero la seña figura ' . $en_tablero . ': revisar cuál es.'));
+        return [$f, $exacta ? [] : ['Lo cobrado difiere por poco: planilla ' . bs_imp_plata($todo) . ', tablero ' . $en_tablero . '. Queda la del tablero y una nota']];
+    }
+    $f['nota'] = trim($f['nota'] . "\n" . 'OJO con la plata: en el tablero la seña figura ' . $en_tablero . ' y en la planilla lo cobrado es ' . ($detalle !== '' ? $detalle : 'nada') . '. Enlazado se muestra la del tablero: revisar.');
+    return [$f, ['La plata no coincide: seña del tablero ' . $en_tablero . ', planilla ' . ($detalle !== '' ? $detalle : 'sin cobros') . '. Se carga, con una nota para revisar']];
+}
+
 // Una línea por ficha del tablero: su fila (si la hay), por qué, y si queda tildada.
 $lineas = [];
 $en_disputa = []; // fichas que compiten por una fila que quedó en duda
@@ -263,7 +338,6 @@ foreach ($fichas as $k => $x) {
     $l = ['ficha' => $x, 'fila' => null, 'por' => '', 'aviso' => [], 'tildada' => true, 'nivel' => 0];
     if (isset($de_ficha[$k])) {
         $p = $pares[$de_ficha[$k]];
-        $f = $filas[$p['i']];
         // ¿Había otra fila (u otra ficha) igual de posible? Solo cuenta si quedó libre o peor ubicada.
         $rival = [];
         foreach ($pares as $n => $q) {
@@ -274,30 +348,21 @@ foreach ($fichas as $k => $x) {
             if ($q['k'] !== $k) $en_disputa[$q['k']] = 'Podría ser la fila ' . $filas[$p['i']]['fila'] . ' (' . $filas[$p['i']]['cliente'] . '), que quedó en duda con la ficha ' . $k;
             $rival[] = $q['k'] === $k ? 'la fila ' . $filas[$q['i']]['fila'] . ' (' . $filas[$q['i']]['cliente'] . ')' : 'la ficha ' . $q['k'] . ' (' . $fichas[$q['k']]['nombre'] . ')';
         }
+        list($f, $av) = bs_imp_alinear_sena($filas[$p['i']], $x['sena']);
         $l['fila'] = $f; $l['nivel'] = $p['nivel'];
-        $l['por'] = $NIVEL[$p['nivel']];
+        $l['por'] = $NIVEL[$p['nivel']] . ($p['prueba'] ? ' + ' . implode(' y ', $p['prueba']) : '');
         if ($p['dias'] !== null) {
             $l['por'] .= ' · contrato ' . ($p['dias'] === 0 ? 'el día de la medición' : (abs($p['dias']) === 1 ? '1 día ' : abs($p['dias']) . ' días ') . ($p['dias'] > 0 ? 'antes de la medición' : 'después de la medición'));
         }
         if ($rival) { $l['tildada'] = false; $l['aviso'][] = 'También podría ser ' . implode(' o ', array_unique($rival)) . ': la fecha de medición no alcanza para decidir'; }
-        if ($p['nivel'] === 3) {
-            if ($p['tel_dist'] && !$p['en_fecha']) { $l['tildada'] = false; $l['aviso'][] = 'El teléfono es otro y la fecha de medición no lo confirma'; }
-            elseif ($p['tel_dist']) $l['aviso'][] = 'El teléfono es otro; lo confirma la fecha de medición';
-        } elseif ($p['nivel'] === 4) {
-            // un nombre parecido solo se acepta si la fecha de medición acompaña y el teléfono no lo contradice
-            if ($p['dias'] === null) { $l['tildada'] = false; $l['aviso'][] = 'La ficha no tiene fecha de medición para confirmarlo'; }
-            elseif (!$p['en_fecha']) { $l['tildada'] = false; $l['aviso'][] = 'La fecha del contrato queda lejos de la medición'; }
-            elseif ($p['tel_dist']) { $l['tildada'] = false; $l['aviso'][] = 'La fecha acompaña, pero el teléfono es otro'; }
-            else $l['aviso'][] = 'Lo confirma la fecha de medición';
-        } elseif ($p['dias'] !== null && !$p['en_fecha']) {
-            $l['aviso'][] = 'La fecha del contrato queda lejos de la medición (se carga igual: coincide el ' . ($p['nivel'] === 1 ? 'N°' : 'teléfono') . ')';
-        }
-        if ($x['sena'] && (!$f['sena'] || $f['sena']['moneda'] !== $x['sena']['moneda'] || abs($f['sena']['monto'] - $x['sena']['monto']) > 0.5)) {
-            $l['aviso'][] = 'En el tablero la seña figura ' . bs_imp_plata($x['sena']['monto'], $x['sena']['moneda']) . ': enlazado, se muestra esa';
-        }
+        if ($p['dias'] !== null && !$p['en_fecha']) $l['aviso'][] = 'La fecha del contrato queda lejos de la medición';
+        $l['aviso'] = array_merge($l['aviso'], $av);
     } else {
         // No está en la planilla: el contrato se arma con lo que tiene la ficha.
         $l['por'] = 'No está en la planilla';
+        // homónimos que quedaron libres (los que ya son de otra ficha no hace falta nombrarlos)
+        $h = array_values(array_diff_key($homonimos[$k] ?? [], $de_fila));
+        if ($h) $l['aviso'][] = 'En la planilla hay un nombre parecido en la ' . implode(', la ', array_slice($h, 0, 3)) . (count($h) > 3 ? ' y ' . (count($h) - 3) . ' más' : '') . ', pero no coincide el teléfono, la dirección ni la seña: no se usa';
         $l['fila'] = [
             'fila' => 0, 'cliente' => $x['nombre'], 'telefono' => bs_contrato_tel($x['celular']), 'direccion' => $x['direccion'],
             'material' => $x['material'], 'medidas' => '', 'vendedor' => '', 'procedencia' => '', 'contrato_paralelo' => '',
@@ -332,7 +397,8 @@ function bs_imp_cuentas($f) {
         else $apl[$x['moneda']] += $x['monto'];
     }
     $j = function ($o) { $l = []; foreach (['USD', 'ARS'] as $m) if (abs($o[$m]) > 0.004) $l[] = bs_imp_plata($o[$m], $m); return $l ? implode(' + ', $l) : '—'; };
-    return [$j(['USD' => $f['total_usd'], 'ARS' => $f['total_ars']]), $j($pag), $j(['USD' => round($f['total_usd'] - $apl['USD'], 2), 'ARS' => round($f['total_ars'] - $apl['ARS'], 2)])];
+    $sin_total = $f['total_usd'] <= 0 && $f['total_ars'] <= 0;
+    return [$sin_total ? 'Sin total' : $j(['USD' => $f['total_usd'], 'ARS' => $f['total_ars']]), $j($pag), $sin_total ? '—' : $j(['USD' => round($f['total_usd'] - $apl['USD'], 2), 'ARS' => round($f['total_ars'] - $apl['ARS'], 2)])];
 }
 
 // ============================================================

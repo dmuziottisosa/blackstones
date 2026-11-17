@@ -27,15 +27,18 @@ Después de revisar los huecos del sistema (16/11/2026), el dueño resolvió cua
 
 - La seña habitual es 50% del total, o 75% si no hay muebles (dueño). La página lo informa y no bloquea: "no podemos confiar ciegamente".
 - La planilla de octubre y noviembre 2026 tiene 79 contratos, todos con total en pesos. En 57 el detalle de cobros suma exactamente lo cobrado (17 de ellos con dólares, a cotizaciones de 1530 a 1570 que salen de la propia planilla). En 17 no suma y en 5 no hay detalle.
-- Entre el contrato y la medición pasan pocos días: en las 21 fichas que coinciden por teléfono, de 29 días antes a 4 días después. Por eso la fecha de medición sirve para desempatar.
-- Probado en local contra una copia del tablero del 14/11 (34 fichas): 26 reciben los datos de la planilla (21 por teléfono, 5 por nombre confirmadas por la fecha), 2 quedan en duda y 6 no están en la planilla.
+- Entre el contrato y la medición pasan pocos días: en las fichas que coinciden por teléfono, de 33 días antes a 5 días después. Por eso la fecha de medición sirve para desempatar, pero no para reconocer a alguien.
+- **Simulado contra el tablero real exportado el 16/11 (38 fichas), antes de cargar nada:** 38 contratos para 38 fichas, ninguno de más. 33 con los datos de la planilla (28 por teléfono, 5 por nombre con una segunda prueba) y 5 que no están en la planilla.
+- **Nombre y fecha solos no alcanzan.** En esa simulación, una ficha quedaba enlazada con el contrato de otro cliente del mismo nombre de pila, con fecha razonable pero otra dirección y otra seña. Por nombre ahora se exige además teléfono casi igual, misma dirección o misma seña.
+- La seña del tablero y lo cobrado según la planilla son la misma plata en casi todos los casos (a veces el tablero la tiene en pesos y la planilla en dólares con su cotización). En 2 fichas no coinciden y en 2 difieren por un dígito: se cargan con nota.
 - Probado: tirar y restaurar fichas y contratos, vencimiento de la papelera, regresión del tablero, calendario, y el tablero funcionando con Relación-Contrato borrada.
 
 ## Known unknowns
 
 - **Qué son las cuatro columnas de montos en pesos de la planilla** (no vinieron los encabezados): el medio de cada cobro queda sin marcar.
 - En las 17 filas donde el detalle no suma lo cobrado, cuál de los dos números es el bueno. Se cargó lo cobrado y quedó una nota en cada contrato.
-- Cuántas fichas del tablero de hoy coinciden con la planilla: la prueba fue contra una copia de hace dos días; la vista previa del importador da el número real.
+- Si el tablero cambió después de la exportación del 16/11: una ficha nueva aparecería como "no está en la planilla". La vista previa lo muestra antes de cargar.
+- En las 2 fichas donde la seña del tablero y la planilla no coinciden, cuál es el número bueno.
 - Si la ventana de 35 días antes y 7 después alcanza para obras más viejas que octubre.
 - Si el dólar que se propone tiene que ser el oficial (lo que trae hoy la calculadora) o el blue.
 - Sigue sin haber respaldo automático diario de los datos.
