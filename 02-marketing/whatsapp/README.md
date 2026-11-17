@@ -7,6 +7,7 @@ Operación de venta por WhatsApp — el verdadero motor de cierre del negocio.
 | Archivo / carpeta | Qué es |
 |---|---|
 | `flow.md` ⭐ | Flow de venta completo: primer contacto → calificación → cotización → seguimiento → cierre |
+| `como-cotizamos.md` | Cómo se cotiza cuando el dueño pega un chat: la cuenta, sus reglas y qué se entrega |
 | `templates/` | Mensajes por escenario (primer respuesta, follow-up 24h, no contestó en 48h, dudas frecuentes, cierre) |
 | `objection-bank.md` (pendiente) | Objeciones reales del avatar + respuestas que funcionaron |
 

@@ -134,6 +134,10 @@ Tres docs canónicos en `04-operations/`, leelos en este orden:
 >
 > **El repo NO se clona en la máquina del usuario.** No hay `git clone`, no hay `git pull`, no hay carpeta del repo en Windows, no hay GitHub token. Si una IA propone "cd al repo" o "git pull" o "agregá `GITHUB_TOKEN` al `.env`" → está violando la regla. El único archivo local persistente del proyecto es `D:\blackstones\.env` con credenciales FTP.
 
+### Si te pegan un chat y te piden cotizar
+
+Leé `02-marketing/whatsapp/como-cotizamos.md` antes de contestar: cómo se hace la cuenta (m², traforos, zócalo, regrueso, flete), las reglas del dueño (sin color no hay número, avisar el granito que se mancha, plazo de 20 días) y qué se entrega (mensaje listo para pegar + "para revisar antes de mandarlo"). El texto del mensaje está en `02-marketing/whatsapp/flow.md`.
+
 ### Si dudás dónde poner algo
 Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-linkea con paths relativos.
 
@@ -218,4 +222,4 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ---
 
-*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días; sin pestaña Reporte; usuarios y roles). Próxima revisión obligatoria: febrero 2027.*
+*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días; sin pestaña Reporte; usuarios y roles; cómo cotizamos). Próxima revisión obligatoria: febrero 2027.*

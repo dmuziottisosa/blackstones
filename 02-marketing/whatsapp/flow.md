@@ -125,6 +125,8 @@ Cualquier duda me decís. Si te sirve, coordinamos la medición técnica.
 
 ### Formato vigente de la cotización (en uso desde oct 2026)
 
+> Cómo se hace la cuenta y las reglas del dueño para cotizar: `como-cotizamos.md`.
+
 > Manda sobre la estructura de arriba. Recuperado de las cotizaciones reales el 2026-11-15.
 
 ```
