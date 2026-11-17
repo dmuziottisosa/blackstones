@@ -405,6 +405,11 @@ function bs_imp_cuentas($f) {
 // GET — vista previa (no toca nada)
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    // Si todas las fichas ya tienen contrato no queda nada por hacer: la planilla subida se borra.
+    if (!$lineas && !$errores) {
+        @unlink(BS_CONTRATOS_IMPORT);
+        bs_imp_pagina('Contratos de las fichas del tablero', '<div class="caja">Todas las fichas del tablero ya tienen su contrato. No hay nada para cargar, y la planilla subida se borró del servidor.</div><p><a class="btn" href="/presupuestos/relacion-contrato.php">Ir a Relación-Contrato</a></p>');
+    }
     $c = '';
     if ($errores) {
         $c .= '<div class="caja"><span class="rojo">El archivo tiene errores. No se puede cargar hasta corregirlo.</span><ul>';

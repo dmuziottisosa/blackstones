@@ -1252,7 +1252,17 @@ $('mesHoy').addEventListener('click',()=>{mes=HOY.slice(0,7);dibujar();});
 
 // Catálogo de materiales de la calculadora, para escribir el material siempre igual ("Marca · Color").
 pedir(API_COLORES).then(r=>{$('catalogo').innerHTML=(r.colors||[]).map(c=>'<option value="'+esc(c.full)+'">').join('');}).catch(()=>{});
-cargar();
+// Llegando desde el tablero ("Con contrato"): ?contrato=<id> abre ese contrato, en su mes.
+(async function(){
+  await cargar();
+  const id=new URLSearchParams(location.search).get('contrato');
+  if(!id)return;
+  history.replaceState(null,'',location.pathname); // que al recargar no se vuelva a abrir solo
+  const c=CONTRATOS.find(x=>x.id===id);
+  if(!c){toast('Ese contrato ya no está. Puede estar en la papelera.');return;}
+  if(/^\d{4}-\d{2}/.test(c.fecha||'')){mes=c.fecha.slice(0,7);dibujar();}
+  abrirFicha(id);
+})();
 
 // === THEME TOGGLE (mismo que calc, hub y tablero) ===
 function toggleTheme(){

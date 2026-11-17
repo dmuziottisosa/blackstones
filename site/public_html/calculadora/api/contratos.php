@@ -271,6 +271,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         bs_ok(['presup' => bs_contrato_presup(intval($m[1]) . (isset($m[2]) ? '-' . intval($m[2]) : ''))]);
     }
     $d = bs_contratos_leer();
+    if (isset($_GET['enlaces'])) {
+        // Lo consulta el tablero al cargar, para marcar "Con contrato" en la ficha abierta.
+        $enl = [];
+        foreach ($d['contratos'] as $c) {
+            if (is_array($c['enlace'] ?? null)) $enl[$c['enlace']['cliente_nro'] . '-' . intval($c['enlace']['sub'])] = (string)$c['id'];
+        }
+        bs_ok(['enlaces' => (object)$enl]);
+    }
     if (isset($_GET['enlace'])) {
         if (!preg_match('/^(\d{1,6})-(\d{1,3})$/', (string)$_GET['enlace'], $m)) bs_error('enlace inválido');
         $k = bs_contrato_de_ficha($d, intval($m[1]), intval($m[2]));

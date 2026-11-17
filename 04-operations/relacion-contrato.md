@@ -153,6 +153,7 @@ Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, list
 - **Borrar el presupuesto no toca nada de esto:** la ficha, el calendario y el contrato siguen (ver el decision log de la etapa).
 - **Enlazado, manda el tablero en lo operativo**: cliente, teléfono, dirección, material y pileta se ven como están en la ficha y se cambian desde el tablero. La plata se cambia acá.
 - **Distintivo de enlace:** el renglón enlazado lleva una raya verde a la izquierda y la marca "Enlazado" al lado de la etapa; la ficha dice "Enlazado con el tablero y el calendario" (el calendario lee del tablero, así que queda enlazado solo).
+- **Del otro lado también se ve (17/11/2026):** en el tablero, la ficha abierta de una obra con contrato muestra la marca "Con contrato", que lleva directo a ese contrato (`relacion-contrato.php?contrato=<id>` lo abre en su mes). Solo en la ficha abierta, no en la plegada.
 - El renglón muestra **la etapa** de la obra (Por medir, Por cortar…), la fecha de medición o instalación y el vencimiento, y lleva a la ficha con un toque.
 - **Seña, un solo dato:** si se carga acá y la obra está en Por medir, queda tildada en el tablero ("Trajo la seña"). Si se carga en el tablero, aparece acá sola. Cuando el tablero ya tiene la seña, acá es de solo lectura.
 - Si la ficha sale del tablero (archivada o borrada) el renglón dice "Fuera del tablero" y conserva la última seña.
@@ -179,7 +180,7 @@ La página no modifica ningún endpoint existente: para crear la ficha usa `tabl
 Exigencia del dueño (16/11/2026): **Relación-Contrato se tiene que poder eliminar completa sin afectar el tablero ni el calendario.**
 
 - Relación-Contrato **lee** del tablero y de `clientes/`. El calendario, el hub y la calculadora **nunca** leen ni escriben nada de contratos.
-- **Única excepción, a prueba de ausencia:** al borrar o restaurar una ficha, el tablero llama a `contratos.php` (`?enlace=` para avisar, `borrar_enlazado` y `restaurar_enlazado`). Si el archivo no existe, la llamada falla en silencio y el tablero borra la ficha igual. Probado el 16/11/2026 con Relación-Contrato borrada.
+- **Única excepción, a prueba de ausencia:** el tablero llama a `contratos.php` en dos momentos: al cargar, para saber qué fichas tienen contrato y mostrar la marca "Con contrato" (`?enlaces=1`, una sola consulta, aparte y sin esperar la respuesta); y al borrar o restaurar una ficha (`?enlace=` para avisar, `borrar_enlazado` y `restaurar_enlazado`). Si el archivo no existe, la llamada falla en silencio: el tablero no muestra la marca y borra la ficha igual. Probado el 16 y el 17/11/2026 con Relación-Contrato borrada.
 - Ningún archivo existente llama a `contratos.php`, `contratos-adjunto.php` ni `_contratos.php`, ni abre `bs-data/contratos/`. Relación-Contrato sí lee `clientes/` (para saber si un N° existe) y el tablero, sin modificarlos. Lo único que la nombra desde afuera es el link de la pestaña en la barra de páginas.
 - Las fichas creadas con "Cargar en Por medir" son fichas comunes del tablero: siguen ahí, con su fecha y su seña, aunque el contrato desaparezca.
 - Verificado el 16/11/2026 (dos veces, la segunda con los adjuntos ya hechos): con la página, el endpoint y los datos borrados, pasaron la regresión completa del tablero y las pruebas del calendario.

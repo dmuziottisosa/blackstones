@@ -285,6 +285,9 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-id b{font-weight:700;font-variant-numeric:tabular-nums}
 .c-id .zona{color:var(--text3);font-weight:500}
 .c-mat{color:var(--text2);font-size:13px;margin-top:3px;overflow-wrap:anywhere}
+.c-contrato{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:3px 0;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gr);text-decoration:none;white-space:nowrap}
+.c-contrato svg{width:12px;height:12px;flex-shrink:0}
+.c-contrato:hover,.c-contrato:focus-visible{text-decoration:underline}
 
 .c-fecha{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer}
 @media(hover:hover){.c-fecha:hover{border-color:var(--gd)}}
@@ -696,6 +699,21 @@ const PERSONAS={
 let CARDS=[];       // tarjetas
 let HOY='';         // YYYY-MM-DD según el server
 let abierta='';     // key de la tarjeta con el detalle abierto
+// Qué fichas tienen contrato en Relación-Contrato (ficha → contrato). Lo dice Relación-Contrato;
+// si no existe o no contesta, queda vacío y la ficha simplemente no muestra la marca.
+let ENLACES={};
+const ICO_ENL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>';
+async function cargarEnlaces(){
+  let n={};
+  try{
+    const r=await fetch('/calculadora/api/contratos.php?enlaces=1',{credentials:'same-origin',cache:'no-store'});
+    const j=r.ok?await r.json():null;
+    if(j&&j.ok&&j.enlaces&&typeof j.enlaces==='object')n=j.enlaces;
+  }catch(e){}
+  if(JSON.stringify(n)===JSON.stringify(ENLACES))return;
+  ENLACES=n;
+  if(!drag&&libre())dibujar();
+}
 let colMovil=localStorage.getItem('bs-tablero-col')||'medir';
 let ocupado=false;  // hay un guardado en curso
 let fechaKey='';    // tarjeta a la que se le está eligiendo fecha
@@ -798,6 +816,7 @@ async function cargar(){
     const j=await pedir(API);
     if(drag)return; // no redibujar con una tarjeta en el aire
     ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;
+    cargarEnlaces(); // aparte y sin esperar: el tablero no depende de esto
     $('papB').hidden=!j.papelera;$('papB').textContent='Papelera · '+(j.papelera||0);INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];MEDIDORES=j.medidores||[];
     dibujar();
   }catch(e){
@@ -1151,6 +1170,7 @@ function htmlCard(c){
   h+='</div>';
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
   if(mat)h+='<div class="c-mat">'+esc(mat)+'</div>';
+  if(ENLACES[c.key])h+='<a class="c-contrato" href="/presupuestos/relacion-contrato.php?contrato='+encodeURIComponent(ENLACES[c.key])+'" target="_top" title="Tiene contrato en Relación-Contrato: tocá para abrirlo">'+ICO_ENL+'Con contrato</a>';
 
   // El botón de la etapa (Medido / Cortado) es lo que más se ve en la tarjeta:
   // dice de un vistazo si ese trabajo ya se hizo o no. Tocarlo otra vez lo deshace.
