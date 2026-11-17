@@ -142,7 +142,7 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 ## 5. Reglas duras de este negocio (memorizar)
 
 - **No mencionar VenarStones** en ninguna comunicación pública. (Rebrand 2026, separación de socios — interno.)
-- **Plazos reales:** 15-20 días corridos desde medición. Sinterizado: 20. **Nunca decir "10 días".**
+- **Plazo que se promete: 20 días corridos desde la medición**, para todos los materiales (dueño, 17/11/2026; antes "15-20"). **Nunca decir "10 días".**
 - **No coordinamos gremios** (carpinteros, plomeros). El cliente ya los tiene.
 - **Medimos cuando los muebles ya están puestos.** Es un filtro, no una limitación.
 - **Presupuesto cerrado por escrito en 24 hs por WhatsApp.** Es el mecanismo diferenciador.
@@ -167,7 +167,9 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **Nada se borra de una: papelera de 30 días.** Borrar una ficha del tablero o un contrato los manda a la papelera (con tildes, adjuntos y pagos) y se recuperan desde "Papelera". A los 30 días se borran de verdad. Enlazados, van y vuelven juntos.
 - **"Verificado" = presupuesto adjunto.** Un contrato lleva el sello solo si tiene el PDF o Excel adjunto. El N° de presupuesto enlaza, pero no verifica (deja de existir a los 180 días).
 - **Un contrato está completo con tres cosas:** N° puesto, presupuesto adjunto y enlazado con el tablero. Cada obra viva del tablero tendría que tener su contrato; Relación-Contrato avisa las que no.
-- **Enlazado, manda el tablero en lo operativo y Relación-Contrato en la plata.** La seña es un solo dato: se refleja en los dos sentidos.
+- **Enlazado, manda el tablero en lo operativo y Relación-Contrato en la plata.**
+- **La seña del tablero y la del contrato no se pisan nunca.** Si difieren, hay un aviso en Relación-Contrato y nada más; cada una se corrige a mano. Nada cambia plata solo.
+- **"→ Aprobado" ya no existe en Presupuestos.** Si una obra está en el tablero es que fue aprobada. Un presupuesto entra al tablero desde el tablero ("Cargar obra" con su N°) o desde su contrato ("Cargar en Por medir"); `state.php` rechaza aprobar desde Presupuestos.
 - **Cobro en una moneda, contrato en la otra: lleva cotización.** Cada seña o pago guarda la suya (se propone el dólar del día, se puede cambiar). "Cobrado" es lo que entró de verdad; "Saldo", lo que falta ya convertido.
 - **El calendario lee del tablero.** Lo que se enlaza con el tablero queda enlazado con el calendario.
 - **Plazo de entrega en el sistema: 20 días corridos desde la medición**, para todos los materiales; ventana de entrega del día 15 al 20. En Por cortar y Por fabricar la cola va por semana de entrega y, dentro de la semana, mismo color junto. → `04-operations/tablero-obras.md`
@@ -211,4 +213,4 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ---
 
-*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar). Próxima revisión obligatoria: febrero 2027.*
+*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días). Próxima revisión obligatoria: febrero 2027.*

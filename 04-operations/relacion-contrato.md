@@ -114,11 +114,7 @@ Si nada de eso coincide, la ficha se toma como "no está en la planilla" y la vi
 
 **Ficha que no está en la planilla:** el contrato se arma con lo que tiene la ficha (cliente, teléfono, dirección, material, pileta, seña), con la fecha de la medición y sin total. Queda una nota en el contrato.
 
-**La seña, alineada con el tablero.** Enlazado, la seña que se ve es la del tablero. Para que la plata no se cuente dos veces ni cambie sola al abrir la página, el contrato se guarda ya alineado:
-
-- Si la seña del tablero es todo lo cobrado según la planilla (la misma plata puesta en pesos), el contrato queda con esa seña y sin pagos, y el detalle original ("USD 600 a $ 1.560") va a la nota.
-- Si difiere por poco (un dígito), queda la del tablero y una nota para revisar cuál es.
-- Si no coincide, se carga igual, con una nota que dice los dos números.
+**La seña no se pisa.** El contrato se carga con lo que dice la planilla, tal cual (seña y pagos, con su cotización si fueron en dólares). Si la seña del tablero es otra, la vista previa lo avisa y el contrato va a mostrar el aviso; no se cambia ninguno de los dos.
 
 **Antes de subir la planilla, se recorta.** Con el tablero exportado se simula la carga en local y al servidor viajan solo las filas que resultaron ser de una ficha. Las demás no salen de la máquina.
 
@@ -161,7 +157,11 @@ Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, list
 - **Distintivo de enlace:** el renglón enlazado lleva una raya verde a la izquierda y la marca "Enlazado" al lado de la etapa; la ficha dice "Enlazado con el tablero y el calendario" (el calendario lee del tablero, así que queda enlazado solo).
 - **Del otro lado también se ve (17/11/2026):** en el tablero, la ficha abierta de una obra con contrato muestra la marca "Con contrato", que lleva directo a ese contrato (`relacion-contrato.php?contrato=<id>` lo abre en su mes). Solo en la ficha abierta, no en la plegada.
 - El renglón muestra **la etapa** de la obra (Por medir, Por cortar…), la fecha de medición o instalación y el vencimiento, y lleva a la ficha con un toque.
-- **Seña, un solo dato:** si se carga acá y la obra está en Por medir, queda tildada en el tablero ("Trajo la seña"). Si se carga en el tablero, aparece acá sola. Cuando el tablero ya tiene la seña, acá es de solo lectura.
+- **La seña del tablero y la del contrato no se pisan nunca (dueño, 17/11/2026).** Si difieren, hay un aviso y nada más: el renglón dice "Seña distinta en el tablero" (con los dos números al pasar el mouse), la ficha del contrato lo explica debajo de la seña, y aparece un filtro "Seña distinta". Cada una se corrige a mano donde esté mal.
+  - No cuenta como diferencia la misma plata dicha de otra forma: la seña en dólares con su cotización contra la del tablero en pesos, o el tablero con todo lo cobrado anotado como seña.
+  - Sí avisa si un lado tiene seña y el otro no.
+  - Antes (16/11) la del tablero reemplazaba a la del contrato al abrir la página, y con la seña en el tablero el campo quedaba de solo lectura. Eso se sacó: cambiaba la plata sin que nadie lo decidiera.
+  - Lo único que sigue copiándose es al llenar un lado vacío en un momento explícito: "Cargar en Por medir" y "Crear contrato" desde la ficha llevan la seña, y guardar un contrato con seña la tilda en el tablero si la obra está en Por medir y el tablero todavía no la tiene (la ficha lo avisa antes de guardar).
 - **Enlazado con una ficha que ya no está entre las obras vivas, se dice por qué** (17/11/2026). El contrato conserva la última seña.
   - **Archivada:** la obra se entregó. Es lo normal; el contrato queda.
   - **En la papelera:** su ficha está en la papelera del tablero.

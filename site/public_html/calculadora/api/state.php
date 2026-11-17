@@ -106,6 +106,15 @@ try {
                 bs_error('Esa obra está en el tablero: la etapa se cambia desde ahí (se archiva o se borra la ficha en el tablero).', 409);
             }
 
+            // "→ Aprobado" ya no existe en Presupuestos (dueño, 17/11/2026): si una obra está en el
+            // tablero es que fue aprobada. Un presupuesto entra al tablero desde el tablero ("Cargar
+            // obra" con su N°) o desde su contrato ("Cargar en Por medir"), que no pasan por acá.
+            // Devolver un entregado al tablero (desde el Reporte) sigue permitido.
+            if ($nuevo_estado === 'aprobado' && $estado_anterior !== 'entregado' && empty($body['desde_tablero'])) {
+                bs_lock_release($fp);
+                bs_error('Un presupuesto pasa al tablero desde el tablero ("Cargar obra" con su N°) o desde su contrato en Relación-Contrato.', 409);
+            }
+
             // Validar transición
             $allowed_from = $ALLOWED[$estado_anterior] ?? [];
             if (!in_array($nuevo_estado, $allowed_from, true)) {

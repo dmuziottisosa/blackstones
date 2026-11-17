@@ -19,7 +19,7 @@ Marmolería sofisticada en CABA (Av. Juan Bautista Alberdi 3575). Vende mesadas 
 - +500 mesadas colocadas en CABA y GBA.
 - Taller propio, corte CNC, equipo de colocación propio.
 - Cotización cerrada por escrito en 24 hs por WhatsApp.
-- Plazo desde medición: 15-20 días corridos.
+- Plazo desde medición: 20 días corridos. *(Actualizado 17/11/2026, dueño: antes "15-20".)*
 
 ---
 

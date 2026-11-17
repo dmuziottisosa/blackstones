@@ -83,7 +83,7 @@ Estas honestidades **no se esconden** porque son lo que nos diferencia:
 - "Los oscuros son menos porosos que los claros — los claros tienden a mancharse con vino, café o aceite."
 - "No coordinamos con carpinteros ni plomeros."
 - "Medimos cuando los muebles ya están puestos."
-- "Plazo real desde medición: 15-20 días corridos. Sinterizado: 20."
+- "Plazo real desde medición: 20 días corridos."
 
 Decir esto **suma confianza**, no resta.
 

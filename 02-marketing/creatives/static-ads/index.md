@@ -152,7 +152,7 @@ Cada static está clasificado por:
 - **Aspect ratio:** 4:5 default (mejor performance en feed Meta).
 - **Logo:** bottom-right, 8-10% del ancho del frame. Integrado, no pegado. Usar exacto como se provee.
 - **Test de Living:** sí o sí antes de generar el asset final.
-- **Plazos en copy:** **15-20 días corridos**. Nunca "10 días". Nunca "3-4 semanas".
+- **Plazos en copy:** **20 días corridos** (desde 17/11/2026; antes "15-20"). Nunca "10 días". Nunca "3-4 semanas".
 - **No mencionar VenarStones.** Ni en wink, ni en nostalgia.
 - **No poner niños** en imágenes.
 - **No mencionar coordinación con gremios** (carpinteros, plomeros).

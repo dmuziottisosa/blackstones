@@ -195,6 +195,7 @@ Botón "Editar obra" en "Más" (también desde el calendario, que muestra la mis
 ## Borrar una ficha
 
 - **Borrar el presupuesto no borra la ficha (16/11/2026).** Si alguien elimina en Presupuestos el presupuesto de una obra que está en el tablero, o le llegan los 180 días, el presupuesto sale de esa pestaña y la ficha sigue igual, con sus fotos. La ficha solo se borra con "Borrar ficha", acá.
+- **"→ Aprobado" ya no existe en Presupuestos (17/11/2026).** Si una obra está en el tablero es que fue aprobada. Un presupuesto entra al tablero con "Cargar obra" y su N°, o desde su contrato con "Cargar en Por medir". El servidor rechaza aprobar desde Presupuestos; devolver un entregado al tablero desde el Reporte sigue permitido.
 - **Presupuestos ya no cambia la etapa de una obra viva:** en esa pestaña, un presupuesto aprobado muestra "En el tablero →" en lugar de los botones de estado.
 - **Pero la etapa se ve y se filtra en Presupuestos (16/11/2026):** la columna Estado de una obra viva dice su etapa del tablero ("Por cortar"), y el filtro de estados tiene un grupo "En el tablero" con cada etapa. El CSV también la lleva.
 - **La ficha abierta dice si tiene contrato (17/11/2026).** Debajo del material aparece "Con contrato", en verde, y lleva a ese contrato en Relación-Contrato. Si Relación-Contrato no existe o no contesta, la marca no aparece y nada más cambia.

@@ -14,7 +14,7 @@
   - **Colocación** — por m² y/o por trabajo, con y sin escalera, con angulos especiales
   - **Otros**: pulido especial, biselado, leather/brushed, perforaciones extra, terminaciones (chamfered, ojiva, etc.), zócalos
   - **Por qué importa**: la calc hoy estima estos costos en `COSTOS_FIJOS` y constantes hardcodeadas — sin lista oficial actualizada, el "presupuesto cerrado por escrito en 24hs" (disparador #1 de Carolina) puede tener desviaciones reales, generando el dolor #4 ("extras al colocar")
-- [ ] **Verificar AMBOS crons** activos en panel Hostinger (al menos uno está corriendo según `health.php` `cron_recent: true`):
+- [ ] **Verificar AMBOS crons** *(17/11/2026: `health.php` informa cada tarea por separado, `cron_limpieza_horas` y `cron_reporte_horas`; ese día el log tenía 22,7 hs, o sea que al menos la de las 03:00 corre. Falta leerlo con el health nuevo desplegado.)* activos en panel Hostinger (al menos uno está corriendo según `health.php` `cron_recent: true`):
   - `cleanup-retention.php` → 03:00 ART diario
   - `monthly-report.php` → 02:00 ART diario
   - Validación: `cat bs-data/registro/_cron-log.txt` → ver entradas con `cleanup:` Y `monthly-report:`

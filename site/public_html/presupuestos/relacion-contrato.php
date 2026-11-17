@@ -181,6 +181,9 @@ button{font-family:inherit;color:inherit}
 .etapa.fuera{--et:var(--text3);--et-soft:var(--card-alt)}
 .etapa.rota{--et:var(--red);--et-soft:var(--red-soft,rgba(176,58,58,.1))}
 .tab [data-desenlazar]{margin-top:6px}
+.tab small.sena-d{color:var(--amb);font-weight:700;cursor:help}
+.nota-t.sena-d{background:var(--amb-soft);color:var(--amb)}
+.nota-t.sena-d b{font-weight:800}
 .tab small{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tab small.rojo{color:var(--red);font-weight:700}
 .tab .btn.chico{padding:5px 11px;font-size:12px}
@@ -604,9 +607,8 @@ function ver(c){
   if(!k)return c;
   return Object.assign({},c,{
     cliente:k.nombre||c.cliente,telefono:telLindo(k.celular)||c.telefono,direccion:k.direccion||c.direccion,material:k.material||c.material,
-    bacha:k.bacha||c.bacha,bacha_modelo:k.bacha?k.bacha_modelo:c.bacha_modelo,
-    // la seña del tablero no trae cotización: se usa la que el contrato tenga anotada para esa moneda
-    sena:k.sena?Object.assign({},c.sena&&c.sena.moneda===k.sena.moneda?{cotizacion:c.sena.cotizacion,aplica:c.sena.aplica}:{},{monto:k.sena.monto,moneda:k.sena.moneda,fecha:(c.sena&&c.sena.fecha)||HOY}):c.sena
+    bacha:k.bacha||c.bacha,bacha_modelo:k.bacha?k.bacha_modelo:c.bacha_modelo
+    // la seña NO: la del contrato es la del contrato. Si la del tablero es otra, se avisa (senaDif).
   });
 }
 // Un cobro se descuenta del total de su misma moneda, salvo que tenga cotización: ahí se
@@ -671,22 +673,30 @@ async function cargar(){
     if(t){t.cards.forEach(k=>{CARDS[k.key]=k;});t.etapas.forEach(e=>{ETAPAS[e.id]=e.titulo;});}
     $('err').hidden=true;
     dibujar();
-    espejarSenas();
   }catch(e){$('err').textContent=e.message;$('err').hidden=false;$('lista').innerHTML='<div class="vacio">No se pudo cargar la lista.</div>';}
 }
-// La seña cargada en el tablero queda copiada en el contrato: así el saldo sigue bien
-// cuando la obra se archiva y la ficha ya no está.
-function espejarSenas(){
-  CONTRATOS.forEach(c=>{
-    const k=cardDe(c);
-    if(!k||!k.sena)return;
-    if(c.sena&&c.sena.monto===k.sena.monto&&c.sena.moneda===k.sena.moneda)return;
-    const f=(c.sena&&c.sena.fecha)||HOY;
-    c.sena=Object.assign({},c.sena&&c.sena.moneda===k.sena.moneda?{cotizacion:c.sena.cotizacion,aplica:c.sena.aplica}:{},{monto:k.sena.monto,moneda:k.sena.moneda,fecha:f});
-    pedir(API,{accion:'sena',id:c.id,monto:k.sena.monto,moneda:k.sena.moneda,fecha:f}).catch(()=>{});
-  });
+// La seña del tablero y la del contrato no se pisan nunca (dueño, 17/11/2026): si difieren, se avisa.
+// No es diferencia que sea la misma plata dicha de otra forma: la seña en dólares con su cotización
+// contra la del tablero en pesos, o el tablero con todo lo cobrado anotado como seña.
+// Devuelve null si coinciden, o {t: la del tablero, s: la del contrato, txt}.
+function senaDif(c){
+  const k=cardDe(c);
+  if(!k)return null;
+  const t=k.sena||null,s=c.sena||null,igual=(a,b)=>Math.abs(a-b)<1;
+  if(!t&&!s)return null;
+  if(t&&s){
+    if(t.moneda===s.moneda&&igual(t.monto,s.monto))return null;
+    const a={USD:0,ARS:0};aplicar(a,s);
+    if(igual(a[t.moneda],t.monto))return null;
+  }
+  if(t){
+    const a={USD:0,ARS:0};(s?[s]:[]).concat(c.pagos||[]).forEach(x=>aplicar(a,x));
+    if(a[t.moneda]>0&&igual(a[t.moneda],t.monto))return null;
+  }
+  const txt=t&&s?'En el tablero la seña figura '+plata(t.monto,t.moneda)+'; acá, '+plata(s.monto,s.moneda)+'.'
+    :(t?'En el tablero figura una seña de '+plata(t.monto,t.moneda)+' y acá no hay ninguna cargada.':'Acá hay una seña de '+plata(s.monto,s.moneda)+' y en el tablero no está tildada.');
+  return {t:t,s:s,txt:txt};
 }
-
 // Obras vivas en el tablero que no tienen contrato acá. Con el tablero sin leer, no se sabe: ninguna.
 const sinContrato=()=>{const con={};CONTRATOS.forEach(c=>{if(c.enlace)con[keyDe(c)]=1;});return Object.keys(CARDS).map(k=>CARDS[k]).filter(k=>!con[k.key]).sort((a,b)=>llano(a.nombre)<llano(b.nombre)?-1:1);};
 // Un contrato cierra limpio con las tres cosas: N°, presupuesto adjunto y enlazado con el tablero.
@@ -695,7 +705,7 @@ const sumar=(l)=>{const s={tot:{USD:0,ARS:0},pag:{USD:0,ARS:0},deb:{USD:0,ARS:0}
 const debe=c=>{const n=cuentas(c);return n.sal.USD>0.004||n.sal.ARS>0.004;};
 const pagado=c=>{const n=cuentas(c);return (n.tot.USD>0||n.tot.ARS>0)&&!debe(c);};
 // Filtros de control: lo que hay que perseguir.
-const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['completos','Completos',completo]];
+const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['completos','Completos',completo],['sena','Seña distinta',c=>!!senaDif(c),true]];
 const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':(v==='cf'?'<span class="sn si" title="Factura a consumidor final">CF</span>':'<span class="sn">—</span>'));
 const PIL={nuestra:'Nuestra',cliente:'Cliente',no:'No'};
 
@@ -735,7 +745,7 @@ function dibujar(){
     +(buscando?'':'<div class="tod"><div class="t">Por cobrar, todos los meses</div><div class="v">'+(linea(todo.deb)||'Nada')+'</div></div>');
   if(!FILTROS.some(f=>f[0]===filtro))filtro='todos';
   $('filtros').hidden=!delMes.length;
-  $('filtros').innerHTML=FILTROS.map(f=>'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+delMes.filter(f[2]).length+'</i></button>').join('');
+  $('filtros').innerHTML=FILTROS.filter(f=>!f[3]||delMes.some(f[2])||filtro===f[0]).map(f=>'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+delMes.filter(f[2]).length+'</i></button>').join('');
 
   const fx=FILTROS.find(f=>f[0]===filtro)[2];
   const dir=ordenAsc?1:-1;
@@ -762,10 +772,11 @@ function dibujar(){
       +[v.telefono?(waLink(v.telefono)?'<a class="tel" href="'+esc(waLink(v.telefono))+'" target="_blank" rel="noopener" title="Abrir WhatsApp">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'',esc(c.vendedor),esc(c.procedencia)].filter(Boolean).join(' · ');
     const tot=partes(n.tot),pag=partes(n.pag);
     let tab;
+    const sd=senaDif(c);
     const fp=fichaPara(c),kn=fp?fp.k:null; // su obra ya está en el tablero (mismo N° o mismo teléfono): se enlaza, no se carga de nuevo
     if(kn)tab='<button type="button" class="btn chico enl-b" data-enlazar="'+esc(c.id)+'">'+ICO_ENL+'Enlazar con el tablero</button><small>'+(fp.por==='tel'?'Mismo teléfono que una obra del tablero: ':'Ya está en el tablero: ')+esc(ETAPAS[kn.etapa]||kn.etapa)+'</small>';
     else if(!c.enlace)tab='<button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
-    else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><small'+(d.rojo?' class="rojo"':'')+'><span class="enl" title="Enlazado con el tablero y el calendario">'+ICO_ENL+'Enlazado</span>'+(d.t?' · '+esc(d.t):'')+'</small>';}
+    else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><small'+(d.rojo?' class="rojo"':'')+'><span class="enl" title="Enlazado con el tablero y el calendario">'+ICO_ENL+'Enlazado</span>'+(d.t?' · '+esc(d.t):'')+'</small>'+(sd?'<small class="sena-d" title="'+esc(sd.txt)+'">Seña distinta en el tablero</small>':'');}
     else tab=sinFichaHtml(c);
     const nota=(c.nota||'').replace(/\s+/g,' ').trim();
     const obra=[c.factura?'Factura <b>'+(c.factura==='si'?'sí':(c.factura==='cf'?'cons. final':'no'))+'</b>':'',c.muebles?'Muebles <b>'+(c.muebles==='si'?'sí':'no')+'</b>':'',v.bacha?'Pileta <b>'+esc(PIL[v.bacha].toLowerCase())+'</b>':''].filter(Boolean).join(' · ');
@@ -819,8 +830,8 @@ function abrirFicha(id){
   const v=c?ver(c):{},k=c?cardDe(c):null;
   // Enlazado y con la ficha a la vista: lo operativo se edita en el tablero (un solo lugar por dato).
   const fijo=!!k,ro=fijo?' readonly':'';
-  const senaFija=!!(k&&k.sena);
-  F={id:c?c.id:'',factura:c?c.factura:'',muebles:c?c.muebles:'',bacha:c?v.bacha:'',pagos:c?(c.pagos||[]).slice():[],fijo:fijo,senaFija:senaFija,
+  const dif=c?senaDif(c):null;
+  F={id:c?c.id:'',factura:c?c.factura:'',muebles:c?c.muebles:'',bacha:c?v.bacha:'',pagos:c?(c.pagos||[]).slice():[],fijo:fijo,
      empujarSena:!!(k&&!k.sena&&k.etapa==='medir'),key:k?k.key:'',
      contrato:c?c.contrato:'',enlazado:!!(c&&c.enlace),archivo:c?c.archivo:null,archivoNuevo:null,quitarArchivo:false,presup:c?c.presup:null,nroMal:'',buscando:false};
   const val=x=>esc(x==null?'':x);
@@ -851,12 +862,13 @@ function abrirFicha(id){
   h+='<h4>Plata</h4>'
     +'<div class="dos"><label class="campo">Total en dólares<input id="fTotU" value="'+enCampo(c&&c.total_usd)+'" inputmode="decimal" placeholder="0" autocomplete="off"></label>'
     +'<label class="campo">Total en pesos<input id="fTotA" value="'+enCampo(c&&c.total_ars)+'" inputmode="decimal" placeholder="0" autocomplete="off"></label></div>'
-    +'<div class="tres"><label class="campo">Seña recibida<input id="fSen" value="'+enCampo(v.sena&&v.sena.monto)+'" inputmode="decimal" placeholder="0" autocomplete="off"'+(senaFija?' readonly':'')+'></label>'
-    +'<label class="campo">Moneda<select id="fSenM"'+(senaFija?' disabled':'')+'><option value="ARS"'+(v.sena&&v.sena.moneda==='USD'?'':' selected')+'>Pesos</option><option value="USD"'+(v.sena&&v.sena.moneda==='USD'?' selected':'')+'>Dólares</option></select></label>'
+    +'<div class="tres"><label class="campo">Seña recibida<input id="fSen" value="'+enCampo(v.sena&&v.sena.monto)+'" inputmode="decimal" placeholder="0" autocomplete="off"></label>'
+    +'<label class="campo">Moneda<select id="fSenM"><option value="ARS"'+(v.sena&&v.sena.moneda==='USD'?'':' selected')+'>Pesos</option><option value="USD"'+(v.sena&&v.sena.moneda==='USD'?' selected':'')+'>Dólares</option></select></label>'
     +'<label class="campo">Fecha de la seña<input id="fSenF" type="date" value="'+val((v.sena&&v.sena.fecha)||'')+'"></label></div>'
     +'<label class="campo cot" id="cSenC" hidden>Cotización del dólar para la seña <i id="fSenCI"></i><input id="fSenC" value="'+enCampo(v.sena&&v.sena.cotizacion)+'" inputmode="decimal" placeholder="1.575" autocomplete="off"></label>'
     +'<div class="pista" id="fSenP" hidden></div>'
-    +(senaFija?'<div class="nota-t">La seña se cargó en el tablero ("Trajo la seña"). Para cambiar el monto, se cambia ahí.</div>':(F.empujarSena?'<div class="nota-t">Al guardar, la seña queda tildada también en el tablero ("Trajo la seña").</div>':''));
+    +(dif?'<div class="nota-t sena-d"><b>La seña no coincide con el tablero.</b> '+esc(dif.txt)+' No se cambia sola en ninguno de los dos lados: corregí la que esté mal.</div>':'')
+    +(F.empujarSena?'<div class="nota-t">Al guardar, la seña queda tildada también en el tablero ("Trajo la seña"), que hoy no la tiene.</div>':'');
   if(c)h+='<div id="fPagos"></div>'
     +'<div class="tres"><label class="campo">Nuevo pago<input id="pMonto" inputmode="decimal" placeholder="Monto" autocomplete="off"></label>'
     +'<label class="campo">Cómo<select id="pComo"><option value="efectivo|ARS">Efectivo $</option><option value="efectivo|USD">Efectivo USD</option><option value="transferencia|ARS">Transferencia</option></select></label>'

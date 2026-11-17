@@ -21,7 +21,7 @@
 - En **días corridos** (no "3-4 semanas" ni "más o menos a fin de mes").
 - Por escrito en el WhatsApp + en el presupuesto formal.
 
-**Por qué importa:** El dolor #2 de Carolina es "le dijeron una fecha y la incumplieron". Decir "15-20 días corridos" + cumplir = anticuerpo contra ese dolor.
+**Por qué importa:** El dolor #2 de Carolina es "le dijeron una fecha y la incumplieron". Decir "20 días corridos" + cumplir = anticuerpo contra ese dolor.
 
 ### 1.3 Un solo interlocutor
 - El cliente habla siempre con la misma persona.

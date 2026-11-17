@@ -26,8 +26,8 @@
 // Si no, la ficha se toma como "no está en la planilla" y su contrato se arma
 // con los datos de la ficha. Entre dos filas posibles decide la FECHA DE
 // MEDICIÓN: va la de contrato más cercano. Lo que sigue en duda queda SIN tildar.
-// Enlazado, la seña que se ve es la del tablero: el contrato se guarda ya
-// alineado con ella, y si la plata no coincide queda una nota para revisar.
+// La seña no se pisa: el contrato se carga con lo que dice la planilla, y si la
+// del tablero es otra, se avisa (acá y después en Relación-Contrato).
 // Una ficha lleva un solo contrato. No se toca el tablero: solo se lee.
 //
 // Formato de importar.json:
@@ -305,29 +305,29 @@ foreach ($pares as $n => $p) {
 }
 
 /**
- * Enlazado, la seña que se ve es la del tablero. Para que la plata no se cuente dos veces ni
- * cambie sola, el contrato se guarda ya alineado con esa seña. Devuelve [fila, avisos].
+ * La seña del tablero y la del contrato no se pisan (dueño, 17/11/2026): el contrato se carga con lo
+ * que dice la planilla, tal cual, y si la seña del tablero es otra se avisa. No es diferencia que sea
+ * la misma plata dicha de otra forma (dólares con su cotización contra pesos, o el tablero con todo
+ * lo cobrado anotado como seña). Devuelve los avisos; la fila no se toca.
  */
-function bs_imp_alinear_sena($f, $sena) {
-    if (!$sena) return [$f, []];
+function bs_imp_aviso_sena($f, $sena) {
     $cobros = array_merge($f['sena'] ? [$f['sena']] : [], $f['pagos']);
     $p = $cobros[0] ?? null;
-    if ($p && $p['moneda'] === $sena['moneda'] && abs($p['monto'] - $sena['monto']) < 1) return [$f, []];
-    $detalle = implode(' + ', array_map(function ($c) {
-        return bs_imp_plata($c['monto'], $c['moneda']) . (($c['aplica'] !== $c['moneda'] && $c['cotizacion'] > 0) ? ' a $ ' . number_format($c['cotizacion'], 0, ',', '.') : '');
-    }, $cobros));
-    list($todo, ) = bs_imp_cobrado($f);
-    $en_tablero = bs_imp_plata($sena['monto'], $sena['moneda']);
-    if ($sena['moneda'] === 'ARS' && $f['total_ars'] > 0 && $todo > 0 && abs($sena['monto'] - $todo) <= 1000) {
-        // La seña del tablero ES todo lo cobrado según la planilla (misma plata, puesta en pesos).
-        $f['sena'] = ['fecha' => $p['fecha'], 'monto' => $sena['monto'], 'moneda' => 'ARS', 'cotizacion' => 0, 'aplica' => 'ARS'];
-        $f['pagos'] = [];
-        $exacta = abs($sena['monto'] - $todo) < 1;
-        $f['nota'] = trim($f['nota'] . "\n" . 'Cobros según la planilla: ' . $detalle . '.' . ($exacta ? '' : ' Suma ' . bs_imp_plata($todo) . '; en el tablero la seña figura ' . $en_tablero . ': revisar cuál es.'));
-        return [$f, $exacta ? [] : ['Lo cobrado difiere por poco: planilla ' . bs_imp_plata($todo) . ', tablero ' . $en_tablero . '. Queda la del tablero y una nota']];
+    if (!$sena && !$p) return [];
+    $en = function ($c) { return ($c['aplica'] !== $c['moneda'] && $c['cotizacion'] > 0) ? ($c['moneda'] === 'USD' ? $c['monto'] * $c['cotizacion'] : $c['monto'] / $c['cotizacion']) : $c['monto']; };
+    $dice = function ($c) { return bs_imp_plata($c['monto'], $c['moneda']) . (($c['aplica'] !== $c['moneda'] && $c['cotizacion'] > 0) ? ' a $ ' . number_format($c['cotizacion'], 0, ',', '.') : ''); };
+    if ($sena && $p) {
+        if ($p['moneda'] === $sena['moneda'] && abs($p['monto'] - $sena['monto']) < 1) return [];
+        if ($p['aplica'] === $sena['moneda'] && abs($en($p) - $sena['monto']) < 1) return [];
     }
-    $f['nota'] = trim($f['nota'] . "\n" . 'OJO con la plata: en el tablero la seña figura ' . $en_tablero . ' y en la planilla lo cobrado es ' . ($detalle !== '' ? $detalle : 'nada') . '. Enlazado se muestra la del tablero: revisar.');
-    return [$f, ['La plata no coincide: seña del tablero ' . $en_tablero . ', planilla ' . ($detalle !== '' ? $detalle : 'sin cobros') . '. Se carga, con una nota para revisar']];
+    if ($sena) {
+        $todo = 0;
+        foreach ($cobros as $c) if ($c['aplica'] === $sena['moneda']) $todo += $en($c);
+        if ($todo > 0 && abs($todo - $sena['monto']) < 1) return [];
+    }
+    if ($sena && $p) return ['La seña no coincide: tablero ' . bs_imp_plata($sena['monto'], $sena['moneda']) . ', planilla ' . $dice($p) . '. Se carga lo de la planilla; el contrato va a mostrar el aviso'];
+    if ($sena) return ['El tablero tiene una seña de ' . bs_imp_plata($sena['monto'], $sena['moneda']) . ' y la planilla no trae cobros: el contrato va a mostrar el aviso'];
+    return ['La planilla trae una seña de ' . $dice($p) . ' y en el tablero no está tildada: el contrato va a mostrar el aviso'];
 }
 
 // Una línea por ficha del tablero: su fila (si la hay), por qué, y si queda tildada.
@@ -348,7 +348,8 @@ foreach ($fichas as $k => $x) {
             if ($q['k'] !== $k) $en_disputa[$q['k']] = 'Podría ser la fila ' . $filas[$p['i']]['fila'] . ' (' . $filas[$p['i']]['cliente'] . '), que quedó en duda con la ficha ' . $k;
             $rival[] = $q['k'] === $k ? 'la fila ' . $filas[$q['i']]['fila'] . ' (' . $filas[$q['i']]['cliente'] . ')' : 'la ficha ' . $q['k'] . ' (' . $fichas[$q['k']]['nombre'] . ')';
         }
-        list($f, $av) = bs_imp_alinear_sena($filas[$p['i']], $x['sena']);
+        $f = $filas[$p['i']];
+        $av = bs_imp_aviso_sena($f, $x['sena']);
         $l['fila'] = $f; $l['nivel'] = $p['nivel'];
         $l['por'] = $NIVEL[$p['nivel']] . ($p['prueba'] ? ' + ' . implode(' y ', $p['prueba']) : '');
         if ($p['dias'] !== null) {

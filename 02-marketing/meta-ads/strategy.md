@@ -32,7 +32,7 @@ Conversación de calificación (medidas + material + zona)
 Cotización cerrada por escrito
    ↓ ~3-7 días
 Medición técnica
-   ↓ 15-20 días corridos
+   ↓ 20 días corridos
 Colocación
 ```
 

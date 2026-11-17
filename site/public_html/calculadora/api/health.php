@@ -49,6 +49,24 @@ if (file_exists(BS_REGISTRO_CRON_LOG)) {
     $checks['cron_recent'] = null;
 }
 
+// Cada una de las dos tareas por separado: hace cuántas horas escribió su último renglón en el log.
+// (El chequeo de arriba solo dice que ALGUNA corrió.) null = no hay ningún renglón suyo.
+$cron_por_tarea = ['cleanup' => null, 'monthly-report' => null];
+if (file_exists(BS_REGISTRO_CRON_LOG)) {
+    $tam = filesize(BS_REGISTRO_CRON_LOG);
+    $fh = @fopen(BS_REGISTRO_CRON_LOG, 'r');
+    if ($fh) {
+        if ($tam > 65536) fseek($fh, -65536, SEEK_END); // alcanza con el final del archivo
+        $cola = (string)stream_get_contents($fh);
+        fclose($fh);
+        foreach (array_keys($cron_por_tarea) as $tarea) {
+            if (preg_match_all('/^\[([^\]]+)\] ' . preg_quote($tarea, '/') . ':/m', $cola, $mm) && ($t = strtotime(end($mm[1])))) {
+                $cron_por_tarea[$tarea] = round((time() - $t) / 3600, 1);
+            }
+        }
+    }
+}
+
 // Check 5: free disk space
 $free_bytes = @disk_free_space(BS_DATA_DIR);
 $free_mb = $free_bytes !== false ? round($free_bytes / (1024 * 1024)) : null;
@@ -60,5 +78,7 @@ echo json_encode([
     'ok' => !$failed,
     'checks' => $checks,
     'cron_log_age_hours' => $cron_log_age_hours,
+    'cron_limpieza_horas' => $cron_por_tarea['cleanup'],
+    'cron_reporte_horas' => $cron_por_tarea['monthly-report'],
     'timestamp' => date('c'),
 ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

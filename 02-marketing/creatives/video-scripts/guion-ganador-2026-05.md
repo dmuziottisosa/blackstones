@@ -75,7 +75,7 @@ Después de la medición técnica, te damos fecha de entrega. [surprised] ¡En d
 
 - Mecanismo de las 5 piezas no se diluye (cotización 24hs, escrito, días corridos, todo adentro, +500).
 - CTA único: "Mandanos largo x ancho por WhatsApp" / "hoy tenés cotización".
-- Plazo: 15-20 días corridos. **Nunca "10 días" en ningún hook**.
+- Plazo: 20 días corridos (desde 17/11/2026; antes "15-20"). **Nunca "10 días" en ningún hook**.
 - No mencionar VenarStones.
 - No prometer cosa que no podemos cumplir.
 

@@ -141,7 +141,7 @@ Con eso te mando cotización cerrada por escrito en menos de 24 hs.
 
 ### Cliente pregunta "tiempos de entrega"
 
-✅ Plazo real: **15-20 días corridos desde medición**. Sinterizado: 20.
+✅ Plazo real: **20 días corridos desde medición**, para todos los materiales.
 ❌ Nunca decir "10 días" (regla dura del negocio, ver `CLAUDE.md`).
 
 ### Cliente pregunta si coordinan plomería/carpintería

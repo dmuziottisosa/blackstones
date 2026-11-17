@@ -117,7 +117,7 @@ No incluye:
 ✗ Grifería
 ✗ Demolición de mesada anterior
 
-Plazo: 15-20 días corridos desde la medición.
+Plazo: 20 días corridos desde la medición.
 Forma de pago: 50% al confirmar, 50% al colocar.
 
 Cualquier duda me decís. Si te sirve, coordinamos la medición técnica.
@@ -142,7 +142,7 @@ Incluye fabricación, traforo para [bacha / bacha y anafe] y zócalo de 5 cm.
 
 Es un presupuesto estimado: nuestro técnico rectifica las medidas en obra antes de fabricar, y ahí cerramos el número final.
 
-Plazo: [15 días corridos el granito / 20 el sinterizado], desde la medición.
+Plazo: 20 días corridos desde la medición.
 ```
 
 Convenciones que se vienen usando:

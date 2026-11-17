@@ -758,7 +758,9 @@ const ESTADOS_LABELS = {
 // se borra la ficha en el tablero. El servidor (state.php) también lo rechaza.
 const TRANSICIONES = {
   borrador: ['enviado', 'perdido'],
-  enviado: ['aprobado', 'perdido'],
+  // "→ Aprobado" ya no existe (dueño, 17/11/2026): si una obra está en el tablero es que fue aprobada.
+  // Un presupuesto entra al tablero desde el tablero ("Cargar obra" con su N°) o desde su contrato.
+  enviado: ['perdido'],
   aprobado: [],
   entregado: [],
   perdido: []
