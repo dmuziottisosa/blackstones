@@ -31,6 +31,7 @@
 // GET ?papelera=1     → { ok, dias, contratos }  (los borrados que todavía se pueden recuperar)
 //   restaurar          { id }                         (saca un contrato de la papelera)
 //   restaurar_enlazado { cliente_nro, sub }           (ídem, por la ficha con la que estaba enlazado)
+//   mudar_enlazado { de:{cliente_nro,sub}, a:{cliente_nro,sub} }  (el tablero avisa que la ficha cambió de N°: el contrato la sigue y toma ese N°)
 //
 // PAPELERA (30 días, decisión del dueño 16/11/2026): borrar un contrato no lo destruye. Pasa a
 // "papelera" dentro del mismo archivo, con sus pagos, y su presupuesto adjunto queda en disco.
@@ -51,14 +52,15 @@ require_once __DIR__ . '/_contratos.php';
 require_once __DIR__ . '/_auth.php';
 
 // Ver: administradores y operadores. Cambiar: solo administradores, salvo lo que el tablero
-// dispara al borrar o recuperar una ficha enlazada (borrar_enlazado / restaurar_enlazado),
+// dispara al borrar, recuperar o cambiarle el N° a una ficha enlazada (borrar_enlazado /
+// restaurar_enlazado / mudar_enlazado),
 // que lo puede quien opera el tablero.
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     bs_require_permiso('contratos');
 } else {
     $bs_pre = json_decode((string)@file_get_contents('php://input'), true);
     $bs_acc = is_array($bs_pre) ? (string)($bs_pre['accion'] ?? '') : '';
-    bs_require_permiso(in_array($bs_acc, ['borrar_enlazado', 'restaurar_enlazado'], true) ? 'tablero_operar' : 'contratos_editar');
+    bs_require_permiso(in_array($bs_acc, ['borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado'], true) ? 'tablero_operar' : 'contratos_editar');
 }
 bs_check_csrf();
 bs_ensure_dirs();
@@ -357,13 +359,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') bs_error('Solo GET o POST', 405);
 $body = json_decode(@file_get_contents('php://input'), true);
 if (!is_array($body)) bs_error('Body JSON inválido');
 $accion = (string)($body['accion'] ?? '');
-$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'borrar_enlazado', 'restaurar', 'restaurar_enlazado', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
+$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'borrar_enlazado', 'restaurar', 'restaurar_enlazado', 'mudar_enlazado', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
 if (!in_array($accion, $acciones, true)) bs_error('accion inválida');
 
 // Todo lo que puede fallar por datos mal cargados se valida ANTES de tomar el lock.
 $campos = in_array($accion, ['crear', 'editar'], true) ? bs_contrato_campos($body) : null;
 $id = (string)($body['id'] ?? '');
-if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado', 'restaurar_enlazado'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
+if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
 
 $sena_nueva = null;
 if ($accion === 'sena') $sena_nueva = bs_contrato_sena($body['monto'] ?? 0, $body['moneda'] ?? '', $body['fecha'] ?? '', $body['cotizacion'] ?? '', $body['aplica'] ?? '');
@@ -457,6 +459,32 @@ try {
             $id = bs_contrato_id() . $i;
             // 'creado' escalonado para que queden en este orden en la lista
             $d['contratos'][$id] = array_merge($p, ['id' => $id, 'creado' => date('c', time() - $i), 'actualizado' => $ahora, 'prueba' => true, 'enlace' => null]);
+        }
+
+    } elseif ($accion === 'mudar_enlazado') {
+        // Enlazados, el contrato y la ficha comparten el N° (dueño, 17/11/2026). Lo llama el tablero
+        // cuando a una ficha se le cambia el N° de presupuesto desde "Editar obra": la ficha pasa a
+        // otra clave, y su contrato la sigue (no queda apuntando a una ficha que ya no existe) y toma
+        // ese N°. Solo vale si la mudanza ocurrió de verdad: la ficha vieja ya no está viva y la nueva sí.
+        $de = is_array($body['de'] ?? null) ? $body['de'] : [];
+        $a  = is_array($body['a'] ?? null) ? $body['a'] : [];
+        $de_n = intval($de['cliente_nro'] ?? 0); $de_s = intval($de['sub'] ?? 0);
+        $a_n  = intval($a['cliente_nro'] ?? 0);  $a_s  = intval($a['sub'] ?? 0);
+        if ($de_n <= 0 || $de_s <= 0 || $a_n <= 0 || $a_s <= 0) bs_contratos_salir($fp, 'Falta de qué ficha a cuál.');
+        if (bs_contrato_ficha_estado(['cliente_nro' => $de_n, 'sub' => $de_s]) === 'viva'
+            || bs_contrato_ficha_estado(['cliente_nro' => $a_n, 'sub' => $a_s]) !== 'viva') {
+            bs_contratos_salir($fp, 'Esa ficha no cambió de N°: el contrato no se toca.', 409);
+        }
+        $k = bs_contrato_de_ficha($d, $de_n, $de_s);
+        $extra['mudado'] = false;
+        if ($k !== null && bs_contrato_de_ficha($d, $a_n, $a_s) === null) {
+            $id = (string)$k;
+            $nro_nuevo = str_pad((string)$a_n, 4, '0', STR_PAD_LEFT);
+            $d['contratos'][$k]['enlace'] = ['cliente_nro' => $nro_nuevo, 'sub' => $a_s, 'at' => $ahora];
+            $d['contratos'][$k]['nro'] = $nro_nuevo . ($a_s > 1 ? '-' . $a_s : '');
+            $d['contratos'][$k]['actualizado'] = $ahora;
+            $extra['mudado'] = true;
+            $extra['nro'] = $d['contratos'][$k]['nro'];
         }
 
     } elseif ($accion === 'borrar_enlazado') {

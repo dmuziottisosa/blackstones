@@ -205,6 +205,7 @@ Botón "Editar obra" en "Más" (también desde el calendario, que muestra la mis
   - El anterior: si era una obra cargada a mano, se borra (su número no se recicla); si era un presupuesto de la calculadora, vuelve a Enviado.
   - Los datos de la ficha pasan a ser los del presupuesto nuevo. Teléfono y dirección se heredan de la ficha solo si el presupuesto nuevo no los tiene.
   - No se puede mudar a un presupuesto que ya está en el tablero como otra ficha, ni a uno entregado.
+  - **Si la ficha tenía contrato, el contrato la sigue (17/11/2026):** queda enlazado con la ficha nueva y toma su N°. Enlazados, el contrato y la ficha comparten el número. El tablero le avisa a Relación-Contrato (`mudar_enlazado`); si Relación-Contrato no existe, el aviso falla en silencio y la mudanza se hace igual.
 - **Medición al cargar:** "Cargar obra" tiene día y hora de medición (la hora es opcional), con o sin N° de presupuesto. Así la obra no nace "sin fecha". Sin día, queda marcada "sin fecha" como siempre.
 - **Nunca se pierde lo escrito:** si el número no existe o algo falla, la ventana queda abierta con los datos y el motivo. Lo mismo vale para "Cargar obra".
 

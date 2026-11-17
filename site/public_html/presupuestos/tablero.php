@@ -1902,6 +1902,9 @@ function pedirEditar(c){
       ocupado=false;
       const key=j.cliente_nro+'-'+j.sub;
       if(j.mudada){
+        // Enlazados, el contrato comparte el N° con la ficha: la sigue a su número nuevo. Relación-Contrato
+        // es opcional: si no existe o no contesta, la ficha se mudó igual y no pasa nada.
+        try{await fetch(API_CONTRATOS,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'mudar_enlazado',de:{cliente_nro:c.cliente_nro,sub:c.sub},a:{cliente_nro:j.cliente_nro,sub:j.sub}})});}catch(e){}
         // en modo "una ficha" (calendario) la página sigue a la obra a su número nuevo
         if(SOLO){location.replace('?solo='+encodeURIComponent(key));return;}
         if(abierta===c.key)abierta=key;

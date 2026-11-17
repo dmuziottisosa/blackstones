@@ -169,11 +169,14 @@ Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, list
 
 ## El N° del contrato en la ficha del tablero (17/11/2026)
 
+**Regla (dueño, 17/11/2026): enlazados, el contrato y la ficha comparten el N°.** El enlace sigue siendo un dato aparte (se puede enlazar sin número y desenlazar sin borrar nada), pero mientras están enlazados se ve el mismo número en los dos lados.
+
 Una ficha cargada a mano dice "Sin N°". Si está enlazada con un contrato que tiene N°, **muestra ese número** en el tablero y en el calendario, y se la encuentra buscándolo.
 
 - **El dueño del dato es el contrato.** Se le pasa a la ficha al guardar el contrato, al enlazarlo y cada vez que alguien que puede editar contratos abre Relación-Contrato. Cambiar el N° en el contrato lo cambia en la ficha.
 - **Si el contrato se desenlaza, se borra o se queda sin N°, la ficha vuelve a "Sin N°".**
 - **No muda la ficha a ningún presupuesto.** Es solo el número que se muestra: sirve aunque ese presupuesto ya no exista en la calculadora. Atar la ficha al presupuesto real sigue siendo "Editar obra" en el tablero.
+- **Y al revés: si en el tablero le cambian el N° a la ficha ("Editar obra"), el contrato la sigue.** Queda enlazado con la ficha nueva y toma ese N°; no se toca nada más del contrato. Antes el contrato quedaba apuntando a una ficha que ya no existía. Lo hace la acción `mudar_enlazado` de `contratos.php`, que llama la página del tablero después de mudar la ficha; solo actúa si la ficha vieja ya no está y la nueva sí.
 - **Una ficha que viene de un presupuesto no lo lleva:** ya tiene su número.
 - El contrato paralelo ("ctto") no se pasa; es un dato solo del contrato.
 - Cómo está hecho: la página de Relación-Contrato llama a `tablero.php` con la acción `nro_contrato` (`pasarNros()`), y el número queda guardado en la ficha. El tablero y el calendario no leen nada de contratos: si Relación-Contrato se borra, las fichas conservan el último número que tenían.
