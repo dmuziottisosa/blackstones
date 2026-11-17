@@ -181,6 +181,15 @@ Una ficha cargada a mano dice "Sin N°". Si está enlazada con un contrato que t
 - El contrato paralelo ("ctto") no se pasa; es un dato solo del contrato.
 - Cómo está hecho: la página de Relación-Contrato llama a `tablero.php` con la acción `nro_contrato` (`pasarNros()`), y el número queda guardado en la ficha. El tablero y el calendario no leen nada de contratos: si Relación-Contrato se borra, las fichas conservan el último número que tenían.
 
+## El nombre del contrato completa la ficha que no lo tiene (17/11/2026)
+
+Un presupuesto hecho sin saber el nombre del cliente trae el teléfono en su lugar, y al cargarlo en Por medir la ficha entraba "sin nombre". Ahora, si el contrato enlazado tiene nombre y apellido y la ficha no (su nombre no tiene letras), **Relación-Contrato se lo pasa a la ficha**.
+
+- **Nunca pisa un nombre que la ficha ya tiene.** Solo llena el que falta. Si el nombre de la ficha y el del contrato difieren, no se toca ninguno.
+- Se hace al cargar en Por medir, al enlazar y cada vez que alguien que puede editar contratos abre Relación-Contrato.
+- Como la ficha de un presupuesto comparte el cliente con ese presupuesto, el nombre también queda en la pestaña Presupuestos.
+- Cómo está hecho: `pasarNombres()` llama a `tablero-editar.php` con el nombre. El tablero no lee nada de contratos.
+
 ## Renglones de prueba
 
 Con la lista vacía aparece "Cargar 3 de prueba". Quedan marcados PRUEBA, no cuentan en "Por cobrar" y se borran juntos con "Borrar los de prueba" (si alguno se cargó en el tablero, esa ficha de prueba también se borra).

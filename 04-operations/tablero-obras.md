@@ -199,7 +199,8 @@ Desde "Más" → **Retira en el local**, o arrastrando la tarjeta al cuadro de a
 
 Botón "Editar obra" en "Más" (también desde el calendario, que muestra la misma ficha). Se puede en cualquier etapa.
 
-- **Corregir datos:** cliente, teléfono, dirección, material (del catálogo de la calculadora) y **nota**. Solo se guarda lo que cambió. *(16/11/2026: el campo "Trabajo" se cambió por "Nota" a pedido del dueño; es la misma nota que se ve en la ficha y en "Más". El dato "trabajo" de las fichas que ya lo tenían se conserva y se sigue viendo, pero ya no se edita desde acá.)*
+- **Corregir datos:** nombre y apellido, teléfono, dirección, material (del catálogo de la calculadora) y **nota**. Solo se guarda lo que cambió. *(16/11/2026: el campo "Trabajo" se cambió por "Nota" a pedido del dueño; es la misma nota que se ve en la ficha y en "Más". El dato "trabajo" de las fichas que ya lo tenían se conserva y se sigue viendo, pero ya no se edita desde acá.)*
+- **"Nombre y apellido" es un solo campo, y se llama igual en todos lados** (dueño, 17/11/2026): Cargar obra, Editar obra, el contrato y la calculadora. Un presupuesto hecho sin saber el nombre trae el teléfono en su lugar; en ese caso la ficha figura con el teléfono y, en "Editar obra", el campo arranca vacío y avisa que falta. Guardar otra cosa sin ponerlo no da error. Si la ficha tiene contrato enlazado con nombre, lo toma de ahí → `relacion-contrato.md`.
 - **Cambiar el N° de presupuesto:** la ficha se muda a ese presupuesto con todo lo hecho: tildes, fechas, seña, historial, fotos y planos. Sirve para la obra que se cargó a mano y después tuvo presupuesto en la calculadora, o para la que se ató al número equivocado. Acepta `0042` o `0042-2`.
   - El presupuesto nuevo pasa a Aprobado.
   - El anterior: si era una obra cargada a mano, se borra (su número no se recicla); si era un presupuesto de la calculadora, vuelve a Enviado.

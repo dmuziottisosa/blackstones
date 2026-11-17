@@ -1832,16 +1832,20 @@ function pedirTurno(c){
 
 // Editar una obra ya cargada: corregir sus datos o cambiarle el N° de presupuesto, en cualquier etapa.
 // Al cambiar el N°, la ficha se muda a ese presupuesto con todo lo hecho (tildes, fechas, fotos).
+// ¿Es un nombre de verdad? Un teléfono puesto en el lugar del nombre no tiene letras.
+const tieneLetras=s=>/[a-záéíóúüñ]/i.test(String(s||''));
 function pedirEditar(c){
   const campo=(id,rotulo,valor,extra)=>'<label class="campo">'+rotulo+'<input type="text" id="'+id+'" autocomplete="off" value="'+esc(valor)+'" '+(extra||'')+'></label>';
   const propio=c.cliente_nro+'-'+c.sub;
   // Una obra cargada a mano no tiene presupuesto: el campo arranca vacío, para poner el número cuando exista.
   const nro0=c.manual?'':propio;
   const conBacha=c.bacha==='nuestra'||c.bacha==='cliente';
+  // Un presupuesto hecho sin saber el nombre trae el teléfono en su lugar: el campo arranca vacío para escribirlo.
+  const sinNombre=!tieneLetras(c.nombre);
   abrirModal('Editar obra '+propio,
     campo('edNro','N° de presupuesto',nro0,'maxlength="12" inputmode="numeric" placeholder="'+(c.manual?'Todavía sin presupuesto':'Ej: 0042 o 0042-2')+'"')+
     '<p>'+(c.manual?'Esta obra se cargó a mano. Cuando el presupuesto esté hecho, poné acá su número.':'Cambialo para pasar la ficha a otro presupuesto.')+' La ficha conserva sus tildes, fechas y fotos.</p>'+
-    campo('edNombre','Cliente',c.nombre,'maxlength="120"')+
+    campo('edNombre','Nombre y apellido',sinNombre?'':c.nombre,'maxlength="120" placeholder="'+(sinNombre&&c.nombre?'Falta: hoy figura '+esc(c.nombre):'Nombre y apellido del cliente')+'"')+
     campo('edCel','Teléfono',c.celular,'maxlength="40" inputmode="tel"')+
     campo('edDir','Dirección',c.direccion,'maxlength="200"')+
     '<label class="campo mat-wrap">Material y color (del catálogo de la calculadora)<input type="text" id="edMat" autocomplete="off" maxlength="200" value="'+esc(c.material)+'"><div class="mat-caja" id="edMatCaja"></div></label>'+
@@ -1861,6 +1865,7 @@ function pedirEditar(c){
         [['nombre','edNombre',c.nombre],['celular','edCel',c.celular],['direccion','edDir',c.direccion],['material','edMat',c.material]]
           .forEach(x=>{
             if(v(x[1])===String(x[2]||'').trim())return;          // no se tocó: queda exactamente como estaba
+            if(x[0]==='nombre'&&sinNombre&&!v(x[1]))return;       // no tenía nombre y no se le puso: queda como estaba
             body[x[0]]=x[0]==='material'?materialNormal(v(x[1])):v(x[1]);
           });
         if(body.nombre===''){$('edNombre').focus();toast('El nombre no puede quedar vacío.');return;}
@@ -1928,7 +1933,7 @@ function pedirCargar(){
   abrirModal('Cargar obra',
     campo('cgNro','N° de presupuesto (si ya está hecho en la calculadora)','maxlength="12" inputmode="numeric" placeholder="Ej: 0042 o 0042-2"')+
     '<p>Con el número alcanza: la ficha toma los datos de ese presupuesto. Sin número, completá lo de abajo.</p>'+
-    campo('cgNombre','Cliente','maxlength="120" placeholder="Nombre y apellido"')+
+    campo('cgNombre','Nombre y apellido','maxlength="120" placeholder="Ej: Carolina Pereyra"')+
     campo('cgCel','Teléfono','maxlength="40" inputmode="tel"')+
     campo('cgDir','Dirección','maxlength="200"')+
     '<label class="campo mat-wrap">Material y color (del catálogo de la calculadora)<input type="text" id="cgMat" autocomplete="off" maxlength="200" placeholder="Escribí y elegí: Negro Boreal, Blanco Suggar…"><div class="mat-caja" id="cgMatCaja"></div></label>'+

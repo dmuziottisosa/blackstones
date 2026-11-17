@@ -511,7 +511,7 @@ const $=id=>document.getElementById(id);
 // sin 'contratos_editar' la página es solo para mirar (el servidor rechaza los cambios).
 const YO=<?= auth_permisos_js() ?>,PLATA=!!YO.puede.contratos_plata,EDITA=!!YO.puede.contratos_editar;
 const RESUMEN=!!YO.puede.contratos_resumen; // sin esto no se arma el resumen de plata del mes ni las sumas del pie
-const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php',API_ADJ='/calculadora/api/contratos-adjunto.php',API_PAP_T='/calculadora/api/tablero-papelera.php';
+const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_EDITAR='/calculadora/api/tablero-editar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php',API_ADJ='/calculadora/api/contratos-adjunto.php',API_PAP_T='/calculadora/api/tablero-papelera.php';
 let CONTRATOS=[],CARDS={},ETAPAS={},HOY='',TABLERO_OK=false,q='';
 let VENDEDORES=[],PROCEDENCIAS=[];
 let EN_PAPELERA=0; // contratos borrados que todavía se pueden recuperar (30 días) // listas cerradas: las manda el servidor (se editan en contratos.php)
@@ -683,6 +683,7 @@ async function cargar(){
     $('err').hidden=true;
     dibujar();
     pasarNros();
+    pasarNombres();
   }catch(e){$('err').textContent=e.message;$('err').hidden=false;$('lista').innerHTML='<div class="vacio">No se pudo cargar la lista.</div>';}
 }
 // El N° del contrato se ve también en su ficha del tablero (dueño, 17/11/2026). Una ficha cargada a mano
@@ -704,6 +705,23 @@ async function pasarNros(){
     try{await pedir(API_T,{cliente_nro:x[0].cliente_nro,sub:x[0].sub,accion:'nro_contrato',nro:x[1]});x[0].nro_contrato=x[1];}catch(e){}
   }
   pasandoNros=false;
+}
+// El nombre del contrato completa la ficha que no lo tiene (dueño, 17/11/2026). Un presupuesto hecho sin
+// saber el nombre trae el teléfono en su lugar, y la ficha entra al tablero "sin nombre". Si su contrato
+// enlazado sí tiene nombre y apellido, se le pasa. Nunca pisa un nombre que la ficha ya tiene: solo llena
+// el que falta (sin letras). Solo lo hace quien puede editar contratos; si el tablero no contesta, no pasa nada.
+const tieneLetras=s=>/[a-záéíóúüñ]/i.test(String(s||''));
+let pasandoNombres=false;
+async function pasarNombres(){
+  if(!EDITA||!TABLERO_OK||pasandoNombres)return;
+  const cambios=CONTRATOS.map(c=>[cardDe(c),String(c.cliente||'').trim()]).filter(x=>x[0]&&!tieneLetras(x[0].nombre)&&tieneLetras(x[1]));
+  if(!cambios.length)return;
+  pasandoNombres=true;
+  for(const x of cambios){
+    try{await pedir(API_EDITAR,{cliente_nro:x[0].cliente_nro,sub:x[0].sub,nombre:x[1].slice(0,120)});x[0].nombre=x[1];}catch(e){}
+  }
+  pasandoNombres=false;
+  dibujar();
 }
 // La seña del tablero y la del contrato no se pisan nunca (dueño, 17/11/2026): si difieren, se avisa.
 // No es diferencia que sea la misma plata dicha de otra forma: la seña en dólares con su cotización
@@ -912,7 +930,7 @@ function abrirFicha(id){
   }
   h+='<label class="campo notas">Notas<textarea id="fNota" rows="4" maxlength="4000" placeholder="Acá van los detalles: qué se acordó, aclaraciones de medidas, forma de pago, lo que haya que acordarse.">'+val(c&&c.nota)+'</textarea></label>';
   h+='<h4>Cliente</h4>'
-    +'<label class="campo">Nombre<input id="fCliente" value="'+val(v.cliente)+'" autocomplete="off"'+ro+(c?'':' data-foco')+'></label>'
+    +'<label class="campo">Nombre y apellido<input id="fCliente" value="'+val(v.cliente)+'" autocomplete="off"'+ro+(c?'':' data-foco')+'></label>'
     +'<div class="dos"><label class="campo">Teléfono <i id="fWaI" hidden>· <a id="fWa" href="#" target="_blank" rel="noopener">abrir WhatsApp</a></i><input id="fTel" value="'+val(telLindo(v.telefono))+'" inputmode="tel" autocomplete="off" placeholder="11 5555-1234"'+ro+'></label>'
     +'<label class="campo">Dirección<input id="fDir" value="'+val(v.direccion)+'" autocomplete="off"'+ro+'></label></div>';
   h+='<h4>Contrato</h4>'
