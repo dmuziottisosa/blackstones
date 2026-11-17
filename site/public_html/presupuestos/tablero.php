@@ -604,8 +604,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 </div>
 <nav class="h-tabs">
   <a href="/calculadora/">Calculadora</a>
-  <a href="/presupuestos/?tab=activos">Presupuestos · Activos</a>
-  <a href="/presupuestos/?tab=reporte">Presupuestos · Reporte</a>
+  <a href="/presupuestos/">Presupuestos</a>
   <a href="/presupuestos/tablero.php" class="active">Tablero</a>
   <a href="/presupuestos/calendario.php">Calendario</a>
   <a href="/presupuestos/relacion-contrato.php">Relación-Contrato</a>
@@ -624,6 +623,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
       <div class="tope-b">
         <button type="button" class="vista-b" id="vistaB"></button>
         <button type="button" class="vista-b" id="exportB" title="Baja todas las obras del tablero en un archivo CSV (se abre con Excel)">Exportar<span class="sob"> tablero</span></button>
+        <button type="button" class="vista-b" id="archB" title="Obras archivadas: se pueden devolver al tablero" hidden></button>
         <button type="button" class="vista-b" id="papB" title="Fichas borradas: se pueden recuperar durante 30 días" hidden></button>
       </div>
       <div class="hoy" id="hoyTxt"></div>
@@ -821,7 +821,8 @@ async function cargar(){
     if(drag)return; // no redibujar con una tarjeta en el aire
     ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;
     cargarEnlaces(); // aparte y sin esperar: el tablero no depende de esto
-    $('papB').hidden=!j.papelera;$('papB').textContent='Papelera · '+(j.papelera||0);INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];MEDIDORES=j.medidores||[];
+    $('papB').hidden=!j.papelera;$('papB').textContent='Papelera · '+(j.papelera||0);
+    $('archB').hidden=!j.archivadas;$('archB').textContent='Archivadas · '+(j.archivadas||0);INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];MEDIDORES=j.medidores||[];
     dibujar();
   }catch(e){
     if(!CARDS.length)$('board').innerHTML='<div class="aviso" style="grid-column:1/-1">'+esc(e.message)+'</div>';
@@ -2278,6 +2279,30 @@ async function pedirBorrar(c){
 // Papelera: las fichas borradas en los últimos 30 días, con el botón para recuperarlas.
 // Restaurar deja la ficha como estaba (etapa, tildes, fechas, fotos) y, si tenía un contrato
 // enlazado que se fue con ella, también lo trae de vuelta.
+// Archivadas: las obras que ya se entregaron. Desde acá se devuelve al tablero una que se archivó por error.
+// (Antes eso se hacía desde la pestaña "Presupuestos · Reporte", que se eliminó el 17/11/2026.)
+async function pedirArchivadas(){
+  let j;
+  try{j=await pedir(API+'?archivadas=1');}catch(e){toast(e.message);return;}
+  const filas=j.obras.map(f=>'<div class="pap-f"><div><b>'+(f.manual?'':esc(f.key)+' · ')+esc(nombreCorto(f.nombre)||'Sin nombre')+'</b><small>'+(f.material?esc(f.material)+' · ':'')+'Archivada el '+esc(fechaCorta(f.archivada))+'</small><small>'+(f.quedan<=0?'Se borra hoy':'Se guarda '+f.quedan+(f.quedan===1?' día más':' días más'))+'</small></div><button type="button" data-devolver="'+esc(f.key)+'">Devolver al tablero</button></div>').join('');
+  abrirModal('Archivadas',
+    (filas?'<p>Obras entregadas. Se guardan '+j.dias+' días desde que se archivan. Si una se archivó por error, "Devolver al tablero" la vuelve a la etapa en la que estaba, con todo lo que tenía.</p><div class="pap">'+filas+'</div>':'<p>No hay obras archivadas.</p>'),
+    'Cerrar',cerrarModal);
+  $('mCancelar').style.display='none';
+}
+async function devolverArchivada(key,btn){
+  if(ocupado)return;
+  ocupado=true;btn.disabled=true;btn.textContent='Un momento…';
+  const p=key.split('-');
+  try{
+    await pedir(API_ESTADO,{cliente_nro:p[0],sub:+p[1],nuevo_estado:'aprobado',desde_tablero:true});
+    toast('La obra volvió al tablero, a la etapa en la que estaba.');
+    ocupado=false;
+    await cargar();
+    if($('archB').hidden)cerrarModal();else pedirArchivadas();
+  }catch(e){toast(e.message);btn.disabled=false;btn.textContent='Devolver al tablero';}
+  ocupado=false;
+}
 async function pedirPapelera(){
   let j;
   try{j=await pedir(API_PAPELERA);}catch(e){toast(e.message);return;}
@@ -2306,7 +2331,9 @@ async function restaurarFicha(key,btn){
   if($('papB').hidden)cerrarModal();else pedirPapelera();
 }
 $('papB').addEventListener('click',pedirPapelera);
+$('archB').addEventListener('click',pedirArchivadas);
 $('mCuerpo').addEventListener('click',ev=>{const b=ev.target.closest('[data-restaurar]');if(b)restaurarFicha(b.dataset.restaurar,b);});
+$('mCuerpo').addEventListener('click',ev=>{const b=ev.target.closest('[data-devolver]');if(b)devolverArchivada(b.dataset.devolver,b);});
 
 // Archivar: el presupuesto pasa a "Entregado" en el hub. No borra nada.
 function pedirArchivar(c){

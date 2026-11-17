@@ -19,9 +19,11 @@ if (!auth_is_valid()) {
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Content-Type: text/html; charset=UTF-8');
 
-$tab = $_GET['tab'] ?? 'activos';
-if (!in_array($tab, ['activos', 'reporte'], true)) $tab = 'activos';
-$tab_label = $tab === 'activos' ? 'Presupuestos · Activos' : 'Presupuestos · Reporte';
+// La pestaña "Presupuestos · Reporte" se eliminó (dueño, 17/11/2026): sacaba la plata de los
+// presupuestos, y la plata ahora vive en Relación-Contrato. Cualquier link viejo a ?tab=reporte
+// cae acá. Devolver una obra archivada al tablero se hace desde el tablero ("Archivadas").
+$tab = 'activos';
+$tab_label = 'Presupuestos';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -471,8 +473,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
 </div>
 <nav class="h-tabs">
   <a href="/calculadora/">Calculadora</a>
-  <a href="/presupuestos/?tab=activos" class="<?= $tab==='activos' ? 'active' : '' ?>">Presupuestos · Activos</a>
-  <a href="/presupuestos/?tab=reporte" class="<?= $tab==='reporte' ? 'active' : '' ?>">Presupuestos · Reporte</a>
+  <a href="/presupuestos/" class="active">Presupuestos</a>
   <a href="/presupuestos/tablero.php">Tablero</a>
   <a href="/presupuestos/calendario.php">Calendario</a>
   <a href="/presupuestos/relacion-contrato.php">Relación-Contrato</a>

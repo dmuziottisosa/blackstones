@@ -13,7 +13,7 @@ Dónde está cada obra y qué le falta para avanzar. Vive en `blackstones.com.ar
     - Antes creaba un presupuesto aprobado en $ 0 con el siguiente número de la calculadora. Eso hacía que el N° de la ficha no coincidiera con el del contrato y que en Presupuestos aparecieran presupuestos que nunca se hicieron.
     - Por dentro la ficha necesita un número para existir: sale de una serie aparte, de 90001 en adelante (`BS_NRO_FICHA_MANUAL_DESDE`, `bs_tablero_nro_ficha_manual()` en `_tablero.php`). No se muestra. La numeración de presupuestos (`next-nro.php`, `save.php`, `add-manual.php`) ignora esa serie.
     - Las fichas a mano que ya existían conservan su número interno viejo; como están marcadas `manual`, también dicen "Sin N°" y salen de Presupuestos.
-    - Archivada, la obra pasa a ser una entrega del reporte, como cualquier alta manual.
+    - Archivada, queda en "Archivadas" del tablero como cualquier otra obra.
 - En Por medir hay dos filtros, **Sin plano** y **Sin foto de bacha**, con la cantidad de fichas a las que les falta cada uno. Las obras que no llevan bacha no cuentan como faltantes. En Por instalar hay un filtro igual, **Sin turno**, para ver solo las que no tienen día u hora de instalación.
 - **Buscador** arriba del tablero: por cliente, N°, material, zona, teléfono, dirección o instalador. En celular salta solo a la pestaña donde está la obra.
 - La tarjeta se identifica con el código del presupuesto: N° de cliente + versión (`0042-1`).
@@ -173,9 +173,11 @@ Desde "Más" → **Retira en el local**, o arrastrando la tarjeta al cuadro de a
 
 ## Archivar
 
-"Archivar obra" pasa el presupuesto a **Entregado** en el hub y saca la tarjeta del tablero. Desde el tablero **no se borra nada** (ni las otras versiones del presupuesto). El hub conserva los entregados 180 días (`BS_RETENTION_DAYS`); la copia permanente es la física que arma administración.
+"Archivar obra" saca la tarjeta del tablero (por dentro la cotización pasa a "entregado"). **No se borra nada** (ni las otras versiones del presupuesto). Las archivadas se guardan 180 días (`BS_RETENTION_DAYS`); la copia permanente es la física que arma administración.
 
-Si un presupuesto se devuelve a Activos desde el hub, la tarjeta vuelve al tablero con sus tildes.
+- **Archivadas (17/11/2026):** arriba del tablero aparece el botón **"Archivadas · N"** cuando hay alguna. Abre la lista con cliente, material, cuándo se archivó y cuántos días le quedan. **"Devolver al tablero"** la vuelve a la etapa en la que estaba, con sus tildes, seña, fotos y turno.
+  - Antes eso se hacía desde la pestaña "Presupuestos · Reporte", que se eliminó ese día. → `01-strategy/decision-log/2026-11-17-sin-pestana-reporte.md`
+  - La lista sale de `tablero.php?archivadas=1`: solo cotizaciones "entregado" que tienen registro en el tablero.
 
 - **Una obra viva no vence (16/11/2026):** la limpieza nocturna de 180 días ya no toca las obras que están en el tablero. Antes las borraba, con sus fotos, a los 180 días de aprobadas. El reloj de 180 días empieza al archivar.
 
@@ -205,7 +207,7 @@ En "Más" → **Borrar ficha**. Siempre pide confirmación y dice qué se pierde
 
 - **Va a la papelera (16/11/2026).** La ficha sale del tablero y del calendario con sus tildes, fechas, datos y adjuntos, y se puede recuperar durante 30 días desde el botón "Papelera" del tablero; vuelve a la etapa en la que estaba. Pasados los 30 días se borra de verdad (lo hace la limpieza diaria, y también cada vez que se abre la papelera).
 - Al vencer la papelera: si la obra vino de un presupuesto de la calculadora, el presupuesto **no** se borra, vuelve a Enviado en Presupuestos; si se cargó a mano con "Cargar obra", se borra completa.
-- Mientras está en la papelera no aparece en Presupuestos ni cuenta en el reporte.
+- Mientras está en la papelera no aparece en Presupuestos ni en Archivadas.
 
 ## Carga masiva (traspaso de una planilla)
 

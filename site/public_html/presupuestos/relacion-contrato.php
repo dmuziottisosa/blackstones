@@ -456,8 +456,7 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 </div>
 <nav class="h-tabs">
   <a href="/calculadora/">Calculadora</a>
-  <a href="/presupuestos/?tab=activos">Presupuestos · Activos</a>
-  <a href="/presupuestos/?tab=reporte">Presupuestos · Reporte</a>
+  <a href="/presupuestos/">Presupuestos</a>
   <a href="/presupuestos/tablero.php">Tablero</a>
   <a href="/presupuestos/calendario.php">Calendario</a>
   <a href="/presupuestos/relacion-contrato.php" class="active">Relación-Contrato</a>

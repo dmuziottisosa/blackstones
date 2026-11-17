@@ -41,11 +41,12 @@
 
 | Cuándo | Comando | Qué hace |
 |---|---|---|
-| `0 2 * * *` | `/usr/bin/php /home/u144473384/domains/blackstones.com.ar/public_html/calculadora/api/monthly-report.php` | Genera el reporte de cada mes cerrado |
+| `0 2 * * *` | `/usr/bin/php /home/u144473384/domains/blackstones.com.ar/public_html/calculadora/api/monthly-report.php` | Genera el reporte de cada mes cerrado. **Desde el 17/11/2026 nadie lo lee** (ver abajo) |
 | `0 3 * * *` | `/usr/bin/php /home/u144473384/domains/blackstones.com.ar/public_html/calculadora/api/cleanup-retention.php` | Borra presupuestos a los 180 días y vacía la papelera a los 30 |
 
 - La hora es la del servidor, no necesariamente la de Argentina.
-- **No borrarlas.** Sin la segunda, nada vence ni se limpia; sin la primera, el reporte de un mes viejo se puede perder cuando sus presupuestos se borran.
+- **La de las 3 no se borra nunca.** Sin ella nada vence ni se limpia.
+- **La de las 2 quedó sin uso (17/11/2026).** La pestaña que mostraba ese reporte se eliminó; la tarea sigue escribiendo archivos en `bs-data` que ninguna pantalla lee. No molesta y se puede borrar desde el panel cuando el dueño quiera. Si se borra, `cron_reporte_horas` en `health.php` va a crecer sin parar y eso deja de ser una alarma.
 - **Para ver si corren sin entrar al panel:** `blackstones.com.ar/calculadora/api/health.php`. `cron_limpieza_horas` y `cron_reporte_horas` dicen hace cuántas horas escribió cada una; por debajo de 36 están bien. Desde el panel, "Ver resultado" muestra la última corrida.
 
 **Límites de PHP.** Están en Avanzado → Configuración PHP → Opciones de PHP.

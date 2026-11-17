@@ -157,7 +157,7 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 > Fijadas por el dueño el 16/11/2026. Si vas a tocar algo de `site/public_html/presupuestos/` o `calculadora/api/`, leelas antes. El detalle y el porqué están en los docs que se citan.
 
-- **La etapa de una obra la dicta el tablero.** Los estados del presupuesto ya no mandan. Que no la dicte no quiere decir que no se vea: en Presupuestos cada obra viva muestra su etapa del tablero y se puede filtrar por ella (`list.php` lee el tablero, no lo toca). Por dentro, una obra del tablero es una cotización "aprobado"; archivarla la pasa a "entregado" (el reporte mensual depende de eso). → `01-strategy/decision-log/2026-11-16-la-etapa-la-dicta-el-tablero.md`
+- **La etapa de una obra la dicta el tablero.** Los estados del presupuesto ya no mandan. Que no la dicte no quiere decir que no se vea: en Presupuestos cada obra viva muestra su etapa del tablero y se puede filtrar por ella (`list.php` lee el tablero, no lo toca). Por dentro, una obra del tablero es una cotización "aprobado"; archivarla la pasa a "entregado" y queda en "Archivadas" del tablero, desde donde se devuelve. → `01-strategy/decision-log/2026-11-16-la-etapa-la-dicta-el-tablero.md`
 - **El presupuesto dura 180 días** en la pestaña Presupuestos y después se borra solo (`cleanup-retention.php`). **Una obra viva en el tablero no vence nunca**; su reloj empieza cuando se archiva. No tocar esa limpieza sin probarla con datos envejecidos.
 - **Eliminar un presupuesto NO elimina la ficha, ni el calendario, ni el contrato.** Si la obra está viva en el tablero, borrar su presupuesto (a mano o por los 180 días) solo lo saca de la pestaña Presupuestos (marca `fuera_de_presupuestos`). La ficha solo se borra desde el tablero, que manda `desde_tablero: true`. Desde Presupuestos tampoco se puede cambiar el estado de una obra viva (`state.php` lo rechaza).
 - **Cargar una obra a mano NO crea un presupuesto.** La ficha no aparece en Presupuestos ni se lleva un N° de la calculadora; dice "Sin N°" hasta que se le ponga el de su presupuesto desde "Editar obra". Por dentro usa un número de otra serie (90001 en adelante) que no se muestra; las fichas a mano viejas conservan el suyo, marcadas `manual`. → `04-operations/tablero-obras.md`
@@ -169,6 +169,7 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **Un contrato está completo con tres cosas:** N° puesto, presupuesto adjunto y enlazado con el tablero. Cada obra viva del tablero tendría que tener su contrato; Relación-Contrato avisa las que no.
 - **Enlazado, manda el tablero en lo operativo y Relación-Contrato en la plata.**
 - **La seña del tablero y la del contrato no se pisan nunca.** Si difieren, hay un aviso en Relación-Contrato y nada más; cada una se corrige a mano. Nada cambia plata solo.
+- **La pestaña "Presupuestos · Reporte" ya no existe (17/11/2026).** Sacaba la plata de los presupuestos, y la plata vive en los contratos. Presupuestos es una sola pestaña. Los números de ventas, cuando hagan falta, salen de Relación-Contrato. → `01-strategy/decision-log/2026-11-17-sin-pestana-reporte.md`
 - **"→ Aprobado" ya no existe en Presupuestos.** Si una obra está en el tablero es que fue aprobada. Un presupuesto entra al tablero desde el tablero ("Cargar obra" con su N°) o desde su contrato ("Cargar en Por medir"); `state.php` rechaza aprobar desde Presupuestos.
 - **Cobro en una moneda, contrato en la otra: lleva cotización.** Cada seña o pago guarda la suya (se propone el dólar del día, se puede cambiar). "Cobrado" es lo que entró de verdad; "Saldo", lo que falta ya convertido.
 - **El calendario lee del tablero.** Lo que se enlaza con el tablero queda enlazado con el calendario.
@@ -213,4 +214,4 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ---
 
-*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días). Próxima revisión obligatoria: febrero 2027.*
+*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días; sin pestaña Reporte). Próxima revisión obligatoria: febrero 2027.*

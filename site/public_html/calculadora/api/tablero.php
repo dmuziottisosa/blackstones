@@ -178,6 +178,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $tablero = bs_tablero_leer();
     $cards = [];
     $en_papelera = 0; // fichas borradas que todavía se pueden recuperar
+    // Obras archivadas (entregadas) que pasaron por el tablero: se pueden devolver desde "Archivadas".
+    // Las ventas históricas cargadas a mano en el hub no tienen registro en el tablero y no cuentan.
+    $archivadas = [];
 
     if (is_dir(BS_CLIENTES_DIR)) {
         foreach (scandir(BS_CLIENTES_DIR) as $f) {
@@ -191,6 +194,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             foreach ($cots as $cot) {
                 if (($cot['estado'] ?? '') === 'papelera') $en_papelera++;
+                if (($cot['estado'] ?? '') === 'entregado' && isset($tablero['obras'][$cliente_nro . '-' . intval($cot['sub'] ?? 0)])) {
+                    $at = strtotime((string)($cot['entregado_at'] ?? '')) ?: time();
+                    $archivadas[] = [
+                        'key' => $cliente_nro . '-' . intval($cot['sub'] ?? 0), 'cliente_nro' => $cliente_nro, 'sub' => intval($cot['sub'] ?? 0),
+                        'nombre' => (string)($cli['nombre'] ?? ''), 'material' => bs_tablero_material($cot)[0], 'manual' => !empty($cot['manual']),
+                        'archivada' => date('Y-m-d', $at),
+                        'quedan' => max(0, BS_RETENTION_DAYS - intval(floor((time() - $at) / 86400))),
+                    ];
+                }
                 if (($cot['estado'] ?? '') !== 'aprobado') continue;
 
                 $sub = intval($cot['sub'] ?? 0);
@@ -284,7 +296,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'oculta' => !empty($def['oculta']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'avisa_fecha' => !empty($def['avisa_fecha']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'pendientes' => (string)($def['pendientes'] ?? ''), 'urge' => array_values((array)($def['urge'] ?? [])), 'en_manos' => array_values((array)($def['en_manos'] ?? [])), 'hecha_txt' => array_values((array)($def['hecha_txt'] ?? [])), 'urge_txt' => (string)($def['urge_txt'] ?? ''), 'urge_ok_txt' => (string)($def['urge_ok_txt'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
     }
 
-    bs_ok(['hoy' => date('Y-m-d'), 'papelera' => $en_papelera, 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
+    if (isset($_GET['archivadas'])) {
+        usort($archivadas, function ($a, $b) { return strcmp($b['archivada'], $a['archivada']); });
+        bs_ok(['dias' => BS_RETENTION_DAYS, 'obras' => $archivadas]);
+    }
+    bs_ok(['hoy' => date('Y-m-d'), 'papelera' => $en_papelera, 'archivadas' => count($archivadas), 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES, 'cards' => $cards]);
 }
 
 // ============================================================
