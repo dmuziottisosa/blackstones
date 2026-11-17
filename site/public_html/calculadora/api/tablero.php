@@ -210,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         'key' => $cliente_nro . '-' . intval($cot['sub'] ?? 0), 'cliente_nro' => $cliente_nro, 'sub' => intval($cot['sub'] ?? 0),
                         'nombre' => (string)($cli['nombre'] ?? ''), 'material' => bs_tablero_material($cot)[0], 'manual' => !empty($cot['manual']),
                         'archivada' => date('Y-m-d', $at),
-                        'quedan' => max(0, BS_RETENTION_DAYS - intval(floor((time() - $at) / 86400))),
+                        'quedan' => max(0, BS_ARCHIVADAS_DAYS - intval(floor((time() - $at) / 86400))),
                     ];
                 }
                 if (($cot['estado'] ?? '') !== 'aprobado') continue;
@@ -319,7 +319,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (isset($_GET['archivadas'])) {
         bs_require_permiso('tablero_operar');
         usort($archivadas, function ($a, $b) { return strcmp($b['archivada'], $a['archivada']); });
-        bs_ok(['dias' => BS_RETENTION_DAYS, 'obras' => $archivadas]);
+        bs_ok(['dias' => BS_ARCHIVADAS_DAYS, 'obras' => $archivadas]);
     }
     bs_ok(['hoy' => date('Y-m-d'), 'papelera' => auth_puede('tablero_operar') ? $en_papelera : 0, 'archivadas' => auth_puede('tablero_operar') ? count($archivadas) : 0, 'ventana' => BS_PLAZO_VENTANA, 'etapas' => $etapas_out, 'instaladores' => $BS_INSTALADORES, 'fabricadores' => $BS_FABRICADORES, 'cortadores' => $BS_CORTADORES, 'medidores' => $BS_MEDIDORES,
         // Los tildes que son aprobaciones (muestran quién los dio) y si el que mira puede darlas.

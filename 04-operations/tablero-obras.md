@@ -187,7 +187,7 @@ Desde "Más" → **Retira en el local**, o arrastrando la tarjeta al cuadro de a
 
 ## Archivar
 
-"Archivar obra" saca la tarjeta del tablero (por dentro la cotización pasa a "entregado"). **No se borra nada** (ni las otras versiones del presupuesto). Las archivadas se guardan 180 días (`BS_RETENTION_DAYS`); la copia permanente es la física que arma administración.
+"Archivar obra" saca la tarjeta del tablero (por dentro la cotización pasa a "entregado"). **No se borra nada** (ni las otras versiones del presupuesto). Las archivadas se guardan **1 año** desde que se archivan (`BS_ARCHIVADAS_DAYS`; dueño, 17/11/2026, antes 180 días), con sus fotos, planos, tildes e historial. Pasado el año se borran de verdad, sin papelera. Devolverla al tablero frena el reloj; archivarla de nuevo lo arranca otra vez. Los presupuestos siguen durando 180 días (`BS_RETENTION_DAYS`). La copia permanente es la física que arma administración. Cuánto ocupa → `01-strategy/decision-log/2026-11-17-archivadas-un-ano.md`.
 
 - **Archivadas (17/11/2026):** arriba del tablero aparece el botón **"Archivadas · N"** cuando hay alguna. Abre la lista con cliente, material, cuándo se archivó y cuántos días le quedan. **"Devolver al tablero"** la vuelve a la etapa en la que estaba, con sus tildes, seña, fotos y turno.
   - Antes eso se hacía desde la pestaña "Presupuestos · Reporte", que se eliminó ese día. → `01-strategy/decision-log/2026-11-17-sin-pestana-reporte.md`

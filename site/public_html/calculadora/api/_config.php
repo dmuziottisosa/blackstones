@@ -25,7 +25,12 @@ define('BS_REGISTRO_CRON_LOG',       $BS_BASE . '/registro/_cron-log.txt');
 define('BS_CLIENTES_INDEX',          $BS_BASE . '/registro/clientes-index.json');
 
 // Política de retención (días)
+// Presupuestos (pestaña Presupuestos) y sus ZIP: 180 días.
 define('BS_RETENTION_DAYS', 180);
+// Obras ARCHIVADAS del tablero, con sus fotos, planos, tildes e historial: 1 año desde que se
+// archivan (dueño, 17/11/2026; antes 180 días). Pasado el año se borran de verdad, sin papelera.
+// Cada obra pesa unos 3 MB de fotos (medido): un año de 500 obras archivadas son ~1,5 GB.
+define('BS_ARCHIVADAS_DAYS', 365);
 
 // Versión del JSON contract
 define('BS_CONTRACT_VERSION', '1.0');

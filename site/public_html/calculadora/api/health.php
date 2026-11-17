@@ -73,6 +73,22 @@ $free_mb = $free_bytes !== false ? round($free_bytes / (1024 * 1024)) : null;
 $checks['free_disk_mb'] = $free_mb;
 if ($free_mb !== null && $free_mb < 100) $failed = true;
 
+// Cuánto ocupan las fotos y planos del tablero (lo único que pesa de verdad en bs-data). Solo números:
+// sirve para ver cuánto crece con las obras archivadas, que se guardan 1 año. No frena nada.
+$fotos_bytes = 0; $fotos_archivos = 0; $obras_con_fotos = 0;
+$adj = BS_DATA_DIR . '/tablero/adjuntos';
+if (is_dir($adj)) {
+    foreach ((array)@scandir($adj) as $carpeta) {
+        if ($carpeta === '.' || $carpeta === '..' || !is_dir("$adj/$carpeta")) continue;
+        $tiene = false;
+        foreach ((array)@scandir("$adj/$carpeta") as $f) {
+            if ($f === '.' || $f === '..' || !is_file("$adj/$carpeta/$f")) continue;
+            $fotos_bytes += (int)@filesize("$adj/$carpeta/$f"); $fotos_archivos++; $tiene = true;
+        }
+        if ($tiene) $obras_con_fotos++;
+    }
+}
+
 http_response_code($failed ? 503 : 200);
 echo json_encode([
     'ok' => !$failed,
@@ -80,5 +96,8 @@ echo json_encode([
     'cron_log_age_hours' => $cron_log_age_hours,
     'cron_limpieza_horas' => $cron_por_tarea['cleanup'],
     'cron_reporte_horas' => $cron_por_tarea['monthly-report'],
+    'fotos_tablero_mb' => round($fotos_bytes / (1024 * 1024), 1),
+    'fotos_tablero_archivos' => $fotos_archivos,
+    'obras_con_fotos' => $obras_con_fotos,
     'timestamp' => date('c'),
 ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

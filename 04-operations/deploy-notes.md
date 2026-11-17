@@ -48,6 +48,7 @@
 - **La de las 3 no se borra nunca.** Sin ella nada vence ni se limpia.
 - **La de las 2 quedó sin uso (17/11/2026).** La pestaña que mostraba ese reporte se eliminó; la tarea sigue escribiendo archivos en `bs-data` que ninguna pantalla lee. No molesta y se puede borrar desde el panel cuando el dueño quiera. Si se borra, `cron_reporte_horas` en `health.php` va a crecer sin parar y eso deja de ser una alarma.
 - **Para ver si corren sin entrar al panel:** `blackstones.com.ar/calculadora/api/health.php`. `cron_limpieza_horas` y `cron_reporte_horas` dicen hace cuántas horas escribió cada una; por debajo de 36 están bien. Desde el panel, "Ver resultado" muestra la última corrida.
+- **Cuánto pesan las fotos del tablero:** la misma dirección dice `fotos_tablero_mb`, `fotos_tablero_archivos` y `obras_con_fotos` (17/11/2026). Sirve para seguir cuánto crece con las archivadas, que se guardan 1 año. El espacio real de la cuenta se mira en el panel de Hostinger: `free_disk_mb` es del servidor entero, no de la cuenta.
 
 **Límites de PHP.** Están en Avanzado → Configuración PHP → Opciones de PHP.
 

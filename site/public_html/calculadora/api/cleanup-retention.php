@@ -9,8 +9,9 @@
 // Lógica:
 //   Para cada bs-data/clientes/{nro}.json:
 //     Para cada cotización:
-//       Si estado == "entregado" Y (now - entregado_at) > 180 días:
-//         Borrar la cotización del array.
+//       Si estado == "entregado" (obra ARCHIVADA) Y (now - entregado_at) > 365 días
+//         (BS_ARCHIVADAS_DAYS; dueño, 17/11/2026, antes 180):
+//         Borrar la cotización del array. Con ella se van su ficha, fotos y planos.
 //       Si estado == "aprobado": NO se borra nunca por antigüedad. Es una obra
 //         viva en el tablero, y la etapa la dicta el tablero (regla del dueño,
 //         16/11/2026): sale de ahí cuando se archiva (pasa a "entregado" y recién
@@ -18,7 +19,7 @@
 //         Antes se borraba a los 180 días de aprobada, con sus fotos y planos.
 //         A los 180 días se la marca "fuera_de_presupuestos": deja de verse en la
 //         pestaña Presupuestos, y la ficha sigue en el tablero.
-//       Si estado != "entregado" Y NO existe ningún entregado en este cliente
+//       Si estado != "entregado" Y NO existe ningún entregado vigente (menos de 365 días) en este cliente
 //          Y (now - última_modificación) > 180 días:
 //         Borrar la cotización del array.
 //     Si quedaron 0 cotizaciones:
@@ -48,6 +49,7 @@ bs_ensure_dirs();
 
 $now = time();
 $retention_seconds = BS_RETENTION_DAYS * 24 * 3600;
+$archivadas_seconds = BS_ARCHIVADAS_DAYS * 24 * 3600; // las obras archivadas duran más que los presupuestos
 
 $stats = [
     'cotizaciones_borradas' => 0,
@@ -84,7 +86,7 @@ if (is_dir(BS_CLIENTES_DIR)) {
         foreach ($cliente['cotizaciones'] ?? [] as $cot) {
             if (($cot['estado'] ?? '') === 'entregado') {
                 $entregado_at = strtotime($cot['entregado_at'] ?? $cot['fecha'] ?? '');
-                if ($entregado_at && ($now - $entregado_at) <= $retention_seconds) {
+                if ($entregado_at && ($now - $entregado_at) <= $archivadas_seconds) {
                     $tiene_entregado_activo = true;
                     break;
                 }
@@ -98,7 +100,7 @@ if (is_dir(BS_CLIENTES_DIR)) {
             $estado = $cot['estado'] ?? '';
             if ($estado === 'entregado') {
                 $entregado_at = strtotime($cot['entregado_at'] ?? $cot['fecha'] ?? '');
-                if ($entregado_at && ($now - $entregado_at) > $retention_seconds) {
+                if ($entregado_at && ($now - $entregado_at) > $archivadas_seconds) {
                     // Entregado expiró → borrar (también su ZIP)
                     if (!empty($cot['zip_path'])) {
                         $zip = BS_DATA_DIR . '/' . $cot['zip_path'];

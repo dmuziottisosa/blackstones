@@ -2314,7 +2314,7 @@ async function pedirArchivadas(){
   try{j=await pedir(API+'?archivadas=1');}catch(e){toast(e.message);return;}
   const filas=j.obras.map(f=>'<div class="pap-f"><div><b>'+(f.manual?'':esc(f.key)+' · ')+esc(nombreCorto(f.nombre)||'Sin nombre')+'</b><small>'+(f.material?esc(f.material)+' · ':'')+'Archivada el '+esc(fechaCorta(f.archivada))+'</small><small>'+(f.quedan<=0?'Se borra hoy':'Se guarda '+f.quedan+(f.quedan===1?' día más':' días más'))+'</small></div><button type="button" data-devolver="'+esc(f.key)+'">Devolver al tablero</button></div>').join('');
   abrirModal('Archivadas',
-    (filas?'<p>Obras entregadas. Se guardan '+j.dias+' días desde que se archivan. Si una se archivó por error, "Devolver al tablero" la vuelve a la etapa en la que estaba, con todo lo que tenía.</p><div class="pap">'+filas+'</div>':'<p>No hay obras archivadas.</p>'),
+    (filas?'<p>Obras entregadas. Se guardan '+(j.dias===365?'1 año':j.dias+' días')+' desde que se archivan, con sus fotos y planos. Si una se archivó por error, "Devolver al tablero" la vuelve a la etapa en la que estaba, con todo lo que tenía.</p><div class="pap">'+filas+'</div>':'<p>No hay obras archivadas.</p>'),
     'Cerrar',cerrarModal);
   $('mCancelar').style.display='none';
 }
