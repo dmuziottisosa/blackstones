@@ -43,6 +43,7 @@ const AUTH_PERMISOS = [
     'contratos_editar'  => ['admin'],                       // crear, editar, borrar, pagos, adjuntos
     'contratos_plata'   => ['admin', 'operador'],           // ver el total, la seña, los pagos y el saldo de cada contrato
     'contratos_resumen' => ['admin'],                       // ver el resumen de plata del mes (contratado, cobrado, por cobrar) y las sumas del pie
+    'presencia'         => ['admin', 'operador', 'planos'], // ver quién está trabajando ahora y en qué pantalla
     'usuarios'          => ['admin'],
     'mantenimiento'     => ['admin'],                       // importadores y scripts de una sola vez
 ];
@@ -220,7 +221,98 @@ function auth_nav_html(string $activa): string {
         $h .= '  <a href="' . $url . '"' . ($activa === $permiso ? ' class="active"' : '') . '>' . $txt . "</a>\n";
     }
     $h .= '  <a href="/presupuestos/usuarios.php"' . ($activa === 'usuarios' ? ' class="active"' : '') . '>' . (auth_puede('usuarios') ? 'Usuarios' : 'Mi usuario') . "</a>\n";
-    return $h . '</nav>';
+    return $h . '</nav>' . auth_presencia_js($activa);
+}
+
+/**
+ * "Quién está trabajando": cada pantalla le avisa al servidor, cada 20 segundos mientras está
+ * a la vista, que esa persona la tiene abierta (api/presencia.php), y el servidor le contesta
+ * quiénes están en línea y en qué pantalla. Arriba de cada página se ven sus iniciales (con
+ * borde verde los que están en esta misma pantalla); al tocarlas se abre la lista con nombre
+ * y pantalla. Lo ve todo el que tenga el permiso 'presencia'.
+ * Viaja pegado al menú, así lo tienen todas las páginas sin tocarlas una por una.
+ * Los nombres se escriben siempre como texto, nunca como HTML. Si algo falla, no se nota.
+ */
+function auth_presencia_js(string $pagina): string {
+    $u = auth_usuario();
+    if (!$u || !empty($u['viejo'])) return ''; // con la contraseña compartida no hay a quién anotar
+    $js = <<<'JS'
+(function(){
+var P=__PAG__,YO=__YO__,VE=__VE__,ADM=__ADM__,U='/calculadora/api/presencia.php',L=[],pop=null,btn=null;
+function el(t,css,txt){var e=document.createElement(t);if(css)e.style.cssText=css;if(txt!=null)e.textContent=txt;return e;}
+function ini(n){var p=String(n||'').trim().split(/\s+/);return ((p[0]||'?').charAt(0)+(p.length>1?p[p.length-1].charAt(0):'')).toUpperCase();}
+function aca(x){return x.paginas.indexOf(P)>=0;}
+function pintar(){
+  try{
+    if(!VE)return;var h=document.querySelector('.h-right');if(!h)return;
+    if(!btn){btn=el('button','display:inline-flex;align-items:center;gap:0;background:none;border:none;padding:4px 2px;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent');
+      btn.type='button';btn.id='bsLinea';btn.setAttribute('aria-haspopup','true');btn.addEventListener('click',function(e){e.stopPropagation();abrir(!pop);});h.insertBefore(btn,h.firstChild);}
+    var l=L.slice().sort(function(a,b){return (aca(b)-aca(a))||(a.nombre<b.nombre?-1:1);}),chico=window.innerWidth<700,max=chico?0:4;
+    btn.textContent='';
+    // En el celular no hay lugar para las iniciales: un solo círculo con cuántos son. Al tocarlo, la lista.
+    if(chico){h.style.gap='8px';btn.style.padding='0';} // en el celular cada píxel cuenta: que no tape el nombre
+    if(chico&&l.length)btn.appendChild(el('span','min-width:26px;height:26px;padding:0 5px;box-sizing:border-box;border-radius:13px;display:inline-flex;align-items:center;justify-content:center;font:700 12px/1 Manrope,sans-serif;letter-spacing:0;text-transform:none;color:#0E2A18;background:#34D670',String(l.length)));
+    l.slice(0,max).forEach(function(x,k){
+      btn.appendChild(el('span','width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:700 10.5px/1 Manrope,sans-serif;letter-spacing:.02em;text-transform:none;color:'+(aca(x)?'#0E2A18':'#C4A77D')+';background:'+(aca(x)?'#34D670':'#2A2522')+';border:2px solid #1A1816;margin-left:'+(k?'-7px':'0'),ini(x.nombre)));
+    });
+    if(!chico&&l.length>max)btn.appendChild(el('span','font:700 11px/1 Manrope,sans-serif;color:#C4A77D;margin-left:5px;letter-spacing:0;text-transform:none','+'+(l.length-max)));
+    btn.title='Trabajando ahora: '+l.map(function(x){return x.nombre+' ('+x.donde+')';}).join(', ');
+    btn.setAttribute('aria-label',btn.title);btn.style.display=l.length?'inline-flex':'none';
+    if(chico)entrar();
+    if(pop)lista();
+  }catch(e){}
+}
+// En pantallas angostas el círculo no puede pisar el nombre: si no entra, se achica el título de a poco.
+function entrar(){
+  var hd=document.querySelector('.header'),t=hd&&hd.querySelector('h1'),im=hd&&hd.querySelector('img');if(!t||!btn)return;
+  var pasos=[function(){t.style.fontSize='1.15rem';if(im)im.style.setProperty('height','30px','important');},
+    function(){t.style.fontSize='1.02rem';},
+    function(){if(im){im.style.setProperty('height','26px','important');if(im.parentNode)im.parentNode.style.gap='8px';}},
+    function(){t.style.fontSize='.92rem';}];
+  for(var i=0;i<pasos.length&&btn.getBoundingClientRect().left<t.getBoundingClientRect().right+4;i++)pasos[i]();
+}
+function lista(){
+  pop.textContent='';
+  pop.appendChild(el('div','font:700 10.5px/1 Manrope,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#C4A77D;margin-bottom:10px','Trabajando ahora · '+L.length));
+  L.slice().sort(function(a,b){return (aca(b)-aca(a))||(a.nombre<b.nombre?-1:1);}).forEach(function(x){
+    var f=el('div','display:flex;align-items:center;gap:9px;padding:6px 0');
+    f.appendChild(el('span','flex:none;width:8px;height:8px;border-radius:50%;background:'+(aca(x)?'#34D670':'#8B7860')));
+    var t=el('div','min-width:0');
+    t.appendChild(el('div','font:700 13.5px/1.25 Manrope,sans-serif;color:#FAF8F4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap',x.nombre+(x.id===YO?' (vos)':'')));
+    t.appendChild(el('div','font:500 12px/1.3 Manrope,sans-serif;color:#C4B596',x.donde));
+    f.appendChild(t);pop.appendChild(f);
+  });
+  if(ADM){var a=el('a','display:block;margin-top:8px;padding-top:9px;border-top:1px solid rgba(196,167,125,.25);font:600 12.5px/1 Manrope,sans-serif;color:#C4A77D;text-decoration:none','Ver usuarios');a.href='/presupuestos/usuarios.php';pop.appendChild(a);}
+}
+function abrir(si){
+  if(!si){if(pop){pop.remove();pop=null;}if(btn)btn.setAttribute('aria-expanded','false');return;}
+  var r=btn.getBoundingClientRect();
+  pop=el('div','position:fixed;z-index:9999;top:'+Math.round(r.bottom+8)+'px;right:'+Math.max(8,Math.round(window.innerWidth-r.right-40))+'px;width:250px;max-width:calc(100vw - 16px);max-height:60vh;overflow:auto;background:#1A1816;border:1px solid rgba(196,167,125,.45);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.45);padding:14px 15px 12px;text-align:left');
+  pop.id='bsLineaPop';pop.setAttribute('role','dialog');pop.addEventListener('click',function(e){e.stopPropagation();});
+  document.body.appendChild(pop);btn.setAttribute('aria-expanded','true');lista();senal(false);
+}
+document.addEventListener('click',function(){if(pop)abrir(false);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&pop)abrir(false);});
+function senal(f){
+  try{
+    var b=JSON.stringify({pagina:P,fuera:!!f});
+    if(f){if(navigator.sendBeacon)navigator.sendBeacon(U,b);return;}
+    fetch(U,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:b,keepalive:true})
+      .then(function(r){return r.ok?r.json():null;}).then(function(j){if(j&&j.linea){L=j.linea;pintar();}}).catch(function(){});
+  }catch(e){}
+}
+function vivo(){if(document.visibilityState==='visible')senal(false);}
+vivo();setInterval(vivo,20000);document.addEventListener('visibilitychange',vivo);
+// La letra del título carga después y lo ensancha; y el celular se puede girar: se vuelve a acomodar.
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(btn)pintar();});
+window.addEventListener('resize',function(){if(btn)pintar();});
+window.addEventListener('pagehide',function(){senal(true);});
+})();
+JS;
+    $f = JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
+    $js = str_replace(['__PAG__', '__YO__', '__VE__', '__ADM__'],
+        [json_encode($pagina, $f), json_encode((string)$u['id'], $f), auth_puede('presencia') ? 'true' : 'false', auth_puede('usuarios') ? 'true' : 'false'], $js);
+    return "\n<script>" . $js . "</script>";
 }
 
 /** Quién está adentro, para el encabezado (solo se ve en pantallas anchas). */

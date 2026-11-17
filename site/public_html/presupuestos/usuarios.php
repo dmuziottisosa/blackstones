@@ -109,10 +109,18 @@ button{font-family:inherit;color:inherit}
 .fila:first-of-type{border-top:none}
 .fila .quien b{display:block;font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fila .quien span{font-size:12.5px;color:var(--text3)}
+.fila .quien [data-estado]{margin-top:1px}
 .fila .bts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .fila.baja .quien b{color:var(--text3);text-decoration:line-through}
 .et{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.04em;background:var(--amb-soft);color:var(--amb);margin-left:6px;vertical-align:1px}
 .et.vos{background:var(--gr-soft);color:var(--gr)}
+.pt{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--border);margin-right:6px;vertical-align:1px}
+.pt.on{background:var(--gr);box-shadow:0 0 0 3px var(--gr-soft)}
+.fila .quien span.on{color:var(--gr);font-weight:700}
+.ahora{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:-4px 0 14px;font-size:13.5px;color:var(--text2)}
+.ahora b{color:var(--text)}
+.ahora .chip{display:inline-flex;align-items:center;padding:4px 11px;border-radius:999px;background:var(--gr-soft);color:var(--gr);font-weight:700;font-size:12.5px}
+.ahora .chip small{font-weight:600;opacity:.8;margin-left:5px}
 .roles{width:100%;border-collapse:collapse;font-size:13.5px}
 .roles th,.roles td{padding:8px 8px;border-top:1px solid var(--border-soft);text-align:center}
 .roles th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);border-top:none}
@@ -205,6 +213,7 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
   <div class="caja oculto" id="cajaLista">
     <h2>Usuarios</h2>
     <p class="sub">El cambio de rol y la baja valen al instante: la persona pierde el acceso en el momento.</p>
+    <div class="ahora" id="ahora" aria-live="polite"></div>
     <div id="lista"></div>
     <div class="acc"><button class="btn pri" type="button" id="bNuevo">+ Nuevo usuario</button><span class="msg" id="lMsg"></span></div>
   </div>
@@ -223,6 +232,7 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
       <tr><td>Ver Relación-Contrato, con la plata de cada contrato</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Ver el resumen de plata del mes</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
       <tr><td>Cargar y cambiar contratos, cobros y pagos</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
+      <tr><td>Ver quién está trabajando ahora y dónde</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
       <tr><td>Usuarios</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
     </table>
   </div>
@@ -250,6 +260,39 @@ const API='/calculadora/api/usuarios.php';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let D=null,VELO=null;
+// Quién está conectado ahora y en qué pantalla (api/presencia.php). Se refresca solo.
+const API_PRES='/calculadora/api/presencia.php';
+const PAGINAS={calculadora:'Calculadora',presupuestos:'Presupuestos',tablero:'Tablero',calendario:'Calendario',contratos:'Relación-Contrato',stock:'Stock',usuarios:'Usuarios'};
+let PRES={};
+function hace(s){
+  if(s<90)return 'hace un momento';
+  if(s<3600)return 'hace '+Math.round(s/60)+' min';
+  if(s<86400){const h=Math.round(s/3600);return 'hace '+h+(h===1?' hora':' horas');}
+  const d=Math.round(s/86400);return 'hace '+d+(d===1?' día':' días');
+}
+function dondeTxt(l){const n=l.map(p=>PAGINAS[p]||p);return n.length>1?n.slice(0,-1).join(', ')+' y '+n[n.length-1]:n[0];}
+function estadoHtml(u){
+  const p=PRES[u.id];
+  if(p&&p.en_linea.length)return '<span class="on"><i class="pt on"></i>En línea · '+esc(dondeTxt(p.en_linea))+'</span>';
+  if(p)return '<span><i class="pt"></i>'+esc(u.usuario)+' · visto '+hace(p.visto)+' en '+esc(PAGINAS[p.pagina]||p.pagina)+'</span>';
+  return '<span><i class="pt"></i>'+esc(u.usuario)+' · último ingreso: '+fecha(u.ultimo)+'</span>';
+}
+function pintarAhora(){
+  if(!D||!Array.isArray(D.usuarios))return;
+  const on=D.usuarios.filter(u=>PRES[u.id]&&PRES[u.id].en_linea.length);
+  $('ahora').innerHTML=on.length
+    ?'<b>En línea ahora:</b>'+on.map(u=>'<span class="chip">'+esc(u.nombre)+'<small>'+esc(dondeTxt(PRES[u.id].en_linea))+'</small></span>').join('')
+    :'<b>En línea ahora:</b> nadie más.';
+  // el estado de cada renglón, sin redibujar la lista (no se pierde un desplegable abierto)
+  document.querySelectorAll('#lista .fila').forEach(f=>{const u=D.usuarios.find(x=>x.id===f.dataset.id),e=f.querySelector('[data-estado]');if(u&&e)e.innerHTML=estadoHtml(u);});
+}
+async function cargarPresencia(){
+  if(!D||!Array.isArray(D.usuarios)||document.visibilityState!=='visible')return;
+  try{
+    const r=await fetch(API_PRES,{credentials:'same-origin',cache:'no-store'});const j=r.ok?await r.json():null;
+    if(j&&j.ok){PRES=j.usuarios||{};pintarAhora();}
+  }catch(e){}
+}
 
 async function pedir(body){
   const r=await fetch(API,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});
@@ -273,7 +316,7 @@ async function cargar(){
   const rol=(D.roles.find(r=>r.id===D.yo.rol)||{}).nombre||'';
   $('yoNombre').textContent=D.yo.nombre;
   $('yoSub').textContent='Entrás como "'+D.yo.usuario+'" · '+rol;
-  if(admin)pintar();
+  if(admin){pintar();pintarAhora();cargarPresencia();}
 }
 function pintar(){
   $('lista').innerHTML=D.usuarios.map(u=>{
@@ -281,7 +324,7 @@ function pintar(){
     const ops=D.roles.map(r=>'<option value="'+r.id+'"'+(r.id===u.rol?' selected':'')+'>'+esc(r.nombre)+'</option>').join('');
     return '<div class="fila'+(u.activo?'':' baja')+'" data-id="'+u.id+'">'+
       '<div class="quien"><b>'+esc(u.nombre)+(yo?'<span class="et vos">Vos</span>':'')+(u.activo?'':'<span class="et">De baja</span>')+'</b>'+
-      '<span>'+esc(u.usuario)+' · último ingreso: '+fecha(u.ultimo)+'</span></div>'+
+      '<div data-estado>'+estadoHtml(u)+'</div></div>'+
       '<div><select data-rol aria-label="Rol de '+esc(u.nombre)+'"'+(yo?' disabled':'')+'>'+ops+'</select></div>'+
       '<div class="bts"><button class="btn chico" data-clave>Contraseña</button>'+
       (yo?'':'<button class="btn chico" data-baja>'+(u.activo?'Dar de baja':'Reactivar')+'</button><button class="btn chico rojo" data-borrar>Borrar</button>')+
@@ -356,6 +399,8 @@ $('fClave').addEventListener('submit',async e=>{
   catch(err){msg($('cMsg'),err.message,false);}
 });
 
+setInterval(cargarPresencia,10000);
+document.addEventListener('visibilitychange',cargarPresencia);
 cargar().catch(e=>{document.querySelector('.wrap').insertAdjacentHTML('afterbegin','<div class="caja"><p class="msg mal">'+esc(e.message)+'</p></div>');});
 
 // En pantallas angostas la barra de páginas se desliza de costado: la página actual queda a la vista.

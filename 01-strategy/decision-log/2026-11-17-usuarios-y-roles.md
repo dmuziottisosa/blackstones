@@ -25,6 +25,7 @@ Definido por el dueño (17/11/2026):
 - "Planos y bacha" **puede borrar fotos que subió otro**. (La primera versión solo le dejaba las suyas; corregido el mismo día.)
 - "Planos y bacha" no entra al calendario.
 - "Planos y bacha" **puede poner el modelo de la bacha** (y de quién es), sin operar nada más del tablero.
+- **Que se vea quién está trabajando**, en tiempo real y en todas las pantallas, no solo en Usuarios ("que se vea la comunidad trabajando"). Lo ven los tres roles.
 
 Puesto por defecto, sin respuesta del dueño. Cada uno es un renglón de `AUTH_PERMISOS`:
 
@@ -56,6 +57,8 @@ Una revisión propia de casos límite y una revisión independiente del código,
 No se encontró ninguna forma de saltear permisos, falsificar la sesión ni reabrir la contraseña compartida.
 
 ## Known unknowns
+
+- Si el dueño quiere que la presencia diga algo más que la pantalla (por ejemplo, en qué ficha o presupuesto está cada uno). Hoy dice solo dónde.
 
 - Qué hace exactamente "Planos y bacha" con la foto de entrega.
 - Cuántos administradores va a haber. Con uno solo, perder la contraseña obliga a borrar el archivo de usuarios por el panel de Hostinger.

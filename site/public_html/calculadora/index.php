@@ -29,6 +29,6 @@ header('Content-Type: text/html; charset=UTF-8');
 // calc.html es un archivo fijo: el menú y el nombre de quien entró se le ponen acá,
 // para que sea el mismo menú por rol que en el resto del sistema.
 $html = (string)file_get_contents($calcPath);
-$html = preg_replace('~<nav class="h-tabs">.*?</nav>~s', auth_nav_html('calculadora'), $html, 1) ?? $html;
+$html = preg_replace_callback('~<nav class="h-tabs">.*?</nav>~s', function () { return auth_nav_html('calculadora'); }, $html, 1) ?? $html;
 $html = str_replace('<span>blackstones.com.ar</span>', auth_quien_html(), $html);
 echo $html;

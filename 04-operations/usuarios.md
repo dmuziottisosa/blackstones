@@ -16,11 +16,22 @@
 | Ver Relación-Contrato, con la plata de cada contrato | Sí | Sí, solo mirar | No entra |
 | Ver el resumen de plata del mes (contratado, cobrado, por cobrar) | Sí | No | No |
 | Cargar y cambiar contratos, cobros y pagos | Sí | No | No |
+| Ver quién está trabajando ahora y en qué pantalla | Sí | Sí | Sí |
 | Usuarios | Sí | No | No |
 
 - **Operador en Relación-Contrato (dueño, 17/11/2026):** ve cada contrato con su total, seña, pagos y saldo. No ve el resumen del mes ni las sumas del pie. No puede crear, editar ni borrar: al abrir un contrato lo ve sin formulario.
 - **Planos y bacha:** entra directo al tablero. Ve las fichas enteras menos la seña. No puede tildar, mover, editar ni escribir notas. Adjunta fotos y puede borrar o girar cualquiera, también las que subió otro (dueño, 17/11/2026). Desde el botón "Modelo de bacha" de la ficha anota de quién es la bacha y su modelo, en cualquier etapa (dueño, 17/11/2026); eso no toca el tilde "Tenemos la bacha", salvo que marque "No lleva", que lo deja tildado como siempre. No entra al calendario. Si escribe otra dirección, vuelve al tablero.
 - **Las notas de las fichas son texto libre.** A "Planos y bacha" se le tapan los montos: "Saldo $ 285.720" le llega como "Saldo $ ···". Reconoce el signo antes o después del número ($, U$S, USD, ARS, pesos, dólares) y las cantidades en mil, millones o lucas. Un número suelto ("quedan 200") no se reconoce y se ve. Si no tiene que verse, no va en la nota.
+
+## Quién está trabajando (17/11/2026)
+
+- Arriba de cada pantalla se ven las iniciales de quienes están conectados; en verde, los que están en esa misma pantalla. En el celular es un solo círculo con cuántos son.
+- Al tocarlas se abre la lista: nombre y pantalla de cada uno (Calculadora, Tablero, Relación-Contrato…).
+- Lo ven los tres roles (pedido del dueño: "que se vea la comunidad trabajando"). Es el permiso `presencia`.
+- En **Usuarios**, el administrador ve además el detalle de cada persona: en línea y dónde, o "visto hace 10 min en Tablero".
+- **Qué es "en línea":** tener la pantalla abierta y a la vista. Cada pantalla avisa cada 20 segundos; a los 50 segundos sin aviso la persona deja de figurar. Con la pestaña tapada o el celular bloqueado el navegador deja de avisar, así que pasa a "visto hace…". Al cerrar o cambiar de pantalla se avisa en el momento.
+- Dice dónde está la persona, no qué está haciendo.
+- Cómo está hecho: el aviso viaja pegado al menú (`auth_presencia_js()` en `auth_check.php`) y lo recibe `calculadora/api/presencia.php`, que guarda la última señal de cada pantalla en `bs-data/usuarios/presencia.json`. No se anota en el registro de cambios. Con la contraseña compartida (sin usuarios) no hay presencia.
 
 ## Cómo se usa
 
@@ -64,4 +75,4 @@
 
 ## Pruebas
 
-322 comprobaciones contra un servidor local: cada rol contra cada página y cada archivo de datos (lectura y escritura), que la plata no salga del servidor, fotos propias y ajenas, bajas y cambios de rol al instante, cookie adulterada, archivo dañado, bloqueo por intentos fallidos. Más los flujos completos del Operador en el navegador (borrar una ficha con contrato y recuperarla, archivar y devolver) y las pantallas de los tres roles en computadora, tablet y celular. La regresión completa del tablero, calendario, contratos y hub pasa igual con la contraseña compartida y entrando como administrador.
+342 comprobaciones contra un servidor local: cada rol contra cada página y cada archivo de datos (lectura y escritura), que la plata no salga del servidor, fotos propias y ajenas, bajas y cambios de rol al instante, cookie adulterada, archivo dañado, bloqueo por intentos fallidos, presencia. Más tres personas conectadas a la vez viéndose entre sí, los flujos completos del Operador en el navegador (borrar una ficha con contrato y recuperarla, archivar y devolver) y las pantallas de los tres roles en computadora, tablet y celular. La regresión completa del tablero, calendario, contratos y hub pasa igual con la contraseña compartida y entrando como administrador.
