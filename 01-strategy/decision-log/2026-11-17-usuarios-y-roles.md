@@ -7,8 +7,8 @@
 El sistema interno deja la contraseña compartida. Cada persona entra con su usuario, y hay tres roles:
 
 - **Administrador:** sin restricción.
-- **Operador:** tablero completo (cargar, mover, archivar, borrar, papelera), calculadora, Presupuestos, calendario y stock. Ve Relación-Contrato sin la plata y sin poder cambiar nada.
-- **Planos y bacha:** solo el tablero, y solo para adjuntar foto de bacha, plano y foto de entrega.
+- **Operador:** tablero completo (cargar, mover, archivar, borrar, papelera), calculadora, Presupuestos, calendario y stock. Ve Relación-Contrato con la plata de cada contrato, sin el resumen del mes y sin poder cambiar nada.
+- **Planos y bacha:** solo el tablero, y solo para las fotos: adjunta bacha, plano y entrega, y puede borrar cualquiera.
 
 ## Por qué
 
@@ -17,27 +17,32 @@ El sistema interno deja la contraseña compartida. Cada persona entra con su usu
 
 ## Lo que definió el dueño y lo que quedó por defecto
 
-Definido por el dueño (17/11/2026): los tres roles; el Operador puede borrar, archivar y usar la papelera; el Operador entra a Calculadora, Presupuestos y Calendario.
+Definido por el dueño (17/11/2026):
 
-Puesto por defecto, con la recomendación que se le había dado y sin respuesta suya todavía. Cada uno es un renglón de `AUTH_PERMISOS`:
-
-- El Operador no ve ningún monto de los contratos (total, seña, pagos, saldo), no solo el resumen de arriba, y no los edita.
-- "Planos y bacha" no ve la seña de la ficha y solo borra las fotos que subió ella.
+- Los tres roles.
+- El Operador puede borrar, archivar y usar la papelera; entra a Calculadora, Presupuestos y Calendario.
+- El Operador **sí ve los montos** de cada contrato. Lo que no ve es el resumen de plata. (La primera versión le tapaba todo; el dueño lo corrigió el mismo día.)
+- "Planos y bacha" **puede borrar fotos que subió otro**. (La primera versión solo le dejaba las suyas; corregido el mismo día.)
 - "Planos y bacha" no entra al calendario.
+
+Puesto por defecto, sin respuesta del dueño. Cada uno es un renglón de `AUTH_PERMISOS`:
+
+- El Operador no edita contratos ni carga pagos (el dueño dijo "puede ver").
+- "Planos y bacha" no ve la seña de la ficha.
 - El Operador entra a Stock (hoy es una página vacía).
 - La foto de entrega quedó habilitada para "Planos y bacha" (el dueño dijo "después vemos eso").
 
 ## Knowns
 
 - El permiso se controla en el servidor, en cada archivo de datos. Probado rol por rol contra los 35 archivos.
-- Lo que un rol no puede ver no sale del servidor (seña, historial de la seña, montos de contratos).
-- Las notas llevan plata escrita a mano ("Saldo $ …"). Se tapan los montos con signo para quien no ve la plata.
+- Lo que un rol no puede ver no sale del servidor (seña e historial de la seña para "Planos y bacha").
+- Las notas de las fichas llevan plata escrita a mano ("Saldo $ …"). A "Planos y bacha" se le tapan los montos con signo.
+- El resumen del mes se arma en la página con los contratos. El Operador no lo ve, pero tiene los montos de cada contrato y podría sumarlos.
 - Mientras no se cree el primer administrador nada cambia para el equipo.
 - Al crear el primer administrador se cierran todas las sesiones de la contraseña compartida: el resto no entra hasta tener su usuario.
 
 ## Known unknowns
 
-- Si el dueño quiere que el Operador vea los montos de cada contrato y solo se le oculte el resumen.
 - Qué hace exactamente "Planos y bacha" con la foto de entrega.
 - Cuántos administradores va a haber. Con uno solo, perder la contraseña obliga a borrar el archivo de usuarios por el panel de Hostinger.
 - Montos escritos en notas sin signo de pesos: no se tapan.

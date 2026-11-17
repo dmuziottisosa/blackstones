@@ -438,7 +438,7 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 /* Sin permiso para ver la plata: no hay columnas de montos ni resumen. */
 .sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 42px 42px 64px 172px minmax(0,1.25fr) 30px}
 .sin-plata .fila>.der,.sin-plata .cab>.der,.sin-plata .pie>.der,.sin-plata .res>div:not(:first-child){display:none}
-.sin-plata .res>div:first-child{flex:1 1 auto}
+.sin-plata .res>div:first-child,.sin-resumen .res>div:first-child{flex:1 1 auto}
 @media(max-width:1519px){.sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 42px 42px 64px 172px 30px}}
 @media(max-width:1199px){.sin-plata .lista{--cols:70px 68px minmax(0,1.6fr) minmax(0,1.3fr) 172px 30px}}
 /* Solo mirar: sin botones que cambien algo. */
@@ -447,10 +447,11 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 .lec>span{color:var(--text3);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding-top:2px}
 .lec>div{min-width:0;overflow-wrap:anywhere}
 .lec .nt{white-space:pre-wrap}
+.lec.cob{margin:12px 0 14px;padding-bottom:12px;border-bottom:1px solid var(--border-soft)}
 @media(max-width:560px){.lec{grid-template-columns:minmax(0,1fr);gap:2px 0}.lec>div{margin-bottom:8px}}
 </style>
 </head>
-<body class="<?= auth_puede('contratos_plata') ? '' : 'sin-plata' ?> <?= auth_puede('contratos_editar') ? '' : 'solo-ver' ?>">
+<body class="<?= auth_puede('contratos_plata') ? '' : 'sin-plata' ?> <?= auth_puede('contratos_editar') ? '' : 'solo-ver' ?> <?= auth_puede('contratos_resumen') ? '' : 'sin-resumen' ?>">
 
 <div class="header">
   <div style="display:flex;align-items:center;gap:12px">
@@ -505,9 +506,11 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 // Un renglón por contrato. Lo operativo (cliente, dirección, material, pileta, seña) lo manda el
 // tablero cuando el contrato está enlazado; la plata (total y pagos) vive acá.
 const $=id=>document.getElementById(id);
-// Quién entró y qué puede. Sin 'contratos_plata' los montos ni llegan del servidor;
+// Quién entró y qué puede. Sin 'contratos_plata' los montos ni llegan del servidor; sin
+// 'contratos_resumen' se ve la plata de cada contrato pero no la suma del mes;
 // sin 'contratos_editar' la página es solo para mirar (el servidor rechaza los cambios).
 const YO=<?= auth_permisos_js() ?>,PLATA=!!YO.puede.contratos_plata,EDITA=!!YO.puede.contratos_editar;
+const RESUMEN=!!YO.puede.contratos_resumen; // sin esto no se arma el resumen de plata del mes ni las sumas del pie
 const API='/calculadora/api/contratos.php',API_T='/calculadora/api/tablero.php',API_CARGAR='/calculadora/api/tablero-cargar.php',API_DEL='/calculadora/api/delete.php',API_COLORES='/calculadora/api/colors-db.php',API_ADJ='/calculadora/api/contratos-adjunto.php',API_PAP_T='/calculadora/api/tablero-papelera.php';
 let CONTRATOS=[],CARDS={},ETAPAS={},HOY='',TABLERO_OK=false,q='';
 let VENDEDORES=[],PROCEDENCIAS=[];
@@ -746,10 +749,10 @@ function dibujar(){
   const linea=o=>partes(o).join(' + ');
   $('res').hidden=false;
   $('res').innerHTML='<div><div class="t">Contratos</div><div class="v">'+base.length+(base.length?'<small title="Completo: con N°, presupuesto adjunto y enlazado con el tablero">'+base.filter(completo).length+' de '+base.length+' completos</small>':'')+'</div></div>'
-    +'<div><div class="t">Contratado</div><div class="v'+(linea(s.tot)?'':' nada')+'">'+(linea(s.tot)||'—')+'</div></div>'
+    +(!RESUMEN?'':'<div><div class="t">Contratado</div><div class="v'+(linea(s.tot)?'':' nada')+'">'+(linea(s.tot)||'—')+'</div></div>'
     +'<div class="cobr"><div class="t">Cobrado</div><div class="v'+(linea(s.pag)?'':' nada')+'">'+(linea(s.pag)||'—')+'</div></div>'
     +'<div class="debe'+(hayDeuda?'':' cero')+'"><div class="t">Por cobrar</div><div class="v'+(hayDeuda||base.length?'':' nada')+'">'+(linea(s.deb)||(base.length?'Nada':'—'))+'</div></div>'
-    +(buscando?'':'<div class="tod"><div class="t">Por cobrar, todos los meses</div><div class="v">'+(linea(todo.deb)||'Nada')+'</div></div>');
+    +(buscando?'':'<div class="tod"><div class="t">Por cobrar, todos los meses</div><div class="v">'+(linea(todo.deb)||'Nada')+'</div></div>'));
   if(!FILTROS.some(f=>f[0]===filtro))filtro='todos';
   $('filtros').hidden=!delMes.length;
   $('filtros').innerHTML=FILTROS.filter(f=>!f[3]||delMes.some(f[2])||filtro===f[0]).map(f=>'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+delMes.filter(f[2]).length+'</i></button>').join('');
@@ -806,7 +809,7 @@ function dibujar(){
   else{
     // pie: la suma de lo que se ve, debajo de cada columna
     const z=sumar(lista),col=(o,cls)=>{const l=partes(o);return '<div class="der"><div class="plata'+(l.length?cls:' nada')+'">'+(l.length?l.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>';};
-    h+='<div class="pie"><div class="q">'+lista.length+(lista.length===1?' contrato':' contratos')+(filtro!=='todos'?' · '+esc(FILTROS.find(f=>f[0]===filtro)[1].toLowerCase()):'')+'</div>'+col(z.tot,'')+col(z.pag,'')+col(z.deb,' debe')+'</div>';
+    h+='<div class="pie"><div class="q">'+lista.length+(lista.length===1?' contrato':' contratos')+(filtro!=='todos'?' · '+esc(FILTROS.find(f=>f[0]===filtro)[1].toLowerCase()):'')+'</div>'+(RESUMEN?col(z.tot,'')+col(z.pag,'')+col(z.deb,' debe'):'')+'</div>';
   }
   $('lista').innerHTML=h;
 }
@@ -842,6 +845,12 @@ function verFicha(c){
     +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
   if(k)h+='<div class="nota-t"><span class="enl">'+ICO_ENL+'Enlazado con el tablero y el calendario</span>'+(etapaDet(k).t?'<br>'+esc(etapaDet(k).t)+'.':'')+'</div>';
   else if(c.enlace&&TABLERO_OK)h+='<div class="nota-t'+(FUERA[c.ficha]?'':' rota')+'"><span class="enl roto">'+ICO_ENL+(FUERA[c.ficha]?FUERA[c.ficha][0]:'Esta ficha no existe en el tablero')+'</span>'+(FUERA[c.ficha]?'<br>'+FUERA[c.ficha][1]:'')+'</div>';
+  if(PLATA){
+    const n=cuentas(c,v),s=saldoTxt(n),l=o=>partes(o).map(esc).join('<br>')||'—';
+    h+='<div class="m-res"><div><div class="t">Total</div><b>'+l(n.tot)+'</b></div><div><div class="t">Cobrado</div><b>'+l(n.pag)+'</b></div><div><div class="t">Saldo</div><b class="'+s.cls+'">'+s.l.map(esc).join('<br>')+'</b></div></div>';
+    const cobros=(c.sena?[Object.assign({sena:true},c.sena)]:[]).concat(c.pagos||[]);
+    if(cobros.length)h+='<div class="lec cob">'+cobros.map(x=>'<span>'+(x.sena?'Seña':'Pago')+(x.fecha?' · '+esc(fch(x.fecha)):'')+'</span><div>'+esc(plata(x.monto,x.moneda))+(x.medio?' · '+esc(x.medio):'')+esc(cambioTxt(x))+(x.nota?' · '+esc(x.nota):'')+'</div>').join('')+'</div>';
+  }
   h+='<div class="lec">'
     +fila('Teléfono',v.telefono?(wa?'<a href="'+esc(wa)+'" target="_blank" rel="noopener">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'')
     +fila('Dirección',esc(v.direccion))

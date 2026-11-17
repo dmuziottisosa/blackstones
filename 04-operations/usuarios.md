@@ -8,17 +8,18 @@
 |---|---|---|---|
 | Ver el tablero y abrir fichas | Sí | Sí | Sí |
 | Adjuntar foto de bacha, plano y entrega | Sí | Sí | Sí |
-| Borrar o girar una foto | Todas | Todas | Solo las que subió ella |
+| Borrar o girar una foto, también las que subió otro | Sí | Sí | Sí |
 | Cargar, mover, tildar, editar, archivar y borrar obras; papelera | Sí | Sí | No |
 | Ver la seña de la ficha | Sí | Sí | No |
 | Calculadora, Presupuestos, Calendario, Stock | Sí | Sí | No entra |
-| Ver Relación-Contrato | Sí | Sin la plata, solo mirar | No entra |
+| Ver Relación-Contrato, con la plata de cada contrato | Sí | Sí, solo mirar | No entra |
+| Ver el resumen de plata del mes (contratado, cobrado, por cobrar) | Sí | No | No |
 | Cargar y cambiar contratos, cobros y pagos | Sí | No | No |
 | Usuarios | Sí | No | No |
 
-- **Operador en Relación-Contrato:** ve los contratos (cliente, N°, material, estado, enlace, adjunto), pero no el total, la seña, los pagos, el saldo ni el resumen del mes. No puede crear, editar ni borrar. Sí ve los precios en Calculadora y Presupuestos, y la seña en la ficha del tablero.
-- **Planos y bacha:** entra directo al tablero. Ve las fichas enteras menos la plata. No puede tildar, mover, editar ni escribir notas. Si escribe otra dirección, vuelve al tablero.
-- **Las notas son texto libre.** A quien no ve la plata se le tapan los montos escritos con signo: "Saldo $ 285.720" le llega como "Saldo $ ···". Un monto sin signo ("200 mil") no se reconoce y se ve. Si no tiene que verse, no va en la nota.
+- **Operador en Relación-Contrato (dueño, 17/11/2026):** ve cada contrato con su total, seña, pagos y saldo. No ve el resumen del mes ni las sumas del pie. No puede crear, editar ni borrar: al abrir un contrato lo ve sin formulario.
+- **Planos y bacha:** entra directo al tablero. Ve las fichas enteras menos la seña. No puede tildar, mover, editar ni escribir notas. Adjunta fotos y puede borrar o girar cualquiera, también las que subió otro (dueño, 17/11/2026). No entra al calendario. Si escribe otra dirección, vuelve al tablero.
+- **Las notas de las fichas son texto libre.** A "Planos y bacha" se le tapan los montos escritos con signo: "Saldo $ 285.720" le llega como "Saldo $ ···". Un monto sin signo ("200 mil") no se reconoce y se ve. Si no tiene que verse, no va en la nota.
 
 ## Cómo se usa
 
@@ -42,11 +43,11 @@
 - **Dónde viven:** `bs-data/usuarios/usuarios.json`, fuera de la web y fuera del repo. Guarda usuario, nombre, rol, si está activo y la contraseña cifrada (`password_hash`). Tiene copia `.bak`.
 - **La tabla de permisos** está en un solo lugar: `AUTH_PERMISOS` en `site/public_html/calculadora/auth_check.php`. Cambiar qué puede un rol es cambiar un renglón ahí.
 - **El bloqueo lo hace el servidor.** Cada archivo de `calculadora/api/` empieza con `bs_require_permiso('<permiso>')` (`_auth.php`): sin sesión responde 401, sin permiso 403. Las páginas llaman a `auth_exigir_pagina()`. Esconder botones en pantalla es solo para que quede limpia.
-- **Lo que un rol no ve no sale del servidor:** `tablero.php` no manda la seña (ni en el historial) sin `tablero_plata`; `contratos.php` no manda totales, seña ni pagos sin `contratos_plata`.
+- **Lo que un rol no ve no sale del servidor:** `tablero.php` no manda la seña (ni en el historial) sin `tablero_plata`; `contratos.php` no manda totales, seña ni pagos sin `contratos_plata` (hoy lo tienen Administrador y Operador). El resumen del mes se arma en la página a partir de los contratos: sin `contratos_resumen` no se arma, pero quien ve cada contrato podría sumarlos a mano.
 - **El menú** lo arma `auth_nav_html()` para todas las páginas: solo lo que el rol puede abrir.
 - **La sesión** es una cookie firmada con un secreto que se genera en el servidor al crear el primer administrador (campo `secreto` del archivo). No está en el repo. Dura 60 días.
 - **Un endpoint nuevo** tiene que llamar a `bs_require_permiso()`. `bs_require_auth()` a secas quedó cerrado a administradores, para que un olvido no abra nada.
-- **Fotos:** cada adjunto guarda quién lo subió (`por`). Las de antes de los usuarios no dicen de quién son: "Planos y bacha" no las puede borrar.
+- **Fotos:** cada adjunto guarda quién lo subió (`por`). Hoy los tres roles pueden borrar las de cualquiera (`tablero_adj_ajeno`); si se le saca ese permiso a un rol, solo borra las suyas.
 - **Registro:** cada cambio queda en `bs-data/usuarios/registro-AAAA-MM.log` (fecha, usuario, archivo, permiso, N° de ficha). No guarda contraseñas ni nombres de clientes. No tiene pantalla: se baja por FTP.
 - **Relación-Contrato sigue pudiendo borrarse entera:** los usuarios no dependen de ella.
 

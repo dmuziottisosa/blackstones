@@ -215,11 +215,12 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
     <table class="roles">
       <tr><th></th><th>Administrador</th><th>Operador</th><th>Planos y bacha</th></tr>
       <tr><td>Ver el tablero</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
-      <tr><td>Adjuntar foto de bacha, plano y entrega</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
+      <tr><td>Adjuntar y borrar fotos de bacha, plano y entrega</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
       <tr><td>Cargar, mover, editar, archivar y borrar obras</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Ver la seña de la ficha</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Calculadora, Presupuestos y Calendario</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
-      <tr><td>Ver Relación-Contrato</td><td class="si">Sí</td><td class="si">Sin la plata</td><td class="no">No</td></tr>
+      <tr><td>Ver Relación-Contrato, con la plata de cada contrato</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
+      <tr><td>Ver el resumen de plata del mes</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
       <tr><td>Cargar y cambiar contratos, cobros y pagos</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
       <tr><td>Usuarios</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
     </table>

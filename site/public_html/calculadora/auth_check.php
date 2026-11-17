@@ -34,13 +34,14 @@ const AUTH_PERMISOS = [
     'tablero'           => ['admin', 'operador', 'planos'], // ver el tablero y abrir fichas
     'tablero_operar'    => ['admin', 'operador'],           // cargar, mover, tildar, editar, archivar, borrar, papelera
     'tablero_adjuntar'  => ['admin', 'operador', 'planos'], // subir foto de bacha, plano y entrega
-    'tablero_adj_ajeno' => ['admin', 'operador'],           // borrar o girar un adjunto que subió otro
+    'tablero_adj_ajeno' => ['admin', 'operador', 'planos'], // borrar o girar un adjunto que subió otro (dueño, 17/11/2026: también planos)
     'tablero_plata'     => ['admin', 'operador'],           // ver la seña de la ficha
     'calendario'        => ['admin', 'operador'],
     'stock'             => ['admin', 'operador'],
     'contratos'         => ['admin', 'operador'],           // ver Relación-Contrato
     'contratos_editar'  => ['admin'],                       // crear, editar, borrar, pagos, adjuntos
-    'contratos_plata'   => ['admin'],                       // ver montos, señas, pagos y el resumen
+    'contratos_plata'   => ['admin', 'operador'],           // ver el total, la seña, los pagos y el saldo de cada contrato
+    'contratos_resumen' => ['admin'],                       // ver el resumen de plata del mes (contratado, cobrado, por cobrar) y las sumas del pie
     'usuarios'          => ['admin'],
     'mantenimiento'     => ['admin'],                       // importadores y scripts de una sola vez
 ];
