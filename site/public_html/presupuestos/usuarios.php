@@ -216,6 +216,7 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
       <tr><th></th><th>Administrador</th><th>Operador</th><th>Planos y bacha</th></tr>
       <tr><td>Ver el tablero</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
       <tr><td>Adjuntar y borrar fotos de bacha, plano y entrega</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
+      <tr><td>Anotar de quién es la bacha y su modelo</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
       <tr><td>Cargar, mover, editar, archivar y borrar obras</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Ver la seña de la ficha</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Calculadora, Presupuestos y Calendario</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
@@ -295,7 +296,7 @@ async function hacer(body,ok){
 $('lista').addEventListener('change',e=>{
   if(!e.target.matches('[data-rol]'))return;
   const u=usuarioDe(e.target);
-  hacer({accion:'editar',id:u.id,nombre:u.nombre,rol:e.target.value,activo:u.activo},'Rol cambiado.');
+  hacer({accion:'editar',id:u.id,rol:e.target.value},'Rol cambiado.'); // solo el rol: no pisa una baja hecha desde otra pantalla
 });
 $('lista').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
@@ -303,7 +304,7 @@ $('lista').addEventListener('click',e=>{
   if(b.hasAttribute('data-clave'))abrirVelo('clave',u);
   else if(b.hasAttribute('data-baja')){
     if(u.activo&&!confirm('¿Dar de baja a '+u.nombre+'? Pierde el acceso en el momento. Se puede reactivar.'))return;
-    hacer({accion:'editar',id:u.id,nombre:u.nombre,rol:u.rol,activo:!u.activo},u.activo?'Dado de baja.':'Reactivado.');
+    hacer({accion:'editar',id:u.id,activo:!u.activo},u.activo?'Dado de baja.':'Reactivado.');
   }else if(b.hasAttribute('data-borrar')){
     if(!confirm('¿Borrar el usuario de '+u.nombre+'? No se puede deshacer. Lo que cargó en el sistema no se toca.'))return;
     hacer({accion:'borrar',id:u.id},'Usuario borrado.');

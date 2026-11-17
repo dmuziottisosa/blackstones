@@ -50,7 +50,14 @@
 require_once __DIR__ . '/_tablero.php';
 require_once __DIR__ . '/_auth.php';
 
-bs_require_permiso((($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') ? 'tablero' : 'tablero_operar');
+// Leer: quien ve el tablero. Cambiar: quien lo opera; salvo el dato de la bacha (de quién es y
+// qué modelo), que también lo puede cargar quien tiene 'tablero_bacha' sin operar nada más.
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+    bs_require_permiso('tablero');
+} else {
+    $bs_pre = json_decode((string)@file_get_contents('php://input'), true);
+    bs_require_permiso((is_array($bs_pre) && ($bs_pre['accion'] ?? '') === 'bacha') ? 'tablero_bacha' : 'tablero_operar');
+}
 bs_check_csrf();
 bs_ensure_dirs();
 

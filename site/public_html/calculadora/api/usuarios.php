@@ -9,7 +9,7 @@
 // POST /api/usuarios.php  (JSON)
 //   primer_admin  { usuario, nombre, clave }          solo mientras no haya usuarios
 //   crear         { usuario, nombre, rol, clave }     administradores
-//   editar        { id, nombre, rol, activo }         administradores
+//   editar        { id, [nombre], [rol], [activo] }   administradores (solo cambia lo que se manda)
 //   clave         { id, clave }                       administradores (le cambia la contraseña a otro)
 //   borrar        { id }                              administradores
 //   mi_clave      { actual, nueva }                   cualquiera, la propia
@@ -165,6 +165,8 @@ if ($accion === 'crear') {
         if (($rol !== 'admin' || !$activo) && bs_usuario_admins_activos($db, $id) === 0) bs_usuarios_salir($fp, 'Tiene que quedar al menos un administrador activo.');
         $db['usuarios'][$id]['nombre'] = $nombre;
         $db['usuarios'][$id]['rol'] = $rol;
+        // Dar de baja cierra sus sesiones para siempre: si después se lo reactiva, tiene que volver a entrar.
+        if (!$activo && !empty($r['activo'])) $db['usuarios'][$id]['ver'] = intval($r['ver'] ?? 1) + 1;
         $db['usuarios'][$id]['activo'] = $activo;
         $reg['rol'] = $rol; $reg['activo'] = $activo ? 'si' : 'no';
 

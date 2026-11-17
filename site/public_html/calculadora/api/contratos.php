@@ -461,6 +461,10 @@ try {
 
     } elseif ($accion === 'borrar_enlazado') {
         // Lo llama el tablero al borrar una ficha: si tenía un contrato enlazado, se va con ella.
+        // Solo vale si la ficha de verdad salió del tablero: con la ficha viva (o archivada) el contrato
+        // no se toca. Así quien opera el tablero no puede mandar contratos a la papelera por su cuenta.
+        $est = bs_contrato_ficha_estado(['cliente_nro' => intval($body['cliente_nro'] ?? 0), 'sub' => intval($body['sub'] ?? 0)]);
+        if ($est === 'viva' || $est === 'archivada') bs_contratos_salir($fp, 'Esa ficha sigue en el tablero: su contrato no se borra.', 409);
         $k = bs_contrato_de_ficha($d, intval($body['cliente_nro'] ?? 0), intval($body['sub'] ?? 0));
         $extra['borrado'] = $k !== null;
         if ($k !== null) {
@@ -475,6 +479,10 @@ try {
         if ($accion === 'restaurar') {
             $k = isset($d['papelera'][$id]) ? $id : null;
         } else {
+            // El contrato vuelve con su ficha: solo si la ficha ya está de nuevo en el tablero.
+            if (bs_contrato_ficha_estado(['cliente_nro' => intval($body['cliente_nro'] ?? 0), 'sub' => intval($body['sub'] ?? 0)]) !== 'viva') {
+                bs_contratos_salir($fp, 'Esa ficha no está en el tablero: su contrato no se recupera solo.', 409);
+            }
             $n = str_pad((string)intval($body['cliente_nro'] ?? 0), 4, '0', STR_PAD_LEFT);
             foreach ((array)$d['papelera'] as $kk => $c) {
                 $e = $c['enlace'] ?? null;

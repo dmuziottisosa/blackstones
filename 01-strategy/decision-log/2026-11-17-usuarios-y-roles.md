@@ -24,6 +24,7 @@ Definido por el dueño (17/11/2026):
 - El Operador **sí ve los montos** de cada contrato. Lo que no ve es el resumen de plata. (La primera versión le tapaba todo; el dueño lo corrigió el mismo día.)
 - "Planos y bacha" **puede borrar fotos que subió otro**. (La primera versión solo le dejaba las suyas; corregido el mismo día.)
 - "Planos y bacha" no entra al calendario.
+- "Planos y bacha" **puede poner el modelo de la bacha** (y de quién es), sin operar nada más del tablero.
 
 Puesto por defecto, sin respuesta del dueño. Cada uno es un renglón de `AUTH_PERMISOS`:
 
@@ -37,9 +38,22 @@ Puesto por defecto, sin respuesta del dueño. Cada uno es un renglón de `AUTH_P
 - El permiso se controla en el servidor, en cada archivo de datos. Probado rol por rol contra los 35 archivos.
 - Lo que un rol no puede ver no sale del servidor (seña e historial de la seña para "Planos y bacha").
 - Las notas de las fichas llevan plata escrita a mano ("Saldo $ …"). A "Planos y bacha" se le tapan los montos con signo.
-- El resumen del mes se arma en la página con los contratos. El Operador no lo ve, pero tiene los montos de cada contrato y podría sumarlos.
+- El resumen del mes se arma en la página con los contratos; ningún archivo del servidor lo controla. El Operador no lo ve, pero tiene los montos de cada contrato y podría sumarlos.
 - Mientras no se cree el primer administrador nada cambia para el equipo.
 - Al crear el primer administrador se cierran todas las sesiones de la contraseña compartida: el resto no entra hasta tener su usuario.
+
+## Lo que encontró la búsqueda de bugs (17/11/2026)
+
+Una revisión propia de casos límite y una revisión independiente del código, antes del deploy. Todo arreglado y con su prueba:
+
+- Cinco contraseñas mal de una persona bloqueaban el ingreso de todo el taller (todos salen por la misma conexión). Ahora se bloquea ese usuario.
+- Quien opera el tablero podía mandar a la papelera el contrato de una ficha viva llamando directo al servidor. Ahora el servidor exige que la ficha haya salido del tablero.
+- Reactivar a alguien dado de baja le revivía las sesiones viejas. Ahora la baja las cierra para siempre.
+- Cambiar el rol desde una pantalla desactualizada podía reactivar a alguien dado de baja. Ahora cada cambio manda solo lo que cambia.
+- Los montos en notas escritos como "200.000$", "ARS 90.000", "USD: 1200" o "350mil" no se tapaban.
+- Un guardado con el archivo de usuarios dañado pisaba la copia de respaldo sana.
+
+No se encontró ninguna forma de saltear permisos, falsificar la sesión ni reabrir la contraseña compartida.
 
 ## Known unknowns
 

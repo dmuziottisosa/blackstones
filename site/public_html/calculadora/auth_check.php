@@ -34,6 +34,7 @@ const AUTH_PERMISOS = [
     'tablero'           => ['admin', 'operador', 'planos'], // ver el tablero y abrir fichas
     'tablero_operar'    => ['admin', 'operador'],           // cargar, mover, tildar, editar, archivar, borrar, papelera
     'tablero_adjuntar'  => ['admin', 'operador', 'planos'], // subir foto de bacha, plano y entrega
+    'tablero_bacha'     => ['admin', 'operador', 'planos'], // anotar o corregir de quién es la bacha y su modelo (dueño, 17/11/2026: también planos)
     'tablero_adj_ajeno' => ['admin', 'operador', 'planos'], // borrar o girar un adjunto que subió otro (dueño, 17/11/2026: también planos)
     'tablero_plata'     => ['admin', 'operador'],           // ver la seña de la ficha
     'calendario'        => ['admin', 'operador'],
@@ -172,12 +173,21 @@ function auth_puede(string $permiso): bool {
 
 /**
  * Tapa los montos escritos en un texto libre (notas), para quien no puede ver la plata.
- * "Saldo $ 285.720" → "Saldo $ ···". Reconoce $, USD, U$S, US$ y "pesos"/"dólares" después del número.
- * Es lo mejor que se puede hacer con texto libre: un monto escrito sin signo ("200 mil") no se reconoce.
+ * "Saldo $ 285.720" → "Saldo $ ···". Reconoce el signo antes o después del número ($, U$S, US$,
+ * USD, ARS, "pesos", "dólares"), con o sin dos puntos, miles separados por punto o por espacio,
+ * y cantidades en "mil", "millones" o "lucas".
+ * Es lo mejor que se puede hacer con texto libre: un número suelto ("quedan 200") no se reconoce.
  */
 function auth_tapar_plata(string $txt): string {
-    $txt = (string)preg_replace('/(?:U\$S|US\$|USD|U\$D|\$)\s*\d[\d.,]*(?:\s*(?:mil(?:lones)?|k|m)\b)?/iu', '$ ···', $txt);
-    return (string)preg_replace('/\d[\d.,]*\s*(?:mil(?:lones)?\s*)?(?:pesos|d[oó]lares|usd)\b/iu', '$ ···', $txt);
+    $num = '\d(?:[\d.,]*\d)?(?:[ \x{00A0}]\d{3}\b)*'; // no se lleva el punto o la coma del final de la frase
+    $mon = '(?:U\$S|US\$|U\$D|USD|ARS|AR\$|\$)';
+    $x = '$ ···';
+    // signo adelante: "$ 285.720", "USD: 1200", "ARS 90.000", "$ 1 500 000", "$2M"
+    $txt = (string)preg_replace('/' . $mon . '\s*:?\s*' . $num . '(?:\s*(?:mil(?:lones)?|lucas|k|m)\b)?/iu', $x, $txt);
+    // signo atrás: "200.000$", "500 U$S", "1.500 dólares" (no si lo que sigue ya es otro monto)
+    $txt = (string)preg_replace('/' . $num . '\s*(?:mil(?:lones)?\s*)?(?:' . $mon . '(?!\s*[:\d·])|(?:pesos|d[oó]lares)\b)/iu', $x, $txt);
+    // sin signo pero dicho como plata: "350mil", "2 millones", "200 lucas"
+    return (string)preg_replace('/' . $num . '\s*(?:mil(?:lones)?|lucas)\b/iu', $x, $txt);
 }
 
 /** Todo lo que puede el que entró, para que la página esconda lo que no usa. */
@@ -380,6 +390,11 @@ function auth_rate_restante(array $data, string $key, int $max): int {
     if (($entry['count'] ?? 0) < $max) return 0;
     $remaining = ($entry['last'] ?? 0) + AUTH_LOCKOUT_TIME - time();
     return $remaining > 0 ? $remaining : 0;
+}
+
+/** Segundos que le quedan al bloqueo de la conexión entera (con usuarios), o 0. */
+function auth_lockout_conexion(): int {
+    return auth_rate_restante(auth_get_attempts(), auth_rate_key_ip(), AUTH_MAX_ATTEMPTS * 6);
 }
 
 /**

@@ -17,15 +17,23 @@ $es_post = $_SERVER['REQUEST_METHOD'] === 'POST';
 if ($es_post && $con_usuarios) $usuario_tipeado = trim((string)($_POST['usuario'] ?? ''));
 // Con usuarios, el bloqueo por intentos fallidos es de ese usuario (más un tope para la conexión
 // entera); con la contraseña compartida, de la conexión, como siempre.
-$lockoutSeconds = auth_check_lockout($usuario_tipeado);
 // ¿El bloqueo es de toda la conexión (no se puede probar con ningún usuario) o solo de ese usuario?
-$bloqueo_total = !$con_usuarios ? $lockoutSeconds > 0 : auth_check_lockout('') > 0;
+if ($con_usuarios) {
+    $bloqueo_total = auth_lockout_conexion() > 0;
+    $lockoutSeconds = $usuario_tipeado !== '' ? auth_check_lockout($usuario_tipeado) : auth_lockout_conexion();
+} else {
+    $lockoutSeconds = auth_check_lockout();
+    $bloqueo_total = $lockoutSeconds > 0;
+}
 
 // Procesar form POST
 if ($es_post && $lockoutSeconds === 0) {
     $password = (string)($_POST['password'] ?? '');
 
-    if ($con_usuarios) {
+    if ($con_usuarios && $usuario_tipeado === '') {
+        // Sin usuario no hay a quién contarle el intento: se avisa y nada más.
+        $error = 'Escribí tu usuario.';
+    } elseif ($con_usuarios) {
         $id = auth_entrar($usuario_tipeado, $password);
         if ($id !== '') {
             auth_reset_attempts($usuario_tipeado);
@@ -48,7 +56,7 @@ if ($es_post && $lockoutSeconds === 0) {
             auth_record_failure($usuario_tipeado);
             $error = 'Usuario o contraseña incorrectos.';
             $lockoutSeconds = auth_check_lockout($usuario_tipeado);
-            $bloqueo_total = auth_check_lockout('') > 0;
+            $bloqueo_total = auth_lockout_conexion() > 0;
         }
     } elseif (auth_check_password($password)) {
         auth_reset_attempts();

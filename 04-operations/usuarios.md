@@ -9,6 +9,7 @@
 | Ver el tablero y abrir fichas | Sí | Sí | Sí |
 | Adjuntar foto de bacha, plano y entrega | Sí | Sí | Sí |
 | Borrar o girar una foto, también las que subió otro | Sí | Sí | Sí |
+| Anotar de quién es la bacha y su modelo | Sí | Sí | Sí |
 | Cargar, mover, tildar, editar, archivar y borrar obras; papelera | Sí | Sí | No |
 | Ver la seña de la ficha | Sí | Sí | No |
 | Calculadora, Presupuestos, Calendario, Stock | Sí | Sí | No entra |
@@ -18,8 +19,8 @@
 | Usuarios | Sí | No | No |
 
 - **Operador en Relación-Contrato (dueño, 17/11/2026):** ve cada contrato con su total, seña, pagos y saldo. No ve el resumen del mes ni las sumas del pie. No puede crear, editar ni borrar: al abrir un contrato lo ve sin formulario.
-- **Planos y bacha:** entra directo al tablero. Ve las fichas enteras menos la seña. No puede tildar, mover, editar ni escribir notas. Adjunta fotos y puede borrar o girar cualquiera, también las que subió otro (dueño, 17/11/2026). No entra al calendario. Si escribe otra dirección, vuelve al tablero.
-- **Las notas de las fichas son texto libre.** A "Planos y bacha" se le tapan los montos escritos con signo: "Saldo $ 285.720" le llega como "Saldo $ ···". Un monto sin signo ("200 mil") no se reconoce y se ve. Si no tiene que verse, no va en la nota.
+- **Planos y bacha:** entra directo al tablero. Ve las fichas enteras menos la seña. No puede tildar, mover, editar ni escribir notas. Adjunta fotos y puede borrar o girar cualquiera, también las que subió otro (dueño, 17/11/2026). Desde el botón "Modelo de bacha" de la ficha anota de quién es la bacha y su modelo, en cualquier etapa (dueño, 17/11/2026); eso no toca el tilde "Tenemos la bacha", salvo que marque "No lleva", que lo deja tildado como siempre. No entra al calendario. Si escribe otra dirección, vuelve al tablero.
+- **Las notas de las fichas son texto libre.** A "Planos y bacha" se le tapan los montos: "Saldo $ 285.720" le llega como "Saldo $ ···". Reconoce el signo antes o después del número ($, U$S, USD, ARS, pesos, dólares) y las cantidades en mil, millones o lucas. Un número suelto ("quedan 200") no se reconoce y se ve. Si no tiene que verse, no va en la nota.
 
 ## Cómo se usa
 
@@ -29,6 +30,7 @@
 - Cambiarle la contraseña a alguien le cierra las sesiones abiertas.
 - Siempre queda al menos un administrador activo. Nadie se saca su propio rol ni se da de baja a sí mismo. **Conviene que haya dos administradores.**
 - Contraseña: 8 caracteres o más. El usuario va en minúsculas, sin espacios.
+- **La baja cierra las sesiones para siempre:** si después se reactiva a la persona, tiene que volver a entrar.
 - **Cinco contraseñas mal seguidas bloquean a ese usuario 15 minutos**, no a todo el taller: los demás siguen entrando desde la misma conexión. Si desde una conexión se prueban 30 veces usuarios distintos, se frena la conexión entera.
 - **Las contraseñas no se pasan por chat ni por escrito.** El administrador la carga y se la dice a la persona, que después la cambia desde "Mi usuario".
 
@@ -49,6 +51,7 @@
 - **La sesión** es una cookie firmada con un secreto que se genera en el servidor al crear el primer administrador (campo `secreto` del archivo). No está en el repo. Dura 60 días.
 - **Permisos que van de a dos** (`AUTH_REQUIERE`): cambiar el tablero pide también ver su plata, y cambiar contratos pide ver la de los contratos. Un rol que no recibe los montos guardaría de vuelta las notas tapadas o los totales en cero; por eso, si se le saca el de ver, pierde el de cambiar.
 - **Un endpoint nuevo** tiene que llamar a `bs_require_permiso()`. `bs_require_auth()` a secas quedó cerrado a administradores, para que un olvido no abra nada.
+- **Contrato enlazado:** el tablero le pide a `contratos.php` borrar o recuperar el contrato de una ficha (`borrar_enlazado`, `restaurar_enlazado`). El servidor solo lo hace si la ficha de verdad salió del tablero o volvió a él; con la ficha viva, quien opera el tablero no puede mandar su contrato a la papelera.
 - **Fotos:** cada adjunto guarda quién lo subió (`por`). Hoy los tres roles pueden borrar las de cualquiera (`tablero_adj_ajeno`); si se le saca ese permiso a un rol, solo borra las suyas.
 - **Registro:** cada cambio queda en `bs-data/usuarios/registro-AAAA-MM.log` (fecha, usuario, archivo, permiso, N° de ficha). No guarda contraseñas ni nombres de clientes. No tiene pantalla: se baja por FTP.
 - **Relación-Contrato sigue pudiendo borrarse entera:** los usuarios no dependen de ella.
@@ -61,4 +64,4 @@
 
 ## Pruebas
 
-312 comprobaciones contra un servidor local: cada rol contra cada página y cada archivo de datos (lectura y escritura), que la plata no salga del servidor, fotos propias y ajenas, bajas y cambios de rol al instante, cookie adulterada, archivo dañado, bloqueo por intentos fallidos. Más los flujos completos del Operador en el navegador (borrar una ficha con contrato y recuperarla, archivar y devolver) y las pantallas de los tres roles en computadora, tablet y celular. La regresión completa del tablero, calendario, contratos y hub pasa igual con la contraseña compartida y entrando como administrador.
+322 comprobaciones contra un servidor local: cada rol contra cada página y cada archivo de datos (lectura y escritura), que la plata no salga del servidor, fotos propias y ajenas, bajas y cambios de rol al instante, cookie adulterada, archivo dañado, bloqueo por intentos fallidos. Más los flujos completos del Operador en el navegador (borrar una ficha con contrato y recuperarla, archivar y devolver) y las pantallas de los tres roles en computadora, tablet y celular. La regresión completa del tablero, calendario, contratos y hub pasa igual con la contraseña compartida y entrando como administrador.

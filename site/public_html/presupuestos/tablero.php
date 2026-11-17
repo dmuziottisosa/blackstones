@@ -586,8 +586,11 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 /* Rol que solo adjunta fotos: la ficha se ve entera pero no se cambia. */
 .solo-fotos .c-hecho,.solo-fotos .c-fecha,.solo-fotos .chk{pointer-events:none}
 .solo-fotos .c-avanzar,.solo-fotos input[data-nota],.solo-fotos .c-det .acciones,.solo-fotos .col-cargar,.solo-fotos #exportB,.solo-fotos .c-fecha.vacia{display:none}
+.solo-fotos .c-hecho:not(.listo){display:none} /* el botón grande de la etapa no se le muestra a quien no puede usarlo */
+.solo-fotos .chk{opacity:.8}
 .solo-fotos .card{cursor:default}
 .solo-fotos .card.plegada{cursor:pointer}
+.adj.bacha-b{width:auto;max-width:100%;min-width:0;flex-shrink:1;padding:0 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body<?= auth_puede('tablero_operar') ? '' : ' class="solo-fotos"' ?>>
@@ -663,6 +666,7 @@ function toggleTheme(){
 // Quién entró y qué puede (el servidor igual rechaza lo que el rol no puede).
 const YO=<?= auth_permisos_js() ?>;
 const OPERA=!!YO.puede.tablero_operar; // sin esto la ficha solo se mira y se le adjuntan fotos
+const SOLO_BACHA=!OPERA&&!!YO.puede.tablero_bacha; // no opera, pero anota de quién es la bacha y su modelo
 const API='/calculadora/api/tablero.php';
 const API_ESTADO='/calculadora/api/state.php';
 const API_ADJ='/calculadora/api/tablero-adjunto.php';
@@ -931,6 +935,8 @@ function htmlAdjuntos(c,desplegada){
   if(c.etapa==='instalar'||c.etapa==='archivar'){
     h+='<button type="button" class="adj mas" data-act="adjuntar" data-tipo="entrega">+ Foto entrega</button>';
   }
+  // Quien no opera el tablero carga o corrige desde acá de quién es la bacha y su modelo.
+  if(SOLO_BACHA)h+='<button type="button" class="adj mas bacha-b" data-act="bacha">'+(c.bacha?'Bacha: '+esc(c.bacha==='no'?'no lleva':BACHA[c.bacha]+(c.bacha_modelo?' · '+c.bacha_modelo:' · sin modelo')):'+ Modelo de bacha')+'</button>';
   return h?'<div class="c-adj">'+h+'</div>':'';
 }
 
@@ -1395,7 +1401,7 @@ window.addEventListener('resize',ajustarAlto);
 
 // Guarda un cambio: primero lo aplica en pantalla, después lo confirma el server.
 async function guardar(c,body,aplicar){
-  if(!OPERA){toast('Tu usuario no puede cambiar las fichas.');return;}
+  if(!OPERA&&!(SOLO_BACHA&&body.accion==='bacha')){toast('Tu usuario no puede cambiar las fichas.');return;}
   if(ocupado)return;
   ocupado=true;
   // Si el cambio le mueve el lugar en la cola (fecha, hora, Medido, Cortado), la pantalla
@@ -1517,7 +1523,8 @@ wrap.addEventListener('click',ev=>{
   const c=art&&cardDe(art.dataset.key);
   if(!c)return;
   const act=b.dataset.act;
-  if(!OPERA&&!['abrir','plegar','mas','adjuntar','ver'].includes(act))return; // solo mira y adjunta
+  if(!OPERA&&!['abrir','plegar','mas','adjuntar','ver'].concat(SOLO_BACHA?['bacha']:[]).includes(act))return; // solo mira, adjunta y anota la bacha
+  if(act==='bacha'){pedirBacha(c);return;}
   if(act==='abrir'||act==='plegar'){
     if(Date.now()-ultimoArrastre<400)return;
     VISTA[c.key]=act==='abrir';
@@ -1983,7 +1990,7 @@ function pedirBacha(c){
     '<p>¿De quién es la bacha?</p><div class="sena">'+op('nuestra','Nuestra')+op('cliente','Del cliente')+op('no','No lleva')+'</div>'+
     '<label class="campo" id="bachaModL" style="margin-top:16px"><span id="bachaModT">Modelo de la bacha</span><input type="text" id="bachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34" value="'+esc(c.bacha_modelo||'')+'"></label>'+
     '<button type="button" class="adjuntar" id="bachaFoto">+ Adjuntar foto de la bacha</button>'+
-    (c.checks.bacha||c.bacha?'<p style="margin:14px 0 0"><button type="button" class="lnk" id="bachaQuitar">'+(c.checks.bacha?'Quitar el tilde':'Borrar el dato')+'</button></p>':''),
+    (OPERA&&(c.checks.bacha||c.bacha)?'<p style="margin:14px 0 0"><button type="button" class="lnk" id="bachaQuitar">'+(c.checks.bacha?'Quitar el tilde':'Borrar el dato')+'</button></p>':''),
     'Guardar',
     ()=>{
       if(!origen){toast('Elegí de quién es la bacha.');return;}
@@ -1991,7 +1998,9 @@ function pedirBacha(c){
       // el modelo obliga solo si la bacha es nuestra; si es del cliente, se pone si se sabe
       if(origen==='nuestra'&&!modelo){$('bachaMod').focus();toast('Poné el modelo de la bacha.');return;}
       cerrarModal();
-      if(c.checks.bacha&&origen===c.bacha&&modelo===(c.bacha_modelo||''))return;
+      if((c.checks.bacha||!OPERA)&&origen===c.bacha&&modelo===(c.bacha_modelo||''))return;
+      // Sin operar el tablero se guarda solo el dato (de quién es y el modelo): el tilde no se toca.
+      if(!OPERA){guardar(c,{accion:'bacha',origen:origen,modelo:modelo},()=>{c.bacha=origen;c.bacha_modelo=modelo;c._txt='';});return;}
       guardar(c,{accion:'check',clave:'bacha',valor:true,origen:origen,modelo:modelo},()=>{c.checks.bacha=true;c.bacha=origen;c.bacha_modelo=modelo;c._txt='';});
     });
   const ver=()=>{
