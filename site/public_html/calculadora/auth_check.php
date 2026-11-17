@@ -46,6 +46,14 @@ const AUTH_PERMISOS = [
     'mantenimiento'     => ['admin'],                       // importadores y scripts de una sola vez
 ];
 
+// Un permiso para CAMBIAR no sirve sin el de VER la plata de eso mismo: quien no la recibe
+// guardaría de vuelta los montos tapados o en cero. Si a un rol se le saca el de la derecha,
+// pierde también el de la izquierda, aunque figure en AUTH_PERMISOS.
+const AUTH_REQUIERE = [
+    'tablero_operar'   => 'tablero_plata',
+    'contratos_editar' => 'contratos_plata',
+];
+
 function auth_usuarios_archivo(): string {
     return __DIR__ . '/../../../../bs-data/usuarios/usuarios.json';
 }
@@ -77,7 +85,9 @@ function auth_db_guardar(array $db): bool {
     if ($txt === false) return false;
     $tmp = $f . '.tmp' . bin2hex(random_bytes(4));
     if (@file_put_contents($tmp, $txt, LOCK_EX) === false) return false;
-    if (file_exists($f)) @copy($f, $f . '.bak');
+    // La copia de respaldo solo se pisa con un archivo sano: si el principal está dañado, la copia buena se conserva.
+    $actual = file_exists($f) ? json_decode((string)@file_get_contents($f), true) : null;
+    if (is_array($actual) && !empty($actual['secreto']) && !empty($actual['usuarios'])) @copy($f, $f . '.bak');
     if (!@rename($tmp, $f)) { @unlink($tmp); return false; }
     auth_db(true);
     return true;
@@ -155,7 +165,9 @@ function auth_is_valid(): bool {
 function auth_puede(string $permiso): bool {
     $u = auth_usuario();
     if (!$u) return false;
-    return in_array($u['rol'], AUTH_PERMISOS[$permiso] ?? [], true);
+    if (!in_array($u['rol'], AUTH_PERMISOS[$permiso] ?? [], true)) return false;
+    $base = AUTH_REQUIERE[$permiso] ?? '';
+    return $base === '' || in_array($u['rol'], AUTH_PERMISOS[$base] ?? [], true);
 }
 
 /**
@@ -172,7 +184,7 @@ function auth_tapar_plata(string $txt): string {
 function auth_permisos_js(): string {
     $u = auth_usuario();
     $p = [];
-    foreach (AUTH_PERMISOS as $k => $roles) $p[$k] = $u ? in_array($u['rol'], $roles, true) : false;
+    foreach (AUTH_PERMISOS as $k => $roles) $p[$k] = auth_puede($k);
     return json_encode([
         'usuario' => $u ? $u['usuario'] : '', 'nombre' => $u ? $u['nombre'] : '', 'rol' => $u ? $u['rol'] : '',
         'rol_txt' => $u ? AUTH_ROLES[$u['rol']] : '', 'viejo' => $u ? !empty($u['viejo']) : false, 'puede' => $p,
@@ -348,34 +360,49 @@ function auth_get_ip(): string {
 }
 
 /**
- * Devuelve segundos restantes de bloqueo, o 0 si no está bloqueado.
+ * A quién se le cuentan los intentos fallidos. Con usuarios, a ese usuario desde esa conexión:
+ * en el taller todos salen por la misma IP, y que uno se equivoque no puede dejar afuera al resto.
+ * Sin usuario (contraseña compartida), a la conexión entera, como siempre.
  */
-function auth_check_lockout(): int {
-    $ip = auth_get_ip();
-    $data = auth_get_attempts();
-    if (!isset($data[$ip])) return 0;
+function auth_rate_key(string $usuario = ''): string {
+    $u = substr((string)preg_replace('/[^a-z0-9._-]/', '', auth_usuario_llano($usuario)), 0, 30);
+    return auth_get_ip() . ($u !== '' ? '|' . $u : '');
+}
 
-    $entry = $data[$ip];
-    if (($entry['count'] ?? 0) < AUTH_MAX_ATTEMPTS) return 0;
+/** Tope para la conexión entera cuando hay usuarios: frena a quien prueba muchos usuarios distintos. */
+function auth_rate_key_ip(): string {
+    return auth_get_ip() . '|*';
+}
 
-    $unlockAt = ($entry['last'] ?? 0) + AUTH_LOCKOUT_TIME;
-    $remaining = $unlockAt - time();
+function auth_rate_restante(array $data, string $key, int $max): int {
+    if (!isset($data[$key])) return 0;
+    $entry = $data[$key];
+    if (($entry['count'] ?? 0) < $max) return 0;
+    $remaining = ($entry['last'] ?? 0) + AUTH_LOCKOUT_TIME - time();
     return $remaining > 0 ? $remaining : 0;
 }
 
-function auth_record_failure(): void {
-    $ip = auth_get_ip();
+/**
+ * Devuelve segundos restantes de bloqueo, o 0 si no está bloqueado.
+ */
+function auth_check_lockout(string $usuario = ''): int {
     $data = auth_get_attempts();
-    $entry = $data[$ip] ?? ['count' => 0, 'last' => 0];
+    $r = auth_rate_restante($data, auth_rate_key($usuario), AUTH_MAX_ATTEMPTS);
+    return max($r, auth_rate_restante($data, auth_rate_key_ip(), AUTH_MAX_ATTEMPTS * 6));
+}
 
-    // Reset si ya pasó la ventana de bloqueo
-    if (time() - $entry['last'] > AUTH_LOCKOUT_TIME) {
-        $entry = ['count' => 0, 'last' => 0];
+function auth_record_failure(string $usuario = ''): void {
+    $data = auth_get_attempts();
+    $keys = [auth_rate_key($usuario)];
+    if ($usuario !== '') $keys[] = auth_rate_key_ip();
+    foreach ($keys as $key) {
+        $entry = $data[$key] ?? ['count' => 0, 'last' => 0];
+        // Reset si ya pasó la ventana de bloqueo
+        if (time() - $entry['last'] > AUTH_LOCKOUT_TIME) $entry = ['count' => 0, 'last' => 0];
+        $entry['count']++;
+        $entry['last'] = time();
+        $data[$key] = $entry;
     }
-
-    $entry['count']++;
-    $entry['last'] = time();
-    $data[$ip] = $entry;
 
     // Limpieza: borrar entradas viejas (>1 día) para que el archivo no crezca
     foreach ($data as $k => $v) {
@@ -385,11 +412,12 @@ function auth_record_failure(): void {
     auth_save_attempts($data);
 }
 
-function auth_reset_attempts(): void {
-    $ip = auth_get_ip();
+/** Entró bien: se le borran sus intentos (los de la conexión entera siguen su curso). */
+function auth_reset_attempts(string $usuario = ''): void {
+    $key = auth_rate_key($usuario);
     $data = auth_get_attempts();
-    if (isset($data[$ip])) {
-        unset($data[$ip]);
+    if (isset($data[$key])) {
+        unset($data[$key]);
         auth_save_attempts($data);
     }
 }

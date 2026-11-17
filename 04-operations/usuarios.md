@@ -29,6 +29,7 @@
 - Cambiarle la contraseña a alguien le cierra las sesiones abiertas.
 - Siempre queda al menos un administrador activo. Nadie se saca su propio rol ni se da de baja a sí mismo. **Conviene que haya dos administradores.**
 - Contraseña: 8 caracteres o más. El usuario va en minúsculas, sin espacios.
+- **Cinco contraseñas mal seguidas bloquean a ese usuario 15 minutos**, no a todo el taller: los demás siguen entrando desde la misma conexión. Si desde una conexión se prueban 30 veces usuarios distintos, se frena la conexión entera.
 - **Las contraseñas no se pasan por chat ni por escrito.** El administrador la carga y se la dice a la persona, que después la cambia desde "Mi usuario".
 
 ## El arranque (una sola vez)
@@ -46,6 +47,7 @@
 - **Lo que un rol no ve no sale del servidor:** `tablero.php` no manda la seña (ni en el historial) sin `tablero_plata`; `contratos.php` no manda totales, seña ni pagos sin `contratos_plata` (hoy lo tienen Administrador y Operador). El resumen del mes se arma en la página a partir de los contratos: sin `contratos_resumen` no se arma, pero quien ve cada contrato podría sumarlos a mano.
 - **El menú** lo arma `auth_nav_html()` para todas las páginas: solo lo que el rol puede abrir.
 - **La sesión** es una cookie firmada con un secreto que se genera en el servidor al crear el primer administrador (campo `secreto` del archivo). No está en el repo. Dura 60 días.
+- **Permisos que van de a dos** (`AUTH_REQUIERE`): cambiar el tablero pide también ver su plata, y cambiar contratos pide ver la de los contratos. Un rol que no recibe los montos guardaría de vuelta las notas tapadas o los totales en cero; por eso, si se le saca el de ver, pierde el de cambiar.
 - **Un endpoint nuevo** tiene que llamar a `bs_require_permiso()`. `bs_require_auth()` a secas quedó cerrado a administradores, para que un olvido no abra nada.
 - **Fotos:** cada adjunto guarda quién lo subió (`por`). Hoy los tres roles pueden borrar las de cualquiera (`tablero_adj_ajeno`); si se le saca ese permiso a un rol, solo borra las suyas.
 - **Registro:** cada cambio queda en `bs-data/usuarios/registro-AAAA-MM.log` (fecha, usuario, archivo, permiso, N° de ficha). No guarda contraseñas ni nombres de clientes. No tiene pantalla: se baja por FTP.
@@ -55,8 +57,8 @@
 
 - **Alguien olvidó su contraseña:** un administrador le pone otra desde Usuarios.
 - **El único administrador olvidó la suya:** entrar al administrador de archivos de Hostinger y borrar `bs-data/usuarios/usuarios.json` y `usuarios.json.bak`. El sistema vuelve a la contraseña compartida y hay que crear el administrador de nuevo, en el momento. Se pierden todos los usuarios. Por eso conviene tener dos administradores.
-- **El archivo se dañó:** se usa la copia `.bak`. Si las dos están dañadas no entra nadie, y la contraseña compartida no se reabre sola.
+- **El archivo se dañó:** se usa la copia `.bak`, y el próximo guardado rehace el principal sin pisar la copia sana. Si las dos están dañadas no entra nadie, y la contraseña compartida no se reabre sola.
 
 ## Pruebas
 
-303 comprobaciones contra un servidor local: cada rol contra cada página y cada archivo de datos (lectura y escritura), que la plata no salga del servidor, fotos propias y ajenas, bajas y cambios de rol al instante, cookie adulterada, archivo dañado. Más las pantallas de los tres roles en computadora, tablet y celular. La regresión completa del tablero, calendario, contratos y hub pasa igual con la contraseña compartida y entrando como administrador.
+312 comprobaciones contra un servidor local: cada rol contra cada página y cada archivo de datos (lectura y escritura), que la plata no salga del servidor, fotos propias y ajenas, bajas y cambios de rol al instante, cookie adulterada, archivo dañado, bloqueo por intentos fallidos. Más los flujos completos del Operador en el navegador (borrar una ficha con contrato y recuperarla, archivar y devolver) y las pantallas de los tres roles en computadora, tablet y celular. La regresión completa del tablero, calendario, contratos y hub pasa igual con la contraseña compartida y entrando como administrador.

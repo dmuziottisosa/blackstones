@@ -13,17 +13,22 @@ $con_usuarios = $db !== null;
 $usuario_tipeado = '';
 
 $error = '';
-$lockoutSeconds = auth_check_lockout();
+$es_post = $_SERVER['REQUEST_METHOD'] === 'POST';
+if ($es_post && $con_usuarios) $usuario_tipeado = trim((string)($_POST['usuario'] ?? ''));
+// Con usuarios, el bloqueo por intentos fallidos es de ese usuario (más un tope para la conexión
+// entera); con la contraseña compartida, de la conexión, como siempre.
+$lockoutSeconds = auth_check_lockout($usuario_tipeado);
+// ¿El bloqueo es de toda la conexión (no se puede probar con ningún usuario) o solo de ese usuario?
+$bloqueo_total = !$con_usuarios ? $lockoutSeconds > 0 : auth_check_lockout('') > 0;
 
 // Procesar form POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockoutSeconds === 0) {
+if ($es_post && $lockoutSeconds === 0) {
     $password = (string)($_POST['password'] ?? '');
-    $usuario_tipeado = trim((string)($_POST['usuario'] ?? ''));
 
     if ($con_usuarios) {
         $id = auth_entrar($usuario_tipeado, $password);
         if ($id !== '') {
-            auth_reset_attempts();
+            auth_reset_attempts($usuario_tipeado);
             auth_login($id);
             // Último acceso (si no se puede anotar, se entra igual).
             $fp = auth_db_candado();
@@ -36,9 +41,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockoutSeconds === 0) {
             header('Location: ' . (in_array($rol, AUTH_PERMISOS['calculadora'], true) ? '/calculadora/' : '/presupuestos/tablero.php'));
             exit;
         }
-        auth_record_failure();
-        $error = !empty($db['roto']) ? 'No se pudo leer la lista de usuarios. Avisale al administrador.' : 'Usuario o contraseña incorrectos.';
-        $lockoutSeconds = auth_check_lockout();
+        if (!empty($db['roto'])) {
+            // No es culpa de quien escribe: no se le cuenta como intento fallido.
+            $error = 'No se pudo leer la lista de usuarios. Avisale al administrador.';
+        } else {
+            auth_record_failure($usuario_tipeado);
+            $error = 'Usuario o contraseña incorrectos.';
+            $lockoutSeconds = auth_check_lockout($usuario_tipeado);
+            $bloqueo_total = auth_check_lockout('') > 0;
+        }
     } elseif (auth_check_password($password)) {
         auth_reset_attempts();
         auth_login();
@@ -48,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockoutSeconds === 0) {
         auth_record_failure();
         $error = 'Contraseña incorrecta.';
         $lockoutSeconds = auth_check_lockout();
+        $bloqueo_total = $lockoutSeconds > 0;
     }
 }
 
@@ -225,7 +237,7 @@ $lockoutMinutes = $lockoutSeconds > 0 ? ceil($lockoutSeconds / 60) : 0;
       autocapitalize="none"
       autocorrect="off"
       spellcheck="false"
-      <?= $lockoutSeconds > 0 ? 'disabled' : '' ?>
+      <?= $bloqueo_total ? 'disabled' : '' ?>
     >
 <?php endif; ?>
     <label for="password">Contraseña</label>
@@ -236,10 +248,10 @@ $lockoutMinutes = $lockoutSeconds > 0 ? ceil($lockoutSeconds / 60) : 0;
       <?= (!$con_usuarios || $usuario_tipeado !== '') ? 'autofocus' : '' ?>
       required
       autocomplete="current-password"
-      <?= $lockoutSeconds > 0 ? 'disabled' : '' ?>
+      <?= $bloqueo_total ? 'disabled' : '' ?>
     >
 
-    <button type="submit" <?= $lockoutSeconds > 0 ? 'disabled' : '' ?>>
+    <button type="submit" <?= $bloqueo_total ? 'disabled' : '' ?>>
       Ingresar
     </button>
 
@@ -249,7 +261,7 @@ $lockoutMinutes = $lockoutSeconds > 0 ? ceil($lockoutSeconds / 60) : 0;
 
     <?php if ($lockoutSeconds > 0): ?>
       <div class="lock">
-        Demasiados intentos fallidos. Probá de nuevo en <?= $lockoutMinutes ?> min.
+        <?= $bloqueo_total ? 'Demasiados intentos fallidos.' : 'Demasiados intentos fallidos con ese usuario.' ?> Probá de nuevo en <?= $lockoutMinutes ?> min.
       </div>
     <?php endif; ?>
 
