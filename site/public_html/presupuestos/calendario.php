@@ -292,7 +292,7 @@ button{font-family:inherit;color:inherit}
 /* Dos partes: a la izquierda lo propio del calendario (día, hora, plazo); a la derecha la ficha del tablero, entera. */
 .modal .dos{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:22px;align-items:start}
 /* Dirección y teléfono a la vista, cada uno con su botón de copiar (dueño, 18/11/2026) */
-.modal .datos{margin-top:12px;border-top:1px solid var(--border-soft)}
+.modal .datos{margin-top:14px;border-top:1px solid var(--border-soft)}
 .modal .dato{display:grid;grid-template-columns:minmax(0,1fr) 36px;align-items:center;gap:2px 8px;padding:7px 0;border-bottom:1px solid var(--border-soft)}
 .modal .dato .k{grid-column:1;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
 .modal .dato .v{grid-column:1;font-size:14px;font-weight:600;color:var(--text);line-height:1.4;overflow-wrap:anywhere}
@@ -1118,7 +1118,7 @@ const ICO_LISTO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 function datosHtml(c){
   const fila=(k,v,extra,que)=>'<div class="dato"><span class="k">'+k+'</span><span class="v'+(v?'':' sin')+'">'+(v?esc(v)+(extra?' <small>· '+esc(extra)+'</small>':''):'Sin '+k.toLowerCase())+'</span>'
     +(v?'<button type="button" class="copiar" data-copiar="'+esc(v)+'" data-que="'+que+'" title="Copiar '+que+'" aria-label="Copiar '+que+'">'+ICO_COPIAR+'</button>':'')+'</div>';
-  return fila('Dirección',String(c.direccion||'').trim(),c.zona,'la dirección')+fila('Teléfono',String(c.celular||'').trim(),'','el teléfono');
+  return fila('Teléfono',String(c.celular||'').trim(),'','el teléfono')+fila('Dirección',String(c.direccion||'').trim(),c.zona,'la dirección');
 }
 async function copiar(b){
   const txt=b.dataset.copiar;let ok=false;
@@ -1153,7 +1153,6 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
   let h='<p class="sub estado">'+esc(e.titulo)+'</p>';
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
   if(mat)h+='<p class="sub">'+esc(mat)+'</p>';
-  h+='<div class="datos" id="fDatos">'+datosHtml(c)+'</div>';
   if(c.equipo.length&&e.exige_fecha)h+='<p class="sub">Instalan: '+esc(c.equipo.join(', '))+'</p>';
   if(conTurno){
     h+='<label class="campo" for="fDia">'+esc(e.fecha)+'</label><div class="fila"><input type="date" id="fDia" value="'+esc(dia||c.fecha)+'">'+(e.pide_hora?'<input type="time" id="fHora" step="900" value="'+esc(c.hora)+'" aria-label="Hora">':'')+'</div>'
@@ -1167,6 +1166,8 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
   h+='<a class="ir" href="/presupuestos/tablero.php?q='+encodeURIComponent(c.cliente_nro+'-'+c.sub)+'">Ver en el tablero →</a>';
   // El historial va acá, a la vista (dueño, 18/11/2026); en la ficha de al lado ya no está adentro de "Más".
   h+='<div class="hist"><div class="t">Historial</div><div id="fHist">'+historialHtml(c)+'</div></div>';
+  // Abajo del historial (dueño, 18/11/2026): teléfono y dirección ya a la vista, sin abrir "Más", con su botón de copiar.
+  h+='<div class="datos" id="fDatos">'+datosHtml(c)+'</div>';
   // La ficha del tablero, entera y editable (tildes, seña, bacha, fotos, nota): es la misma página en modo "una ficha".
   h='<div class="dos"><div>'+h+'</div><div><div class="ficha-t">Ficha</div><iframe class="ficha" id="fFicha" title="Ficha de la obra" src="/presupuestos/tablero.php?solo='+encodeURIComponent(c.key)+'"></iframe></div></div>';
   $('mTitulo').textContent=(c.manual?(c.nro_contrato||'Sin N°'):c.cliente_nro+'-'+c.sub)+' · '+(nombreCorto(c.nombre)||'Sin nombre');
