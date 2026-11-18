@@ -843,8 +843,10 @@ const etapaDe=id=>ETAPAS.find(e=>e.id===id);
 const cardDe=key=>CARDS.find(c=>c.key===key);
 const columnas=()=>ETAPAS.filter(e=>!e.aparte); // las columnas, en orden
 // Qué le falta a la tarjeta para salir de su etapa: la fecha (si la etapa la exige) y los tildes.
+// "Turno confirmado" deja de pedirse cuando la visita ya se hizo (Medido / Instalado): no traba a una obra ya medida.
+const liberado=(c,e,k)=>!!e.confirma&&k.id===e.confirma&&!!e.cierra&&!!c.checks[e.cierra];
 function faltanDe(c,e){
-  const f=e.checks.filter(k=>!c.checks[k.id]).map(k=>k.label);
+  const f=e.checks.filter(k=>!c.checks[k.id]&&!liberado(c,e,k)).map(k=>k.label);
   if(e.exige_fecha&&e.id===c.etapa){
     if(!c.fecha)f.unshift((e.pide_hora?'Fecha y hora de ':'Fecha de ')+e.fecha.toLowerCase());
     else if(e.pide_hora&&!c.hora)f.unshift('Hora de '+e.fecha.toLowerCase());
@@ -1164,7 +1166,7 @@ function htmlPlegada(c,e,cls,estilo,pos){
   if(pl==='vencida')et('Plazo vencido','rojo');
   else if(pl==='cerca')et('Vence '+(c.limite===HOY?'hoy':fechaCorta(c.limite)),'amb');
   // cuánto le falta para poder pasar de etapa
-  if(faltanDe(c,e).length)et(e.checks.filter(k=>c.checks[k.id]).length+' de '+e.checks.length,'tildes');
+  if(faltanDe(c,e).length){const ex=e.checks.filter(k=>!liberado(c,e,k)||c.checks[k.id]);et(ex.filter(k=>c.checks[k.id]).length+' de '+ex.length,'tildes');}
   else et('Lista para pasar','ok');
   h+='<div class="c-res">'+r.join('')+'</div>';
   if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';

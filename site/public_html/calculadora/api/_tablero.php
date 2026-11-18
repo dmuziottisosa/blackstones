@@ -101,7 +101,12 @@ $BS_ETAPAS = [
         // hecha_txt: cómo se nombra, en el detalle del aviso "por avanzar", a la
         // ficha que ya está hecha y sigue en la columna [singular, plural].
         'hecha_txt'   => ['ya medida', 'ya medidas'],
+        // confirma: el tilde que dice que el cliente confirmó el turno (dueño, 18/11/2026). Va primero.
+        // Solo se puede tildar con el día puesto, se cae solo si cambia el día o la hora, y deja de
+        // pedirse cuando la visita ya se hizo ("cierra"): una obra ya medida no queda trabada por él.
+        'confirma' => 'turno_ok',
         'checks' => [
+            'turno_ok' => 'Turno confirmado',
             'medidor' => 'Medidor',
             'medido' => 'Medido',
             'medida' => 'Medidas y planos listos',
@@ -214,8 +219,11 @@ $BS_ETAPAS = [
         'hecho'       => 'Ya instaladas · falta la aprobación',
         'pendientes'  => 'Necesitan instalarse',
         'hecha_txt'   => ['ya instalada', 'ya instaladas'],
+        // confirma: en esta etapa ese tilde ya existía como "Se avisó al cliente". Es el mismo dato,
+        // así que se llama igual que en Por medir ("Turno confirmado") y se porta igual (18/11/2026).
+        'confirma' => 'avisado',
         'checks' => [
-            'avisado' => 'Se avisó al cliente',
+            'avisado' => 'Turno confirmado',
             // Antes de mandar al equipo: confirmar con el cliente a qué dirección se va.
             'dir_ok'  => 'Dirección confirmada',
             'equipo'  => 'Instaladores',
@@ -284,6 +292,16 @@ $BS_TILDES_APROBACION = [
     'qc_fab'         => ['pide' => '',         'falta' => ''],
     'qc_instalacion' => ['pide' => 'instalado', 'falta' => 'Primero marcá la obra como instalada.'],
 ];
+
+/**
+ * ¿Ese tilde ya no hace falta para avanzar? Hoy es uno solo: "Turno confirmado" deja de pedirse
+ * cuando la visita ya se hizo (Medido / Instalado).
+ */
+function bs_tablero_tilde_liberado($etapa_id, $cid, $obra) {
+    global $BS_ETAPAS;
+    $def = $BS_ETAPAS[$etapa_id] ?? [];
+    return ($def['confirma'] ?? '') === $cid && ($def['cierra'] ?? '') !== '' && !empty($obra['checks'][$def['cierra']]);
+}
 
 /** Quién tildó ese tilde (nombre), o ''. Solo se guarda desde que hay usuarios. */
 function bs_tablero_tilde_por($obra, $clave) {

@@ -315,6 +315,12 @@ button{font-family:inherit;color:inherit}
 .cr-cab{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 14px;margin-top:20px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .cr-cab b{font-family:'Fraunces',serif;font-size:17px;font-weight:600}
 .cr-cab a{font-size:13px;font-weight:700;color:var(--text2)}
+.cr-nok{font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;color:var(--amb)}
+.cr-nok.todo{color:var(--gr)}
+.cr-f label.cr-ok{display:inline-flex;align-items:center;gap:9px;margin-top:4px;min-height:40px;font-size:13.5px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--text2);cursor:pointer}
+.cr-f label.cr-ok.si{color:var(--gr)}
+.cr-f label.cr-ok input{margin:0;padding:0;width:22px;height:22px;flex:none;accent-color:var(--gr)}
+.cr-f label.cr-ok small{font-weight:600;color:var(--text3)}
 .cr-f{display:grid;grid-template-columns:28px 126px minmax(0,1fr) 156px;gap:4px 12px;align-items:start;padding:13px 0;border-bottom:1px solid var(--border-soft)}
 .cr-n{width:28px;height:28px;margin-top:8px;border-radius:50%;background:var(--et);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
 .cr-n.sin{background:var(--card-alt);color:var(--text3)}
@@ -724,8 +730,10 @@ function crDibujar(){
   h+='<div class="cr-dias">'+dias.map(x=>'<button type="button" data-crdia="'+x+'" class="'+(x===dia?'on ':'')+(x<HOY?'atras':'')+'" title="'+(x<HOY?'Atrasadas: eran el ':'')+esc(fechaLarga(x))+'">'+esc(x===HOY?'Hoy '+ddmm(x):fechaCorta(x))+' · '+porDia[x].length+'</button>').join('')
     +(porDia['']?'<button type="button" data-crdia="" class="'+(dia===''?'on':'')+'">'+T.sin+' · '+porDia[''].length+'</button>':'')+'</div>';
   const l=porDia[dia].slice().sort(crOrden),n=l.length;
+  // "Turno confirmado" (dueño, 18/11/2026): el tilde de la ficha, a mano en la ruta para ir marcando a medida que confirman.
+  const eDef=ETAPAS.find(e=>e.id===et)||{},conf=eDef.confirma||'',nOk=conf?l.filter(c=>c.checks[conf]).length:0;
   const ruta=l.map(c=>String(c.direccion||'').trim()).filter(Boolean);
-  h+='<div class="cr-cab"><b>'+(dia?esc(fechaLarga(dia))+(dia<HOY?' · atrasadas':''):T.sinTit)+' · '+n+' '+(n===1?T.una:T.varias)+'</b>'
+  h+='<div class="cr-cab"><b>'+(dia?esc(fechaLarga(dia))+(dia<HOY?' · atrasadas':''):T.sinTit)+' · '+n+' '+(n===1?T.una:T.varias)+(conf&&dia?' · <span class="cr-nok'+(nOk===n?' todo':'')+'">'+nOk+' de '+n+' confirmad'+(n===1?'a':'as')+'</span>':'')+'</b>'
     +(dia&&ruta.length?'<a href="https://www.google.com/maps/dir/'+ruta.map(encodeURIComponent).join('/')+'" target="_blank" rel="noopener">Ver la ruta en el mapa →</a>':'')+'</div>';
   l.forEach((c,i)=>{
     const wa=waLink(c.celular),dir=String(c.direccion||'').trim(),id=esc(c.key);
@@ -743,7 +751,8 @@ function crDibujar(){
       +'<div class="cr-d"><b>'+esc(c.nombre||'Sin nombre')+(nroDe(c)?' <small>· '+esc(nroDe(c))+'</small>':'')+'</b>'
         +(dir?'<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(dir)+'" target="_blank" rel="noopener">'+esc(dir)+'</a>':'<span class="falta">Falta la dirección</span>')+(c.zona?' · '+esc(c.zona):'')+'<br>'
         +(c.celular?(wa?'<a href="'+esc(wa)+'" target="_blank" rel="noopener">'+esc(c.celular)+'</a>':esc(c.celular)):'<span class="falta">Falta el teléfono</span>')
-        +' · '+(c.material?esc(c.material):'Sin color')+extra+'</div>'
+        +' · '+(c.material?esc(c.material):'Sin color')+extra
+        +(conf?'<br><label class="cr-ok'+(c.checks[conf]?' si':'')+'"><input type="checkbox" data-crok="'+id+'"'+(c.checks[conf]?' checked':'')+(dia&&(c.hora||!eDef.exige_fecha)?'':' disabled')+'> Turno confirmado'+(dia&&(c.hora||!eDef.exige_fecha)?'':' <small>(primero '+(dia?'la hora':'el día')+')</small>')+'</label>':'')+'</div>'
       +'<label>Día<input type="date" data-crfecha="'+id+'" value="'+esc(c.fecha)+'"></label></div>';
   });
   const hechas=dia&&crTipo==='med'?CARDS.filter(c=>c.medido_at===dia):[];
@@ -766,10 +775,28 @@ async function crGuardar(key,esHora,valor){
       const vacia=dia!==c.fecha&&crPend(t).filter(x=>x.fecha===c.fecha).length===1; // era la única de ese día
       await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'fecha',fecha:dia,hora:dia?hora:'',en_etapa:crEtapa(t)});
       c.fecha=dia;c.hora=dia?hora:'';
+      // el turno cambió: el servidor le sacó "Turno confirmado" (lo confirmado era el turno anterior)
+      const eC=ETAPAS.find(x=>x.id===crEtapa(t))||{},estaba=!!(eC.confirma&&c.checks[eC.confirma]);
+      if(estaba)delete c.checks[eC.confirma];
       if(vacia)crDia[t]=dia; // el día quedó sin obras: se sigue a la que se movió
-      toast(quien(c)+': '+(dia?CR[t].aviso+' el '+fechaCorta(dia)+(c.hora?' · '+c.hora+' hs':(t==='inst'?', falta la hora':', sin hora')):CR[t].sinTit.toLowerCase()),!!(dia&&(c.hora||t==='med')));
+      toast(quien(c)+': '+(dia?CR[t].aviso+' el '+fechaCorta(dia)+(c.hora?' · '+c.hora+' hs':(t==='inst'?', falta la hora':', sin hora')):CR[t].sinTit.toLowerCase())+(estaba?'. Hay que volver a confirmar el turno':''),!!(dia&&(c.hora||t==='med'))&&!estaba);
     }
   }catch(e){toast(e.message);}
+  crOcupado=false;
+  crDibujar();
+}
+// Tildar o destildar "Turno confirmado" desde la ruta: es el mismo tilde de la ficha.
+async function crConfirmar(key,valor){
+  if(crOcupado){crDibujar();return;}
+  crOcupado=true;
+  const t=crTipo;
+  try{
+    const c=cardDe(key),e=ETAPAS.find(x=>x.id===crEtapa(t))||{};
+    if(!c||!e.confirma)throw new Error('Esa obra ya no está en esta ruta.');
+    await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'check',clave:e.confirma,valor:valor});
+    toast(quien(c)+': '+(valor?'turno confirmado':'turno sin confirmar'),valor);
+    await cargar();
+  }catch(e){toast(e.message);await cargar();}
   crOcupado=false;
   crDibujar();
 }
@@ -797,7 +824,11 @@ $('mCuerpo').addEventListener('click',ev=>{
   const b=ev.target.closest('[data-crdia]');
   if(b){crDia[crTipo]=b.dataset.crdia;crDibujar();}
 });
-$('mCuerpo').addEventListener('change',ev=>{crAnotar(ev.target);});
+$('mCuerpo').addEventListener('change',ev=>{
+  const t=ev.target;
+  if(t.dataset&&t.dataset.crok!==undefined){crConfirmar(t.dataset.crok,t.checked);return;}
+  crAnotar(t);
+});
 $('mCuerpo').addEventListener('focusout',ev=>{const t=ev.target;if(crEsp&&t.dataset&&(t.dataset.crhora!==undefined||t.dataset.crfecha!==undefined))crFlush();});
 $('mCuerpo').addEventListener('keydown',ev=>{const t=ev.target;if(ev.key==='Enter'&&t.dataset&&(t.dataset.crhora!==undefined||t.dataset.crfecha!==undefined)){ev.preventDefault();if(crEsp)crFlush();}});
 

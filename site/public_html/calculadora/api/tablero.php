@@ -198,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         if (!empty($def['oculta']) && empty($con_obras[$id])) continue;
         $checks = [];
         foreach ($def['checks'] as $cid => $label) $checks[] = ['id' => $cid, 'label' => $label];
-        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'oculta' => !empty($def['oculta']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'avisa_fecha' => !empty($def['avisa_fecha']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'pendientes' => (string)($def['pendientes'] ?? ''), 'urge' => array_values((array)($def['urge'] ?? [])), 'en_manos' => array_values((array)($def['en_manos'] ?? [])), 'hecha_txt' => array_values((array)($def['hecha_txt'] ?? [])), 'urge_txt' => (string)($def['urge_txt'] ?? ''), 'urge_ok_txt' => (string)($def['urge_ok_txt'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
+        $etapas_out[] = ['id' => $id, 'titulo' => $def['titulo'], 'aparte' => !empty($def['aparte']), 'oculta' => !empty($def['oculta']), 'fecha' => $def['fecha'], 'cierra' => $def['cierra'], 'confirma' => (string)($def['confirma'] ?? ''), 'exige_fecha' => !empty($def['exige_fecha']), 'pide_hora' => !empty($def['pide_hora']), 'avisa_fecha' => !empty($def['avisa_fecha']), 'boton' => (string)($def['boton'] ?? ''), 'boton_txt' => (string)($def['boton_txt'] ?? ''), 'boton_listo' => (string)($def['boton_listo'] ?? ''), 'pendientes' => (string)($def['pendientes'] ?? ''), 'urge' => array_values((array)($def['urge'] ?? [])), 'en_manos' => array_values((array)($def['en_manos'] ?? [])), 'hecha_txt' => array_values((array)($def['hecha_txt'] ?? [])), 'urge_txt' => (string)($def['urge_txt'] ?? ''), 'urge_ok_txt' => (string)($def['urge_ok_txt'] ?? ''), 'hecho' => (string)($def['hecho'] ?? ''), 'checks' => $checks];
     }
 
     if (isset($_GET['archivadas'])) {
@@ -276,6 +276,14 @@ try {
         if (!isset($BS_ETAPAS[$etapa]['checks'][$clave])) {
             bs_lock_release($fp);
             bs_error('Ese tilde no es de esta etapa. Actualizá el tablero.', 409);
+        }
+        // "Turno confirmado": no se confirma un turno que no tiene día (ni hora, donde la hora es obligatoria).
+        if ($valor && ($BS_ETAPAS[$etapa]['confirma'] ?? '') === $clave) {
+            $bs_falta_hora = !empty($BS_ETAPAS[$etapa]['exige_fecha']) && !empty($BS_ETAPAS[$etapa]['pide_hora']) && !bs_tablero_hora_valida($obra['hora']);
+            if (!bs_tablero_fecha_valida($obra['fecha']) || $bs_falta_hora) {
+                bs_lock_release($fp);
+                bs_error('Primero poné el día' . ($bs_falta_hora ? ' y la hora' : '') . ' del turno: no se puede confirmar un turno que no está puesto.');
+            }
         }
         // Las aprobaciones: las da quien tiene el permiso, y no se aprueba lo que todavía no se hizo.
         if (isset($BS_TILDES_APROBACION[$clave])) {
@@ -436,6 +444,7 @@ try {
             bs_lock_release($fp);
             bs_error('Fecha inválida');
         }
+        $bs_turno_antes = [(string)$obra['fecha'], (string)$obra['hora']];
         $obra['fecha'] = $fecha;
 
         // La hora solo existe en las etapas que la piden, y siempre atada a una fecha.
@@ -446,6 +455,13 @@ try {
             bs_error('Hora inválida');
         }
         $obra['hora'] = $hora;
+        // Cambió el día o la hora: lo que el cliente confirmó era el turno anterior. El tilde se cae solo.
+        $bs_conf = (string)($BS_ETAPAS[$etapa]['confirma'] ?? '');
+        if ($bs_conf !== '' && $bs_turno_antes !== [$fecha, $hora] && !empty($obra['checks'][$bs_conf])) {
+            unset($obra['checks'][$bs_conf]);
+            if (is_array($obra['tildes_at'] ?? null)) unset($obra['tildes_at'][$bs_conf]);
+            if (is_array($obra['tildes_por'] ?? null)) unset($obra['tildes_por'][$bs_conf]);
+        }
 
     } elseif ($accion === 'plazo') {
         // Plazo de entrega fijado a mano. Vacío = volver al calculado
@@ -583,6 +599,7 @@ try {
             // haber entrado directo a una etapa avanzada).
             for ($i = ($en_retiro ? 0 : $idx); $i < $destino; $i++) {
                 foreach ($BS_ETAPAS[$BS_ETAPA_IDS[$i]]['checks'] as $cid => $label) {
+                    if (bs_tablero_tilde_liberado($BS_ETAPA_IDS[$i], $cid, $obra)) continue; // la visita ya se hizo
                     if (empty($obra['checks'][$cid])) $faltan[] = $label;
                 }
             }
@@ -596,6 +613,13 @@ try {
         // la anterior en el historial y la tarjeta queda sin fecha.
         $obra['hist'][] = ['de' => $etapa, 'a' => $nueva, 'fecha' => $obra['fecha'], 'hora' => $obra['hora'], 'at' => date('c')];
         $obra['etapa'] = $nueva;
+        // La etapa nueva arranca sin turno: si traía un "Turno confirmado" de una vuelta anterior, no vale.
+        $bs_conf = (string)($BS_ETAPAS[$nueva]['confirma'] ?? '');
+        if ($bs_conf !== '' && !empty($obra['checks'][$bs_conf])) {
+            unset($obra['checks'][$bs_conf]);
+            if (is_array($obra['tildes_at'] ?? null)) unset($obra['tildes_at'][$bs_conf]);
+            if (is_array($obra['tildes_por'] ?? null)) unset($obra['tildes_por'][$bs_conf]);
+        }
         $obra['fecha'] = '';
         $obra['hora'] = '';
         $obra['desde'] = date('c'); // entra última a la cola de la etapa nueva

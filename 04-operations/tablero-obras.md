@@ -331,3 +331,14 @@ Accesos por rol (hoy hay una sola contraseña), hojas imprimibles para medidor/c
 - **Una obra, una ficha:** no se carga otra obra con un N° que ya está en el tablero o en su papelera; avisa a nombre de quién está y ofrece "Enlazar con el tablero".
 - **En Presupuestos** el presupuesto de esa obra sigue siendo un presupuesto ("Enviado" por dentro), pero se muestra con su etapa y el link "En el tablero →": `list.php` lo encuentra por el N° y devuelve `en_tablero`. Sin versión en el N°, vale para la última versión del presupuesto.
 - **Las fichas viejas** que nacieron de un N° de presupuesto (su clave es ese número) siguen funcionando igual: para ellas cambiar el N° sigue siendo una mudanza, con las protecciones del barrido. **No se convierten** (decisión del dueño, 18/11/2026): es más riesgoso tocarlas que dejar que salgan solas al archivarse. Alcanza con que cada una tenga su contrato; el aviso "N sin contrato" del tablero dice cuáles faltan.
+
+## "Turno confirmado" (18/11/2026)
+
+- **Es el primer tilde de Por medir** (antes de "Medidor") **y de Por instalar** (antes de "Dirección confirmada" e "Instaladores"). Dice que el cliente confirmó su turno.
+- **En Por instalar no es un tilde nuevo:** es el que se llamaba "Se avisó al cliente" (`avisado`), con otro nombre. Las obras que ya lo tenían tildado lo conservan. En Por medir sí es nuevo (`turno_ok`).
+- **Solo se tilda con el turno puesto:** el día en Por medir; el día y la hora en Por instalar.
+- **Se cae solo si cambia el día o la hora**, desde la ficha, el calendario o el Cronograma: lo que el cliente confirmó era el turno anterior. El Cronograma avisa "hay que volver a confirmar".
+- **Deja de pedirse cuando la visita ya se hizo** ("Medido" / "Instalado"): una obra ya medida o ya instalada no queda trabada por no tenerlo. Antes de la visita figura entre lo que falta.
+- **En el Cronograma** cada obra tiene su casillero "Turno confirmado" y cada día dice cuántas van ("3 de 5 confirmadas"). Es el mismo tilde de la ficha.
+- **Qué etapa lo tiene** lo define `confirma` en `$BS_ETAPAS` (`_tablero.php`); la regla de "ya no se pide" está en `bs_tablero_tilde_liberado()`.
+- No hay avisos automáticos (se evaluó Telegram y el dueño lo descartó) ni un botón que abra WhatsApp (abre otra ventana, no la que ya está en uso).
