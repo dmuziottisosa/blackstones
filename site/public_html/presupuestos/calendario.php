@@ -564,11 +564,15 @@ const quien=c=>(nroDe(c)?nroDe(c)+' ':'')+(nombreCorto(c.nombre)||'Sin nombre');
 
 // Mismas reglas que el tablero.
 function cumplida(c){const e=etapaDe(c.etapa);return !!(e&&e.cierra&&c.checks[e.cierra]);} // ya se midió / ya se retiró
-// ¿Ya está instalada? null, o {fecha} (el día, si se sabe). El tilde "Instalado" queda en la ficha cuando
-// la obra sigue a Por archivar; si la devolvieron a una etapa anterior a Por instalar, no cuenta.
+// ¿Ya está instalada? null, o {fecha, etapa} (el día, si se sabe).
+//  · En Por instalar: cuando tiene el tilde "Instalado".
+//  · Pasada esa etapa (Por archivar): siempre, tenga o no el tilde. Las fichas de la carga inicial entraron
+//    directo en Por archivar sin él, y una obra que está por archivarse ya fue instalada.
+//  · Antes de Por instalar (aunque la hayan devuelto con el tilde puesto) y en las etapas aparte: no.
 function instalada(c){
   const i=ETAPAS.findIndex(e=>e.boton==='instalado'),a=ETAPAS.findIndex(e=>e.id===c.etapa);
-  if(i<0||a<i||!c.checks.instalado)return null;
+  if(i<0||a<i||ETAPAS[a].aparte)return null;
+  if(a===i&&!c.checks.instalado)return null;
   const h=(c.hitos||[]).find(x=>x.txt==='Instalado');
   return {fecha:(a===i&&c.boton_at)||(h&&h.fecha)||'',etapa:ETAPAS[i].id};
 }
