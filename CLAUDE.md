@@ -180,6 +180,7 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **"→ Aprobado" ya no existe en Presupuestos.** Si una obra está en el tablero es que fue aprobada. Un presupuesto entra al tablero desde el tablero ("Cargar obra" con su N°) o desde su contrato ("Cargar en Por medir"); `state.php` rechaza aprobar desde Presupuestos.
 - **Cobro en una moneda, contrato en la otra: lleva cotización.** Cada seña o pago guarda la suya (se propone el dólar del día, se puede cambiar). "Cobrado" es lo que entró de verdad; "Saldo", lo que falta ya convertido.
 - **El calendario lee del tablero.** Lo que se enlaza con el tablero queda enlazado con el calendario.
+- **El Cronograma del calendario es la ruta de medición de cada día (18/11/2026).** En orden de hora, con nombre y apellido, dirección, teléfono y color. La hora y el día se cambian ahí y escriben el turno de medición de la ficha: no hay un dato nuevo. → `04-operations/tablero-obras.md`
 - **Plazo de entrega en el sistema: 20 días corridos desde la medición**, para todos los materiales; ventana de entrega del día 15 al 20. En Por cortar y Por fabricar la cola va por semana de entrega y, dentro de la semana, mismo color junto. → `04-operations/tablero-obras.md`
 - **Vendedores y procedencias son listas cerradas** (`_contratos.php`). No inventar nombres en datos de prueba.
 - **Datos de clientes reales nunca van al repo** (nombres, teléfonos, direcciones, planillas exportadas). Tampoco como ejemplo en comentarios o pruebas: usar ficticios (`11 5555-1234`).
@@ -226,4 +227,4 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ---
 
-*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días; sin pestaña Reporte; usuarios y roles; cómo cotizamos; enlazados comparten el N°; archivadas 1 año; nombre y apellido; lo que comparten contrato y ficha). Próxima revisión obligatoria: febrero 2027.*
+*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días; sin pestaña Reporte; usuarios y roles; cómo cotizamos; enlazados comparten el N°; archivadas 1 año; nombre y apellido; lo que comparten contrato y ficha; cronograma de medición). Próxima revisión obligatoria: febrero 2027.*

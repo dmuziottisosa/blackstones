@@ -300,6 +300,35 @@ button{font-family:inherit;color:inherit}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.ok{border-left-color:var(--gr)}
 
+/* === CRONOGRAMA DE MEDICIÓN: la ruta de un día, en orden de hora === */
+.cron-b{height:34px;padding:0 14px;border:1px solid var(--dk);border-radius:var(--radius-sm);background:var(--dk);color:var(--cr);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.cr-dias{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.cr-dias button{padding:7px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer}
+.cr-dias button.atras{color:var(--red);border-color:var(--red)}
+.cr-dias button.on{background:var(--dk);color:var(--cr);border-color:var(--dk)}
+.cr-dias button.atras.on{background:var(--red);border-color:var(--red);color:#fff}
+.cr-cab{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 14px;margin-top:20px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.cr-cab b{font-family:'Fraunces',serif;font-size:17px;font-weight:600}
+.cr-cab a{font-size:13px;font-weight:700;color:var(--text2)}
+.cr-f{display:grid;grid-template-columns:28px 126px minmax(0,1fr) 156px;gap:4px 12px;align-items:start;padding:13px 0;border-bottom:1px solid var(--border-soft)}
+.cr-n{width:28px;height:28px;margin-top:8px;border-radius:50%;background:var(--et);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.cr-n.sin{background:var(--card-alt);color:var(--text3)}
+.cr-f label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3)}
+.cr-f label input{margin-top:3px;padding:8px 9px;font-size:15px}
+.cr-d{min-width:0;padding-top:1px;font-size:13.5px;line-height:1.5;color:var(--text2);overflow-wrap:anywhere}
+.cr-d b{display:block;font-size:15px;color:var(--text)}
+.cr-d a{color:var(--text2);font-weight:600}
+.cr-d .falta{color:var(--red);font-weight:700}
+.cr-d small{font-size:12.5px;color:var(--text3)}
+.cr-hechas{margin-top:14px;font-size:12.5px;color:var(--text3);line-height:1.5}
+.cr-vacio{margin-top:18px;font-size:13.5px;color:var(--text2)}
+@media(max-width:700px){
+  .cron-b{height:42px}
+  .cr-f{grid-template-columns:28px minmax(0,1fr) minmax(0,1.25fr)}
+  .cr-d{grid-column:1/-1;grid-row:1}
+  .cr-n{grid-row:2}
+}
+
 /* Al tocar: sin el destello gris del navegador ni la espera del doble toque. */
 a,button,input,.toggle{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
@@ -383,6 +412,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
       <button type="button" id="mesSig" aria-label="Mes siguiente">›</button>
       <button type="button" class="hoy-b" id="mesHoy">Hoy</button>
     </div>
+    <button type="button" class="cron-b" id="cronB" title="La ruta de medición de cada día: orden, horas y direcciones">Cronograma</button>
     <div class="hoy" id="hoyTxt"></div>
   </div>
   <div class="plano">
@@ -642,6 +672,85 @@ function abrirBloque(dia,origen){
   $('modalBg').classList.add('show');
 }
 
+// ---------- Cronograma de medición (dueño, 18/11/2026) ----------
+// La ruta de medición de un día: las obras de Por medir que tienen ese día, en orden de hora, con nombre y
+// apellido, dirección, teléfono y color. Acá mismo se les cambia la hora o el día. No inventa nada: escribe
+// el turno de medición de la ficha (la misma acción "fecha" de siempre), así que repercute en Por medir,
+// en este calendario y en Relación-Contrato, que lo leen del tablero.
+let crAbierto=false,crDia=null,crOcupado=false; // crDia: 'AAAA-MM-DD', '' = las que no tienen fecha, null = elegir solo
+const crPend=()=>CARDS.filter(c=>c.etapa===MEDIR&&!cumplida(c));
+const crOrden=(a,b)=>{if(a.hora!==b.hora){if(!a.hora)return 1;if(!b.hora)return -1;return a.hora<b.hora?-1:1;}return a.key<b.key?-1:1;};
+function waLink(cel){
+  let n=String(cel||'').replace(/\D/g,'');
+  if(n.length<8)return '';
+  if(n.indexOf('54')!==0)n='549'+n.replace(/^0/,'');
+  return 'https://wa.me/'+n;
+}
+function abrirCronograma(){
+  crAbierto=true;crDia=null;
+  $('mTitulo').textContent='Cronograma de medición';
+  document.querySelector('.modal').classList.remove('angosta');
+  $('mOk').hidden=true;modalOk=null;
+  crDibujar();
+  $('modalBg').classList.add('show');
+}
+function crDibujar(){
+  if(!crAbierto)return;
+  const pend=crPend(),porDia={};
+  pend.forEach(c=>{(porDia[c.fecha||'']=porDia[c.fecha||'']||[]).push(c);});
+  const dias=Object.keys(porDia).filter(Boolean).sort();
+  // Arranca en hoy; si hoy no hay mediciones, en el próximo día que tenga; si no, en lo que haya.
+  if(crDia===null||!porDia[crDia])crDia=dias.find(x=>x>=HOY)||dias[dias.length-1]||(porDia['']?'':null);
+  let h='<p class="sub">Elegí el día para ver su ruta. Cambiar la hora o el día acá cambia el turno de medición de la ficha.</p>';
+  if(crDia===null){
+    $('mCuerpo').innerHTML=h+'<p class="cr-vacio">No hay obras por medir.</p>';return;
+  }
+  h+='<div class="cr-dias">'+dias.map(x=>'<button type="button" data-crdia="'+x+'" class="'+(x===crDia?'on ':'')+(x<HOY?'atras':'')+'" title="'+(x<HOY?'Atrasadas: eran el ':'')+esc(fechaLarga(x))+'">'+esc(x===HOY?'Hoy '+ddmm(x):fechaCorta(x))+' · '+porDia[x].length+'</button>').join('')
+    +(porDia['']?'<button type="button" data-crdia="" class="'+(crDia===''?'on':'')+'">Sin fecha · '+porDia[''].length+'</button>':'')+'</div>';
+  const l=porDia[crDia].slice().sort(crOrden),n=l.length;
+  const ruta=l.map(c=>String(c.direccion||'').trim()).filter(Boolean);
+  h+='<div class="cr-cab"><b>'+(crDia?esc(fechaLarga(crDia))+(crDia<HOY?' · atrasadas':''):'Sin fecha de medición')+' · '+n+(n===1?' medición':' mediciones')+'</b>'
+    +(crDia&&ruta.length?'<a href="https://www.google.com/maps/dir/'+ruta.map(encodeURIComponent).join('/')+'" target="_blank" rel="noopener">Ver la ruta en el mapa →</a>':'')+'</div>';
+  l.forEach((c,i)=>{
+    const wa=waLink(c.celular),dir=String(c.direccion||'').trim(),id=esc(c.key);
+    h+='<div class="cr-f et-'+esc(MEDIR)+'">'
+      +'<div class="cr-n'+(c.hora||!crDia?'':' sin')+'" title="'+(crDia?'Orden en la ruta':'')+'">'+(crDia?i+1:'·')+'</div>'
+      +'<label>Hora<input type="time" step="900" data-crhora="'+id+'" value="'+esc(c.hora)+'"'+(crDia?'':' disabled title="Primero ponele el día"')+'></label>'
+      +'<div class="cr-d"><b>'+esc(c.nombre||'Sin nombre')+(nroDe(c)?' <small>· '+esc(nroDe(c))+'</small>':'')+'</b>'
+        +(dir?'<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(dir)+'" target="_blank" rel="noopener">'+esc(dir)+'</a>':'<span class="falta">Falta la dirección</span>')+(c.zona?' · '+esc(c.zona):'')+'<br>'
+        +(c.celular?(wa?'<a href="'+esc(wa)+'" target="_blank" rel="noopener">'+esc(c.celular)+'</a>':esc(c.celular)):'<span class="falta">Falta el teléfono</span>')
+        +' · '+(c.material?esc(c.material):'Sin color')+'</div>'
+      +'<label>Día<input type="date" data-crfecha="'+id+'" value="'+esc(c.fecha)+'"></label></div>';
+  });
+  const hechas=crDia?CARDS.filter(c=>c.medido_at===crDia):[];
+  if(hechas.length)h+='<p class="cr-hechas">Ya medidas ese día: '+hechas.map(c=>esc(nombreCorto(c.nombre)||'Sin nombre')).join(', ')+'.</p>';
+  $('mCuerpo').innerHTML=h;
+}
+async function crGuardar(c,dia,hora){
+  if(crOcupado)return;
+  if(dia===c.fecha&&hora===c.hora)return;
+  crOcupado=true;
+  const seMuda=dia!==c.fecha,vacia=seMuda&&crPend().filter(x=>x.fecha===c.fecha).length===1; // era la única de ese día
+  try{
+    await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'fecha',fecha:dia,hora:dia?hora:''});
+    c.fecha=dia;c.hora=dia?hora:'';
+    if(vacia)crDia=dia; // el día quedó sin obras: se sigue a la que se movió
+    toast(quien(c)+': '+(dia?'medición el '+fechaCorta(dia)+(c.hora?' · '+c.hora+' hs':', sin hora'):'sin fecha de medición'),true);
+  }catch(e){toast(e.message);}
+  crOcupado=false;
+  crDibujar();
+}
+$('cronB').addEventListener('click',abrirCronograma);
+$('mCuerpo').addEventListener('click',ev=>{
+  const b=ev.target.closest('[data-crdia]');
+  if(b){crDia=b.dataset.crdia;crDibujar();}
+});
+$('mCuerpo').addEventListener('change',ev=>{
+  const t=ev.target;
+  if(t.dataset.crhora!==undefined){const c=cardDe(t.dataset.crhora);if(c)crGuardar(c,c.fecha,t.value.slice(0,5));}
+  else if(t.dataset.crfecha!==undefined){const c=cardDe(t.dataset.crfecha);if(c)crGuardar(c,t.value,c.hora);}
+});
+
 // Todos los eventos, por día: {iso:[{tipo,c}]}. tipo = id de etapa (turno) o 'vence' (plazo).
 function armar(){
   const dias={};
@@ -854,7 +963,7 @@ function cambioPlazo(c,dia){
 let modalOk=null;
 // Al cerrar se vuelve a leer el tablero: en la ficha se pudo haber cambiado cualquier cosa.
 function cerrarModal(recargar){
-  $('modalBg').classList.remove('show');modalOk=null;
+  $('modalBg').classList.remove('show');modalOk=null;crAbierto=false;
   $('mCuerpo').innerHTML='';
   if(recargar!==false)cargar();
 }
