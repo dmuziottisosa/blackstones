@@ -252,6 +252,28 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 .card.primera .c-plegar{top:1px}
 .card:not(.plegada):not(.primera) .c-id{padding-right:28px}
 .fantasma .c-plegar{display:none}
+/* Tres puntitos arriba a la derecha (dueño, 18/11/2026): abren un menú para copiar el N°, el teléfono o la dirección.
+   No ocupan lugar en la ficha. En la ficha abierta van al lado del botón de plegar. */
+.c-menu{position:absolute;top:8px;right:8px;width:28px;height:28px;padding:0;border:none;border-radius:50%;background:none;cursor:pointer;z-index:1;display:inline-flex;align-items:center;justify-content:center;gap:3px}
+.c-menu i{width:3.5px;height:3.5px;border-radius:50%;background:var(--text3)}
+@media(hover:hover){.c-menu:hover{background:var(--card-alt)}.c-menu:hover i{background:var(--text)}}
+.card:not(.plegada) .c-menu{right:38px}
+.card.primera .c-menu{top:1px}
+.card.plegada:not(.primera) .c-id{padding-right:28px}
+.card.con-menu:not(.plegada):not(.primera) .c-id{padding-right:62px}
+.fantasma .c-menu{display:none}
+.menu-c{position:fixed;z-index:60;min-width:230px;max-width:min(330px,calc(100vw - 16px));padding:6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow-lg)}
+.menu-c[hidden]{display:none}
+.menu-c .mt{padding:6px 10px 4px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.menu-c button{display:grid;grid-template-columns:minmax(0,1fr) 18px;align-items:center;gap:1px 12px;width:100%;padding:9px 10px;border:none;border-radius:var(--radius-sm);background:none;font-family:inherit;text-align:left;color:var(--text);cursor:pointer}
+.menu-c button span{grid-column:1;font-size:11.5px;color:var(--text3)}
+.menu-c button b{grid-column:1;font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.menu-c button svg{grid-column:2;grid-row:1/3;width:16px;height:16px;color:var(--text3)}
+@media(hover:hover){.menu-c button:hover{background:var(--card-alt)}.menu-c button:hover svg{color:var(--text)}}
+.menu-c a.ir{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;color:var(--text);text-decoration:none}
+.menu-c button+a.ir{margin-top:4px;border-top:1px solid var(--border-soft);border-radius:0 0 var(--radius-sm) var(--radius-sm);padding-top:12px}
+.menu-c a.ir span{color:var(--text3)}
+@media(hover:hover){.menu-c a.ir:hover{background:var(--card-alt)}}
 @media(hover:hover){.card:hover{border-color:var(--et)}}
 /* Algo la frena (atrasada, sin turno, se pisa): marco rojo. Un solo marco, sin doble borde. */
 .card.alerta,.card.sin-turno,.card.choque{border-color:var(--red);border-left-color:var(--et)}
@@ -343,6 +365,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-promesa{font-size:12.5px;color:var(--text3);margin-top:8px;line-height:1.5}
 .c-promesa.cerca{color:var(--amb);font-weight:600}
 .c-promesa.vencida{color:var(--red);font-weight:700}
+/* La entrega estimada de la ficha (dueño, 18/11/2026): más grande y en negrita, para que se distinga del resto. */
+.c-promesa.entrega{font-size:14px;font-weight:700;color:var(--text);margin-top:10px}
+.c-promesa.entrega.cerca{color:var(--amb)}
+.c-promesa.entrega.vencida{color:var(--red)}
 .c-nota{margin-top:10px;padding:7px 10px;border-radius:var(--radius-sm);background:var(--amb-soft);color:var(--amb);font-size:12.5px;font-weight:600;overflow-wrap:anywhere}
 
 .c-checks{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
@@ -490,6 +516,13 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .c-plegar{width:36px;height:36px;top:4px;right:4px}
   .c-plegar::before{left:14px;top:16px}
   .card.primera .c-plegar{top:-2px}
+  .c-menu{width:36px;height:36px;top:4px;right:4px}
+  .card:not(.plegada) .c-menu{right:42px}
+  .card.primera .c-menu{top:-2px}
+  .card.plegada:not(.primera) .c-id{padding-right:34px}
+  .card.con-menu:not(.plegada):not(.primera) .c-id{padding-right:76px}
+  .menu-c button{padding:12px 10px}
+  .menu-c a.ir{padding:14px 10px}
   .card:not(.plegada):not(.primera) .c-id{padding-right:34px}
   .c-det .lnk{padding:8px 0;font-size:13.5px}
   .c-det .acciones{gap:6px 20px}
@@ -645,6 +678,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
     </div>
   </div>
 </div>
+<div class="menu-c" id="menuC" role="menu" hidden></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -716,6 +750,50 @@ const nroTxt=c=>!c.manual?c.cliente_nro+'-'+c.sub:(c.nro_contrato||'Sin N°');
 // Qué fichas tienen contrato en Relación-Contrato (ficha → contrato). Lo dice Relación-Contrato;
 // si no existe o no contesta, queda vacío y la ficha simplemente no muestra la marca.
 let ENLACES={},ENLACES_OK=false,soloSinCto=false; // soloSinCto: filtro "Sin contrato" (dueño, 18/11/2026)
+// Copiar datos de una ficha (dueño, 18/11/2026): tres puntitos arriba a la derecha abren un menú con el N° de
+// presupuesto, el teléfono y la dirección. Tocar uno lo copia tal cual figura. No ocupa lugar en la ficha.
+const ICO_COPIAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
+// Lo que se puede copiar de esa ficha: [valor, rótulo, cómo se nombra en el aviso]. Lo que falta no aparece.
+function queCopiar(c){
+  const n=nroTxt(c);
+  return [[n==='Sin N°'?'':n,'N° de presupuesto','el N° de presupuesto'],[String(c.celular||'').trim(),'Teléfono','el teléfono'],[String(c.direccion||'').trim(),'Dirección','la dirección']].filter(x=>x[0]);
+}
+// "Ir al calendario" (dueño, 18/11/2026) va en el mismo menú, para quien tiene acceso al calendario.
+const VE_CALENDARIO=!!YO.puede.calendario;
+const botonMenu=c=>SOLO||(!queCopiar(c).length&&!VE_CALENDARIO)?'':'<button type="button" class="c-menu" data-act="menu" aria-haspopup="menu" aria-label="Más acciones de la ficha" title="Copiar N°, teléfono o dirección'+(VE_CALENDARIO?' · Ir al calendario':'')+'"><i></i><i></i><i></i></button>';
+let menuAbiertoAt=0; // cuándo se abrió: un desplazamiento que venía de antes no lo cierra
+function cerrarMenu(){const m=$('menuC');if(!m.hidden){m.hidden=true;m.innerHTML='';m.dataset.key='';}}
+function abrirMenu(b,c){
+  const m=$('menuC');
+  if(!m.hidden&&m.dataset.key===c.key){cerrarMenu();return;} // tocar los puntitos otra vez lo cierra
+  m.dataset.key=c.key;
+  const q=queCopiar(c);
+  m.innerHTML=(q.length?'<div class="mt">Copiar</div>'+q.map(x=>'<button type="button" role="menuitem" data-copiar="'+esc(x[0])+'" data-que="'+x[2]+'"><span>'+x[1]+'</span><b>'+esc(x[0])+'</b>'+ICO_COPIAR+'</button>').join(''):'')
+    // abre el calendario en el mes de esa obra, con su ficha abierta
+    +(VE_CALENDARIO?'<a class="ir" role="menuitem" href="/presupuestos/calendario.php?ficha='+encodeURIComponent(c.key)+'">Ir al calendario <span>→</span></a>':'');
+  m.hidden=false;menuAbiertoAt=Date.now();
+  // debajo de los puntitos, alineado a su derecha; si no entra, arriba. Siempre adentro de la pantalla.
+  const r=b.getBoundingClientRect(),w=m.offsetWidth,al=m.offsetHeight;
+  m.style.left=Math.max(8,Math.min(innerWidth-w-8,r.right-w))+'px';
+  m.style.top=(r.bottom+6+al>innerHeight-8?Math.max(8,r.top-al-6):r.bottom+6)+'px';
+}
+async function copiarTexto(txt,que){
+  let ok=false;
+  try{await navigator.clipboard.writeText(txt);ok=true;}catch(e){
+    // sin permiso o en un navegador viejo: el camino de antes
+    const t=document.createElement('textarea');t.value=txt;t.setAttribute('readonly','');t.style.cssText='position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(t);t.select();try{ok=document.execCommand('copy');}catch(e2){}t.remove();
+  }
+  toast(ok?'Se copió '+que+': '+txt:'No se pudo copiar.',ok);
+}
+document.getElementById('menuC').addEventListener('click',ev=>{ // ($ se define más abajo)
+  const b=ev.target.closest('[data-copiar]');if(!b)return;
+  copiarTexto(b.dataset.copiar,b.dataset.que);cerrarMenu();
+});
+// Se cierra al tocar afuera, con Escape, o si la pantalla se mueve (el menú quedaría lejos de su ficha).
+document.addEventListener('click',ev=>{if(!ev.target.closest('#menuC,.c-menu'))cerrarMenu();});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape')cerrarMenu();});
+window.addEventListener('scroll',()=>{if(Date.now()-menuAbiertoAt>350)cerrarMenu();},true);window.addEventListener('resize',cerrarMenu);
 const ICO_ENL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>';
 async function cargarEnlaces(){
   if(!YO.puede.contratos)return; // sin acceso a Relación-Contrato no hay marca que mostrar
@@ -776,6 +854,9 @@ function semanaTxt(iso,corto){
   return 'Semana '+(mismo?l.getDate()+'-'+v.getDate()+' de '+m(l):l.getDate()+' '+m(l).slice(0,3)+' - '+v.getDate()+' '+m(v).slice(0,3));
 }
 function fechaLarga(iso){const d=partes(iso);return DIAS_L[d.getDay()]+' '+d.getDate()+' de '+MESES[d.getMonth()];}
+// Cuánto tiempo estuvo la ficha en una etapa (dueño, 18/11/2026). Los días los cuenta el servidor.
+const estuvoTxt=n=>n===0?'menos de un día':(n===1?'1 día':n+' días');
+const haceTxt=n=>n===0?'entró hoy':(n===1?'está hace 1 día':'está hace '+n+' días');
 function ddmm(iso){const p=iso.split('-');return p[2]+'/'+p[1];}
 function fechaCorta(iso){return DIAS[partes(iso).getDay()]+' '+ddmm(iso);}
 function lunesDe(iso){ // lunes de la semana de esa fecha, YYYY-MM-DD
@@ -1137,6 +1218,7 @@ function desplegada(c){
 // La ficha plegada: N°, cliente, material y una fila de etiquetas con lo que hay que saber de un vistazo.
 function htmlPlegada(c,e,cls,estilo,pos){
   let h='<article class="'+cls+' plegada"'+estilo+' data-key="'+esc(c.key)+'" data-act="abrir" title="Tocar para abrir la ficha">';
+  h+=botonMenu(c);
   if(pos===1)h+='<div class="c-prox">Próxima</div>';
   h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+nroB(c)+' · '+esc(nombreCorto(c.nombre)||'Sin nombre');
   if(c.zona)h+=' <span class="zona">· '+esc(c.zona)+'</span>';
@@ -1180,8 +1262,9 @@ function htmlCard(c){
     if(dt<1000){cls+=' '+recien.tipo;estilo=' style="animation-delay:-'+dt+'ms"';}
   }
   if(!desplegada(c))return htmlPlegada(c,e,cls,estilo,pos);
-  let h='<article class="'+cls+'"'+estilo+' data-key="'+esc(c.key)+'">';
+  let h='<article class="'+cls+(botonMenu(c)?' con-menu':'')+'"'+estilo+' data-key="'+esc(c.key)+'">';
   if(!SOLO)h+='<button type="button" class="c-plegar" data-act="plegar" aria-label="Plegar la ficha" title="Plegar"></button>';
+  h+=botonMenu(c);
 
   if(pos===1)h+='<div class="c-prox">Próxima</div>';
   h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+nroB(c)+' · '+esc(nombreCorto(c.nombre)||'Sin nombre');
@@ -1216,7 +1299,7 @@ function htmlCard(c){
     // Lejos del plazo alcanza con la semana; cerca o vencido, se dice el día.
     const pl=plazo(c);
     const txt=pl==='vencida'?'Plazo vencido el '+fechaCorta(c.limite):(pl==='cerca'?'Vence '+(c.limite===HOY?'hoy':'el '+fechaCorta(c.limite)):'Entrega estimada: semana del '+ddmm(c.semana))+(c.plazo_manual?' · plazo modificado':'');
-    h+='<div class="c-promesa'+(pl?' '+pl:'')+'">'+esc(txt)+'</div>';
+    h+='<div class="c-promesa entrega'+(pl?' '+pl:'')+'">'+esc(txt)+'</div>';
   }
   // Datos que se cargan al medir y quedan a la vista para el taller y el que instala.
   if(c.etapa!=='medir'&&c.etapa!=='archivar'){
@@ -1261,12 +1344,14 @@ function htmlCard(c){
     h+='<div class="c-det">';
     if(c.celular)h+='<div class="fila"><span>Teléfono</span><div>'+(wa?'<a href="'+esc(wa)+'" target="_blank" rel="noopener">'+esc(c.celular)+'</a>':esc(c.celular))+'</div></div>';
     if(c.direccion)h+='<div class="fila"><span>Dirección</span><div><a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(c.direccion)+'" target="_blank" rel="noopener">'+esc(c.direccion)+'</a></div></div>';
-    if(c.historia.length){
+    if(c.historia.length||c.etapa_dias!=null){
       h+='<div class="c-hist"><div class="t">Historial</div>';
       c.historia.forEach(et=>{
-        h+='<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' <span>· salió el '+esc(fechaCorta(et.salio))+'</span>':'')+'</div>';
+        h+='<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' <span>· salió el '+esc(fechaCorta(et.salio))+'</span>':'')+(et.dias!=null?' <span>· estuvo '+estuvoTxt(et.dias)+'</span>':'')+'</div>';
         h+=et.items.length?et.items.map(x=>'<div class="i"><span>'+esc(x.txt)+'</span><span>'+(x.fecha?esc(fechaCorta(x.fecha)):'—')+'</span></div>').join(''):'<div class="i"><span>Sin tildes cargados</span><span></span></div>';
       });
+      // y la etapa en la que está ahora: hace cuánto
+      if(c.etapa_dias!=null)h+='<div class="e"><b>'+esc(e.titulo)+'</b> <span>· '+haceTxt(c.etapa_dias)+'</span></div>';
       h+='</div>';
     }
     h+='<input type="text" maxlength="300" data-nota placeholder="Nota (ej: falta la bacha)" value="'+esc(c.nota)+'">';
@@ -1537,6 +1622,7 @@ wrap.addEventListener('click',ev=>{
   const c=art&&cardDe(art.dataset.key);
   if(!c)return;
   const act=b.dataset.act;
+  if(act==='menu'){abrirMenu(b,c);return;} // copiar lo puede hacer cualquiera que vea la ficha
   if(!OPERA&&!['abrir','plegar','mas','adjuntar','ver'].concat(SOLO_BACHA?['bacha']:[]).includes(act))return; // solo mira, adjunta y anota la bacha
   if(act==='bacha'){pedirBacha(c);return;}
   if(act==='abrir'||act==='plegar'){

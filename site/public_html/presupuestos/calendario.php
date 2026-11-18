@@ -1135,11 +1135,15 @@ async function copiar(b){
   setTimeout(()=>{if(b.isConnected){b.classList.remove('listo');b.innerHTML=ICO_COPIAR;}},1400);
 }
 // El historial de la obra: qué se hizo en cada etapa que ya pasó, y cuándo. Mismos datos que el tablero.
+// Dice también cuánto estuvo en cada etapa y hace cuánto está en la actual (dueño, 18/11/2026); los días los cuenta el servidor.
+const estuvoTxt=n=>n===0?'menos de un día':(n===1?'1 día':n+' días');
+const haceTxt=n=>n===0?'entró hoy':(n===1?'está hace 1 día':'está hace '+n+' días');
 function historialHtml(c){
-  const H=c.historia||[];
-  if(!H.length)return '<div class="nada">Todavía está en su primera etapa.</div>';
-  return H.map(et=>'<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' <span>· salió el '+esc(fechaCorta(et.salio))+'</span>':'')+'</div>'
-    +(et.items.length?et.items.map(x=>'<div class="i"><span>'+esc(x.txt)+'</span><span>'+(x.fecha?esc(fechaCorta(x.fecha)):'—')+'</span></div>').join(''):'<div class="i"><span>Sin tildes cargados</span><span></span></div>')).join('');
+  const H=c.historia||[],e=etapaDe(c.etapa);
+  const ahora=e&&c.etapa_dias!=null?'<div class="e"><b>'+esc(e.titulo)+'</b> <span>· '+haceTxt(c.etapa_dias)+'</span></div>':'';
+  if(!H.length)return ahora||'<div class="nada">Todavía está en su primera etapa.</div>';
+  return H.map(et=>'<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' <span>· salió el '+esc(fechaCorta(et.salio))+'</span>':'')+(et.dias!=null?' <span>· estuvo '+estuvoTxt(et.dias)+'</span>':'')+'</div>'
+    +(et.items.length?et.items.map(x=>'<div class="i"><span>'+esc(x.txt)+'</span><span>'+(x.fecha?esc(fechaCorta(x.fecha)):'—')+'</span></div>').join(''):'<div class="i"><span>Sin tildes cargados</span><span></span></div>')).join('')+ahora;
 }
 // ---------- Ficha de la obra: su turno y su plazo, en un solo lugar ----------
 let modalOk=null;
@@ -1264,10 +1268,7 @@ document.addEventListener('click',ev=>{
   const bq=ev.target.closest('[data-busca]');
   if(bq){
     const c=cardDe(bq.dataset.busca);if(!c)return;
-    // el calendario queda en el mes de su fecha (el turno pendiente, la medición o el vencimiento)
-    const e=etapaDe(c.etapa),f=(e&&e.fecha&&c.fecha&&!cumplida(c)?c.fecha:'')||c.medido_at||c.fecha||c.limite;
-    if(f&&!selB.size&&f.slice(0,7)!==mes){mes=f.slice(0,7);dibujar();}
-    abrir(c);return;
+    irAFicha(c);return;
   }
   if(ev.target.closest('[data-limpiar]')){$('buscar').value='';buscado=[];dibujar();$('buscar').focus();return;}
   const fb=ev.target.closest('[data-fbloque]');
@@ -1286,6 +1287,12 @@ document.addEventListener('click',ev=>{
 });
 $('buscar').addEventListener('input',()=>{buscado=llano($('buscar').value).split(/\s+/).filter(Boolean);dibujar();});
 $('buscar').addEventListener('keydown',ev=>{if(ev.key==='Escape'&&$('buscar').value){ev.stopPropagation();$('buscar').value='';buscado=[];dibujar();}});
+// Lleva el calendario al mes de esa obra (su turno pendiente, la medición o el vencimiento) y abre su ficha.
+function irAFicha(c){
+  const e=etapaDe(c.etapa),f=(e&&e.fecha&&c.fecha&&!cumplida(c)?c.fecha:'')||c.medido_at||c.fecha||c.limite;
+  if(f&&!selB.size&&f.slice(0,7)!==mes){mes=f.slice(0,7);dibujar();}
+  abrir(c);
+}
 function moverMes(n){
   // con bloques en foco no hay "mes": la vista corre de a 4 semanas, con el filtro puesto
   if(selB.size){vIni=masDias(vAhora,n*28);dibujar();return;}
@@ -1354,6 +1361,14 @@ setInterval(()=>{if(!document.hidden&&libre())cargar();},60000);
 cargar().then(()=>{
   const q=new URLSearchParams(location.search),t=q.get('crono'),dq=q.get('dia')||'';
   if(t==='med'||t==='inst')abrirCronograma(t,dq==='sin'||/^\d{4}-\d{2}-\d{2}$/.test(dq)?dq:'');
+  // Desde el tablero ("Ir al calendario", en los tres puntitos de la ficha) se llega con ?ficha=0042-1:
+  // el calendario se para en el mes de esa obra y abre su ficha.
+  const fk=q.get('ficha')||'';
+  if(/^\d{4,}-\d+$/.test(fk)){
+    history.replaceState(null,'',location.pathname); // que al recargar no se vuelva a abrir sola
+    const c=cardDe(fk);
+    if(c)irAFicha(c);else toast('Esa obra ya no está en el tablero.');
+  }
 });
 </script>
 </body>

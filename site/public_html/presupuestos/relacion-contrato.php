@@ -642,7 +642,7 @@ function tableroHtml(k){
     +li('Entrega',k.limite&&k.etapa!=='archivar'?(venc?'Plazo vencido el '+fch(k.limite):'Vence el '+fch(k.limite)):'')
     +li('Instalación',inst)+li('Fotos y planos',n?n+(n===1?' archivo':' archivos'):'')+li('Nota del tablero',k.nota)+'</ul>';
   if((k.historia||[]).length){
-    h+='<details class="t-hist"><summary>Historial del tablero</summary>'+k.historia.map(et=>'<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' · salió el '+esc(fch(et.salio)):'')+'</div>'
+    h+='<details class="t-hist"><summary>Historial del tablero</summary>'+k.historia.map(et=>'<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' · salió el '+esc(fch(et.salio)):'')+(et.dias!=null?' · estuvo '+(et.dias===0?'menos de un día':(et.dias===1?'1 día':et.dias+' días')):'')+'</div>'
       +(et.items.length?et.items.map(x=>'<div class="i"><span>'+esc(x.txt)+'</span><span>'+(x.fecha?esc(fch(x.fecha)):'—')+'</span></div>').join(''):'<div class="i"><span>Sin tildes cargados</span><span></span></div>')).join('')+'</details>';
   }
   return h;

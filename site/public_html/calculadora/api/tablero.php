@@ -129,7 +129,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $desde = (string)$obra['desde'];
                 if ($desde === '') $desde = bs_tablero_aprobado_at($cot);
 
-                list($historia, $hitos) = bs_tablero_historia($obra);
+                list($historia, $hitos) = bs_tablero_historia($obra, bs_tablero_aprobado_at($cot));
+                // Cuántos días lleva en la etapa en la que está (null si no se sabe desde cuándo).
+                $bs_desde_dia = substr($desde, 0, 10);
+                $etapa_dias = bs_tablero_fecha_valida($bs_desde_dia) ? bs_tablero_dias_entre($bs_desde_dia, date('Y-m-d')) : null;
 
                 $cards[] = [
                     'key'         => $key,
@@ -185,6 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'plazo_manual' => $plazo_manual,
                     'plazo_dias'  => $plazo,
                     'desde'       => $desde,
+                    'etapa_dias'  => $etapa_dias,
                 ];
             }
         }

@@ -541,12 +541,13 @@ function bs_tablero_sena($obra) {
  *   hitos    → lo más importante, para ver de un vistazo en la ficha (Medido, Cortado, Corte aprobado…)
  * Las fechas de tildes existen desde que se guardan (tildes_at); lo anterior figura sin fecha.
  */
-function bs_tablero_historia($obra) {
+function bs_tablero_historia($obra, $inicio = '') {
     global $BS_ETAPAS, $BS_ETAPA_IDS, $BS_TILDES_PERSONAS, $BS_TILDES_APROBACION;
     $historia = []; $hitos = [];
     $actual = array_search($obra['etapa'], $BS_ETAPA_IDS, true);
     if ($actual === false) return [$historia, $hitos];
     $tildes_at = is_array($obra['tildes_at'] ?? null) ? $obra['tildes_at'] : [];
+    $estuvo = bs_tablero_dias_por_etapa($obra, $inicio);
 
     for ($i = 0; $i < $actual; $i++) {
         $eid = $BS_ETAPA_IDS[$i];
@@ -583,9 +584,35 @@ function bs_tablero_historia($obra) {
         foreach ((array)($obra['hist'] ?? []) as $h) {
             if (($h['de'] ?? '') === $eid && !empty($h['at'])) $salio = substr((string)$h['at'], 0, 10);
         }
-        $historia[] = ['etapa' => $def['titulo'], 'items' => $items, 'salio' => bs_tablero_fecha_valida($salio) ? $salio : ''];
+        // 'dias': cuántos días estuvo en esa etapa (null si no se sabe: entró antes de que se anotaran los pases).
+        $historia[] = ['etapa' => $def['titulo'], 'items' => $items, 'salio' => bs_tablero_fecha_valida($salio) ? $salio : '', 'dias' => $estuvo[$eid] ?? null];
     }
     return [$historia, $hitos];
+}
+
+/** Días corridos entre dos fechas AAAA-MM-DD (nunca negativo). */
+function bs_tablero_dias_entre($desde, $hasta) {
+    return max(0, intval(round((strtotime($hasta . ' 12:00:00') - strtotime($desde . ' 12:00:00')) / 86400)));
+}
+
+/**
+ * Cuánto tiempo estuvo la ficha en cada etapa (dueño, 18/11/2026): { id de etapa: días corridos }.
+ * Sale de los pases que ya se anotan en 'hist' (de, a, at): cada pase cierra la estadía en la etapa
+ * de la que sale. $inicio es el día en que la ficha entró al tablero (de ahí arranca la primera).
+ * Si pasó dos veces por la misma etapa (la devolvieron), se suman. La etapa actual no va acá.
+ */
+function bs_tablero_dias_por_etapa($obra, $inicio = '') {
+    $t = substr((string)$inicio, 0, 10);
+    if (!bs_tablero_fecha_valida($t)) $t = '';
+    $out = [];
+    foreach ((array)($obra['hist'] ?? []) as $h) {
+        $at = substr((string)($h['at'] ?? ''), 0, 10);
+        if (!bs_tablero_fecha_valida($at)) continue;
+        $de = (string)($h['de'] ?? '');
+        if ($t !== '' && $de !== '') $out[$de] = ($out[$de] ?? 0) + bs_tablero_dias_entre($t, $at);
+        $t = $at;
+    }
+    return $out;
 }
 
 /** Cómo sube la pieza: planta baja, por ascensor o por escalera (con cuántos pisos). */
