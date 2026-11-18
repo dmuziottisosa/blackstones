@@ -288,6 +288,18 @@ button{font-family:inherit;color:inherit}
 .modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:24px;max-width:920px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
 /* Dos partes: a la izquierda lo propio del calendario (día, hora, plazo); a la derecha la ficha del tablero, entera. */
 .modal .dos{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:22px;align-items:start}
+/* Dirección y teléfono a la vista, cada uno con su botón de copiar (dueño, 18/11/2026) */
+.modal .datos{margin-top:12px;border-top:1px solid var(--border-soft)}
+.modal .dato{display:grid;grid-template-columns:minmax(0,1fr) 36px;align-items:center;gap:2px 8px;padding:7px 0;border-bottom:1px solid var(--border-soft)}
+.modal .dato .k{grid-column:1;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.modal .dato .v{grid-column:1;font-size:14px;font-weight:600;color:var(--text);line-height:1.4;overflow-wrap:anywhere}
+.modal .dato .v.sin{font-weight:500;color:var(--text3)}
+.modal .dato .v small{font-size:12.5px;font-weight:500;color:var(--text3)}
+.modal .copiar{grid-column:2;grid-row:1/3;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text2);cursor:pointer}
+.modal .copiar svg{width:16px;height:16px;display:block}
+@media(hover:hover){.modal .copiar:hover{border-color:var(--dk);color:var(--text)}}
+.modal .copiar.listo{border-color:var(--gr);color:var(--gr)}
+@media(max-width:700px){.modal .dato{grid-template-columns:minmax(0,1fr) 44px}.modal .copiar{width:44px;height:44px}}
 /* Historial de la obra, a la izquierda de la ficha y siempre desplegado (dueño, 18/11/2026) */
 .modal .hist{margin-top:16px;padding:10px 12px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);font-size:12.5px}
 .modal .hist .t{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
@@ -1095,6 +1107,27 @@ function cambioPlazo(c,dia){
   return [{accion:'plazo',fecha:manual},()=>{c.plazo_manual=!!manual;c.limite=manual||c.limite_auto;}];
 }
 
+// Dirección y teléfono de la obra, a la vista y con un botón para copiar cada uno (dueño, 18/11/2026).
+// Se copian tal cual figuran en la ficha; el botón no abre WhatsApp ni el mapa.
+const ICO_COPIAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
+const ICO_LISTO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function datosHtml(c){
+  const fila=(k,v,extra,que)=>'<div class="dato"><span class="k">'+k+'</span><span class="v'+(v?'':' sin')+'">'+(v?esc(v)+(extra?' <small>· '+esc(extra)+'</small>':''):'Sin '+k.toLowerCase())+'</span>'
+    +(v?'<button type="button" class="copiar" data-copiar="'+esc(v)+'" data-que="'+que+'" title="Copiar '+que+'" aria-label="Copiar '+que+'">'+ICO_COPIAR+'</button>':'')+'</div>';
+  return fila('Dirección',String(c.direccion||'').trim(),c.zona,'la dirección')+fila('Teléfono',String(c.celular||'').trim(),'','el teléfono');
+}
+async function copiar(b){
+  const txt=b.dataset.copiar;let ok=false;
+  try{await navigator.clipboard.writeText(txt);ok=true;}catch(e){
+    // sin permiso o en un navegador viejo: el camino de antes
+    const t=document.createElement('textarea');t.value=txt;t.setAttribute('readonly','');t.style.cssText='position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(t);t.select();try{ok=document.execCommand('copy');}catch(e2){}t.remove();
+  }
+  if(!ok){toast('No se pudo copiar. Mantené apretado el texto para copiarlo.');return;}
+  b.classList.add('listo');b.innerHTML=ICO_LISTO;
+  toast('Se copió '+b.dataset.que+'.',true);
+  setTimeout(()=>{if(b.isConnected){b.classList.remove('listo');b.innerHTML=ICO_COPIAR;}},1400);
+}
 // El historial de la obra: qué se hizo en cada etapa que ya pasó, y cuándo. Mismos datos que el tablero.
 function historialHtml(c){
   const H=c.historia||[];
@@ -1116,8 +1149,7 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
   let h='<p class="sub estado">'+esc(e.titulo)+'</p>';
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
   if(mat)h+='<p class="sub">'+esc(mat)+'</p>';
-  const lugar=[c.zona,c.direccion].filter(Boolean).join(' · ');
-  if(lugar)h+='<p class="sub">'+esc(lugar)+'</p>';
+  h+='<div class="datos" id="fDatos">'+datosHtml(c)+'</div>';
   if(c.equipo.length&&e.exige_fecha)h+='<p class="sub">Instalan: '+esc(c.equipo.join(', '))+'</p>';
   if(conTurno){
     h+='<label class="campo" for="fDia">'+esc(e.fecha)+'</label><div class="fila"><input type="date" id="fDia" value="'+esc(dia||c.fecha)+'">'+(e.pide_hora?'<input type="time" id="fHora" step="900" value="'+esc(c.hora)+'" aria-label="Hora">':'')+'</div>'
@@ -1145,20 +1177,29 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
       const doc=marco.contentDocument,ajustar=()=>{if(marco.isConnected)marco.style.height=Math.max(520,doc.documentElement.scrollHeight+2)+'px';};
       new ResizeObserver(ajustar).observe(doc.body);
       ajustar();
-      // Si en la ficha la obra pasa de etapa, el historial de la izquierda se pone al día.
-      let etVista=c.etapa,tH=null;
+      // Lo de la izquierda se pone al día solo cuando en la ficha la obra pasa de etapa (historial) o se cierra
+      // una de sus ventanas (por ejemplo "Editar obra", que cambia el nombre, el teléfono o la dirección).
+      let etVista=c.etapa,habia=false,quedan=0,tH=null;
       const mirar=()=>{
         const k=doc.querySelector('section.col .card'),et=k?k.closest('section.col').dataset.col:'';
-        if(!et||et===etVista||!$('fHist'))return;
-        etVista=et;
+        if(!et||(et===etVista&&!quedan)||!$('fHist'))return;
+        etVista=et;if(quedan)quedan--;
         pedir(API).then(j=>{
           const n=(j.cards||[]).find(x=>x.key===c.key);
           if(!n||!$('fHist'))return;
-          $('fHist').innerHTML=historialHtml(n);
+          $('fHist').innerHTML=historialHtml(n);$('fDatos').innerHTML=datosHtml(n);
+          $('mTitulo').textContent=(n.manual?(n.nro_contrato||'Sin N°'):n.cliente_nro+'-'+n.sub)+' · '+(nombreCorto(n.nombre)||'Sin nombre');
           const es=document.querySelector('#mCuerpo .estado');if(es)es.textContent=etapaDe(n.etapa).titulo;
         }).catch(()=>{});
       };
-      new MutationObserver(()=>{clearTimeout(tH);tH=setTimeout(mirar,400);}).observe(doc.body,{childList:true,subtree:true});
+      new MutationObserver(()=>{
+        // ¿se acaba de cerrar una ventana de la ficha? Se mira al momento; la lectura espera a que la ficha se asiente.
+        // Vale dos veces: al cerrarse y cuando la ficha se vuelve a dibujar, porque el guardado puede tardar.
+        const hay=!!doc.querySelector('#modalBg.show');
+        if(habia&&!hay)quedan=2;
+        habia=hay;
+        clearTimeout(tH);tH=setTimeout(mirar,700);
+      }).observe(doc.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
     }catch(e){}
   });
 
@@ -1211,6 +1252,8 @@ document.addEventListener('click',ev=>{
   if(q){abrirBloque(q.dataset.bloque,q.dataset.origen||'');return;}
   const b=ev.target.closest('.ev[data-key]');
   if(b){const c=cardDe(b.dataset.key);if(c)abrir(c,'',b.dataset.tipo==='vence'?'plazo':'');return;}
+  const cp=ev.target.closest('[data-copiar]');
+  if(cp){copiar(cp);return;}
   const bq=ev.target.closest('[data-busca]');
   if(bq){
     const c=cardDe(bq.dataset.busca);if(!c)return;
