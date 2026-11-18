@@ -1,6 +1,7 @@
 <?php
 // ============================================================
-// /presupuestos/reportes.php — Reportes (solo administradores)
+// /presupuestos/reportes.php — Control (solo administradores). Hasta el 18/11/2026 se llamó "Reportes":
+// el archivo y el permiso conservan ese nombre para no romper links; lo que se ve dice "Control".
 // ============================================================
 // Lo que se baja del sistema para guardar afuera. Hoy: el cierre del mes (dueño, 18/11/2026).
 // Acceso: sesión de auth_check.php + permiso 'reportes' (solo administradores; ver AUTH_PERMISOS).
@@ -21,7 +22,7 @@ header('Content-Type: text/html; charset=UTF-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>BlackStones · Reportes</title>
+<title>BlackStones · Control</title>
 <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png" />
 <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg" />
 <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png" />
@@ -84,7 +85,27 @@ button{font-family:inherit;color:inherit}
 }
 
 .wrap{max-width:1480px;margin:0 auto;padding:20px 20px 60px}
-.wrap{max-width:760px}
+.wrap{max-width:1240px}
+/* Control (dueño, 18/11/2026): a la izquierda, el 70 %, los recordatorios; a la derecha, el 30 %, el cierre del mes. */
+.ctl{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,3fr);gap:18px;align-items:start}
+@media(max-width:900px){.ctl{grid-template-columns:minmax(0,1fr)}}
+.ctl .caja h2{font-size:20px}
+.ctl .ci-ops label{flex-wrap:wrap}
+.ctl .ci-ops small{flex-basis:100%;padding-left:27px;margin-top:-6px}
+.rec-vacio{padding:18px 0 6px;color:var(--text2);font-size:14px}
+.rec{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:4px 14px;align-items:start;padding:15px 0;border-top:1px solid var(--border-soft)}
+.rec:first-child{border-top:0;padding-top:6px}
+.rec input{width:24px;height:24px;margin-top:1px;accent-color:var(--gr);cursor:pointer}
+.rec .t{font-size:15.5px;font-weight:700;line-height:1.35}
+.rec .d{grid-column:2;font-size:13.5px;color:var(--text2);line-height:1.5}
+.rec .d a{color:var(--text);font-weight:700;white-space:nowrap}
+.rec .c{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;padding:3px 9px;border-radius:999px;background:var(--card-alt);color:var(--text2)}
+.rec.urge .c{background:var(--amb-soft);color:var(--amb)}
+.rec.hecho .t{font-weight:600;color:var(--text3);text-decoration:line-through}
+.rec.hecho .c{background:var(--gr-soft);color:var(--gr)}
+.rec-sep{margin-top:10px;padding:14px 0 2px;border-top:1px solid var(--border);font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.rec-sep+.rec{border-top:0}
+@media(max-width:520px){.rec{grid-template-columns:30px minmax(0,1fr)}.rec .c{grid-column:2;justify-self:start}}
 .caja{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 22px 20px;margin-bottom:18px}
 .caja h2{font-family:'Fraunces',serif;font-size:21px;font-weight:600;margin-bottom:4px}
 .caja .sub{color:var(--text2);font-size:13.5px;margin-bottom:16px;line-height:1.55}
@@ -133,7 +154,7 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
 <div class="header">
   <div style="display:flex;align-items:center;gap:12px">
     <img src="../logo/logo_isotipo.png" alt="BlackStones" style="height:36px;width:auto">
-    <div><h1>BlackStones</h1><span>Reportes</span></div>
+    <div><h1>BlackStones</h1><span>Control</span></div>
   </div>
   <div class="h-right">
     <?= auth_quien_html() ?>
@@ -147,19 +168,25 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
 <div class="gold-line"></div>
 
 <div class="wrap">
-  <div class="caja" id="cajaCierre">
-    <h2>Cierre del mes</h2>
-    <p class="sub">El último día de cada mes se baja todo en un archivo, tal como está en ese momento, para guardar dos copias: una impresa y una digital. Sirve para dos cosas: una <b>carpeta por cliente</b> (su ficha, el presupuesto y sus fotos) lista para guardar, y la <b>foto completa del sistema</b> de ese día.</p>
-    <div id="ciEstado" class="ci-estado">Cargando…</div>
-    <div class="ci-ops" id="ciOps">
-      <label><input type="checkbox" checked disabled> Fichas, contratos y presupuestos adjuntos <small id="ciBase"></small></label>
-      <label><input type="checkbox" id="ciPlanos" checked> Planos <small id="ciPlanosN"></small></label>
-      <label><input type="checkbox" id="ciEntregas" checked> Fotos de entrega <small id="ciEntregasN"></small></label>
-      <label><input type="checkbox" id="ciBachas" checked> Fotos de bacha <small id="ciBachasN"></small></label>
+  <div class="ctl">
+    <div class="caja" id="cajaRec">
+      <h2>Recordatorios</h2>
+      <p class="sub">Lo que hay que hacer hoy para que no se pase. Aparecen solos y se van cuando se hacen.</p>
+      <div id="recLista"><div class="rec-vacio">Cargando…</div></div>
     </div>
-    <div class="acc"><button class="btn pri" type="button" id="ciBajar" disabled>Descargar</button><span class="msg" id="ciMsg"></span></div>
+    <div class="caja" id="cajaCierre">
+      <h2>Cierre del mes</h2>
+      <p class="sub">El último día del mes se baja todo en un archivo, para imprimir y guardar en la carpeta física: una <b>carpeta por cliente</b> y la <b>foto completa del sistema</b>.</p>
+      <div id="ciEstado" class="ci-estado">Cargando…</div>
+      <div class="ci-ops" id="ciOps">
+        <label><input type="checkbox" checked disabled> Fichas, contratos y presupuestos adjuntos <small id="ciBase"></small></label>
+        <label><input type="checkbox" id="ciPlanos" checked> Planos <small id="ciPlanosN"></small></label>
+        <label><input type="checkbox" id="ciEntregas" checked> Fotos de entrega <small id="ciEntregasN"></small></label>
+        <label><input type="checkbox" id="ciBachas" checked> Fotos de bacha <small id="ciBachasN"></small></label>
+      </div>
+      <div class="acc"><button class="btn pri" type="button" id="ciBajar" disabled>Descargar</button><span class="msg" id="ciMsg"></span></div>
+    </div>
   </div>
-
 
   <div class="caja" id="cajaReg">
     <h2>Registro de acciones</h2>
@@ -200,6 +227,40 @@ $('ciBajar').addEventListener('click',()=>{
   setTimeout(()=>{$('ciMsg').textContent='';},15000);
 });
 cargarCierre();
+
+// ---------- Recordatorios (dueño, 18/11/2026): el recordatorio se hace adentro del sistema, y sin ruido ----------
+// Se calculan en el servidor leyendo el tablero; acá solo se muestran y se tilda "Hecho".
+const API_CTL='/calculadora/api/control.php',escR=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let recYendo=false;
+function recFila(r,listo){
+  const quien=r.hecho?('Hecho'+(r.hecho.por?' por '+escR(r.hecho.por):'')+(r.hecho.at?' · '+escR(r.hecho.at.slice(11,16))+' hs':'')):'';
+  return '<div class="rec'+(listo?' hecho':(r.falta<=1?' urge':''))+'">'
+    +'<input type="checkbox" data-rec="'+escR(r.id)+'"'+(listo?' checked':'')+(r.completo&&!r.hecho?' disabled':'')+' aria-label="Hecho: '+escR(r.titulo)+'">'
+    +'<div class="t">'+escR(r.titulo)+'</div><span class="c">'+(listo?'Hecho':escR(r.cuando))+'</span>'
+    +'<div class="d">'+escR(r.detalle)+(quien?' · '+quien:'')+' · <a href="'+escR(r.link)+'">Ver la ruta →</a></div></div>';
+}
+async function cargarRec(){
+  if(recYendo)return;recYendo=true;
+  try{
+    const r=await fetch(API_CTL,{credentials:'same-origin',cache:'no-store'}),j=await r.json();
+    if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudieron leer los recordatorios');
+    const listo=x=>!!x.hecho||x.completo,pend=j.recordatorios.filter(x=>!listo(x)),hechos=j.recordatorios.filter(listo);
+    $('recLista').innerHTML=(pend.length?pend.map(x=>recFila(x,false)).join(''):'<div class="rec-vacio">'+(hechos.length?'Todo hecho. No queda nada pendiente.':'No hay nada para recordar hoy.')+'</div>')
+      +(hechos.length?'<div class="rec-sep">Hechos</div>'+hechos.map(x=>recFila(x,true)).join(''):'');
+  }catch(e){$('recLista').innerHTML='<div class="rec-vacio">'+escR(e.message)+'</div>';}
+  recYendo=false;
+}
+$('recLista').addEventListener('change',async ev=>{
+  const t=ev.target;if(!t.dataset||t.dataset.rec===undefined)return;
+  t.disabled=true;
+  try{
+    const r=await fetch(API_CTL,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:t.checked?'hecho':'deshacer',id:t.dataset.rec})}),j=await r.json();
+    if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo guardar');
+  }catch(e){alert(e.message);}
+  cargarRec();
+});
+cargarRec();
+setInterval(()=>{if(!document.hidden)cargarRec();},60000);
 
 // ---------- Registro de acciones (dueño, 18/11/2026): solo lectura ----------
 const API_REG='/calculadora/api/registro.php',esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

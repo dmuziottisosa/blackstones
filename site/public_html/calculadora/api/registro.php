@@ -72,6 +72,7 @@ function bs_registro_que($script, $d, $tildes, $etapas, $ADJ) {
         case 'edit-concepto.php': case 'edit-cotizacion.php': return 'Editó un presupuesto';
         case 'add-manual.php': return 'Cargó un entregado a mano';
         case 'cierre-mes.php': return 'Bajó el cierre del mes';
+        case 'control.php': return $a === 'deshacer' ? 'Volvió a dejar pendiente un recordatorio' : 'Marcó como hecho un recordatorio';
         case 'usuarios.php':
             $t = ['primer_admin' => 'Creó el primer administrador', 'crear' => 'Creó un usuario', 'editar' => 'Cambió un usuario (rol o alta/baja)', 'clave' => 'Le cambió la contraseña a un usuario', 'borrar' => 'Borró un usuario', 'mi_clave' => 'Cambió su propia contraseña'];
             return $t[$a] ?? 'Cambió usuarios';

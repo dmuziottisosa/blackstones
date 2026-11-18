@@ -45,7 +45,7 @@ const AUTH_PERMISOS = [
     'contratos_plata'   => ['admin', 'operador'],           // ver el total, la seña, los pagos y el saldo de cada contrato
     'contratos_resumen' => ['admin'],                       // ver el resumen de plata del mes (contratado, cobrado, por cobrar) y las sumas del pie
     'presencia'         => ['admin', 'operador', 'planos'], // ver quién está trabajando ahora y en qué pantalla
-    'reportes'          => ['admin'],                       // pestaña Reportes: el cierre del mes (baja todo)
+    'reportes'          => ['admin'],                       // pestaña Control (hasta el 18/11/2026, "Reportes"): recordatorios, cierre del mes y registro
     'usuarios'          => ['admin'],
     'mantenimiento'     => ['admin'],                       // importadores y scripts de una sola vez
 ];
@@ -216,12 +216,12 @@ function auth_nav_html(string $activa): string {
         ['calendario',   '/presupuestos/calendario.php',         'Calendario'],
         ['contratos',    '/presupuestos/relacion-contrato.php',  'Relación-Contrato'],
         ['stock',        '/presupuestos/stock.php',              'Stock'],
-        ['reportes',     '/presupuestos/reportes.php',           'Reportes'],
+        ['reportes',     '/presupuestos/reportes.php',           'Control'],
     ];
     $h = "<nav class=\"h-tabs\">\n";
     foreach ($items as [$permiso, $url, $txt]) {
         if (!auth_puede($permiso)) continue;
-        // Reportes se puede borrar entero sin que nada se rompa: si la página no está, no hay pestaña.
+        // Control (reportes.php) se puede borrar entero sin que nada se rompa: si la página no está, no hay pestaña.
         if ($permiso === 'reportes' && !is_file(__DIR__ . '/../presupuestos/reportes.php')) continue;
         $h .= '  <a href="' . $url . '"' . ($activa === $permiso ? ' class="active"' : '') . '>' . $txt . "</a>\n";
     }

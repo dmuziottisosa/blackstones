@@ -234,7 +234,7 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
       <tr><td>Ver el resumen de plata del mes</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
       <tr><td>Crear, editar y borrar contratos; seña, cobros y adjuntos; cargar la obra en Por medir</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Ver quién está trabajando ahora y dónde</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
-      <tr><td>Reportes (bajar el cierre del mes)</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
+      <tr><td>Control (recordatorios, cierre del mes y registro)</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
       <tr><td>Usuarios</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
     </table>
   </div>
@@ -264,7 +264,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 let D=null,VELO=null;
 // Quién está conectado ahora y en qué pantalla (api/presencia.php). Se refresca solo.
 const API_PRES='/calculadora/api/presencia.php';
-const PAGINAS={calculadora:'Calculadora',presupuestos:'Presupuestos',tablero:'Tablero',calendario:'Calendario',contratos:'Relación-Contrato',stock:'Stock',reportes:'Reportes',usuarios:'Usuarios'};
+const PAGINAS={calculadora:'Calculadora',presupuestos:'Presupuestos',tablero:'Tablero',calendario:'Calendario',contratos:'Relación-Contrato',stock:'Stock',reportes:'Control',usuarios:'Usuarios'};
 let PRES={};
 function hace(s){
   if(s<90)return 'hace un momento';

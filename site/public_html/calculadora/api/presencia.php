@@ -27,7 +27,7 @@ bs_check_csrf();
 
 const BS_PRESENCIA_VENTANA = 50;   // segundos sin señal para dejar de estar "en línea" (la señal sale cada 20)
 const BS_PRESENCIA_NOMBRES = ['calculadora' => 'Calculadora', 'presupuestos' => 'Presupuestos', 'tablero' => 'Tablero', 'calendario' => 'Calendario',
-    'contratos' => 'Relación-Contrato', 'stock' => 'Stock', 'reportes' => 'Reportes', 'usuarios' => 'Usuarios'];
+    'contratos' => 'Relación-Contrato', 'stock' => 'Stock', 'reportes' => 'Control', 'usuarios' => 'Usuarios'];
 const BS_PRESENCIA_PAGINAS = ['calculadora', 'presupuestos', 'tablero', 'calendario', 'contratos', 'stock', 'reportes', 'usuarios'];
 
 $yo = auth_usuario();
