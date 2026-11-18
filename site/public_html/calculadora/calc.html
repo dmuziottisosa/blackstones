@@ -5820,7 +5820,7 @@ function toggleTheme(){
         try { localStorage.removeItem(BS_DRAFT_KEY); } catch(e){}
         return;
       }
-      var draft = { state: state, nro: nroVal, saved_at: Date.now() };
+      var draft = { state: state, nro: nroVal, auto: !!(nroEl && nroEl.dataset.bsAuto === '1'), saved_at: Date.now() };
       localStorage.setItem(BS_DRAFT_KEY, JSON.stringify(draft));
     } catch(e){ /* silencioso */ }
   }
@@ -5858,11 +5858,14 @@ function toggleTheme(){
           var nroEl = document.getElementById('nro');
           if (nroEl && draft.nro) {
             nroEl.value = draft.nro;
-            nroEl.dataset.bsAuto = '0';
+            // Si el N° era el que propuso la calculadora, sigue siendo "un presupuesto nuevo": si entre
+            // tanto ese número lo tomó otro, el servidor le da el siguiente (18/11/2026).
+            nroEl.dataset.bsAuto = draft.auto ? '1' : '0';
           }
           if (typeof bsApplyState === 'function') {
             bsApplyState(draft.state, { blank: false });
           }
+          if (nroEl && draft.nro) nroEl.dataset.bsAuto = draft.auto ? '1' : '0'; // bsApplyState puede haberlo pisado
           // Toast no-bloqueante avisando recuperación
           var n = document.createElement('div');
           n.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1A1816;color:#FAF8F4;padding:12px 18px;border-radius:6px;font:13px Manrope,sans-serif;border-left:3px solid #C4A77D;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2);max-width:320px';

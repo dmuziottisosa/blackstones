@@ -53,6 +53,40 @@ $presupuesto = $body['presupuesto'] ?? null;
 if (!is_array($presupuesto)) bs_error('presupuesto es obligatorio');
 
 // Lock global del directorio clientes/ para serializar concurrencia
+/** El N° de presupuesto más alto que existe (sin contar las fichas a mano, que van de 90001 en adelante). */
+function bs_save_max_nro() {
+    $max = 0;
+    foreach (@scandir(BS_CLIENTES_DIR) ?: [] as $f) {
+        if (preg_match('/^(\d{4,})\.json$/', $f, $m) && intval($m[1]) < BS_NRO_FICHA_MANUAL_DESDE) $max = max($max, intval($m[1]));
+    }
+    $idx = bs_read_json(BS_CLIENTES_INDEX);
+    if (is_array($idx)) foreach ($idx as $nro_str => $_v) { if (intval($nro_str) < BS_NRO_FICHA_MANUAL_DESDE) $max = max($max, intval($nro_str)); }
+    return $max;
+}
+
+/**
+ * ¿El cliente que ya tiene ese N° es la misma persona que la del presupuesto que llega?
+ * Es estricto a propósito: equivocarse para el lado de "es otra" solo cuesta un N° nuevo;
+ * equivocarse para el lado de "es la misma" mezcla dos clientes.
+ *   - Si los dos tienen teléfono, manda el teléfono (últimos 8 dígitos).
+ *   - Si a alguno le falta, tienen que coincidir los nombres (igual, o uno contiene al otro).
+ */
+function bs_save_misma_persona(array $viejo, array $nuevo) {
+    $tel = function ($s) { $n = preg_replace('/\D/', '', (string)$s); return strlen($n) >= 8 ? substr($n, -8) : ''; };
+    $llano = function ($s) {
+        $s = mb_strtolower(trim((string)$s), 'UTF-8');
+        $s = strtr($s, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
+        return trim(preg_replace('/\s+/', ' ', preg_replace('/[^a-z0-9 ]/', ' ', $s)));
+    };
+    $tv = $tel($viejo['celular'] ?? ''); $tn = $tel($nuevo['celular'] ?? '');
+    // a veces el teléfono está cargado en el lugar del nombre
+    if ($tv === '' && !preg_match('/[a-z]/', $llano($viejo['nombre'] ?? ''))) $tv = $tel($viejo['nombre'] ?? '');
+    if ($tv !== '' && $tn !== '') return $tv === $tn;
+    $nv = $llano($viejo['nombre'] ?? ''); $nn = $llano($nuevo['nombre'] ?? '');
+    if ($nv === '' || $nn === '' || !preg_match('/[a-z]/', $nv)) return false;
+    return $nv === $nn || strpos($nn, $nv) !== false || strpos($nv, $nn) !== false;
+}
+
 $lockfile = BS_CLIENTES_DIR . '/.write.lock';
 $fp = bs_lock_acquire($lockfile);
 if (!$fp) bs_error('No se pudo adquirir lock', 500);
@@ -153,6 +187,27 @@ try {
         $cliente_path = BS_CLIENTES_DIR . '/' . $target . '.json';
         $cliente_obj = bs_read_json($cliente_path);
 
+        // PROTECCIÓN (dueño, 18/11/2026, "hubo un traspapeleo que no puede pasar nunca más"):
+        // el N° que viaja puede ser viejo (la calculadora lo recupera de un borrador o quedó de una
+        // pestaña abierta) y entre tanto pudo tomarlo OTRA persona: una ficha cargada a mano, que usa
+        // la misma serie y no muestra su número, u otro presupuesto. Antes se guardaba encima: le
+        // cambiaba el nombre, el teléfono y la dirección a la obra de otro cliente.
+        // Ahora solo se agrega una versión si es la misma persona. Si no, el presupuesto se guarda
+        // con un N° nuevo y se avisa. Una ficha cargada a mano nunca recibe un presupuesto por acá.
+        if ($cliente_obj) {
+            $es_ficha_manual = false;
+            foreach ($cliente_obj['cotizaciones'] ?? [] as $cot_v) { if (!empty($cot_v['manual'])) $es_ficha_manual = true; }
+            if ($es_ficha_manual || !bs_save_misma_persona((array)($cliente_obj['cliente'] ?? []), $cliente_data)) {
+                $de_quien = $es_ficha_manual ? 'una obra cargada a mano en el tablero' : (trim((string)($cliente_obj['cliente']['nombre'] ?? '')) ?: 'otro cliente');
+                $target_viejo = $target;
+                $target = str_pad((string)(bs_save_max_nro() + 1), 4, '0', STR_PAD_LEFT);
+                $cliente_path = BS_CLIENTES_DIR . '/' . $target . '.json';
+                $cliente_obj = null;
+                $warning = "El N° {$target_viejo} ya era de {$de_quien}. Para no mezclarlos, este presupuesto se guardó con el N° {$target}.";
+                @file_put_contents(BS_REGISTRO_DIR . '/_cruces-evitados.log', '[' . $now . "] save.php: N° {$target_viejo} ya tomado; se guardó como {$target}\n", FILE_APPEND | LOCK_EX);
+            }
+        }
+
         if (!$cliente_obj) {
             // No existe → crear cliente nuevo con ese nro (caso "tipeé manual un nro nuevo")
             $cliente_obj = [
@@ -208,7 +263,7 @@ try {
             'cliente_nro' => $target,
             'sub'         => $next_sub,
             'estado'      => 'borrador',
-            'warning'     => null,
+            'warning'     => $warning,
         ]);
     }
 } catch (Throwable $e) {

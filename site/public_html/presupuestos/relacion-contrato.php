@@ -123,6 +123,8 @@ button{font-family:inherit;color:inherit}
 .filtros button i{font-style:normal;font-weight:800;color:var(--text3);font-variant-numeric:tabular-nums}
 .filtros button.on{background:var(--dk);border-color:var(--dk);color:var(--cr)}
 .filtros button.on i{color:var(--gd)}
+.filtros select{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-family:inherit;font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer}
+.filtros select.on{background:var(--dk);border-color:var(--dk);color:var(--cr)}
 [data-theme="dark"] .filtros button.on{background:var(--gd);border-color:var(--gd);color:#1A1816}
 [data-theme="dark"] .filtros button.on i{color:#1A1816}
 
@@ -798,7 +800,18 @@ const sumar=(l)=>{const s={tot:{USD:0,ARS:0},pag:{USD:0,ARS:0},deb:{USD:0,ARS:0}
 const debe=c=>{const n=cuentas(c);return n.sal.USD>0.004||n.sal.ARS>0.004;};
 const pagado=c=>{const n=cuentas(c);return (n.tot.USD>0||n.tot.ARS>0)&&!debe(c);};
 // Filtros de control: lo que hay que perseguir.
-const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['completos','Completos',completo],['sena','Seña distinta',c=>!!senaDif(c),true]].filter(f=>PLATA||['saldo','pagados','sena'].indexOf(f[0])<0);
+// Sin turno (dueño, 18/11/2026): la obra está en Por medir o Por instalar y todavía no tiene su turno.
+// En Por medir alcanza con el día; en Por instalar hacen falta día y hora. Lo dice el tablero.
+function sinTurno(c){
+  const k=cardDe(c);if(!k)return false;
+  if(k.etapa==='medir')return !k.fecha&&!k.medido_at&&!(k.checks&&k.checks.medido);
+  if(k.etapa==='instalar')return (!k.fecha||!k.hora)&&!(k.checks&&k.checks.instalado);
+  return false;
+}
+// La etapa del tablero como filtro de la planilla: '' = todas, 'sin' = los que no están cargados en el tablero.
+let fEtapa='';
+const etapaOk=c=>{if(!fEtapa)return true;const k=cardDe(c);return fEtapa==='sin'?!k:(!!k&&k.etapa===fEtapa);};
+const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['completos','Completos',completo],['sinturno','Sin turno',sinTurno],['sena','Seña distinta',c=>!!senaDif(c),true]].filter(f=>PLATA||['saldo','pagados','sena'].indexOf(f[0])<0);
 const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':(v==='cf'?'<span class="sn si" title="Factura a consumidor final">CF</span>':'<span class="sn">—</span>'));
 const PIL={nuestra:'Nuestra',cliente:'Cliente',no:'No'};
 
@@ -838,11 +851,16 @@ function dibujar(){
     +(buscando?'':'<div class="tod"><div class="t">Por cobrar, todos los meses</div><div class="v">'+(linea(todo.deb)||'Nada')+'</div></div>'));
   if(!FILTROS.some(f=>f[0]===filtro))filtro='todos';
   $('filtros').hidden=!delMes.length;
-  $('filtros').innerHTML=FILTROS.filter(f=>!f[3]||delMes.some(f[2])||filtro===f[0]).map(f=>'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+delMes.filter(f[2]).length+'</i></button>').join('');
+  // La etapa se elige aparte y se combina con el filtro de al lado ("Por instalar" + "Sin turno", por ejemplo).
+  const porEt={};delMes.forEach(c=>{const k=cardDe(c),e=k?k.etapa:'sin';porEt[e]=(porEt[e]||0)+1;});
+  if(fEtapa&&!porEt[fEtapa])fEtapa='';
+  const opsEt=TABLERO_OK?Object.keys(ETAPAS).filter(e=>porEt[e]).map(e=>[e,ETAPAS[e]]).concat(porEt.sin?[['sin','Sin cargar al tablero']]:[]):[];
+  $('filtros').innerHTML=FILTROS.filter(f=>(!f[3]||delMes.some(f[2])||filtro===f[0])&&(f[0]!=='sinturno'||TABLERO_OK)).map(f=>'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+delMes.filter(etapaOk).filter(f[2]).length+'</i></button>').join('')
+    +(opsEt.length?'<select id="fEtapa" class="'+(fEtapa?'on':'')+'" aria-label="Filtrar por etapa del tablero"><option value="">Etapa: todas</option>'+opsEt.map(o=>'<option value="'+esc(o[0])+'"'+(fEtapa===o[0]?' selected':'')+'>'+esc(o[1])+' · '+porEt[o[0]]+'</option>').join('')+'</select>':'');
 
   const fx=FILTROS.find(f=>f[0]===filtro)[2];
   const dir=ordenAsc?1:-1;
-  const lista=delMes.filter(fx).sort((a,b)=>{
+  const lista=delMes.filter(etapaOk).filter(fx).sort((a,b)=>{
     if(orden==='cliente'){const x=llano(ver(a).cliente),y=llano(ver(b).cliente);if(x!==y)return (x<y?-1:1)*dir;}
     else if(a.fecha!==b.fecha)return (a.fecha<b.fecha?-1:1)*dir;
     return a.creado<b.creado?1:-1;
@@ -1156,16 +1174,20 @@ function pedirEnviar(id){
 }
 async function enviar(id){
   const c=CONTRATOS.find(x=>x.id===id);if(!c)return;
-  let nro,sub,yaEstaba=false;
+  // "Cargar en Por medir" crea la ficha en Por medir o avisa por qué no (dueño, 18/11/2026). Antes, si el
+  // presupuesto "ya estaba en el tablero", buscaba una ficha con ese número y la enlazaba sola: podía ser la
+  // de otra persona. Enlazar con una ficha que ya existe es otro botón ("Enlazar con el tablero"), que
+  // muestra de quién es antes de confirmar.
+  let nro,sub;const yaEstaba=false;
   try{
     const r=await pedir(API_CARGAR,c.nro?{nro:c.nro}:{nombre:c.cliente,celular:telLindo(c.telefono),direccion:c.direccion,material:c.material});
     nro=r.cliente_nro;sub=r.sub;
   }catch(e){
-    // El presupuesto ya estaba aprobado: la ficha existe, solo falta enlazarla.
-    if(!c.nro||!/ya está en el tablero/.test(e.message))throw e;
-    const t=await pedir(API_T),p=c.nro.split('-'),l=t.cards.filter(k=>k.cliente_nro===p[0]&&(!p[1]||k.sub===+p[1]));
-    if(l.length!==1)throw e;
-    nro=l[0].cliente_nro;sub=l[0].sub;yaEstaba=true;
+    if(c.nro&&/ya está en el tablero/.test(e.message)){
+      cargar(); // la lista se pone al día: si corresponde, el renglón pasa a ofrecer "Enlazar con el tablero"
+      throw new Error('El presupuesto N° '+c.nro+' ya está en el tablero. No se cargó de nuevo. Si es esta misma obra, usá "Enlazar con el tablero".');
+    }
+    throw e;
   }
   await pedir(API,{accion:'enlazar',id:c.id,cliente_nro:nro,sub:sub});
   // Lo que sigue completa la ficha nueva. Si algo falla, el enlace queda y se avisa qué faltó.
@@ -1436,6 +1458,7 @@ document.addEventListener('keydown',ev=>{
   if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList&&ev.target.classList.contains('fila')){ev.preventDefault();abrirFicha(ev.target.dataset.id);}
 });
 $('modal').addEventListener('input',ev=>{if(ev.target.id==='fNota'){crecerNota();return;}if(ev.target.id==='fNro'){buscarNro();return;}if(F&&['fTotU','fTotA','fSen','fSenM','fSenC','pMonto','pCot'].indexOf(ev.target.id)>=0)pintarPagos();});
+$('filtros').addEventListener('change',ev=>{if(ev.target.id==='fEtapa'){fEtapa=ev.target.value;dibujar();}});
 $('modal').addEventListener('change',ev=>{
   if(F&&(ev.target.id==='fSenM'||ev.target.id==='pComo'))pintarPagos();
   if(ev.target.id==='fTel')pintarTel(true);

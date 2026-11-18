@@ -194,6 +194,16 @@ La idea del dueño: una vez enlazados, que se aproveche al máximo lo que cada l
 - **"Enlazado" es un link a la ficha.** En el renglón de la lista y dentro del contrato, tocarlo abre el tablero con esa ficha. Es el camino inverso de "Con contrato" en la ficha, que lleva al contrato.
 - El N° también se comparte: ver "El N° del contrato en la ficha del tablero", arriba.
 
+## Filtrar por etapa y ver las que no tienen turno (18/11/2026)
+
+- **Selector "Etapa"**, al final de los filtros: deja solo los contratos cuya obra está en esa etapa del tablero, o los que todavía no están cargados. Ofrece solo las etapas que hay en el mes, con su cantidad.
+- **Filtro "Sin turno":** obras en Por medir sin día de medición, y obras en Por instalar sin día o sin hora de instalación.
+- **Se combinan:** "Por instalar" + "Sin turno" muestra las instalaciones que falta agendar. Los números de los demás filtros acompañan a la etapa elegida.
+
+## "Cargar en Por medir" carga o avisa (18/11/2026)
+
+Crea la ficha en Por medir, vacía, y la enlaza. Si el presupuesto ya está en el tablero, **avisa y no hace nada**: no busca una ficha para enlazarla por su cuenta. Para enlazar con una ficha que ya existe está "Enlazar con el tablero", que muestra de quién es antes de confirmar. → `01-strategy/decision-log/2026-11-18-un-numero-una-persona.md`
+
 ## Renglones de prueba
 
 Con la lista vacía aparece "Cargar 3 de prueba". Quedan marcados PRUEBA, no cuentan en "Por cobrar" y se borran juntos con "Borrar los de prueba" (si alguno se cargó en el tablero, esa ficha de prueba también se borra).

@@ -210,6 +210,14 @@ Botón "Editar obra" en "Más" (también desde el calendario, que muestra la mis
 - **Medición al cargar:** "Cargar obra" tiene día y hora de medición (la hora es opcional), con o sin N° de presupuesto. Así la obra no nace "sin fecha". Sin día, queda marcada "sin fecha" como siempre.
 - **Nunca se pierde lo escrito:** si el número no existe o algo falla, la ventana queda abierta con los datos y el motivo. Lo mismo vale para "Cargar obra".
 
+## Cómo entra una obra al tablero (regla del 18/11/2026)
+
+- **Solo por dos puertas:** "Cargar obra" en el tablero (con el N° de su presupuesto, o a mano) y "Cargar en Por medir" en Relación-Contrato. Ningún otro camino aprueba un presupuesto.
+- **Siempre nace en Por medir, vacía.** No hereda etapa, tildes ni fotos de ningún registro anterior. Lo que está en la papelera se recupera desde la Papelera.
+- **El número interno de una ficha a mano no es un N° de presupuesto.** Si alguien lo escribe en "Cargar obra", la respuesta es que ese presupuesto no existe.
+- **La calculadora no puede guardar un presupuesto encima del número de otra persona** ni del de una ficha a mano: lo guarda con un N° nuevo y avisa.
+- El porqué → `01-strategy/decision-log/2026-11-18-un-numero-una-persona.md`.
+
 ## Borrar una ficha
 
 - **Borrar el presupuesto no borra la ficha (16/11/2026).** Si alguien elimina en Presupuestos el presupuesto de una obra que está en el tablero, o le llegan los 180 días, el presupuesto sale de esa pestaña y la ficha sigue igual, con sus fotos. La ficha solo se borra con "Borrar ficha", acá.

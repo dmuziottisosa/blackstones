@@ -14,6 +14,10 @@
 // "aprobado", así la ficha queda atada al presupuesto real (se ve el
 // detalle, el material, la zona). Acepta "0042" o "0042-2" (versión).
 //
+// REGLA (dueño, 18/11/2026): una obra entra al tablero solo por acá, que es lo que llaman
+// "Cargar obra" (tablero) y "Cargar en Por medir" (Relación-Contrato). Siempre nace en
+// Por medir, vacía: nunca hereda la etapa ni los tildes de otra obra.
+//
 // Body JSON:
 //   {
 //     "nro":       "0042-2",                  // opcional: presupuesto existente
@@ -47,6 +51,20 @@ function bs_cargar_texto($body, $campo, $max, $etiqueta) {
     $v = trim(preg_replace('/\s+/u', ' ', (string)($body[$campo] ?? '')));
     if (mb_strlen($v) > $max) bs_error($etiqueta . ' demasiado largo');
     return $v;
+}
+
+/** Borra del tablero cualquier registro previo de esa clave: la ficha nueva nace vacía, en Por medir. */
+function bs_cargar_ciclo_nuevo($key) {
+    if (!is_dir(BS_TABLERO_DIR)) return;
+    $ft = bs_lock_acquire(BS_TABLERO_LOCK);
+    if (!$ft) return;
+    $t = bs_tablero_leer();
+    if (isset($t['obras'][$key])) {
+        bs_tablero_borrar_carpeta($key);
+        unset($t['obras'][$key]);
+        bs_write_json_atomic(BS_TABLERO_FILE, $t);
+    }
+    bs_lock_release($ft);
 }
 
 // ------------------------------------------------------------
@@ -85,6 +103,19 @@ if ($nro_txt !== '') {
         foreach ($cliente_obj['cotizaciones'] as &$cot) {
             if (intval($cot['sub'] ?? 0) !== $sub_pedido) continue;
             $estado = (string)($cot['estado'] ?? '');
+            // Una ficha cargada a mano no es un presupuesto, aunque por dentro tenga un número (las
+            // viejas lo tienen en la misma serie, y no se ve). Si alguien escribe justo ese número,
+            // no se la toca ni se enlaza nada con ella (dueño, 18/11/2026).
+            if (!empty($cot['manual'])) {
+                bs_lock_release($fp);
+                bs_error('No hay ningún presupuesto N° ' . $nro . '. Para cargar la obra sin presupuesto, dejá el número vacío.', 404);
+            }
+            // Lo que está en la papelera se recupera desde la Papelera, con todo lo que tenía.
+            // "Cargar" siempre empieza una obra de cero, en Por medir.
+            if ($estado === 'papelera') {
+                bs_lock_release($fp);
+                bs_error('El ' . $nro . '-' . $sub_pedido . ' está en la papelera del tablero. Recuperalo desde "Papelera".', 409);
+            }
             if ($estado === 'aprobado') {
                 bs_lock_release($fp);
                 bs_error('El ' . $nro . '-' . $sub_pedido . ' ya está en el tablero.', 409);
@@ -93,8 +124,6 @@ if ($nro_txt !== '') {
                 bs_lock_release($fp);
                 bs_error('El ' . $nro . '-' . $sub_pedido . ' ya figura como entregado.', 409);
             }
-            // (si estaba en la papelera del tablero, esto la restaura con todo lo que tenía)
-            unset($cot['papelera']);
             $cot['estado'] = 'aprobado';
             $cot['transiciones'][] = ['estado' => 'aprobado', 'at' => $now];
         }
@@ -105,6 +134,9 @@ if ($nro_txt !== '') {
             bs_error('No se pudo escribir el cliente', 500);
         }
         bs_lock_release($fp);
+        // La obra que se carga empieza su ciclo en Por medir (dueño, 18/11/2026): si en el tablero
+        // quedó un registro viejo con esa clave (tildes, etapa, fotos de otra vuelta), no se hereda.
+        bs_cargar_ciclo_nuevo($nro . '-' . $sub_pedido);
         bs_ok(['cliente_nro' => $nro, 'sub' => $sub_pedido, 'vinculada' => true]);
     } catch (Throwable $e) {
         bs_lock_release($fp);
@@ -177,6 +209,7 @@ try {
     }
 
     bs_lock_release($fp);
+    bs_cargar_ciclo_nuevo($target_nro . '-1');
     bs_ok(['cliente_nro' => $target_nro, 'sub' => 1]);
 
 } catch (Throwable $e) {

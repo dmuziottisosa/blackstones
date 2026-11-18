@@ -113,7 +113,9 @@ try {
             // tablero es que fue aprobada. Un presupuesto entra al tablero desde el tablero ("Cargar
             // obra" con su N°) o desde su contrato ("Cargar en Por medir"), que no pasan por acá.
             // Devolver un entregado al tablero (desde el Reporte) sigue permitido.
-            if ($nuevo_estado === 'aprobado' && $estado_anterior !== 'entregado' && empty($body['desde_tablero'])) {
+            // (18/11/2026) Tampoco con "desde_tablero": por acá solo se devuelve una archivada. Una obra
+            // nueva entra por tablero-cargar.php, que la deja en Por medir y vacía.
+            if ($nuevo_estado === 'aprobado' && $estado_anterior !== 'entregado') {
                 bs_lock_release($fp);
                 bs_error('Un presupuesto pasa al tablero desde el tablero ("Cargar obra" con su N°) o desde su contrato en Relación-Contrato.', 409);
             }
