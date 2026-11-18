@@ -60,12 +60,37 @@ El dueño: "¿Por qué hacer el recordatorio fuera del sistema cuando se puede h
   - Dice cuántos turnos son, cuántos ya están en "Turno confirmado" y cuántos no tienen hora. No trae nombres ni teléfonos: "Ver la ruta →" abre el Cronograma del calendario en ese día, que es donde están.
   - **"Hecho"** lo tilda una persona cuando ya les avisó. Si después se suma un turno a ese día, vuelve a quedar pendiente y lo dice.
   - Si todas las obras de ese día tienen "Turno confirmado" en su ficha, se da por hecho solo.
-- **Bajar el cierre del mes:** aparece solo el último día del mes. Se da por hecho solo cuando alguien lo baja ese día (lo lee del registro).
-- **Dar turno de instalación:** obras en Por instalar, sin instalar, que no tienen día u hora y cuyo plazo de entrega vence en 7 días o menos, o ya venció. Dice cuántas son, cuándo vence la primera y cuántas ya vencieron. Lleva al Cronograma de instalación. Se va solo cuando todas tienen turno.
-- **Pasar a cortar:** obras medidas hace más de 2 días que siguen en Por medir. Dice cuál es la más vieja y qué tildes les faltan. Lleva al tablero. Se va solo cuando pasan a Por cortar.
-- **Los dos últimos son de todos los días:** el "Hecho" vale por hoy. Si mañana siguen sin resolverse, vuelven a aparecer.
 - **Por qué el de turnos queda hasta el mismo día:** aparece dos días hábiles antes y sigue hasta el día del turno inclusive ("es hoy"), porque un turno sin confirmar el mismo día es justo el que más importa. Se va al día siguiente, o antes si todas las obras quedan en "Turno confirmado" o se marcan Medido / Instalado.
-- **Orden:** primero los turnos, lo más cercano arriba; después cierre, dar turno y pasar a cortar. Nunca hay más de un renglón por tipo (salvo turnos, que va uno por día).
-- **En pantalla:** primero los pendientes; abajo, "Hechos", tachados. Sin pendientes dice "No hay nada para recordar hoy". Se actualiza solo cada minuto.
+
+### Los que hay, por grupo
+
+El dueño aprobó cada uno (los cuatro primeros el 18/11/2026; los nueve siguientes el mismo día, de una lista de la que rechazó uno). En pantalla van en este orden, con un rótulo chico por grupo.
+
+| Grupo | Recordatorio | Cuándo aparece | Cuándo se va solo | Lleva a |
+|---|---|---|---|---|
+| Turnos | **Marcar o reprogramar** las mediciones / instalaciones que ya pasaron | Turno de los últimos 14 días sin "Medido" / "Instalado" | Al marcarlas o cambiarles el día | Cronograma |
+| Turnos | **Confirmar los turnos** del día | 2 días hábiles antes, hasta el día | Todas en "Turno confirmado" | Cronograma de ese día |
+| Turnos | **Completar los datos de la medición** | El día hábil anterior, solo si a alguna le falta dirección o teléfono | Al completarlos | Cronograma de ese día |
+| Turnos | **Preparar la instalación** | El día hábil anterior, solo si a alguna le faltan instaladores o "Dirección confirmada" | Al tildarlos | Cronograma de ese día |
+| Taller y plazo | **Dar turno de instalación** | Por instalar, sin día u hora, plazo a 7 días o menos (o vencido) | Todas con turno | Cronograma de instalación |
+| Taller y plazo | **Apurar** lo que vence en 5 días o menos | Plazo a 5 días o menos (o vencido) y sigue en Por cortar o Por fabricar | Al pasar a Por instalar | Tablero |
+| Taller y plazo | **Pedir la placa** | Ya medida y sin "Tenemos la placa" | Al tildarla | Tablero |
+| Taller y plazo | **Pasar a cortar** | Medida hace más de 2 días, con placa y seña, y sigue en Por medir | Al pasar a Por cortar | Tablero |
+| Taller y plazo | **Cerrar lo ya instalado** | "Instalado" hace más de 2 días y sigue en Por instalar | Al pasar a Por archivar | Tablero |
+| Plata y contratos | **Cobrar la seña** | Ya medida y sin "Trajo la seña" | Al tildarla | Tablero |
+| Plata y contratos | **Cargar en Por medir** un contrato | Contrato cargado hace 2 días o más, sin enlazar con el tablero | Al cargarlo o enlazarlo | Relación-Contrato |
+| Plata y contratos | **Adjuntar el presupuesto** al contrato | Al presupuesto de la calculadora le quedan 15 días o menos de sus 180, y el contrato no lo tiene adjunto | Al adjuntarlo | Relación-Contrato |
+| Fin de mes | **Bajar el cierre** | Solo el último día del mes | Cuando alguien lo baja (lo lee del registro) | El cierre, en la misma pantalla |
+
+Detalles que no se ven en la tabla:
+
+- **Una obra no se repite.** "Pasar a cortar" no cuenta las que esperan la placa o la seña: esas ya están en su propio recordatorio, que dice qué las frena.
+- **El presupuesto sigue durando 180 días.** Los "15 días" de "Adjuntar el presupuesto" son la anticipación del aviso, no un plazo nuevo. La cuenta es la misma de la limpieza nocturna (`cleanup-retention.php`): 180 días desde la última vez que se tocó. Si ese N° ya es una obra (viva o archivada) no avisa: ahí el presupuesto tiene otro reloj.
+- **"Cargar en Por medir" mira solo contratos de los últimos 30 días** (por la fecha del contrato), para que los históricos importados no hagan ruido. Los de prueba no cuentan.
+- **Si Relación-Contrato no está instalada**, los dos que leen contratos simplemente no aparecen; el resto sigue.
+- **Los que no son de un día puntual son de todos los días:** el "Hecho" vale por hoy. Si mañana siguen sin resolverse, vuelven a aparecer. Marcado "Hecho", cualquiera vuelve a quedar pendiente si después se le suma una obra, y lo dice.
+- **Ninguno trae nombres, teléfonos, direcciones ni plata:** dicen cuántas obras son y llevan a la pantalla donde están.
+- **Orden:** por grupo; dentro de cada grupo, por fecha (lo que ya pasó, después lo más cercano). Nunca hay más de un renglón por tipo (salvo los de turnos, que van uno por día).
+- **En pantalla:** primero los pendientes, por grupo; abajo, "Hechos", tachados. Sin pendientes dice "No hay nada para recordar hoy". Se actualiza solo cada minuto.
 - **Solo lo ven los administradores**, como el resto de Control.
 - **Para sumar un tipo nuevo:** se agrega en `control.php` (cada uno arma su `id`, título, detalle y link). Antes, preguntarle al dueño: la regla es cero ruido.

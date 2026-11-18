@@ -99,12 +99,17 @@ button{font-family:inherit;color:inherit}
 .rec .t{font-size:15.5px;font-weight:700;line-height:1.35}
 .rec .d{grid-column:2;font-size:13.5px;color:var(--text2);line-height:1.5}
 .rec .d a{color:var(--text);font-weight:700;white-space:nowrap}
+.rec .d .ir{white-space:nowrap}
 .rec .c{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;padding:3px 9px;border-radius:999px;background:var(--card-alt);color:var(--text2)}
 .rec.urge .c{background:var(--amb-soft);color:var(--amb)}
 .rec.hecho .t{font-weight:600;color:var(--text3);text-decoration:line-through}
 .rec.hecho .c{background:var(--gr-soft);color:var(--gr)}
 .rec-sep{margin-top:10px;padding:14px 0 2px;border-top:1px solid var(--border);font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
 .rec-sep+.rec{border-top:0}
+/* Los pendientes van por grupo (Turnos, Taller y plazo, Plata y contratos, Fin de mes): un rótulo chico y nada más */
+.rec-grupo{padding:16px 0 0;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.rec-grupo:first-child{padding-top:4px}
+.rec-grupo+.rec{border-top:0;padding-top:8px}
 @media(max-width:520px){.rec{grid-template-columns:30px minmax(0,1fr)}.rec .c{grid-column:2;justify-self:start}}
 .caja{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 22px 20px;margin-bottom:18px}
 .caja h2{font-family:'Fraunces',serif;font-size:21px;font-weight:600;margin-bottom:4px}
@@ -237,7 +242,7 @@ function recFila(r,listo){
   return '<div class="rec'+(listo?' hecho':(r.falta<=1?' urge':''))+'">'
     +'<input type="checkbox" data-rec="'+escR(r.id)+'"'+(listo?' checked':'')+(r.completo&&!r.hecho?' disabled':'')+' aria-label="Hecho: '+escR(r.titulo)+'">'
     +'<div class="t">'+escR(r.titulo)+'</div><span class="c">'+(listo?'Hecho':escR(r.cuando))+'</span>'
-    +'<div class="d">'+escR(r.detalle)+(quien?' · '+quien:'')+' · <a href="'+escR(r.link)+'">'+escR(r.link_txt||'Ver →')+'</a></div></div>';
+    +'<div class="d">'+escR(r.detalle)+(quien?' · '+quien:'')+' <span class="ir">· <a href="'+escR(r.link)+'">'+escR(r.link_txt||'Ver →')+'</a></span></div></div>';
 }
 async function cargarRec(){
   if(recYendo)return;recYendo=true;
@@ -245,7 +250,9 @@ async function cargarRec(){
     const r=await fetch(API_CTL,{credentials:'same-origin',cache:'no-store'}),j=await r.json();
     if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudieron leer los recordatorios');
     const listo=x=>!!x.hecho||x.completo,pend=j.recordatorios.filter(x=>!listo(x)),hechos=j.recordatorios.filter(listo);
-    $('recLista').innerHTML=(pend.length?pend.map(x=>recFila(x,false)).join(''):'<div class="rec-vacio">'+(hechos.length?'Todo hecho. No queda nada pendiente.':'No hay nada para recordar hoy.')+'</div>')
+    // un rótulo cada vez que cambia el grupo (vienen ordenados del servidor)
+    let g='';const porGrupo=pend.map(x=>{const cab=(x.grupo&&x.grupo!==g)?'<div class="rec-grupo">'+escR(x.grupo)+'</div>':'';g=x.grupo||g;return cab+recFila(x,false);}).join('');
+    $('recLista').innerHTML=(pend.length?porGrupo:'<div class="rec-vacio">'+(hechos.length?'Todo hecho. No queda nada pendiente.':'No hay nada para recordar hoy.')+'</div>')
       +(hechos.length?'<div class="rec-sep">Hechos</div>'+hechos.map(x=>recFila(x,true)).join(''):'');
   }catch(e){$('recLista').innerHTML='<div class="rec-vacio">'+escR(e.message)+'</div>';}
   recYendo=false;
