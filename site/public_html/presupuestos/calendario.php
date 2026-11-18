@@ -383,7 +383,12 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
   .ley button{padding:9px 4px;font-size:13.5px}
   .ley button::before{width:18px;height:18px}
   .f-tit{padding:10px 16px}
-  .ev{padding:7px 8px}
+  .ev{padding:9px 8px}
+  /* Auditoría de tablet (18/11/2026): el buscador y los campos de día y hora, cómodos para el dedo y sin zoom al escribir */
+  .busca{height:42px;font-size:16px}
+  .cron-b{height:42px}
+  .blq{height:30px} /* las franjas de entrega y de medición también se tocan */
+  .modal input:not([type=checkbox]){font-size:16px}
   .agenda .ev,.pend .ev{padding:11px 12px;font-size:13.5px}
   .modal .btns button{padding:11px 18px;font-size:14px}
   .modal .lnk{padding:8px 0;display:inline-block}
@@ -414,7 +419,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
   .dia{min-height:108px;padding:5px 4px 7px;--dp:4px}
   .blq{font-size:11px;padding:0 5px}
   .cal .dh{padding:8px 6px}
-  .cal .ev{font-size:11.5px;padding:6px 6px;margin-top:3px}
+  .cal .ev{font-size:11.5px;padding:10px 6px;margin-top:3px} /* 36 px de alto: se toca bien con el dedo */
 }
 /* Celular: el mes va en lista. */
 @media(max-width:699px){

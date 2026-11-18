@@ -54,6 +54,23 @@ Reglas que se cuidan en todas las pantallas:
 - Los efectos al pasar el mouse solo existen donde hay mouse (en táctil quedaban pegados después de tocar).
 - Arrastrar con el dedo funciona igual en tablet: mantener apretada la ficha y soltarla sobre la pestaña (tablet parada) o sobre la columna (tablet acostada).
 
+### Auditoría de tablet del 18/11/2026
+
+El dueño preguntó si el tablero y cada pestaña están optimizados para tablet. Se midió cada pestaña con pantalla táctil en tres tamaños (820 × 1180 parada, 1180 × 820 acostada, 768 × 1024 parada chica), con las ventanas más usadas abiertas: desborde de costado, lo que se toca y mide menos de 36 px, campos con letra de menos de 16 px.
+
+| Pestaña | Cómo dio | Qué se hizo |
+|---|---|---|
+| **Tablero** | Sin desbordes. Quedaban chicos los avisos de arriba de cada columna (29 px) y los links "Editar obra" / "Borrar ficha" (34 px). | Corregido: 0 cosas chicas en los tres tamaños, también con la ficha abierta y el menú de tres puntitos. |
+| **Calendario** | Sin desbordes. Las obras del mes medían 30-32 px de alto, las franjas 22 px, y el buscador y los campos del Cronograma tenían letra de menos de 16 px. | Corregido: obras del mes 36 px, franjas 30 px, buscador y "Cronograma" 42 px, campos a 16 px. Las franjas quedan en 30 px a propósito: son anchas y más altas le comen lugar al mes. |
+| **Relación-Contrato** | Parada, bien. Acostada en tablet ancha (1180 px) le tocaban los tamaños de computadora: filtros de 33 px y "Más acciones" de 30 px. | Corregido: en tablet acostada usa los mismos tamaños táctiles que parada, sin cambiar la planilla. |
+| **Control** | Sin desbordes. El tilde "Hecho" medía 24 px. | Corregido: 32 px en táctil. |
+| **Usuarios** | Bien. | Nada. |
+| **Stock** | Es un cartel de "en construcción". | Nada. |
+| **Presupuestos** | **No está pensada para tablet.** La planilla no entra parada (la fecha y las acciones quedan a la derecha, hay que deslizar), y los botones de cada renglón miden 25 px y los casilleros 16 px. | Sin tocar: es un rediseño (qué columnas se ven, cómo se muestran las acciones) y lo decide el dueño. |
+| **Calculadora** | **Es una herramienta de computadora.** No se desborda, pero los campos de cada fila miden 29 px con letra de 12,5 px y los botones de fila 24 px. | Sin tocar: es la herramienta de cotizar y cualquier cambio de tamaños mueve toda la grilla. Lo decide el dueño. |
+
+El guion de la auditoría queda con las pruebas (`tablet-audit.js`): se puede volver a correr después de cualquier cambio de diseño.
+
 ## Colores
 
 Cada etapa tiene un color fijo, que se repite en la columna, el borde de la tarjeta, la pestaña del celular y el botón que lleva a esa etapa: **Por medir** azul, **Por cortar** gris grafito, **Por fabricar** naranja, **Por instalar** violeta, **Por archivar** verde, **Retiro en local** turquesa. El rojo queda reservado para lo que está mal (atrasada, no puede pasar).

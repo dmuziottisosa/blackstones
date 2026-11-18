@@ -524,12 +524,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .menu-c button{padding:12px 10px}
   .menu-c a.ir{padding:14px 10px}
   .card:not(.plegada):not(.primera) .c-id{padding-right:34px}
-  .c-det .lnk{padding:8px 0;font-size:13.5px}
+  .c-det .lnk{padding:11px 0;font-size:13.5px}
   .c-det .acciones{gap:6px 20px}
   .vista-b{padding:9px 14px;font-size:13px}
   .col-fb{padding:10px 14px}
   .col-filtros button{padding:8px 13px;font-size:12.5px}
-  .col-aviso{padding:6px 12px 6px 5px;font-size:12px}
+  .col-aviso{min-height:38px;padding:8px 13px 8px 6px;font-size:12px} /* para el dedo (auditoría de tablet, 18/11/2026) */
   .aviso-g{padding:8px 15px 8px 7px}
   .limpiar-f{padding:8px 15px 8px 11px}
   .modal .btns button{padding:11px 18px;font-size:14px}

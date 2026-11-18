@@ -382,6 +382,20 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   .opc button{padding:12px 6px}
   .pago button{width:40px;height:40px}
 }
+/* Tablet acostada (auditoría del 18/11/2026): es ancha como una compu, así que no le tocan las reglas de arriba,
+   pero se usa con el dedo. Mismos tamaños que en la tablet parada, sin cambiar la planilla. */
+@media(min-width:1100px) and (pointer:coarse){
+  .filtros button{padding:10px 14px;font-size:13px}
+  .filtros select{padding:10px 12px;font-size:16px}
+  .btn{padding:12px 18px}
+  .btn.chico,.tab .btn.chico{padding:10px 14px;font-size:13px}
+  .mas{width:40px;height:40px}
+  .mes button{height:42px;min-width:42px}
+  .pago button{width:40px;height:40px}
+  .opc button{padding:12px 6px}
+  .campo input,.campo select,.campo textarea,.buscar input{font-size:16px}
+  .modal .btns button{padding:11px 18px;font-size:14px}
+}
 /* Pantallas medianas: primero se va la columna de notas (queda un punto al lado del nombre),
    después factura / muebles / pileta. Todo sigue estando en la ficha. */
 @media(max-width:1519px){

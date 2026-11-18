@@ -143,7 +143,10 @@ button{font-family:inherit;color:inherit}
 .ci-ops small{color:var(--text3);font-size:12.5px}
 a,button,.toggle{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
+@media(max-width:520px) and (pointer:coarse){.rec{grid-template-columns:38px minmax(0,1fr)}}
+@media(min-width:521px) and (pointer:coarse){.rec{grid-template-columns:38px minmax(0,1fr) auto}}
 @media(max-width:1099px),(pointer:coarse){
+  .rec input{width:32px;height:32px} /* el tilde "Hecho", para el dedo (auditoría de tablet, 18/11/2026) */
   .toggle{width:54px;height:30px}
   .toggle::after{top:3px}
   .logout-link{width:36px;height:36px;opacity:.7}
