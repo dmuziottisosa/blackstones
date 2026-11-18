@@ -149,13 +149,13 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
 <div class="wrap">
   <div class="caja" id="cajaCierre">
     <h2>Cierre del mes</h2>
-    <p class="sub">El último día de cada mes se baja todo en un archivo, tal como está en ese momento, para guardar dos copias: una impresa y una digital. Trae todas las obras con su contrato y su presupuesto adjunto, la hoja para imprimir y los datos del sistema.</p>
+    <p class="sub">El último día de cada mes se baja todo en un archivo, tal como está en ese momento, para guardar dos copias: una impresa y una digital. Sirve para dos cosas: una <b>carpeta por cliente</b> (su ficha, el presupuesto y sus fotos) lista para guardar, y la <b>foto completa del sistema</b> de ese día.</p>
     <div id="ciEstado" class="ci-estado">Cargando…</div>
     <div class="ci-ops" id="ciOps">
       <label><input type="checkbox" checked disabled> Fichas, contratos y presupuestos adjuntos <small id="ciBase"></small></label>
       <label><input type="checkbox" id="ciPlanos" checked> Planos <small id="ciPlanosN"></small></label>
       <label><input type="checkbox" id="ciEntregas" checked> Fotos de entrega <small id="ciEntregasN"></small></label>
-      <label><input type="checkbox" id="ciBachas"> Fotos de bacha <small id="ciBachasN"></small></label>
+      <label><input type="checkbox" id="ciBachas" checked> Fotos de bacha <small id="ciBachasN"></small></label>
     </div>
     <div class="acc"><button class="btn pri" type="button" id="ciBajar" disabled>Descargar</button><span class="msg" id="ciMsg"></span></div>
   </div>

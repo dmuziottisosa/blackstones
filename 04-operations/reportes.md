@@ -16,7 +16,8 @@ La idea del dueño: al final de cada mes se baja todo y se guarda dos veces, **u
 
 - **Solo el último día del mes** (28, 29, 30 o 31, según el mes). El resto de los días el botón está apagado y dice qué día se habilita.
 - **Es una foto del sistema en ese momento.** Baja un archivo `blackstones-cierre-AAAA-MM.zip`.
-- **Opciones:** las fichas, los contratos y los presupuestos adjuntos van siempre. Tildados de entrada: **Planos** y **Fotos de entrega**. Sin tildar: Fotos de bacha. Al lado de cada una dice cuántos archivos son y cuánto pesan.
+- **Sirve para dos cosas:** una **carpeta por cliente** lista para guardar (su ficha, el presupuesto, planos, fotos de entrega y de bacha) y la **foto completa del sistema** de ese día.
+- **Opciones:** las fichas, los contratos y los presupuestos adjuntos van siempre. **Planos, Fotos de entrega y Fotos de bacha** vienen tildados y se pueden destildar. Al lado de cada una dice cuántos archivos son y cuánto pesan.
 
 Qué trae el ZIP:
 
@@ -26,7 +27,7 @@ Qué trae el ZIP:
 | `para-imprimir.html` | La copia impresa: una hoja por obra, con sus datos, su contrato, su historial y sus fotos |
 | `fichas.csv` | Todas las obras, para Excel |
 | `contratos.csv` | Todos los contratos, de todos los meses, con su seña y pagos |
-| `fichas/<N° Nombre>/` | Una carpeta por obra: el presupuesto adjunto de su contrato y lo que se haya tildado |
+| `fichas/<N° Nombre>/` | La carpeta del cliente: `ficha.html` (su ficha, se abre e imprime sola, con sus fotos), el presupuesto adjunto de su contrato y las fotos tildadas |
 | `datos/` | Los archivos del sistema tal cual, para poder reconstruirlo |
 
 - **Qué obras entran:** las que están vivas en el tablero y las que se archivaron en el mes que se cierra. Las archivadas antes ya salieron en el cierre de su mes.
@@ -43,5 +44,5 @@ Quién hizo qué y a qué hora. Se puede filtrar por mes, por usuario y buscar p
 
 - **Se anota cada cambio que se guarda**: tildes (cuál y si se tildó o destildó), cambios de etapa, turnos, altas y bajas de fichas y contratos, pagos, usuarios. Mirar una pantalla no deja registro; entrar y salir, tampoco.
 - **No guarda nombres de clientes, plata ni el texto de las notas.** El nombre de la obra se busca en el momento de mostrarlo. Tampoco guarda contraseñas: el tilde del tablero se anota como `tilde=`, nunca como `clave=`, que es como se llama el campo de la contraseña.
-- **La hora es siempre la de Argentina** desde el 18/11/2026. Las acciones anteriores a esa fecha pueden figurar con algunas horas de diferencia (se anotaban con la hora del servidor).
+- **La hora es siempre la de Argentina (UTC-3).** Las líneas nuevas terminan en `ART` y ya se anotan así. Las anteriores al 18/11/2026 se anotaron con la hora del servidor (UTC, 3 horas adelantada): `registro.php` les resta las 3 horas al mostrarlas. El archivo no se reescribe.
 - Vive en `bs-data/usuarios/registro-AAAA-MM.log`, un archivo por mes. Lo escribe `auth_registrar()` (`calculadora/auth_check.php`); Reportes solo lo lee.

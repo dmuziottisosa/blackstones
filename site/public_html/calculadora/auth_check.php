@@ -438,7 +438,7 @@ function auth_registrar(string $permiso, array $datos = []): void {
     // La hora, siempre la de Argentina (18/11/2026): esto corre antes de que cada archivo fije su zona
     // horaria, y con la del servidor las acciones quedaban anotadas con horas de diferencia.
     $ahora = new DateTime('now', new DateTimeZone('America/Argentina/Buenos_Aires'));
-    $linea = $ahora->format('Y-m-d H:i:s') . "\t" . $quien . "\t" . basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) . "\t" . $permiso . "\t" . implode(' ', $partes) . "\n";
+    $linea = $ahora->format('Y-m-d H:i:s') . "\t" . $quien . "\t" . basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) . "\t" . $permiso . "\t" . implode(' ', $partes) . "\tART\n"; // "ART": esta línea ya está en hora de Argentina
     @file_put_contents($dir . '/registro-' . $ahora->format('Y-m') . '.log', $linea, FILE_APPEND | LOCK_EX);
 }
 

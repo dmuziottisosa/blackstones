@@ -16,7 +16,8 @@
 //   para-imprimir.html         una hoja por obra, con sus datos, su contrato, su historial y sus fotos
 //   fichas.csv                 todas las obras (se abre en Excel)
 //   contratos.csv              todos los contratos, de todos los meses
-//   fichas/<N° Nombre>/        el presupuesto adjunto del contrato y, si se tildan, planos y fotos
+//   fichas/<N° Nombre>/        la carpeta del cliente: su ficha (ficha.html), el presupuesto adjunto del
+//                              contrato y, si se tildan, planos, fotos de entrega y fotos de bacha
 //   datos/                     los archivos del sistema tal cual, para poder reconstruirlo
 //
 // Qué obras entran: las que están vivas en el tablero y las que se archivaron en el mes que se
@@ -169,33 +170,38 @@ $html = '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Black
     . '<div class="obra"><h3>Índice</h3><table class="ind"><tr><th style="width:auto">N°</th><th style="width:auto">Nombre y apellido</th><th style="width:auto">Etapa</th><th style="width:auto">Material</th><th style="width:auto">Saldo a mirar en</th></tr>';
 foreach ($fichas as $fi) $html .= '<tr><td>' . $h($fi['nro'] ?: 'Sin N°') . '</td><td>' . $h($fi['nombre']) . '</td><td>' . $h($fi['etapa']) . '</td><td>' . $h($fi['material']) . '</td><td>' . ($fi['contrato'] ? 'contratos.csv' : 'sin contrato') . '</td></tr>';
 $html .= '</table></div>';
-foreach ($fichas as $fi) {
+// La hoja de una obra. $en_carpeta: los links y las fotos se nombran como archivos de su misma carpeta
+// (para la ficha suelta que va adentro de cada carpeta); si no, con la ruta entera desde la raíz del ZIP.
+$hoja = function ($fi, $en_carpeta) use ($h, $dia, $plata, $turno, $quiero) {
     $c = $fi['contrato']; $fila = function ($t, $v) use ($h) { return (string)$v === '' ? '' : '<tr><th>' . $t . '</th><td>' . $h($v) . '</td></tr>'; };
-    $html .= '<div class="obra"><h2>' . $h(($fi['nro'] ?: 'Sin N°') . ' · ' . ($fi['nombre'] ?: 'Sin nombre')) . '</h2><p class="sub">' . $h($fi['etapa'] . ($fi['archivada'] ? ' el ' . $dia($fi['archivada']) : '')) . ' · ficha ' . $h($fi['key']) . '</p><table>'
+    $ruta = function ($z) use ($en_carpeta) { return $en_carpeta ? basename($z) : $z; };
+    $o = '<div class="obra"><h2>' . $h(($fi['nro'] ?: 'Sin N°') . ' · ' . ($fi['nombre'] ?: 'Sin nombre')) . '</h2><p class="sub">' . $h($fi['etapa'] . ($fi['archivada'] ? ' el ' . $dia($fi['archivada']) : '')) . ' · ficha ' . $h($fi['key']) . '</p><table>'
         . $fila('Teléfono', $fi['celular']) . $fila('Dirección', $fi['direccion']) . $fila('Material', $fi['material']) . $fila('Turno', $turno($fi)) . $fila('Medido el', $dia($fi['medido']))
         . $fila('Seña (tablero)', $fi['sena']) . $fila('Bacha', trim($fi['bacha'] . ' ' . $fi['bacha_modelo'])) . $fila('Mide', $fi['mide']) . $fila('Corta', $fi['corta']) . $fila('Fabrica', $fi['fabrica']) . $fila('Instala', $fi['instala']) . $fila('Nota', $fi['nota']) . '</table>';
     if ($c) {
-        $html .= '<h3>Contrato</h3><table>' . $fila('N° de contrato', (string)($c['nro'] ?? '')) . $fila('Ctto paralelo', (string)($c['contrato_paralelo'] ?? '')) . $fila('Fecha', $dia($c['fecha'] ?? '')) . $fila('Medidas', (string)($c['medidas'] ?? ''))
+        $o .= '<h3>Contrato</h3><table>' . $fila('N° de contrato', (string)($c['nro'] ?? '')) . $fila('Ctto paralelo', (string)($c['contrato_paralelo'] ?? '')) . $fila('Fecha', $dia($c['fecha'] ?? '')) . $fila('Medidas', (string)($c['medidas'] ?? ''))
             . $fila('Total', trim($plata(floatval($c['total_usd'] ?? 0), 'USD') . ' ' . $plata(floatval($c['total_ars'] ?? 0), 'ARS'))) . $fila('Cobrado', trim($plata($fi['pagado']['USD'], 'USD') . ' ' . $plata($fi['pagado']['ARS'], 'ARS'))) . $fila('Notas', (string)($c['nota'] ?? '')) . '</table>';
-    } else $html .= '<p class="sub">Sin contrato enlazado.</p>';
+    } else $o .= '<p class="sub">Sin contrato enlazado.</p>';
     if ($fi['historia']) {
-        $html .= '<h3>Historial</h3><table class="hist">';
-        foreach ($fi['historia'] as $et) { $html .= '<tr><td colspan="2"><b>' . $h($et['etapa']) . '</b>' . ($et['salio'] ? ' · salió el ' . $dia($et['salio']) : '') . '</td></tr>'; foreach ($et['items'] as $it) $html .= '<tr><td>' . $h($it['txt']) . '</td><td>' . ($it['fecha'] ? $dia($it['fecha']) : '—') . '</td></tr>'; }
-        $html .= '</table>';
+        $o .= '<h3>Historial</h3><table class="hist">';
+        foreach ($fi['historia'] as $et) { $o .= '<tr><td colspan="2"><b>' . $h($et['etapa']) . '</b>' . ($et['salio'] ? ' · salió el ' . $dia($et['salio']) : '') . '</td></tr>'; foreach ($et['items'] as $it) $o .= '<tr><td>' . $h($it['txt']) . '</td><td>' . ($it['fecha'] ? $dia($it['fecha']) : '—') . '</td></tr>'; }
+        $o .= '</table>';
     }
     $van = array_values(array_filter($fi['archivos'], function ($a) use ($quiero) { return !empty($quiero[$a[0]]); }));
     if ($van || $fi['links']) {
-        $html .= '<h3>Archivos</h3><p>' . implode(' · ', array_map(function ($a) use ($h) { return '<a href="' . $h($a[1]) . '">' . $h(basename($a[1])) . '</a>'; }, $van)) . ($fi['links'] ? '<br>' . $h(implode(' · ', $fi['links'])) : '') . '</p><div class="fotos">';
-        foreach ($van as $a) if ($a[2]) $html .= '<img src="' . $h($a[1]) . '" alt="' . $h(basename($a[1])) . '">';
-        $html .= '</div>';
+        $o .= '<h3>Archivos</h3><p>' . implode(' · ', array_map(function ($a) use ($h, $ruta) { return '<a href="' . $h($ruta($a[1])) . '">' . $h(basename($a[1])) . '</a>'; }, $van)) . ($fi['links'] ? '<br>' . $h(implode(' · ', $fi['links'])) : '') . '</p><div class="fotos">';
+        foreach ($van as $a) if ($a[2]) $o .= '<img src="' . $h($ruta($a[1])) . '" alt="' . $h(basename($a[1])) . '">';
+        $o .= '</div>';
     }
-    $html .= '</div>';
-}
+    return $o . '</div>';
+};
+$cabeza = substr($html, 0, strpos($html, '<body>') + 6); // el mismo encabezado y estilos, para la ficha suelta de cada carpeta
+foreach ($fichas as $fi) $html .= $hoja($fi, false);
 $html .= '</body></html>';
 
 $leeme = "BLACKSTONES · CIERRE DE " . mb_strtoupper($MES_TXT, 'UTF-8') . "\r\nFoto del sistema del " . $dia($HOY) . " a las " . date('H:i') . ".\r\n\r\n"
     . "QUE HAY ACA\r\n- para-imprimir.html: abrilo con doble clic y mandalo a imprimir. Sale una hoja por obra.\r\n- fichas.csv y contratos.csv: se abren en Excel.\r\n"
-    . "- fichas/: una carpeta por obra, con el presupuesto adjunto de su contrato" . ($quiero['plano'] ? ', sus planos' : '') . ($quiero['entrega'] ? ', sus fotos de entrega' : '') . ($quiero['bacha'] ? ', sus fotos de bacha' : '') . ".\r\n"
+    . "- fichas/: una carpeta por cliente, lista para guardar: su ficha (ficha.html, se abre e imprime sola), el presupuesto adjunto de su contrato" . ($quiero['plano'] ? ', sus planos' : '') . ($quiero['entrega'] ? ', sus fotos de entrega' : '') . ($quiero['bacha'] ? ', sus fotos de bacha' : '') . ".\r\n"
     . "- datos/: los archivos del sistema tal cual. Sirven para reconstruirlo si hiciera falta.\r\n\r\n"
     . "QUE OBRAS ENTRAN\r\nLas " . $vivas . " que estan en el tablero y las " . (count($fichas) - $vivas) . " que se archivaron este mes. Las archivadas antes salieron en el cierre de su mes.\r\n\r\n"
     . "COMO GUARDARLO\r\nDos copias: una impresa (para-imprimir.html y lo que haga falta de cada carpeta) y otra digital, en un lugar que no sea esta computadora.\r\n"
@@ -211,6 +217,8 @@ $zip->addFromString('LEEME.txt', $leeme);
 $zip->addFromString('para-imprimir.html', $html);
 $zip->addFromString('fichas.csv', $f_csv);
 $zip->addFromString('contratos.csv', $c_csv);
+// En cada carpeta, la ficha de esa obra: se abre sola, con sus fotos, y se imprime o se guarda con la carpeta.
+foreach ($fichas as $fi) $zip->addFromString('fichas/' . $fi['carpeta'] . '/ficha.html', $cabeza . $hoja($fi, true) . '</body></html>');
 foreach ($quiero as $tipo => $si) {
     if (!$si) continue;
     foreach ($archivos[$tipo] as $a) { if ($zip->addFile($a[1], $a[0]) && method_exists($zip, 'setCompressionName')) $zip->setCompressionName($a[0], ZipArchive::CM_STORE); } // las fotos ya vienen comprimidas

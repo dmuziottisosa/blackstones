@@ -89,9 +89,33 @@ $nombre_obra = function ($nro, $sub) {
 
 $filas = []; $usuarios_mes = [];
 $lineas = @file($dir . '/registro-' . $mes . '.log', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+
+// LA HORA ES SIEMPRE LA DE ARGENTINA (UTC-3). Las líneas nuevas terminan en "ART" y ya vienen así.
+// Las anteriores al 18/11/2026 se anotaron con la hora del servidor (UTC, 3 horas adelantada), salvo
+// las de usuarios y del cierre del mes, que ya salían bien. Hubo además unas horas en que se anotó
+// bien pero sin la marca: se reconocen porque el reloj "vuelve atrás" más de 2 horas de una línea a la
+// siguiente. Desde ese punto no se corrige nada; antes, se restan las 3 horas.
+$YA_BIEN = ['usuarios.php', 'cierre-mes.php'];
+$corte = null; $antes = null;
+foreach ($lineas as $i => $l) {
+    $p = explode("\t", $l);
+    if (count($p) < 4) continue;
+    if (($p[5] ?? '') === 'ART') { $corte = $i; break; }
+    if (in_array($p[2], $YA_BIEN, true)) continue;
+    $t = strtotime($p[0] . ' UTC');
+    if ($antes !== null && $t < $antes - 7200) { $corte = $i; break; }
+    $antes = $t;
+}
+$hora_ar = function ($i, $p) use ($corte, $YA_BIEN) {
+    if (($p[5] ?? '') === 'ART' || ($corte !== null && $i >= $corte) || in_array($p[2], $YA_BIEN, true)) return $p[0];
+    $t = strtotime($p[0] . ' UTC');
+    return $t ? gmdate('Y-m-d H:i:s', $t - 3 * 3600) : $p[0];
+};
+
 for ($i = count($lineas) - 1; $i >= 0; $i--) {
     $p = explode("\t", $lineas[$i]);
     if (count($p) < 4) continue;
+    $p[0] = $hora_ar($i, $p);
     $d = [];
     foreach (preg_split('/\s+/', trim($p[4] ?? ''), -1, PREG_SPLIT_NO_EMPTY) as $par) { $x = explode('=', $par, 2); if (count($x) === 2) $d[$x[0]] = $x[1]; }
     $usuarios_mes[$p[1]] = true;
@@ -101,6 +125,7 @@ for ($i = count($lineas) - 1; $i >= 0; $i--) {
     if ($q !== '' && mb_strpos(mb_strtolower($fila['at'] . ' ' . $fila['nombre'] . ' ' . $fila['que'] . ' ' . $fila['obra'], 'UTF-8'), $q) === false) continue;
     $filas[] = $fila;
 }
+usort($filas, function ($x, $y) { return strcmp($y['at'], $x['at']); }); // lo más nuevo arriba, ya con la hora corregida
 $total = count($filas);
 $us = [];
 foreach (array_keys($usuarios_mes) as $u) $us[] = ['usuario' => $u, 'nombre' => ($nombres[$u] ?? '') ?: $u];
