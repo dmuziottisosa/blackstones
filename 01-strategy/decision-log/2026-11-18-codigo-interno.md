@@ -1,6 +1,6 @@
 # El código interno de la ficha: el N° de presupuesto pasa a ser un dato
 
-**Fecha:** 18/11/2026 · **Decide:** el dueño · **Estado:** paso 1 implementado; paso 2 pendiente
+**Fecha:** 18/11/2026 · **Decide:** el dueño · **Estado:** paso 1 implementado; paso 2 descartado por el dueño
 
 ## Qué pidió el dueño
 
@@ -20,9 +20,11 @@ Había dos clases de fichas:
 - El presupuesto de la calculadora no se toca. En Presupuestos sigue figurando "En el tablero · etapa", buscado por N°.
 - No se carga dos veces una obra con el mismo N°.
 
-## Paso 2 (pendiente de decisión)
+## Paso 2 (descartado, 18/11/2026)
 
-Convertir las fichas vivas que nacieron de un N° de presupuesto al mismo formato: sacarlas del archivo del presupuesto, darles código interno y dejarles su N° como dato, conservando tildes, fechas, fotos, historial, seña y contrato. Es una conversión de una sola vez sobre datos de producción: se hace con respaldo previo y probada antes con una copia de "Exportar tablero".
+Convertir las fichas vivas que nacieron de un N° de presupuesto al mismo formato: sacarlas del archivo del presupuesto, darles código interno y dejarles su N° como dato, conservando tildes, fechas, fotos, historial, seña y contrato. Es una conversión de una sola vez sobre datos de producción.
+
+**El dueño decidió no hacerlo:** "Más riesgoso es intentar arreglarlas que que salgan solas. Si ya tienen cada una su contrato asignado, estamos." Las fichas viejas siguen como están y dejan de existir a medida que se archivan. Lo que hay que cuidar es que cada una tenga su contrato (el aviso "N sin contrato" del tablero) y no cambiarles el N° desde "Editar obra" salvo necesidad, porque en ellas eso sigue siendo una mudanza.
 
 ## Knowns
 
@@ -31,7 +33,7 @@ Convertir las fichas vivas que nacieron de un N° de presupuesto al mismo format
 
 ## Known unknowns
 
-- Cuántas fichas vivas de producción son de la clase vieja. Sin el paso 2 conviven las dos clases hasta que las viejas se archiven.
+- Cuántas fichas vivas de producción son de la clase vieja, y por lo tanto cuánto tiempo conviven las dos clases (hasta que la última se archive).
 - Si alguien necesita, desde la ficha, abrir el detalle del presupuesto (ítems, medidas). Hoy la ficha con código interno no lo trae: lo que queda del presupuesto es el adjunto del contrato.
 - El presupuesto de una obra viva ahora vence a los 180 días como cualquier otro. Antes quedaba guardado, fuera de la pestaña.
 
