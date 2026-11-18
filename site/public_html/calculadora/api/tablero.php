@@ -580,26 +580,18 @@ try {
         // Regla única, valga para el botón o para el arrastre: hacia atrás
         // o hacia Retiro se mueve libre; hacia adelante hay que tener
         // completos los tildes de la etapa actual (y de las que saltee).
+        // Lo que NO frena el pase (dueño, 18/11/2026): el día y la hora del turno, ni "Turno confirmado".
+        // Lo que frena son los tildes del trabajo: en Por instalar, "Instalado" e "Instalación aprobada" entre ellos.
         $destino = array_search($nueva, $BS_ETAPA_IDS, true);
         $retrocede = !$en_retiro && $destino !== false && $destino < $idx;
         if ($destino !== false && !$retrocede) {
             $faltan = [];
-            // La fecha de la etapa actual, si esa etapa la exige para salir.
-            if (!$en_retiro && !empty($BS_ETAPAS[$etapa]['exige_fecha'])) {
-                $nombre = mb_strtolower($BS_ETAPAS[$etapa]['fecha']);
-                $con_hora = !empty($BS_ETAPAS[$etapa]['pide_hora']);
-                if (!bs_tablero_fecha_valida($obra['fecha'])) {
-                    $faltan[] = ($con_hora ? 'Fecha y hora de ' : 'Fecha de ') . $nombre;
-                } elseif ($con_hora && !bs_tablero_hora_valida($obra['hora'])) {
-                    $faltan[] = 'Hora de ' . $nombre;
-                }
-            }
             // Tildes de la etapa en la que está y de las que se saltearía. Lo
             // de más atrás no se vuelve a pedir (una obra importada puede
             // haber entrado directo a una etapa avanzada).
             for ($i = ($en_retiro ? 0 : $idx); $i < $destino; $i++) {
                 foreach ($BS_ETAPAS[$BS_ETAPA_IDS[$i]]['checks'] as $cid => $label) {
-                    if (bs_tablero_tilde_liberado($BS_ETAPA_IDS[$i], $cid, $obra)) continue; // la visita ya se hizo
+                    if (bs_tablero_tilde_liberado($BS_ETAPA_IDS[$i], $cid, $obra)) continue; // "Turno confirmado" no frena
                     if (empty($obra['checks'][$cid])) $faltan[] = $label;
                 }
             }

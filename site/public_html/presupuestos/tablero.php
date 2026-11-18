@@ -844,21 +844,16 @@ async function cargar(){
 const etapaDe=id=>ETAPAS.find(e=>e.id===id);
 const cardDe=key=>CARDS.find(c=>c.key===key);
 const columnas=()=>ETAPAS.filter(e=>!e.aparte); // las columnas, en orden
-// Qué le falta a la tarjeta para salir de su etapa: la fecha (si la etapa la exige) y los tildes.
-// "Turno confirmado" deja de pedirse cuando la visita ya se hizo (Medido / Instalado): no traba a una obra ya medida.
-const liberado=(c,e,k)=>!!e.confirma&&k.id===e.confirma&&!!e.cierra&&!!c.checks[e.cierra];
+// Qué le falta a la tarjeta para salir de su etapa: los tildes del trabajo. Mismas reglas que el servidor.
+// No frenan el pase (dueño, 18/11/2026): el día y la hora del turno, ni "Turno confirmado".
+const liberado=(c,e,k)=>!!e.confirma&&k.id===e.confirma;
 function faltanDe(c,e){
-  const f=e.checks.filter(k=>!c.checks[k.id]&&!liberado(c,e,k)).map(k=>k.label);
-  if(e.exige_fecha&&e.id===c.etapa){
-    if(!c.fecha)f.unshift((e.pide_hora?'Fecha y hora de ':'Fecha de ')+e.fecha.toLowerCase());
-    else if(e.pide_hora&&!c.hora)f.unshift('Hora de '+e.fecha.toLowerCase());
-  }
-  return f;
+  return e.checks.filter(k=>!c.checks[k.id]&&!liberado(c,e,k)).map(k=>k.label);
 }
 // A la obra le falta el turno que su etapa exige para salir (Por instalar: día y hora).
 function sinTurno(c){
   const e=etapaDe(c.etapa);
-  if(e.exige_fecha)return !c.fecha||!!(e.pide_hora&&!c.hora); // Por instalar: falta el día o la hora
+  if(e.exige_fecha)return !hecho(c)&&(!c.fecha||!!(e.pide_hora&&!c.hora)); // Por instalar: falta el día o la hora (ya instalada, no aplica)
   if(e.avisa_fecha)return !c.fecha&&!hecho(c);                // Por medir: sin fecha acordada (si ya se midió, no aplica)
   return false;
 }
@@ -1151,7 +1146,6 @@ function htmlPlegada(c,e,cls,estilo,pos){
   const r=[],et=(txt,tipo)=>r.push('<span class="r'+(tipo?' '+tipo:'')+'">'+esc(txt)+'</span>');
   if(hecho(c)){
     et(e.boton_listo+(c.boton_at?' · '+fechaCorta(c.boton_at):''),'ok');
-    if(e.exige_fecha&&sinTurno(c))et(!c.fecha?'Sin turno':'Falta la hora','rojo'); // instalada sin el turno completo: se ve sin abrirla
   }else if(e.fecha){
     if(!c.fecha){if(e.exige_fecha||e.avisa_fecha)et(e.exige_fecha?'Sin turno':'Sin fecha','rojo');}
     else{
@@ -1204,9 +1198,8 @@ function htmlCard(c){
       ?'<button type="button" class="c-hecho listo" data-act="check" data-clave="'+esc(e.boton)+'" title="Tocar para desmarcar">'+esc(e.boton_listo)+(c.boton_at?' · '+esc(fechaCorta(c.boton_at)):'')+'</button>'
       :'<button type="button" class="c-hecho" data-act="check" data-clave="'+esc(e.boton)+'">'+esc(e.boton_txt)+'</button>';
   }
-  // Ya hecha, la fecha no se muestra; salvo que la etapa exija el turno y esté incompleto (Por instalar:
-  // instalada pero sin día u hora cargados): sin eso no puede pasar de etapa, así que tiene que poder cargarse.
-  if(e.fecha&&(!hecho(c)||(e.exige_fecha&&sinTurno(c)))){
+  // Ya hecha, la fecha no se muestra: el turno no frena el pase de etapa, así que no hay nada que cargar.
+  if(e.fecha&&!hecho(c)){
     let cls='',txt;
     const hora=c.hora?' · '+c.hora+' hs':(e.pide_hora&&e.exige_fecha?' · falta la hora':'');
     if(!c.fecha&&(e.exige_fecha||e.avisa_fecha)){cls=' aviso';txt='Falta fecha '+(e.exige_fecha&&e.pide_hora?'y hora ':'')+'de '+e.fecha.toLowerCase();}

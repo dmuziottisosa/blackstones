@@ -203,8 +203,9 @@ $BS_ETAPAS = [
     'instalar' => [
         'titulo' => 'Por instalar',
         // Si la fecha de instalación pasó y todavía no está "Instalado", se marca atrasada.
-        // exige_fecha: sin fecha de instalación cargada no sale de la columna.
-        // pide_hora: el turno lleva día y hora, y la hora también es obligatoria.
+        // exige_fecha: el turno de instalación es día Y hora, y se avisa en rojo mientras falte ("Sin turno").
+        // Desde el 18/11/2026 NO frena el pase a Por archivar: lo que frena son los tildes.
+        // pide_hora: el turno lleva hora; con exige_fecha, al poner el día la hora es obligatoria.
         'fecha'  => 'Instalación',
         // "Instalado" es el botón de la etapa (dueño, 17/11/2026), igual que Medido, Cortado y
         // Fabricado: avisa que la mesada ya se colocó. La ficha NO avanza sola: baja a
@@ -294,13 +295,14 @@ $BS_TILDES_APROBACION = [
 ];
 
 /**
- * ¿Ese tilde ya no hace falta para avanzar? Hoy es uno solo: "Turno confirmado" deja de pedirse
- * cuando la visita ya se hizo (Medido / Instalado).
+ * ¿Ese tilde no hace falta para avanzar? Hoy es uno solo: "Turno confirmado" nunca frena el pase de
+ * etapa (dueño, 18/11/2026; antes dejaba de pedirse recién con la visita hecha). Es un dato de la
+ * agenda, no del trabajo. $obra queda en la firma por si otra regla vuelve a depender de la ficha.
  */
 function bs_tablero_tilde_liberado($etapa_id, $cid, $obra) {
     global $BS_ETAPAS;
     $def = $BS_ETAPAS[$etapa_id] ?? [];
-    return ($def['confirma'] ?? '') === $cid && ($def['cierra'] ?? '') !== '' && !empty($obra['checks'][$def['cierra']]);
+    return ($def['confirma'] ?? '') !== '' && $def['confirma'] === $cid;
 }
 
 /** Quién tildó ese tilde (nombre), o ''. Solo se guarda desde que hay usuarios. */
