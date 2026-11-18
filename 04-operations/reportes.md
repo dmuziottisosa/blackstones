@@ -40,7 +40,7 @@ Un error que pise datos a mitad de mes (como el cruce de dos clientes del 18/11/
 
 ## Registro de acciones
 
-Quién hizo qué y a qué hora. Se puede filtrar por mes, por usuario y buscar por texto (una obra, una acción). Va de lo más nuevo a lo más viejo, agrupado por día.
+Quién hizo qué y a qué hora, **en el día**. Abre siempre en hoy y se actualiza solo cada 15 segundos (dueño, 18/11/2026: "lo que quiero ver es el real time del día"). Va de lo más nuevo a lo más viejo, de a 20, con "Ver más". Se puede filtrar por usuario, buscar por texto (una obra, una acción) y, con el selector de fecha, mirar un día anterior: se ve un día por vez, nunca mezclados.
 
 - **Se anota cada cambio que se guarda**: tildes (cuál y si se tildó o destildó), cambios de etapa, turnos, altas y bajas de fichas y contratos, pagos, usuarios. Mirar una pantalla no deja registro; entrar y salir, tampoco.
 - **No guarda nombres de clientes, plata ni el texto de las notas.** El nombre de la obra se busca en el momento de mostrarlo. Tampoco guarda contraseñas: el tilde del tablero se anota como `tilde=`, nunca como `clave=`, que es como se llama el campo de la contraseña.

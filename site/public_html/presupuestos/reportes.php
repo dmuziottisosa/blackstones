@@ -163,9 +163,9 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
 
   <div class="caja" id="cajaReg">
     <h2>Registro de acciones</h2>
-    <p class="sub">Quién hizo qué, y a qué hora. Se anota cada cambio que se guarda en el sistema; mirar una pantalla no deja registro.</p>
+    <p class="sub">Lo que se hizo hoy, quién y a qué hora. Se actualiza solo. Se anota cada cambio que se guarda en el sistema; mirar una pantalla no deja registro.</p>
     <div class="rg-filtros">
-      <select id="rgMes" aria-label="Mes"></select>
+      <input type="date" id="rgDia" aria-label="Día">
       <select id="rgUsuario" aria-label="Usuario"><option value="">Todos los usuarios</option></select>
       <input type="search" id="rgQ" placeholder="Buscar: una obra, una acción…" autocomplete="off">
     </div>
@@ -204,35 +204,40 @@ cargarCierre();
 // ---------- Registro de acciones (dueño, 18/11/2026): solo lectura ----------
 const API_REG='/calculadora/api/registro.php',esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const MESES_R=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],DIAS_R=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-let rgFilas=[],rgTotal=0;
-async function cargarRegistro(mas){
-  const q=new URLSearchParams({mes:$('rgMes').value||'',usuario:$('rgUsuario').value||'',q:$('rgQ').value.trim(),desde:mas?rgFilas.length:0});
+let rgFilas=[],rgTotal=0,rgHoy='',rgYendo=false;
+// Se ve un día por vez, y de entrada el de hoy (dueño, 18/11/2026). Mientras se mira hoy, se actualiza solo.
+async function cargarRegistro(mas,solo){
+  if(rgYendo)return;rgYendo=true;
+  const q=new URLSearchParams({dia:$('rgDia').value||'',usuario:$('rgUsuario').value||'',q:$('rgQ').value.trim(),desde:mas?rgFilas.length:0});
   try{
     const r=await fetch(API_REG+'?'+q,{credentials:'same-origin'}),j=await r.json();
     if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo leer el registro');
     if(!mas){
       rgFilas=[];
-      $('rgMes').innerHTML=(j.meses.length?j.meses:[j.mes]).map(m=>'<option value="'+m+'"'+(m===j.mes?' selected':'')+'>'+MESES_R[+m.slice(5,7)-1]+' '+m.slice(0,4)+'</option>').join('');
+      if(rgHoy&&j.hoy!==rgHoy&&$('rgDia').value===rgHoy){rgHoy=j.hoy;$('rgDia').max=j.hoy;$('rgDia').value=j.hoy;rgYendo=false;return cargarRegistro();} // pasó la medianoche: se sigue viendo "hoy"
+      rgHoy=j.hoy;$('rgDia').max=j.hoy;$('rgDia').value=j.dia;
       const u=$('rgUsuario').value;
       $('rgUsuario').innerHTML='<option value="">Todos los usuarios</option>'+j.usuarios.map(x=>'<option value="'+esc(x.usuario)+'"'+(x.usuario===u?' selected':'')+'>'+esc(x.nombre)+'</option>').join('');
     }
     rgFilas=rgFilas.concat(j.filas);rgTotal=j.total;
-    let h='',dia='';
+    const esHoy=j.dia===j.hoy,p=j.dia.split('-').map(Number);
+    let h='<div class="rg-dia">'+(esHoy?'Hoy · ':'')+DIAS_R[new Date(p[0],p[1]-1,p[2]).getDay()]+' '+p[2]+' de '+MESES_R[p[1]-1]+'</div>';
     rgFilas.forEach(f=>{
-      const d=f.at.slice(0,10);
-      if(d!==dia){dia=d;const p=d.split('-').map(Number);h+='<div class="rg-dia">'+DIAS_R[new Date(p[0],p[1]-1,p[2]).getDay()]+' '+p[2]+' de '+MESES_R[p[1]-1]+'</div>';}
       h+='<div class="rg-f"><span class="h">'+esc(f.at.slice(11,16))+'</span><span class="d">'+esc(f.nombre)+'</span><span class="q">'+esc(f.que)+(f.obra?' <span class="o">· '+esc(f.obra)+'</span>':'')+'</span></div>';
     });
-    $('rgTabla').innerHTML=h||'<div class="rg-vacio">No hay acciones registradas con ese filtro.</div>';
+    $('rgTabla').innerHTML=rgFilas.length?h:'<div class="rg-vacio">'+(esHoy?'Hoy todavía no se anotó ninguna acción':'Ese día no hay acciones anotadas')+($('rgUsuario').value||$('rgQ').value.trim()?' con ese filtro':'')+'.</div>';
     $('rgCuenta').textContent=rgTotal?(rgTotal===1?'1 acción':rgTotal+' acciones')+(rgFilas.length<rgTotal?' · se ven las últimas '+rgFilas.length:''):'';
     $('rgMas').hidden=!j.hay_mas;
-  }catch(e){$('rgTabla').innerHTML='<div class="rg-vacio">'+esc(e.message)+'</div>';}
+  }catch(e){if(!solo)$('rgTabla').innerHTML='<div class="rg-vacio">'+esc(e.message)+'</div>';}
+  rgYendo=false;
 }
-$('rgMes').addEventListener('change',()=>cargarRegistro());
+$('rgDia').addEventListener('change',()=>cargarRegistro());
 $('rgUsuario').addEventListener('change',()=>cargarRegistro());
 let rgT=null;$('rgQ').addEventListener('input',()=>{clearTimeout(rgT);rgT=setTimeout(()=>cargarRegistro(),300);});
 $('rgMas').addEventListener('click',()=>cargarRegistro(true));
 cargarRegistro();
+// En vivo: cada 15 segundos, solo si se mira hoy, la pestaña está a la vista y no se abrió "Ver más".
+setInterval(()=>{if(!document.hidden&&rgHoy&&$('rgDia').value===rgHoy&&rgFilas.length<=20&&document.activeElement!==$('rgQ'))cargarRegistro(false,true);},15000);
 // En pantallas angostas la barra de páginas se desliza de costado: la página actual queda a la vista.
 (function(){
   const a=document.querySelector('.h-tabs a.active'),n=a&&a.parentElement;

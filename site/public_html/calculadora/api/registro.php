@@ -6,9 +6,10 @@
 // Lee bs-data/usuarios/registro-AAAA-MM.log, que escribe auth_registrar() en cada cambio.
 // Es solo lectura: no escribe nada, y si este archivo se borra el sistema sigue igual.
 //
-//   GET ?mes=AAAA-MM&usuario=&q=&desde=0
-//     → { ok, mes, meses:[…], usuarios:[{usuario,nombre}], total, filas:[{at,usuario,nombre,que,obra}], hay_mas }
-//   Las filas van de la más nueva a la más vieja, de a 200.
+//   GET ?dia=AAAA-MM-DD&usuario=&q=&desde=0     (sin "dia": hoy, hora de Argentina)
+//     → { ok, dia, hoy, usuarios:[{usuario,nombre}], total, filas:[{at,usuario,nombre,que,obra}], hay_mas }
+//   Se ve UN día por vez (dueño, 18/11/2026: "lo que quiero ver es el real time del día"). Las filas
+//   van de la más nueva a la más vieja, de a 20.
 // ============================================================
 
 require_once __DIR__ . '/_config.php';
@@ -20,15 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') bs_error('Solo GET', 405);
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 $dir = dirname(auth_usuarios_archivo());
-$meses = [];
-foreach (@scandir($dir) ?: [] as $f) { if (preg_match('/^registro-(\d{4}-\d{2})\.log$/', $f, $m)) $meses[] = $m[1]; }
-rsort($meses);
-$mes = (string)($_GET['mes'] ?? '');
-if (!preg_match('/^\d{4}-\d{2}$/', $mes) || !in_array($mes, $meses, true)) $mes = $meses[0] ?? date('Y-m');
+$hoy = date('Y-m-d');
+$dia = (string)($_GET['dia'] ?? '');
+$pd = preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $dia, $m) ? $m : null;
+if (!$pd || !checkdate(intval($pd[2]), intval($pd[3]), intval($pd[1])) || $dia > $hoy) $dia = $hoy;
+$mes = substr($dia, 0, 7);
 $f_usuario = trim((string)($_GET['usuario'] ?? ''));
 $q = mb_strtolower(trim((string)($_GET['q'] ?? '')), 'UTF-8');
 $desde = max(0, intval($_GET['desde'] ?? 0));
-const BS_REGISTRO_PAGINA = 200;
+const BS_REGISTRO_PAGINA = 20;
 
 // Quién es quién (para mostrar el nombre y no solo el usuario).
 $nombres = ['equipo' => 'Equipo (contraseña compartida)', '-' => 'Sin sesión'];
@@ -87,7 +88,7 @@ $nombre_obra = function ($nro, $sub) {
     return trim(($cache[$k][1] ? '' : $k . '-' . intval($sub) . ' ') . $cache[$k][0]) ?: ($k . '-' . intval($sub));
 };
 
-$filas = []; $usuarios_mes = [];
+$filas = []; $usuarios_mes = []; // (los usuarios que hicieron algo ese día)
 $lineas = @file($dir . '/registro-' . $mes . '.log', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
 
 // LA HORA ES SIEMPRE LA DE ARGENTINA (UTC-3). Las líneas nuevas terminan en "ART" y ya vienen así.
@@ -116,6 +117,7 @@ for ($i = count($lineas) - 1; $i >= 0; $i--) {
     $p = explode("\t", $lineas[$i]);
     if (count($p) < 4) continue;
     $p[0] = $hora_ar($i, $p);
+    if (substr($p[0], 0, 10) !== $dia) continue; // solo el día pedido
     $d = [];
     foreach (preg_split('/\s+/', trim($p[4] ?? ''), -1, PREG_SPLIT_NO_EMPTY) as $par) { $x = explode('=', $par, 2); if (count($x) === 2) $d[$x[0]] = $x[1]; }
     $usuarios_mes[$p[1]] = true;
@@ -130,4 +132,4 @@ $total = count($filas);
 $us = [];
 foreach (array_keys($usuarios_mes) as $u) $us[] = ['usuario' => $u, 'nombre' => ($nombres[$u] ?? '') ?: $u];
 usort($us, function ($a, $b) { return strcasecmp($a['nombre'], $b['nombre']); });
-bs_ok(['mes' => $mes, 'meses' => $meses, 'usuarios' => $us, 'total' => $total, 'filas' => array_slice($filas, $desde, BS_REGISTRO_PAGINA), 'hay_mas' => $desde + BS_REGISTRO_PAGINA < $total]);
+bs_ok(['dia' => $dia, 'hoy' => $hoy, 'usuarios' => $us, 'total' => $total, 'filas' => array_slice($filas, $desde, BS_REGISTRO_PAGINA), 'hay_mas' => $desde + BS_REGISTRO_PAGINA < $total]);
