@@ -109,6 +109,8 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 .solo .col{display:block!important;background:none;border:none;padding:0;min-height:0}
 .solo .card{margin:0;box-shadow:none;cursor:default}
 .solo .aviso{padding:30px 10px}
+/* En el calendario el historial va a la izquierda de la ficha, siempre a la vista: acá adentro no se repite. */
+.solo .c-hist{display:none}
 
 /* === BUSCADOR === */
 .tope{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}

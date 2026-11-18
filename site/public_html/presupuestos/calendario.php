@@ -149,6 +149,14 @@ button{font-family:inherit;color:inherit}
 .foco-b .fin{margin-left:auto;display:flex;gap:6px}
 @media(hover:hover){.ley button:hover{background:var(--card-alt)}}
 .hoy{margin-left:auto;font-size:14px;color:var(--text2);white-space:nowrap}
+/* Buscador (dueño, 18/11/2026): deja en el calendario solo las obras que coinciden con el nombre o el N° */
+.busca{height:34px;width:230px;max-width:100%;padding:0 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);font-family:inherit;font-size:13.5px;color:var(--text)}
+.busca:focus{outline:none;border-color:var(--dk)}
+[data-theme="dark"] .busca:focus{border-color:var(--gd)}
+.busca.activo{border-color:var(--dk);box-shadow:inset 3px 0 0 var(--dk)}
+[data-theme="dark"] .busca.activo{border-color:var(--gd);box-shadow:inset 3px 0 0 var(--gd)}
+.busca-b button[data-busca]{text-align:left;color:var(--text)}
+.busca-b button[data-busca] span{color:var(--text3);font-weight:500}
 .hoy b{font-weight:700;color:var(--text)}
 
 /* === PLANO: el mes + lo que falta agendar === */
@@ -199,6 +207,8 @@ button{font-family:inherit;color:inherit}
 .ev.hecha{background:none;border-color:var(--border-soft);border-left-color:var(--et);color:var(--text3);font-weight:500}
 .ev.hecha b{color:var(--text2)}
 .ev em.ok{background:var(--gr)}
+/* El segundo tilde, pegado al primero: medición + instalación */
+.ev em.ok+em.ok{margin-left:-1px}
 [data-theme="dark"] .ev em.ok{color:#04220F}
 /* Vencimiento del plazo: es un límite, no un turno. Va sin relleno y con borde punteado. */
 .ev.vence{--et:var(--text3);background:none;border:1px dashed var(--border);border-left:1px dashed var(--border);color:var(--text2);font-weight:600}
@@ -278,6 +288,15 @@ button{font-family:inherit;color:inherit}
 .modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:24px;max-width:920px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
 /* Dos partes: a la izquierda lo propio del calendario (día, hora, plazo); a la derecha la ficha del tablero, entera. */
 .modal .dos{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:22px;align-items:start}
+/* Historial de la obra, a la izquierda de la ficha y siempre desplegado (dueño, 18/11/2026) */
+.modal .hist{margin-top:16px;padding:10px 12px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);font-size:12.5px}
+.modal .hist .t{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
+.modal .hist .e{margin-top:8px;color:var(--text)}
+.modal .hist .e span{color:var(--text3);font-weight:500}
+.modal .hist .i{display:flex;justify-content:space-between;gap:10px;padding:2px 0 2px 10px;color:var(--text2)}
+.modal .hist .i span:first-child{min-width:0;overflow-wrap:anywhere}
+.modal .hist .i span:last-child{color:var(--text3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.modal .hist .nada{margin-top:6px;color:var(--text3)}
 .modal .ficha-t{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text2);margin-bottom:6px}
 .modal .ficha{display:block;width:100%;height:520px;border:none;border-radius:var(--radius);background:var(--card)}
 @media(max-width:820px){.modal .dos{grid-template-columns:minmax(0,1fr);gap:18px}}
@@ -390,6 +409,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
   .h-tabs a{font-size:.62rem;letter-spacing:.06em}
   .barra{gap:10px}
   .hoy{order:-1;width:100%;margin-left:0}
+  .busca{width:100%;height:42px;font-size:16px}
   .mes{width:100%}
   .mes h2{flex:1;min-width:0;font-size:20px}
   .cal{display:none}
@@ -424,6 +444,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
       <button type="button" class="hoy-b" id="mesHoy">Hoy</button>
     </div>
     <button type="button" class="cron-b" id="cronB" title="La ruta de cada día, de medición y de instalación: orden, horas y direcciones">Cronograma</button>
+    <input type="search" class="busca" id="buscar" placeholder="Buscar por nombre o N°" autocomplete="off" enterkeyhint="search" aria-label="Buscar una obra por nombre o por número">
     <div class="hoy" id="hoyTxt"></div>
   </div>
   <div class="plano">
@@ -438,6 +459,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
       </div>
     </aside>
     <div>
+      <div class="foco-b busca-b" id="buscaB" hidden></div>
       <div class="foco-b" id="focoB" hidden></div>
       <div class="cal" id="cal"><div class="aviso" style="grid-column:1/-1">Cargando…</div></div>
       <div class="agenda" id="agenda"></div>
@@ -529,6 +551,14 @@ const quien=c=>(nroDe(c)?nroDe(c)+' ':'')+(nombreCorto(c.nombre)||'Sin nombre');
 
 // Mismas reglas que el tablero.
 function cumplida(c){const e=etapaDe(c.etapa);return !!(e&&e.cierra&&c.checks[e.cierra]);} // ya se midió / ya se retiró
+// ¿Ya está instalada? null, o {fecha} (el día, si se sabe). El tilde "Instalado" queda en la ficha cuando
+// la obra sigue a Por archivar; si la devolvieron a una etapa anterior a Por instalar, no cuenta.
+function instalada(c){
+  const i=ETAPAS.findIndex(e=>e.boton==='instalado'),a=ETAPAS.findIndex(e=>e.id===c.etapa);
+  if(i<0||a<i||!c.checks.instalado)return null;
+  const h=(c.hitos||[]).find(x=>x.txt==='Instalado');
+  return {fecha:(a===i&&c.boton_at)||(h&&h.fecha)||''};
+}
 function atrasada(c){const e=etapaDe(c.etapa);return !!(e&&e.fecha&&c.fecha&&c.fecha<HOY&&!cumplida(c));}
 function estadoPlazo(c){ // '' | 'cerca' (vence hoy o en los próximos 6 días) | 'vencida'
   if(!c.limite||c.etapa==='archivar')return '';
@@ -596,7 +626,17 @@ const selB=new Set();
 const bloqueDe=c=>c.medido_at||(c.etapa===MEDIR&&c.fecha&&!cumplida(c)?c.fecha:'');
 // Con TODOS los bloques marcados se ve todo, también las obras que todavía no tienen fecha de medición.
 let todosMarcados=false;
-const enFoco=c=>!selB.size||selB.has(bloqueDe(c))||(todosMarcados&&!bloqueDe(c));
+// Buscador: las palabras que se escribieron, sin acentos ni mayúsculas. Vacío = se ve todo.
+let buscado=[];
+const llano=s=>String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function coincide(c){
+  if(!buscado.length)return true;
+  // el nombre y el N° que se muestra (nunca el código interno de una ficha a mano). El teléfono no: un N° corto
+  // aparecería adentro de cualquier teléfono.
+  if(!c._txt)c._txt=llano([c.nombre,c.manual?(c.nro_contrato||''):c.cliente_nro+'-'+c.sub].join(' '));
+  return buscado.every(w=>c._txt.indexOf(w)>=0);
+}
+const enFoco=c=>coincide(c)&&(!selB.size||selB.has(bloqueDe(c))||(todosMarcados&&!bloqueDe(c)));
 const diaMes=iso=>(+iso.slice(8,10))+'-'+MESES[+iso.slice(5,7)-1].slice(0,3);
 function bloques(todos){
   const m={};
@@ -648,7 +688,7 @@ function obrasMedicion(dia){
   return CARDS.filter(c=>bloqueDe(c)===dia);
 }
 function tiraMedicion(iso,largo){
-  const l=selB.size&&!selB.has(iso)?[]:obrasMedicion(iso);
+  const l=selB.size&&!selB.has(iso)?[]:obrasMedicion(iso).filter(coincide);
   if(!l.length||!MEDIR)return '';
   const n=l.length,h=l.filter(c=>c.medido_at).length;
   const estado=h===n?(n===1?'hecha':'hechas'):(h?h+' de '+n+' hechas':'');
@@ -871,8 +911,10 @@ function chip(ev,largo){
     return '<button type="button" class="ev vence prev" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" title="'+esc(t)+'">Entrega estimada · '+nom+(largo?' <span>· todavía sin medir</span>':'')+'</button>';
   }
   if(ev.tipo==='medida'){
-    const t='Medición hecha el '+fechaCorta(c.medido_at)+' · ahora en '+etapaDe(c.etapa).titulo;
-    return '<button type="button" class="ev hecha et-'+esc(MEDIR)+'" data-key="'+esc(c.key)+'" data-tipo="medida" title="'+esc(t)+'"><em class="ok">✓</em>'+(largo?'Medición hecha · ':'')+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
+    // Dos tildes en el mismo renglón (dueño, 18/11/2026): el primero es la medición; el segundo, la instalación.
+    const inst=instalada(c),ti=inst?'Instalada'+(inst.fecha?' el '+fechaCorta(inst.fecha):''):'';
+    const t='Medición hecha el '+fechaCorta(c.medido_at)+(inst?' · '+ti:'')+' · ahora en '+etapaDe(c.etapa).titulo;
+    return '<button type="button" class="ev hecha et-'+esc(MEDIR)+'" data-key="'+esc(c.key)+'" data-tipo="medida" title="'+esc(t)+'"><em class="ok">✓</em>'+(inst?'<em class="ok inst">✓</em>':'')+(largo?'Medición hecha · '+(inst?esc(ti)+' · ':''):'')+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
   }
   if(ev.tipo==='vence'){
     const p=estadoPlazo(c);
@@ -945,6 +987,17 @@ function dibujar(){
   $('mesAnt').setAttribute('aria-label',foco?'4 semanas antes':'Mes anterior');
   $('mesSig').setAttribute('aria-label',foco?'4 semanas después':'Mes siguiente');
   $('focoB').innerHTML=fo;$('focoB').hidden=!fo;
+  // Lo que encontró el buscador: quiénes son y en qué andan. Tocar uno lleva a su mes y abre la ficha.
+  let bu='';
+  if(buscado.length){
+    const M=CARDS.filter(coincide),donde=c=>{const e=etapaDe(c.etapa),t=e?e.titulo:'';
+      if(e&&e.fecha&&c.fecha&&!cumplida(c))return t+' · '+e.fecha.toLowerCase()+' '+fechaCorta(c.fecha);
+      return t+(c.medido_at?' · medida el '+fechaCorta(c.medido_at):'');};
+    bu=M.length?'<span><b>'+M.length+(M.length===1?' obra':' obras')+'</b></span>'+M.slice(0,5).map(c=>'<button type="button" data-busca="'+esc(c.key)+'" title="Ir a su fecha y abrir la ficha">'+esc(quien(c))+' <span>· '+esc(donde(c))+'</span></button>').join('')+(M.length>5?'<span>y '+(M.length-5)+' más</span>':'')
+      :'<span>Ninguna obra coincide con <b>«'+esc($('buscar').value.trim())+'»</b>.</span>';
+    bu+='<span class="fin"><button type="button" data-limpiar>Limpiar</button></span>';
+  }
+  $('buscaB').innerHTML=bu;$('buscaB').hidden=!bu;$('buscar').classList.toggle('activo',buscado.length>0);
   $('fTit').textContent=nFil?'Filtros · '+nFil:'Filtros';
   $('fTit').classList.toggle('activo',nFil>0);
 
@@ -990,6 +1043,7 @@ function dibujar(){
   // Lo urgente primero, y siempre a la vista aunque caiga en otro mes.
   // Cuenta también la entrega estimada que ya pasó (medición agendada, sin tildar "Medido").
   const venDia=c=>c.limite||previsto(c);
+  if(buscado.length)p+='<div class="ayuda foco">Solo lo que coincide con la búsqueda.</div>';
   if(selB.size)p+='<div class="ayuda foco">Solo '+(selB.size===1?'el bloque '+esc(diaMes([...selB][0])):'los '+selB.size+' bloques marcados')+'.</div>';
   const ven=F.filter(c=>estadoPlazo(c)==='vencida'||(previsto(c)&&previsto(c)<HOY)).sort((x,z)=>venDia(x)<venDia(z)?-1:1);
   if(ven.length){hay=true;p+='<h4 class="rojo">Plazo vencido <b>'+ven.length+'</b></h4>'+ven.map(c=>chip({tipo:'vence',c:c,prev:!c.limite},true)).join('');}
@@ -1041,6 +1095,13 @@ function cambioPlazo(c,dia){
   return [{accion:'plazo',fecha:manual},()=>{c.plazo_manual=!!manual;c.limite=manual||c.limite_auto;}];
 }
 
+// El historial de la obra: qué se hizo en cada etapa que ya pasó, y cuándo. Mismos datos que el tablero.
+function historialHtml(c){
+  const H=c.historia||[];
+  if(!H.length)return '<div class="nada">Todavía está en su primera etapa.</div>';
+  return H.map(et=>'<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' <span>· salió el '+esc(fechaCorta(et.salio))+'</span>':'')+'</div>'
+    +(et.items.length?et.items.map(x=>'<div class="i"><span>'+esc(x.txt)+'</span><span>'+(x.fecha?esc(fechaCorta(x.fecha)):'—')+'</span></div>').join(''):'<div class="i"><span>Sin tildes cargados</span><span></span></div>')).join('');
+}
 // ---------- Ficha de la obra: su turno y su plazo, en un solo lugar ----------
 let modalOk=null;
 // Al cerrar se vuelve a leer el tablero: en la ficha se pudo haber cambiado cualquier cosa.
@@ -1068,6 +1129,8 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
     +'<p class="nota">'+(c.limite_auto?'Plazo normal: '+esc(fechaCorta(c.limite_auto))+' ('+c.plazo_dias+' días corridos desde la medición).':'Todavía no se midió: el plazo normal se calcula al medir ('+c.plazo_dias+' días corridos).'+(previsto(c)?' Si se mide el '+esc(fechaCorta(c.fecha))+', vence el '+esc(fechaCorta(previsto(c)))+'.':''))
     +' <button type="button" class="lnk" id="fNormal"'+(c.plazo_manual?'':' hidden')+'>Volver al plazo normal</button></p>';
   h+='<a class="ir" href="/presupuestos/tablero.php?q='+encodeURIComponent(c.cliente_nro+'-'+c.sub)+'">Ver en el tablero →</a>';
+  // El historial va acá, a la vista (dueño, 18/11/2026); en la ficha de al lado ya no está adentro de "Más".
+  h+='<div class="hist"><div class="t">Historial</div><div id="fHist">'+historialHtml(c)+'</div></div>';
   // La ficha del tablero, entera y editable (tildes, seña, bacha, fotos, nota): es la misma página en modo "una ficha".
   h='<div class="dos"><div>'+h+'</div><div><div class="ficha-t">Ficha</div><iframe class="ficha" id="fFicha" title="Ficha de la obra" src="/presupuestos/tablero.php?solo='+encodeURIComponent(c.key)+'"></iframe></div></div>';
   $('mTitulo').textContent=(c.manual?(c.nro_contrato||'Sin N°'):c.cliente_nro+'-'+c.sub)+' · '+(nombreCorto(c.nombre)||'Sin nombre');
@@ -1082,6 +1145,20 @@ function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en u
       const doc=marco.contentDocument,ajustar=()=>{if(marco.isConnected)marco.style.height=Math.max(520,doc.documentElement.scrollHeight+2)+'px';};
       new ResizeObserver(ajustar).observe(doc.body);
       ajustar();
+      // Si en la ficha la obra pasa de etapa, el historial de la izquierda se pone al día.
+      let etVista=c.etapa,tH=null;
+      const mirar=()=>{
+        const k=doc.querySelector('section.col .card'),et=k?k.closest('section.col').dataset.col:'';
+        if(!et||et===etVista||!$('fHist'))return;
+        etVista=et;
+        pedir(API).then(j=>{
+          const n=(j.cards||[]).find(x=>x.key===c.key);
+          if(!n||!$('fHist'))return;
+          $('fHist').innerHTML=historialHtml(n);
+          const es=document.querySelector('#mCuerpo .estado');if(es)es.textContent=etapaDe(n.etapa).titulo;
+        }).catch(()=>{});
+      };
+      new MutationObserver(()=>{clearTimeout(tH);tH=setTimeout(mirar,400);}).observe(doc.body,{childList:true,subtree:true});
     }catch(e){}
   });
 
@@ -1134,6 +1211,15 @@ document.addEventListener('click',ev=>{
   if(q){abrirBloque(q.dataset.bloque,q.dataset.origen||'');return;}
   const b=ev.target.closest('.ev[data-key]');
   if(b){const c=cardDe(b.dataset.key);if(c)abrir(c,'',b.dataset.tipo==='vence'?'plazo':'');return;}
+  const bq=ev.target.closest('[data-busca]');
+  if(bq){
+    const c=cardDe(bq.dataset.busca);if(!c)return;
+    // el calendario queda en el mes de su fecha (el turno pendiente, la medición o el vencimiento)
+    const e=etapaDe(c.etapa),f=(e&&e.fecha&&c.fecha&&!cumplida(c)?c.fecha:'')||c.medido_at||c.fecha||c.limite;
+    if(f&&!selB.size&&f.slice(0,7)!==mes){mes=f.slice(0,7);dibujar();}
+    abrir(c);return;
+  }
+  if(ev.target.closest('[data-limpiar]')){$('buscar').value='';buscado=[];dibujar();$('buscar').focus();return;}
   const fb=ev.target.closest('[data-fbloque]');
   if(fb){
     const d=fb.dataset.fbloque;
@@ -1148,6 +1234,8 @@ document.addEventListener('click',ev=>{
   const ft=ev.target.closest('#fTit');
   if(ft){const ab=$('filtros').classList.toggle('abierto');ft.setAttribute('aria-expanded',ab);return;}
 });
+$('buscar').addEventListener('input',()=>{buscado=llano($('buscar').value).split(/\s+/).filter(Boolean);dibujar();});
+$('buscar').addEventListener('keydown',ev=>{if(ev.key==='Escape'&&$('buscar').value){ev.stopPropagation();$('buscar').value='';buscado=[];dibujar();}});
 function moverMes(n){
   // con bloques en foco no hay "mes": la vista corre de a 4 semanas, con el filtro puesto
   if(selB.size){vIni=masDias(vAhora,n*28);dibujar();return;}
