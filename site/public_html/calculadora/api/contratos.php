@@ -61,7 +61,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     $bs_pre = json_decode((string)@file_get_contents('php://input'), true);
     $bs_acc = is_array($bs_pre) ? (string)($bs_pre['accion'] ?? '') : '';
     // los renglones de prueba son de mantenimiento: solo administradores (el Operador edita contratos desde el 18/11/2026)
-    bs_require_permiso(in_array($bs_acc, ['borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado'], true) ? 'tablero_operar' : (in_array($bs_acc, ['prueba', 'borrar_prueba'], true) ? 'mantenimiento' : 'contratos_editar'));
+    bs_require_permiso(in_array($bs_acc, ['borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado', 'nro_de_ficha'], true) ? 'tablero_operar' : (in_array($bs_acc, ['prueba', 'borrar_prueba'], true) ? 'mantenimiento' : 'contratos_editar'));
 }
 bs_check_csrf();
 bs_ensure_dirs();
@@ -360,13 +360,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') bs_error('Solo GET o POST', 405);
 $body = json_decode(@file_get_contents('php://input'), true);
 if (!is_array($body)) bs_error('Body JSON inválido');
 $accion = (string)($body['accion'] ?? '');
-$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'borrar_enlazado', 'restaurar', 'restaurar_enlazado', 'mudar_enlazado', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
+$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'borrar_enlazado', 'restaurar', 'restaurar_enlazado', 'mudar_enlazado', 'nro_de_ficha', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
 if (!in_array($accion, $acciones, true)) bs_error('accion inválida');
 
 // Todo lo que puede fallar por datos mal cargados se valida ANTES de tomar el lock.
 $campos = in_array($accion, ['crear', 'editar'], true) ? bs_contrato_campos($body) : null;
 $id = (string)($body['id'] ?? '');
-if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
+if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado', 'nro_de_ficha'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
 
 $sena_nueva = null;
 if ($accion === 'sena') $sena_nueva = bs_contrato_sena($body['monto'] ?? 0, $body['moneda'] ?? '', $body['fecha'] ?? '', $body['cotizacion'] ?? '', $body['aplica'] ?? '');
@@ -461,6 +461,21 @@ try {
             // 'creado' escalonado para que queden en este orden en la lista
             $d['contratos'][$id] = array_merge($p, ['id' => $id, 'creado' => date('c', time() - $i), 'actualizado' => $ahora, 'prueba' => true, 'enlace' => null]);
         }
+
+    } elseif ($accion === 'nro_de_ficha') {
+        // EL N° ES UN DATO QUE COMPARTEN LA FICHA Y SU CONTRATO (dueño, 18/11/2026). Lo llama el tablero
+        // cuando en "Editar obra" le cambian el N° a una ficha con código interno: el contrato toma ese
+        // mismo N°. La ficha no se mueve de lugar y el enlace no cambia. Vacío lo borra.
+        $f_n = intval($body['cliente_nro'] ?? 0); $f_s = intval($body['sub'] ?? 0);
+        $nro_nuevo = trim((string)($body['nro'] ?? ''));
+        if ($f_n <= 0 || $f_s <= 0) bs_contratos_salir($fp, 'Falta de qué ficha.');
+        if ($nro_nuevo !== '' && !preg_match('/^\d{1,6}(?:-\d{1,3})?$/', $nro_nuevo)) bs_contratos_salir($fp, 'El N° va como 0042, o 0042-2 si tiene versiones.');
+        $k = bs_contrato_de_ficha($d, $f_n, $f_s);
+        if ($k === null) bs_contratos_salir($fp, 'Esta ficha no tiene contrato. El N° es de la obra y de su contrato a la vez: primero creale el contrato en Relación-Contrato.', 409);
+        $id = (string)$k;
+        $d['contratos'][$k]['nro'] = $nro_nuevo;
+        $d['contratos'][$k]['actualizado'] = $ahora;
+        $extra['nro'] = $nro_nuevo;
 
     } elseif ($accion === 'mudar_enlazado') {
         // Enlazados, el contrato y la ficha comparten el N° (dueño, 17/11/2026). Lo llama el tablero

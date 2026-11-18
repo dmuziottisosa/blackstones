@@ -322,3 +322,12 @@ Accesos por rol (hoy hay una sola contraseña), hojas imprimibles para medidor/c
 - **El número interno de una ficha a mano no aparece** en títulos de ventanas ni avisos.
 - **El presupuesto eliminado mientras era obra vuelve a verse en Presupuestos** cuando la obra sale del tablero.
 - **La limpieza nocturna** usa el mismo candado que el resto, guarda el ZIP de una archivada el año entero y no recicla números.
+
+## El código interno de la ficha (18/11/2026)
+
+- **Toda obra nueva nace con un código interno** (serie 90001+, no se muestra), tenga o no N° su contrato. `tablero-cargar.php` ya no aprueba presupuestos: crea la ficha con los datos del contrato, le anota el N° del contrato como dato (`nro_contrato`) y la deja enlazada en el mismo paso.
+- **El N° es un dato compartido.** En "Editar obra", cambiar el N° de una ficha con código interno lo cambia en su contrato (`contratos.php`, acción `nro_de_ficha`) y en la ficha (`tablero.php`, acción `nro_contrato`). La ficha no cambia de lugar. Si la ficha no tiene contrato, avisa que primero hay que crearle el contrato.
+- **Una ficha con código interno no se muda nunca.** `tablero-editar.php` rechaza el pedido.
+- **Una obra, una ficha:** no se carga otra obra con un N° que ya está en el tablero o en su papelera; avisa a nombre de quién está y ofrece "Enlazar con el tablero".
+- **En Presupuestos** el presupuesto de esa obra sigue siendo un presupuesto ("Enviado" por dentro), pero se muestra con su etapa y el link "En el tablero →": `list.php` lo encuentra por el N° y devuelve `en_tablero`. Sin versión en el N°, vale para la última versión del presupuesto.
+- **Las fichas viejas** que nacieron de un N° de presupuesto (su clave es ese número) siguen funcionando igual: para ellas cambiar el N° sigue siendo una mudanza, con las protecciones del barrido. Convertirlas a código interno es el paso 2, pendiente de decisión.

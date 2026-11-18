@@ -1223,29 +1223,22 @@ function pedirEnviar(id){
   const c=CONTRATOS.find(x=>x.id===id);if(!c)return;
   const li=(a,b)=>b?'<li><span>'+a+'</span><b>'+esc(b)+'</b></li>':'';
   let h='<h3>Cargar en Por medir</h3>';
-  if(c.nro)h+='<div class="bajada">Se aprueba el presupuesto <b>N° '+esc(c.nro)+'</b> y la obra aparece en Por medir del tablero, con los datos de ese presupuesto. Si ese N° es de otra persona, no se carga y se avisa.</div><ul class="lista-c">'+li('Contrato de',c.cliente)+li('Presupuesto de',c.presup&&c.presup.cliente)+li('Pileta',bachaTxt(c))+li('Medición',fch(c.medicion))+li('Seña',c.sena?plata(c.sena.monto,c.sena.moneda):'')+'</ul>';
-  else h+='<div class="bajada">Se crea la ficha en Por medir del tablero con estos datos. El total, los pagos y lo demás del contrato quedan acá.</div><ul class="lista-c">'+li('Cliente',c.cliente)+li('Teléfono',telLindo(c.telefono))+li('Dirección',c.direccion)+li('Material',c.material)+li('Pileta',bachaTxt(c))+li('Medición',fch(c.medicion))+li('Seña',c.sena?plata(c.sena.monto,c.sena.moneda):'')+'</ul>';
+  // (dueño, 18/11/2026) La ficha nace siempre con un código interno, tenga o no N° el contrato. El N° es un
+  // dato que comparten: no se aprueba ningún presupuesto ni se toca nada de la pestaña Presupuestos.
+  h+='<div class="bajada">Se crea la ficha en Por medir del tablero con estos datos, enlazada con este contrato. El total, los pagos y lo demás del contrato quedan acá.'+(c.nro&&c.presup&&c.presup.cliente&&String(c.presup.cliente).trim().toLowerCase()!==String(c.cliente||'').trim().toLowerCase()?'<br><b>Ojo:</b> el presupuesto N° '+esc(c.nro)+' figura a nombre de '+esc(c.presup.cliente)+'. Si el N° está mal, corregilo en el contrato.':'')+'</div><ul class="lista-c">'+li('N° de presupuesto',c.nro)+li('Cliente',c.cliente)+li('Teléfono',telLindo(c.telefono))+li('Dirección',c.direccion)+li('Material',c.material)+li('Pileta',bachaTxt(c))+li('Medición',fch(c.medicion))+li('Seña',c.sena?plata(c.sena.monto,c.sena.moneda):'')+'</ul>';
   h+='<div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar>Cancelar</button><button type="button" class="ok" data-foco data-confirmar-enviar="'+esc(c.id)+'">Cargar en Por medir</button></div>';
   abrirModal(h,true,false);
 }
 async function enviar(id){
   const c=CONTRATOS.find(x=>x.id===id);if(!c)return;
-  // "Cargar en Por medir" crea la ficha en Por medir o avisa por qué no (dueño, 18/11/2026). Antes, si el
-  // presupuesto "ya estaba en el tablero", buscaba una ficha con ese número y la enlazaba sola: podía ser la
-  // de otra persona. Enlazar con una ficha que ya existe es otro botón ("Enlazar con el tablero"), que
-  // muestra de quién es antes de confirmar.
+  // "Cargar en Por medir" crea una ficha nueva en Por medir, con código interno, y la deja enlazada (dueño,
+  // 18/11/2026). Nunca enlaza sola con una ficha que ya existe: eso es otro botón ("Enlazar con el tablero"),
+  // que muestra de quién es antes de confirmar.
   let nro,sub;const yaEstaba=false;
-  try{
-    const r=await pedir(API_CARGAR,c.nro?{contrato:c.id,nro:c.nro}:{contrato:c.id,nombre:c.cliente,celular:telLindo(c.telefono),direccion:c.direccion,material:c.material});
-    nro=r.cliente_nro;sub=r.sub;
-  }catch(e){
-    if(c.nro&&/ya está en el tablero/.test(e.message)){
-      cargar(); // la lista se pone al día: si corresponde, el renglón pasa a ofrecer "Enlazar con el tablero"
-      throw new Error('El presupuesto N° '+c.nro+' ya está en el tablero. No se cargó de nuevo. Si es esta misma obra, usá "Enlazar con el tablero".');
-    }
-    throw e;
-  }
-  await pedir(API,{accion:'enlazar',id:c.id,cliente_nro:nro,sub:sub});
+  const r=await pedir(API_CARGAR,{contrato:c.id,nombre:c.cliente,celular:telLindo(c.telefono),direccion:c.direccion,material:c.material});
+  nro=r.cliente_nro;sub=r.sub;
+  // el servidor ya la dejó enlazada; si por algo no pudo, se enlaza acá
+  if(!r.enlazado)await pedir(API,{accion:'enlazar',id:c.id,cliente_nro:nro,sub:sub});
   // Lo que sigue completa la ficha nueva. Si algo falla, el enlace queda y se avisa qué faltó.
   const falto=[];
   if(!yaEstaba){

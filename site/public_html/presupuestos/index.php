@@ -883,12 +883,12 @@ async function cargarActivos() {
     }
     _activosCache = d.results;
     const rows = d.results.map(r => {
-      const transitions = r.estado === 'aprobado'
-        ? `<a class="act-util" href="/presupuestos/tablero.php?q=${r.cliente_nro}-${r.sub}" title="La etapa de esta obra se ve y se cambia en el tablero">En el tablero →</a>`
+      const transitions = (r.estado === 'aprobado' || r.en_tablero)
+        ? `<a class="act-util" href="/presupuestos/tablero.php?q=${r.en_tablero || (r.cliente_nro + '-' + r.sub)}" title="La etapa de esta obra se ve y se cambia en el tablero">En el tablero →</a>`
         : (TRANSICIONES[r.estado] || []).map(t =>
         `<button class="act-trans act-trans-${t}" onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${t}')">→ ${ESTADOS_LABELS[t]}</button>`
       ).join('');
-      const back = TRANSICIONES_BACK[r.estado]
+      const back = (!r.en_tablero && TRANSICIONES_BACK[r.estado])
         ? `<button class="act-trans act-back" onclick="cambiarEstado('${r.cliente_nro}', ${r.sub}, '${TRANSICIONES_BACK[r.estado]}')" title="Volver a ${ESTADOS_LABELS[TRANSICIONES_BACK[r.estado]]}">← ${ESTADOS_LABELS[TRANSICIONES_BACK[r.estado]]}</button>`
         : '';
       const editar = `<button class="act-util act-edit" onclick="abrirModalEditar('${r.cliente_nro}', ${r.sub})" title="Edición rápida (cliente, concepto, montos, fecha)" aria-label="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`;
@@ -912,7 +912,7 @@ async function cargarActivos() {
           <td><span class="cell-id">${r.cliente_nro}-${r.sub}</span></td>
           <td><span class="cliente-nombre" contenteditable="true" data-nro="${r.cliente_nro}" data-orig="${escapeHtml(cliNombre)}" onblur="onClienteNombreBlur(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" title="Click para editar el nombre">${cliNombre ? escapeHtml(cliNombre) : '—'}</span>${r.cliente_dni ? `<span class="cliente-dni">DNI ${escapeHtml(r.cliente_dni)}</span>` : ''}</td>
           <td>${r.cliente_celular ? `<span class="cell-tel">${escapeHtml(r.cliente_celular)}</span>` : '<span class="muted">—</span>'}</td>
-          <td><span class="estado est-${r.estado}"${r.etapa_titulo ? ' title="Etapa en el tablero"' : ''}>${r.etapa_titulo || ESTADOS_LABELS[r.estado] || r.estado}</span></td>
+          <td><span class="estado est-${r.en_tablero ? 'aprobado' : r.estado}"${r.etapa_titulo ? ' title="Etapa en el tablero"' : ''}>${r.etapa_titulo || ESTADOS_LABELS[r.estado] || r.estado}</span></td>
           <td><button type="button" class="origen-cell ${origenCls}" data-origen="${origenVal}" onclick="toggleOrigen(this, '${r.cliente_nro}', ${r.sub})" title="Click para alternar Publicidad / Sin publicidad"><span class="od"></span>${origenLabel}</button></td>
           <td class="num cell-num">${fmtUSD(r.monto_usd)}</td>
           <td class="num cell-num">${fmtARS(r.monto_ars)}</td>

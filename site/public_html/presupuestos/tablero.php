@@ -1846,14 +1846,15 @@ const tieneLetras=s=>/[a-záéíóúüñ]/i.test(String(s||''));
 function pedirEditar(c){
   const campo=(id,rotulo,valor,extra)=>'<label class="campo">'+rotulo+'<input type="text" id="'+id+'" autocomplete="off" value="'+esc(valor)+'" '+(extra||'')+'></label>';
   const propio=c.cliente_nro+'-'+c.sub;
-  // Una obra cargada a mano no tiene presupuesto: el campo arranca vacío, para poner el número cuando exista.
-  const nro0=c.manual?'':propio;
+  // Ficha con código interno (dueño, 18/11/2026): el N° es un dato que comparte con su contrato. Se cambia acá
+  // y cambia en el contrato; la ficha no se mueve. Las fichas viejas que nacieron de un N° siguen mudándose.
+  const nro0=c.manual?(c.nro_contrato||''):propio;
   const conBacha=c.bacha==='nuestra'||c.bacha==='cliente';
   // Un presupuesto hecho sin saber el nombre trae el teléfono en su lugar: el campo arranca vacío para escribirlo.
   const sinNombre=!tieneLetras(c.nombre);
-  abrirModal('Editar obra '+propio,
-    campo('edNro','N° de presupuesto',nro0,'maxlength="12" inputmode="numeric" placeholder="'+(c.manual?'Todavía sin presupuesto':'Ej: 0042 o 0042-2')+'"')+
-    '<p>'+(c.manual?'Esta obra se cargó a mano. Cuando el presupuesto esté hecho, poné acá su número.':'Cambialo para pasar la ficha a otro presupuesto.')+' La ficha conserva sus tildes, fechas y fotos.</p>'+
+  abrirModal('Editar obra '+nroTxt(c),
+    campo('edNro','N° de presupuesto',nro0,'maxlength="12" inputmode="numeric" placeholder="'+(c.manual?'Todavía sin N°':'Ej: 0042 o 0042-2')+'"')+
+    '<p>'+(c.manual?'Es el N° de esta obra y de su contrato: se cambia acá y cambia en los dos. La ficha no se mueve.':'Cambialo para pasar la ficha a otro presupuesto. La ficha conserva sus tildes, fechas y fotos.')+'</p>'+
     campo('edNombre','Nombre y apellido',sinNombre?'':c.nombre,'maxlength="120" placeholder="'+(sinNombre&&c.nombre?'Falta: hoy figura '+esc(c.nombre):'Nombre y apellido del cliente')+'"')+
     campo('edCel','Teléfono',c.celular,'maxlength="40" inputmode="tel"')+
     campo('edDir','Dirección',c.direccion,'maxlength="200"')+
@@ -1866,7 +1867,10 @@ function pedirEditar(c){
     'Guardar',
     async()=>{
       const v=id=>$(id).value.trim();
-      const nro=v('edNro'),cambiaNro=!!nro&&nro.replace(/^0+(?=\d)/,'')!==nro0.replace(/^0+(?=\d)/,'');
+      const sinCeros=s=>String(s).replace(/^#?\s*/,'').replace(/^0+(?=\d)/,'');
+      const nro=v('edNro'),cambiaDato=!!c.manual&&sinCeros(nro)!==sinCeros(nro0);       // ficha con código interno: el N° es un dato
+      const cambiaNro=!c.manual&&!!nro&&sinCeros(nro)!==sinCeros(nro0);                  // ficha vieja de presupuesto: se muda
+      if(cambiaDato&&nro&&!/^#?\s*\d{1,6}(\s*-\s*\d{1,3})?$/.test(nro)){$('edNro').focus();toast('El N° va como 0042, o 0042-2 si tiene versiones.');return;}
       const body={cliente_nro:c.cliente_nro,sub:c.sub};
       if(cambiaNro)body.nro=nro; // con N° nuevo los datos los pone ese presupuesto
       else{
@@ -1883,7 +1887,7 @@ function pedirEditar(c){
       const cambiaBacha=conBacha&&modelo!==(c.bacha_modelo||'');
       const cambiaDatos=cambiaNro||Object.keys(body).length>2;
       const nota=v('edNota').replace(/\s+/g,' '),cambiaNota=nota!==String(c.nota||'').trim();
-      if(!cambiaDatos&&!cambiaBacha&&!cambiaNota){cerrarModal();return;} // no cambió nada
+      if(!cambiaDatos&&!cambiaBacha&&!cambiaNota&&!cambiaDato){cerrarModal();return;} // no cambió nada
       if(cambiaBacha&&!modelo&&c.bacha==='nuestra'&&c.checks.bacha){$('edBacha').focus();toast('Poné el modelo de la bacha.');return;}
       if(ocupado)return;
       ocupado=true;
@@ -1904,11 +1908,18 @@ function pedirEditar(c){
           c.nota=nota;c._txt='';
         }
         if(cambiaDatos)j=await pedir(API_EDITAR,body);
+        // El N°, al final: primero el contrato (si no tiene contrato, avisa y no se cambia nada), después la ficha.
+        if(cambiaDato){
+          const n=nro.replace(/^#?\s*/,'').replace(/\s+/g,'').replace(/-1$/,'').replace(/^(\d{1,3})(?=$|-)/,x=>('000'+x).slice(-4));
+          await pedir(API_CONTRATOS,{accion:'nro_de_ficha',cliente_nro:c.cliente_nro,sub:c.sub,nro:n});
+          await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'nro_contrato',nro:n});
+          c.nro_contrato=n;c._txt='';
+        }
       }catch(e){
         ocupado=false;
         b.disabled=false;b.textContent=rotulo;
         $('edError').textContent=e.message;$('edError').hidden=false;
-        if(cambiaNro){$('edNro').focus();$('edNro').select();}
+        if(cambiaNro||cambiaDato){$('edNro').focus();$('edNro').select();}
         return;
       }
       b.disabled=false;
@@ -1924,7 +1935,7 @@ function pedirEditar(c){
         if(abierta===c.key)abierta=key;
         recien={key:key,tipo:'llego',t:Date.now()};
         toast('La ficha ahora es la '+key,true);
-      }else toast('Obra '+key+' guardada',true);
+      }else toast('Obra '+(c.manual?(c.nro_contrato?c.nro_contrato+' ':''):key+' ')+'guardada',true);
       await cargar();
     });
   // con algo modificado, tocar afuera no cierra la ventana

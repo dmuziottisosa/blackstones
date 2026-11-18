@@ -39,6 +39,22 @@ bs_require_permiso('presupuestos');
 $etapa_filter = (string)($_GET['etapa'] ?? '');
 if ($etapa_filter !== '' && !isset($BS_ETAPAS[$etapa_filter])) $etapa_filter = '';
 $bs_obras_tablero = bs_tablero_leer()['obras'] ?? [];
+// (dueño, 18/11/2026) Las obras nuevas nacen con un código interno y llevan el N° de presupuesto como
+// dato: el presupuesto ya no pasa a "aprobado". Para que en Presupuestos se siga viendo que ese
+// presupuesto es una obra del tablero, y en qué etapa, se busca por ese N°. Solo se lee.
+//   $bs_por_nro[N° sin ceros]['' o versión] = clave de la ficha
+$bs_por_nro = [];
+foreach ($bs_obras_tablero as $bs_k => $bs_o) {
+    $bs_n = trim((string)(is_array($bs_o) ? ($bs_o['nro_contrato'] ?? '') : ''));
+    if (!preg_match('/^(\d{1,6})(?:-(\d{1,3}))?$/', $bs_n, $bs_m)) continue;
+    $bs_kp = explode('-', (string)$bs_k);
+    $bs_cf = bs_read_json(BS_CLIENTES_DIR . '/' . $bs_kp[0] . '.json');
+    $bs_viva = false;
+    foreach ((array)(is_array($bs_cf) ? ($bs_cf['cotizaciones'] ?? []) : []) as $bs_x) {
+        if (intval($bs_x['sub'] ?? 0) === intval($bs_kp[1] ?? 0) && ($bs_x['estado'] ?? '') === 'aprobado' && !empty($bs_x['manual'])) $bs_viva = true;
+    }
+    if ($bs_viva) $bs_por_nro[intval($bs_m[1])][isset($bs_m[2]) ? intval($bs_m[2]) : ''] = (string)$bs_k;
+}
 
 $estado_filter = $_GET['estado'] ?? '';
 $origen_filter = $_GET['origen'] ?? ''; // 'publicidad' | 'local' | ''
@@ -103,13 +119,23 @@ if (is_dir(BS_CLIENTES_DIR)) {
             // Ficha borrada, en la papelera del tablero (30 días): tampoco se lista.
             if (($cot['estado'] ?? '') === 'papelera') continue;
 
-            // Filtro estado
-            if ($estado_filter !== '' && ($cot['estado'] ?? '') !== $estado_filter) continue;
+            // ¿Este presupuesto es una obra del tablero por su N° (ficha con código interno)?
+            // Sin versión en el N° de la ficha, vale para la última versión del presupuesto.
+            $en_tablero = '';
+            if (empty($cot['manual']) && in_array(($cot['estado'] ?? ''), ['borrador', 'enviado', 'perdido'], true) && isset($bs_por_nro[intval($cliente_nro)])) {
+                $bs_s = intval($cot['sub'] ?? 0); $bs_c = $bs_por_nro[intval($cliente_nro)];
+                $bs_max = 0; foreach ($cliente_obj['cotizaciones'] ?? [] as $bs_y) { if (empty($bs_y['manual'])) $bs_max = max($bs_max, intval($bs_y['sub'] ?? 0)); }
+                if (isset($bs_c[$bs_s])) $en_tablero = $bs_c[$bs_s];
+                elseif (isset($bs_c['']) && $bs_s === $bs_max) $en_tablero = $bs_c[''];
+            }
+
+            // Filtro estado (una obra del tablero cuenta como tal, no como "Enviado")
+            if ($estado_filter !== '' && ($en_tablero !== '' ? 'aprobado' : ($cot['estado'] ?? '')) !== $estado_filter) continue;
 
             // Etapa del tablero (solo las obras vivas la tienen). Sin registro todavía: Por medir.
             $etapa = '';
-            if (($cot['estado'] ?? '') === 'aprobado') {
-                $e = (string)($bs_obras_tablero[$cliente_nro . '-' . intval($cot['sub'] ?? 0)]['etapa'] ?? '');
+            if (($cot['estado'] ?? '') === 'aprobado' || $en_tablero !== '') {
+                $e = (string)($bs_obras_tablero[$en_tablero !== '' ? $en_tablero : $cliente_nro . '-' . intval($cot['sub'] ?? 0)]['etapa'] ?? '');
                 $etapa = isset($BS_ETAPAS[$e]) ? $e : 'medir';
             }
             if ($etapa_filter !== '' && $etapa !== $etapa_filter) continue;
@@ -172,6 +198,7 @@ if (is_dir(BS_CLIENTES_DIR)) {
                 'notas'             => $cot['notas'] ?? '',
                 'estado'            => $cot['estado'] ?? '',
                 'etapa'             => $etapa,
+                'en_tablero'        => $en_tablero, // clave de su ficha, si es una obra por N° (ficha con código interno)
                 'etapa_titulo'      => $etapa !== '' ? (string)$BS_ETAPAS[$etapa]['titulo'] : '',
                 'monto_usd'         => $monto_usd,
                 'monto_ars'         => $monto_ars,

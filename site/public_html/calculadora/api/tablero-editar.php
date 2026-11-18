@@ -102,8 +102,15 @@ try {
     }
     $now = date('c');
 
+    // Una ficha con código interno no se muda nunca (dueño, 18/11/2026): su N° es un dato que comparte
+    // con su contrato y se cambia sin moverla (tablero.php "nro_contrato" + contratos.php "nro_de_ficha").
+    // Esto solo lo puede pedir una pantalla vieja que quedó abierta.
+    if ($nuevo_nro !== '' && !empty($origen['cotizaciones'][$i_origen]['manual'])) {
+        $fallar('El N° de esta obra se cambia sin mover la ficha. Actualizá la página y volvé a probar.', 409);
+    }
+
     // --------------------------------------------------------
-    // Mudanza a otro presupuesto
+    // Mudanza a otro presupuesto (solo las fichas viejas que nacieron de un N° de presupuesto)
     // --------------------------------------------------------
     if ($nuevo_nro !== '') {
         $mismo_cliente = ($nuevo_nro === $cliente_nro);

@@ -263,3 +263,10 @@ Para eliminarla: borrar `presupuestos/relacion-contrato.php`, los cuatro archivo
 - **Borrar un contrato enlazado** se frena si en ese momento no se pudo leer el tablero.
 - **Cierre del mes:** los presupuestos adjuntos de contratos sin ficha en ese cierre van en `contratos-sin-ficha/`.
 - **Pendiente de decisión:** un cobro queda atado a la moneda del total que había cuando se cargó; avisar si dos contratos tienen el mismo N°; qué mostrar cuando la obra archivada de un contrato cumple su año y se borra.
+
+## El código interno (18/11/2026)
+
+- "Cargar en Por medir" crea siempre una ficha con código interno, tenga o no N° el contrato, y el servidor la deja enlazada en el mismo paso. El N° del contrato viaja a la ficha como dato.
+- Cambiar el N° en el contrato lo cambia en la ficha (al abrir Relación-Contrato), y cambiarlo en "Editar obra" del tablero lo cambia en el contrato. El enlace no depende del N° y no se rompe.
+- Si el N° del contrato ya está en el tablero, no se carga otra obra: se usa "Enlazar con el tablero". Si ese N° es el presupuesto de otra persona, tampoco se carga.
+- La confirmación avisa si el presupuesto de ese N° figura a nombre de otro.
