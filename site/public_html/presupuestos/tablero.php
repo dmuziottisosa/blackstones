@@ -418,8 +418,6 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-fb.on::after{transform:translateY(1px) rotate(-135deg)}
 .col-fb.on{border-color:var(--et);color:var(--et)}
 @media(hover:hover){.col-fb:hover{border-color:var(--et);color:var(--et)}}
-.col-cargar{display:block;text-decoration:none;text-align:center;box-sizing:border-box;flex:1 1 auto;min-width:0;margin-bottom:0;padding:8px;border:1.5px dashed var(--et);border-radius:var(--radius);background:var(--card);color:var(--et);font-size:13.5px;font-weight:700;cursor:pointer}
-@media(hover:hover){.col-cargar:hover{background:var(--et-soft)}}
 .modal .campo{display:block;margin-bottom:16px;font-size:12px;font-weight:700;color:var(--text2)}
 .modal .campo+.sena{margin:-10px 0 0}
 .modal .campo[hidden]{display:none}
@@ -495,7 +493,6 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .c-det .acciones{gap:6px 20px}
   .vista-b{padding:9px 14px;font-size:13px}
   .col-fb{padding:10px 14px}
-  .col-cargar{padding:10px}
   .col-filtros button{padding:8px 13px;font-size:12.5px}
   .col-aviso{padding:6px 12px 6px 5px;font-size:12px}
   .aviso-g{padding:8px 15px 8px 7px}
@@ -585,7 +582,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 }
 /* Rol que solo adjunta fotos: la ficha se ve entera pero no se cambia. */
 .solo-fotos .c-hecho,.solo-fotos .c-fecha,.solo-fotos .chk{pointer-events:none}
-.solo-fotos .c-avanzar,.solo-fotos input[data-nota],.solo-fotos .c-det .acciones,.solo-fotos .col-cargar,.solo-fotos #exportB,.solo-fotos .c-fecha.vacia{display:none}
+.solo-fotos .c-avanzar,.solo-fotos input[data-nota],.solo-fotos .c-det .acciones,.solo-fotos #exportB,.solo-fotos .c-fecha.vacia{display:none}
 .solo-fotos .c-hecho:not(.listo){display:none} /* el botón grande de la etapa no se le muestra a quien no puede usarlo */
 .solo-fotos .chk{opacity:.8}
 .solo-fotos .card{cursor:default}
@@ -716,7 +713,6 @@ const nroB=c=>!c.manual?'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b>'
 const nroTxt=c=>!c.manual?c.cliente_nro+'-'+c.sub:(c.nro_contrato||'Sin N°');
 // Qué fichas tienen contrato en Relación-Contrato (ficha → contrato). Lo dice Relación-Contrato;
 // si no existe o no contesta, queda vacío y la ficha simplemente no muestra la marca.
-const HAY_RC=<?= is_file(__DIR__ . '/relacion-contrato.php') ? 'true' : 'false' ?>; // si Relación-Contrato no está, no se ofrece el link para cargar
 let ENLACES={},ENLACES_OK=false,soloSinCto=false; // soloSinCto: filtro "Sin contrato" (dueño, 18/11/2026)
 const ICO_ENL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>';
 async function cargarEnlaces(){
@@ -1369,12 +1365,12 @@ function dibujar(){
       h+='</div>';
     }
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">Por semana de entrega · mismo color junto</div>';
-    // Fila de acciones: cargar (solo la primera columna) y el botón que muestra u oculta los filtros.
+    // Fila de acciones: el botón que muestra u oculta los filtros. (Acá estaba "+ Cargar obra": las obras
+    // se cargan desde su contrato, en Relación-Contrato, y el dueño pidió que el tablero no tenga ni el link.)
     const nAct=filtros.filter(f=>falta[f[0]]).length,verF=filtros.length>0&&(!!filtrosAb[e.id]||nAct>0);
-    if((esPrimera&&YO.puede.contratos_editar&&HAY_RC)||filtros.length){
+    if(filtros.length){
       h+='<div class="col-acc">';
-      if(esPrimera&&YO.puede.contratos_editar&&HAY_RC)h+='<a class="col-cargar" href="/presupuestos/relacion-contrato.php" target="_top" title="Toda obra nace de su contrato: se carga desde Relación-Contrato">+ Cargar obra desde su contrato</a>';
-      if(filtros.length)h+='<button type="button" class="col-fb'+(verF?' on':'')+'" data-filtros="'+esc(e.id)+'" aria-expanded="'+verF+'">Filtrar'+(nAct?' · '+nAct:'')+'</button>';
+      h+='<button type="button" class="col-fb'+(verF?' on':'')+'" data-filtros="'+esc(e.id)+'" aria-expanded="'+verF+'">Filtrar'+(nAct?' · '+nAct:'')+'</button>';
       h+='</div>';
     }
     if(verF)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+((f[0].indexOf('turno_')===0||f[0].indexOf('pisa_')===0)&&deEtapa.some(f[2])?' avi':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
