@@ -14,30 +14,24 @@
 // Control es el tilde "Hecho" de cada uno, en su propio archivo (bs-data/control/hechos.json).
 // Nada más del sistema lee ese archivo: Control se puede borrar entero sin que se rompa nada.
 //
-//   GET  → { ok, hoy, recordatorios:[{id, titulo, detalle, para, cuando, total, confirmados,
-//                                      link, completo, hecho:{at,por}|null, nuevos}] }
+//   GET  → { ok, hoy, recordatorios:[{id, grupo, titulo, detalle, para, cuando, total, confirmados, link, link_txt,
+//                                      fichas_txt, fichas:[{txt,link}], fichas_mas, completo, hecho:{at,por}|null, nuevos}] }
 //   POST { accion:'hecho'|'deshacer', id } → { ok }
 //
-// LOS RECORDATORIOS QUE HAY (cada uno lo aprobó el dueño; para sumar otro, primero se le pregunta):
-//  Turnos
-//   · Confirmar los turnos de un día de medición o de instalación: 2 días hábiles antes y hasta ese día.
-//   · Completar los datos de la medición (dirección, teléfono) / preparar la instalación (instaladores,
-//     dirección confirmada): el día hábil anterior, y solo si falta algo.
-//   · Marcar o reprogramar las mediciones o instalaciones que ya pasaron y no quedaron marcadas (14 días).
-//  Taller y plazo
-//   · Dar turno de instalación (Por instalar, sin turno, plazo a 7 días o menos).
-//   · Apurar lo que vence en 5 días o menos y sigue en Por cortar o Por fabricar.
-//   · Pedir la placa de lo ya medido · Pasar a cortar lo medido hace más de 2 días.
-//   · Cerrar lo instalado hace más de 2 días que sigue en Por instalar.
-//  Plata y contratos
-//   · Cobrar la seña de lo ya medido.
-//   · Cargar en Por medir los contratos de 2 días o más que no están en el tablero.
-//   · Adjuntar el presupuesto al contrato cuando al presupuesto le quedan 15 días o menos de sus 180.
-//  Fin de mes
-//   · Bajar el cierre, solo el último día.
+// QUÉ ESTÁ PRENDIDO (dueño, 18/11/2026): "Por los momentos vamos a dejar solo aviso de confirmación medir
+// y aviso de confirmación instalar. Nada más." Son los dos de "Confirmar los turnos": aparecen 2 días
+// hábiles antes del día y quedan hasta ese día inclusive. Abajo de cada uno dice qué fichas faltan confirmar.
+//
+// Los demás (aprobados el mismo día y apagados horas después, al verlos en uso) siguen escritos y con sus
+// pruebas, pero NO se muestran: ver $BS_CONTROL_PRENDIDOS. Para volver a prender uno se suma su tipo ahí,
+// y antes se le pregunta al dueño.
+//  Turnos           · datos-medir / datos-instalar: el día hábil anterior, lo que falta para ir.
+//                   · pasadas-medir / pasadas-instalar: lo que ya pasó y no quedó marcado (14 días).
+//  Taller y plazo   · dar-turno · plazo-taller · placa · pasar-cortar · cerrar-instaladas
+//  Plata y contratos· sena · contratos-sin-cargar · adjuntar
+//  Fin de mes       · cierre
 // Un renglón por tipo (los de turnos, uno por día). Marcado a mano como hecho, cualquiera vuelve a
-// aparecer si después se le suma una obra. Los que no son de un día puntual son de todos los días:
-// el "Hecho" vale por hoy, y mañana vuelven si siguen sin resolverse.
+// aparecer si después se le suma una obra.
 // ============================================================
 
 require_once __DIR__ . '/_config.php';
@@ -50,6 +44,11 @@ define('BS_CONTROL_DIR',  BS_DATA_DIR . '/control');
 define('BS_CONTROL_FILE', BS_CONTROL_DIR . '/hechos.json');
 define('BS_CONTROL_LOCK', BS_CONTROL_DIR . '/.write.lock');
 define('BS_CONTROL_DIAS_ANTES', 2); // días hábiles (lunes a viernes) antes del turno
+
+// Los tipos de recordatorio que se muestran. El tipo es el id sin la fecha del final.
+$BS_CONTROL_PRENDIDOS = ['turnos-medir', 'turnos-instalar'];
+// Solo para las pruebas automáticas, con el servidor de desarrollo de PHP: probar también los apagados.
+$BS_CONTROL_TODOS = php_sapi_name() === 'cli-server' && getenv('BS_CONTROL_TODOS') === '1';
 
 $DIAS  = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 $HOY   = date('Y-m-d');
@@ -92,7 +91,8 @@ foreach (@scandir(BS_CLIENTES_DIR) ?: [] as $f) {
         foreach ($def['checks'] as $cid => $label) { if (empty($checks[$cid]) && !bs_tablero_tilde_liberado($et, $cid, $obra)) $faltan[] = $label; }
         $fecha_ok = bs_tablero_fecha_valida($obra['fecha']);
         $medido = bs_tablero_fecha_valida($obra['medido_at']) ? (string)$obra['medido_at'] : '';
-        $inst = (string)(is_array($obra['tildes_at'] ?? null) ? ($obra['tildes_at']['instalado'] ?? '') : ''); // el día en que se tildó "Instalado"
+        $inst = (string)($obra['instalado_at'] ?? '');   // el día en que se marcó "Instalado"
+        if ($inst === '' && is_array($obra['tildes_at'] ?? null)) $inst = (string)($obra['tildes_at']['instalado'] ?? '');
         $obras[] = [
             'key' => $key, 'et' => $et, 'checks' => $checks, 'faltan' => $faltan,
             'fecha' => $fecha_ok ? (string)$obra['fecha'] : '', 'hora' => ($fecha_ok && bs_tablero_hora_valida($obra['hora'])) ? (string)$obra['hora'] : '',
@@ -102,6 +102,9 @@ foreach (@scandir(BS_CLIENTES_DIR) ?: [] as $f) {
             // el mismo plazo de entrega que muestra el tablero: el puesto a mano, o medición + 20 días corridos
             'limite' => bs_tablero_fecha_valida((string)$obra['plazo']) ? (string)$obra['plazo'] : ($medido !== '' ? date('Y-m-d', strtotime($medido . ' +' . BS_PLAZO_DIAS . ' days')) : ''),
             'dir' => trim((string)($cli['cliente']['direccion'] ?? '')), 'cel' => trim((string)($cli['cliente']['celular'] ?? '')),
+            // cómo se nombra la ficha: igual que en el tablero (el N° de una ficha a mano es el de su contrato, si tiene)
+            'nombre' => trim((string)($cli['cliente']['nombre'] ?? '')),
+            'nro' => empty($cot['manual']) ? $key : trim((string)($obra['nro_contrato'] ?? '')),
         ];
     }
 }
@@ -131,15 +134,27 @@ $que_falta = function ($lista) {
 // $grupo: 1 Turnos · 2 Taller y plazo · 3 Plata y contratos · 4 Fin de mes.
 $GRUPOS = [1 => 'Turnos', 2 => 'Taller y plazo', 3 => 'Plata y contratos', 4 => 'Fin de mes'];
 $sec = 0;
-$armar = function ($grupo, $id, $keys, array $r) use ($hechos, $GRUPOS, &$sec, &$rec) {
+$por_key = array_column($obras, null, 'key');
+define('BS_CONTROL_FICHAS', 6);   // cuántas fichas se nombran abajo de un recordatorio; el resto va como "y N más"
+$armar = function ($grupo, $id, $keys, array $r) use ($hechos, $GRUPOS, $BS_CONTROL_PRENDIDOS, $BS_CONTROL_TODOS, $por_key, &$sec, &$rec) {
+    if (!$BS_CONTROL_TODOS && !in_array(substr($id, 0, -11), $BS_CONTROL_PRENDIDOS, true)) return;   // apagado
     $keys = array_values(array_map('strval', $keys)); sort($keys);
     $ord = (string)($r['ord'] ?? ($r['para'] ?? '')); unset($r['ord']);   // dentro del grupo: por fecha, lo más cercano arriba
+    // Qué fichas son (dueño, 18/11/2026: "abajito debe aparecer qué ficha es"): nombre y N°, con link a la ficha.
+    $fk = $r['fichas_keys'] ?? $keys; unset($r['fichas_keys']);
+    $fichas = [];
+    foreach ($fk as $k) {
+        $o = $por_key[$k] ?? null;
+        if (!$o) continue;
+        $fichas[] = ['txt' => ($o['nombre'] !== '' ? $o['nombre'] : 'Sin nombre') . ($o['nro'] !== '' ? ' (' . $o['nro'] . ')' : ''), 'link' => '/presupuestos/tablero.php?q=' . rawurlencode($k)];
+    }
     $h = is_array($hechos[$id] ?? null) ? $hechos[$id] : null;
     $nuevos = $h ? count(array_diff($keys, (array)($h['keys'] ?? []))) : 0;
     if ($h && $nuevos > 0) $h = null;
     if ($nuevos) $r['detalle'] .= ' · ' . ($nuevos === 1 ? 'se sumó 1 después de marcarlo' : 'se sumaron ' . $nuevos . ' después de marcarlo');
     $rec[] = array_merge(['id' => $id, 'grupo' => $GRUPOS[$grupo], 'total' => count($keys), 'confirmados' => 0, 'nuevos' => $nuevos, 'completo' => false, 'falta' => 9,
         'link_txt' => 'Ver en el tablero →', 'link' => '/presupuestos/tablero.php',
+        'fichas_txt' => count($fichas) === 1 ? 'Ficha' : 'Fichas', 'fichas' => array_slice($fichas, 0, BS_CONTROL_FICHAS), 'fichas_mas' => max(0, count($fichas) - BS_CONTROL_FICHAS),
         'hecho' => $h ? ['at' => (string)($h['at'] ?? ''), 'por' => (string)($h['por'] ?? '')] : null,
         'keys' => $keys, 'orden' => sprintf('%d%s%03d', $grupo, $ord, $sec++)], $r);
 };
@@ -164,12 +179,16 @@ foreach (['medir' => ['medición', 'med', 'Medido'], 'instalar' => ['instalació
             $n = count($lista);
             $ok = count(array_filter($lista, function ($x) { return $x['conf']; }));
             $sin_hora = count(array_filter($lista, function ($x) { return $x['hora'] === ''; }));
+            $pend = array_values(array_filter($lista, function ($x) { return !$x['conf']; }));
+            usort($pend, function ($a, $b) { return strcmp($a['hora'] === '' ? '99' : $a['hora'], $b['hora'] === '' ? '99' : $b['hora']); });
+            $sin_conf = array_column($pend, 'key');
             $det = [$s($n, '1 turno', '# turnos'), $ok === $n ? $s($n, 'confirmado', 'todos confirmados') : ($ok . ' de ' . $n . ($ok === 1 ? ' confirmado' : ' confirmados'))];
             if ($sin_hora) $det[] = $s($sin_hora, '1 sin hora', '# sin hora');
             $armar(1, 'turnos-' . $et . '-' . $fecha, array_column($lista, 'key'), [
                 'para' => $fecha, 'titulo' => 'Confirmar los turnos de ' . $T[0] . ' del ' . $dia_txt($fecha),
                 'detalle' => implode(' · ', $det), 'cuando' => $cuando($fecha), 'falta' => $dias_a($fecha),
                 'confirmados' => $ok, 'completo' => $ok === $n, 'link' => $link, 'link_txt' => 'Ver la ruta →',
+                'fichas_txt' => 'Falta confirmar', 'fichas_keys' => $sin_conf,
             ]);
         }
         // 1b. El día hábil anterior: lo que falta para poder ir. Solo aparece si falta algo.
@@ -275,7 +294,7 @@ if ($l) {
     ]);
 }
 // Los dos que siguen leen los contratos. Si Relación-Contrato no está instalada, simplemente no aparecen.
-if (is_file(__DIR__ . '/_contratos.php')) {
+if (($BS_CONTROL_TODOS || array_intersect(['contratos-sin-cargar', 'adjuntar'], $BS_CONTROL_PRENDIDOS)) && is_file(__DIR__ . '/_contratos.php')) {
     require_once __DIR__ . '/_contratos.php';
     $contratos = (array)(bs_contratos_leer()['contratos'] ?? []);
     // 3b. Contrato cargado hace 2 días o más que no está en el tablero: una obra vendida que nadie sigue.

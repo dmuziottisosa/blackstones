@@ -100,6 +100,11 @@ button{font-family:inherit;color:inherit}
 .rec .d{grid-column:2;font-size:13.5px;color:var(--text2);line-height:1.5}
 .rec .d a{color:var(--text);font-weight:700;white-space:nowrap}
 .rec .d .ir{white-space:nowrap}
+/* Abajo: qué fichas son (dueño, 18/11/2026). Cada nombre abre su ficha en el tablero. */
+.rec .f{grid-column:2;font-size:13.5px;line-height:1.6;color:var(--text2)}
+.rec .f a{color:var(--text);font-weight:600;text-decoration:none;border-bottom:1px solid var(--border)}
+.rec .f a:hover{border-bottom-color:var(--text)}
+.rec.hecho .f{display:none}
 .rec .c{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;padding:3px 9px;border-radius:999px;background:var(--card-alt);color:var(--text2)}
 .rec.urge .c{background:var(--amb-soft);color:var(--amb)}
 .rec.hecho .t{font-weight:600;color:var(--text3);text-decoration:line-through}
@@ -242,7 +247,8 @@ function recFila(r,listo){
   return '<div class="rec'+(listo?' hecho':(r.falta<=1?' urge':''))+'">'
     +'<input type="checkbox" data-rec="'+escR(r.id)+'"'+(listo?' checked':'')+(r.completo&&!r.hecho?' disabled':'')+' aria-label="Hecho: '+escR(r.titulo)+'">'
     +'<div class="t">'+escR(r.titulo)+'</div><span class="c">'+(listo?'Hecho':escR(r.cuando))+'</span>'
-    +'<div class="d">'+escR(r.detalle)+(quien?' · '+quien:'')+' <span class="ir">· <a href="'+escR(r.link)+'">'+escR(r.link_txt||'Ver →')+'</a></span></div></div>';
+    +'<div class="d">'+escR(r.detalle)+(quien?' · '+quien:'')+' <span class="ir">· <a href="'+escR(r.link)+'">'+escR(r.link_txt||'Ver →')+'</a></span></div>'
+    +((r.fichas||[]).length?'<div class="f">'+escR(r.fichas_txt||'Fichas')+': '+r.fichas.map(x=>'<a href="'+escR(x.link)+'">'+escR(x.txt)+'</a>').join(' · ')+(r.fichas_mas?' y '+r.fichas_mas+' más':'')+'</div>':'')+'</div>';
 }
 async function cargarRec(){
   if(recYendo)return;recYendo=true;
@@ -251,7 +257,9 @@ async function cargarRec(){
     if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudieron leer los recordatorios');
     const listo=x=>!!x.hecho||x.completo,pend=j.recordatorios.filter(x=>!listo(x)),hechos=j.recordatorios.filter(listo);
     // un rótulo cada vez que cambia el grupo (vienen ordenados del servidor)
-    let g='';const porGrupo=pend.map(x=>{const cab=(x.grupo&&x.grupo!==g)?'<div class="rec-grupo">'+escR(x.grupo)+'</div>':'';g=x.grupo||g;return cab+recFila(x,false);}).join('');
+    // (con un solo grupo, el rótulo sobra)
+    const varios=new Set(pend.map(x=>x.grupo)).size>1;
+    let g='';const porGrupo=pend.map(x=>{const cab=(varios&&x.grupo&&x.grupo!==g)?'<div class="rec-grupo">'+escR(x.grupo)+'</div>':'';g=x.grupo||g;return cab+recFila(x,false);}).join('');
     $('recLista').innerHTML=(pend.length?porGrupo:'<div class="rec-vacio">'+(hechos.length?'Todo hecho. No queda nada pendiente.':'No hay nada para recordar hoy.')+'</div>')
       +(hechos.length?'<div class="rec-sep">Hechos</div>'+hechos.map(x=>recFila(x,true)).join(''):'');
   }catch(e){$('recLista').innerHTML='<div class="rec-vacio">'+escR(e.message)+'</div>';}

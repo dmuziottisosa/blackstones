@@ -57,12 +57,22 @@ El dueño: "¿Por qué hacer el recordatorio fuera del sistema cuando se puede h
 - **No se guardan.** `calculadora/api/control.php` los calcula cada vez leyendo el tablero. Lo único que se guarda es el tilde "Hecho" de cada uno (`bs-data/control/hechos.json`), con quién y a qué hora. Los tildes de más de 45 días se borran solos.
 - **Confirmar los turnos** de un día de medición o de instalación (el primero que se hizo).
   - Aparece **dos días hábiles antes** (lunes a viernes): un bloque de sábado y otro de lunes aparecen los dos el jueves. Se va cuando pasa ese día.
-  - Dice cuántos turnos son, cuántos ya están en "Turno confirmado" y cuántos no tienen hora. No trae nombres ni teléfonos: "Ver la ruta →" abre el Cronograma del calendario en ese día, que es donde están.
+  - Dice cuántos turnos son, cuántos ya están en "Turno confirmado" y cuántos no tienen hora. Abajo nombra las fichas que faltan confirmar. No trae teléfonos: "Ver la ruta →" abre el Cronograma del calendario en ese día, que es donde están.
   - **"Hecho"** lo tilda una persona cuando ya les avisó. Si después se suma un turno a ese día, vuelve a quedar pendiente y lo dice.
   - Si todas las obras de ese día tienen "Turno confirmado" en su ficha, se da por hecho solo.
 - **Por qué el de turnos queda hasta el mismo día:** aparece dos días hábiles antes y sigue hasta el día del turno inclusive ("es hoy"), porque un turno sin confirmar el mismo día es justo el que más importa. Se va al día siguiente, o antes si todas las obras quedan en "Turno confirmado" o se marcan Medido / Instalado.
 
-### Los que hay, por grupo
+### Qué está prendido (18/11/2026)
+
+El dueño, después de verlos todos en uso: "Por los momentos vamos a dejar solo aviso de confirmación medir y aviso de confirmación instalar. Nada más."
+
+- **Se muestran solo los dos de "Confirmar los turnos"** (medición e instalación).
+- **Abajo de cada uno dice qué fichas faltan confirmar** (dueño: "abajito debe aparecer qué ficha es"): nombre y N°, en orden de hora, cada una con link a su ficha en el tablero. Nombra hasta seis; si hay más, dice "y N más". El N° es el que muestra el tablero; el código interno no se ve.
+- **Los demás quedaron apagados, no borrados.** Siguen escritos en `control.php` con sus pruebas. La lista de los prendidos es `$BS_CONTROL_PRENDIDOS`, arriba de ese archivo: para volver a prender uno se suma su tipo ahí, con el OK del dueño.
+- **No se armaron** (quedaron aprobados antes del apagón, por si vuelven): el aviso de seña distinta entre tablero y contrato, solo para contratos nuevos; y un tilde "Plano y monto rectificados" en Por medir, que no frenaría el pase a Por cortar.
+- Con un solo grupo en pantalla, el rótulo del grupo no se muestra.
+
+### Los que hay escritos, por grupo (hoy solo está prendido "Confirmar los turnos")
 
 El dueño aprobó cada uno (los cuatro primeros el 18/11/2026; los nueve siguientes el mismo día, de una lista de la que rechazó uno). En pantalla van en este orden, con un rótulo chico por grupo.
 
@@ -89,7 +99,7 @@ Detalles que no se ven en la tabla:
 - **"Cargar en Por medir" mira solo contratos de los últimos 30 días** (por la fecha del contrato), para que los históricos importados no hagan ruido. Los de prueba no cuentan.
 - **Si Relación-Contrato no está instalada**, los dos que leen contratos simplemente no aparecen; el resto sigue.
 - **Los que no son de un día puntual son de todos los días:** el "Hecho" vale por hoy. Si mañana siguen sin resolverse, vuelven a aparecer. Marcado "Hecho", cualquiera vuelve a quedar pendiente si después se le suma una obra, y lo dice.
-- **Ninguno trae nombres, teléfonos, direcciones ni plata:** dicen cuántas obras son y llevan a la pantalla donde están.
+- **Ninguno trae teléfonos, direcciones ni plata.** Dicen cuántas obras son, nombran las fichas (nombre y N°) y llevan a la pantalla donde están.
 - **Orden:** por grupo; dentro de cada grupo, por fecha (lo que ya pasó, después lo más cercano). Nunca hay más de un renglón por tipo (salvo los de turnos, que van uno por día).
 - **En pantalla:** primero los pendientes, por grupo; abajo, "Hechos", tachados. Sin pendientes dice "No hay nada para recordar hoy". Se actualiza solo cada minuto.
 - **Solo lo ven los administradores**, como el resto de Control.
