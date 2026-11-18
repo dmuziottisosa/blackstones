@@ -246,6 +246,19 @@ button{font-family:inherit;color:inherit}
 /* Distintivo: este contrato ya está enlazado con el tablero (y por eso también con el calendario). */
 .enl{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gr);white-space:nowrap}
 .enl svg{width:12px;height:12px;flex-shrink:0}
+a.enl{text-decoration:none}
+.nota-t a.enl{color:var(--gr);font-weight:800}
+a.enl:hover,a.enl:focus-visible{text-decoration:underline}
+.nota-t .lista-c{margin-top:6px;font-size:12.5px}
+.nota-t .lista-c li{padding:5px 0}
+.nota-t .lista-c li:last-child{border-bottom:none}
+.nota-t .lista-c li span{flex-basis:104px}
+.t-hist{margin-top:6px;border-top:1px solid var(--border-soft);padding-top:8px}
+.t-hist summary{cursor:pointer;font-weight:700;color:var(--text);font-size:12.5px}
+.t-hist .e{margin-top:9px;color:var(--text)}
+.t-hist .i{display:flex;justify-content:space-between;gap:12px;padding:3px 0 3px 10px;font-size:12px}
+.t-hist .i span:last-child{flex-shrink:0;color:var(--text3)}
+.t-pie{margin-top:8px;font-size:12px;color:var(--text3)}
 .tab small .enl{vertical-align:-1px}
 .enl.roto{color:var(--text3)}
 .nota-t.rota .enl.roto{color:var(--red)}
@@ -610,6 +623,27 @@ function fichaPara(c){
 const obraTxt=k=>k.manual?'cargada a mano, sin N° de presupuesto':k.key;
 // La ficha con la que estaba enlazado un contrato y que ya no está. Los números de 90001 en adelante son internos (fichas a mano).
 const fichaIda=c=>+c.enlace.cliente_nro>=90000?'una ficha cargada a mano':'la ficha '+keyDe(c);
+// "Enlazado" es un link a la ficha del tablero, igual que "Con contrato" en la ficha lleva al contrato (dueño, 18/11/2026).
+const enlA=(k,txt)=>'<a class="enl" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Enlazado con el tablero y el calendario: tocá para abrir la ficha">'+ICO_ENL+txt+'</a>';
+// Lo que el tablero sabe de la obra, a la vista dentro del contrato (dueño, 18/11/2026): medición, entrega,
+// instalación, fotos, nota e historial. Es solo lectura: sale de lo que el tablero ya manda, y se cambia allá.
+function tableroHtml(k){
+  const li=(a,b)=>b?'<li><span>'+a+'</span><b>'+esc(b)+'</b></li>':'';
+  const quien=l=>(l||[]).length?' · '+l.join(', '):'';
+  const turno=()=>k.fecha?fch(k.fecha)+(k.hora?' · '+k.hora+' hs':''):'';
+  const venc=!!k.limite&&k.limite<HOY;
+  const med=k.medido_at?'Medida el '+fch(k.medido_at)+quien(k.medidor):(k.etapa==='medir'?(turno()?'Coordinada para el '+turno():'Sin fecha de medición')+quien(k.medidor):'');
+  const inst=k.etapa==='instalar'?(turno()||'Sin turno de instalación')+quien(k.equipo):'';
+  const n=(k.adjuntos||[]).length;
+  let h='<ul class="lista-c">'+li('Etapa',ETAPAS[k.etapa]||k.etapa)+li('Medición',med)
+    +li('Entrega',k.limite&&k.etapa!=='archivar'?(venc?'Plazo vencido el '+fch(k.limite):'Vence el '+fch(k.limite)):'')
+    +li('Instalación',inst)+li('Fotos y planos',n?n+(n===1?' archivo':' archivos'):'')+li('Nota del tablero',k.nota)+'</ul>';
+  if((k.historia||[]).length){
+    h+='<details class="t-hist"><summary>Historial del tablero</summary>'+k.historia.map(et=>'<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' · salió el '+esc(fch(et.salio)):'')+'</div>'
+      +(et.items.length?et.items.map(x=>'<div class="i"><span>'+esc(x.txt)+'</span><span>'+(x.fecha?esc(fch(x.fecha)):'—')+'</span></div>').join(''):'<div class="i"><span>Sin tildes cargados</span><span></span></div>')).join('')+'</details>';
+  }
+  return h;
+}
 // Cómo se ve un contrato: enlazado y con la ficha en el tablero, lo operativo sale de la ficha.
 function ver(c){
   const k=cardDe(c);
@@ -706,19 +740,29 @@ async function pasarNros(){
   }
   pasandoNros=false;
 }
-// El nombre del contrato completa la ficha que no lo tiene (dueño, 17/11/2026). Un presupuesto hecho sin
-// saber el nombre trae el teléfono en su lugar, y la ficha entra al tablero "sin nombre". Si su contrato
-// enlazado sí tiene nombre y apellido, se le pasa. Nunca pisa un nombre que la ficha ya tiene: solo llena
-// el que falta (sin letras). Solo lo hace quien puede editar contratos; si el tablero no contesta, no pasa nada.
+// El contrato completa lo que le falta a su ficha: nombre, teléfono y dirección (dueño, 17 y 18/11/2026).
+// Un presupuesto hecho sin saber el nombre trae el teléfono en su lugar y casi nunca trae la dirección:
+// al cargarlo en Por medir la ficha entraba "sin nombre" y sin dónde ir a medir, aunque el contrato lo tuviera.
+// Nunca pisa un dato que la ficha ya tiene: solo llena el que falta (el nombre "falta" si no tiene letras).
+// Enlazados, esos datos se siguen cambiando desde el tablero. Solo lo hace quien puede editar contratos;
+// si el tablero no contesta, no pasa nada.
 const tieneLetras=s=>/[a-záéíóúüñ]/i.test(String(s||''));
 let pasandoNombres=false;
 async function pasarNombres(){
   if(!EDITA||!TABLERO_OK||pasandoNombres)return;
-  const cambios=CONTRATOS.map(c=>[cardDe(c),String(c.cliente||'').trim()]).filter(x=>x[0]&&!tieneLetras(x[0].nombre)&&tieneLetras(x[1]));
+  const t=s=>String(s||'').trim(),cambios=[];
+  CONTRATOS.forEach(c=>{
+    const k=cardDe(c);if(!k)return;
+    const b={};
+    if(!tieneLetras(k.nombre)&&tieneLetras(c.cliente))b.nombre=t(c.cliente).slice(0,120);
+    if(!t(k.celular)&&t(c.telefono))b.celular=telLindo(c.telefono).slice(0,40);
+    if(!t(k.direccion)&&t(c.direccion))b.direccion=t(c.direccion).slice(0,200);
+    if(Object.keys(b).length)cambios.push([k,b]);
+  });
   if(!cambios.length)return;
   pasandoNombres=true;
   for(const x of cambios){
-    try{await pedir(API_EDITAR,{cliente_nro:x[0].cliente_nro,sub:x[0].sub,nombre:x[1].slice(0,120)});x[0].nombre=x[1];}catch(e){}
+    try{await pedir(API_EDITAR,Object.assign({cliente_nro:x[0].cliente_nro,sub:x[0].sub},x[1]));Object.assign(x[0],x[1]);}catch(e){}
   }
   pasandoNombres=false;
   dibujar();
@@ -825,7 +869,7 @@ function dibujar(){
     const fp=fichaPara(c),kn=fp?fp.k:null; // su obra ya está en el tablero (mismo N° o mismo teléfono): se enlaza, no se carga de nuevo
     if(kn)tab='<button type="button" class="btn chico enl-b" data-enlazar="'+esc(c.id)+'">'+ICO_ENL+'Enlazar con el tablero</button><small>'+(fp.por==='tel'?'Mismo teléfono que una obra del tablero: ':'Ya está en el tablero: ')+esc(ETAPAS[kn.etapa]||kn.etapa)+'</small>';
     else if(!c.enlace)tab='<button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
-    else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><small'+(d.rojo?' class="rojo"':'')+'><span class="enl" title="Enlazado con el tablero y el calendario">'+ICO_ENL+'Enlazado</span>'+(d.t?' · '+esc(d.t):'')+'</small>'+(sd?'<small class="sena-d" title="'+esc(sd.txt)+'">Seña distinta en el tablero</small>':'');}
+    else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><small'+(d.rojo?' class="rojo"':'')+'>'+enlA(k,'Enlazado')+(d.t?' · '+esc(d.t):'')+'</small>'+(sd?'<small class="sena-d" title="'+esc(sd.txt)+'">Seña distinta en el tablero</small>':'');}
     else tab=sinFichaHtml(c);
     const nota=(c.nota||'').replace(/\s+/g,' ').trim();
     const obra=[c.factura?'Factura <b>'+(c.factura==='si'?'sí':(c.factura==='cf'?'cons. final':'no'))+'</b>':'',c.muebles?'Muebles <b>'+(c.muebles==='si'?'sí':'no')+'</b>':'',v.bacha?'Pileta <b>'+esc(PIL[v.bacha].toLowerCase())+'</b>':''].filter(Boolean).join(' · ');
@@ -882,7 +926,7 @@ function verFicha(c){
     +'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de contrato',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>'
     +'<div class="m-chk">'+[[!!c.nro,'N° de contrato'],[!!c.archivo,'Presupuesto adjunto'],[!!c.enlace,'Enlazado con el tablero']].map(x=>'<span class="'+(x[0]?'si':'')+'">'+x[1]+'</span>').join('')+'</div></div>'
     +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
-  if(k)h+='<div class="nota-t"><span class="enl">'+ICO_ENL+'Enlazado con el tablero y el calendario</span>'+(etapaDet(k).t?'<br>'+esc(etapaDet(k).t)+'.':'')+'</div>';
+  if(k)h+='<div class="nota-t">'+enlA(k,'Enlazado con el tablero y el calendario')+tableroHtml(k)+'</div>';
   else if(c.enlace&&TABLERO_OK)h+='<div class="nota-t'+(FUERA[c.ficha]?'':' rota')+'"><span class="enl roto">'+ICO_ENL+(FUERA[c.ficha]?FUERA[c.ficha][0]:'Esta ficha no existe en el tablero')+'</span>'+(FUERA[c.ficha]?'<br>'+FUERA[c.ficha][1]:'')+'</div>';
   if(PLATA){
     const n=cuentas(c,v),s=saldoTxt(n),l=o=>partes(o).map(esc).join('<br>')||'—';
@@ -923,7 +967,7 @@ function abrirFicha(id){
   let h='<div class="m-cab"><div><h3>'+(c?esc(v.cliente):'Nuevo contrato')+'<span class="ver" id="hVer" hidden title="Tiene adjunto el presupuesto">'+ICO_VER+'Verificado</span></h3>'+(c?'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de contrato',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>':'')+'<div class="m-chk" id="mChk"></div></div>'
     +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
   h+='<div class="m-res"><div><div class="t">Total</div><b id="rTot"></b></div><div><div class="t">Cobrado</div><b id="rCob"></b></div><div><div class="t">Saldo</div><b id="rSal"></b></div></div>';
-  if(k)h+='<div class="nota-t"><span class="enl">'+ICO_ENL+'Enlazado con el tablero y el calendario</span><br>'+(etapaDet(k).t?esc(etapaDet(k).t)+'. ':'')+'Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div>';
+  if(k)h+='<div class="nota-t">'+enlA(k,'Enlazado con el tablero y el calendario')+tableroHtml(k)+'<div class="t-pie">Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div></div>';
   else if(c&&c.enlace&&TABLERO_OK){
     if(FUERA[c.ficha])h+='<div class="nota-t"><span class="enl roto">'+ICO_ENL+FUERA[c.ficha][0]+'</span><br>'+FUERA[c.ficha][1]+'</div>';
     else h+='<div class="nota-t rota"><span class="enl roto">'+ICO_ENL+'Esta ficha no existe en el tablero</span><br>El contrato está enlazado con '+esc(fichaIda(c))+' que ya no está: se borró o le cambiaron el N° de presupuesto. <button type="button" class="lnk" data-desenlazar="'+esc(c.id)+'">Desenlazar</button></div>';

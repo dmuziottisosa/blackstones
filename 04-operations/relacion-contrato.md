@@ -181,14 +181,18 @@ Una ficha cargada a mano dice "Sin N°". Si está enlazada con un contrato que t
 - El contrato paralelo ("ctto") no se pasa; es un dato solo del contrato.
 - Cómo está hecho: la página de Relación-Contrato llama a `tablero.php` con la acción `nro_contrato` (`pasarNros()`), y el número queda guardado en la ficha. El tablero y el calendario no leen nada de contratos: si Relación-Contrato se borra, las fichas conservan el último número que tenían.
 
-## El nombre del contrato completa la ficha que no lo tiene (17/11/2026)
+## Enlazados: qué comparten el contrato y la ficha (17 y 18/11/2026)
 
-Un presupuesto hecho sin saber el nombre del cliente trae el teléfono en su lugar, y al cargarlo en Por medir la ficha entraba "sin nombre". Ahora, si el contrato enlazado tiene nombre y apellido y la ficha no (su nombre no tiene letras), **Relación-Contrato se lo pasa a la ficha**.
+La idea del dueño: una vez enlazados, que se aproveche al máximo lo que cada lado ya sabe, sin cargar dos veces.
 
-- **Nunca pisa un nombre que la ficha ya tiene.** Solo llena el que falta. Si el nombre de la ficha y el del contrato difieren, no se toca ninguno.
-- Se hace al cargar en Por medir, al enlazar y cada vez que alguien que puede editar contratos abre Relación-Contrato.
-- Como la ficha de un presupuesto comparte el cliente con ese presupuesto, el nombre también queda en la pestaña Presupuestos.
-- Cómo está hecho: `pasarNombres()` llama a `tablero-editar.php` con el nombre. El tablero no lee nada de contratos.
+- **El contrato completa lo que le falta a la ficha: nombre y apellido, teléfono y dirección.** Un presupuesto hecho sin saber el nombre trae el teléfono en su lugar y casi nunca trae la dirección; al cargarlo en Por medir la ficha entraba "sin nombre" y sin dónde ir a medir, aunque el contrato lo tuviera. Ahora Relación-Contrato se lo pasa.
+  - **Nunca pisa un dato que la ficha ya tiene.** Solo llena el que falta (el nombre "falta" si no tiene letras). Si difieren, no se toca ninguno; enlazados, esos datos se siguen cambiando desde el tablero.
+  - Se hace al cargar en Por medir, al enlazar y cada vez que alguien que puede editar contratos abre Relación-Contrato.
+  - Como la ficha de un presupuesto comparte el cliente con ese presupuesto, el dato también queda en la pestaña Presupuestos.
+  - Cómo está hecho: `pasarNombres()` llama a `tablero-editar.php`. El tablero no lee nada de contratos.
+- **Dentro del contrato se ve lo del tablero.** La ventana del contrato (también la de solo mirar) muestra etapa, medición (coordinada o hecha, y quién midió), cuándo vence la entrega, el turno de instalación con el equipo, cuántas fotos y planos tiene, la nota del tablero y, plegado, el **historial del tablero** con sus tildes y fechas. Es solo lectura y sale de lo que el tablero ya manda (`tableroHtml()`): no se guarda nada en el contrato.
+- **"Enlazado" es un link a la ficha.** En el renglón de la lista y dentro del contrato, tocarlo abre el tablero con esa ficha. Es el camino inverso de "Con contrato" en la ficha, que lleva al contrato.
+- El N° también se comparte: ver "El N° del contrato en la ficha del tablero", arriba.
 
 ## Renglones de prueba
 
