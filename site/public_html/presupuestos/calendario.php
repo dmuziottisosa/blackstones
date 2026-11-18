@@ -300,8 +300,13 @@ button{font-family:inherit;color:inherit}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.ok{border-left-color:var(--gr)}
 
-/* === CRONOGRAMA DE MEDICIÓN: la ruta de un día, en orden de hora === */
+/* === CRONOGRAMA: la ruta de un día (medición o instalación), en orden de hora === */
 .cron-b{height:34px;padding:0 14px;border:1px solid var(--dk);border-radius:var(--radius-sm);background:var(--dk);color:var(--cr);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.cr-tabs{display:flex;gap:4px;margin:8px 0 12px;border-bottom:1px solid var(--border)}
+.cr-tabs button{padding:10px 16px;border:none;border-bottom:3px solid transparent;margin-bottom:-1px;background:none;font-family:inherit;font-size:14.5px;font-weight:700;color:var(--text3);cursor:pointer}
+.cr-tabs button.on{color:var(--text);border-bottom-color:var(--et)}
+.cr-tabs button span{display:inline-block;min-width:22px;margin-left:4px;padding:1px 7px;border-radius:999px;background:var(--card-alt);font-size:12px;color:var(--text2);text-align:center}
+.cr-tabs button.on span{background:var(--et);color:#fff}
 .cr-dias{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .cr-dias button{padding:7px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer}
 .cr-dias button.atras{color:var(--red);border-color:var(--red)}
@@ -412,7 +417,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
       <button type="button" id="mesSig" aria-label="Mes siguiente">›</button>
       <button type="button" class="hoy-b" id="mesHoy">Hoy</button>
     </div>
-    <button type="button" class="cron-b" id="cronB" title="La ruta de medición de cada día: orden, horas y direcciones">Cronograma</button>
+    <button type="button" class="cron-b" id="cronB" title="La ruta de cada día, de medición y de instalación: orden, horas y direcciones">Cronograma</button>
     <div class="hoy" id="hoyTxt"></div>
   </div>
   <div class="plano">
@@ -672,13 +677,19 @@ function abrirBloque(dia,origen){
   $('modalBg').classList.add('show');
 }
 
-// ---------- Cronograma de medición (dueño, 18/11/2026) ----------
-// La ruta de medición de un día: las obras de Por medir que tienen ese día, en orden de hora, con nombre y
-// apellido, dirección, teléfono y color. Acá mismo se les cambia la hora o el día. No inventa nada: escribe
-// el turno de medición de la ficha (la misma acción "fecha" de siempre), así que repercute en Por medir,
-// en este calendario y en Relación-Contrato, que lo leen del tablero.
-let crAbierto=false,crDia=null,crOcupado=false; // crDia: 'AAAA-MM-DD', '' = las que no tienen fecha, null = elegir solo
-const crPend=()=>CARDS.filter(c=>c.etapa===MEDIR&&!cumplida(c));
+// ---------- Cronograma (dueño, 18/11/2026) ----------
+// La ruta de un día, en dos pestañas: Medición (las obras de Por medir) e Instalación (las de Por instalar).
+// Van en orden de hora, con nombre y apellido, dirección, teléfono y color. Acá mismo se les cambia la hora
+// o el día. No inventa nada: escribe el turno de la ficha en su etapa (la misma acción "fecha" de siempre),
+// así que repercute en el tablero, en este calendario y en Relación-Contrato, que lo leen del tablero.
+let crAbierto=false,crTipo='med',crOcupado=false;
+const crDia={med:null,inst:null}; // por pestaña: 'AAAA-MM-DD', '' = las que no tienen día, null = elegir solo
+const CR={
+  med:{txt:'Medición',una:'medición',varias:'mediciones',sin:'Sin fecha',sinTit:'Sin fecha de medición',aviso:'medición'},
+  inst:{txt:'Instalación',una:'instalación',varias:'instalaciones',sin:'Sin turno',sinTit:'Sin turno de instalación',aviso:'instalación'}
+};
+const crEtapa=t=>t==='med'?MEDIR:((ETAPAS.find(e=>e.boton==='instalado')||{}).id||'');
+const crPend=t=>{const id=crEtapa(t);return id?CARDS.filter(c=>c.etapa===id&&!cumplida(c)):[];};
 const crOrden=(a,b)=>{if(a.hora!==b.hora){if(!a.hora)return 1;if(!b.hora)return -1;return a.hora<b.hora?-1:1;}return a.key<b.key?-1:1;};
 function waLink(cel){
   let n=String(cel||'').replace(/\D/g,'');
@@ -687,8 +698,8 @@ function waLink(cel){
   return 'https://wa.me/'+n;
 }
 function abrirCronograma(){
-  crAbierto=true;crDia=null;
-  $('mTitulo').textContent='Cronograma de medición';
+  crAbierto=true;crTipo='med';crDia.med=crDia.inst=null;
+  $('mTitulo').textContent='Cronograma';
   document.querySelector('.modal').classList.remove('angosta');
   $('mOk').hidden=true;modalOk=null;
   crDibujar();
@@ -696,33 +707,45 @@ function abrirCronograma(){
 }
 function crDibujar(){
   if(!crAbierto)return;
-  const pend=crPend(),porDia={};
+  calcularChoques();
+  const T=CR[crTipo],et=crEtapa(crTipo),pend=crPend(crTipo),porDia={};
   pend.forEach(c=>{(porDia[c.fecha||'']=porDia[c.fecha||'']||[]).push(c);});
   const dias=Object.keys(porDia).filter(Boolean).sort();
-  // Arranca en hoy; si hoy no hay mediciones, en el próximo día que tenga; si no, en lo que haya.
-  if(crDia===null||!porDia[crDia])crDia=dias.find(x=>x>=HOY)||dias[dias.length-1]||(porDia['']?'':null);
-  let h='<p class="sub">Elegí el día para ver su ruta. Cambiar la hora o el día acá cambia el turno de medición de la ficha.</p>';
-  if(crDia===null){
-    $('mCuerpo').innerHTML=h+'<p class="cr-vacio">No hay obras por medir.</p>';return;
+  // Arranca en hoy; si hoy no hay nada, en el próximo día que tenga; si no, en lo que haya.
+  let dia=crDia[crTipo];
+  if(dia===null||!porDia[dia])dia=dias.find(x=>x>=HOY)||dias[dias.length-1]||(porDia['']?'':null);
+  crDia[crTipo]=dia;
+  let h='<div class="cr-tabs" role="tablist">'+['med','inst'].map(t=>'<button type="button" role="tab" aria-selected="'+(t===crTipo)+'" data-crtipo="'+t+'" class="et-'+esc(crEtapa(t))+(t===crTipo?' on':'')+'">'+CR[t].txt+' <span>'+crPend(t).length+'</span></button>').join('')+'</div>'
+    +'<p class="sub">Elegí el día para ver su ruta. Cambiar la hora o el día acá cambia el turno de '+T.aviso+' de la ficha.</p>';
+  if(dia===null){
+    $('mCuerpo').innerHTML=h+'<p class="cr-vacio">'+(crTipo==='med'?'No hay obras por medir.':'No hay obras por instalar.')+'</p>';return;
   }
-  h+='<div class="cr-dias">'+dias.map(x=>'<button type="button" data-crdia="'+x+'" class="'+(x===crDia?'on ':'')+(x<HOY?'atras':'')+'" title="'+(x<HOY?'Atrasadas: eran el ':'')+esc(fechaLarga(x))+'">'+esc(x===HOY?'Hoy '+ddmm(x):fechaCorta(x))+' · '+porDia[x].length+'</button>').join('')
-    +(porDia['']?'<button type="button" data-crdia="" class="'+(crDia===''?'on':'')+'">Sin fecha · '+porDia[''].length+'</button>':'')+'</div>';
-  const l=porDia[crDia].slice().sort(crOrden),n=l.length;
+  h+='<div class="cr-dias">'+dias.map(x=>'<button type="button" data-crdia="'+x+'" class="'+(x===dia?'on ':'')+(x<HOY?'atras':'')+'" title="'+(x<HOY?'Atrasadas: eran el ':'')+esc(fechaLarga(x))+'">'+esc(x===HOY?'Hoy '+ddmm(x):fechaCorta(x))+' · '+porDia[x].length+'</button>').join('')
+    +(porDia['']?'<button type="button" data-crdia="" class="'+(dia===''?'on':'')+'">'+T.sin+' · '+porDia[''].length+'</button>':'')+'</div>';
+  const l=porDia[dia].slice().sort(crOrden),n=l.length;
   const ruta=l.map(c=>String(c.direccion||'').trim()).filter(Boolean);
-  h+='<div class="cr-cab"><b>'+(crDia?esc(fechaLarga(crDia))+(crDia<HOY?' · atrasadas':''):'Sin fecha de medición')+' · '+n+(n===1?' medición':' mediciones')+'</b>'
-    +(crDia&&ruta.length?'<a href="https://www.google.com/maps/dir/'+ruta.map(encodeURIComponent).join('/')+'" target="_blank" rel="noopener">Ver la ruta en el mapa →</a>':'')+'</div>';
+  h+='<div class="cr-cab"><b>'+(dia?esc(fechaLarga(dia))+(dia<HOY?' · atrasadas':''):T.sinTit)+' · '+n+' '+(n===1?T.una:T.varias)+'</b>'
+    +(dia&&ruta.length?'<a href="https://www.google.com/maps/dir/'+ruta.map(encodeURIComponent).join('/')+'" target="_blank" rel="noopener">Ver la ruta en el mapa →</a>':'')+'</div>';
   l.forEach((c,i)=>{
     const wa=waLink(c.celular),dir=String(c.direccion||'').trim(),id=esc(c.key);
-    h+='<div class="cr-f et-'+esc(MEDIR)+'">'
-      +'<div class="cr-n'+(c.hora||!crDia?'':' sin')+'" title="'+(crDia?'Orden en la ruta':'')+'">'+(crDia?i+1:'·')+'</div>'
-      +'<label>Hora<input type="time" step="900" data-crhora="'+id+'" value="'+esc(c.hora)+'"'+(crDia?'':' disabled title="Primero ponele el día"')+'></label>'
+    // Instalación: quién va, cuándo vence y lo que hay que mirar (falta la hora, queda después del plazo, se pisa con otra).
+    let extra='';
+    if(crTipo==='inst'){
+      const venc=c.limite&&c.limite<HOY;
+      extra='<br>'+(c.equipo.length?'Instalan: '+esc(c.equipo.join(', ')):'Sin instaladores asignados')+(c.limite?' · <span'+(venc?' class="falta"':'')+'>'+(venc?'Plazo vencido el ':'Vence el ')+esc(fechaCorta(c.limite))+'</span>':'');
+      const av=dia?avisosDe(c).filter(x=>x.indexOf('Atrasada')!==0):[];
+      if(av.length)extra+='<br><span class="falta">'+av.map(esc).join(' · ')+'</span>';
+    }
+    h+='<div class="cr-f et-'+esc(et)+'">'
+      +'<div class="cr-n'+(c.hora||!dia?'':' sin')+'" title="'+(dia?'Orden en la ruta':'')+'">'+(dia?i+1:'·')+'</div>'
+      +'<label>Hora<input type="time" step="900" data-crhora="'+id+'" value="'+esc(c.hora)+'"'+(dia?'':' disabled title="Primero ponele el día"')+'></label>'
       +'<div class="cr-d"><b>'+esc(c.nombre||'Sin nombre')+(nroDe(c)?' <small>· '+esc(nroDe(c))+'</small>':'')+'</b>'
         +(dir?'<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(dir)+'" target="_blank" rel="noopener">'+esc(dir)+'</a>':'<span class="falta">Falta la dirección</span>')+(c.zona?' · '+esc(c.zona):'')+'<br>'
         +(c.celular?(wa?'<a href="'+esc(wa)+'" target="_blank" rel="noopener">'+esc(c.celular)+'</a>':esc(c.celular)):'<span class="falta">Falta el teléfono</span>')
-        +' · '+(c.material?esc(c.material):'Sin color')+'</div>'
+        +' · '+(c.material?esc(c.material):'Sin color')+extra+'</div>'
       +'<label>Día<input type="date" data-crfecha="'+id+'" value="'+esc(c.fecha)+'"></label></div>';
   });
-  const hechas=crDia?CARDS.filter(c=>c.medido_at===crDia):[];
+  const hechas=dia&&crTipo==='med'?CARDS.filter(c=>c.medido_at===dia):[];
   if(hechas.length)h+='<p class="cr-hechas">Ya medidas ese día: '+hechas.map(c=>esc(nombreCorto(c.nombre)||'Sin nombre')).join(', ')+'.</p>';
   $('mCuerpo').innerHTML=h;
 }
@@ -730,20 +753,22 @@ async function crGuardar(c,dia,hora){
   if(crOcupado)return;
   if(dia===c.fecha&&hora===c.hora)return;
   crOcupado=true;
-  const seMuda=dia!==c.fecha,vacia=seMuda&&crPend().filter(x=>x.fecha===c.fecha).length===1; // era la única de ese día
+  const t=crTipo,vacia=dia!==c.fecha&&crPend(t).filter(x=>x.fecha===c.fecha).length===1; // era la única de ese día
   try{
     await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'fecha',fecha:dia,hora:dia?hora:''});
     c.fecha=dia;c.hora=dia?hora:'';
-    if(vacia)crDia=dia; // el día quedó sin obras: se sigue a la que se movió
-    toast(quien(c)+': '+(dia?'medición el '+fechaCorta(dia)+(c.hora?' · '+c.hora+' hs':', sin hora'):'sin fecha de medición'),true);
+    if(vacia)crDia[t]=dia; // el día quedó sin obras: se sigue a la que se movió
+    toast(quien(c)+': '+(dia?CR[t].aviso+' el '+fechaCorta(dia)+(c.hora?' · '+c.hora+' hs':(t==='inst'?', falta la hora':', sin hora')):CR[t].sinTit.toLowerCase()),!!(dia&&(c.hora||t==='med')));
   }catch(e){toast(e.message);}
   crOcupado=false;
   crDibujar();
 }
 $('cronB').addEventListener('click',abrirCronograma);
 $('mCuerpo').addEventListener('click',ev=>{
+  const t=ev.target.closest('[data-crtipo]');
+  if(t){crTipo=t.dataset.crtipo;crDibujar();return;}
   const b=ev.target.closest('[data-crdia]');
-  if(b){crDia=b.dataset.crdia;crDibujar();}
+  if(b){crDia[crTipo]=b.dataset.crdia;crDibujar();}
 });
 $('mCuerpo').addEventListener('change',ev=>{
   const t=ev.target;
