@@ -27,8 +27,8 @@ bs_check_csrf();
 
 const BS_PRESENCIA_VENTANA = 50;   // segundos sin señal para dejar de estar "en línea" (la señal sale cada 20)
 const BS_PRESENCIA_NOMBRES = ['calculadora' => 'Calculadora', 'presupuestos' => 'Presupuestos', 'tablero' => 'Tablero', 'calendario' => 'Calendario',
-    'contratos' => 'Relación-Contrato', 'stock' => 'Stock', 'usuarios' => 'Usuarios'];
-const BS_PRESENCIA_PAGINAS = ['calculadora', 'presupuestos', 'tablero', 'calendario', 'contratos', 'stock', 'usuarios'];
+    'contratos' => 'Relación-Contrato', 'stock' => 'Stock', 'reportes' => 'Reportes', 'usuarios' => 'Usuarios'];
+const BS_PRESENCIA_PAGINAS = ['calculadora', 'presupuestos', 'tablero', 'calendario', 'contratos', 'stock', 'reportes', 'usuarios'];
 
 $yo = auth_usuario();
 $archivo = dirname(auth_usuarios_archivo()) . '/presencia.json';

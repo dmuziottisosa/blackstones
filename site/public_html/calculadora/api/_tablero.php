@@ -455,3 +455,132 @@ function bs_tablero_borrar_carpeta($key) {
     }
     @rmdir($dir);
 }
+
+// ============================================================
+// Leer una obra: material, seña, historial, acceso, zona
+// (Estaban en tablero.php; se mudaron acá el 18/11/2026 para que las use también cierre-mes.php.)
+// ============================================================
+
+// Van dentro de un "si no existen": mientras se sube una versión nueva, por unos segundos puede quedar
+// el tablero.php anterior (que todavía las trae) con este archivo ya nuevo, y así no chocan.
+if (!function_exists('bs_tablero_material')) {
+
+/**
+ * Material a mostrar y plazo prometido, leídos del presupuesto guardado.
+ * Si el hub tiene cargado "material_final", manda ese texto.
+ */
+function bs_tablero_material($cot) {
+    $colores = [];
+    $hay_items = false;
+
+    $secciones = $cot['presupuesto']['secciones'] ?? [];
+    if (is_array($secciones)) {
+        foreach ($secciones as $sec) {
+            $items = (isset($sec['items']) && is_array($sec['items'])) ? $sec['items'] : [];
+            $qty = isset($sec['qty']) ? intval($sec['qty']) : count($items);
+            foreach (array_slice($items, 0, max($qty, 0)) as $it) {
+                $color = trim((string)($it['color'] ?? ''));
+                $mat   = trim((string)($it['mat'] ?? ''));
+                if ($color === '' && $mat === '') continue;
+                $hay_items = true;
+                if ($color !== '' && !in_array($color, $colores, true)) $colores[] = $color;
+            }
+        }
+    }
+
+    $texto = trim((string)($cot['material_final'] ?? ''));
+    if ($texto === '') {
+        $texto = implode(' + ', array_slice($colores, 0, 2));
+        if (count($colores) > 2) $texto .= ' …';
+    }
+
+    // El plazo es el mismo para todos los materiales (ver BS_PLAZO_DIAS).
+    return [$texto, BS_PLAZO_DIAS];
+}
+
+/** Cuándo se aprobó el presupuesto: es el momento en que la obra entró al tablero. */
+function bs_tablero_aprobado_at($cot) {
+    $at = '';
+    foreach ((array)($cot['transiciones'] ?? []) as $t) {
+        if (($t['estado'] ?? '') === 'aprobado' && !empty($t['at'])) $at = (string)$t['at'];
+    }
+    if ($at === '') $at = (string)($cot['fecha'] ?? '');
+    return $at;
+}
+
+function bs_tablero_sena($obra) {
+    $s = $obra['sena'] ?? null;
+    if (!is_array($s) || floatval($s['monto'] ?? 0) <= 0) return null;
+    return ['monto' => floatval($s['monto']), 'moneda' => (($s['moneda'] ?? '') === 'USD') ? 'USD' : 'ARS'];
+}
+
+/**
+ * Historial de la obra: qué se hizo en cada etapa que ya pasó, y cuándo.
+ * Devuelve [historia, hitos]:
+ *   historia → por etapa anterior: sus tildes cumplidos con fecha y dato, y el día en que salió de ahí
+ *   hitos    → lo más importante, para ver de un vistazo en la ficha (Medido, Cortado, Corte aprobado…)
+ * Las fechas de tildes existen desde que se guardan (tildes_at); lo anterior figura sin fecha.
+ */
+function bs_tablero_historia($obra) {
+    global $BS_ETAPAS, $BS_ETAPA_IDS, $BS_TILDES_PERSONAS, $BS_TILDES_APROBACION;
+    $historia = []; $hitos = [];
+    $actual = array_search($obra['etapa'], $BS_ETAPA_IDS, true);
+    if ($actual === false) return [$historia, $hitos];
+    $tildes_at = is_array($obra['tildes_at'] ?? null) ? $obra['tildes_at'] : [];
+
+    for ($i = 0; $i < $actual; $i++) {
+        $eid = $BS_ETAPA_IDS[$i];
+        $def = $BS_ETAPAS[$eid];
+        $boton = (string)($def['boton'] ?? '');
+        $items = [];
+        foreach ($def['checks'] as $cid => $label) {
+            if (empty($obra['checks'][$cid])) continue;
+            // El botón de etapa tiene su propia fecha (la medición puede ser anterior al día en que se tildó).
+            $fecha = (string)($tildes_at[$cid] ?? '');
+            if ($cid === $boton && bs_tablero_fecha_valida((string)($obra[$cid . '_at'] ?? ''))) $fecha = $obra[$cid . '_at'];
+            if (!bs_tablero_fecha_valida($fecha)) $fecha = '';
+
+            $txt = $label;
+            if (isset($BS_TILDES_PERSONAS[$cid])) {
+                $quienes = array_values(array_intersect($BS_TILDES_PERSONAS[$cid][0], (array)($obra[$BS_TILDES_PERSONAS[$cid][1]] ?? [])));
+                if ($quienes) $txt .= ': ' . implode(', ', $quienes);
+            } elseif ($cid === 'sena' && auth_puede('tablero_plata') && ($s = bs_tablero_sena($obra))) { // el monto, solo a quien puede verlo
+                $txt .= ': ' . ($s['moneda'] === 'USD' ? 'USD ' : '$ ') . number_format($s['monto'], 0, ',', '.');
+            } elseif ($cid === 'bacha' && in_array($obra['bacha'] ?? '', ['nuestra', 'cliente', 'no'], true)) {
+                $txt = ['nuestra' => 'Bacha nuestra', 'cliente' => 'Bacha del cliente', 'no' => 'No lleva bacha'][$obra['bacha']];
+                if ($obra['bacha'] !== 'no' && trim((string)($obra['bacha_modelo'] ?? '')) !== '') $txt .= ' · ' . trim((string)$obra['bacha_modelo']);
+            } elseif ($cid === 'acceso' && ($a = bs_tablero_acceso($obra))) {
+                $txt .= ': ' . ($a['modo'] === 'pb' ? 'planta baja' : ($a['modo'] === 'ascensor' ? 'por ascensor' : 'por escalera, ' . $a['pisos'] . ($a['pisos'] === 1 ? ' piso' : ' pisos')));
+            }
+            // Las aprobaciones dicen quién las dio.
+            $por = isset($BS_TILDES_APROBACION[$cid]) ? bs_tablero_tilde_por($obra, $cid) : '';
+            if ($por !== '') $txt .= ' · ' . $por;
+            $items[] = ['txt' => $txt, 'fecha' => $fecha, 'por' => $por];
+            if ($cid === $boton || in_array($cid, (array)($def['hitos'] ?? []), true)) $hitos[] = ['txt' => $label, 'fecha' => $fecha, 'por' => $por];
+        }
+        // Día en que salió de esa etapa (el último, si pasó más de una vez).
+        $salio = '';
+        foreach ((array)($obra['hist'] ?? []) as $h) {
+            if (($h['de'] ?? '') === $eid && !empty($h['at'])) $salio = substr((string)$h['at'], 0, 10);
+        }
+        $historia[] = ['etapa' => $def['titulo'], 'items' => $items, 'salio' => bs_tablero_fecha_valida($salio) ? $salio : ''];
+    }
+    return [$historia, $hitos];
+}
+
+/** Cómo sube la pieza: planta baja, por ascensor o por escalera (con cuántos pisos). */
+function bs_tablero_acceso($obra) {
+    $a = $obra['acceso'] ?? null;
+    if (!is_array($a) || !in_array($a['modo'] ?? '', ['pb', 'ascensor', 'escalera'], true)) return null;
+    return ['modo' => $a['modo'], 'pisos' => ($a['modo'] === 'escalera') ? max(1, intval($a['pisos'] ?? 1)) : 0];
+}
+
+function bs_tablero_zona($cot) {
+    $flete = $cot['presupuesto']['adicionales']['flete'] ?? [];
+    $zona = trim((string)($flete['zona_nombre'] ?? ''));
+    if ($zona === '') $zona = trim((string)($flete['zona'] ?? ''));
+    if (in_array($zona, ['Sin flete', 'Otra zona', 'manual', '0'], true)) return '';
+    return $zona;
+}
+
+} // fin de: si no existen

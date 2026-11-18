@@ -36,8 +36,16 @@ function bs_require_permiso($permiso) {
         $in = json_decode((string)@file_get_contents('php://input'), true);
         if (!is_array($in)) $in = $_POST;
         $d = [];
-        foreach (['cliente_nro', 'sub', 'id', 'accion', 'etapa', 'nuevo_estado', 'tipo'] as $k) {
+        $campos = ['cliente_nro', 'sub', 'id', 'accion', 'etapa', 'nuevo_estado', 'tipo'];
+        foreach ($campos as $k) {
             if (isset($in[$k]) && is_scalar($in[$k])) $d[$k] = $in[$k];
+        }
+        // Solo en el tablero se anota además qué tilde fue y qué turno se puso (18/11/2026). El tilde se
+        // escribe como "tilde=", nunca como "clave=": en usuarios.php "clave" es la contraseña, y en el
+        // registro no aparece jamás un campo con ese nombre.
+        if (basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) === 'tablero.php') {
+            if (isset($in['clave']) && is_scalar($in['clave'])) $d['tilde'] = $in['clave'];
+            foreach (['valor', 'fecha', 'hora'] as $k) { if (isset($in[$k]) && is_scalar($in[$k])) $d[$k] = is_bool($in[$k]) ? ($in[$k] ? 'si' : 'no') : $in[$k]; }
         }
         auth_registrar($permiso, $d);
     }

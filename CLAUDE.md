@@ -191,6 +191,8 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **El permiso lo controla el servidor, no la pantalla.** Todo archivo de `calculadora/api/` empieza con `bs_require_permiso('<permiso>')` y toda página con `auth_exigir_pagina()`. Lo que un rol no puede ver (la seña para Planos y bacha) no sale del servidor. Un endpoint nuevo sin su permiso queda cerrado a administradores.
 - **Cada etapa cierra con una aprobación, y queda quién la dio (17/11/2026).** Medición, Corte, Fabricación e Instalación aprobada: el tilde y el historial dicen el nombre. "Medición aprobada" pide "Medido" e "Instalación aprobada" pide "Instalado", que es el botón de Por instalar. → `04-operations/tablero-obras.md`
 - **Se ve quién está trabajando.** Arriba de cada pantalla, las iniciales de quienes están conectados y en qué pantalla; lo ven los tres roles. El aviso sale del menú (`auth_nav_html`), no de cada página. → `04-operations/usuarios.md`
+- **Reportes es solo para administradores y se puede borrar entera (18/11/2026).** Tiene el cierre del mes (baja todo en un ZIP, solo el último día del mes) y el registro de acciones (quién hizo qué y a qué hora). No escribe nada y nada depende de ella. → `04-operations/reportes.md`
+- **En el registro no se escribe nunca una contraseña, un nombre de cliente ni plata.** Si hace falta anotar un dato nuevo, que no se llame `clave`.
 - **Los usuarios viven en `bs-data/usuarios/`, fuera del repo.** Las contraseñas nunca van al repo, a un chat ni a un ejemplo.
 - **Cada cambio se prueba antes de entregar** (regresión del tablero, pruebas del calendario y de contratos, en computadora, tablet y celular) y se entrega con su bloque de deploy.
 
@@ -205,7 +207,7 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **Funnel actual:** ad → click WhatsApp → cotización 24 hs → cierre.
 - **Sitio web:** `blackstones.com.ar` en Hostinger, dominio en donweb.
 - **Calculadora interna:** `blackstones.com.ar/calculadora/` (cada persona con su usuario desde nov 2026; antes, contraseña compartida).
-- **Sistema interno (nov 2026), con usuarios y roles:** Presupuestos (`/presupuestos/`), Tablero de obras (`/presupuestos/tablero.php`), Calendario (`/presupuestos/calendario.php`), Relación-Contrato (`/presupuestos/relacion-contrato.php`) y Stock (en construcción). Docs: `04-operations/tablero-obras.md`, `04-operations/relacion-contrato.md` y `04-operations/usuarios.md`.
+- **Sistema interno (nov 2026), con usuarios y roles:** Presupuestos (`/presupuestos/`), Tablero de obras (`/presupuestos/tablero.php`), Calendario (`/presupuestos/calendario.php`), Relación-Contrato (`/presupuestos/relacion-contrato.php`), Stock (en construcción) y Reportes (`/presupuestos/reportes.php`, solo administradores). Docs: `04-operations/tablero-obras.md`, `04-operations/relacion-contrato.md` y `04-operations/usuarios.md`.
 
 ---
 
@@ -229,4 +231,4 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 
 ---
 
-*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días; sin pestaña Reporte; usuarios y roles; cómo cotizamos; enlazados comparten el N°; archivadas 1 año; nombre y apellido; lo que comparten contrato y ficha; cronograma de medición e instalación; un número, una persona). Próxima revisión obligatoria: febrero 2027.*
+*Última actualización: noviembre 2026 (reglas del sistema interno, sección 5 bis; papelera, cotización, contrato completo; fichas a mano sin presupuesto y desenlazar; seña sin pisar, plazo de 20 días; sin pestaña Reporte; usuarios y roles; cómo cotizamos; enlazados comparten el N°; archivadas 1 año; nombre y apellido; lo que comparten contrato y ficha; cronograma de medición e instalación; un número, una persona; Reportes y cierre del mes). Próxima revisión obligatoria: febrero 2027.*

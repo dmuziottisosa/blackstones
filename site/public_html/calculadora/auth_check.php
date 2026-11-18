@@ -45,6 +45,7 @@ const AUTH_PERMISOS = [
     'contratos_plata'   => ['admin', 'operador'],           // ver el total, la seña, los pagos y el saldo de cada contrato
     'contratos_resumen' => ['admin'],                       // ver el resumen de plata del mes (contratado, cobrado, por cobrar) y las sumas del pie
     'presencia'         => ['admin', 'operador', 'planos'], // ver quién está trabajando ahora y en qué pantalla
+    'reportes'          => ['admin'],                       // pestaña Reportes: el cierre del mes (baja todo)
     'usuarios'          => ['admin'],
     'mantenimiento'     => ['admin'],                       // importadores y scripts de una sola vez
 ];
@@ -205,7 +206,7 @@ function auth_permisos_js(): string {
 
 /**
  * El menú de arriba, igual en todas las páginas: solo lo que el rol puede abrir.
- * $activa: 'calculadora' | 'presupuestos' | 'tablero' | 'calendario' | 'contratos' | 'stock' | 'usuarios'
+ * $activa: 'calculadora' | 'presupuestos' | 'tablero' | 'calendario' | 'contratos' | 'stock' | 'reportes' | 'usuarios'
  */
 function auth_nav_html(string $activa): string {
     $items = [
@@ -215,10 +216,13 @@ function auth_nav_html(string $activa): string {
         ['calendario',   '/presupuestos/calendario.php',         'Calendario'],
         ['contratos',    '/presupuestos/relacion-contrato.php',  'Relación-Contrato'],
         ['stock',        '/presupuestos/stock.php',              'Stock'],
+        ['reportes',     '/presupuestos/reportes.php',           'Reportes'],
     ];
     $h = "<nav class=\"h-tabs\">\n";
     foreach ($items as [$permiso, $url, $txt]) {
         if (!auth_puede($permiso)) continue;
+        // Reportes se puede borrar entero sin que nada se rompa: si la página no está, no hay pestaña.
+        if ($permiso === 'reportes' && !is_file(__DIR__ . '/../presupuestos/reportes.php')) continue;
         $h .= '  <a href="' . $url . '"' . ($activa === $permiso ? ' class="active"' : '') . '>' . $txt . "</a>\n";
     }
     $h .= '  <a href="/presupuestos/usuarios.php"' . ($activa === 'usuarios' ? ' class="active"' : '') . '>' . (auth_puede('usuarios') ? 'Usuarios' : 'Mi usuario') . "</a>\n";
@@ -431,8 +435,11 @@ function auth_registrar(string $permiso, array $datos = []): void {
     foreach ($datos as $k => $v) {
         if (is_scalar($v) && $v !== '') $partes[] = $k . '=' . preg_replace('/[^\w\-\.:]/u', '_', substr((string)$v, 0, 60));
     }
-    $linea = date('Y-m-d H:i:s') . "\t" . $quien . "\t" . basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) . "\t" . $permiso . "\t" . implode(' ', $partes) . "\n";
-    @file_put_contents($dir . '/registro-' . date('Y-m') . '.log', $linea, FILE_APPEND | LOCK_EX);
+    // La hora, siempre la de Argentina (18/11/2026): esto corre antes de que cada archivo fije su zona
+    // horaria, y con la del servidor las acciones quedaban anotadas con horas de diferencia.
+    $ahora = new DateTime('now', new DateTimeZone('America/Argentina/Buenos_Aires'));
+    $linea = $ahora->format('Y-m-d H:i:s') . "\t" . $quien . "\t" . basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) . "\t" . $permiso . "\t" . implode(' ', $partes) . "\n";
+    @file_put_contents($dir . '/registro-' . $ahora->format('Y-m') . '.log', $linea, FILE_APPEND | LOCK_EX);
 }
 
 // ============================================================
