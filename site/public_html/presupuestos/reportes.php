@@ -237,7 +237,7 @@ function recFila(r,listo){
   return '<div class="rec'+(listo?' hecho':(r.falta<=1?' urge':''))+'">'
     +'<input type="checkbox" data-rec="'+escR(r.id)+'"'+(listo?' checked':'')+(r.completo&&!r.hecho?' disabled':'')+' aria-label="Hecho: '+escR(r.titulo)+'">'
     +'<div class="t">'+escR(r.titulo)+'</div><span class="c">'+(listo?'Hecho':escR(r.cuando))+'</span>'
-    +'<div class="d">'+escR(r.detalle)+(quien?' · '+quien:'')+' · <a href="'+escR(r.link)+'">Ver la ruta →</a></div></div>';
+    +'<div class="d">'+escR(r.detalle)+(quien?' · '+quien:'')+' · <a href="'+escR(r.link)+'">'+escR(r.link_txt||'Ver →')+'</a></div></div>';
 }
 async function cargarRec(){
   if(recYendo)return;recYendo=true;

@@ -705,7 +705,7 @@ function waLink(cel){
 }
 function abrirCronograma(tipo,dia){
   crAbierto=true;crTipo=tipo==='inst'?'inst':'med';crDia.med=crDia.inst=null;
-  if(dia)crDia[crTipo]=dia; // se llega desde un recordatorio de Control: directo a la ruta de ese día
+  if(dia)crDia[crTipo]=dia==='sin'?'':dia; // se llega desde un recordatorio de Control: directo a la ruta de ese día (o a las que no tienen día)
   $('mTitulo').textContent='Cronograma';
   document.querySelector('.modal').classList.remove('angosta');
   $('mOk').hidden=true;modalOk=null;
@@ -1215,7 +1215,7 @@ setInterval(()=>{if(!document.hidden&&libre())cargar();},60000);
 // Desde Control ("Ver la ruta →") se llega con ?crono=med|inst&dia=AAAA-MM-DD: abre el Cronograma en ese día.
 cargar().then(()=>{
   const q=new URLSearchParams(location.search),t=q.get('crono'),dq=q.get('dia')||'';
-  if(t==='med'||t==='inst')abrirCronograma(t,/^\d{4}-\d{2}-\d{2}$/.test(dq)?dq:'');
+  if(t==='med'||t==='inst')abrirCronograma(t,dq==='sin'||/^\d{4}-\d{2}-\d{2}$/.test(dq)?dq:'');
 });
 </script>
 </body>

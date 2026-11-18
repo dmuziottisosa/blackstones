@@ -55,11 +55,17 @@ El dueño: "¿Por qué hacer el recordatorio fuera del sistema cuando se puede h
 
 - **Qué es un recordatorio:** algo con fecha, que una persona puede hacer hoy, y que desaparece cuando se hizo. Lo que es un estado (atrasadas, plazo vencido, fichas sin contrato) no va acá: ya está en el tablero.
 - **No se guardan.** `calculadora/api/control.php` los calcula cada vez leyendo el tablero. Lo único que se guarda es el tilde "Hecho" de cada uno (`bs-data/control/hechos.json`), con quién y a qué hora. Los tildes de más de 45 días se borran solos.
-- **Hoy hay un solo tipo: confirmar los turnos** de un día de medición o de instalación.
+- **Confirmar los turnos** de un día de medición o de instalación (el primero que se hizo).
   - Aparece **dos días hábiles antes** (lunes a viernes): un bloque de sábado y otro de lunes aparecen los dos el jueves. Se va cuando pasa ese día.
   - Dice cuántos turnos son, cuántos ya están en "Turno confirmado" y cuántos no tienen hora. No trae nombres ni teléfonos: "Ver la ruta →" abre el Cronograma del calendario en ese día, que es donde están.
   - **"Hecho"** lo tilda una persona cuando ya les avisó. Si después se suma un turno a ese día, vuelve a quedar pendiente y lo dice.
   - Si todas las obras de ese día tienen "Turno confirmado" en su ficha, se da por hecho solo.
+- **Bajar el cierre del mes:** aparece solo el último día del mes. Se da por hecho solo cuando alguien lo baja ese día (lo lee del registro).
+- **Dar turno de instalación:** obras en Por instalar, sin instalar, que no tienen día u hora y cuyo plazo de entrega vence en 7 días o menos, o ya venció. Dice cuántas son, cuándo vence la primera y cuántas ya vencieron. Lleva al Cronograma de instalación. Se va solo cuando todas tienen turno.
+- **Pasar a cortar:** obras medidas hace más de 2 días que siguen en Por medir. Dice cuál es la más vieja y qué tildes les faltan. Lleva al tablero. Se va solo cuando pasan a Por cortar.
+- **Los dos últimos son de todos los días:** el "Hecho" vale por hoy. Si mañana siguen sin resolverse, vuelven a aparecer.
+- **Por qué el de turnos queda hasta el mismo día:** aparece dos días hábiles antes y sigue hasta el día del turno inclusive ("es hoy"), porque un turno sin confirmar el mismo día es justo el que más importa. Se va al día siguiente, o antes si todas las obras quedan en "Turno confirmado" o se marcan Medido / Instalado.
+- **Orden:** primero los turnos, lo más cercano arriba; después cierre, dar turno y pasar a cortar. Nunca hay más de un renglón por tipo (salvo turnos, que va uno por día).
 - **En pantalla:** primero los pendientes; abajo, "Hechos", tachados. Sin pendientes dice "No hay nada para recordar hoy". Se actualiza solo cada minuto.
 - **Solo lo ven los administradores**, como el resto de Control.
 - **Para sumar un tipo nuevo:** se agrega en `control.php` (cada uno arma su `id`, título, detalle y link). Antes, preguntarle al dueño: la regla es cero ruido.
