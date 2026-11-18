@@ -503,7 +503,7 @@ td small{color:var(--text3);font-size:11.5px;display:block;margin-top:2px}
       <option value="publicidad">Publicidad</option>
       <option value="local">Local</option>
     </select>
-    <button class="btn-search" onclick="cargarActivos()">Buscar</button>
+    <button class="btn-search" onclick="buscarActivos()">Buscar</button>
     <button class="btn-excel" onclick="exportarExcel()" title="Descargar resumen de la tabla como CSV (abre en Excel)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       CSV resumen
@@ -735,6 +735,9 @@ function toggleTheme(){
 // Tab Activos: listing + filtros + acciones
 // ============================================================
 let _activosPage = 1;
+// Al cambiar el filtro o buscar se vuelve a la página 1 (barrido del 18/11/2026): si no, estando en la
+// página 3 el filtro pedía la página 3 de un resultado más corto y mostraba "Sin resultados".
+function buscarActivos(){ _activosPage = 1; cargarActivos(); }
 const _activosPerPage = 30;
 
 const ESTADOS_LABELS = {
@@ -2069,9 +2072,9 @@ _matInitInput('mm-material-final', 'mm-material-final-box');
 const _tab = '<?= $tab ?>';
 if (_tab === 'activos') {
   cargarActivos();
-  document.getElementById('filter-q').addEventListener('keypress', e => { if (e.key === 'Enter') cargarActivos(); });
-  document.getElementById('filter-estado').addEventListener('change', cargarActivos);
-  document.getElementById('filter-origen').addEventListener('change', cargarActivos);
+  document.getElementById('filter-q').addEventListener('keypress', e => { if (e.key === 'Enter') buscarActivos(); });
+  document.getElementById('filter-estado').addEventListener('change', buscarActivos);
+  document.getElementById('filter-origen').addEventListener('change', buscarActivos);
 } else {
   cargarReporte();
 }

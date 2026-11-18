@@ -60,7 +60,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
 } else {
     $bs_pre = json_decode((string)@file_get_contents('php://input'), true);
     $bs_acc = is_array($bs_pre) ? (string)($bs_pre['accion'] ?? '') : '';
-    bs_require_permiso(in_array($bs_acc, ['borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado'], true) ? 'tablero_operar' : 'contratos_editar');
+    // los renglones de prueba son de mantenimiento: solo administradores (el Operador edita contratos desde el 18/11/2026)
+    bs_require_permiso(in_array($bs_acc, ['borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado'], true) ? 'tablero_operar' : (in_array($bs_acc, ['prueba', 'borrar_prueba'], true) ? 'mantenimiento' : 'contratos_editar'));
 }
 bs_check_csrf();
 bs_ensure_dirs();
@@ -575,6 +576,14 @@ try {
                 }
             }
             $c['enlace'] = $enlace;
+            // Enlazados comparten el N°: un contrato sin N° que se enlaza (por teléfono) con la ficha de
+            // un presupuesto toma ese N° (barrido del 18/11/2026). Si ya tiene uno, no se le cambia acá.
+            if (trim((string)($c['nro'] ?? '')) === '') {
+                $bs_cli = bs_read_json(BS_CLIENTES_DIR . '/' . $enlace['cliente_nro'] . '.json');
+                foreach ((array)($bs_cli['cotizaciones'] ?? []) as $bs_x) {
+                    if (intval($bs_x['sub'] ?? 0) === $enlace['sub'] && empty($bs_x['manual'])) $c['nro'] = $enlace['cliente_nro'] . ($enlace['sub'] > 1 ? '-' . $enlace['sub'] : '');
+                }
+            }
         } elseif ($accion === 'desenlazar') {
             $c['enlace'] = null;
         }

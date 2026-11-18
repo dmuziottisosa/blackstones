@@ -203,6 +203,7 @@ try {
         $idx = bs_read_json(BS_CLIENTES_INDEX);
         if (!is_array($idx)) $idx = [];
         $idx_cambio = false;
+        $bs_borradas = []; // solo se borran las fichas VIVAS; las archivadas y las de la papelera quedan con lo suyo
         foreach (@scandir(BS_CLIENTES_DIR) ?: [] as $archivo) {
             if (!preg_match('/^(\d{4,})\.json$/', $archivo, $mm)) continue;
             $path = BS_CLIENTES_DIR . '/' . $archivo;
@@ -212,9 +213,11 @@ try {
             foreach (($cli['cotizaciones'] ?? []) as $cot) {
                 if (($cot['estado'] ?? '') !== 'aprobado') { $kept[] = $cot; continue; }
                 $cambio = true;
+                $bs_borradas[] = $mm[1] . '-' . intval($cot['sub'] ?? 0);
                 if (!empty($cot['manual'])) { $res['manuales_borradas']++; continue; }
                 $cot['estado'] = 'enviado';
                 $cot['transiciones'][] = ['estado' => 'enviado', 'at' => $now];
+                unset($cot['fuera_de_presupuestos']);
                 $kept[] = $cot;
                 $res['vueltas_a_enviado']++;
             }
@@ -232,13 +235,9 @@ try {
         }
         if ($idx_cambio) bs_write_json_atomic(BS_CLIENTES_INDEX, $idx);
 
-        foreach (array_keys($tablero['obras']) as $key) bs_tablero_borrar_carpeta((string)$key);
-        if (is_dir(BS_TABLERO_ADJ_DIR)) {
-            foreach (scandir(BS_TABLERO_ADJ_DIR) as $d) {
-                if ($d !== '.' && $d !== '..') bs_tablero_borrar_carpeta($d);
-            }
-        }
-        $tablero['obras'] = [];
+        // (barrido del 18/11/2026) Antes se vaciaba todo el tablero: se llevaba también los registros
+        // y las fotos de las obras archivadas (1 año) y de las fichas en la papelera (30 días).
+        foreach ($bs_borradas as $key) { bs_tablero_borrar_carpeta((string)$key); unset($tablero['obras'][$key]); }
     }
 
     // 2) Próximo número: la serie interna de las fichas a mano (no son presupuestos)

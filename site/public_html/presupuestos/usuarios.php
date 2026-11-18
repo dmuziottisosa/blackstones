@@ -227,12 +227,12 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
       <tr><td>Adjuntar y borrar fotos de bacha, plano y entrega</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
       <tr><td>Anotar de quién es la bacha y su modelo</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
       <tr><td>Dar aprobaciones (medición, corte, fabricación, instalación)</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
-      <tr><td>Cargar, mover, editar, archivar y borrar obras</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
+      <tr><td>Mover, tildar, editar, archivar y borrar obras</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Ver la seña de la ficha</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Calculadora, Presupuestos y Calendario</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
-      <tr><td>Ver Relación-Contrato, con la plata de cada contrato</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
+      <tr><td>Relación-Contrato, con la plata de cada contrato</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Ver el resumen de plata del mes</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
-      <tr><td>Cargar y cambiar contratos, cobros y pagos</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
+      <tr><td>Crear, editar y borrar contratos; seña, cobros y adjuntos; cargar la obra en Por medir</td><td class="si">Sí</td><td class="si">Sí</td><td class="no">No</td></tr>
       <tr><td>Ver quién está trabajando ahora y dónde</td><td class="si">Sí</td><td class="si">Sí</td><td class="si">Sí</td></tr>
       <tr><td>Reportes (bajar el cierre del mes)</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>
       <tr><td>Usuarios</td><td class="si">Sí</td><td class="no">No</td><td class="no">No</td></tr>

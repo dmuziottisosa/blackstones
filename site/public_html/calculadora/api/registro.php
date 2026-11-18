@@ -54,7 +54,7 @@ function bs_registro_que($script, $d, $tildes, $etapas, $ADJ) {
             if ($a === 'nro_contrato') return 'Pasó el N° del contrato a la ficha';
             return 'Cambió la ficha';
         case 'tablero-cargar.php': return 'Cargó una obra en Por medir';
-        case 'tablero-editar.php': return 'Editó los datos de la obra';
+        case 'tablero-editar.php': return !empty($d['auto']) ? 'Se completaron datos de la ficha desde su contrato (automático)' : 'Editó los datos de la obra';
         case 'tablero-adjunto.php': return ($a === 'borrar' ? 'Borró ' : ($a === 'girar' ? 'Giró ' : 'Subió ')) . ($ADJ[$d['tipo'] ?? ''] ?? 'un archivo');
         case 'tablero-papelera.php': return $a === 'restaurar' ? 'Recuperó la ficha de la papelera' : ($a === 'tirar' ? 'Mandó la ficha a la papelera' : 'Papelera del tablero');
         case 'tablero-importar.php': return 'Importó fichas';
@@ -104,6 +104,7 @@ foreach ($lineas as $i => $l) {
     if (($p[5] ?? '') === 'ART') { $corte = $i; break; }
     if (in_array($p[2], $YA_BIEN, true)) continue;
     $t = strtotime($p[0] . ' UTC');
+    if ($t === false) continue; // una línea con la fecha ilegible no decide nada
     if ($antes !== null && $t < $antes - 7200) { $corte = $i; break; }
     $antes = $t;
 }

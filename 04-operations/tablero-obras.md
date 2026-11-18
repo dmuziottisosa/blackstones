@@ -7,7 +7,7 @@ Dónde está cada obra y qué le falta para avanzar. Vive en `blackstones.com.ar
 ## Cómo funciona
 
 - Una obra aparece sola cuando su presupuesto se marca **Aprobado** en Presupuestos.
-- La columna Por medir tiene el botón **+ Cargar obra**, con dos usos:
+- **Desde el 18/11/2026 el tablero ya no tiene "+ Cargar obra"** (decisión final del dueño: todo nace de Relación-Contrato). En su lugar hay un link "+ Cargar obra desde su contrato" que lleva a Relación-Contrato. Lo que sigue describe los dos casos, que ahora los resuelve "Cargar en Por medir" desde el contrato (con N° de presupuesto, o sin N°):
   - **Con N° de presupuesto** (`0042`, o `0042-2` si tiene versiones): busca ese presupuesto de la calculadora y lo aprueba. La ficha queda atada al presupuesto real.
   - **Sin número** (cliente, teléfono, dirección, material; el renglón "Trabajo" se sacó de esta ventana el 15/11/2026 para aliviarla, y se sigue pudiendo cargar desde "Editar obra"): para obras que no pasaron por la calculadora. **No crea un presupuesto** (dueño, 17/11/2026): la ficha no aparece en la pestaña Presupuestos, no se lleva un N° de la calculadora y en el tablero y el calendario dice **"Sin N°"**. Cuando el presupuesto exista, se le pone su número desde "Editar obra".
     - Antes creaba un presupuesto aprobado en $ 0 con el siguiente número de la calculadora. Eso hacía que el N° de la ficha no coincidiera con el del contrato y que en Presupuestos aparecieran presupuestos que nunca se hicieron.
@@ -213,7 +213,9 @@ Botón "Editar obra" en "Más" (también desde el calendario, que muestra la mis
 
 ## Cómo entra una obra al tablero (regla del 18/11/2026)
 
-- **Solo por dos puertas:** "Cargar obra" en el tablero (con el N° de su presupuesto, o a mano) y "Cargar en Por medir" en Relación-Contrato. Ningún otro camino aprueba un presupuesto.
+- **Una sola puerta (18/11/2026, decisión final):** "Cargar en Por medir", desde su contrato en Relación-Contrato. El tablero ya no carga obras. `tablero-cargar.php` exige el id de un contrato que exista; sin eso responde que las obras se cargan desde su contrato. Lo usan administradores y operadores.
+- **Aviso "N sin contrato":** arriba del tablero, junto a "atrasadas" y "plazo vencido". Aparece solo si hay fichas sin contrato (las de la carga inicial); tocarlo las deja solas a la vista. No aparece si Relación-Contrato no contesta.
+- **Si el N° del contrato es el presupuesto de otra persona, no se carga** y se avisa de quién es cada uno ("un número, una persona").
 - **Siempre nace en Por medir, vacía.** No hereda etapa, tildes ni fotos de ningún registro anterior. Lo que está en la papelera se recupera desde la Papelera.
 - **El número interno de una ficha a mano no es un N° de presupuesto.** Si alguien lo escribe en "Cargar obra", la respuesta es que ese presupuesto no existe.
 - **La calculadora no puede guardar un presupuesto encima del número de otra persona** ni del de una ficha a mano: lo guarda con un N° nuevo y avisa.
@@ -222,7 +224,7 @@ Botón "Editar obra" en "Más" (también desde el calendario, que muestra la mis
 ## Borrar una ficha
 
 - **Borrar el presupuesto no borra la ficha (16/11/2026).** Si alguien elimina en Presupuestos el presupuesto de una obra que está en el tablero, o le llegan los 180 días, el presupuesto sale de esa pestaña y la ficha sigue igual, con sus fotos. La ficha solo se borra con "Borrar ficha", acá.
-- **"→ Aprobado" ya no existe en Presupuestos (17/11/2026).** Si una obra está en el tablero es que fue aprobada. Un presupuesto entra al tablero con "Cargar obra" y su N°, o desde su contrato con "Cargar en Por medir". El servidor rechaza aprobar desde Presupuestos; devolver un entregado al tablero desde el Reporte sigue permitido.
+- **"→ Aprobado" ya no existe en Presupuestos (17/11/2026).** Si una obra está en el tablero es que fue aprobada. Un presupuesto entra al tablero solo desde su contrato, con "Cargar en Por medir". El servidor rechaza aprobar desde Presupuestos; devolver un entregado al tablero desde el Reporte sigue permitido.
 - **Presupuestos ya no cambia la etapa de una obra viva:** en esa pestaña, un presupuesto aprobado muestra "En el tablero →" en lugar de los botones de estado.
 - **Pero la etapa se ve y se filtra en Presupuestos (16/11/2026):** la columna Estado de una obra viva dice su etapa del tablero ("Por cortar"), y el filtro de estados tiene un grupo "En el tablero" con cada etapa. El CSV también la lleva.
 - **La ficha abierta dice si tiene contrato (17/11/2026).** Debajo del material aparece "Con contrato", en verde, y lleva a ese contrato en Relación-Contrato. Si Relación-Contrato no existe o no contesta, la marca no aparece y nada más cambia.
@@ -298,7 +300,7 @@ Es un traspaso: la planilla se adapta a los campos del tablero, no al revés. Lo
 | Endpoint de las tarjetas | `site/public_html/calculadora/api/tablero.php` |
 | Definición de etapas, tildes y listas de personas | `site/public_html/calculadora/api/_tablero.php` (array `$BS_ETAPAS`: para cambiar un tilde o un título se toca solo ahí) |
 | Adjuntos (subir, ver, borrar) | `site/public_html/calculadora/api/tablero-adjunto.php` |
-| Cargar obra (a mano o por N° de presupuesto) | `site/public_html/calculadora/api/tablero-cargar.php` |
+| Cargar en Por medir (desde su contrato; con o sin N° de presupuesto) | `site/public_html/calculadora/api/tablero-cargar.php` |
 | Editar obra / cambiar N° de presupuesto | `site/public_html/calculadora/api/tablero-editar.php` |
 | Carga masiva | `site/public_html/calculadora/api/tablero-importar.php` |
 | Papelera (tirar, restaurar, listar) | `site/public_html/calculadora/api/tablero-papelera.php`. Los 30 días se definen en `_tablero.php` (`BS_PAPELERA_DIAS`) |
@@ -308,3 +310,15 @@ Es un traspaso: la planilla se adapta a los campos del tablero, no al revés. Lo
 ## Lo que la v1 deja afuera a propósito
 
 Accesos por rol (hoy hay una sola contraseña), hojas imprimibles para medidor/cortador/instalador, agrupar cortes por material, etiquetas, métricas de tiempos, fotos por etapa, tarjetas de reclamo, saldos y conversión de moneda (eso lo lleva administración). Están en la propuesta original: `06-knowledge/layer-0-raw/2026-11-14-propuesta-sistema-gestion-kanban.md`.
+
+## Barrido de errores del 18/11/2026: lo que cambió en el tablero
+
+- **Archivar lo valida el servidor:** la obra tiene que estar en Por archivar con "Saldo cobrado". Antes solo lo miraba la pantalla.
+- **Eliminar de Presupuestos una obra archivada no la borra:** sale de la pestaña y sigue en "Archivadas". Antes se borraba de verdad, con fotos y planos.
+- **"Editar obra", cambiar el N°:** no deja mudarse al N° de una ficha que está en la papelera ni al número interno de otra ficha a mano, y solo hereda teléfono y dirección si el presupuesto es de la misma persona.
+- **Bacha:** si una obra cargada como "No lleva" pasa a llevar, el tilde automático "Tenemos la bacha" se va.
+- **Cronograma del calendario:** guarda cuando se termina de escribir (no en cada tecla), relee el tablero antes de guardar y no le escribe el turno a una obra que ya cambió de etapa.
+- **Enter no confirma una ventana si el foco está en otro botón** (elegir "USD" en la seña, "Cancelar" al archivar).
+- **El número interno de una ficha a mano no aparece** en títulos de ventanas ni avisos.
+- **El presupuesto eliminado mientras era obra vuelve a verse en Presupuestos** cuando la obra sale del tablero.
+- **La limpieza nocturna** usa el mismo candado que el resto, guarda el ZIP de una archivada el año entero y no recicla números.

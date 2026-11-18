@@ -124,6 +124,11 @@ try {
         if (!($mismo_cliente && $nuevo_sub === $sub)) { // (pedir el mismo número que ya tiene no es un cambio)
             $i_destino = $buscar($destino, $nuevo_sub);
             $estado = (string)($destino['cotizaciones'][$i_destino]['estado'] ?? '');
+            // Mismas dos barreras que "Cargar obra" (barrido del 18/11/2026): una ficha a mano no es un
+            // presupuesto aunque por dentro tenga número, y lo que está en la papelera se recupera desde
+            // la Papelera. Antes, mudarse a ese N° le pisaba el registro y le borraba las fotos.
+            if (!empty($destino['cotizaciones'][$i_destino]['manual'])) $fallar('No hay ningún presupuesto N° ' . $nuevo_nro . '.', 404);
+            if ($estado === 'papelera')  $fallar('El ' . $nuevo_nro . '-' . $nuevo_sub . ' está en la papelera del tablero. Recuperalo desde "Papelera".', 409);
             if ($estado === 'aprobado')  $fallar('El ' . $nuevo_nro . '-' . $nuevo_sub . ' ya está en el tablero como otra ficha.', 409);
             if ($estado === 'entregado') $fallar('El ' . $nuevo_nro . '-' . $nuevo_sub . ' ya figura como entregado.', 409);
 
@@ -139,7 +144,10 @@ try {
             // 1) El presupuesto nuevo entra al tablero. Lo que no tenga de contacto lo hereda de la ficha.
             $destino['cotizaciones'][$i_destino]['estado'] = 'aprobado';
             $destino['cotizaciones'][$i_destino]['transiciones'][] = ['estado' => 'aprobado', 'at' => $now];
-            foreach (['celular', 'direccion'] as $k) {
+            // Un número, una persona: solo hereda si el presupuesto es de la misma persona que la ficha.
+            // Un N° mal tipeado no le deja a otro cliente el teléfono y la dirección de esta obra.
+            $hereda = $mismo_cliente || bs_misma_persona((array)($destino['cliente'] ?? []), (array)$cli_viejo);
+            foreach ($hereda ? ['celular', 'direccion'] : [] as $k) {
                 if (trim((string)($destino['cliente'][$k] ?? '')) === '' && trim((string)($cli_viejo[$k] ?? '')) !== '') {
                     $destino['cliente'][$k] = $cli_viejo[$k];
                 }
@@ -154,6 +162,7 @@ try {
                 } else {
                     $destino['cotizaciones'][$i_origen]['estado'] = 'enviado';
                     $destino['cotizaciones'][$i_origen]['transiciones'][] = ['estado' => 'enviado', 'at' => $now];
+                    unset($destino['cotizaciones'][$i_origen]['fuera_de_presupuestos']); // vuelve a verse en Presupuestos
                 }
             }
             $destino['ultima_actualizacion'] = $now;
@@ -191,6 +200,7 @@ try {
                 } else {
                     $origen['cotizaciones'][$i_origen]['estado'] = 'enviado';
                     $origen['cotizaciones'][$i_origen]['transiciones'][] = ['estado' => 'enviado', 'at' => $now];
+                    unset($origen['cotizaciones'][$i_origen]['fuera_de_presupuestos']); // vuelve a verse en Presupuestos
                     $origen['ultima_actualizacion'] = $now;
                     bs_write_json_atomic($path_de($cliente_nro), $origen);
                 }

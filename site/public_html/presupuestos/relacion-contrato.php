@@ -750,12 +750,24 @@ async function pasarNros(){
 // Enlazados, esos datos se siguen cambiando desde el tablero. Solo lo hace quien puede editar contratos;
 // si el tablero no contesta, no pasa nada.
 const tieneLetras=s=>/[a-záéíóúüñ]/i.test(String(s||''));
+// Un número, una persona (barrido del 18/11/2026): si la ficha enlazada parece de OTRA persona que el
+// contrato (teléfonos distintos, o nombres sin nada en común), no se le completa nada. Mejor una ficha con
+// un dato vacío que una ficha con el nombre de uno y la dirección de otro.
+function otraPersona(k,c){
+  const tel=s=>{const n=String(s||'').replace(/\D/g,'');return n.length>=8?n.slice(-8):'';};
+  const ta=tel(k.celular)||(tieneLetras(k.nombre)?'':tel(k.nombre)),tb=tel(c.telefono);
+  if(ta&&tb)return ta!==tb;
+  if(!tieneLetras(k.nombre)||!tieneLetras(c.cliente))return false;
+  const pal=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').split(' ').filter(w=>w.length>=3);
+  const a=pal(k.nombre),b=pal(c.cliente);
+  return !a.some(x=>b.some(y=>x===y||x.indexOf(y)===0||y.indexOf(x)===0));
+}
 let pasandoNombres=false;
 async function pasarNombres(){
   if(!EDITA||!TABLERO_OK||pasandoNombres)return;
   const t=s=>String(s||'').trim(),cambios=[];
   CONTRATOS.forEach(c=>{
-    const k=cardDe(c);if(!k)return;
+    const k=cardDe(c);if(!k||otraPersona(k,c))return;
     const b={};
     if(!tieneLetras(k.nombre)&&tieneLetras(c.cliente))b.nombre=t(c.cliente).slice(0,120);
     if(!t(k.celular)&&t(c.telefono))b.celular=telLindo(c.telefono).slice(0,40);
@@ -765,7 +777,7 @@ async function pasarNombres(){
   if(!cambios.length)return;
   pasandoNombres=true;
   for(const x of cambios){
-    try{await pedir(API_EDITAR,Object.assign({cliente_nro:x[0].cliente_nro,sub:x[0].sub},x[1]));Object.assign(x[0],x[1]);}catch(e){}
+    try{await pedir(API_EDITAR,Object.assign({cliente_nro:x[0].cliente_nro,sub:x[0].sub,auto:1},x[1]));Object.assign(x[0],x[1]);}catch(e){}
   }
   pasandoNombres=false;
   dibujar();
@@ -840,7 +852,7 @@ function exportarCSV(){
   ]);
   const celda=v=>{
     let t=String(v==null?'':v).replace(/\r?\n/g,' ').trim();
-    if(/^[=+\-@]/.test(t))t="'"+t; // que Excel no lo tome como fórmula
+    if(/^[=+\-@]/.test(t)&&!/^-?\d+(,\d+)?$/.test(t))t="'"+t; // que Excel no lo tome como fórmula (un número negativo no lo es)
     return /[";]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t;
   };
   const csv='\uFEFF'+[cols.map(k=>celda(k[0])).join(';')].concat(filas.map(c=>cols.map(k=>celda(k[1](c))).join(';'))).join('\r\n')+'\r\n';
@@ -853,7 +865,7 @@ function exportarCSV(){
 }
 // La etapa del tablero como filtro de la planilla: '' = todas, 'sin' = los que no están cargados en el tablero.
 let fEtapa='';
-const etapaOk=c=>{if(!fEtapa)return true;const k=cardDe(c);return fEtapa==='sin'?!k:(!!k&&k.etapa===fEtapa);};
+const etapaOk=c=>{if(!fEtapa)return true;const k=cardDe(c);return fEtapa==='sin'?!c.enlace:(!!k&&k.etapa===fEtapa);};
 const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['completos','Completos',completo],['sinturno','Sin turno',sinTurno],['sena','Seña distinta',c=>!!senaDif(c),true]].filter(f=>PLATA||['saldo','pagados','sena'].indexOf(f[0])<0);
 const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':(v==='cf'?'<span class="sn si" title="Factura a consumidor final">CF</span>':'<span class="sn">—</span>'));
 const PIL={nuestra:'Nuestra',cliente:'Cliente',no:'No'};
@@ -871,8 +883,9 @@ function dibujar(){
   $('mesAnt').disabled=$('mesSig').disabled=buscando;
   $('mesHoy').hidden=buscando||mes===HOY.slice(0,7);
   if(!CONTRATOS.length){
+    EN_PANTALLA=[];
     $('res').hidden=$('filtros').hidden=true;
-    $('lista').innerHTML='<div class="vacio"><h2>Todavía no hay contratos</h2>'+(EDITA?'Acá va un renglón por cada cliente que contrata: el total, la seña y lo que falta cobrar.<br>Desde cada renglón se puede cargar la obra en Por medir del tablero.':'Acá va un renglón por cada cliente que contrata.')+'<div class="btns-v"><button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button><button type="button" class="btn" data-prueba>Cargar 3 de prueba</button></div></div>';
+    $('lista').innerHTML='<div class="vacio"><h2>Todavía no hay contratos</h2>'+(EDITA?'Acá va un renglón por cada cliente que contrata: el total, la seña y lo que falta cobrar.<br>Desde cada renglón se puede cargar la obra en Por medir del tablero.':'Acá va un renglón por cada cliente que contrata.')+'<div class="btns-v"><button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button>'+(YO.puede.mantenimiento?'<button type="button" class="btn" data-prueba>Cargar 3 de prueba</button>':'')+'</div></div>';
     return;
   }
   // El mes (por la fecha del contrato). Buscando, todos los meses.
@@ -895,7 +908,7 @@ function dibujar(){
   if(!FILTROS.some(f=>f[0]===filtro))filtro='todos';
   $('filtros').hidden=!delMes.length;
   // La etapa se elige aparte y se combina con el filtro de al lado ("Por instalar" + "Sin turno", por ejemplo).
-  const porEt={};delMes.forEach(c=>{const k=cardDe(c),e=k?k.etapa:'sin';porEt[e]=(porEt[e]||0)+1;});
+  const porEt={};delMes.forEach(c=>{const k=cardDe(c),e=k?k.etapa:(c.enlace?'':'sin');if(e)porEt[e]=(porEt[e]||0)+1;});
   if(fEtapa&&!porEt[fEtapa])fEtapa='';
   const opsEt=TABLERO_OK?Object.keys(ETAPAS).filter(e=>porEt[e]).map(e=>[e,ETAPAS[e]]).concat(porEt.sin?[['sin','Sin cargar al tablero']]:[]):[];
   $('filtros').innerHTML=FILTROS.filter(f=>(!f[3]||delMes.some(f[2])||filtro===f[0])&&(f[0]!=='sinturno'||TABLERO_OK)).map(f=>'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+delMes.filter(etapaOk).filter(f[2]).length+'</i></button>').join('')
@@ -929,7 +942,7 @@ function dibujar(){
     const sd=senaDif(c);
     const fp=fichaPara(c),kn=fp?fp.k:null; // su obra ya está en el tablero (mismo N° o mismo teléfono): se enlaza, no se carga de nuevo
     if(kn)tab='<button type="button" class="btn chico enl-b" data-enlazar="'+esc(c.id)+'">'+ICO_ENL+'Enlazar con el tablero</button><small>'+(fp.por==='tel'?'Mismo teléfono que una obra del tablero: ':'Ya está en el tablero: ')+esc(ETAPAS[kn.etapa]||kn.etapa)+'</small>';
-    else if(!c.enlace)tab='<button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
+    else if(!c.enlace)tab='<div class="fila-e"><span class="etapa fuera">No existe en el tablero</span></div><button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
     else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><small'+(d.rojo?' class="rojo"':'')+'>'+enlA(k,'Enlazado')+(d.t?' · '+esc(d.t):'')+'</small>'+(sd?'<small class="sena-d" title="'+esc(sd.txt)+'">Seña distinta en el tablero</small>':'');}
     else tab=sinFichaHtml(c);
     const nota=(c.nota||'').replace(/\s+/g,' ').trim();
@@ -1194,7 +1207,7 @@ async function guardar(){
   }catch(e){aviso=' El archivo no se pudo '+(nuevo?'subir':'quitar')+': '+e.message;}
   if(empujar){
     const p=key.split('-');
-    try{await pedir(API_T,{cliente_nro:p[0],sub:+p[1],accion:'check',clave:'sena',valor:true,monto:d.sena_monto,moneda:d.sena_moneda});}
+    try{await pedir(API_T,{cliente_nro:p[0],sub:+p[1],accion:'check',clave:'sena',valor:true,monto:d.sena_monto,moneda:d.sena_moneda,solo_si_vacia:true});}
     catch(e){aviso=' La seña no se pudo tildar en el tablero: '+e.message;}
   }
   cerrarModal();
@@ -1210,7 +1223,7 @@ function pedirEnviar(id){
   const c=CONTRATOS.find(x=>x.id===id);if(!c)return;
   const li=(a,b)=>b?'<li><span>'+a+'</span><b>'+esc(b)+'</b></li>':'';
   let h='<h3>Cargar en Por medir</h3>';
-  if(c.nro)h+='<div class="bajada">Se aprueba el presupuesto <b>N° '+esc(c.nro)+'</b> y la obra aparece en Por medir del tablero, con los datos de ese presupuesto. Si ya está en el tablero, solo se enlaza.</div><ul class="lista-c">'+li('Pileta',bachaTxt(c))+li('Medición',fch(c.medicion))+li('Seña',c.sena?plata(c.sena.monto,c.sena.moneda):'')+'</ul>';
+  if(c.nro)h+='<div class="bajada">Se aprueba el presupuesto <b>N° '+esc(c.nro)+'</b> y la obra aparece en Por medir del tablero, con los datos de ese presupuesto. Si ese N° es de otra persona, no se carga y se avisa.</div><ul class="lista-c">'+li('Contrato de',c.cliente)+li('Presupuesto de',c.presup&&c.presup.cliente)+li('Pileta',bachaTxt(c))+li('Medición',fch(c.medicion))+li('Seña',c.sena?plata(c.sena.monto,c.sena.moneda):'')+'</ul>';
   else h+='<div class="bajada">Se crea la ficha en Por medir del tablero con estos datos. El total, los pagos y lo demás del contrato quedan acá.</div><ul class="lista-c">'+li('Cliente',c.cliente)+li('Teléfono',telLindo(c.telefono))+li('Dirección',c.direccion)+li('Material',c.material)+li('Pileta',bachaTxt(c))+li('Medición',fch(c.medicion))+li('Seña',c.sena?plata(c.sena.monto,c.sena.moneda):'')+'</ul>';
   h+='<div class="m-err" id="mErr" hidden></div><div class="btns"><button type="button" data-cerrar>Cancelar</button><button type="button" class="ok" data-foco data-confirmar-enviar="'+esc(c.id)+'">Cargar en Por medir</button></div>';
   abrirModal(h,true,false);
@@ -1223,7 +1236,7 @@ async function enviar(id){
   // muestra de quién es antes de confirmar.
   let nro,sub;const yaEstaba=false;
   try{
-    const r=await pedir(API_CARGAR,c.nro?{nro:c.nro}:{nombre:c.cliente,celular:telLindo(c.telefono),direccion:c.direccion,material:c.material});
+    const r=await pedir(API_CARGAR,c.nro?{contrato:c.id,nro:c.nro}:{contrato:c.id,nombre:c.cliente,celular:telLindo(c.telefono),direccion:c.direccion,material:c.material});
     nro=r.cliente_nro;sub=r.sub;
   }catch(e){
     if(c.nro&&/ya está en el tablero/.test(e.message)){
@@ -1331,6 +1344,7 @@ function pedirBorrar(id){
   const c=CONTRATOS.find(x=>x.id===(id||(F&&F.id)));if(!c)return;
   id=c.id;
   const k=cardDe(c),nAdj=k&&k.adjuntos?k.adjuntos.length:0;
+  if(c.enlace&&!k&&(!TABLERO_OK||c.ficha==='viva')){toast('No se pudo leer el tablero. Actualizá la página antes de borrar: este contrato tiene una ficha enlazada.');return;}
   abrirModal('<h3>Borrar contrato</h3><div class="bajada">El contrato de <b>'+esc(ver(c).cliente)+'</b> va a la papelera, con sus pagos'+(c.archivo?' y su presupuesto adjunto':'')+'.'
     +(k?'<br><br><b>También sale del tablero su ficha</b> ('+esc(obraTxt(k))+', en '+esc(ETAPAS[k.etapa]||k.etapa)+'), con sus tildes, fechas y datos'+(nAdj?', y '+(nAdj===1?'su archivo adjunto':'sus '+nAdj+' archivos adjuntos'):'')+'.'
       :(c.enlace?'<br>La ficha del tablero ya no está (archivada o borrada): no se toca nada más.':''))
@@ -1339,6 +1353,7 @@ function pedirBorrar(id){
 async function borrarContrato(id){
   const c=CONTRATOS.find(x=>x.id===id);if(!c)return;
   const k=cardDe(c);
+  if(c.enlace&&!k&&(!TABLERO_OK||c.ficha==='viva'))throw new Error('No se pudo leer el tablero. Actualizá la página antes de borrar.');
   // primero la ficha del tablero: si eso falla, el contrato no se toca
   if(k){
     const base={cliente_nro:k.cliente_nro,sub:k.sub};

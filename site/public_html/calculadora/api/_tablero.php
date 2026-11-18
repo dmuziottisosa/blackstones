@@ -409,7 +409,7 @@ function bs_tablero_papelera_purgar() {
                     }
                     $cot['estado'] = 'enviado';
                     $cot['transiciones'][] = ['estado' => 'enviado', 'at' => date('c')];
-                    unset($cot['papelera']);
+                    unset($cot['papelera'], $cot['fuera_de_presupuestos']); // vuelve a verse en Presupuestos
                 }
             }
             $kept[] = $cot;

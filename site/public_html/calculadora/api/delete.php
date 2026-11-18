@@ -61,9 +61,18 @@ try {
     }
 
     // Obra viva en el tablero: sale de Presupuestos, la ficha no se toca.
+    // Lo mismo una obra ARCHIVADA (barrido del 18/11/2026): es una ficha del tablero, dura 1 año y se
+    // devuelve desde "Archivadas". Antes, eliminarla acá la borraba de verdad con fotos y planos.
+    // Y una ficha en la papelera, que tiene sus 30 días.
     if (!$desde_tablero) {
+        $bs_tab = null;
         foreach ($cliente_obj['cotizaciones'] as $i => $cot) {
-            if (intval($cot['sub']) !== $sub || ($cot['estado'] ?? '') !== 'aprobado') continue;
+            if (intval($cot['sub']) !== $sub) continue;
+            $est = (string)($cot['estado'] ?? '');
+            if ($est === 'entregado') {
+                if ($bs_tab === null) { require_once __DIR__ . '/_tablero.php'; $bs_tab = bs_tablero_leer(); }
+                if (!isset($bs_tab['obras'][$cliente_nro . '-' . $sub])) continue; // venta histórica sin ficha: se borra normal
+            } elseif ($est !== 'aprobado' && $est !== 'papelera') continue;
             if (empty($cot['fuera_de_presupuestos'])) {
                 $cliente_obj['cotizaciones'][$i]['fuera_de_presupuestos'] = date('c');
                 $cliente_obj['ultima_actualizacion'] = date('c');

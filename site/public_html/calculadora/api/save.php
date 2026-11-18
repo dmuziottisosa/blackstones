@@ -69,22 +69,10 @@ function bs_save_max_nro() {
  * Es estricto a propósito: equivocarse para el lado de "es otra" solo cuesta un N° nuevo;
  * equivocarse para el lado de "es la misma" mezcla dos clientes.
  *   - Si los dos tienen teléfono, manda el teléfono (últimos 8 dígitos).
- *   - Si a alguno le falta, tienen que coincidir los nombres (igual, o uno contiene al otro).
+ *   - Si a alguno le falta, tienen que coincidir los nombres (igual, o dos palabras enteras en común).
  */
 function bs_save_misma_persona(array $viejo, array $nuevo) {
-    $tel = function ($s) { $n = preg_replace('/\D/', '', (string)$s); return strlen($n) >= 8 ? substr($n, -8) : ''; };
-    $llano = function ($s) {
-        $s = mb_strtolower(trim((string)$s), 'UTF-8');
-        $s = strtr($s, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
-        return trim(preg_replace('/\s+/', ' ', preg_replace('/[^a-z0-9 ]/', ' ', $s)));
-    };
-    $tv = $tel($viejo['celular'] ?? ''); $tn = $tel($nuevo['celular'] ?? '');
-    // a veces el teléfono está cargado en el lugar del nombre
-    if ($tv === '' && !preg_match('/[a-z]/', $llano($viejo['nombre'] ?? ''))) $tv = $tel($viejo['nombre'] ?? '');
-    if ($tv !== '' && $tn !== '') return $tv === $tn;
-    $nv = $llano($viejo['nombre'] ?? ''); $nn = $llano($nuevo['nombre'] ?? '');
-    if ($nv === '' || $nn === '' || !preg_match('/[a-z]/', $nv)) return false;
-    return $nv === $nn || strpos($nn, $nv) !== false || strpos($nv, $nn) !== false;
+    return bs_misma_persona($viejo, $nuevo); // una sola regla para todo el sistema: _config.php
 }
 
 $lockfile = BS_CLIENTES_DIR . '/.write.lock';
@@ -122,6 +110,9 @@ try {
             }
         }
 
+        // Un N° de más de 4 cifras es un error de tipeo ("22510" por "2251"): dejaba la serie trabada
+        // (next-nro.php corta en 9999) o caía en la serie de las fichas a mano. Se da el siguiente.
+        if ($proposed_int > 9999) { $proposed_int = 0; $warning = "El N° {$proposed} no es válido (hasta 4 cifras)."; }
         if ($proposed_int > 0 && $proposed_int > $max && !file_exists(BS_CLIENTES_DIR . '/' . str_pad($proposed, 4, '0', STR_PAD_LEFT) . '.json')) {
             // Proposed está libre y es mayor que cualquier existente → usarlo
             $target_nro = str_pad((string)$proposed_int, 4, '0', STR_PAD_LEFT);
@@ -131,6 +122,7 @@ try {
             if ($proposed_int > 0 && $target_nro !== str_pad((string)$proposed_int, 4, '0', STR_PAD_LEFT)) {
                 $warning = "El N° {$proposed} ya estaba tomado. Se asignó {$target_nro}.";
             }
+            if ($warning !== null && intval($proposed) > 9999) $warning .= " Se asignó {$target_nro}.";
         }
 
         // Crear el archivo cliente nuevo
@@ -186,6 +178,14 @@ try {
 
         $cliente_path = BS_CLIENTES_DIR . '/' . $target . '.json';
         $cliente_obj = bs_read_json($cliente_path);
+        // N° tipeado de más de 4 cifras que no existe: error de tipeo (ver arriba). Va el siguiente.
+        if (!$cliente_obj && intval($target) > 9999) {
+            $target_viejo = $target;
+            $target = str_pad((string)(bs_save_max_nro() + 1), 4, '0', STR_PAD_LEFT);
+            $cliente_path = BS_CLIENTES_DIR . '/' . $target . '.json';
+            $cliente_obj = bs_read_json($cliente_path);
+            $warning = "El N° {$target_viejo} no es válido (hasta 4 cifras). Este presupuesto se guardó con el N° {$target}.";
+        }
 
         // PROTECCIÓN (dueño, 18/11/2026, "hubo un traspapeleo que no puede pasar nunca más"):
         // el N° que viaja puede ser viejo (la calculadora lo recupera de un borrador o quedó de una

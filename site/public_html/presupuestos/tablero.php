@@ -418,7 +418,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-fb.on::after{transform:translateY(1px) rotate(-135deg)}
 .col-fb.on{border-color:var(--et);color:var(--et)}
 @media(hover:hover){.col-fb:hover{border-color:var(--et);color:var(--et)}}
-.col-cargar{display:block;flex:1 1 auto;min-width:0;margin-bottom:0;padding:8px;border:1.5px dashed var(--et);border-radius:var(--radius);background:var(--card);color:var(--et);font-size:13.5px;font-weight:700;cursor:pointer}
+.col-cargar{display:block;text-decoration:none;text-align:center;box-sizing:border-box;flex:1 1 auto;min-width:0;margin-bottom:0;padding:8px;border:1.5px dashed var(--et);border-radius:var(--radius);background:var(--card);color:var(--et);font-size:13.5px;font-weight:700;cursor:pointer}
 @media(hover:hover){.col-cargar:hover{background:var(--et-soft)}}
 .modal .campo{display:block;margin-bottom:16px;font-size:12px;font-weight:700;color:var(--text2)}
 .modal .campo+.sena{margin:-10px 0 0}
@@ -711,20 +711,24 @@ let abierta='';     // key de la tarjeta con el detalle abierto
 const nroB=c=>!c.manual?'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b>'
   :(c.nro_contrato?'<b title="N° de su contrato en Relación-Contrato. La ficha se cargó a mano.">'+esc(c.nro_contrato)+'</b>'
   :'<b class="sin-nro" title="Cargada a mano: todavía no tiene presupuesto ni contrato con N°.">Sin N°</b>');
+// Lo mismo, en texto, para títulos de ventanas y avisos (barrido del 18/11/2026: ahí se veía el
+// número interno de la ficha a mano, y alguien lo podía copiar como N° en el contrato).
+const nroTxt=c=>!c.manual?c.cliente_nro+'-'+c.sub:(c.nro_contrato||'Sin N°');
 // Qué fichas tienen contrato en Relación-Contrato (ficha → contrato). Lo dice Relación-Contrato;
 // si no existe o no contesta, queda vacío y la ficha simplemente no muestra la marca.
-let ENLACES={};
+const HAY_RC=<?= is_file(__DIR__ . '/relacion-contrato.php') ? 'true' : 'false' ?>; // si Relación-Contrato no está, no se ofrece el link para cargar
+let ENLACES={},ENLACES_OK=false,soloSinCto=false; // soloSinCto: filtro "Sin contrato" (dueño, 18/11/2026)
 const ICO_ENL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>';
 async function cargarEnlaces(){
   if(!YO.puede.contratos)return; // sin acceso a Relación-Contrato no hay marca que mostrar
-  let n={};
+  let n={},ok=false;
   try{
     const r=await fetch('/calculadora/api/contratos.php?enlaces=1',{credentials:'same-origin',cache:'no-store'});
     const j=r.ok?await r.json():null;
-    if(j&&j.ok&&j.enlaces&&typeof j.enlaces==='object')n=j.enlaces;
+    if(j&&j.ok&&j.enlaces&&typeof j.enlaces==='object'){n=j.enlaces;ok=true;}
   }catch(e){}
-  if(JSON.stringify(n)===JSON.stringify(ENLACES))return;
-  ENLACES=n;
+  if(JSON.stringify(n)===JSON.stringify(ENLACES)&&ok===ENLACES_OK)return;
+  ENLACES=n;ENLACES_OK=ok;
   if(!drag&&libre())dibujar();
 }
 let colMovil=localStorage.getItem('bs-tablero-col')||'medir';
@@ -898,7 +902,7 @@ function minutos(h){const m=/^(\d\d):(\d\d)$/.exec(h||'');return m?m[1]*60+(+m[2
 function calcularChoques(){
   CHOQUES={};
   const l=CARDS.filter(c=>etapaDe(c.etapa).exige_fecha&&c.fecha&&c.fecha>=HOY&&c.hora&&c.equipo.length);
-  const anotar=(a,b,quien)=>{(CHOQUES[a.key]=CHOQUES[a.key]||[]).push(quien.join(', ')+(quien.length>1?' también instalan ':' también instala ')+b.hora+' hs · '+b.cliente_nro+' '+(nombreCorto(b.nombre)||''));};
+  const anotar=(a,b,quien)=>{(CHOQUES[a.key]=CHOQUES[a.key]||[]).push(quien.join(', ')+(quien.length>1?' también instalan ':' también instala ')+b.hora+' hs · '+(b.manual?(b.nro_contrato?b.nro_contrato+' ':''):b.cliente_nro+' ')+(nombreCorto(b.nombre)||''));};
   for(let i=0;i<l.length;i++)for(let j=i+1;j<l.length;j++){
     const a=l[i],b=l[j];
     if(a.fecha!==b.fecha||Math.abs(minutos(a.hora)-minutos(b.hora))>=CHOQUE_MIN)continue;
@@ -1305,12 +1309,16 @@ function dibujar(){
   if((plazoF==='vencida'&&!nVen)||(plazoF==='cerca'&&!nCer)||(plazoF==='atrasada'&&!nAtr))plazoF='';
   // "Limpiar filtros": aparece solo cuando algo está filtrando (buscador, un aviso de arriba o un
   // filtro de columna) y va primero en la fila, para que siempre quede a la vista.
-  const nFil=(buscado.length?1:0)+(plazoF?1:0)+Object.keys(falta).filter(k=>falta[k]).length;
-  $('avisosG').innerHTML=(nFil&&!SOLO?'<button type="button" class="limpiar-f" data-limpiar title="Saca el buscador y todos los filtros">Limpiar filtros'+(nFil>1?' · '+nFil:'')+'</button>':'')+(nAtr?'<button type="button" class="aviso-g'+(plazoF==='atrasada'?' on':'')+'" data-plazo="atrasada" aria-pressed="'+(plazoF==='atrasada')+'">'+nAtr+(nAtr===1?' atrasada':' atrasadas')+'</button>':'')
+  // PROTECCIÓN (dueño, 18/11/2026): toda obra nace de su contrato, así que una ficha sin contrato es
+  // rara y se avisa arriba. Tocar el aviso las deja solas a la vista. Solo si Relación-Contrato contestó.
+  const nSinCto=ENLACES_OK?CARDS.filter(c=>!ENLACES[c.key]).length:0;
+  if(!nSinCto)soloSinCto=false;
+  const nFil=(buscado.length?1:0)+(plazoF?1:0)+(soloSinCto?1:0)+Object.keys(falta).filter(k=>falta[k]).length;
+  $('avisosG').innerHTML=(nFil&&!SOLO?'<button type="button" class="limpiar-f" data-limpiar title="Saca el buscador y todos los filtros">Limpiar filtros'+(nFil>1?' · '+nFil:'')+'</button>':'')+(nSinCto?'<button type="button" class="aviso-g'+(soloSinCto?' on':'')+'" data-sincto aria-pressed="'+soloSinCto+'" title="Fichas que no tienen contrato en Relación-Contrato. No debería haber: toda obra nace de su contrato.">'+nSinCto+' sin contrato</button>':'')+(nAtr?'<button type="button" class="aviso-g'+(plazoF==='atrasada'?' on':'')+'" data-plazo="atrasada" aria-pressed="'+(plazoF==='atrasada')+'">'+nAtr+(nAtr===1?' atrasada':' atrasadas')+'</button>':'')
     +(nVen?'<button type="button" class="aviso-g'+(plazoF==='vencida'?' on':'')+'" data-plazo="vencida" aria-pressed="'+(plazoF==='vencida')+'">'+nVen+' con plazo vencido</button>':'')
     +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'">'+nCer+(nCer===1?' vence en 7 días':' vencen en 7 días')+'</button>':'');
   const filtrando=buscado.length>0||!!plazoF||!!SOLO;
-  const visibles=SOLO?CARDS.filter(c=>c.key===SOLO):CARDS.filter(coincide).filter(c=>!plazoF||(plazoF==='atrasada'?atrasada(c):plazo(c)===plazoF));
+  const visibles=SOLO?CARDS.filter(c=>c.key===SOLO):CARDS.filter(coincide).filter(c=>!soloSinCto||!ENLACES[c.key]).filter(c=>!plazoF||(plazoF==='atrasada'?atrasada(c):plazo(c)===plazoF));
   UNICA=buscado.length&&visibles.length===1?visibles[0].key:'';
   // Buscando en celular: si la pestaña abierta no tiene resultados, salta a la primera que sí.
   if(filtrando&&visibles.length&&!visibles.some(c=>c.etapa===colMovil))colMovil=ETAPAS.find(e=>visibles.some(c=>c.etapa===e.id)).id;
@@ -1363,9 +1371,9 @@ function dibujar(){
     if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">Por semana de entrega · mismo color junto</div>';
     // Fila de acciones: cargar (solo la primera columna) y el botón que muestra u oculta los filtros.
     const nAct=filtros.filter(f=>falta[f[0]]).length,verF=filtros.length>0&&(!!filtrosAb[e.id]||nAct>0);
-    if(esPrimera||filtros.length){
+    if((esPrimera&&YO.puede.contratos_editar&&HAY_RC)||filtros.length){
       h+='<div class="col-acc">';
-      if(esPrimera)h+='<button type="button" class="col-cargar" data-cargar>+ Cargar obra</button>';
+      if(esPrimera&&YO.puede.contratos_editar&&HAY_RC)h+='<a class="col-cargar" href="/presupuestos/relacion-contrato.php" target="_top" title="Toda obra nace de su contrato: se carga desde Relación-Contrato">+ Cargar obra desde su contrato</a>';
       if(filtros.length)h+='<button type="button" class="col-fb'+(verF?' on':'')+'" data-filtros="'+esc(e.id)+'" aria-expanded="'+verF+'">Filtrar'+(nAct?' · '+nAct:'')+'</button>';
       h+='</div>';
     }
@@ -1481,7 +1489,7 @@ function limpiarFiltros(){
   $('buscar').value='';
   $('buscar').classList.remove('activo');
   $('buscarX').hidden=true;
-  plazoF='';
+  plazoF='';soloSinCto=false;
   Object.keys(falta).forEach(k=>{falta[k]=false;});
   dibujar();
   toast('Filtros limpios: se ven todas las obras',true);
@@ -1506,8 +1514,8 @@ wrap.addEventListener('click',ev=>{
     dibujar();
     return;
   }
-  if(ev.target.closest('[data-cargar]')){if(OPERA)pedirCargar();return;}
   if(ev.target.closest('[data-limpiar]')){limpiarFiltros();return;}
+  if(ev.target.closest('[data-sincto]')){soloSinCto=!soloSinCto;dibujar();return;}
   const bp=ev.target.closest('[data-plazo]');
   if(bp){plazoF=plazoF===bp.dataset.plazo?'':bp.dataset.plazo;dibujar();return;}
   const bfi=ev.target.closest('[data-filtros]');
@@ -1759,14 +1767,16 @@ $('mCancelar').addEventListener('click',cerrarModal);
 $('modalBg').addEventListener('click',ev=>{if(ev.target===$('modalBg')&&!(modalProtegido&&modalProtegido()))cerrarModal();});
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape'){if(drag)dragSoltar(true);cerrarModal();}
-  else if(ev.key==='Enter'&&modalOk&&$('modalBg').classList.contains('show')&&!$('mOk').classList.contains('peligro')){ev.preventDefault();$('mOk').click();} // (borrar nunca se confirma con Enter)
+  else if(ev.key==='Enter'&&modalOk&&$('modalBg').classList.contains('show')&&!$('mOk').classList.contains('peligro')){
+    if(ev.target&&ev.target.closest&&ev.target.closest('button,a'))return; // el foco está en otro botón (USD, Cancelar): Enter aprieta ESE botón
+    ev.preventDefault();$('mOk').click();} // (borrar nunca se confirma con Enter)
 });
 $('mOk').addEventListener('click',()=>{if(modalOk)modalOk();});
 
 // Seña: no alcanza con tildar, hay que cargar cuánto se cobró.
 function pedirSena(c){
   let moneda='ARS';
-  abrirModal('Seña de '+c.cliente_nro+'-'+c.sub+' · '+(nombreCorto(c.nombre)||'Sin nombre'),
+  abrirModal('Seña de '+nroTxt(c)+' · '+(nombreCorto(c.nombre)||'Sin nombre'),
     '<p>¿Cuánto se cobró?</p><div class="sena"><input type="text" id="senaMonto" inputmode="decimal" autocomplete="off" placeholder="Monto"><button type="button" data-mon="ARS" class="on">$</button><button type="button" data-mon="USD">USD</button></div>',
     'Guardar seña',
     ()=>{
@@ -1796,7 +1806,7 @@ function pedirSena(c){
 // Piso y ascensor: un toque para decir cómo sube la pieza.
 function pedirAcceso(c){
   let modo='';
-  abrirModal('Piso y ascensor · '+c.cliente_nro+'-'+c.sub,
+  abrirModal('Piso y ascensor · '+nroTxt(c),
     '<p>¿Cómo sube la pieza?</p><div class="sena"><button type="button" data-op="pb">Planta baja</button><button type="button" data-op="ascensor">Por ascensor</button><button type="button" data-op="escalera">Por escalera</button></div>'+
     '<div class="sena" id="accPisos" style="display:none;margin-top:10px"><input type="text" id="accN" inputmode="numeric" autocomplete="off" placeholder="¿Cuántos pisos?"></div>',
     'Guardar',
@@ -1820,7 +1830,7 @@ function pedirAcceso(c){
 // Turno con día y hora (Por instalar).
 function pedirTurno(c){
   const e=etapaDe(c.etapa);
-  abrirModal(e.fecha+' · '+c.cliente_nro+'-'+c.sub,
+  abrirModal(e.fecha+' · '+nroTxt(c),
     '<p>'+(e.exige_fecha?'¿Qué día y a qué hora?':'¿Qué día? La hora es opcional.')+'</p><div class="sena"><input type="date" id="tuDia" value="'+esc(c.fecha)+'"><input type="time" id="tuHora" step="900" value="'+esc(c.hora)+'"></div>',
     'Guardar',
     ()=>{
@@ -1929,88 +1939,15 @@ function pedirEditar(c){
   $(c.manual?'edNro':'edNombre').focus();
 }
 
-// Cargar una obra a mano: para las que no pasaron por la calculadora.
-function pedirCargar(){
-  let bacha=''; // '', 'nuestra', 'cliente' o 'no'
-  const campo=(id,rotulo,extra)=>'<label class="campo">'+rotulo+'<input type="text" id="'+id+'" autocomplete="off" '+(extra||'')+'></label>';
-  abrirModal('Cargar obra',
-    campo('cgNro','N° de presupuesto (si ya está hecho en la calculadora)','maxlength="12" inputmode="numeric" placeholder="Ej: 0042 o 0042-2"')+
-    '<p>Con el número alcanza: la ficha toma los datos de ese presupuesto. Sin número, completá lo de abajo.</p>'+
-    campo('cgNombre','Nombre y apellido','maxlength="120" placeholder="Ej: Carolina Pereyra"')+
-    campo('cgCel','Teléfono','maxlength="40" inputmode="tel"')+
-    campo('cgDir','Dirección','maxlength="200"')+
-    '<label class="campo mat-wrap">Material y color (del catálogo de la calculadora)<input type="text" id="cgMat" autocomplete="off" maxlength="200" placeholder="Escribí y elegí: Negro Boreal, Blanco Suggar…"><div class="mat-caja" id="cgMatCaja"></div></label>'+
-    // De quién es la bacha, si ya se sabe: queda anotado en la ficha. No tilda "Tenemos la bacha".
-    '<label class="campo aire" for="cgBachaMod">Bacha (opcional)</label><div class="sena" id="cgBacha"><button type="button" data-op="nuestra">Nuestra</button><button type="button" data-op="cliente">Del cliente</button><button type="button" data-op="no">No lleva</button></div>'+
-    '<label class="campo" id="cgBachaModL" hidden>Modelo de la bacha (si ya se sabe)<input type="text" id="cgBachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34"></label>'+
-    // La medición se puede dejar agendada de entrada: así la obra no nace "sin fecha".
-    '<label class="campo aire" for="cgDia">Medición (la hora es opcional)</label><div class="sena"><input type="date" id="cgDia"><input type="time" id="cgHora" step="900" aria-label="Hora de medición"></div>'+
-    '<p class="m-error" id="cgError" hidden></p>',
-    'Cargar obra',
-    async()=>{
-      const nombre=$('cgNombre').value.trim(),nro=$('cgNro').value.trim();
-      if(!nro&&!nombre){$('cgNombre').focus();toast('Poné el N° de presupuesto o el nombre del cliente.');return;}
-      const dia=$('cgDia').value,hora=$('cgHora').value.slice(0,5);
-      if(hora&&!dia){$('cgDia').focus();toast('Pusiste la hora: falta el día de la medición.');return;}
-      if(ocupado)return;
-      ocupado=true;
-      const bModelo=bacha&&bacha!=='no'?$('cgBachaMod').value.trim().replace(/\s+/g,' '):'';
-      const datos={nro:nro,nombre:nombre,celular:$('cgCel').value,direccion:$('cgDir').value,material:materialNormal($('cgMat').value)};
-      // La ventana NO se cierra hasta que el server confirma: si el número no existe (o falla
-      // cualquier cosa), queda abierta con todo lo escrito y el motivo a la vista.
-      const b=$('mOk'),rotulo=b.textContent;
-      b.disabled=true;b.textContent='Cargando…';
-      $('cgError').hidden=true;
-      let j=null;
-      try{
-        j=await pedir(API_CARGAR,datos);
-      }catch(e){
-        ocupado=false;
-        b.disabled=false;b.textContent=rotulo;
-        $('cgError').textContent=e.message;$('cgError').hidden=false;
-        if(nro){$('cgNro').focus();$('cgNro').select();}
-        return;
-      }
-      b.disabled=false;
-      cerrarModal();
-      recien={key:j.cliente_nro+'-'+j.sub,tipo:'llego',t:Date.now()}; // late al aparecer
-      // La obra ya está cargada; la fecha de medición se guarda aparte. Si eso falla, la obra
-      // queda igual (marcada "sin fecha") y se avisa: nada de lo cargado se pierde.
-      let aviso='Obra '+j.cliente_nro+'-'+j.sub+' cargada en Por medir',bien=true;
-      if(dia){
-        try{
-          await pedir(API,{cliente_nro:j.cliente_nro,sub:j.sub,accion:'fecha',fecha:dia,hora:hora});
-          aviso+=' · medición '+fechaCorta(dia)+(hora?' '+hora+' hs':'');
-        }catch(e){aviso='La obra se cargó, pero no se pudo guardar la fecha de medición: '+e.message;bien=false;}
-      }
-      if(bacha){
-        try{
-          await pedir(API,{cliente_nro:j.cliente_nro,sub:j.sub,accion:'bacha',origen:bacha,modelo:bModelo});
-        }catch(e){aviso='La obra se cargó, pero no se pudo anotar la bacha: '+e.message;bien=false;}
-      }
-      toast(aviso,bien);
-      ocupado=false;
-      await cargar();
-    });
-  // Con algo escrito, tocar afuera de la ventana no la cierra (se cierra con Cancelar).
-  modalProtegido=()=>!!bacha||['cgNro','cgNombre','cgCel','cgDir','cgMat','cgDia','cgHora'].some(id=>$(id)&&$(id).value.trim());
-  // Bacha: tocar la opción elegida la saca (es opcional).
-  $('cgBacha').querySelectorAll('[data-op]').forEach(b=>b.addEventListener('click',()=>{
-    bacha=bacha===b.dataset.op?'':b.dataset.op;
-    $('cgBacha').querySelectorAll('[data-op]').forEach(x=>x.classList.toggle('on',x.dataset.op===bacha));
-    $('cgBachaModL').hidden=!bacha||bacha==='no';
-    if(bacha&&bacha!=='no')$('cgBachaMod').focus();
-  }));
-  conCatalogo('cgMat','cgMatCaja');
-  $('cgNro').focus();
-}
+// "Cargar obra" ya no existe en el tablero (dueño, 18/11/2026, decisión final): toda obra nace de su
+// contrato, en Relación-Contrato ("Cargar en Por medir"). Así el contrato y la ficha van siempre enlazados.
 
 // Bacha: de quién es.
 function pedirBacha(c){
   // Se abre tanto para tildar como para corregir: de quién es la bacha y qué modelo es.
   let origen=c.bacha||''; // si ya se anotó al cargar la obra, viene elegida
   const op=(v,t)=>'<button type="button" data-op="'+v+'" class="'+(origen===v?'on':'')+'">'+t+'</button>';
-  abrirModal('Bacha · '+c.cliente_nro+'-'+c.sub,
+  abrirModal('Bacha · '+nroTxt(c),
     '<p>¿De quién es la bacha?</p><div class="sena">'+op('nuestra','Nuestra')+op('cliente','Del cliente')+op('no','No lleva')+'</div>'+
     '<label class="campo" id="bachaModL" style="margin-top:16px"><span id="bachaModT">Modelo de la bacha</span><input type="text" id="bachaMod" maxlength="80" autocomplete="off" placeholder="Ej: Johnson E37, 37 × 34" value="'+esc(c.bacha_modelo||'')+'"></label>'+
     '<button type="button" class="adjuntar" id="bachaFoto">+ Adjuntar foto de la bacha</button>'+
@@ -2054,7 +1991,7 @@ let adjPara=null,subiendo=false;
 
 // Sumar una foto o un plano: se sube desde el dispositivo, o se pega el link de Drive donde ya está.
 function pedirAdjunto(c,tipo){
-  abrirModal(ADJ_L[tipo]+' · '+c.cliente_nro+'-'+c.sub,
+  abrirModal(ADJ_L[tipo]+' · '+nroTxt(c),
     '<button type="button" class="adjuntar subir" id="adjSubir">Subir desde este dispositivo</button>'+
     '<div class="adj-o">o</div>'+
     '<label class="campo">Pegar el link de Drive<input type="url" id="adjLink" autocomplete="off" inputmode="url" placeholder="https://drive.google.com/…"></label>'+
@@ -2156,7 +2093,7 @@ function verAdjunto(c,id){
   const a=c.adjuntos.find(x=>x.id===id);
   if(!a)return;
   const url=a.link||urlAdj(c,a),foto=!a.link&&!a.pdf;
-  abrirModal(ADJ[a.tipo]+' · '+c.cliente_nro+'-'+c.sub,
+  abrirModal(ADJ[a.tipo]+' · '+nroTxt(c),
     '<div class="visor">'+(a.link?'<p class="visor-link">Está en Drive: '+esc(a.link.replace(/^https:\/\//,'').slice(0,60))+(a.link.length>68?'…':'')+'</p>':(a.pdf?'':'<div class="lienzo" id="adjLienzo"><img src="'+esc(url)+'" alt="" id="adjImg"></div>'))+
     '<div class="acciones"><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(a.link?'Abrir en Drive':(a.pdf?'Abrir el PDF':'Abrir en grande'))+'</a>'+
     (foto&&a.mio!==false?'<button type="button" class="girar" id="adjGirar" title="Gira la foto un cuarto de vuelta">Girar</button>':'')+
@@ -2242,7 +2179,7 @@ function verAdjunto(c,id){
 function pedirPersonas(c,clave){
   const P=PERSONAS[clave],lista=P.lista();
   const elegidos=new Set(c[P.campo]);
-  abrirModal(P.titulo+' · '+c.cliente_nro+'-'+c.sub,
+  abrirModal(P.titulo+' · '+nroTxt(c),
     '<p>'+P.pregunta+' Podés marcar más de uno.</p><div class="sena">'+lista.map(n=>'<button type="button" data-op="'+esc(n)+'" class="'+(elegidos.has(n)?'on':'')+'">'+esc(n)+'</button>').join('')+'</div>',
     'Guardar',
     ()=>{
@@ -2282,10 +2219,10 @@ async function borrarContratoDe(c){
 // Borrar ficha: siempre pide confirmación y dice exactamente qué se pierde.
 // Si la ficha está enlazada con un contrato, se borran los dos (regla del dueño, 16/11/2026).
 async function pedirBorrar(c){
-  const quien=c.cliente_nro+'-'+c.sub+' · '+(nombreCorto(c.nombre)||'Sin nombre');
+  const quien=nroTxt(c)+' · '+(nombreCorto(c.nombre)||'Sin nombre');
   const n=c.adjuntos.length;
   const ct=await contratoDe(c);
-  abrirModal('¿Borrar la ficha '+c.cliente_nro+'-'+c.sub+'?',
+  abrirModal('¿Borrar la ficha '+nroTxt(c)+'?',
     '<p><b>'+esc(quien)+'</b></p>'+
     '<p>Sale del tablero y del calendario, con sus tildes, fechas y datos'+(n?', y '+(n===1?'su archivo adjunto':'sus '+n+' archivos adjuntos'):'')+'.</p>'+
     (ct?'<p class="ojo">Está enlazada con un contrato de Relación-Contrato: <b>también se borra el contrato</b>'+(ct.pagos||ct.archivo?', con '+[ct.pagos?(ct.pagos===1?'su pago':'sus '+ct.pagos+' pagos'):'',ct.archivo?'su presupuesto adjunto':''].filter(Boolean).join(' y '):'')+'.</p>':'')+
@@ -2301,7 +2238,7 @@ async function pedirBorrar(c){
         // 2) su contrato enlazado, si lo tiene, va a su propia papelera
         const conContrato=ct?await borrarContratoDe(c):false;
         if(abierta===c.key)abierta='';
-        toast('Ficha '+c.cliente_nro+'-'+c.sub+' en la papelera'+(conContrato?', con su contrato':'')+'. Se puede recuperar 30 días.',true);
+        toast('Ficha '+nroTxt(c)+' en la papelera'+(conContrato?', con su contrato':'')+'. Se puede recuperar 30 días.',true);
       }catch(e){
         toast(e.message);
       }
@@ -2360,7 +2297,7 @@ async function restaurarFicha(key,btn){
       const r=await fetch(API_CONTRATOS,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'restaurar_enlazado',cliente_nro:c.cliente_nro,sub:c.sub})});
       const jj=await r.json();conContrato=!!(jj&&jj.ok&&jj.restaurado);
     }catch(e){}
-    toast('Ficha '+key+' restaurada'+(conContrato?', con su contrato':''),true);
+    toast('Ficha '+(+p[0]>=90001?'':key+' ')+'restaurada'+(conContrato?', con su contrato':''),true);
   }catch(e){toast(e.message);}
   ocupado=false;
   await cargar();
@@ -2373,8 +2310,8 @@ $('mCuerpo').addEventListener('click',ev=>{const b=ev.target.closest('[data-devo
 
 // Archivar: el presupuesto pasa a "Entregado" en el hub. No borra nada.
 function pedirArchivar(c){
-  abrirModal('Archivar '+c.cliente_nro+'-'+c.sub+' · '+(nombreCorto(c.nombre)||'Sin nombre'),
-    '<p>La obra sale del tablero y el presupuesto pasa a <b>Entregado</b>.</p><p>No se borra nada: queda guardado 6 meses.</p>',
+  abrirModal('Archivar '+nroTxt(c)+' · '+(nombreCorto(c.nombre)||'Sin nombre'),
+    '<p>La obra sale del tablero y el presupuesto pasa a <b>Entregado</b>.</p><p>No se borra nada: queda guardado 1 año en "Archivadas", con sus fotos y planos.</p>',
     'Archivar',
     async()=>{
       if(ocupado)return;

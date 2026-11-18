@@ -36,7 +36,7 @@ function bs_require_permiso($permiso) {
         $in = json_decode((string)@file_get_contents('php://input'), true);
         if (!is_array($in)) $in = $_POST;
         $d = [];
-        $campos = ['cliente_nro', 'sub', 'id', 'accion', 'etapa', 'nuevo_estado', 'tipo'];
+        $campos = ['cliente_nro', 'sub', 'id', 'accion', 'etapa', 'nuevo_estado', 'tipo', 'auto'];
         foreach ($campos as $k) {
             if (isset($in[$k]) && is_scalar($in[$k])) $d[$k] = $in[$k];
         }
@@ -47,7 +47,13 @@ function bs_require_permiso($permiso) {
             if (isset($in['clave']) && is_scalar($in['clave'])) $d['tilde'] = $in['clave'];
             foreach (['valor', 'fecha', 'hora'] as $k) { if (isset($in[$k]) && is_scalar($in[$k])) $d[$k] = is_bool($in[$k]) ? ($in[$k] ? 'si' : 'no') : $in[$k]; }
         }
-        auth_registrar($permiso, $d);
+        // Se anota al terminar, y solo si la acción salió bien (barrido del 18/11/2026). Antes se
+        // anotaba al entrar: una carga rechazada quedaba en el registro como "Cargó una obra".
+        register_shutdown_function(function () use ($permiso, $d) {
+            $c = http_response_code();
+            if (!empty($GLOBALS['bs_no_registrar'])) return; // el endpoint avisó que no cambió nada
+            if ($c === false || $c < 400) auth_registrar($permiso, $d);
+        });
     }
 }
 

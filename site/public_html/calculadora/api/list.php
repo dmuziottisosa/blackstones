@@ -92,11 +92,14 @@ if (is_dir(BS_CLIENTES_DIR)) {
 
         foreach ($cliente_obj['cotizaciones'] ?? [] as $cot) {
             // Eliminado de Presupuestos (a mano o por los 180 días) mientras la obra sigue en el
-            // tablero: acá no aparece más. Los entregados sí, porque son las ventas del reporte.
-            if (!empty($cot['fuera_de_presupuestos']) && ($cot['estado'] ?? '') !== 'entregado') continue;
+            // tablero: acá no aparece más. Tampoco cuando después se archiva (18/11/2026): la pestaña
+            // Reporte ya no existe, y lo que se eliminó de Presupuestos no tiene por qué volver.
+            if (!empty($cot['fuera_de_presupuestos'])) continue;
             // Ficha cargada a mano en el tablero: no es un presupuesto, no se lista (dueño, 17/11/2026).
             // Archivada sí: pasa a ser una entrega del reporte, como cualquier alta manual.
             if (!empty($cot['manual']) && ($cot['estado'] ?? '') === 'aprobado') continue;
+            // ...y archivada tampoco, si es de la serie interna (90001+): ese número no se muestra nunca.
+            if (!empty($cot['manual']) && defined('BS_NRO_FICHA_MANUAL_DESDE') && intval($cliente_nro) >= BS_NRO_FICHA_MANUAL_DESDE) continue;
             // Ficha borrada, en la papelera del tablero (30 días): tampoco se lista.
             if (($cot['estado'] ?? '') === 'papelera') continue;
 

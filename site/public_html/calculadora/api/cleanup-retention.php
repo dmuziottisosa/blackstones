@@ -70,9 +70,14 @@ $stats['papelera'] = bs_tablero_papelera_purgar();
 // Cleanup de clientes/
 // ============================================================
 
+// (barrido del 18/11/2026) Todo lo que sigue lee y reescribe archivos de clientes: se hace con el
+// mismo candado que usa el resto del sistema, para no pisar algo que se esté guardando en ese momento.
+$bs_fp_cli = bs_lock_acquire(BS_CLIENTES_DIR . '/.write.lock');
+if (!$bs_fp_cli) { @file_put_contents(BS_REGISTRO_CRON_LOG, '[' . date('c') . "] cleanup: no se pudo tomar el candado de clientes; no se hizo nada\n", FILE_APPEND | LOCK_EX); exit(1); }
+
 if (is_dir(BS_CLIENTES_DIR)) {
     foreach (scandir(BS_CLIENTES_DIR) as $f) {
-        if (!preg_match('/^(\d{4,})\.json$/', $f)) continue;
+        if (!preg_match('/^(\d{4,})\.json$/', $f, $bs_m)) continue;
         $path = BS_CLIENTES_DIR . '/' . $f;
 
         $cliente = bs_read_json($path);
@@ -150,9 +155,13 @@ if (is_dir(BS_CLIENTES_DIR)) {
         }
 
         if (count($kept) === 0) {
-            // Cliente vacío → borrar archivo entero
+            // Cliente vacío → borrar archivo entero. El número no se recicla (mismo criterio que delete.php).
             @unlink($path);
             $stats['clientes_borrados']++;
+            $bs_idx = bs_read_json(BS_CLIENTES_INDEX);
+            if (!is_array($bs_idx)) $bs_idx = [];
+            $bs_idx[$bs_m[1]] = ['deleted_at' => date('c'), 'reason' => 'retention'];
+            bs_write_json_atomic(BS_CLIENTES_INDEX, $bs_idx);
         } elseif (count($kept) !== count($cliente['cotizaciones'] ?? []) || $ocultos_cliente > 0) {
             // Cambió el array → reescribir
             $cliente['cotizaciones'] = $kept;
@@ -172,7 +181,8 @@ if (is_dir(BS_ZIPS_DIR)) {
         $path = BS_ZIPS_DIR . '/' . $f;
         if (is_file($path)) {
             $mtime = filemtime($path);
-            if ($mtime && ($now - $mtime) > $retention_seconds) {
+            // el ZIP de una obra archivada dura lo que dura la obra archivada (1 año), no 180 días
+            if ($mtime && ($now - $mtime) > max($retention_seconds, $archivadas_seconds)) {
                 @unlink($path);
                 $stats['zips_borrados']++;
             }
@@ -219,6 +229,7 @@ if (is_array($vivas) && is_dir(BS_TABLERO_DIR)) {
         bs_lock_release($fp);
     }
 }
+bs_lock_release($bs_fp_cli);
 
 // ============================================================
 // Log

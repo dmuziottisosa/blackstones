@@ -300,6 +300,14 @@ try {
                     bs_lock_release($fp);
                     bs_error('Cargá el monto de la seña.');
                 }
+                // La seña del tablero y la del contrato no se pisan nunca. El contrato le pasa la suya
+                // al tablero solo cuando el tablero no tiene ("solo_si_vacia"): si entre que se abrió el
+                // contrato y se guardó alguien ya la cargó acá, no se toca (barrido del 18/11/2026).
+                if (!empty($body['solo_si_vacia']) && !empty($obra['sena']['monto'])) {
+                    bs_lock_release($fp);
+                    $GLOBALS['bs_no_registrar'] = true;
+                    bs_ok(['sin_cambios' => true, 'motivo' => 'el tablero ya tiene seña']);
+                }
                 $obra['sena'] = ['monto' => $monto, 'moneda' => $moneda, 'at' => $hoy];
             } else {
                 $obra['sena'] = null;
@@ -416,6 +424,13 @@ try {
         }
 
     } elseif ($accion === 'fecha') {
+        // El Cronograma del calendario manda en qué etapa cree que está la obra ("en_etapa"). Si ya
+        // pasó a otra, no se le escribe el turno de medición a una obra que está en Por cortar.
+        $bs_en = (string)($body['en_etapa'] ?? '');
+        if ($bs_en !== '' && $bs_en !== $etapa) {
+            bs_lock_release($fp);
+            bs_error('Esa obra ya no está en ' . ($BS_ETAPAS[$bs_en]['titulo'] ?? 'esa etapa') . ': ahora está en ' . $BS_ETAPAS[$etapa]['titulo'] . '.', 409);
+        }
         $fecha = trim((string)($body['fecha'] ?? ''));
         if ($fecha !== '' && !bs_tablero_fecha_valida($fecha)) {
             bs_lock_release($fp);
@@ -488,8 +503,16 @@ try {
             bs_lock_release($fp);
             bs_error('Poné el modelo de la bacha.');
         }
+        $bs_bacha_antes = (string)($obra['bacha'] ?? '');
         $obra['bacha'] = $origen;
         $obra['bacha_modelo'] = $modelo;
+        // "No lleva" tilda solo "Tenemos la bacha". Si después resulta que sí lleva, ese tilde automático
+        // se va (barrido del 18/11/2026): si no, la obra salía de Por medir sin que nadie confirmara la bacha.
+        if ($origen !== 'no' && $bs_bacha_antes === 'no' && isset($BS_ETAPAS[$etapa]['checks']['bacha'])) {
+            unset($obra['checks']['bacha']);
+            if (is_array($obra['tildes_at'] ?? null)) unset($obra['tildes_at']['bacha']);
+            if (is_array($obra['tildes_por'] ?? null)) unset($obra['tildes_por']['bacha']);
+        }
         if ($origen === 'no' && isset($BS_ETAPAS[$etapa]['checks']['bacha'])) {
             $obra['checks']['bacha'] = true;
             if (!is_array($obra['tildes_at'] ?? null)) $obra['tildes_at'] = [];

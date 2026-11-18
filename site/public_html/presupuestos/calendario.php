@@ -704,6 +704,7 @@ function abrirCronograma(){
   $('mOk').hidden=true;modalOk=null;
   crDibujar();
   $('modalBg').classList.add('show');
+  cargar().then(crDibujar); // se abre con los datos al día, no con los de la última actualización
 }
 function crDibujar(){
   if(!crAbierto)return;
@@ -749,19 +750,45 @@ function crDibujar(){
   if(hechas.length)h+='<p class="cr-hechas">Ya medidas ese día: '+hechas.map(c=>esc(nombreCorto(c.nombre)||'Sin nombre')).join(', ')+'.</p>';
   $('mCuerpo').innerHTML=h;
 }
-async function crGuardar(c,dia,hora){
+// (barrido del 18/11/2026) Antes de guardar se vuelve a leer el tablero: el cronograma puede llevar un
+// rato abierto. Así no se pisa la hora que otro puso recién, ni se le escribe el turno de medición a una
+// obra que ya pasó a Por cortar (el servidor también lo rechaza: "en_etapa").
+async function crGuardar(key,esHora,valor){
   if(crOcupado)return;
-  if(dia===c.fecha&&hora===c.hora)return;
   crOcupado=true;
-  const t=crTipo,vacia=dia!==c.fecha&&crPend(t).filter(x=>x.fecha===c.fecha).length===1; // era la única de ese día
+  const t=crTipo;
   try{
-    await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'fecha',fecha:dia,hora:dia?hora:''});
-    c.fecha=dia;c.hora=dia?hora:'';
-    if(vacia)crDia[t]=dia; // el día quedó sin obras: se sigue a la que se movió
-    toast(quien(c)+': '+(dia?CR[t].aviso+' el '+fechaCorta(dia)+(c.hora?' · '+c.hora+' hs':(t==='inst'?', falta la hora':', sin hora')):CR[t].sinTit.toLowerCase()),!!(dia&&(c.hora||t==='med')));
+    await cargar();
+    const c=cardDe(key);
+    if(!c||c.etapa!==crEtapa(t)||cumplida(c))throw new Error((c?quien(c)+' ya':'Esa obra ya')+' no está para '+(t==='med'?'medir':'instalar')+': no se cambió nada.');
+    const dia=esHora?c.fecha:valor,hora=esHora?valor:c.hora;
+    if(dia!==c.fecha||hora!==c.hora){
+      const vacia=dia!==c.fecha&&crPend(t).filter(x=>x.fecha===c.fecha).length===1; // era la única de ese día
+      await pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'fecha',fecha:dia,hora:dia?hora:'',en_etapa:crEtapa(t)});
+      c.fecha=dia;c.hora=dia?hora:'';
+      if(vacia)crDia[t]=dia; // el día quedó sin obras: se sigue a la que se movió
+      toast(quien(c)+': '+(dia?CR[t].aviso+' el '+fechaCorta(dia)+(c.hora?' · '+c.hora+' hs':(t==='inst'?', falta la hora':', sin hora')):CR[t].sinTit.toLowerCase()),!!(dia&&(c.hora||t==='med')));
+    }
   }catch(e){toast(e.message);}
   crOcupado=false;
   crDibujar();
+}
+// Escribiendo la hora o el día con el teclado, cada tecla es un valor "completo" (08:00 → 00:00 → 09:00…).
+// No se guarda en cada una: se espera a que la persona termine (un momento sin tocar, Enter, o salir del campo).
+let crT=null,crEsp=null;
+function crFlush(){
+  clearTimeout(crT);
+  if(!crEsp)return;
+  if(crOcupado){crT=setTimeout(crFlush,300);return;}
+  const p=crEsp;crEsp=null;
+  crGuardar(p.key,p.esHora,p.valor);
+}
+function crAnotar(el){
+  const esHora=el.dataset.crhora!==undefined;
+  if(!esHora&&el.dataset.crfecha===undefined)return false;
+  crEsp={key:esHora?el.dataset.crhora:el.dataset.crfecha,esHora:esHora,valor:esHora?el.value.slice(0,5):el.value};
+  clearTimeout(crT);crT=setTimeout(crFlush,900);
+  return true;
 }
 $('cronB').addEventListener('click',abrirCronograma);
 $('mCuerpo').addEventListener('click',ev=>{
@@ -770,11 +797,9 @@ $('mCuerpo').addEventListener('click',ev=>{
   const b=ev.target.closest('[data-crdia]');
   if(b){crDia[crTipo]=b.dataset.crdia;crDibujar();}
 });
-$('mCuerpo').addEventListener('change',ev=>{
-  const t=ev.target;
-  if(t.dataset.crhora!==undefined){const c=cardDe(t.dataset.crhora);if(c)crGuardar(c,c.fecha,t.value.slice(0,5));}
-  else if(t.dataset.crfecha!==undefined){const c=cardDe(t.dataset.crfecha);if(c)crGuardar(c,t.value,c.hora);}
-});
+$('mCuerpo').addEventListener('change',ev=>{crAnotar(ev.target);});
+$('mCuerpo').addEventListener('focusout',ev=>{const t=ev.target;if(crEsp&&t.dataset&&(t.dataset.crhora!==undefined||t.dataset.crfecha!==undefined))crFlush();});
+$('mCuerpo').addEventListener('keydown',ev=>{const t=ev.target;if(ev.key==='Enter'&&t.dataset&&(t.dataset.crhora!==undefined||t.dataset.crfecha!==undefined)){ev.preventDefault();if(crEsp)crFlush();}});
 
 // Todos los eventos, por día: {iso:[{tipo,c}]}. tipo = id de etapa (turno) o 'vence' (plazo).
 function armar(){
@@ -1062,7 +1087,9 @@ $('modalBg').addEventListener('click',ev=>{if(ev.target===$('modalBg'))cerrarMod
 document.addEventListener('keydown',ev=>{
   if(!$('modalBg').classList.contains('show'))return;
   if(ev.key==='Escape')cerrarModal();
-  else if(ev.key==='Enter'&&modalOk){ev.preventDefault();$('mOk').click();}
+  else if(ev.key==='Enter'&&modalOk){
+    if(ev.target&&ev.target.closest&&ev.target.closest('button,a'))return; // el foco está en otro botón: Enter aprieta ESE botón
+    ev.preventDefault();$('mOk').click();}
 });
 
 // ---------- Tocar ----------

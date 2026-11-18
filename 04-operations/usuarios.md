@@ -11,16 +11,17 @@
 | Borrar o girar una foto, también las que subió otro | Sí | Sí | Sí |
 | Anotar de quién es la bacha y su modelo | Sí | Sí | Sí |
 | Dar aprobaciones (Medición, Corte, Fabricación e Instalación aprobada) | Sí | Sí | No |
-| Cargar, mover, tildar, editar, archivar y borrar obras; papelera | Sí | Sí | No |
+| Mover, tildar, editar, archivar y borrar obras; papelera | Sí | Sí | No |
+| Cargar una obra nueva: solo desde su contrato ("Cargar en Por medir"); el tablero ya no carga (18/11/2026) | Sí | Sí | No |
 | Ver la seña de la ficha | Sí | Sí | No |
 | Calculadora, Presupuestos, Calendario, Stock | Sí | Sí | No entra |
-| Ver Relación-Contrato, con la plata de cada contrato | Sí | Sí, solo mirar | No entra |
+| Relación-Contrato, con la plata de cada contrato | Sí | Sí | No entra |
 | Ver el resumen de plata del mes (contratado, cobrado, por cobrar) | Sí | No | No |
-| Cargar y cambiar contratos, cobros y pagos | Sí | No | No |
+| Crear, editar y borrar contratos; seña, cobros, adjuntos y papelera | Sí | Sí (18/11/2026) | No |
 | Ver quién está trabajando ahora y en qué pantalla | Sí | Sí | Sí |
 | Usuarios | Sí | No | No |
 
-- **Operador en Relación-Contrato (dueño, 17/11/2026):** ve cada contrato con su total, seña, pagos y saldo. No ve el resumen del mes ni las sumas del pie. No puede crear, editar ni borrar: al abrir un contrato lo ve sin formulario.
+- **Operador en Relación-Contrato (dueño, 18/11/2026; antes solo miraba):** crea y edita contratos, carga la seña y los cobros, adjunta el presupuesto, borra contratos, ve la papelera y carga la obra en Por medir. No ve el resumen del mes ni las sumas del pie, y no carga renglones de prueba (eso es de mantenimiento).
 - **Planos y bacha:** entra directo al tablero. Ve las fichas enteras menos la seña. No puede tildar, mover, editar ni escribir notas. Adjunta fotos y puede borrar o girar cualquiera, también las que subió otro (dueño, 17/11/2026). Desde el botón "Modelo de bacha" de la ficha anota de quién es la bacha y su modelo, en cualquier etapa (dueño, 17/11/2026); eso no toca el tilde "Tenemos la bacha", salvo que marque "No lleva", que lo deja tildado como siempre. No entra al calendario. Si escribe otra dirección, vuelve al tablero.
 - **Las notas de las fichas son texto libre.** A "Planos y bacha" se le tapan los montos: "Saldo $ 285.720" le llega como "Saldo $ ···". Reconoce el signo antes o después del número ($, U$S, USD, ARS, pesos, dólares) y las cantidades en mil, millones o lucas. Un número suelto ("quedan 200") no se reconoce y se ve. Si no tiene que verse, no va en la nota.
 

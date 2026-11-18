@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-// tablero-cargar.php — Cargar una obra a mano en "Por medir"
+// tablero-cargar.php — Cargar en "Por medir" la obra de un contrato
 // BlackStones Marmolería · Registry de Presupuestos
 // ============================================================
 // POST /api/tablero-cargar.php
@@ -14,12 +14,16 @@
 // "aprobado", así la ficha queda atada al presupuesto real (se ve el
 // detalle, el material, la zona). Acepta "0042" o "0042-2" (versión).
 //
-// REGLA (dueño, 18/11/2026): una obra entra al tablero solo por acá, que es lo que llaman
-// "Cargar obra" (tablero) y "Cargar en Por medir" (Relación-Contrato). Siempre nace en
-// Por medir, vacía: nunca hereda la etapa ni los tildes de otra obra.
+// REGLA (dueño, 18/11/2026, decisión final): TODO NACE DE RELACIÓN-CONTRATO. Una obra entra al
+// tablero solo por acá y solo desde su contrato ("Cargar en Por medir"): el pedido tiene que traer
+// "contrato" (el id). En el tablero ya no hay "Cargar obra". Así el contrato y la ficha hacen todo
+// el ciclo enlazados y no quedan fichas sueltas. Siempre nace en Por medir, vacía: nunca hereda la
+// etapa ni los tildes de otra obra. Lo usan administradores y operadores (permiso contratos_editar).
+// Si Relación-Contrato no está instalada, no se pueden cargar obras nuevas (el resto del tablero sigue).
 //
 // Body JSON:
 //   {
+//     "contrato":  "c261118...",              // REQUERIDO: el contrato del que nace la obra
 //     "nro":       "0042-2",                  // opcional: presupuesto existente
 //     "nombre":    "Carolina Pereyra",        // requerido si no hay nro
 //     "celular":   "1124981031",              // opcional
@@ -38,7 +42,7 @@ require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_auth.php';
 require_once __DIR__ . '/_tablero.php';
 
-bs_require_permiso('tablero_operar');
+bs_require_permiso('contratos_editar');
 bs_check_csrf();
 bs_ensure_dirs();
 
@@ -46,6 +50,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') bs_error('Solo POST', 405);
 
 $body = json_decode(@file_get_contents('php://input'), true);
 if (!is_array($body)) bs_error('Body JSON inválido');
+
+// ------------------------------------------------------------
+// El contrato del que nace la obra
+// ------------------------------------------------------------
+$bs_cid = (string)($body['contrato'] ?? '');
+$bs_no = 'Las obras se cargan desde su contrato, en Relación-Contrato ("Cargar en Por medir"). Desde el tablero ya no se cargan.';
+if (!is_file(__DIR__ . '/_contratos.php')) bs_error($bs_no, 409);
+require_once __DIR__ . '/_contratos.php';
+$bs_con = ($bs_cid !== '' && bs_contrato_id_ok($bs_cid)) ? (bs_contratos_leer()['contratos'][$bs_cid] ?? null) : null;
+if (!is_array($bs_con)) bs_error($bs_no, 409);
+if (is_array($bs_con['enlace'] ?? null)) {
+    // ya tiene una ficha: si sigue viva, no se carga otra
+    $bs_cli = bs_read_json(BS_CLIENTES_DIR . '/' . str_pad((string)intval($bs_con['enlace']['cliente_nro'] ?? 0), 4, '0', STR_PAD_LEFT) . '.json');
+    foreach ((array)(is_array($bs_cli) ? ($bs_cli['cotizaciones'] ?? []) : []) as $bs_x) {
+        if (intval($bs_x['sub'] ?? 0) === intval($bs_con['enlace']['sub'] ?? 0) && in_array((string)($bs_x['estado'] ?? ''), ['aprobado', 'papelera'], true)) {
+            bs_error('Ese contrato ya tiene su ficha en el tablero' . (($bs_x['estado'] ?? '') === 'papelera' ? ' (está en la papelera: recuperala desde "Papelera")' : '') . '.', 409);
+        }
+    }
+}
 
 function bs_cargar_texto($body, $campo, $max, $etiqueta) {
     $v = trim(preg_replace('/\s+/u', ' ', (string)($body[$campo] ?? '')));
@@ -123,6 +146,16 @@ if ($nro_txt !== '') {
             if ($estado === 'entregado') {
                 bs_lock_release($fp);
                 bs_error('El ' . $nro . '-' . $sub_pedido . ' ya figura como entregado.', 409);
+            }
+            // UN NÚMERO, UNA PERSONA (barrido del 18/11/2026). Si el presupuesto de ese N° es de otra
+            // persona que la del contrato, el N° del contrato está mal: no se carga, y se avisa. Antes se
+            // cargaba y la ficha quedaba con el nombre de uno y la seña, la pileta y la dirección del otro.
+            // De quién es el contrato lo dice el contrato guardado, no lo que mande la pantalla.
+            $bs_esp = ['nombre' => (string)($bs_con['cliente'] ?? ''), 'celular' => (string)($bs_con['telefono'] ?? '')];
+            if ($bs_esp && trim((string)($bs_esp['nombre'] ?? '') . (string)($bs_esp['celular'] ?? '')) !== ''
+                && !bs_misma_persona((array)($cliente_obj['cliente'] ?? []), ['nombre' => (string)($bs_esp['nombre'] ?? ''), 'celular' => (string)($bs_esp['celular'] ?? '')])) {
+                bs_lock_release($fp);
+                bs_error('El presupuesto N° ' . $nro . ' es de ' . (trim((string)($cliente_obj['cliente']['nombre'] ?? '')) ?: 'otro cliente') . ', no de ' . (trim((string)($bs_esp['nombre'] ?? '')) ?: 'este contrato') . '. Revisá el N° del contrato. No se cargó nada.', 409);
             }
             $cot['estado'] = 'aprobado';
             $cot['transiciones'][] = ['estado' => 'aprobado', 'at' => $now];

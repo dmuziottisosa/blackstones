@@ -70,7 +70,9 @@ foreach (@scandir(BS_CLIENTES_DIR) ?: [] as $f) {
     $cli = (array)($cli_obj['cliente'] ?? []);
     foreach ((array)($cli_obj['cotizaciones'] ?? []) as $cot) {
         $estado = (string)($cot['estado'] ?? '');
-        $archivada = $estado === 'entregado' ? substr((string)($cot['entregado_at'] ?? ''), 0, 10) : '';
+        // el día en que se archivó, en hora de Argentina (lo guardado antes del 18/11/2026 está en UTC)
+        $bs_ea = $estado === 'entregado' ? strtotime((string)($cot['entregado_at'] ?? '')) : false;
+        $archivada = $bs_ea ? date('Y-m-d', $bs_ea) : '';
         $key = $nro . '-' . intval($cot['sub'] ?? 0);
         if ($estado === 'entregado' && !isset($tablero['obras'][$key])) continue;   // un entregado histórico, sin ficha
         if (!($estado === 'aprobado' || ($archivada !== '' && substr($archivada, 0, 7) === $MES))) continue;
@@ -117,6 +119,18 @@ foreach ($fichas as $i => $fi) {
         $z = 'fichas/' . $fi['carpeta'] . '/' . $ad['tipo'] . '-' . (++$n[$ad['tipo']]) . '.' . $ad['ext'];
         $archivos[$ad['tipo']][] = [$z, $p, filesize($p)]; $fichas[$i]['archivos'][] = [$ad['tipo'], $z, $ad['ext'] !== 'pdf'];
     }
+}
+// Los presupuestos adjuntos de los contratos que no tienen una ficha en este cierre (contrato suelto,
+// o de una obra que ya salió en otro mes): también van, en su propia carpeta (barrido del 18/11/2026).
+// Ese PDF es lo único que queda del presupuesto pasados los 180 días.
+$bs_ya = [];
+foreach ($fichas as $fi) { if ($fi['contrato']) $bs_ya[(string)$fi['contrato']['id']] = true; }
+foreach ($contratos as $id => $c) {
+    if (!empty($c['borrado']) || isset($bs_ya[(string)$id])) continue;
+    $a = bs_contrato_archivo($c);
+    if (!$a || !is_file($p = bs_contrato_adj_path((string)$id, $a['ext']))) continue;
+    $z = 'contratos-sin-ficha/' . $carpeta((trim((string)($c['nro'] ?? '')) ?: 'Sin N') . ' ' . (trim((string)($c['cliente'] ?? '')) ?: 'Sin nombre')) . ' (' . preg_replace('/[^A-Za-z0-9_-]/', '', (string)$id) . ')/presupuesto.' . $a['ext'];
+    $archivos['presupuesto'][] = [$z, $p, filesize($p)];
 }
 $mb = function ($l) { return round(array_sum(array_column($l, 2)) / 1048576, 1); };
 $vivas = count(array_filter($fichas, function ($f) { return $f['archivada'] === ''; }));

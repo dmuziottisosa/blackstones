@@ -15,6 +15,11 @@
 
 $BS_BASE = __DIR__ . '/../../../../../bs-data';
 
+// LA HORA ES SIEMPRE LA DE ARGENTINA (barrido del 18/11/2026). El servidor corre en UTC: sin esto,
+// lo que se guardaba de 21 a 24 hs quedaba con la fecha del día siguiente (un presupuesto, una obra
+// archivada el último día del mes que caía en el cierre del mes siguiente, el "hoy" de los contratos).
+date_default_timezone_set('America/Argentina/Buenos_Aires');
+
 define('BS_DATA_DIR',                $BS_BASE);
 define('BS_CLIENTES_DIR',            $BS_BASE . '/clientes');
 define('BS_ZIPS_DIR',                $BS_BASE . '/zips');
@@ -34,6 +39,37 @@ define('BS_ARCHIVADAS_DAYS', 365);
 
 // Versión del JSON contract
 define('BS_CONTRACT_VERSION', '1.0');
+
+/**
+ * UN NÚMERO, UNA PERSONA (dueño, 18/11/2026). ¿Estos dos juegos de datos son de la misma persona?
+ * Es estricto a propósito: equivocarse para el lado de "es otra" solo cuesta un aviso o un N° nuevo;
+ * equivocarse para el lado de "es la misma" mezcla dos clientes.
+ *   - Si los dos tienen teléfono, manda el teléfono (últimos 8 dígitos).
+ *   - Si a alguno le falta: el nombre tiene que ser el mismo, o compartir dos palabras enteras
+ *     ("Ana Lopez" y "Ana Maria Lopez"). Un nombre suelto no alcanza: "Ana" no es "Mariana Lopez",
+ *     ni "Maria" es cualquier Maria.
+ * La usan la calculadora (save.php), "Editar obra" y "Cargar en Por medir" del contrato.
+ */
+if (!function_exists('bs_misma_persona')) {
+    function bs_misma_persona(array $viejo, array $nuevo) {
+        $tel = function ($s) { $n = preg_replace('/\D/', '', (string)$s); return strlen($n) >= 8 ? substr($n, -8) : ''; };
+        $llano = function ($s) {
+            $s = mb_strtolower(trim((string)$s), 'UTF-8');
+            $s = strtr($s, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
+            return trim(preg_replace('/\s+/', ' ', preg_replace('/[^a-z0-9 ]/', ' ', $s)));
+        };
+        $tv = $tel($viejo['celular'] ?? ''); $tn = $tel($nuevo['celular'] ?? '');
+        // a veces el teléfono está cargado en el lugar del nombre
+        if ($tv === '' && !preg_match('/[a-z]/', $llano($viejo['nombre'] ?? ''))) $tv = $tel($viejo['nombre'] ?? '');
+        if ($tn === '' && !preg_match('/[a-z]/', $llano($nuevo['nombre'] ?? ''))) $tn = $tel($nuevo['nombre'] ?? '');
+        if ($tv !== '' && $tn !== '') return $tv === $tn;
+        $nv = $llano($viejo['nombre'] ?? ''); $nn = $llano($nuevo['nombre'] ?? '');
+        if ($nv === '' || $nn === '' || !preg_match('/[a-z]/', $nv) || !preg_match('/[a-z]/', $nn)) return false;
+        if ($nv === $nn) return true;
+        $pal = function ($s) { return array_values(array_unique(array_filter(explode(' ', $s), function ($w) { return strlen($w) >= 3 && !ctype_digit($w); }))); };
+        return count(array_intersect($pal($nv), $pal($nn))) >= 2;
+    }
+}
 
 // ============================================================
 // Helpers de filesystem

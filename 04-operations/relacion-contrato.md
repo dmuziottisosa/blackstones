@@ -149,7 +149,9 @@ Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, list
 - **Una ficha cargada a mano no tiene N° de presupuesto** (17/11/2026): por número no se la busca, aunque el N° del contrato coincida con su número interno. Se enlaza por teléfono o por la vía 3.
 - El enlace es un dato aparte del N°: sacarle o corregirle el N° a un contrato no lo desenlaza. Para eso está "Desenlazar".
 - **"Cargar en Por medir"** crea la ficha en el tablero y copia solo lo que el tablero ya tiene: cliente, teléfono, dirección, material, pileta, fecha de medición y seña. Total, pagos y el resto quedan acá.
-- Si el renglón tiene **N° de presupuesto**, en vez de crear una ficha aprueba ese presupuesto (mismo camino que "Cargar obra" con número). Si ese presupuesto ya estaba en el tablero, solo se enlaza.
+- Si el renglón tiene **N° de presupuesto**, en vez de crear una ficha aprueba ese presupuesto. Si ese presupuesto ya estaba en el tablero, avisa y ofrece "Enlazar con el tablero". **Si ese N° es el presupuesto de otra persona, no se carga** y dice de quién es cada uno (18/11/2026).
+- **Es la única forma de cargar una obra (18/11/2026, decisión final del dueño).** El tablero ya no tiene "Cargar obra". Un contrato sin enlazar dice **"No existe en el tablero"** y ofrece el botón.
+- **El Operador también (18/11/2026):** crea y edita contratos, carga la seña y los cobros, adjunta el presupuesto, borra contratos y ve la papelera. No ve el resumen de plata del mes ni carga renglones de prueba.
 - Una ficha del tablero se enlaza con un solo contrato.
 - **Enlazados, la ficha se borra en los dos lados (16/11/2026):** borrar el contrato manda también su ficha del tablero a la papelera (con sus tildes y adjuntos), y borrar la ficha en el tablero manda también el contrato (con sus pagos y su presupuesto adjunto). Los dos avisan antes y se recuperan durante 30 días. Si el contrato no está enlazado, o su ficha ya no está en el tablero, se borra solo. **Archivar no es borrar:** el contrato queda y dice "Fuera del tablero".
 - **Borrar el presupuesto no toca nada de esto:** la ficha, el calendario y el contrato siguen (ver el decision log de la etapa).
@@ -250,3 +252,14 @@ Para eliminarla: borrar `presupuestos/relacion-contrato.php`, los cuatro archivo
 - Permisos: hoy todo el equipo ve la plata (decisión del dueño, "por los momentos").
 - Exportar a planilla y filtros por vendedor o procedencia.
 - Un link directo al día de la obra en el calendario (hoy el link lleva a la ficha del tablero).
+
+## Barrido de errores del 18/11/2026: lo que cambió en contratos
+
+- **La seña que el contrato le pasa al tablero no pisa una que ya esté** (se manda con "solo si está vacía").
+- **Al completar datos de la ficha desde el contrato, no se toca una ficha que parece de otra persona** (teléfonos distintos o nombres sin nada en común). En el registro figura como automático.
+- **Enlazar un contrato sin N° con la ficha de un presupuesto le pone ese N°.**
+- **"Sin cargar al tablero"** significa lo mismo en el filtro y en el selector de etapa: contratos sin enlace.
+- **Exportar:** un saldo a favor sale como número (Excel lo suma); sin contratos, no exporta lo anterior.
+- **Borrar un contrato enlazado** se frena si en ese momento no se pudo leer el tablero.
+- **Cierre del mes:** los presupuestos adjuntos de contratos sin ficha en ese cierre van en `contratos-sin-ficha/`.
+- **Pendiente de decisión:** un cobro queda atado a la moneda del total que había cuando se cargó; avisar si dos contratos tienen el mismo N°; qué mostrar cuando la obra archivada de un contrato cumple su año y se borra.

@@ -47,8 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $etapa = isset($BS_ETAPAS[$obra['etapa']]) ? $obra['etapa'] : 'medir';
                 $at = strtotime((string)($cot['papelera']['at'] ?? '')) ?: time();
                 // material: el final si está cargado, si no el del presupuesto (mismo dato que muestra la ficha)
-                $material = trim((string)($cot['material_final'] ?? ''));
-                if ($material === '') $material = trim((string)($cot['presupuesto']['material'] ?? ($cot['material'] ?? '')));
+                $material = trim((string)(bs_tablero_material($cot)[0] ?? ''));
                 $fichas[] = [
                     'key'          => $key,
                     'cliente_nro'  => $nro,

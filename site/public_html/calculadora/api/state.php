@@ -120,6 +120,26 @@ try {
                 bs_error('Un presupuesto pasa al tablero desde el tablero ("Cargar obra" con su N°) o desde su contrato en Relación-Contrato.', 409);
             }
 
+            // ARCHIVAR lo valida el servidor, como cualquier otro cambio de etapa (barrido del 18/11/2026).
+            // Antes solo lo miraba la pantalla: con el tablero desactualizado se archivaba una obra a la
+            // que otro le había sacado "Saldo cobrado" o había devuelto a Por instalar.
+            if ($estado_anterior === 'aprobado' && $nuevo_estado === 'entregado') {
+                require_once __DIR__ . '/_tablero.php';
+                $bs_t = bs_tablero_leer();
+                $bs_o = (array)($bs_t['obras'][$cliente_nro . '-' . $sub] ?? []);
+                $bs_e = isset($BS_ETAPAS[(string)($bs_o['etapa'] ?? '')]) ? (string)$bs_o['etapa'] : 'medir';
+                if ($bs_e !== 'archivar' && $bs_e !== 'retiro') {
+                    bs_lock_release($fp);
+                    bs_error('Esa obra está en ' . $BS_ETAPAS[$bs_e]['titulo'] . ': se archiva desde Por archivar. Actualizá el tablero.', 409);
+                }
+                $bs_faltan = [];
+                foreach ($BS_ETAPAS[$bs_e]['checks'] as $bs_cid => $bs_label) { if (empty($bs_o['checks'][$bs_cid])) $bs_faltan[] = $bs_label; }
+                if ($bs_faltan) {
+                    bs_lock_release($fp);
+                    bs_error('Falta: ' . implode(', ', $bs_faltan) . '. Actualizá el tablero.', 409);
+                }
+            }
+
             // Validar transición
             $allowed_from = $ALLOWED[$estado_anterior] ?? [];
             if (!in_array($nuevo_estado, $allowed_from, true)) {
@@ -129,6 +149,9 @@ try {
 
             $cot['estado'] = $nuevo_estado;
             $cot['transiciones'][] = ['estado' => $nuevo_estado, 'at' => $now];
+            // Sale del tablero y vuelve a ser un presupuesto: si lo habían eliminado de Presupuestos
+            // mientras era una obra, vuelve a verse (si no, quedaba invisible hasta los 180 días).
+            if ($nuevo_estado === 'enviado') unset($cot['fuera_de_presupuestos']);
 
             // Si pasa a entregado, marcar entregado_at
             if ($nuevo_estado === 'entregado') {
