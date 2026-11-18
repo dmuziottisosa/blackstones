@@ -207,11 +207,9 @@ button{font-family:inherit;color:inherit}
 .ev.hecha{background:none;border-color:var(--border-soft);border-left-color:var(--et);color:var(--text3);font-weight:500}
 .ev.hecha b{color:var(--text2)}
 .ev em.ok{background:var(--gr)}
-/* El segundo tilde, pegado al primero: medición + instalación */
-.ev em.ok+em.ok{margin-left:-1px}
 [data-theme="dark"] .ev em.ok{color:#04220F}
-/* El de instalación va en el color de la etapa Por instalar (el mismo del tablero): la clase et-… le da su --et */
-.ev em.ok.inst{background:var(--et)}
+/* El de instalación va después del nombre, en el color de la etapa Por instalar (el mismo del tablero): la clase et-… le da su --et */
+.ev em.ok.inst{background:var(--et);margin:0 0 0 5px}
 [data-theme="dark"] .ev em.ok.inst{color:#1D1033}
 /* Vencimiento del plazo: es un límite, no un turno. Va sin relleno y con borde punteado. */
 .ev.vence{--et:var(--text3);background:none;border:1px dashed var(--border);border-left:1px dashed var(--border);color:var(--text2);font-weight:600}
@@ -926,11 +924,11 @@ function chip(ev,largo){
     return '<button type="button" class="ev vence prev" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" title="'+esc(t)+'">Entrega estimada · '+nom+(largo?' <span>· todavía sin medir</span>':'')+'</button>';
   }
   if(ev.tipo==='medida'){
-    // Dos tildes en el mismo renglón (dueño, 18/11/2026): el primero es la medición; el segundo, la instalación,
-    // en el color que tiene Por instalar en el tablero.
+    // Dos tildes en el mismo renglón (dueño, 18/11/2026): adelante, el de la medición; después del nombre, el de la
+    // instalación, en el color que tiene Por instalar en el tablero. Así los N° y los nombres quedan alineados.
     const inst=instalada(c),ti=inst?'Instalada'+(inst.fecha?' el '+fechaCorta(inst.fecha):''):'';
     const t='Medición hecha el '+fechaCorta(c.medido_at)+(inst?' · '+ti:'')+' · ahora en '+etapaDe(c.etapa).titulo;
-    return '<button type="button" class="ev hecha et-'+esc(MEDIR)+'" data-key="'+esc(c.key)+'" data-tipo="medida" title="'+esc(t)+'"><em class="ok">✓</em>'+(inst?'<em class="ok inst et-'+esc(inst.etapa)+'">✓</em>':'')+(largo?'Medición hecha · '+(inst?esc(ti)+' · ':''):'')+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
+    return '<button type="button" class="ev hecha et-'+esc(MEDIR)+'" data-key="'+esc(c.key)+'" data-tipo="medida" title="'+esc(t)+'"><em class="ok">✓</em>'+(largo?'Medición hecha · '+(inst?esc(ti)+' · ':''):'')+nom+(inst?'<em class="ok inst et-'+esc(inst.etapa)+'">✓</em>':'')+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
   }
   if(ev.tipo==='vence'){
     const p=estadoPlazo(c);
