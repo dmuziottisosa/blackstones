@@ -1018,16 +1018,19 @@ function colorDe(texto){
 // (se junta con las otras del mismo nombre que tampoco dicen la marca). Sin reconocer, el texto tal cual.
 const claveColor=c=>{const k=colorDe(c.material);return k?k.c._n+'|'+(k.marca?k.c._m:'?'):suelto(c.material);};
 
+const MAT_POR_DEFINIR='Por definir';
 // Sugerencias de material en un campo de texto (Cargar obra, Editar obra).
 function conCatalogo(idInput,idCaja){
   const input=$(idInput),caja=$(idCaja);
   if(!input||!caja)return;
   const pintar=()=>{
-    if(!CATALOGO.length){caja.classList.remove('open');return;}
     const q=suelto(input.value);
-    const l=(q?CATALOGO.filter(c=>c._h.indexOf(q)>=0):CATALOGO).slice(0,12);
+    // "Por definir" va siempre primero (dueño, 18/11/2026): la obra se puede cargar aunque el cliente todavía no haya elegido el color.
+    const pd=!q||suelto(MAT_POR_DEFINIR).indexOf(q)>=0?[{full:MAT_POR_DEFINIR,n:MAT_POR_DEFINIR,marca_label:'el cliente todavía no eligió'}]:[];
+    const l=pd.concat(q?CATALOGO.filter(c=>c._h.indexOf(q)>=0):CATALOGO).slice(0,12);
     caja.innerHTML=l.length?l.map((c,i)=>'<div class="mat-item'+(i===0?' active':'')+'" data-full="'+esc(c.full)+'"><span>'+esc(c.n)+'</span><i>'+esc(c.marca_label)+'</i></div>').join('')
-      :'<div class="mat-nada">No está en el catálogo de la calculadora. Se guarda igual, como lo escribiste.</div>';
+      :(CATALOGO.length?'<div class="mat-nada">No está en el catálogo de la calculadora. Se guarda igual, como lo escribiste.</div>':'');
+    if(!l.length&&!CATALOGO.length){caja.classList.remove('open');return;}
     caja.classList.add('open');
   };
   const elegir=el=>{input.value=el.dataset.full;caja.classList.remove('open');};

@@ -200,6 +200,14 @@ La idea del dueño: una vez enlazados, que se aproveche al máximo lo que cada l
 - **Filtro "Sin turno":** obras en Por medir sin día de medición, y obras en Por instalar sin día o sin hora de instalación.
 - **Se combinan:** "Por instalar" + "Sin turno" muestra las instalaciones que falta agendar. Los números de los demás filtros acompañan a la etapa elegida.
 
+## Exportar a CSV (18/11/2026)
+
+Botón "Exportar", arriba. Baja **lo que está en pantalla**: el mes, la búsqueda y los filtros que estén puestos. Trae los datos del contrato, la plata (total, cobrado, saldo y seña; solo si quien exporta la puede ver) y lo del tablero (etapa, medición, instalación, plazo, si le falta el turno). Mismo formato que "Exportar tablero": se abre directo en Excel. **El archivo tiene nombres, teléfonos y direcciones de clientes: no se sube al repo.**
+
+## Material "Por definir" (18/11/2026)
+
+En el contrato, en "Cargar obra" y en "Editar obra", la primera opción del campo Material es **"Por definir"**, para cargar la obra aunque el cliente todavía no haya elegido el color. Se guarda como texto, igual que cualquier material; cuando elige, se cambia desde "Editar obra".
+
 ## "Cargar en Por medir" carga o avisa (18/11/2026)
 
 Crea la ficha en Por medir, vacía, y la enlaza. Si el presupuesto ya está en el tablero, **avisa y no hace nada**: no busca una ficha para enlazarla por su cuenta. Para enlazar con una ficha que ya existe está "Enlazar con el tablero", que muestra de quién es antes de confirmar. → `01-strategy/decision-log/2026-11-18-un-numero-una-persona.md`

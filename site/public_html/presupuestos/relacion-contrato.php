@@ -495,6 +495,7 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
     </div>
     <div class="acc">
       <div class="buscar"><input type="search" id="buscar" placeholder="Buscar en todos los meses" autocomplete="off" aria-label="Buscar cliente, N° o material en todos los meses"></div>
+      <button type="button" class="btn" id="expB" title="Baja a un archivo CSV los contratos que están en pantalla (el mes, la búsqueda y los filtros que tengas puestos)">Exportar</button>
       <button type="button" class="btn" id="papB" data-papelera title="Contratos borrados: se pueden recuperar durante 30 días" hidden></button>
       <button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button>
     </div>
@@ -808,6 +809,48 @@ function sinTurno(c){
   if(k.etapa==='instalar')return (!k.fecha||!k.hora)&&!(k.checks&&k.checks.instalado);
   return false;
 }
+// Exportar a CSV (dueño, 18/11/2026): baja lo que está en pantalla, con el mes, la búsqueda y los filtros puestos.
+// Mismo formato que "Exportar tablero" (punto y coma, se abre directo en Excel). La plata va solo si quien
+// exporta la puede ver. El archivo tiene nombres, teléfonos y direcciones de clientes: no se sube al repo.
+let EN_PANTALLA=[];
+function exportarCSV(){
+  const filas=EN_PANTALLA;
+  if(!filas.length){toast('No hay contratos en pantalla para exportar.');return;}
+  const dia=iso=>/^\d{4}-\d{2}-\d{2}/.test(iso||'')?iso.slice(8,10)+'/'+iso.slice(5,7)+'/'+iso.slice(0,4):'';
+  const nro=n=>Math.abs(n||0)>0.004?String(Math.round(n*100)/100).replace('.',','):'';
+  const kd=c=>cardDe(c),V=c=>ver(c),N=c=>cuentas(c,ver(c));
+  const sn=v=>v==='si'?'SI':(v==='no'?'NO':(v==='cf'?'Consumidor final':''));
+  const cols=[
+    ['Fecha',c=>dia(c.fecha)],['N° de contrato',c=>c.nro],['Ctto paralelo',c=>c.contrato_paralelo],
+    ['Nombre y apellido',c=>V(c).cliente],['Teléfono',c=>telLindo(V(c).telefono)],['Dirección',c=>V(c).direccion],
+    ['Vendedor',c=>c.vendedor],['Procedencia',c=>c.procedencia],['Material',c=>V(c).material],['Medidas',c=>c.medidas]
+  ].concat(!PLATA?[]:[
+    ['Total USD',c=>nro(N(c).tot.USD)],['Total $',c=>nro(N(c).tot.ARS)],['Cobrado USD',c=>nro(N(c).pag.USD)],['Cobrado $',c=>nro(N(c).pag.ARS)],
+    ['Saldo USD',c=>nro(N(c).sal.USD)],['Saldo $',c=>nro(N(c).sal.ARS)],['Seña',c=>c.sena?plata(c.sena.monto,c.sena.moneda):''],
+    ['Estado del cobro',c=>saldoTxt(N(c)).l.join(' + ')]
+  ]).concat([
+    ['Factura',c=>sn(c.factura)],['Muebles',c=>sn(c.muebles)],['Pileta',c=>V(c).bacha?BACHA[V(c).bacha]:''],['Modelo de bacha',c=>V(c).bacha==='nuestra'?V(c).bacha_modelo:''],
+    ['Presupuesto adjunto',c=>c.archivo?'SI':'NO'],['Enlazado con el tablero',c=>kd(c)?'SI':(c.enlace?'La ficha ya no está en el tablero':'NO')],['Completo',c=>completo(c)?'SI':'NO'],
+    ['Etapa',c=>kd(c)?(ETAPAS[kd(c).etapa]||kd(c).etapa):''],
+    ['Medición',c=>{const k=kd(c);return k?(k.medido_at?'Medida el '+dia(k.medido_at):(k.etapa==='medir'&&k.fecha?dia(k.fecha)+(k.hora?' '+k.hora:''):'')):dia(c.medicion);}],
+    ['Instalación',c=>{const k=kd(c);return k&&k.etapa==='instalar'&&k.fecha?dia(k.fecha)+(k.hora?' '+k.hora:''):'';}],
+    ['Sin turno',c=>sinTurno(c)?'SI':''],
+    ['Plazo de entrega',c=>{const k=kd(c);return k&&k.limite&&k.etapa!=='archivar'?dia(k.limite)+(k.limite<HOY?' (vencido)':''):'';}],
+    ['Notas',c=>c.nota]
+  ]);
+  const celda=v=>{
+    let t=String(v==null?'':v).replace(/\r?\n/g,' ').trim();
+    if(/^[=+\-@]/.test(t))t="'"+t; // que Excel no lo tome como fórmula
+    return /[";]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t;
+  };
+  const csv='\uFEFF'+[cols.map(k=>celda(k[0])).join(';')].concat(filas.map(c=>cols.map(k=>celda(k[1](c))).join(';'))).join('\r\n')+'\r\n';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='relacion-contrato-'+(llano(q).trim()?'busqueda':mes)+'-'+HOY+'.csv';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast('Exportados '+filas.length+(filas.length===1?' contrato':' contratos')+' · '+a.download,true);
+}
 // La etapa del tablero como filtro de la planilla: '' = todas, 'sin' = los que no están cargados en el tablero.
 let fEtapa='';
 const etapaOk=c=>{if(!fEtapa)return true;const k=cardDe(c);return fEtapa==='sin'?!k:(!!k&&k.etapa===fEtapa);};
@@ -860,7 +903,7 @@ function dibujar(){
 
   const fx=FILTROS.find(f=>f[0]===filtro)[2];
   const dir=ordenAsc?1:-1;
-  const lista=delMes.filter(etapaOk).filter(fx).sort((a,b)=>{
+  const lista=EN_PANTALLA=delMes.filter(etapaOk).filter(fx).sort((a,b)=>{
     if(orden==='cliente'){const x=llano(ver(a).cliente),y=llano(ver(b).cliente);if(x!==y)return (x<y?-1:1)*dir;}
     else if(a.fecha!==b.fecha)return (a.fecha<b.fecha?-1:1)*dir;
     return a.creado<b.creado?1:-1;
@@ -1003,7 +1046,7 @@ function abrirFicha(id){
     +'<div class="dos"><label class="campo">Fecha del contrato<input id="fFecha" type="date" value="'+val(c?c.fecha:(mes===HOY.slice(0,7)?HOY:mes+'-01'))+'"></label>'
     +'<label class="campo">Vendedor'+selHtml('fVend',VENDEDORES,c?c.vendedor:'')+'</label></div>'
     +'<div class="dos"><label class="campo">Procedencia'+selHtml('fProc',PROCEDENCIAS,c?c.procedencia:'')+'</label>'
-    +'<label class="campo">Material<input id="fMat" value="'+val(v.material)+'" list="catalogo" autocomplete="off"'+ro+'></label></div>'
+    +'<label class="campo">Material<input id="fMat" value="'+val(v.material)+'" list="catalogo" autocomplete="off" placeholder="Color, o Por definir"'+ro+'></label></div>'
     +'<label class="campo">Medidas<input id="fMed" value="'+val(c&&c.medidas)+'" placeholder="2,40 x 0,62 + isla 1,80 x 0,90" autocomplete="off"></label>'
     ;
   h+='<h4>Plata</h4>'
@@ -1459,6 +1502,7 @@ document.addEventListener('keydown',ev=>{
 });
 $('modal').addEventListener('input',ev=>{if(ev.target.id==='fNota'){crecerNota();return;}if(ev.target.id==='fNro'){buscarNro();return;}if(F&&['fTotU','fTotA','fSen','fSenM','fSenC','pMonto','pCot'].indexOf(ev.target.id)>=0)pintarPagos();});
 $('filtros').addEventListener('change',ev=>{if(ev.target.id==='fEtapa'){fEtapa=ev.target.value;dibujar();}});
+$('expB').addEventListener('click',exportarCSV);
 $('modal').addEventListener('change',ev=>{
   if(F&&(ev.target.id==='fSenM'||ev.target.id==='pComo'))pintarPagos();
   if(ev.target.id==='fTel')pintarTel(true);
@@ -1478,7 +1522,9 @@ $('mesSig').addEventListener('click',()=>moverMes(1));
 $('mesHoy').addEventListener('click',()=>{mes=HOY.slice(0,7);dibujar();});
 
 // Catálogo de materiales de la calculadora, para escribir el material siempre igual ("Marca · Color").
-pedir(API_COLORES).then(r=>{$('catalogo').innerHTML=(r.colors||[]).map(c=>'<option value="'+esc(c.full)+'">').join('');}).catch(()=>{});
+// "Por definir" va siempre primero (dueño, 18/11/2026): el contrato se carga aunque el cliente no haya elegido el color.
+$('catalogo').innerHTML='<option value="Por definir">';
+pedir(API_COLORES).then(r=>{$('catalogo').innerHTML='<option value="Por definir">'+(r.colors||[]).map(c=>'<option value="'+esc(c.full)+'">').join('');}).catch(()=>{});
 // Llegando desde el tablero ("Con contrato"): ?contrato=<id> abre ese contrato, en su mes.
 (async function(){
   await cargar();
