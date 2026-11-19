@@ -897,7 +897,8 @@ function toast(msg,ok){ // ok=true: aviso bueno (verde); si no, algo falta o fal
 }
 
 async function pedir(url,body){
-  const opt=body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{};
+  // keepalive: un guardado que ya salió termina aunque la página o la ventana del calendario se cierre enseguida.
+  const opt=body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),keepalive:true}:{};
   opt.credentials='same-origin';
   const r=await fetch(url,opt);
   if(r.status===401){location.href='/calculadora/login.php';throw new Error('Sesión vencida');}
@@ -1517,6 +1518,7 @@ async function guardar(c,body,aplicar){
     a1.scrollIntoView({block:'center',behavior:'smooth'});
   }
   try{
+    await notaPend; // si había una nota guardándose, va primero: así lo que vuelve del servidor ya la trae
     await pedir(API,Object.assign({cliente_nro:c.cliente_nro,sub:c.sub},body));
   }catch(e){
     toast(e.message);
@@ -1698,15 +1700,64 @@ $('dp').addEventListener('change',()=>{
   guardar(c,{accion:'fecha',fecha:f},()=>{c.fecha=f;});
 });
 
-// La nota se guarda al salir del campo o con Enter.
+// ---------- La nota no se pierde (dueño, 19/11/2026: "no puedo setear o modificar la nota") ----------
+// Antes se guardaba recién al salir del campo o con Enter. Si enseguida se tocaba otra cosa (un tilde, "Menos", el
+// "Cerrar" de la ventana del calendario), lo escrito se podía perder: en iPad y Safari tocar un botón no saca el foco
+// del campo, y la ficha se volvía a dibujar (o la ventana se cerraba) antes de guardar.
+// Ahora la nota se guarda sola mientras se escribe, y siempre antes de cualquier otra cosa que se toque.
+let notaT=null,notaPend=Promise.resolve();
+// Guarda ya lo que dice ese campo, sin volver a dibujar la ficha (el campo queda donde está, con el cursor).
+// Devuelve true si había algo para guardar.
+function notaGuardar(inp){
+  const art=inp&&inp.closest('.card'),c=art&&cardDe(art.dataset.key);
+  if(!c||!OPERA)return false;
+  const nota=inp.value.replace(/\s+/g,' ').trim();
+  if(nota===String(c.nota||'').trim())return false;
+  c.nota=nota;c._txt='';
+  notaPend=notaPend.then(()=>pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'nota',nota:nota})).catch(e=>{toast(e.message);});
+  return true;
+}
+// Para el calendario: lo que hay escrito y sin guardar, SIN guardarlo acá. La ventana del calendario lo guarda ella,
+// porque al cerrarse se lleva esta página y un guardado que saliera de acá no llegaría a empezar.
+function notaSinGuardar(){
+  clearTimeout(notaT);notaT=null;
+  const out=[];
+  document.querySelectorAll('input[data-nota]').forEach(inp=>{
+    const art=inp.closest('.card'),c=art&&cardDe(art.dataset.key);
+    if(!c||!OPERA)return;
+    const nota=inp.value.replace(/\s+/g,' ').trim();
+    if(nota!==String(c.nota||'').trim()){c.nota=nota;c._txt='';out.push({cliente_nro:c.cliente_nro,sub:c.sub,nota:nota});}
+  });
+  return out;
+}
+// Guarda lo que haya escrito y sin guardar en cualquier nota a la vista.
+function notaFlush(){
+  clearTimeout(notaT);notaT=null;
+  let hubo=false;
+  document.querySelectorAll('input[data-nota]').forEach(i=>{if(notaGuardar(i))hubo=true;});
+  return hubo;
+}
+// Mientras se escribe: al hacer una pausa.
+wrap.addEventListener('input',ev=>{
+  const inp=ev.target.closest&&ev.target.closest('input[data-nota]');
+  if(!inp)return;
+  clearTimeout(notaT);notaT=setTimeout(()=>{notaT=null;notaGuardar(inp);},1200);
+});
+// Antes de cualquier otra cosa que se toque (en la fase de captura: corre antes que el botón tocado).
+document.addEventListener('pointerdown',ev=>{if(!(ev.target.closest&&ev.target.closest('input[data-nota]')))notaFlush();},true);
+// Y si se sale de la página.
+window.addEventListener('pagehide',notaFlush);
+// Al salir del campo o con Enter: se guarda y la ficha se pone al día (el cartel de la nota, arriba).
 wrap.addEventListener('change',ev=>{
   const inp=ev.target.closest('input[data-nota]');
   if(!inp)return;
-  const c=cardDe(inp.closest('.card').dataset.key);
+  const art=inp.closest('.card'),c=cardDe(art.dataset.key);
   if(!c)return;
-  const nota=inp.value.trim();
-  if(nota===c.nota)return;
-  guardar(c,{accion:'nota',nota:nota},()=>{c.nota=nota;});
+  clearTimeout(notaT);notaT=null;
+  const hubo=notaGuardar(inp),cartel=art.querySelector('.c-nota');
+  if(!hubo&&(cartel?cartel.textContent:'')===String(c.nota||''))return; // nada cambió
+  dibujar();
+  notaPend.then(()=>{if(libre())cargar();});
 });
 wrap.addEventListener('keydown',ev=>{
   if(ev.key==='Enter'&&ev.target.matches('input[data-nota]'))ev.target.blur();

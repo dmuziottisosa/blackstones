@@ -1154,9 +1154,15 @@ function historialHtml(c){
 let modalOk=null;
 // Al cerrar se vuelve a leer el tablero: en la ficha se pudo haber cambiado cualquier cosa.
 function cerrarModal(recargar){
+  // Si en la ficha de al lado quedó una nota escrita y sin guardar, se guarda antes de cerrar: la ventana se lleva
+  // la ficha, y el campo solo guardaba al salir de él (dueño, 19/11/2026).
+  // La guarda esta página y no la ficha: al cerrarse la ventana, la ficha desaparece y su guardado no llegaría a salir.
+  let notas=[];
+  try{const w=$('fFicha')&&$('fFicha').contentWindow;if(w&&w.notaSinGuardar)notas=JSON.parse(JSON.stringify(w.notaSinGuardar()));}catch(e){}
   $('modalBg').classList.remove('show');modalOk=null;crAbierto=false;
   $('mCuerpo').innerHTML='';
-  if(recargar!==false)cargar();
+  const guardadas=Promise.all(notas.map(n=>pedir(API,{cliente_nro:n.cliente_nro,sub:n.sub,accion:'nota',nota:n.nota}).catch(e=>toast(e.message))));
+  if(recargar!==false)guardadas.then(()=>cargar());
 }
 function abrir(c,dia,foco){ // dia: fecha sugerida (viene de soltar la obra en un día)
   const e=etapaDe(c.etapa);
