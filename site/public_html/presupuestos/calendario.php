@@ -197,6 +197,11 @@ button{font-family:inherit;color:inherit}
 /* === EVENTO === */
 .ev{display:block;width:100%;margin-top:4px;padding:5px 7px;border:1px solid transparent;border-left:3px solid var(--et);border-radius:var(--radius-sm);background:var(--et-soft);color:var(--text);font-size:12px;font-weight:600;text-align:left;cursor:pointer;overflow-wrap:anywhere;line-height:1.35}
 @media(hover:hover){.ev:hover{border-color:var(--et);border-left-color:var(--et)}}
+/* Al pasar por el cartel de una obra se marcan todos los suyos: la medición, la instalación y el vencimiento (dueño, 19/11/2026). */
+.ev.mismo{box-shadow:0 0 0 2px var(--dk);position:relative;z-index:1}
+.ev.hecha.mismo{color:var(--text);background:var(--card)}
+.ev.hecha.mismo b{color:var(--text)}
+[data-theme="dark"] .ev.mismo{box-shadow:0 0 0 2px var(--gd)}
 .ev i{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;color:var(--et)}
 .ev span{color:var(--text3);font-weight:500}
 .ev em{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;margin-right:4px;border-radius:50%;background:var(--red);color:var(--card);font-size:10.5px;font-weight:800;vertical-align:-2px}
@@ -207,6 +212,7 @@ button{font-family:inherit;color:inherit}
 .ev.hecha{background:none;border-color:var(--border-soft);border-left-color:var(--et);color:var(--text3);font-weight:500}
 .ev.hecha b{color:var(--text2)}
 .ev em.ok{background:var(--gr)}
+.ev em.conf{background:var(--amb)} /* turno sin confirmar */
 [data-theme="dark"] .ev em.ok{color:#04220F}
 /* El de instalación va después del nombre, en el color de la etapa Por instalar (el mismo del tablero): la clase et-… le da su --et */
 .ev em.ok.inst{background:var(--et);margin:0 0 0 5px}
@@ -733,7 +739,8 @@ function tiraMedicion(iso,largo){
   if(!l.length||!MEDIR)return '';
   const n=l.length,h=l.filter(c=>c.medido_at).length;
   const estado=h===n?(n===1?'hecha':'hechas'):(h?h+' de '+n+' hechas':'');
-  const t='Bloque de medición del '+fechaCorta(iso)+' · '+n+(n===1?' obra':' obras')+(h===n?' · todas medidas':(h?' · '+h+' medidas':' · sin medir todavía'));
+  const sc=l.filter(faltaConfirmar).length;
+  const t='Bloque de medición del '+fechaCorta(iso)+' · '+n+(n===1?' obra':' obras')+(h===n?' · todas medidas':(h?' · '+h+' medidas':' · sin medir todavía'))+(sc?' · '+sc+' sin confirmar':'');
   if(largo)return '<button type="button" class="ev blq-ag med et-'+esc(MEDIR)+'" data-bloque="'+iso+'" data-origen="med">Bloque de medición · '+n+(n===1?' obra':' obras')+(estado?' <span>· '+estado+'</span>':'')+'</button>';
   return '<div class="blq med ini fin et-'+esc(MEDIR)+(h===n?' ok':'')+'" role="button" tabindex="0" data-bloque="'+iso+'" data-origen="med" title="'+esc(t)+'"><span>'+(h===n?'<s>✓ </s>':'')+'Medición · '+n+'<u>'+(n===1?' obra':' obras')+'</u></span>'+(h===n?'<i>✓</i>':'')+'</div>';
 }
@@ -940,6 +947,14 @@ function armar(){
   return dias;
 }
 
+// El turno está puesto y el cliente todavía no lo confirmó (dueño, 19/11/2026): en el calendario lleva un "?" ámbar,
+// igual que "Falta confirmar" en la ficha del tablero. Solo la excepción: el confirmado no lleva nada. No se pide
+// con el turno ya pasado, ni cuando en Por instalar falta la hora (ahí ya avisa el "!").
+function faltaConfirmar(c){
+  const e=etapaDe(c.etapa);
+  if(!e||!e.confirma||!c.fecha||cumplida(c)||atrasada(c)||c.checks[e.confirma])return false;
+  return !(e.exige_fecha&&e.pide_hora&&!c.hora);
+}
 // largo=true: dice también qué es ("Medición · …"). En la grilla alcanza con el color.
 function chip(ev,largo){
   const c=ev.c;
@@ -971,11 +986,11 @@ function chip(ev,largo){
     const t='Plazo de entrega: '+fechaCorta(c.limite)+(c.plazo_manual?' (modificado)':'')+' · '+etapaDe(c.etapa).titulo;
     return '<button type="button" class="ev vence'+(p?' '+p:'')+'" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" title="'+esc(t)+'">'+(p==='vencida'?'Venció':'Vence')+' · '+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
   }
-  const e=etapaDe(c.etapa),av=avisosDe(c);
-  const t=e.fecha+(c.fecha?' '+fechaCorta(c.fecha):'')+(c.hora?' '+c.hora+' hs':'')+(av.length?' · '+av.join(' · '):'');
-  return '<button type="button" class="ev et-'+esc(c.etapa)+(atrasada(c)?' atras':'')+'" draggable="true" data-key="'+esc(c.key)+'" data-tipo="'+esc(c.etapa)+'" title="'+esc(t)+'">'
-    +(av.length?'<em>!</em>':'')+(largo?esc(e.fecha)+' · ':'')+(c.hora?'<i>'+esc(c.hora)+'</i> ':'')+nom+(c.zona?' <span>· '+esc(c.zona)+'</span>':'')
-    +(largo&&av.length?'<br><span>'+esc(av.join(' · '))+'</span>':'')+'</button>';
+  const e=etapaDe(c.etapa),av=avisosDe(c),fc=faltaConfirmar(c);
+  const t=e.fecha+(c.fecha?' '+fechaCorta(c.fecha):'')+(c.hora?' '+c.hora+' hs':'')+(av.length?' · '+av.join(' · '):'')+(fc?' · Falta confirmar el turno con el cliente':'');
+  return '<button type="button" class="ev et-'+esc(c.etapa)+(atrasada(c)?' atras':'')+(fc?' sin-conf':'')+'" draggable="true" data-key="'+esc(c.key)+'" data-tipo="'+esc(c.etapa)+'" title="'+esc(t)+'">'
+    +(av.length?'<em>!</em>':'')+(fc?'<em class="conf">?</em>':'')+(largo?esc(e.fecha)+' · ':'')+(c.hora?'<i>'+esc(c.hora)+'</i> ':'')+nom+(c.zona?' <span>· '+esc(c.zona)+'</span>':'')
+    +(largo&&(av.length||fc)?'<br><span>'+esc(av.concat(fc?['Falta confirmar']:[]).join(' · '))+'</span>':'')+'</button>';
 }
 
 function dibujar(){
@@ -1378,6 +1393,22 @@ $('mesHoy').addEventListener('click',()=>{
 });
 
 // ---------- Arrastrar a un día (computadora) ----------
+// Al pasar el mouse (o el foco del teclado) por el cartel de una obra, se marcan sus otros carteles a la vista:
+// desde la instalación se ve dónde fue su medición y al revés (dueño, 19/11/2026). Solo donde hay mouse:
+// en una pantalla táctil el toque abre la ficha y la marca quedaría pegada.
+function marcarObra(k){
+  if(k===marcarObra.k&&(!k||document.querySelector('.ev.mismo')))return;
+  marcarObra.k=k;
+  document.querySelectorAll('.ev.mismo').forEach(b=>b.classList.remove('mismo'));
+  if(k)document.querySelectorAll('.ev[data-key]').forEach(b=>{if(b.dataset.key===k)b.classList.add('mismo');});
+}
+if(window.matchMedia&&matchMedia('(hover:hover)').matches){
+  const deEv=ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('.ev[data-key]');return b?b.dataset.key:'';};
+  document.addEventListener('mouseover',ev=>marcarObra(deEv(ev)));
+  document.addEventListener('focusin',ev=>marcarObra(deEv(ev)));
+  document.addEventListener('focusout',()=>marcarObra(''));
+  document.documentElement.addEventListener('mouseleave',()=>marcarObra(''));
+}
 document.addEventListener('dragstart',ev=>{
   const b=ev.target.closest&&ev.target.closest('.ev[data-key]');
   if(!b)return;
