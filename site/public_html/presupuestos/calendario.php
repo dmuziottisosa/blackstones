@@ -210,6 +210,7 @@ button{font-family:inherit;color:inherit}
 [data-theme="dark"] .ev em.ok{color:#04220F}
 /* El de instalación va después del nombre, en el color de la etapa Por instalar (el mismo del tablero): la clase et-… le da su --et */
 .ev em.ok.inst{background:var(--et);margin:0 0 0 5px}
+.ev em.ok.inst.pri{margin:0 4px 0 0} /* la instalación hecha, en el día de su turno: el tilde va adelante */
 [data-theme="dark"] .ev em.ok.inst{color:#1D1033}
 /* Vencimiento del plazo: es un límite, no un turno. Va sin relleno y con borde punteado. */
 .ev.vence{--et:var(--text3);background:none;border:1px dashed var(--border);border-left:1px dashed var(--border);color:var(--text2);font-weight:600}
@@ -581,7 +582,11 @@ function instalada(c){
   if(i<0||a<i||ETAPAS[a].aparte)return null;
   if(a===i&&!c.checks.instalado)return null;
   const h=(c.hitos||[]).find(x=>x.txt==='Instalado');
-  return {fecha:(a===i&&c.boton_at)||(h&&h.fecha)||'',etapa:ETAPAS[i].id};
+  const fecha=(a===i&&c.boton_at)||(h&&h.fecha)||'',iso=x=>/^\d{4}-\d{2}-\d{2}/.test(String(x||''))?String(x).slice(0,10):'';
+  // "dia": el día en que se instaló es el de su turno (dueño, 19/11/2026). En Por instalar el turno sigue en la
+  // ficha; después, queda guardado en el pase de etapa. Sin turno cargado, vale el día en que se marcó "Instalado".
+  const t=a===i?{fecha:c.fecha,hora:c.hora}:(((c.historia||[]).find(x=>x.id===ETAPAS[i].id)||{}).turno||{});
+  return {fecha:fecha,etapa:ETAPAS[i].id,dia:iso(t.fecha)||iso(fecha),hora:iso(t.fecha)?(t.hora||''):''};
 }
 // Ya entregada: instalada (aunque siga en Por instalar esperando la aprobación) o en Por archivar.
 // Una obra entregada no vence más: sale de los "Vence", de la franja de entrega y de "Plazo vencido" (dueño, 19/11/2026).
@@ -667,10 +672,9 @@ function coincide(c){
 // Con días de medición y de instalación marcados a la vez, se ven las de unos y las de otros.
 const selI=new Set();
 const instDe=c=>{
-  const e=etapaDe(c.etapa);
-  if(e&&e.boton==='instalado'&&c.fecha)return c.fecha;             // en Por instalar: el día de su turno
-  const i=instalada(c),f=i?String(i.fecha||'').slice(0,10):'';     // ya en Por archivar: el día en que se instaló
-  return /^\d{4}-\d{2}-\d{2}$/.test(f)?f:'';
+  const i=instalada(c),e=etapaDe(c.etapa);
+  if(i)return i.dia;                                               // ya instalada: el día de su turno
+  return e&&e.boton==='instalado'&&c.fecha?c.fecha:'';             // por instalar: el día agendado
 };
 const hayFoco=()=>selB.size>0||selI.size>0;
 const enFoco=c=>coincide(c)&&(!hayFoco()||selB.has(bloqueDe(c))||(todosMarcados&&!bloqueDe(c))||(selI.size>0&&selI.has(instDe(c))));
@@ -921,12 +925,15 @@ function armar(){
     // La medición ya hecha queda marcada en su día, esté la obra en la etapa que esté: es el día
     // que le da nombre a su bloque y desde el que corre el plazo.
     if(c.medido_at&&MEDIR&&ver[MEDIR]!==false)sumar(c.medido_at,{tipo:'medida',c:c});
+    // La instalación ya hecha queda marcada en el día de su turno (dueño, 19/11/2026), como la medición en el suyo.
+    const ins=instalada(c);
+    if(ins&&ins.dia&&ver[ins.etapa]!==false)sumar(ins.dia,{tipo:'instalada',c:c,hora:ins.hora});
     if(c.limite&&!entregada(c)&&ver.vence!==false)sumar(c.limite,{tipo:'vence',c:c});
     if(previsto(c)&&ver.vence!==false)sumar(previsto(c),{tipo:'vence',c:c,prev:true});
   });
   Object.keys(dias).forEach(d=>dias[d].sort((a,b)=>{
     if((a.tipo==='vence')!==(b.tipo==='vence'))return a.tipo==='vence'?1:-1; // los turnos arriba, los vencimientos abajo
-    const ha=a.tipo==='vence'?'':a.c.hora,hb=b.tipo==='vence'?'':b.c.hora;
+    const hd=x=>x.tipo==='vence'?'':(x.tipo==='instalada'?(x.hora||''):x.c.hora),ha=hd(a),hb=hd(b);
     if(ha!==hb){if(!ha)return 1;if(!hb)return -1;return ha<hb?-1:1;}
     return a.c.key<b.c.key?-1:1;
   }));
@@ -950,9 +957,14 @@ function chip(ev,largo){
   if(ev.tipo==='medida'){
     // Dos tildes en el mismo renglón (dueño, 18/11/2026): adelante, el de la medición; después del nombre, el de la
     // instalación, en el color que tiene Por instalar en el tablero. Así los N° y los nombres quedan alineados.
-    const inst=instalada(c),ti=inst?'Instalada'+(inst.fecha?' el '+fechaCorta(inst.fecha):''):'';
+    const inst=instalada(c),ti=inst?'Instalada'+(inst.dia||inst.fecha?' el '+fechaCorta(inst.dia||inst.fecha):''):'';
     const t='Medición hecha el '+fechaCorta(c.medido_at)+(inst?' · '+ti:'')+' · ahora en '+etapaDe(c.etapa).titulo;
     return '<button type="button" class="ev hecha et-'+esc(MEDIR)+'" data-key="'+esc(c.key)+'" data-tipo="medida" title="'+esc(t)+'"><em class="ok">✓</em>'+(largo?'Medición hecha · '+(inst?esc(ti)+' · ':''):'')+nom+(inst?'<em class="ok inst et-'+esc(inst.etapa)+'">✓</em>':'')+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
+  }
+  if(ev.tipo==='instalada'){
+    const inst=instalada(c)||{};
+    const t='Instalada el '+fechaCorta(inst.dia)+(inst.hora?' · turno de las '+inst.hora+' hs':'')+' · ahora en '+etapaDe(c.etapa).titulo;
+    return '<button type="button" class="ev hecha et-'+esc(inst.etapa)+'" data-key="'+esc(c.key)+'" data-tipo="instalada" title="'+esc(t)+'"><em class="ok inst pri">✓</em>'+(largo?'Instalada · ':'')+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
   }
   if(ev.tipo==='vence'){
     const p=estadoPlazo(c);
@@ -986,9 +998,8 @@ function dibujar(){
     // y todo lo que ya tienen agendado esas obras (por ejemplo una instalación más adelante)
     CARDS.filter(enFoco).forEach(c=>{[c.fecha,c.limite,instDe(c)].forEach(f=>{if(f&&f>rHasta)rHasta=f;});});
     // Solo con días de instalación marcados, la vista arranca en la semana de la primera instalación
-    // (lo de antes, la medición, queda a una flecha). Una obra ya instalada no tiene cartel ese día: se ve
-    // en el día en que se midió, con sus dos tildes, así que para esas la vista arranca en su medición.
-    if(!sel.length)sel.push(CARDS.filter(enFoco).map(c=>(instalada(c)&&c.medido_at)||instDe(c)).filter(Boolean).sort()[0]||[...selI].sort()[0]);
+    // (lo de antes, la medición, queda a una flecha). Con bloques de medición, arranca en la medición.
+    if(!sel.length)sel.push([...selI].sort()[0]);
     // Se ven semanas enteras: las que hacen falta para la historia completa (medición → vencimiento),
     // nunca menos de 5. Es un calendario corrido, sin recortes: con las flechas se sigue para atrás y adelante.
     ancla=lunesDe(sel[0]);

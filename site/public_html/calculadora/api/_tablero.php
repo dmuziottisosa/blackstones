@@ -580,12 +580,18 @@ function bs_tablero_historia($obra, $inicio = '') {
             if ($cid === $boton || in_array($cid, (array)($def['hitos'] ?? []), true)) $hitos[] = ['txt' => $label, 'fecha' => $fecha, 'por' => $por];
         }
         // Día en que salió de esa etapa (el último, si pasó más de una vez).
-        $salio = '';
+        // 'turno': el día y la hora que tenía agendados cuando salió (el pase los guarda y después se borran de
+        // la ficha). El calendario lo usa para marcar la instalación en el día de su turno (dueño, 19/11/2026).
+        $salio = ''; $turno = null;
         foreach ((array)($obra['hist'] ?? []) as $h) {
-            if (($h['de'] ?? '') === $eid && !empty($h['at'])) $salio = substr((string)$h['at'], 0, 10);
+            if (($h['de'] ?? '') !== $eid || empty($h['at'])) continue;
+            $salio = substr((string)$h['at'], 0, 10);
+            $turno = bs_tablero_fecha_valida((string)($h['fecha'] ?? ''))
+                ? ['fecha' => (string)$h['fecha'], 'hora' => bs_tablero_hora_valida((string)($h['hora'] ?? '')) ? (string)$h['hora'] : '']
+                : null;
         }
         // 'dias': cuántos días estuvo en esa etapa (null si no se sabe: entró antes de que se anotaran los pases).
-        $historia[] = ['etapa' => $def['titulo'], 'items' => $items, 'salio' => bs_tablero_fecha_valida($salio) ? $salio : '', 'dias' => $estuvo[$eid] ?? null];
+        $historia[] = ['id' => $eid, 'etapa' => $def['titulo'], 'items' => $items, 'salio' => bs_tablero_fecha_valida($salio) ? $salio : '', 'dias' => $estuvo[$eid] ?? null, 'turno' => $turno];
     }
     return [$historia, $hitos];
 }
