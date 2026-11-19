@@ -118,11 +118,26 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 .tope-b{display:flex;align-items:center;gap:8px}
 .vista-b{padding:7px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap}
 @media(hover:hover){.vista-b:hover{border-color:var(--gd);color:var(--text)}}
-.hoy{font-size:14px;color:var(--text2);white-space:nowrap}
-.hoy b{font-weight:700;color:var(--text)}
+.hoy{font-size:13.5px;color:var(--text3);white-space:nowrap}
+.hoy b{font-weight:600;color:var(--text2)}
+/* "Abrir todas / Plegar": sin marco, para que el único control con marco sea el interruptor de vista. */
+.vista-b.quieto{border-color:transparent;background:none;padding-left:8px;padding-right:8px}
+/* "⋯" de la barra: lo que se usa de vez en cuando (exportar, archivadas, papelera). */
+.tope-mas{position:relative}
+.tope-mas-b{display:inline-flex;align-items:center;justify-content:center;gap:3px;width:32px;height:32px;padding:0;border:none;border-radius:50%;background:none;cursor:pointer}
+.tope-mas-b[hidden]{display:none} /* sin esto, el display de arriba le gana al atributo hidden */
+.tope-mas-b i{width:3.5px;height:3.5px;border-radius:50%;background:var(--text3)}
+.tope-mas-b[aria-expanded="true"]{background:var(--card-alt)}
+.tope-mas-b[aria-expanded="true"] i{background:var(--text)}
+@media(hover:hover){.tope-mas-b:hover{background:var(--card-alt)}.tope-mas-b:hover i{background:var(--text)}.vista-b.quieto:hover{border-color:transparent;color:var(--text)}}
+.tope-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;min-width:200px;padding:6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow-lg)}
+.tope-menu[hidden]{display:none}
+.tope-menu button{display:block;width:100%;padding:9px 12px;border:none;border-radius:var(--radius-sm);background:none;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--text);text-align:left;white-space:nowrap;cursor:pointer}
+.tope-menu button[hidden]{display:none}
+@media(hover:hover){.tope-menu button:hover{background:var(--card-alt)}}
 /* Fecha de hoy y semana en curso: versión larga en pantallas anchas, corta en celular. */
 .hoy .f-c,.hoy .s-c{display:none}
-.hoy .sem{color:var(--text2);font-weight:600}
+.hoy .sem{color:var(--text3);font-weight:500}
 @media(max-width:699px){
   .hoy .f-l,.hoy .s-l{display:none}
   .hoy .f-c,.hoy .s-c{display:inline}
@@ -527,6 +542,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .c-det .lnk{padding:11px 0;font-size:13.5px}
   .c-det .acciones{gap:6px 20px}
   .vista-b{padding:9px 14px;font-size:13px}
+  .tope-mas-b{width:40px;height:40px}
+  .tope-menu button{padding:13px 14px;font-size:14px}
   .col-fb{padding:10px 14px}
   .col-filtros button{padding:8px 13px;font-size:12.5px}
   .col-aviso{min-height:38px;padding:8px 13px 8px 6px;font-size:12px} /* para el dedo (auditoría de tablet, 18/11/2026) */
@@ -679,15 +696,22 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
       <button type="button" id="buscarX" aria-label="Borrar búsqueda" hidden>×</button>
       <span id="buscarN"></span>
     </div>
+    <!-- Barra de arriba (dueño, 19/11/2026: "organizar esto mejor, orden y desaturación"): la fecha, y a la derecha lo
+         que se usa todo el tiempo (la vista y abrir/plegar). Lo de vez en cuando (exportar, archivadas, papelera) va en "⋯". -->
     <div class="tope-d">
+      <div class="hoy" id="hoyTxt"></div>
       <div class="tope-b">
         <div class="vista-sw" id="vistaSw" role="group" aria-label="Vista del tablero"><button type="button" data-vista="columnas" title="Las cinco etapas juntas, una al lado de la otra">Columnas</button><button type="button" data-vista="etapa" title="Una etapa a la vez, con sus pestañas: la vista de la tablet">Por etapa</button></div>
-        <button type="button" class="vista-b" id="vistaB"></button>
-        <button type="button" class="vista-b" id="exportB" title="Baja todas las obras del tablero en un archivo CSV (se abre con Excel)">Exportar<span class="sob"> tablero</span></button>
-        <button type="button" class="vista-b" id="archB" title="Obras archivadas: se pueden devolver al tablero" hidden></button>
-        <button type="button" class="vista-b" id="papB" title="Fichas borradas: se pueden recuperar durante 30 días" hidden></button>
+        <button type="button" class="vista-b quieto" id="vistaB"></button>
+        <div class="tope-mas">
+          <button type="button" class="tope-mas-b" id="topeMas" aria-haspopup="menu" aria-expanded="false" aria-controls="topeMenu" aria-label="Más acciones del tablero" title="Exportar, archivadas y papelera"><i></i><i></i><i></i></button>
+          <div class="tope-menu" id="topeMenu" role="menu" hidden>
+            <button type="button" role="menuitem" id="exportB" title="Baja todas las obras del tablero en un archivo CSV (se abre con Excel)">Exportar tablero</button>
+            <button type="button" role="menuitem" id="archB" title="Obras archivadas: se pueden devolver al tablero" hidden></button>
+            <button type="button" role="menuitem" id="papB" title="Fichas borradas: se pueden recuperar durante 30 días" hidden></button>
+          </div>
+        </div>
       </div>
-      <div class="hoy" id="hoyTxt"></div>
     </div>
   </div>
   <div class="avisos-g" id="avisosG"></div>
@@ -864,7 +888,8 @@ const ESCRITORIO=window.matchMedia('(min-width:1100px)');
 // "etapa" (la de la tablet: una etapa a la vez, con pestañas). Se recuerda en este navegador. En pantallas de menos
 // de 1100 px la vista ya es por etapa y el interruptor no se muestra. No cambia ningún dato: es solo cómo se mira.
 let vistaTab='columnas';
-try{if(localStorage.getItem('bs-tablero-vista')==='etapa')vistaTab='etapa';}catch(e){}
+// (clave propia: 'bs-tablero-vista' ya la usa "Abrir todas las fichas")
+try{if(localStorage.getItem('bs-tablero-disposicion')==='etapa')vistaTab='etapa';}catch(e){}
 const porEtapa=()=>!SOLO&&vistaTab==='etapa'&&ESCRITORIO.matches;
 function aplicarVista(){
   document.documentElement.classList.toggle('por-etapa',porEtapa());
@@ -875,7 +900,7 @@ document.getElementById('vistaSw').addEventListener('click',ev=>{ // ($ se defin
   const b=ev.target.closest('button[data-vista]');
   if(!b||b.dataset.vista===vistaTab)return;
   vistaTab=b.dataset.vista;
-  try{localStorage.setItem('bs-tablero-vista',vistaTab);}catch(e){}
+  try{localStorage.setItem('bs-tablero-disposicion',vistaTab);}catch(e){}
   aplicarVista();dibujar();ajustarAlto();
 });
 // Si la ventana cruza los 1100 px (se achica o se agranda), la vista se acomoda sola.
@@ -965,7 +990,7 @@ async function cargar(){
     ETAPAS=j.etapas;CARDS=j.cards;HOY=j.hoy;
     cargarEnlaces(); // aparte y sin esperar: el tablero no depende de esto
     $('papB').hidden=!j.papelera;$('papB').textContent='Papelera · '+(j.papelera||0);
-    $('archB').hidden=!j.archivadas;$('archB').textContent='Archivadas · '+(j.archivadas||0);INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];APROB=j.aprobaciones||[];PUEDE_APROBAR=!!j.puede_aprobar;MEDIDORES=j.medidores||[];
+    $('archB').hidden=!j.archivadas;$('archB').textContent='Archivadas · '+(j.archivadas||0);ajustarTopeMenu();INSTALADORES=j.instaladores||[];FABRICADORES=j.fabricadores||[];CORTADORES=j.cortadores||[];APROB=j.aprobaciones||[];PUEDE_APROBAR=!!j.puede_aprobar;MEDIDORES=j.medidores||[];
     dibujar();
   }catch(e){
     if(!CARDS.length)$('board').innerHTML='<div class="aviso" style="grid-column:1/-1">'+esc(e.message)+'</div>';
@@ -2592,6 +2617,20 @@ $('exportB').addEventListener('click',exportarCSV);
   if(n)n.scrollLeft=Math.max(0,a.offsetLeft-(n.clientWidth-a.offsetWidth)/2);
 })();
 
+// "⋯" de la barra de arriba: abre y cierra su menú. Si a ese usuario no le queda nada adentro, el botón no aparece.
+function cerrarTopeMenu(){$('topeMenu').hidden=true;$('topeMas').setAttribute('aria-expanded','false');}
+function ajustarTopeMenu(){
+  const hay=[...$('topeMenu').children].some(b=>!b.hidden&&getComputedStyle(b).display!=='none');
+  $('topeMas').hidden=!hay;
+  if(!hay)cerrarTopeMenu();
+}
+$('topeMas').addEventListener('click',()=>{
+  const abrir=$('topeMenu').hidden;
+  $('topeMenu').hidden=!abrir;$('topeMas').setAttribute('aria-expanded',String(abrir));
+});
+$('topeMenu').addEventListener('click',ev=>{if(ev.target.closest('button'))cerrarTopeMenu();});
+document.addEventListener('click',ev=>{if(!ev.target.closest('.tope-mas'))cerrarTopeMenu();});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape')cerrarTopeMenu();});
 $('vistaB').addEventListener('click',()=>{
   vistaTodas=!vistaTodas;
   VISTA={};

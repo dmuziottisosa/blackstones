@@ -52,6 +52,12 @@ Pasada de diseño del 16/11/2026 (pedido del dueño: que se trabaje bien en celu
 - Plegar etapas es de la vista en columnas: en "Por etapa" una etapa plegada se ve entera, y al volver sigue plegada.
 - En pantallas de menos de 1100 px el interruptor no aparece, porque ahí la vista ya es por etapa.
 
+**La barra de arriba, ordenada (dueño, 19/11/2026: "organizar esto mejor, orden y desaturación").** Eran cinco botones con marco y la fecha. Ahora, de izquierda a derecha: el buscador, la fecha (en gris, es un dato y no un botón), el interruptor de vista, "Abrir todas / Plegar las fichas" sin marco, y **"⋯"**.
+
+- **El único control con marco es el interruptor de vista.** Lo demás va sin marco para que la barra no compita con el tablero.
+- **"⋯" guarda lo que se usa de vez en cuando:** Exportar tablero, Archivadas · N y Papelera · N. Archivadas y Papelera aparecen solo si hay algo adentro, como antes. A quien no le queda nada en ese menú (Planos y bacha), el "⋯" no le aparece.
+- **Cada preferencia se recuerda por separado** en el navegador: la vista (`bs-tablero-disposicion`) y abrir/plegar (`bs-tablero-vista`). En la primera versión del interruptor compartían la misma clave y al recargar una pisaba a la otra; se corrigió el mismo día.
+
 Reglas que se cuidan en todas las pantallas:
 
 - **Lo que se toca mide lo que mide un dedo.** En pantallas táctiles (también una tablet acostada con las 5 columnas) los tildes, botones, pestañas y enlaces son más grandes.
