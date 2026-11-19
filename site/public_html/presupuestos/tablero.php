@@ -543,6 +543,21 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 }
 
 /* === CELULAR Y TABLET PARADA: una etapa a la vez, con pestañas === */
+/* Pestañas de etapa: cómo se ven. Solo aparecen donde la vista es "una etapa a la vez" (tablet y celular siempre;
+   computadora, si se elige "Por etapa"). */
+.col-tabs button{min-height:44px}
+.col-tabs button{flex:1 1 0;min-width:0;padding:7px 2px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:10.5px;letter-spacing:-.01em;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+.col-tabs button{border-bottom:3px solid var(--et)}
+.col-tabs button.on{background:var(--et);color:var(--et-on);border-color:var(--et)}
+.col-tabs button.con-aviso::after{content:'!';position:absolute;top:-5px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--red);color:var(--card);font-size:11px;font-weight:800;line-height:16px;text-align:center}
+.col-tabs button{position:relative;overflow:visible}
+.col-tabs button i{display:block;font-style:normal;font-size:13px;opacity:.75;font-variant-numeric:tabular-nums}
+.col-tabs button.puede{background:var(--et-soft);color:var(--et);border-color:var(--et);border-style:dashed dashed solid}
+.col-tabs button.puede.drop{background:var(--et);color:var(--et-on);border-style:solid;transform:scale(1.07)}
+.col-tabs button.bloq{opacity:.45}
+.col-tabs button.bloq.drop{opacity:1;background:var(--red-soft);color:var(--red);border-color:var(--red)}
+@keyframes tabllego{0%{transform:scale(1.14);box-shadow:0 0 0 0 var(--et)}100%{transform:none;box-shadow:0 0 0 9px transparent}}
+.col-tabs button.llego{animation:tabllego .9s ease-out}
 @media(max-width:1099px){
   .header{padding:12px max(14px,env(safe-area-inset-right)) 12px max(14px,env(safe-area-inset-left))}
   .header .h-right > span{display:none}
@@ -561,19 +576,6 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .buscar input{max-width:none}
   .toast{bottom:calc(20px + env(safe-area-inset-bottom))}
   .col-tabs{display:flex;gap:4px;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;margin-bottom:2px}
-  .col-tabs button{min-height:44px}
-  .col-tabs button{flex:1 1 0;min-width:0;padding:7px 2px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);font-size:10.5px;letter-spacing:-.01em;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
-  .col-tabs button{border-bottom:3px solid var(--et)}
-  .col-tabs button.on{background:var(--et);color:var(--et-on);border-color:var(--et)}
-  .col-tabs button.con-aviso::after{content:'!';position:absolute;top:-5px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--red);color:var(--card);font-size:11px;font-weight:800;line-height:16px;text-align:center}
-  .col-tabs button{position:relative;overflow:visible}
-  .col-tabs button i{display:block;font-style:normal;font-size:13px;opacity:.75;font-variant-numeric:tabular-nums}
-  .col-tabs button.puede{background:var(--et-soft);color:var(--et);border-color:var(--et);border-style:dashed dashed solid}
-  .col-tabs button.puede.drop{background:var(--et);color:var(--et-on);border-style:solid;transform:scale(1.07)}
-  .col-tabs button.bloq{opacity:.45}
-  .col-tabs button.bloq.drop{opacity:1;background:var(--red-soft);color:var(--red);border-color:var(--red)}
-  @keyframes tabllego{0%{transform:scale(1.14);box-shadow:0 0 0 0 var(--et)}100%{transform:none;box-shadow:0 0 0 9px transparent}}
-  .col-tabs button.llego{animation:tabllego .9s ease-out}
   .col,.col.puede,.col.bloq,.col.origen{border-top:none;outline:none;opacity:1;background:none}
   #aparte{margin-top:0}
   #aparte .cards{grid-template-columns:1fr}
@@ -615,6 +617,33 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 @media(min-width:960px) and (max-width:1099px){
   .col.on{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+/* === VISTA POR ETAPA EN COMPUTADORA (dueño, 19/11/2026) ===
+   La misma vista de la tablet, a elección: una etapa a la vez con sus pestañas, y las fichas en varias columnas.
+   Se elige con el interruptor "Columnas | Por etapa" de arriba y se recuerda en este navegador. La clase
+   .por-etapa la pone el script solo en pantallas de 1100 px o más: por debajo de eso la vista ya es esta. */
+.vista-sw{display:none}
+@media(min-width:1100px){
+  .vista-sw{display:inline-flex;padding:2px;border:1px solid var(--border);border-radius:999px;background:var(--card)}
+  .vista-sw button{padding:5px 12px;border:none;border-radius:999px;background:none;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap}
+  .vista-sw button.on{background:var(--dk);color:var(--cr)}
+  [data-theme="dark"] .vista-sw button.on{background:var(--gd);color:#1A1816}
+  .por-etapa .col-tabs{display:flex;gap:8px;position:sticky;top:0;z-index:50;background:var(--bg);padding:12px 0;margin-bottom:2px}
+  .por-etapa .col-tabs button{padding:9px 4px 8px;font-size:13px;letter-spacing:0}
+  .por-etapa .col-tabs button i{font-size:15px}
+  .por-etapa .board{grid-template-columns:minmax(0,1fr);overflow-x:visible;padding-bottom:0}
+  .por-etapa .board .col,.por-etapa .board .col.puede,.por-etapa .board .col.bloq,.por-etapa .board .col.origen{display:none;min-width:0;min-height:0;max-height:none;overflow:visible;padding:0;border:none;outline:none;opacity:1;background:none}
+  .por-etapa .board .col.on{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-items:start}
+  .por-etapa .board .col.on>*{grid-column:1/-1;margin-bottom:0}
+  .por-etapa .board .col.on>.card{grid-column:auto}
+  .por-etapa .board .col.on>.col-sep{margin:8px 2px 0}
+  .por-etapa .board .col.on>.col-sep.arriba{margin:8px 0 0}
+  .por-etapa .board .col-h{display:none}
+  .por-etapa .col-sub{display:none}
+  .por-etapa .col-avisos{padding:0 0 10px;margin-top:0}
+  .por-etapa .col-acc{max-width:420px}
+}
+@media(min-width:1100px) and (hover:hover){.vista-sw button:not(.on):hover{color:var(--text)}}
+@media(min-width:1100px) and (pointer:coarse){.vista-sw button{padding:10px 15px;font-size:13px}}
 /* Rol que solo adjunta fotos: la ficha se ve entera pero no se cambia. */
 .solo-fotos .c-hecho,.solo-fotos .c-fecha,.solo-fotos .chk{pointer-events:none}
 .solo-fotos .c-avanzar,.solo-fotos input[data-nota],.solo-fotos .c-det .acciones,.solo-fotos #exportB,.solo-fotos .c-fecha.vacia{display:none}
@@ -652,6 +681,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
     </div>
     <div class="tope-d">
       <div class="tope-b">
+        <div class="vista-sw" id="vistaSw" role="group" aria-label="Vista del tablero"><button type="button" data-vista="columnas" title="Las cinco etapas juntas, una al lado de la otra">Columnas</button><button type="button" data-vista="etapa" title="Una etapa a la vez, con sus pestañas: la vista de la tablet">Por etapa</button></div>
         <button type="button" class="vista-b" id="vistaB"></button>
         <button type="button" class="vista-b" id="exportB" title="Baja todas las obras del tablero en un archivo CSV (se abre con Excel)">Exportar<span class="sob"> tablero</span></button>
         <button type="button" class="vista-b" id="archB" title="Obras archivadas: se pueden devolver al tablero" hidden></button>
@@ -830,6 +860,26 @@ if(SOLO)document.documentElement.classList.add('solo');
 let colCerr={};
 try{(JSON.parse(localStorage.getItem('bs-tablero-cerradas')||'[]')||[]).forEach(k=>{colCerr[k]=true;});}catch(e){}
 const ESCRITORIO=window.matchMedia('(min-width:1100px)');
+// Vista del tablero en computadora (dueño, 19/11/2026): "columnas" (las cinco etapas juntas, la de siempre) o
+// "etapa" (la de la tablet: una etapa a la vez, con pestañas). Se recuerda en este navegador. En pantallas de menos
+// de 1100 px la vista ya es por etapa y el interruptor no se muestra. No cambia ningún dato: es solo cómo se mira.
+let vistaTab='columnas';
+try{if(localStorage.getItem('bs-tablero-vista')==='etapa')vistaTab='etapa';}catch(e){}
+const porEtapa=()=>!SOLO&&vistaTab==='etapa'&&ESCRITORIO.matches;
+function aplicarVista(){
+  document.documentElement.classList.toggle('por-etapa',porEtapa());
+  document.querySelectorAll('#vistaSw button').forEach(b=>{const on=b.dataset.vista===vistaTab;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});
+}
+aplicarVista();
+document.getElementById('vistaSw').addEventListener('click',ev=>{ // ($ se define más abajo)
+  const b=ev.target.closest('button[data-vista]');
+  if(!b||b.dataset.vista===vistaTab)return;
+  vistaTab=b.dataset.vista;
+  try{localStorage.setItem('bs-tablero-vista',vistaTab);}catch(e){}
+  aplicarVista();dibujar();ajustarAlto();
+});
+// Si la ventana cruza los 1100 px (se achica o se agranda), la vista se acomoda sola.
+ESCRITORIO.addEventListener('change',()=>{aplicarVista();if(ETAPAS.length)dibujar();});
 const ICO_PLEGAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg>';
 const ICO_DESPLEGAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
 let filtrosAb={};
@@ -1432,7 +1482,7 @@ function dibujar(){
     tabs+='<button type="button" class="et-'+esc(e.id)+(on?' on':'')+(llega?' llego':'')+(sinT?' con-aviso':'')+'" data-col="'+esc(e.id)+'">'+esc(corto)+'<i>'+lista.length+'</i></button>';
     // Avisos de la columna, siempre sobre TODAS sus fichas (no cambian al filtrar). Tocarlos prende su filtro.
     const nSinF=deEtapa.filter(sinTurno).length,nUrg=e.boton?deEtapa.filter(urgente).length:0;
-    const cerr=!SOLO&&!e.aparte&&!!colCerr[e.id];
+    const cerr=!SOLO&&!porEtapa()&&!e.aparte&&!!colCerr[e.id]; // plegar etapas es de la vista en columnas
     let h='<section class="col et-'+esc(e.id)+(on?' on':'')+(cerr?' cerrada':'')+'" data-col="'+esc(e.id)+'">';
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2><span class="col-n">'+lista.length+'</span>'
       +(nSinF||nUrg||nPisan?'<i class="col-al" title="Tiene obras por avanzar o sin fecha">!</i>':'')

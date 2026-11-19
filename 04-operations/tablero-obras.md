@@ -43,6 +43,15 @@ Pasada de diseño del 16/11/2026 (pedido del dueño: que se trabaje bien en celu
 | 700 a 1099 px (tablet parada, tablet chica acostada) | Una etapa a la vez con pestañas, y las fichas en **2 columnas** (3 desde 960 px). Se leen de izquierda a derecha, en el orden de la cola. | El mes en grilla, con los pendientes arriba. |
 | 1100 px o más (tablet acostada, computadora) | Las 5 columnas juntas, sin desplazar de costado. Entre 1100 y 1279 px los márgenes se achican para que entren. | Mes en grilla y panel de pendientes al costado. |
 
+**Interruptor de vista en computadora (dueño, 19/11/2026).** Arriba del tablero, en pantallas de 1100 px o más, hay un interruptor **Columnas | Por etapa**:
+
+- **Columnas:** la vista de siempre, las cinco etapas una al lado de la otra. Es la que viene de entrada.
+- **Por etapa:** la vista de la tablet en la computadora: una etapa a la vez, con las cinco pestañas de colores arriba y las fichas de esa etapa en varias columnas (las que entren, de 300 px como mínimo; 4 en una pantalla de 1440 px).
+- Se recuerda en ese navegador (cada persona elige la suya). No cambia ningún dato: es solo cómo se mira.
+- Todo funciona igual en las dos: tildes, "Más", los tres puntitos, y arrastrar una ficha (en "Por etapa" se suelta sobre la pestaña, como en la tablet).
+- Plegar etapas es de la vista en columnas: en "Por etapa" una etapa plegada se ve entera, y al volver sigue plegada.
+- En pantallas de menos de 1100 px el interruptor no aparece, porque ahí la vista ya es por etapa.
+
 Reglas que se cuidan en todas las pantallas:
 
 - **Lo que se toca mide lo que mide un dedo.** En pantallas táctiles (también una tablet acostada con las 5 columnas) los tildes, botones, pestañas y enlaces son más grandes.
