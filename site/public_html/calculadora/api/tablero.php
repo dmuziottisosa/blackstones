@@ -312,8 +312,8 @@ try {
                     bs_lock_release($fp);
                     bs_error('Cargá el monto de la seña.');
                 }
-                // La seña del tablero y la del contrato no se pisan nunca. El contrato le pasa la suya
-                // al tablero solo cuando el tablero no tiene ("solo_si_vacia"): si entre que se abrió el
+                // La seña que se carga acá pasa después al contrato (contratos.php "de_ficha", 19/11/2026).
+                // Al revés, el contrato le pasa la suya al tablero solo cuando el tablero no tiene ("solo_si_vacia"): si entre que se abrió el
                 // contrato y se guardó alguien ya la cargó acá, no se toca (barrido del 18/11/2026).
                 if (!empty($body['solo_si_vacia']) && !empty($obra['sena']['monto'])) {
                     bs_lock_release($fp);

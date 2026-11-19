@@ -61,7 +61,7 @@ function bs_registro_que($script, $d, $tildes, $etapas, $ADJ) {
         case 'state.php': $n = $d['nuevo_estado'] ?? ''; return $n === 'entregado' ? 'Archivó la obra' : ($n === 'aprobado' ? 'Devolvió la obra al tablero' : 'Cambió el estado del presupuesto a ' . $n);
         case 'contratos.php':
             $t = ['crear' => 'Creó un contrato', 'editar' => 'Editó un contrato', 'sena' => 'Cargó o cambió la seña', 'pago' => 'Cargó un pago', 'borrar_pago' => 'Borró un pago', 'borrar' => 'Borró un contrato', 'borrar_enlazado' => 'Borró el contrato de una ficha borrada',
-                'restaurar' => 'Recuperó un contrato de la papelera', 'restaurar_enlazado' => 'Recuperó el contrato de una ficha', 'mudar_enlazado' => 'El contrato siguió a su ficha (cambio de N°)', 'enlazar' => 'Enlazó un contrato con el tablero', 'desenlazar' => 'Desenlazó un contrato',
+                'restaurar' => 'Recuperó un contrato de la papelera', 'restaurar_enlazado' => 'Recuperó el contrato de una ficha', 'mudar_enlazado' => 'El contrato siguió a su ficha (cambio de N°)', 'de_ficha' => 'El contrato tomó la seña o la nota de su ficha', 'de_fichas' => 'Los contratos tomaron la seña o la nota de sus fichas', 'enlazar' => 'Enlazó un contrato con el tablero', 'desenlazar' => 'Desenlazó un contrato',
                 'prueba' => 'Cargó contratos de prueba', 'borrar_prueba' => 'Borró los contratos de prueba'];
             return $t[$a] ?? 'Cambió un contrato';
         case 'contratos-adjunto.php': return 'Adjuntó o quitó el presupuesto de un contrato';

@@ -32,6 +32,12 @@
 //   restaurar          { id }                         (saca un contrato de la papelera)
 //   restaurar_enlazado { cliente_nro, sub }           (ídem, por la ficha con la que estaba enlazado)
 //   mudar_enlazado { de:{cliente_nro,sub}, a:{cliente_nro,sub} }  (el tablero avisa que la ficha cambió de N°: el contrato la sigue y toma ese N°)
+//   de_ficha       { cliente_nro, sub }               (el tablero avisa que cambió la seña o la nota de esa ficha: su contrato las toma)
+//   de_fichas      {}                                 (lo mismo para todos los contratos enlazados; lo pide esta página al abrirse)
+//
+// LA SEÑA Y LA NOTA DE LA FICHA PASAN AL CONTRATO (dueño, 19/11/2026; cambia la regla del 17/11 de
+// "no se pisan nunca"). El servidor lee la ficha él mismo: nadie le dicta un monto por el pedido.
+// Qué pasa y qué no, en bs_contrato_traer().
 //
 // PAPELERA (30 días, decisión del dueño 16/11/2026): borrar un contrato no lo destruye. Pasa a
 // "papelera" dentro del mismo archivo, con sus pagos, y su presupuesto adjunto queda en disco.
@@ -61,7 +67,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
     $bs_pre = json_decode((string)@file_get_contents('php://input'), true);
     $bs_acc = is_array($bs_pre) ? (string)($bs_pre['accion'] ?? '') : '';
     // los renglones de prueba son de mantenimiento: solo administradores (el Operador edita contratos desde el 18/11/2026)
-    bs_require_permiso(in_array($bs_acc, ['borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado', 'nro_de_ficha'], true) ? 'tablero_operar' : (in_array($bs_acc, ['prueba', 'borrar_prueba'], true) ? 'mantenimiento' : 'contratos_editar'));
+    bs_require_permiso(in_array($bs_acc, ['borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado', 'nro_de_ficha', 'de_ficha'], true) ? 'tablero_operar' : (in_array($bs_acc, ['prueba', 'borrar_prueba'], true) ? 'mantenimiento' : 'contratos_editar'));
 }
 bs_check_csrf();
 bs_ensure_dirs();
@@ -201,6 +207,8 @@ function bs_contrato_salida($c) {
         // Si el N° existe en Presupuestos (solo informa; no verifica).
         'presup'       => bs_contrato_presup((string)($c['nro'] ?? '')),
     ];
+    // ¿La ficha tiene una seña o una nota que este contrato todavía no miró? La página pide "de_fichas".
+    $s['traer'] = $s['ficha'] === 'viva' && bs_contrato_traer($c, bs_contrato_obra($c['enlace']))[1];
     // Sin permiso para ver la plata, los montos no salen del servidor.
     if (!auth_puede('contratos_plata')) {
         $s['total_usd'] = 0; $s['total_ars'] = 0; $s['sena'] = null; $s['pagos'] = [];
@@ -271,6 +279,107 @@ function bs_contrato_de_ficha($d, $nro, $sub) {
         if (is_array($e) && (string)($e['cliente_nro'] ?? '') === $n && intval($e['sub'] ?? 0) === intval($sub)) return $k;
     }
     return null;
+}
+
+// Cómo se escribe en la nota del contrato el renglón que llega de la ficha.
+define('BS_CONTRATO_NOTA_FICHA', 'Tablero: ');
+
+/** La ficha viva del tablero enlazada con ese contrato (su renglón en obras.json), o null. Solo lee. */
+function bs_contrato_obra($enlace) {
+    static $obras = null;
+    if (!is_array($enlace)) return null;
+    if ($obras === null) {
+        $t = bs_read_json(BS_DATA_DIR . '/tablero/obras.json');
+        $obras = (is_array($t) && is_array($t['obras'] ?? null)) ? $t['obras'] : [];
+    }
+    $k = str_pad((string)intval($enlace['cliente_nro'] ?? 0), 4, '0', STR_PAD_LEFT) . '-' . intval($enlace['sub'] ?? 0);
+    return is_array($obras[$k] ?? null) ? $obras[$k] : null;
+}
+
+/** La seña dicha en una línea, para saber si la de la ficha cambió desde la última vez que se miró. */
+function bs_contrato_sena_firma($s) {
+    return is_array($s) ? rtrim(rtrim(number_format(floatval($s['monto']), 2, '.', ''), '0'), '.') . ' ' . $s['moneda'] : '';
+}
+
+/**
+ * La seña y la nota de la ficha pasan a su contrato (dueño, 19/11/2026).
+ *
+ * SEÑA. Cada seña que se carga o se cambia en el tablero viaja UNA vez al contrato:
+ *   - el contrato no tiene seña ni pagos            → la toma;
+ *   - el contrato ya tomó una de la ficha y cambió  → toma la nueva (conserva la cotización si es la misma moneda);
+ *   - primera vez que se miran y los dos tienen una → no se toca: sigue el aviso (eran datos cargados a mano en los dos lados);
+ *   - el contrato no tiene seña pero sí pagos       → no se toca: la seña puede ser uno de esos pagos y se contaría dos veces;
+ *   - la seña entró en una moneda y el contrato solo tiene total en la otra → no se copia: hace falta la
+ *     cotización, y esa la pone una persona (fue el error del 16/11: dólares sin cotización contra un total en pesos).
+ * Destildar la seña en el tablero no borra la del contrato. Lo que después se corrija a mano en el
+ * contrato queda, hasta que alguien vuelva a cambiar la seña en el tablero.
+ *
+ * NOTA. La nota de la ficha queda como un renglón al final de la nota del contrato ("Tablero: ...").
+ * Si la nota de la ficha se edita, se reemplaza ese renglón (no se apila una copia por cada tecla);
+ * si se borra, el renglón queda como estaba. Lo escrito a mano en el contrato no se toca.
+ *
+ * "sena_ficha" y "nota_ficha" anotan lo último que se miró de la ficha; no se muestran.
+ * Devuelve [contrato, hay_que_guardar, ['sena' => ''|'copiada'|'cotizacion', 'nota' => bool]].
+ */
+function bs_contrato_traer($c, $obra) {
+    $info = ['sena' => '', 'nota' => false];
+    $guardar = false;
+
+    $s = null;
+    $x = is_array($obra) ? ($obra['sena'] ?? null) : null;
+    if (is_array($x) && floatval($x['monto'] ?? 0) > 0) {
+        $s = ['monto' => round(floatval($x['monto']), 2), 'moneda' => (($x['moneda'] ?? '') === 'USD') ? 'USD' : 'ARS', 'fecha' => substr((string)($x['at'] ?? ''), 0, 10)];
+    }
+    $firma = bs_contrato_sena_firma($s);
+    $vista = array_key_exists('sena_ficha', $c);
+    if (!$vista || (string)$c['sena_ficha'] !== $firma) {
+        $guardar = true;
+        if ($s) {
+            $vieja = (is_array($c['sena'] ?? null) && floatval($c['sena']['monto'] ?? 0) > 0) ? $c['sena'] : null;
+            $igual = $vieja && ($vieja['moneda'] ?? '') === $s['moneda'] && abs(floatval($vieja['monto']) - $s['monto']) < 0.005;
+            $pagos = is_array($c['pagos'] ?? null) ? count($c['pagos']) : 0;
+            if ($vieja ? ($vista && !$igual) : ($pagos === 0)) {
+                $otra = $s['moneda'] === 'USD' ? 'ARS' : 'USD';
+                $tot = ['USD' => floatval($c['total_usd'] ?? 0), 'ARS' => floatval($c['total_ars'] ?? 0)];
+                $con_cot = $vieja && ($vieja['moneda'] ?? '') === $s['moneda'] && floatval($vieja['cotizacion'] ?? 0) > 0;
+                if ($tot[$s['moneda']] <= 0 && $tot[$otra] > 0 && !$con_cot) {
+                    $info['sena'] = 'cotizacion';
+                } else {
+                    $c['sena'] = [
+                        'monto' => $s['monto'], 'moneda' => $s['moneda'],
+                        'fecha' => bs_contrato_fecha_ok($s['fecha']) ? $s['fecha'] : date('Y-m-d'),
+                        'cotizacion' => $con_cot ? floatval($vieja['cotizacion']) : 0,
+                        'aplica' => $con_cot ? (string)($vieja['aplica'] ?? $s['moneda']) : $s['moneda'],
+                    ];
+                    $info['sena'] = 'copiada';
+                }
+            }
+        }
+        $c['sena_ficha'] = $firma;
+    }
+
+    $n = trim(preg_replace('/\s+/u', ' ', is_array($obra) ? (string)($obra['nota'] ?? '') : ''));
+    $vista = array_key_exists('nota_ficha', $c);
+    $antes = $vista ? (string)$c['nota_ficha'] : '';
+    if (!$vista || $antes !== $n) {
+        $guardar = true;
+        if ($n !== '') {
+            $nota = (string)($c['nota'] ?? '');
+            $lineas = $nota === '' ? [] : explode("\n", $nota);
+            $igual = function ($a, $b) { return mb_strtolower(trim($a)) === mb_strtolower(trim($b)); };
+            $donde = -1; $ya = false;
+            foreach ($lineas as $i => $l) {
+                if ($antes !== '' && $donde < 0 && $igual($l, BS_CONTRATO_NOTA_FICHA . $antes)) $donde = $i;
+                if ($igual($l, $n) || $igual($l, BS_CONTRATO_NOTA_FICHA . $n)) $ya = true;
+            }
+            if ($donde >= 0) $lineas[$donde] = BS_CONTRATO_NOTA_FICHA . $n;
+            elseif (!$ya) $lineas[] = BS_CONTRATO_NOTA_FICHA . $n;
+            $nueva = implode("\n", $lineas);
+            if ($nueva !== $nota && mb_strlen($nueva) <= 4000) { $c['nota'] = $nueva; $info['nota'] = true; }
+        }
+        $c['nota_ficha'] = $n;
+    }
+    return [$c, $guardar, $info];
 }
 
 /** Papelera: saca del archivo (y del disco) lo que lleva más de 30 días borrado. Devuelve si cambió algo. */
@@ -360,13 +469,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') bs_error('Solo GET o POST', 405);
 $body = json_decode(@file_get_contents('php://input'), true);
 if (!is_array($body)) bs_error('Body JSON inválido');
 $accion = (string)($body['accion'] ?? '');
-$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'borrar_enlazado', 'restaurar', 'restaurar_enlazado', 'mudar_enlazado', 'nro_de_ficha', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
+$acciones = ['crear', 'editar', 'sena', 'pago', 'borrar_pago', 'borrar', 'borrar_enlazado', 'restaurar', 'restaurar_enlazado', 'mudar_enlazado', 'nro_de_ficha', 'de_ficha', 'de_fichas', 'enlazar', 'desenlazar', 'prueba', 'borrar_prueba'];
 if (!in_array($accion, $acciones, true)) bs_error('accion inválida');
 
 // Todo lo que puede fallar por datos mal cargados se valida ANTES de tomar el lock.
 $campos = in_array($accion, ['crear', 'editar'], true) ? bs_contrato_campos($body) : null;
 $id = (string)($body['id'] ?? '');
-if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado', 'nro_de_ficha'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
+if (!in_array($accion, ['crear', 'prueba', 'borrar_prueba', 'borrar_enlazado', 'restaurar_enlazado', 'mudar_enlazado', 'nro_de_ficha', 'de_ficha', 'de_fichas'], true) && !bs_contrato_id_ok($id)) bs_error('id inválido');
 
 $sena_nueva = null;
 if ($accion === 'sena') $sena_nueva = bs_contrato_sena($body['monto'] ?? 0, $body['moneda'] ?? '', $body['fecha'] ?? '', $body['cotizacion'] ?? '', $body['aplica'] ?? '');
@@ -503,6 +612,35 @@ try {
             $extra['nro'] = $d['contratos'][$k]['nro'];
         }
 
+    } elseif ($accion === 'de_ficha' || $accion === 'de_fichas') {
+        // La seña y la nota de la ficha pasan a su contrato (ver bs_contrato_traer). "de_ficha" lo llama el
+        // tablero al guardar una de las dos; "de_fichas", esta página al abrirse, por lo que haya quedado sin pasar.
+        // Los montos se leen de la ficha acá: del pedido solo llega de qué ficha se trata.
+        $claves = [];
+        if ($accion === 'de_ficha') {
+            $k = bs_contrato_de_ficha($d, intval($body['cliente_nro'] ?? 0), intval($body['sub'] ?? 0));
+            if ($k !== null) { $claves[] = $k; $id = (string)$k; }
+        } else {
+            foreach ($d['contratos'] as $k => $c) { if (is_array($c['enlace'] ?? null)) $claves[] = $k; }
+        }
+        $guardar = false; $senas = 0; $notas = 0; $sin_cot = 0;
+        foreach ($claves as $k) {
+            $c = $d['contratos'][$k];
+            if (bs_contrato_ficha_estado($c['enlace'] ?? null) !== 'viva') continue;
+            list($nuevo, $g, $info) = bs_contrato_traer($c, bs_contrato_obra($c['enlace']));
+            if (!$g) continue;
+            $guardar = true;
+            if ($info['sena'] === 'copiada') $senas++;
+            if ($info['sena'] === 'cotizacion') $sin_cot++;
+            if ($info['nota']) $notas++;
+            if ($info['sena'] === 'copiada' || $info['nota']) $nuevo['actualizado'] = $ahora;
+            $d['contratos'][$k] = $nuevo;
+        }
+        $extra = ['senas' => $senas, 'notas' => $notas, 'sin_cotizacion' => $sin_cot];
+        // Si no pasó nada que se vea, no queda en el registro (y si no hay nada que anotar, ni se escribe).
+        if (!$senas && !$notas) $GLOBALS['bs_no_registrar'] = true;
+        if (!$guardar) { bs_lock_release($fp); bs_ok(array_merge(['id' => $id, 'sin_cambios' => true], $extra)); }
+
     } elseif ($accion === 'borrar_enlazado') {
         // Lo llama el tablero al borrar una ficha: si tenía un contrato enlazado, se va con ella.
         // Solo vale si la ficha de verdad salió del tablero: con la ficha viva (o archivada) el contrato
@@ -591,6 +729,7 @@ try {
                 }
             }
             $c['enlace'] = $enlace;
+            unset($c['sena_ficha'], $c['nota_ficha']); // otra ficha: lo que se miró de la anterior no vale
             // Enlazados comparten el N°: un contrato sin N° que se enlaza (por teléfono) con la ficha de
             // un presupuesto toma ese N° (barrido del 18/11/2026). Si ya tiene uno, no se le cambia acá.
             if (trim((string)($c['nro'] ?? '')) === '') {
@@ -601,6 +740,7 @@ try {
             }
         } elseif ($accion === 'desenlazar') {
             $c['enlace'] = null;
+            unset($c['sena_ficha'], $c['nota_ficha']);
         }
 
         if ($accion === 'borrar') {

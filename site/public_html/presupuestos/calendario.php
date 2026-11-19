@@ -471,6 +471,8 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
       <div class="f-cuerpo">
         <h4>Bloque de medición</h4>
         <div class="ley" id="fBloques"></div>
+        <h4>Día de instalación</h4>
+        <div class="ley et-instalar" id="fInst"></div>
         <button type="button" class="f-todo" id="fTodo" hidden>Ver todo</button>
         <h4>Referencias</h4>
         <div class="refs" id="ley"></div>
@@ -581,9 +583,12 @@ function instalada(c){
   const h=(c.hitos||[]).find(x=>x.txt==='Instalado');
   return {fecha:(a===i&&c.boton_at)||(h&&h.fecha)||'',etapa:ETAPAS[i].id};
 }
+// Ya entregada: instalada (aunque siga en Por instalar esperando la aprobación) o en Por archivar.
+// Una obra entregada no vence más: sale de los "Vence", de la franja de entrega y de "Plazo vencido" (dueño, 19/11/2026).
+const entregada=c=>c.etapa==='archivar'||!!instalada(c);
 function atrasada(c){const e=etapaDe(c.etapa);return !!(e&&e.fecha&&c.fecha&&c.fecha<HOY&&!cumplida(c));}
 function estadoPlazo(c){ // '' | 'cerca' (vence hoy o en los próximos 6 días) | 'vencida'
-  if(!c.limite||c.etapa==='archivar')return '';
+  if(!c.limite||entregada(c))return '';
   return c.limite<HOY?'vencida':(c.limite<=masDias(HOY,6)?'cerca':'');
 }
 // Entrega estimada de una obra que todavía no se midió: si se mide el día agendado, el plazo
@@ -658,13 +663,23 @@ function coincide(c){
   if(!c._txt)c._txt=llano([c.nombre,c.manual?(c.nro_contrato||''):c.cliente_nro+'-'+c.sub].join(' '));
   return buscado.every(w=>c._txt.indexOf(w)>=0);
 }
-const enFoco=c=>coincide(c)&&(!selB.size||selB.has(bloqueDe(c))||(todosMarcados&&!bloqueDe(c)));
+// También se filtra por día de instalación (dueño, 19/11/2026): las obras que se instalan, o se instalaron, ese día.
+// Con días de medición y de instalación marcados a la vez, se ven las de unos y las de otros.
+const selI=new Set();
+const instDe=c=>{
+  const e=etapaDe(c.etapa);
+  if(e&&e.boton==='instalado'&&c.fecha)return c.fecha;             // en Por instalar: el día de su turno
+  const i=instalada(c),f=i?String(i.fecha||'').slice(0,10):'';     // ya en Por archivar: el día en que se instaló
+  return /^\d{4}-\d{2}-\d{2}$/.test(f)?f:'';
+};
+const hayFoco=()=>selB.size>0||selI.size>0;
+const enFoco=c=>coincide(c)&&(!hayFoco()||selB.has(bloqueDe(c))||(todosMarcados&&!bloqueDe(c))||(selI.size>0&&selI.has(instDe(c))));
 const diaMes=iso=>(+iso.slice(8,10))+'-'+MESES[+iso.slice(5,7)-1].slice(0,3);
 function bloques(todos){
   const m={};
   CARDS.forEach(c=>{
     if(!todos&&!enFoco(c))return;
-    if(c.etapa==='archivar'||c.plazo_manual)return; // ya instalada, o con un plazo propio puesto a mano
+    if(entregada(c)||c.plazo_manual)return; // ya instalada, o con un plazo propio puesto a mano
     // medida: cuenta el día en que se midió; todavía no: el día agendado (bloque estimado)
     const dia=c.medido_at||(previsto(c)?c.fecha:'');
     if(!dia)return;
@@ -710,7 +725,7 @@ function obrasMedicion(dia){
   return CARDS.filter(c=>bloqueDe(c)===dia);
 }
 function tiraMedicion(iso,largo){
-  const l=selB.size&&!selB.has(iso)?[]:obrasMedicion(iso).filter(coincide);
+  const l=obrasMedicion(iso).filter(enFoco); // con un filtro puesto, solo las obras que el filtro deja ver
   if(!l.length||!MEDIR)return '';
   const n=l.length,h=l.filter(c=>c.medido_at).length;
   const estado=h===n?(n===1?'hecha':'hechas'):(h?h+' de '+n+' hechas':'');
@@ -804,7 +819,7 @@ function crDibujar(){
     let extra='';
     if(crTipo==='inst'){
       const venc=c.limite&&c.limite<HOY;
-      extra='<br>'+(c.equipo.length?'Instalan: '+esc(c.equipo.join(', ')):'Sin instaladores asignados')+(c.limite?' · <span'+(venc?' class="falta"':'')+'>'+(venc?'Plazo vencido el ':'Vence el ')+esc(fechaCorta(c.limite))+'</span>':'');
+      extra='<br>'+(c.equipo.length?'Instalan: '+esc(c.equipo.join(', ')):'Sin instaladores asignados')+(c.limite&&!entregada(c)?' · <span'+(venc?' class="falta"':'')+'>'+(venc?'Plazo vencido el ':'Vence el ')+esc(fechaCorta(c.limite))+'</span>':'');
       const av=dia?avisosDe(c).filter(x=>x.indexOf('Atrasada')!==0):[];
       if(av.length)extra+='<br><span class="falta">'+av.map(esc).join(' · ')+'</span>';
     }
@@ -906,7 +921,7 @@ function armar(){
     // La medición ya hecha queda marcada en su día, esté la obra en la etapa que esté: es el día
     // que le da nombre a su bloque y desde el que corre el plazo.
     if(c.medido_at&&MEDIR&&ver[MEDIR]!==false)sumar(c.medido_at,{tipo:'medida',c:c});
-    if(c.limite&&c.etapa!=='archivar'&&ver.vence!==false)sumar(c.limite,{tipo:'vence',c:c});
+    if(c.limite&&!entregada(c)&&ver.vence!==false)sumar(c.limite,{tipo:'vence',c:c});
     if(previsto(c)&&ver.vence!==false)sumar(previsto(c),{tipo:'vence',c:c,prev:true});
   });
   Object.keys(dias).forEach(d=>dias[d].sort((a,b)=>{
@@ -959,16 +974,21 @@ function dibujar(){
   // Lo que se ve: normalmente un mes. Con bloques en foco, la HISTORIA COMPLETA de esos bloques:
   // desde el día de la medición hasta el día en que vence la entrega, aunque cruce de un mes a otro.
   [...selB].forEach(d=>{if(!CARDS.some(c=>bloqueDe(c)===d))selB.delete(d);}); // un bloque que ya no existe deja de filtrar
+  [...selI].forEach(d=>{if(!CARDS.some(c=>instDe(c)===d))selI.delete(d);});
   todosMarcados=selB.size>0&&selB.size>=new Set(CARDS.map(bloqueDe).filter(Boolean)).size;
-  const foco=selB.size>0;
+  const foco=hayFoco();
   let vDesde=isoDe(new Date(y,m-1,1)),vHasta=isoDe(new Date(y,m,0));
   const lunesDe=iso=>masDias(iso,-((partes(iso).getDay()+6)%7));
   let ancla='';
   if(foco){
     const sel=[...selB].sort(),tb=bloques(true);
-    let rHasta=sel.map(d=>{const b=tb.find(x=>x.dia===d);return b?b.hasta:masDias(d,20);}).sort().pop();
+    let rHasta=sel.map(d=>{const b=tb.find(x=>x.dia===d);return b?b.hasta:masDias(d,20);}).sort().pop()||'';
     // y todo lo que ya tienen agendado esas obras (por ejemplo una instalación más adelante)
-    CARDS.filter(enFoco).forEach(c=>{[c.fecha,c.limite].forEach(f=>{if(f&&f>rHasta)rHasta=f;});});
+    CARDS.filter(enFoco).forEach(c=>{[c.fecha,c.limite,instDe(c)].forEach(f=>{if(f&&f>rHasta)rHasta=f;});});
+    // Solo con días de instalación marcados, la vista arranca en la semana de la primera instalación
+    // (lo de antes, la medición, queda a una flecha). Una obra ya instalada no tiene cartel ese día: se ve
+    // en el día en que se midió, con sus dos tildes, así que para esas la vista arranca en su medición.
+    if(!sel.length)sel.push(CARDS.filter(enFoco).map(c=>(instalada(c)&&c.medido_at)||instDe(c)).filter(Boolean).sort()[0]||[...selI].sort()[0]);
     // Se ven semanas enteras: las que hacen falta para la historia completa (medición → vencimiento),
     // nunca menos de 5. Es un calendario corrido, sin recortes: con las flechas se sigue para atrás y adelante.
     ancla=lunesDe(sel[0]);
@@ -986,7 +1006,7 @@ function dibujar(){
   const F=CARDS.filter(enFoco);
   const tipos=ETAPAS.filter(e=>e.fecha).map(e=>({id:e.id,txt:PLURAL[e.fecha]||e.fecha,n:F.filter(c=>c.etapa===e.id&&enVista(c.fecha)&&!cumplida(c)).length}));
   tipos.push({id:'entrega',txt:'Entregas',n:bloques().filter(b=>b.desde<=vHasta&&b.hasta>=vDesde).length});
-  tipos.push({id:'vence',txt:'Vencimientos',n:F.filter(c=>(c.limite&&c.etapa!=='archivar'&&enVista(c.limite))||enVista(previsto(c))).length});
+  tipos.push({id:'vence',txt:'Vencimientos',n:F.filter(c=>(c.limite&&!entregada(c)&&enVista(c.limite))||enVista(previsto(c))).length});
   $('ley').innerHTML=tipos.map(t=>'<div class="ref '+(t.id==='vence'||t.id==='entrega'?t.id:'et-'+esc(t.id))+'">'+esc(t.txt)+' <b>'+t.n+'</b></div>').join('');
   // El filtro: los bloques de medición que existen hoy en el tablero (solo datos reales). Marcar uno
   // muestra su par completo: la medición y su entrega con el vencimiento.
@@ -997,7 +1017,15 @@ function dibujar(){
     const b=todosB.find(x=>x.dia===d),est=b?b.estado:'';
     return '<button type="button" class="'+(selB.has(d)?'on ':'')+est+'" data-fbloque="'+d+'" role="checkbox" aria-checked="'+selB.has(d)+'" title="'+esc('Medición del '+fechaCorta(d)+(b?' · entrega del '+fechaCorta(b.desde)+' al '+fechaCorta(b.hasta):''))+'">'+esc(diaMes(d))+' <b>'+dB[d]+'</b></button>';
   }).join(''):'<div class="nada">Todavía no hay mediciones.</div>';
-  const nFil=selB.size;
+  // Los días de instalación: las obras de Por instalar con turno, y las que ya se instalaron.
+  const dI={};
+  CARDS.forEach(c=>{const d=instDe(c);if(d)(dI[d]=dI[d]||[]).push(c);});
+  const diasI=Object.keys(dI).sort();
+  $('fInst').innerHTML=diasI.length?diasI.map(d=>{
+    const l=dI[d],h=l.filter(c=>instalada(c)).length,est=d<HOY&&h<l.length?'vencida':'';
+    return '<button type="button" class="'+(selI.has(d)?'on ':'')+est+'" style="--fc:var(--et)" data-finst="'+d+'" role="checkbox" aria-checked="'+selI.has(d)+'" title="'+esc('Instalación del '+fechaCorta(d)+' · '+l.length+(l.length===1?' obra':' obras')+(h?' · '+h+(h===1?' instalada':' instaladas'):''))+'">'+esc(diaMes(d))+' <b>'+l.length+'</b></button>';
+  }).join(''):'<div class="nada">Todavía no hay instalaciones con día.</div>';
+  const nFil=selB.size+selI.size;
   $('fTodo').hidden=!nFil;
   // Resumen del foco, arriba de la grilla: qué se está siguiendo y cómo salir.
   let fo='';
@@ -1006,7 +1034,11 @@ function dibujar(){
     fo='<span><b>Bloque '+esc(diaMes(d))+'</b></span><span>Medición: <b>'+esc(fechaCorta(d))+'</b> · '+l.length+(l.length===1?' obra':' obras')+(hm===l.length?' · todas medidas':' · '+hm+(hm===1?' medida, ':' medidas, ')+(l.length-hm)+' sin medir')+'</span>'
       +(b?'<span>'+(b.est?'Entrega estimada':'Entrega')+': <b>'+esc(fechaCorta(b.desde))+' al '+esc(fechaCorta(b.hasta))+'</b>'+(b.estado==='vencida'?' <span class="rojo">· vencida</span>':(b.estado==='cerca'?' <span class="amb">· en curso</span>':''))+'</span>':'');
   }else if(selB.size>1)fo='<span><b>'+selB.size+' bloques en foco:</b> '+[...selB].sort().map(d=>esc(diaMes(d))).join(', ')+'</span>';
-  if(fo)fo+='<span class="fin">'+(vIni&&vIni!==ancla?'<button type="button" data-ancla>Ir al bloque</button>':'')+'<button type="button" data-salir>Volver al mes</button></span>';
+  if(selI.size===1){
+    const d=[...selI][0],l=dI[d]||[],h=l.filter(c=>instalada(c)).length;
+    fo+='<span><b>Instalación del '+esc(fechaCorta(d))+'</b> · '+l.length+(l.length===1?' obra':' obras')+(h===l.length&&h?(h===1?' · instalada':' · todas instaladas'):(h?' · '+h+(h===1?' instalada':' instaladas'):''))+'</span>';
+  }else if(selI.size>1)fo+='<span><b>'+selI.size+' días de instalación en foco:</b> '+[...selI].sort().map(d=>esc(diaMes(d))).join(', ')+'</span>';
+  if(fo)fo+='<span class="fin">'+(vIni&&vIni!==ancla?'<button type="button" data-ancla>'+(selB.size?'Ir al bloque':'Ir a la instalación')+'</button>':'')+'<button type="button" data-salir>Volver al mes</button></span>';
   $('mesAnt').setAttribute('aria-label',foco?'4 semanas antes':'Mes anterior');
   $('mesSig').setAttribute('aria-label',foco?'4 semanas después':'Mes siguiente');
   $('focoB').innerHTML=fo;$('focoB').hidden=!fo;
@@ -1067,7 +1099,12 @@ function dibujar(){
   // Cuenta también la entrega estimada que ya pasó (medición agendada, sin tildar "Medido").
   const venDia=c=>c.limite||previsto(c);
   if(buscado.length)p+='<div class="ayuda foco">Solo lo que coincide con la búsqueda.</div>';
-  if(selB.size)p+='<div class="ayuda foco">Solo '+(selB.size===1?'el bloque '+esc(diaMes([...selB][0])):'los '+selB.size+' bloques marcados')+'.</div>';
+  if(hayFoco()){
+    const que=[];
+    if(selB.size)que.push(selB.size===1?'el bloque '+esc(diaMes([...selB][0])):'los '+selB.size+' bloques marcados');
+    if(selI.size)que.push(selI.size===1?'la instalación del '+esc(diaMes([...selI][0])):'los '+selI.size+' días de instalación marcados');
+    p+='<div class="ayuda foco">Solo '+que.join(' y ')+'.</div>';
+  }
   const ven=F.filter(c=>estadoPlazo(c)==='vencida'||(previsto(c)&&previsto(c)<HOY)).sort((x,z)=>venDia(x)<venDia(z)?-1:1);
   if(ven.length){hay=true;p+='<h4 class="rojo">Plazo vencido <b>'+ven.length+'</b></h4>'+ven.map(c=>chip({tipo:'vence',c:c,prev:!c.limite},true)).join('');}
   const atr=F.filter(atrasada).sort((x,z)=>x.fecha<z.fecha?-1:1);
@@ -1290,9 +1327,17 @@ document.addEventListener('click',ev=>{
     dibujar();
     return;
   }
+  const fi=ev.target.closest('[data-finst]');
+  if(fi){
+    const d=fi.dataset.finst;
+    if(selI.has(d))selI.delete(d);else selI.add(d);
+    vIni='';
+    dibujar();
+    return;
+  }
   if(ev.target.closest('[data-ancla]')){vIni='';dibujar();return;}
-  if(ev.target.closest('[data-salir]')){selB.clear();vIni='';dibujar();return;}
-  if(ev.target.closest('#fTodo')){selB.clear();vIni='';dibujar();return;}
+  if(ev.target.closest('[data-salir]')){selB.clear();selI.clear();vIni='';dibujar();return;}
+  if(ev.target.closest('#fTodo')){selB.clear();selI.clear();vIni='';dibujar();return;}
   const ft=ev.target.closest('#fTit');
   if(ft){const ab=$('filtros').classList.toggle('abierto');ft.setAttribute('aria-expanded',ab);return;}
 });
@@ -1301,12 +1346,12 @@ $('buscar').addEventListener('keydown',ev=>{if(ev.key==='Escape'&&$('buscar').va
 // Lleva el calendario al mes de esa obra (su turno pendiente, la medición o el vencimiento) y abre su ficha.
 function irAFicha(c){
   const e=etapaDe(c.etapa),f=(e&&e.fecha&&c.fecha&&!cumplida(c)?c.fecha:'')||c.medido_at||c.fecha||c.limite;
-  if(f&&!selB.size&&f.slice(0,7)!==mes){mes=f.slice(0,7);dibujar();}
+  if(f&&!hayFoco()&&f.slice(0,7)!==mes){mes=f.slice(0,7);dibujar();}
   abrir(c);
 }
 function moverMes(n){
   // con bloques en foco no hay "mes": la vista corre de a 4 semanas, con el filtro puesto
-  if(selB.size){vIni=masDias(vAhora,n*28);dibujar();return;}
+  if(hayFoco()){vIni=masDias(vAhora,n*28);dibujar();return;}
   const d=new Date(+mes.slice(0,4),+mes.slice(5,7)-1+n,1);mes=isoDe(d).slice(0,7);dibujar();}
 // En pantallas angostas la barra de páginas se desliza de costado: la página actual queda a la vista.
 (function(){
@@ -1317,7 +1362,7 @@ $('mesAnt').addEventListener('click',()=>moverMes(-1));
 $('mesSig').addEventListener('click',()=>moverMes(1));
 $('mesHoy').addEventListener('click',()=>{
   mes=HOY.slice(0,7);
-  if(selB.size)vIni=masDias(HOY,-((partes(HOY).getDay()+6)%7)-7); // con filtro: la semana pasada arriba, hoy a la vista
+  if(hayFoco())vIni=masDias(HOY,-((partes(HOY).getDay()+6)%7)-7); // con filtro: la semana pasada arriba, hoy a la vista
   dibujar();
 });
 

@@ -735,6 +735,7 @@ async function cargar(){
     dibujar();
     pasarNros();
     pasarNombres();
+    traerDeFichas();
   }catch(e){$('err').textContent=e.message;$('err').hidden=false;$('lista').innerHTML='<div class="vacio">No se pudo cargar la lista.</div>';}
 }
 // El N° del contrato se ve también en su ficha del tablero (dueño, 17/11/2026). Una ficha cargada a mano
@@ -796,7 +797,37 @@ async function pasarNombres(){
   pasandoNombres=false;
   dibujar();
 }
-// La seña del tablero y la del contrato no se pisan nunca (dueño, 17/11/2026): si difieren, se avisa.
+// La seña y la nota de cada ficha pasan a su contrato (dueño, 19/11/2026). El tablero avisa cuando se guardan;
+// esto levanta lo que haya quedado sin pasar: lo cargado antes de este cambio, o una nota guardada desde el
+// calendario. Las reglas (qué pasa y qué no) están en el servidor: contratos.php, bs_contrato_traer().
+let trayendo=false;
+async function traerDeFichas(){
+  if(!EDITA||trayendo||!CONTRATOS.some(c=>c.traer))return;
+  trayendo=true;
+  try{
+    const r=await pedir(API,{accion:'de_fichas'});
+    if(r.senas||r.notas){
+      CONTRATOS=(await pedir(API)).contratos;
+      dibujar();
+      const p=[];
+      if(r.senas)p.push(r.senas===1?'la seña de 1 ficha':'la seña de '+r.senas+' fichas');
+      if(r.notas)p.push(r.notas===1?'la nota de 1 ficha':'la nota de '+r.notas+' fichas');
+      toast('Del tablero pasó '+p.join(' y ')+'.');
+    }else CONTRATOS.forEach(c=>{c.traer=false;});
+  }catch(e){}
+  trayendo=false;
+}
+// La seña que se carga o se cambia en el tablero pasa sola al contrato (dueño, 19/11/2026; antes no se pisaban
+// nunca). Si aun así difieren, se avisa: son las que ya venían distintas, o las que no pueden pasar solas.
+// Por qué no pasó, dicho para quien lo tiene que arreglar.
+function senaPorQue(c,dif){
+  if(dif.t&&!dif.s){
+    const otra=dif.t.moneda==='USD'?'ARS':'USD',tot={USD:c.total_usd,ARS:c.total_ars};
+    if(!(tot[dif.t.moneda]>0)&&tot[otra]>0)return 'No pasó sola porque entró en '+(dif.t.moneda==='USD'?'dólares':'pesos')+' y este contrato tiene el total en '+(otra==='USD'?'dólares':'pesos')+': cargala acá con su cotización.';
+    if((c.pagos||[]).length)return 'No pasó sola porque este contrato ya tiene pagos cargados y se podría contar dos veces: si falta, cargala acá.';
+  }
+  return 'La del tablero pasa sola cuando se carga o se cambia allá; estas dos ya venían distintas. Corregí la que esté mal.';
+}
 // No es diferencia que sea la misma plata dicha de otra forma: la seña en dólares con su cotización
 // contra la del tablero en pesos, o el tablero con todo lo cobrado anotado como seña.
 // Devuelve null si coinciden, o {t: la del tablero, s: la del contrato, txt}.
@@ -1084,7 +1115,7 @@ function abrirFicha(id){
     +'<label class="campo">Fecha de la seña<input id="fSenF" type="date" value="'+val((v.sena&&v.sena.fecha)||'')+'"></label></div>'
     +'<label class="campo cot" id="cSenC" hidden>Cotización del dólar para la seña <i id="fSenCI"></i><input id="fSenC" value="'+enCampo(v.sena&&v.sena.cotizacion)+'" inputmode="decimal" placeholder="1.575" autocomplete="off"></label>'
     +'<div class="pista" id="fSenP" hidden></div>'
-    +(dif?'<div class="nota-t sena-d"><b>La seña no coincide con el tablero.</b> '+esc(dif.txt)+' No se cambia sola en ninguno de los dos lados: corregí la que esté mal.</div>':'')
+    +(dif?'<div class="nota-t sena-d"><b>La seña no coincide con el tablero.</b> '+esc(dif.txt)+' '+esc(senaPorQue(c,dif))+'</div>':'')
     +(F.empujarSena?'<div class="nota-t">Al guardar, la seña queda tildada también en el tablero ("Trajo la seña"), que hoy no la tiene.</div>':'');
   if(c)h+='<div id="fPagos"></div>'
     +'<div class="tres"><label class="campo">Nuevo pago<input id="pMonto" inputmode="decimal" placeholder="Monto" autocomplete="off"></label>'

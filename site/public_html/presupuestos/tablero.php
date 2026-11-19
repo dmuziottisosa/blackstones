@@ -1041,8 +1041,9 @@ function motivosAvanzar(e,cards){
 }
 // Plazo prometido al cliente (semana estimada de entrega): '' | 'cerca' (vence hoy o en los próximos 6 días) | 'vencida'.
 // Son días corridos desde la medición: vence el día exacto (c.limite), no al terminar la semana.
+// Una obra ya instalada no vence más (dueño, 19/11/2026): el plazo es para entregar, y ya se entregó.
 function plazo(c){
-  if(!c.limite||c.etapa==='archivar')return '';
+  if(!c.limite||c.etapa==='archivar'||(etapaDe(c.etapa).boton==='instalado'&&c.checks.instalado))return '';
   return c.limite<HOY?'vencida':(c.limite<=masDias(HOY,6)?'cerca':'');
 }
 function masDias(iso,n){const d=partes(iso);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1309,6 +1310,9 @@ function htmlPlegada(c,e,cls,estilo,pos){
     else{
       et((c.fecha===HOY?'Hoy':fechaCorta(c.fecha))+(c.hora?' · '+c.hora:'')+(atrasada(c)?' · atrasada':''),atrasada(c)?'rojo':(c.fecha===HOY?'hoy':''));
       if(e.exige_fecha&&e.pide_hora&&!c.hora&&!atrasada(c))et('Falta la hora','rojo');
+      // El turno está puesto y el cliente todavía no lo confirmó: se ve sin abrir la ficha (dueño, 19/11/2026).
+      // No frena nada; por eso va en ámbar y no en rojo. Con el turno ya pasado, o sin la hora, no se pide.
+      else if(e.confirma&&!c.checks[e.confirma]&&!atrasada(c))et('Falta confirmar','amb');
     }
   }
   // El paso urgente de la etapa (Por cortar / Por fabricar: entregarle la obra a quien la hace) se ve
@@ -1595,11 +1599,20 @@ async function guardar(c,body,aplicar){
   try{
     await notaPend; // si había una nota guardándose, va primero: así lo que vuelve del servidor ya la trae
     await pedir(API,Object.assign({cliente_nro:c.cliente_nro,sub:c.sub},body));
+    if(body.accion==='check'&&body.clave==='sena'&&body.valor)await avisarContrato(c);
   }catch(e){
     toast(e.message);
   }
   ocupado=false;
   await cargar();
+}
+// La seña y la nota de la ficha pasan a su contrato (dueño, 19/11/2026). Acá solo se avisa de qué ficha se
+// trata: el monto y el texto los lee el servidor de la ficha. Si la ficha no tiene contrato, o
+// Relación-Contrato no existe, no pasa nada; lo que no llegue a avisarse lo levanta Relación-Contrato al abrirse.
+function avisarContrato(c){
+  if(ENLACES_OK&&!ENLACES[c.key])return Promise.resolve();
+  return fetch('/calculadora/api/contratos.php',{method:'POST',credentials:'same-origin',keepalive:true,headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({accion:'de_ficha',cliente_nro:c.cliente_nro,sub:c.sub})}).catch(()=>{});
 }
 
 // Mover de etapa: lo usan el botón Siguiente, los links del detalle y el arrastre.
@@ -1789,7 +1802,7 @@ function notaGuardar(inp){
   const nota=inp.value.replace(/\s+/g,' ').trim();
   if(nota===String(c.nota||'').trim())return false;
   c.nota=nota;c._txt='';
-  notaPend=notaPend.then(()=>pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'nota',nota:nota})).catch(e=>{toast(e.message);});
+  notaPend=notaPend.then(()=>pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'nota',nota:nota})).then(()=>avisarContrato(c)).catch(e=>{toast(e.message);});
   return true;
 }
 // Para el calendario: lo que hay escrito y sin guardar, SIN guardarlo acá. La ventana del calendario lo guarda ella,

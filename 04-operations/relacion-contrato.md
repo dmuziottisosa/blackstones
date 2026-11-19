@@ -159,7 +159,7 @@ Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, list
 - **Distintivo de enlace:** el renglón enlazado lleva una raya verde a la izquierda y la marca "Enlazado" al lado de la etapa; la ficha dice "Enlazado con el tablero y el calendario" (el calendario lee del tablero, así que queda enlazado solo).
 - **Del otro lado también se ve (17/11/2026):** en el tablero, la ficha abierta de una obra con contrato muestra la marca "Con contrato", que lleva directo a ese contrato (`relacion-contrato.php?contrato=<id>` lo abre en su mes). Solo en la ficha abierta, no en la plegada.
 - El renglón muestra **la etapa** de la obra (Por medir, Por cortar…), la fecha de medición o instalación y el vencimiento, y lleva a la ficha con un toque.
-- **La seña del tablero y la del contrato no se pisan nunca (dueño, 17/11/2026).** Si difieren, hay un aviso y nada más: el renglón dice "Seña distinta en el tablero" (con los dos números al pasar el mouse), la ficha del contrato lo explica debajo de la seña, y aparece un filtro "Seña distinta". Cada una se corrige a mano donde esté mal.
+- **La seña y la nota de la ficha pasan solas al contrato (dueño, 19/11/2026).** Antes no se pisaban nunca. Ver "La seña y la nota llegan del tablero", más abajo. Si aun así difieren, el renglón sigue diciendo "Seña distinta en el tablero" y el aviso dentro del contrato explica por qué no pasó.
   - No cuenta como diferencia la misma plata dicha de otra forma: la seña en dólares con su cotización contra la del tablero en pesos, o el tablero con todo lo cobrado anotado como seña.
   - Sí avisa si un lado tiene seña y el otro no.
   - Antes (16/11) la del tablero reemplazaba a la del contrato al abrir la página, y con la seña en el tablero el campo quedaba de solo lectura. Eso se sacó: cambiaba la plata sin que nadie lo decidiera.
@@ -195,6 +195,22 @@ La idea del dueño: una vez enlazados, que se aproveche al máximo lo que cada l
 - **Dentro del contrato se ve lo del tablero.** La ventana del contrato (también la de solo mirar) muestra etapa, medición (coordinada o hecha, y quién midió), cuándo vence la entrega, el turno de instalación con el equipo, cuántas fotos y planos tiene, la nota del tablero y, plegado, el **historial del tablero** con sus tildes y fechas. Es solo lectura y sale de lo que el tablero ya manda (`tableroHtml()`): no se guarda nada en el contrato.
 - **"Enlazado" es un link a la ficha.** En el renglón de la lista y dentro del contrato, tocarlo abre el tablero con esa ficha. Es el camino inverso de "Con contrato" en la ficha, que lleva al contrato.
 - El N° también se comparte: ver "El N° del contrato en la ficha del tablero", arriba.
+
+## La seña y la nota llegan del tablero (19/11/2026)
+
+Lo pidió el dueño: "si puse la seña en el tablero tiene que actualizarse en Relación-Contrato; igual las notas, que haga un append".
+
+- **La seña.** Cada seña que se carga o se cambia en la ficha viaja una vez a su contrato. La toma si el contrato no tiene seña ni pagos, o si ya había tomado una de la ficha y allá la cambiaron (conserva la cotización si es la misma moneda).
+- **Cuándo no pasa sola**, y el aviso lo dice:
+  - entró en una moneda y el contrato solo tiene total en la otra: hay que cargarla en el contrato con su cotización;
+  - el contrato ya tiene pagos: podría contarse dos veces;
+  - las dos ya venían distintas de antes: se corrige a mano la que esté mal.
+- **Destildar la seña en el tablero no borra la del contrato.** Corregirla a mano en el contrato tampoco se deshace sola.
+- **La nota.** La nota de la ficha queda como un renglón al final de la nota del contrato: "Tablero: ...". Si se edita en la ficha, se reemplaza ese renglón; si se borra en la ficha, el renglón queda. Lo escrito a mano en el contrato no se toca.
+- **Cuándo pasa.** El tablero avisa al guardar. Además, al abrir Relación-Contrato se levanta lo que haya quedado pendiente y un cartel dice cuántas pasaron ("Del tablero pasó la seña de 2 fichas y la nota de 1 ficha").
+- **Dónde está.** `bs_contrato_traer()` en `calculadora/api/contratos.php`; acciones `de_ficha` (la llama el tablero) y `de_fichas` (la llama esta página). El monto y el texto los lee el servidor de la ficha.
+
+Detalle y casos: `01-strategy/decision-log/2026-11-19-la-sena-y-la-nota-pasan-al-contrato.md`.
 
 ## Filtrar por etapa y ver las que no tienen turno (18/11/2026)
 

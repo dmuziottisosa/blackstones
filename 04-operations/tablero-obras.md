@@ -382,6 +382,13 @@ Accesos por rol (hoy hay una sola contraseña), hojas imprimibles para medidor/c
 - **En Presupuestos** el presupuesto de esa obra sigue siendo un presupuesto ("Enviado" por dentro), pero se muestra con su etapa y el link "En el tablero →": `list.php` lo encuentra por el N° y devuelve `en_tablero`. Sin versión en el N°, vale para la última versión del presupuesto.
 - **Las fichas viejas** que nacieron de un N° de presupuesto (su clave es ese número) siguen funcionando igual: para ellas cambiar el N° sigue siendo una mudanza, con las protecciones del barrido. **No se convierten** (decisión del dueño, 18/11/2026): es más riesgoso tocarlas que dejar que salgan solas al archivarse. Alcanza con que cada una tenga su contrato; el aviso "N sin contrato" del tablero dice cuáles faltan.
 
+## Cambios del 19/11/2026
+
+- **"Falta confirmar" en la ficha cerrada.** Si la ficha tiene el turno puesto y el cliente todavía no lo confirmó, la etiqueta se ve sin abrirla, en ámbar (no frena nada). Vale en Por medir y en Por instalar. No aparece con el turno ya pasado ni cuando en Por instalar falta la hora (ahí primero dice "Falta la hora").
+- **Una obra instalada no vence más.** Con "Instalado" tildado deja de decir "Vence" o "Plazo vencido" en la ficha, sale del aviso de arriba y, en el calendario, sale de los "Vence", de la franja de entrega y de "Plazo vencido". Sigue en Por instalar hasta la aprobación, con su segundo tilde. Si se desmarca "Instalado", vuelve a contar.
+- **Calendario: filtro por día de instalación.** En Filtros, debajo de "Bloque de medición", hay una lista "Día de instalación" con cada día y cuántas obras tiene (las de Por instalar con turno y las ya instaladas). Marcar uno o varios muestra solo esas obras; se puede combinar con bloques de medición y se sale con "Ver todo". El número va en rojo si el día ya pasó y queda alguna sin instalar.
+- **La seña y la nota de la ficha pasan al contrato.** El tablero le avisa a Relación-Contrato al guardarlas. → `relacion-contrato.md`, "La seña y la nota llegan del tablero".
+
 ## "Turno confirmado" (18/11/2026)
 
 - **Es el primer tilde de Por medir** (antes de "Medidor") **y de Por instalar** (antes de "Dirección confirmada" e "Instaladores"). Dice que el cliente confirmó su turno.
