@@ -35,6 +35,7 @@ header('Content-Type: text/html; charset=UTF-8');
   --bg:#FAF8F4;--card:#FFFFFF;--card-alt:#F5F0E5;
   --text:#1A1816;--text2:#5A4A35;--text3:#7A6850;
   --border:#E5DECF;--border-soft:#F0EAD8;
+  --raya:#CFC5AF;--franja:#F1EBDD;
   --dk:#1A1816;--dk2:#2A2522;--gd:#C4A77D;--gdd:#7A6649;
   --gr:#1A7A3C;--gr-soft:#E4F4E8;--cr:#FAF8F4;
   --red:#B03A3A;--red-soft:#FBEAEA;--amb:#8A5A0B;--amb-soft:#FBF1DC;
@@ -47,6 +48,7 @@ header('Content-Type: text/html; charset=UTF-8');
   --bg:#0A0907;--card:#16140F;--card-alt:#1F1B14;
   --text:#F5F0E5;--text2:#C4B596;--text3:#9C8A6E;
   --border:#2D2820;--border-soft:#221E18;
+  --raya:#4A4336;--franja:#2A251C;
   --gr:#34D670;--gr-soft:#0E2A18;
   --red:#E26666;--red-soft:#2A1414;--amb:#E8B95C;--amb-soft:#3A2A14;
   --gd-soft:rgba(196,167,125,.12);
@@ -159,22 +161,35 @@ button{font-family:inherit;color:inherit}
 .aviso-p .btn{margin-left:auto;border-color:var(--amb);color:var(--amb);background:transparent}
 
 /* === PLANILLA: un renglón por contrato, columnas fijas, números alineados === */
-.lista{--cols:66px 66px minmax(0,1.5fr) minmax(0,1.2fr) 178px 104px 104px 110px 52px 54px 60px minmax(0,1fr) 30px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.lista{--cols:66px 66px minmax(0,1.5fr) minmax(0,1.2fr) 178px 104px 104px 110px 52px 54px 60px minmax(0,1fr) 30px;--sangria:96px;--franja-alto:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
 /* Todas las celdas de un renglón apoyan su primer renglón en la misma línea (baseline): el ojo lee derecho.
    Antes cada celda se centraba por su cuenta y, con celdas de uno y de dos renglones, la lectura zigzagueaba. */
 .fila,.cab,.pie{display:grid;grid-template-columns:var(--cols);gap:0 14px;align-items:baseline;padding:9px 16px}
 .cab{align-items:center}
-.cab{position:sticky;top:0;z-index:5;padding-top:9px;padding-bottom:9px;background:var(--card-alt);border-bottom:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
+.cab{position:sticky;top:0;z-index:5;padding-top:9px;padding-bottom:9px;background:var(--card-alt);border-bottom:1px solid var(--raya);border-radius:var(--radius) var(--radius) 0 0;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
 .cab>div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cab button{padding:0;border:none;background:none;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;cursor:pointer}
 .cab button.on{color:var(--text)}
 .cab .der,.fila .der,.pie .der{text-align:right}
 .cab .cen,.fila .cen{text-align:center}
-.fila{padding-top:12px;padding-bottom:11px;border-top:1px solid var(--border-soft);cursor:pointer;min-width:0;font-size:13.5px;color:var(--text2);transition:background .12s}
-/* Los contratos de un mismo día van juntos: la fecha se dice una vez y una raya más firme separa los días. */
-.fila.dia{border-top-color:var(--border)}
+.fila{padding-top:12px;padding-bottom:11px;cursor:pointer;min-width:0;font-size:13.5px;color:var(--text2);transition:background .12s}
+/* Separar se tiene que ver (dueño, 20/11/2026: "no se nota la separación de una fila de otra, menos los días").
+   Medido: la raya entre contratos tenía 1,2 a 1 de contraste y la del día 1,3 a 1; casi lo mismo, y casi nada.
+   Ahora son dos señales distintas para dos niveles distintos: entre contratos, una raya que se ve (--raya);
+   entre días, una franja (--franja). Ordenada por fecha, la raya no llega a la columna de la fecha: la fecha
+   queda sola a la izquierda, como el lomo de todo su día. Va en ::before y no en un borde para que tocar la
+   franja no abra el contrato de abajo. Solo en la planilla: en tablet y celular cada contrato ya es una tarjeta. */
+@media(min-width:1100px){
+  .fila{position:relative}
+  .fila::before{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:var(--raya);pointer-events:none}
+  .cab+.fila::before{display:none}
+  .por-dia .fila::before{left:var(--sangria)}
+  .por-dia .fila.dia{margin-top:var(--franja-alto)}
+  .por-dia .fila.dia::before{left:0;top:calc(-1*var(--franja-alto));height:var(--franja-alto);box-sizing:border-box;border-top:1px solid var(--raya);border-bottom:1px solid var(--raya);background:var(--franja)}
+  .por-dia .cab+.fila.dia{margin-top:0}
+  .por-dia .c-fec{font-weight:800} /* la fecha es el título de su día */
+}
 .fila>.c-mas{align-self:center}
-.cab+.fila{border-top:none}
 .fila>div{min-width:0}
 .c-fec{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
 .c-fec small{display:block;font-size:11px;font-weight:500;color:var(--text3);text-transform:capitalize}
@@ -253,7 +268,7 @@ a.etapa{transition:background .12s}
 .pap-f small{display:block;margin-top:2px;font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pap-f .btn{flex-shrink:0;border-color:var(--gr);color:var(--gr)}
 /* Pie de la planilla: la suma de lo que se está viendo, debajo de cada columna */
-.pie{border-top:2px solid var(--border);border-radius:0 0 var(--radius) var(--radius);background:var(--card-alt);font-size:13px;color:var(--text2)}
+.pie{border-top:1px solid var(--raya);border-radius:0 0 var(--radius) var(--radius);background:var(--card-alt);font-size:13px;color:var(--text2)}
 .pie .q{grid-column:1/6;font-weight:700;color:var(--text)}
 .pie .plata{font-weight:700}
 /* Sello de VERIFICADO: el contrato tiene adjunto el PDF o Excel del presupuesto. Dorado, como un sello. */
@@ -436,11 +451,12 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 }
 /* Antes se iban recién a los 1199 px y el nombre del cliente quedaba cortado ("Mauro Gimen…") en una notebook. */
 @media(max-width:1349px){
-  .lista{--cols:62px 64px minmax(0,1.5fr) minmax(0,1.15fr) 178px 100px 100px 106px 30px}
+  .lista{--cols:62px 64px minmax(0,1.5fr) minmax(0,1.15fr) 178px 100px 100px 106px 30px;--sangria:92px}
   .c-sn,.cab .h-sn{display:none}
 }
 @media(max-width:1199px){
   .fila,.cab,.pie{gap:0 12px;padding-left:14px;padding-right:14px}
+  .lista{--sangria:88px}
 }
 /* Tablet y celular: cada contrato es una tarjeta, con el rótulo al lado de cada dato. */
 @media(max-width:1099px){
@@ -976,6 +992,7 @@ const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn
 const PIL={nuestra:'Nuestra',cliente:'Cliente',no:'No'};
 
 function dibujar(){
+  $('lista').classList.toggle('por-dia',orden==='fecha'); // por día: franja entre días y la fecha una sola vez
   const pr=CONTRATOS.filter(c=>c.prueba).length;
   $('avisoP').hidden=!pr;
   if(pr)$('avisoP').innerHTML='<span>'+(pr===1?'Hay 1 renglón de prueba.':'Hay '+pr+' renglones de prueba.')+' No son contratos reales y cuentan en los números hasta que los borres.</span><button type="button" class="btn chico" data-borrar-prueba>Borrar los de prueba</button>';

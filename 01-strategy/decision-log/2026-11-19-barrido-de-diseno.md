@@ -1,5 +1,5 @@
 ---
-fecha: 2026-11-19 (cerrado el 20/11/2026; Relación-Contrato se rehízo ese mismo día, ver abajo)
+fecha: 2026-11-19 (cerrado el 20/11/2026; Relación-Contrato se rehízo ese mismo día y después se le marcó la separación, ver abajo)
 tema: Barrido de diseño del tablero por columnas, Relación-Contrato y el calendario
 status: decidido (el dueño fijó el criterio; las piezas las eligió quien lo hizo y se pueden revertir de a una)
 ---
@@ -36,6 +36,7 @@ El problema de fondo, también en sus palabras: "abría el tablero formato colum
 8. **Los números, prolijos.** En la planilla de contratos, sin centavos (el exacto está al abrir el contrato); plata a la derecha y texto a la izquierda. Las sumas, redondeadas.
 9. **Todo el texto se lee.** Contraste de 4,5:1 o más en claro y oscuro, en computadora, tablet y celular. Se mide con un programa, no a ojo, y entra en la regresión.
 10. **En una planilla, el patrón lo hacen columnas que se ven** (20/11/2026): la etapa en su color y la barra de lo cobrado. Desaturar es sacar el color que no dice nada, no todo el color.
+11. **Lo que separa se tiene que ver, y se mide como el texto** (20/11/2026). Una raya, una franja o un borde que separa dos cosas se mide con un programa antes de entregarlo. Y dos niveles distintos llevan dos señales distintas (entre contratos, una raya; entre días, una franja), no la misma señal un poco más fuerte.
 
 ## Qué cambió respecto de decisiones anteriores del dueño
 
@@ -72,7 +73,7 @@ Cada una se puede volver atrás por separado:
 |---|---|---|
 | La etapa, un punto de color y el nombre, en la anteúltima columna | Una pastilla teñida con el color de la etapa (el mismo de su columna en el tablero), todas del mismo ancho, al lado del cliente y el material | Es la columna que se recorre de un vistazo: de arriba abajo se ve en qué anda el mes, y una obra vieja que sigue en Por medir salta sola |
 | Total, cobrado y saldo, tres números | Los mismos tres, y debajo de lo cobrado una barra: cuánto del contrato ya entró | La segunda columna que se lee sin leer: quién no pagó nada, quién señó, quién terminó |
-| La fecha en cada renglón | Una vez por día; una raya más firme separa los días | Los contratos se leen en tandas, no de a uno |
+| La fecha en cada renglón | Una vez por día; una raya más firme separa los días (no alcanzó: ver la segunda corrección, abajo) | Los contratos se leen en tandas, no de a uno |
 | Cada celda centrada por su cuenta | Todas apoyan su primera línea a la misma altura | Se lee derecho |
 | "—" en cada celda vacía y "Sin total" en la columna del saldo | Lo que no hay queda en blanco; "Sin total" se dice una vez, en su columna | Menos tinta que no dice nada |
 | Debajo de la etapa, el turno y el plazo (dos renglones) | Un solo renglón, el que más importa: plazo vencido, sin turno, seña distinta, el turno o el plazo | Todos los renglones miden lo mismo |
@@ -90,9 +91,39 @@ Lo que NO cambió, a propósito: un contrato sin enlazar sigue diciendo "No exis
 
 **Un error en el camino, y lo que dejó.** La barra de lo cobrado se llamó en el código igual que la franja de arriba de la pantalla (mes, buscador, "+ Nuevo contrato") y la dejó aplastada, con los botones tapados. Ninguna prueba lo notó: se vio mirando la captura. Se corrigió antes de entregar y la prueba de diseño ahora comprueba que esa franja se vea entera y se pueda tocar (y se verificó que la prueba falla si el error vuelve). Regla para adelante: las pruebas no reemplazan mirar la pantalla.
 
+## Segunda corrección del 20/11/2026: que la separación se vea
+
+**Qué dijo el dueño** al ver la planilla rehecha, ya publicada con sus datos: "nada mal, se nota mejoría; pero no se nota la separación de una fila de otra, menos los días".
+
+**Qué había pasado (medido).** La raya entre contratos tenía un contraste de 1,20 a 1 contra el blanco de la planilla, y la que separaba los días, 1,34 a 1. Eran dos rayas de 1 px casi del mismo color: ninguna se veía bien, y la diferencia entre "otro contrato" y "otro día" no se podía ver. El error fue tratar la separación como un adorno ("una raya más firme") y no medirla: la regla 9 medía solo el texto. → `06-knowledge/layer-0-raw/2026-11-20-separacion-medida.md`
+
+**Qué cambió:**
+
+| Antes | Ahora | Por qué |
+|---|---|---|
+| Entre contratos, una raya de 1 px a 1,20:1 | Una raya de 1 px a 1,71:1 (1,88:1 en oscuro) | Se tiene que ver sin buscarla |
+| Entre días, la misma raya apenas más oscura (1,34:1) | Una franja de 12 px de lado a lado, del tono del encabezado, con una raya arriba y otra abajo | Otro nivel pide otra señal, no la misma un poco más fuerte. Un fondo se ve aunque sea suave; una raya fina, no |
+| La raya cruzaba toda la planilla | Ordenada por fecha, la raya empieza donde empieza el N°: no llega a la columna de la fecha | La fecha queda sola a la izquierda, como el lomo de todo su día |
+| La fecha, en seminegrita | En negrita fuerte | Va una vez por día: es el título del día |
+| El encabezado y el pie cerraban con la raya suave | Cierran con la misma raya que separa los contratos | Una sola raya en toda la planilla |
+
+Ordenada por otra columna (cliente) no hay días que separar: no hay franjas, la raya va de lado a lado y cada renglón dice su fecha. En tablet y celular no cambia nada: ahí cada contrato ya es una tarjeta.
+
+**Por qué raya y no renglones alternados (uno blanco, uno gris).** La franja del día ya es un fondo; dos fondos para decir dos cosas se confunden. Raya para el contrato y franja para el día son dos señales que no se parecen.
+
+**Tocar la franja no hace nada.** No es parte de ningún renglón: un toque ahí no abre el contrato de abajo (probado).
+
+**De paso se arregló un error viejo:** en tablet y celular la primera tarjeta de la lista no tenía borde arriba (se lo sacaba una regla pensada para la planilla). Lo encontró la prueba nueva.
+
+**En qué se apoya.** NN/g (Laubheimer, 2022): el diseño de una planilla tiene que dejar que el ojo no pierda el renglón al cruzarla, y nombra bordes, renglones alternados y resaltar al pasar el mouse. No da números: los de arriba son nuestros, medidos. Para los días, lo mismo que en el tablero: una región y aire agrupan (NN/g, Harley, 2020). → `06-knowledge/layer-2-landscape/como-se-lee-una-pantalla-de-trabajo.md`, punto 8.
+
+**Known unknown nuevo:** cómo se ve la raya en el monitor del dueño. 1,71:1 es una raya clara pero visible en las pantallas de prueba; si en la suya sigue sin notarse, se sube un escalón (el color está en un solo lugar: `--raya`). Se midió además con el zoom de la pantalla: al 110 % y al 125 % el navegador reparte una raya de 1 px en dos píxeles y algunas quedan más lavadas (entre 1,37 y 1,49 a 1), se dibuje como se dibuje. No sabemos qué zoom usa; la raya de antes (1,20 a 1) con ese efecto quedaba todavía más lavada (por cuenta, cerca de 1,1 a 1; eso no se midió).
+
+**Lo que no se tocó:** las otras listas del sistema que usan la raya suave de antes (la Papelera y los renglones de adentro de la ventana del contrato, Presupuestos, el registro de Control). El dueño habló de la planilla de contratos; las demás se miden con esta misma regla cuando les toque su barrido.
+
 ## Knowns
 
-- Probado en local, en computadora (1180, 1440 y 1880 px), tablet y celular, claro y oscuro: `diseno.js` (44 comprobaciones sobre las tres pantallas; 13 son las de la planilla del 20/11), la medición de contraste y la regresión completa del tablero, contratos, calendario y usuarios.
+- Probado en local, en computadora (1180, 1440 y 1880 px), tablet y celular, claro y oscuro: `diseno.js` (54 comprobaciones sobre las tres pantallas; 13 son las de la planilla del 20/11 y 10, las de la separación), la medición de contraste y la regresión completa del tablero, contratos, calendario y usuarios.
 - No cambió ningún dato ni ninguna regla del servidor: son las páginas (`tablero.php`, `relacion-contrato.php`, `calendario.php`, y los colores de `reportes.php`).
 - Nada de lo que se sacó de la ficha cerrada se perdió: está al abrirla o en el aviso de la columna.
 - Contraste, medido: en el tablero, Relación-Contrato y Control todo el texto llega a 4,5:1.

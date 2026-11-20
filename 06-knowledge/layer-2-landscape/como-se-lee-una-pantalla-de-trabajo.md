@@ -82,11 +82,29 @@ Regla del repo: esto es brújula, no mapa. Si el uso real del tablero contradice
 
 ---
 
+## 8. Que no se pierda el renglón: separar contratos y separar grupos
+
+**Fuente.** Nielsen Norman Group, Page Laubheimer: *Data Tables: Four Major User Tasks* (03/04/2022), leído el 20/11/2026.
+
+**Qué dice.** En la tarea de comparar datos: "The visual design needs to enable users to keep their place as they move their eyes across the table. Borders, zebra striping, and hover-triggered highlighting of a record can all help." Nombra tres recursos (bordes, renglones alternados y resaltar el renglón al pasar el mouse) y no elige uno. No da ningún número (ni contraste, ni grosor, ni color) y no habla de separar grupos de renglones.
+
+**Qué hicimos con eso (interpretación nuestra).** El dueño vio la planilla de Relación-Contrato publicada y dijo: "no se nota la separación de una fila de otra, menos los días". Medido, tenía razón: la raya entre contratos tenía 1,20 a 1 de contraste y la del día 1,34 a 1. Quedó así:
+- Entre contratos, una raya (borde) a 1,71 a 1. El número es nuestro: la fuente no da ninguno.
+- Entre días, una franja de fondo de lado a lado. Es el punto 3 de este documento (una región agrupa más que una línea) aplicado a los días.
+- No renglones alternados: la franja del día ya es un fondo, y dos fondos para decir dos cosas se confunden.
+- Resaltar al pasar el mouse ya estaba.
+
+Los números de antes y después están en `06-knowledge/layer-0-raw/2026-11-20-separacion-medida.md`.
+
+---
+
 ## Lo que esta investigación NO dice
 
 - No hay un estudio sobre tableros de marmolerías ni sobre este equipo. Todo lo de arriba es general; que funcione acá se sabe usándolo.
 - Stephen Few (color con cuentagotas, reservarlo para lo que importa) se consultó por fuentes secundarias, no por sus libros. Coincide con Healey y con lean, pero no se cita como fuente directa.
 - El orden de lectura "etapa, tramo, ficha" es una decisión de diseño apoyada en los puntos 3 y 4, no un resultado medido con usuarios.
+- Sobre los renglones alternados hay un estudio conocido (Jessica Enders, A List Apart, 2008). No se leyó: se vio por resúmenes de terceros, que dicen que no encontró una mejora clara en velocidad ni en aciertos y sí una leve preferencia de la gente. No se usa como fuente.
+- Que una raya de 1,71 a 1 alcance es una elección nuestra, vista en capturas. No hay norma que fije un mínimo para una raya entre renglones, y no se probó en el monitor del dueño.
 
 ## Fuentes
 
@@ -98,6 +116,7 @@ Regla del repo: esto es brújula, no mapa. Si el uso real del tablero contradice
 - Mark Graban, Lean Blog (04/08/2015): https://www.leanblog.org/2015/08/moving-from-visuals-to-visual-management-and-lean-thinking/
 - Refactoring UI, Labels are a last resort: https://www.refactoringui.com/previews/labels-are-a-last-resort
 - Matthew Ström, Design Better Data Tables: https://mattstromawn.com/writing/tables/
+- NN/g, Data Tables: Four Major User Tasks (Laubheimer, 2022): https://www.nngroup.com/articles/data-tables/
 - W3C, Understanding SC 1.4.1 Use of Color: https://w3c.github.io/wcag/understanding/use-of-color.html
 - W3C, WCAG 2.2, SC 1.4.3 Contrast (Minimum): https://www.w3.org/TR/WCAG22/#contrast-minimum
 
