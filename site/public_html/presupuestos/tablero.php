@@ -37,10 +37,10 @@ header('Content-Type: text/html; charset=UTF-8');
 /* === DESIGN TOKENS (los mismos del hub de presupuestos) === */
 :root{
   --bg:#FAF8F4;--card:#FFFFFF;--card-alt:#F5F0E5;
-  --text:#1A1816;--text2:#5A4A35;--text3:#8B7860;
+  --text:#1A1816;--text2:#5A4A35;--text3:#7A6850;
   --border:#E5DECF;--border-soft:#F0EAD8;
   --dk:#1A1816;--dk2:#2A2522;--gd:#C4A77D;--gdd:#7A6649;
-  --gr:#1F8F47;--gr-soft:#E4F4E8;--cr:#FAF8F4;
+  --gr:#1A7A3C;--gr-soft:#E4F4E8;--cr:#FAF8F4;
   --red:#B03A3A;--red-soft:#FBEAEA;--amb:#8A5A0B;--amb-soft:#FBF1DC;
   --gd-soft:rgba(196,167,125,.10);
   --shadow-sm:0 1px 2px rgba(26,24,22,.04);
@@ -50,7 +50,7 @@ header('Content-Type: text/html; charset=UTF-8');
 }
 [data-theme="dark"]{
   --bg:#0A0907;--card:#16140F;--card-alt:#1F1B14;
-  --text:#F5F0E5;--text2:#C4B596;--text3:#8B7860;
+  --text:#F5F0E5;--text2:#C4B596;--text3:#9C8A6E;
   --border:#2D2820;--border-soft:#221E18;
   --gr:#34D670;--gr-soft:#0E2A18;
   --red:#E26666;--red-soft:#2A1414;--amb:#E8B95C;--amb-soft:#3A2A14;
@@ -102,7 +102,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 /* === MODO UNA FICHA (embebida en el calendario): sin encabezado, sin columnas, solo la ficha === */
 .solo body{background:var(--card)}
 .solo .header,.solo .h-tabs,.solo .gold-line,.solo .tope,.solo .avisos-g,.solo .col-tabs,
-.solo .col-h,.solo .col-avisos,.solo .col-sub,.solo .col-acc,.solo .col-filtros,.solo .col-sep,.solo .col-sem,.solo .c-prox{display:none!important}
+.solo .col-h,.solo .col-barra,.solo .col-filtros,.solo .col-sep,.solo .col-sem,.solo .c-prox{display:none!important}
 .solo .board .col{max-height:none;overflow:visible}
 .solo .wrap{padding:0;max-width:none}
 .solo .board{display:block;overflow:visible;padding:0}
@@ -156,11 +156,14 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
    botón que lleva a esa etapa. Se aprende una vez y se reconoce de lejos. */
 :root{--et:var(--gd);--et-soft:var(--gd-soft);--et-on:#fff}
 [data-theme="dark"]{--et-on:#14110D}
+/* Contraste medido (WCAG 1.4.3, 20/11/2026): Por fabricar y Por archivar se oscurecieron apenas para que el
+   texto blanco sobre el color de la etapa llegue a 4,5:1 (antes 4,24 y 4,14). El color de la etapa no se usa
+   como texto sobre el carril teñido: ahí no llega. */
 .et-medir{--et:#2F6DB5;--et-soft:rgba(47,109,181,.11)}
 .et-cortar{--et:#4B5563;--et-soft:rgba(75,85,99,.12)}
-.et-fabricar{--et:#B5680A;--et-soft:rgba(181,104,10,.12)}
+.et-fabricar{--et:#AC6309;--et-soft:rgba(172,99,9,.12)}
 .et-instalar{--et:#7A52B3;--et-soft:rgba(122,82,179,.11)}
-.et-archivar{--et:#1F8F47;--et-soft:rgba(31,143,71,.11)}
+.et-archivar{--et:#1A7A3C;--et-soft:rgba(26,122,60,.11)}
 .et-retiro{--et:#14808A;--et-soft:rgba(20,128,138,.11)}
 [data-theme="dark"] .et-medir{--et:#6AA5E8;--et-soft:rgba(106,165,232,.14)}
 [data-theme="dark"] .et-cortar{--et:#A8B3C4;--et-soft:rgba(168,179,196,.14)}
@@ -170,8 +173,13 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 [data-theme="dark"] .et-retiro{--et:#4FC4C4;--et-soft:rgba(79,196,196,.13)}
 
 .col-tabs{display:none}
-.board{display:grid;grid-template-columns:repeat(var(--ncols,5),minmax(200px,1fr));gap:14px;align-items:start;overflow-x:auto;padding-bottom:4px}
-.col{background:var(--card-alt);border:1px solid var(--border);border-top:4px solid var(--et);border-radius:var(--radius);padding:12px;min-height:120px;transition:background .15s,opacity .15s}
+.board{display:grid;grid-template-columns:repeat(var(--ncols,5),minmax(200px,1fr));gap:16px;align-items:start;overflow-x:auto;padding-bottom:4px}
+/* CADA ETAPA, SU CARRIL (comentario del dueño, 19/11/2026: "si todas las etapas tienen el mismo color, todo parece parte
+   de lo mismo y hay que forzar el orden en vez de que venga natural"). El color de la etapa tiñe la columna entera, muy
+   suave, y vuelve en su línea de arriba y en su contador. Así el ojo separa cinco carriles sin leer nada; las fichas
+   siguen blancas y sin color propio, que es lo que evitaba el empaste. La primera línea es para navegadores sin color-mix. */
+.col{background:var(--card-alt);background:color-mix(in srgb,var(--et) 11%,var(--bg));border-top:3px solid var(--et);border-radius:var(--radius);padding:12px;min-height:120px;transition:background .15s,opacity .15s}
+[data-theme="dark"] .col{background:color-mix(in srgb,var(--et) 13%,var(--bg))}
 .col-h{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 12px}
 .col .card:last-child{margin-bottom:0}
 /* En computadora la columna tiene alto fijo y se recorre por dentro; su título queda siempre a la vista. */
@@ -221,14 +229,15 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
   .col-h h2{font-size:16px}
   .card{padding:12px 11px}
   .card.plegada{padding:10px 11px 11px}
-  .card.plegada .c-prox{margin:-10px -11px 9px -11px}
-  .c-prox{margin:-12px -11px 11px -11px;padding:5px 11px}
 }
-.col-h h2{font-family:'Fraunces',serif;font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
-.col-h h2::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--et);flex-shrink:0}
-.col-n{font-size:12px;font-weight:700;color:var(--et-on);background:var(--et);border-radius:999px;min-width:26px;padding:2px 8px;text-align:center;font-variant-numeric:tabular-nums}
-.col-sub{font-size:11.5px;color:var(--text3);padding:0 4px 10px}
-.col-vacia{color:var(--text3);font-size:13px;text-align:center;padding:22px 8px}
+/* EL ORDEN DE LECTURA DEL TABLERO (barrido de diseño, 19/11/2026). Tres escalones, y cada uno pesa distinto:
+     1. la etapa: el título de la columna, lo más grande de la pantalla, con su contador;
+     2. el tramo de la cola: un rótulo en tinta con una raya ("Ya medidas", "Necesitan medirse", cada semana de entrega);
+     3. la ficha: quién, qué, cómo está. La próxima de cada etapa lleva el único marco de color.
+   El color de la etapa va una sola vez por columna (la línea de arriba) y en la ficha próxima. */
+.col-h h2{font-family:'Fraunces',serif;font-size:18px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.col-n{min-width:26px;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--et) 16%,transparent);color:var(--text);font-size:13px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums}
+.col-vacia{color:var(--text2);font-size:13px;text-align:center;padding:22px 8px}
 
 /* === ARRASTRE: qué se ve mientras hay una tarjeta en el aire ===
    puede  → columna a la que se puede soltar: se enciende en su color
@@ -239,7 +248,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 .col.bloq{opacity:.5}
 .col.bloq.drop{opacity:1;outline:3px solid var(--red);outline-offset:2px;background:var(--red-soft)}
 .col.origen{opacity:.8}
-.slot{border:2px dashed var(--et);border-radius:var(--radius);padding:14px 10px;margin-bottom:10px;text-align:center;font-size:13px;font-weight:700;color:var(--et);background:var(--card)}
+.slot{border:2px dashed var(--et);border-radius:var(--radius);padding:14px 10px;margin-bottom:10px;text-align:center;font-size:13px;font-weight:700;color:var(--text);background:var(--card)}
 .slot.bloq{border-color:var(--red);color:var(--red);background:var(--card)}
 
 /* Retiro en local: cuadro aparte, debajo de las columnas */
@@ -249,23 +258,42 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 #aparte .card{margin-bottom:0}
 
 /* === TARJETA === */
-.card{position:relative;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--et);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:8px;box-shadow:var(--shadow-sm);cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:border-color .12s,box-shadow .12s}
 /* FICHA PLEGADA: dos o tres renglones. Se abre al tocarla; la flechita de la abierta la vuelve a plegar. */
-.card.plegada{padding:11px 14px 12px;cursor:pointer}
-.card.plegada .c-id{font-size:14px}
-.card.plegada .c-prox{margin:-11px -14px 10px -14px}
-.card.plegada .c-nota{margin-top:8px;padding:4px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.c-res{display:flex;flex-wrap:wrap;gap:5px 6px;margin-top:9px}
-.c-res .r{max-width:100%;overflow:hidden;text-overflow:ellipsis;padding:2px 9px;border-radius:999px;background:var(--card-alt);color:var(--text2);font-size:11.5px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.card.plegada{padding:12px 14px;cursor:pointer}
+.card.plegada .c-id{font-size:14.5px;letter-spacing:-.005em}
+/* LAS VOCES DE LA FICHA CERRADA. Cada renglón tiene la suya, para que no se lea todo igual:
+     1. quién     → N° y nombre: tinta, negrita, lo más grande de la ficha;
+     2. qué       → material: tinta, liso, un punto menos;
+     3. cómo está → una fila corta: la fecha en texto, y pastilla solo si algo pide atención;
+     4. la nota   → una cita, más chica y en gris, con su filete. */
+.card.plegada .c-mat{color:var(--text);font-size:12.5px;font-weight:500;margin-top:2px}
+.c-mat.falta{color:var(--text3)}
+.card.plegada .c-nota{margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* LA FILA DE ETIQUETAS (barrido de diseño, 19/11/2026). Tres voces, de menos a más:
+     dato      → texto liso: la fecha, el contador de tildes;
+     hecho     → verde con tilde, sin fondo;
+     atención  → pastilla suave, ámbar (falta confirmar, vence pronto) o roja (atrasada, sin turno, plazo vencido).
+   El fondo de color queda solo para lo que pide una acción: así se ve qué ficha tiene algo, no un tablero entero pintado. */
+.c-res{display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px;margin-top:8px}
+.c-res .r{max-width:100%;overflow:hidden;text-overflow:ellipsis;color:var(--text2);font-size:12px;font-weight:600;line-height:20px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.c-res .r.rojo,.c-res .r.amb.pide,.c-res .r.hoy,.c-res .r.lista{padding:0 8px;border-radius:999px;font-weight:700}
 .c-res .r.rojo{background:var(--red-soft);color:var(--red)}
-.c-res .r.amb{background:var(--amb-soft);color:var(--amb)}
-.c-res .r.ok{background:var(--gr-soft);color:var(--gr)}
-.c-res .r.hoy{background:var(--gd);color:#1A1816}
+.c-res .r.amb{color:var(--amb);font-weight:700}          /* "Vence el…": un dato en ámbar, sin fondo */
+.c-res .r.amb.pide{background:var(--amb-soft)}           /* "Falta confirmar": pide una acción, lleva pastilla */
+/* "Hoy" va en tinta (el contraste más fuerte de la ficha), no en dorado: el dorado es de la misma familia que el ámbar
+   de "atención" y que el naranja de Por fabricar, y tres avisos distintos en un mismo tono no se distinguen de un vistazo. */
+.c-res .r.hoy{background:var(--dk);color:var(--cr)}
+[data-theme="dark"] .c-res .r.hoy{background:var(--cr);color:#1A1816}
+/* Lo hecho es lo normal: letra en tinta y solo el tilde en verde. El verde con fondo queda para "Lista para pasar". */
+.c-res .r.ok{color:var(--text2);font-weight:600}
+.c-res .r.ok:not(.lista)::before{content:'✓';margin-right:5px;color:var(--gr);font-weight:800}
+.c-res .r.lista{background:var(--gr-soft);color:var(--gr)}
+
 .c-plegar{position:absolute;top:8px;right:8px;width:28px;height:28px;border:none;border-radius:50%;background:none;cursor:pointer;z-index:1}
 .c-plegar::before{content:'';position:absolute;left:10px;top:12px;width:7px;height:7px;border-left:2px solid var(--text3);border-top:2px solid var(--text3);transform:rotate(45deg)}
 @media(hover:hover){.c-plegar:hover{background:var(--card-alt)}}
-.card.primera .c-plegar{top:1px}
-.card:not(.plegada):not(.primera) .c-id{padding-right:28px}
+.card:not(.plegada) .c-id{padding-right:28px}
 .fantasma .c-plegar{display:none}
 /* Tres puntitos arriba a la derecha (dueño, 18/11/2026): abren un menú para copiar el N°, el teléfono o la dirección.
    No ocupan lugar en la ficha. En la ficha abierta van al lado del botón de plegar. */
@@ -273,9 +301,8 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 .c-menu i{width:3.5px;height:3.5px;border-radius:50%;background:var(--text3)}
 @media(hover:hover){.c-menu:hover{background:var(--card-alt)}.c-menu:hover i{background:var(--text)}}
 .card:not(.plegada) .c-menu{right:38px}
-.card.primera .c-menu{top:1px}
-.card.plegada:not(.primera) .c-id{padding-right:28px}
-.card.con-menu:not(.plegada):not(.primera) .c-id{padding-right:62px}
+.card.plegada .c-id{padding-right:28px}
+.card.con-menu:not(.plegada) .c-id{padding-right:62px}
 .fantasma .c-menu{display:none}
 .menu-c{position:fixed;z-index:60;min-width:230px;max-width:min(330px,calc(100vw - 16px));padding:6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow-lg)}
 .menu-c[hidden]{display:none}
@@ -289,9 +316,12 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 .menu-c button+a.ir{margin-top:4px;border-top:1px solid var(--border-soft);border-radius:0 0 var(--radius-sm) var(--radius-sm);padding-top:12px}
 .menu-c a.ir span{color:var(--text3)}
 @media(hover:hover){.menu-c a.ir:hover{background:var(--card-alt)}}
-@media(hover:hover){.card:hover{border-color:var(--et)}}
-/* Algo la frena (atrasada, sin turno, se pisa): marco rojo. Un solo marco, sin doble borde. */
-.card.alerta,.card.sin-turno,.card.choque{border-color:var(--red);border-left-color:var(--et)}
+@media(hover:hover){.card:hover{border-color:var(--gd);box-shadow:var(--shadow)}}
+/* UNA SOLA MARCA POR FICHA (barrido de diseño, 19/11/2026). El borde izquierdo ya no repite el color de la etapa
+   (la ficha está adentro de su columna): queda libre para decir una sola cosa. Algo la frena (atrasada, sin turno,
+   se pisa) → barra roja a la izquierda; el motivo sigue en las etiquetas. */
+.card.alerta,.card.sin-turno,.card.choque{box-shadow:inset 3px 0 0 var(--red),var(--shadow-sm)}
+@media(hover:hover){.card.alerta:hover,.card.sin-turno:hover,.card.choque:hover{box-shadow:inset 3px 0 0 var(--red),var(--shadow)}}
 /* el hueco que deja la tarjeta mientras viaja */
 .card.arrastrando{background:var(--et-soft);border:2px dashed var(--et);box-shadow:none}
 .card.arrastrando>*{visibility:hidden}
@@ -313,17 +343,21 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 @media(prefers-reduced-motion:reduce){.card.llego,.card.nope{animation:none}}
 .c-id{font-size:15px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 /* Lugar en la cola: 1, 2, 3… La 1 es la próxima a atender y va enmarcada en el color de la etapa. */
-.c-pos{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 6px;margin-right:8px;border-radius:999px;border:1.5px solid var(--et);color:var(--et);font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;vertical-align:1px}
-/* La próxima: marco entero en el color de la etapa (pisa al rojo; el motivo sigue en las pastillas). */
-.card.primera,.card.primera.alerta,.card.primera.sin-turno,.card.primera.choque{border-color:var(--et);outline:2px solid var(--et);outline-offset:-1px}
-.card.primera .c-pos{background:var(--et);color:var(--et-on)}
-.c-prox{margin:-14px -14px 12px -14px;padding:5px 14px;border-radius:9px 9px 0 0;background:var(--et-soft);color:var(--et);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.c-pos{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;margin-right:7px;border-radius:999px;border:1px solid var(--border);color:var(--text3);font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;vertical-align:1px}
+/* La próxima de la cola: el único marco en el color de la etapa, con un halo suave, y su número lleno.
+   Si además algo la frena, conserva la barra roja. */
+.card.primera{border-color:var(--et);box-shadow:0 0 0 3px var(--et-soft),var(--shadow-sm)}
+.card.primera.alerta,.card.primera.sin-turno,.card.primera.choque{box-shadow:inset 3px 0 0 var(--red),0 0 0 3px var(--et-soft),var(--shadow-sm)}
+@media(hover:hover){.card.primera:hover{border-color:var(--et)}}
+.card.primera .c-pos{background:var(--et);border-color:var(--et);color:var(--et-on)}
+.c-prox{margin-bottom:5px;color:var(--text2);font-size:10px;font-weight:800;letter-spacing:.1em;line-height:1.2;text-transform:uppercase}
 .fantasma .c-prox{display:none}
 .c-id b{font-weight:700;font-variant-numeric:tabular-nums}
 .c-id .zona{color:var(--text3);font-weight:500}
 .c-id b.sin-nro{color:var(--text3);font-weight:700}
 .c-mat{color:var(--text2);font-size:13px;margin-top:3px;overflow-wrap:anywhere}
-.c-contrato{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:3px 0;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gr);text-decoration:none;white-space:nowrap}
+.c-contrato{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:3px 0;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);text-decoration:none;white-space:nowrap}
+@media(hover:hover){.c-contrato:hover{color:var(--text)}}
 .c-contrato svg{width:12px;height:12px;flex-shrink:0}
 .c-contrato:hover,.c-contrato:focus-visible{text-decoration:underline}
 
@@ -343,39 +377,51 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-hecho.listo::before{content:'✓  '}
 /* Títulos de sección dentro de una columna.
    Lo que falta hacer: texto gris con una línea punteada arriba (separa sin gritar). */
-.col-sep{margin:16px 2px 10px;padding-top:12px;border-top:2px dashed var(--border);font-size:11.5px;font-weight:700;color:var(--text3);letter-spacing:.02em}
-/* Lo ya hecho que espera control: banda verde con tilde y contador. Va primero en la columna. */
-.col-sep.arriba{display:flex;align-items:center;gap:9px;margin:2px 0 10px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--gr) 35%,var(--card));border-radius:var(--radius-sm);background:var(--gr-soft);font-size:12.5px;color:var(--gr);letter-spacing:0;line-height:1.3}
-.col-sep.arriba::before{content:'✓';flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--gr);color:#fff;font-size:12px;font-weight:800}
-[data-theme="dark"] .col-sep.arriba::before{color:#04220F}
-.col-sep.arriba .t{flex:1;min-width:0}
-.col-sep.arriba small{display:block;margin-top:1px;font-size:11px;font-weight:600;color:var(--gr);opacity:.8}
-.col-sep.arriba b{flex-shrink:0;min-width:24px;padding:2px 8px;border-radius:999px;background:var(--gr);color:#fff;font-size:12px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums}
-[data-theme="dark"] .col-sep.arriba b{color:#04220F}
+/* Los tramos de la cola: un solo estilo para los tres (lo ya hecho, lo que falta, cada semana de entrega).
+   Rótulo en tinta, una raya fina que lo separa del anterior y, a la derecha, el dato: cuántas son o cómo viene
+   la semana. Sin cajas. El color queda para lo que lo necesita: "vencida" y el tilde de lo ya hecho. */
+.col-sep,.col-sem{display:flex;align-items:center;gap:7px;margin:18px 4px 9px;font-size:11.5px;font-weight:700;line-height:1.3;color:var(--text)}
+.col-sep .t,.col-sem .t{flex:0 1 auto;min-width:0}
+.col-sep::after,.col-sem::after{content:'';order:2;flex:1 1 6px;min-width:6px;height:1px;background:color-mix(in srgb,var(--et) 28%,transparent)}
+.col-sep b,.col-sem em{order:3;flex-shrink:0;font-style:normal;font-weight:500;color:var(--text2);font-variant-numeric:tabular-nums}
+.col-sem.rojo em{color:var(--red);font-weight:700}
+.col-sem i{display:none} /* el " · " del texto corrido: en pantalla lo reemplaza la raya */
+/* Lo ya hecho que espera pasar de etapa: va primero en la columna, con su tilde verde. */
+.col-sep.arriba{margin-top:2px}
+.col-sep.arriba::before{content:'✓';flex-shrink:0;color:var(--gr);font-weight:800}
+.col-barra+.col-sem,.col-barra+.col-sep:not(.arriba),.col-filtros+.col-sem,.col-filtros+.col-sep:not(.arriba),.col-h+.col-sem,.col-h+.col-sep:not(.arriba){margin-top:4px}
 /* AVISO "!" en rojo: la obra no tiene fecha (Por medir) o turno (Por instalar). Sin fecha no hay
    plazo, y lo que no tiene plazo se queda olvidado: se marca igual de fuerte que lo atrasado. */
 .c-fecha.aviso{background:var(--red-soft);border:1.5px solid var(--red);color:var(--red);font-weight:700}
-.c-fecha.aviso::before,.col-aviso::before,.aviso-g::before,.c-choque::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--red);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
-.col-avisos{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0 2px 12px}
+.c-fecha.aviso::before,.c-choque::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--red);color:var(--card);font-size:12px;font-weight:800;line-height:1;flex-shrink:0}
+/* Debajo del título de la columna: lo que hay para hacer (a la izquierda) y "Filtrar" (a la derecha), en un renglón. */
+.col-barra{display:flex;align-items:flex-start;gap:10px;padding:0 4px 10px}
+.col-avisos{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;flex:1;min-width:0}
 /* Avisos de todo el tablero (plazo prometido al cliente). Tocarlos deja a la vista solo esas fichas. */
 .avisos-g{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;scrollbar-width:none}
 .avisos-g::-webkit-scrollbar{display:none}
 .avisos-g:empty{display:none}
-.aviso-g{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--red);font-family:inherit;cursor:pointer;padding:6px 14px 6px 6px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:13px;font-weight:700;white-space:nowrap}
-.aviso-g.on{background:var(--red);color:var(--card)}
+/* UN SOLO LENGUAJE PARA TODO LO QUE FILTRA (regla del dueño del 16/11, ahora también acá): apagado, blanco con
+   borde gris y lo urgente lo marca solo el número; prendido, relleno. Antes estos avisos iban pintados de rojo
+   aunque estuvieran apagados. */
+.aviso-g{display:inline-block;flex-shrink:0;border:1px solid var(--border);font-family:inherit;cursor:pointer;padding:6px 13px;border-radius:999px;background:var(--card);color:var(--text2);font-size:12.5px;font-weight:600;line-height:1.45;white-space:nowrap}
+.aviso-g b{margin-right:2px;font-weight:800;color:var(--red);font-variant-numeric:tabular-nums}
+.aviso-g.cerca b{color:var(--amb)}
+.aviso-g.on{background:var(--red);border-color:var(--red);color:var(--card)}
+.aviso-g.on b{color:inherit}
+@media(hover:hover){.aviso-g:not(.on):hover{border-color:var(--gd);color:var(--text)}}
 /* Limpiar filtros: oscuro, para que no se confunda con un aviso rojo ni con un filtro. */
-.limpiar-f{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;border:1.5px solid var(--dk);font-family:inherit;cursor:pointer;padding:6px 14px 6px 10px;border-radius:999px;background:var(--dk);color:var(--cr);font-size:13px;font-weight:700;white-space:nowrap}
+.limpiar-f{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;border:1px solid var(--dk);font-family:inherit;cursor:pointer;padding:6px 13px 6px 10px;border-radius:999px;background:var(--dk);color:var(--cr);font-size:12.5px;font-weight:700;white-space:nowrap}
 .limpiar-f::before{content:'×';font-size:18px;line-height:.8;font-weight:600}
 [data-theme="dark"] .limpiar-f{background:var(--gd);border-color:var(--gd);color:#1A1816}
-.aviso-g.on::before{background:var(--card);color:var(--red)}
-.aviso-g.cerca{border-color:var(--amb);background:var(--amb-soft);color:var(--amb)}
-.aviso-g.cerca::before{background:var(--amb)}
-.aviso-g.cerca.on{background:var(--amb);color:var(--card)}
-.aviso-g.cerca.on::before{background:var(--card);color:var(--amb)}
+.aviso-g.cerca.on{background:var(--amb);border-color:var(--amb);color:var(--card)}
 /* Dos instalaciones que comparten instalador el mismo día, casi a la misma hora. */
 .c-choque{display:flex;align-items:flex-start;gap:6px;margin-top:8px;font-size:12.5px;font-weight:700;color:var(--red);overflow-wrap:anywhere}
-.col-aviso-det{font-size:11.5px;font-weight:600;color:var(--red)}
-.col-aviso{display:inline-flex;align-items:center;gap:5px;border:none;font-family:inherit;cursor:pointer;padding:3px 10px 3px 3px;border-radius:999px;background:var(--red-soft);color:var(--red);font-size:11.5px;font-weight:700;white-space:nowrap}
+/* Los avisos de la columna: un renglón de texto con cada número en rojo. Dicen el motivo concreto ("8 atrasadas ·
+   3 ya medidas", "9 sin entregar") y tocarlos prende su filtro. */
+.col-aviso{border:none;background:none;padding:1px 0;font-family:inherit;font-size:12px;font-weight:500;color:var(--text2);text-align:left;cursor:pointer}
+.col-aviso b{font-weight:800;color:var(--red);font-variant-numeric:tabular-nums}
+@media(hover:hover){.col-aviso:hover{color:var(--text);text-decoration:underline;text-underline-offset:3px}}
 
 .c-promesa{font-size:12.5px;color:var(--text3);margin-top:8px;line-height:1.5}
 .c-promesa.cerca{color:var(--amb);font-weight:600}
@@ -384,21 +430,23 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-promesa.entrega{font-size:14px;font-weight:700;color:var(--text);margin-top:10px}
 .c-promesa.entrega.cerca{color:var(--amb)}
 .c-promesa.entrega.vencida{color:var(--red)}
-.c-nota{margin-top:10px;padding:7px 10px;border-radius:var(--radius-sm);background:var(--amb-soft);color:var(--amb);font-size:12.5px;font-weight:600;overflow-wrap:anywhere}
+/* La nota: una cita, con su filete gris. Se lee, pero no compite con los avisos (antes era una caja ámbar). */
+.c-nota{margin-top:10px;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--text3) 38%,transparent);color:var(--text2);font-size:12px;font-weight:500;line-height:1.45;overflow-wrap:anywhere}
 
 .c-checks{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .chk{display:inline-flex;align-items:center;gap:7px;padding:7px 11px 7px 8px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer;text-align:left}
 .chk::before{content:'';flex-shrink:0;width:16px;height:16px;border-radius:5px;border:1.5px solid var(--text3);display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;color:#fff}
 @media(hover:hover){.chk:hover{border-color:var(--gd)}}
-.chk.on{background:var(--gr-soft);border-color:var(--gr);color:var(--gr)}
+/* Lo ya tildado se apaga (fondo neutro, solo el cuadrito en verde): lo que resalta es lo que falta. */
+.chk.on{background:var(--card-alt);border-color:var(--border-soft);color:var(--text)}
 .chk.on::before{content:'✓';background:var(--gr);border-color:var(--gr)}
 [data-theme="dark"] .chk.on::before{color:#04220F}
 
 /* el botón lleva el color de la etapa a la que manda */
 .c-avanzar{display:block;width:100%;margin-top:14px;padding:10px 12px;border:1px solid var(--et);border-radius:var(--radius-sm);background:var(--et);color:var(--et-on);font-size:13.5px;font-weight:700;cursor:pointer}
 @media(hover:hover){.c-avanzar:hover{filter:brightness(1.08)}}
-.c-avanzar.falta{background:none;color:var(--text3);border:1px dashed var(--border);font-weight:600}
-@media(hover:hover){.c-avanzar.falta:hover{filter:none;color:var(--et);border-color:var(--et)}}
+.c-avanzar.falta{background:none;color:var(--text2);border:1px dashed var(--border);font-weight:600}
+@media(hover:hover){.c-avanzar.falta:hover{filter:none;color:var(--text);border-color:var(--et)}}
 
 .c-mas{display:block;margin:10px auto -2px;padding:4px 10px;border:none;background:none;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer}
 @media(hover:hover){.c-mas:hover{color:var(--text)}}
@@ -406,9 +454,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-det .fila{display:flex;gap:8px}
 .c-det .fila span{color:var(--text3);flex:0 0 74px}
 /* Hitos: lo ya hecho en etapas anteriores, con su fecha, a la vista en la ficha */
-.c-hitos{display:flex;flex-wrap:wrap;gap:5px 6px;margin-top:9px}
-.c-hitos span{padding:2px 8px;border-radius:999px;background:var(--gr-soft);color:var(--gr);font-size:11.5px;font-weight:600;white-space:nowrap}
-.c-hitos b{font-weight:800;font-variant-numeric:tabular-nums}
+.c-hitos{display:flex;flex-wrap:wrap;gap:3px 12px;margin-top:9px}
+.c-hitos span{color:var(--text2);font-size:12px;font-weight:600;white-space:nowrap}
+.c-hitos span::before{content:'✓';margin-right:5px;color:var(--gr);font-weight:800}
+.c-hitos b{font-weight:700;color:var(--text3);font-variant-numeric:tabular-nums}
 /* Historial completo, en "Más" */
 .c-hist{font-size:12.5px;border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:8px 10px}
 .c-hist .t{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
@@ -455,12 +504,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .toast.ok{border-left-color:var(--gr)}
 
 /* === CARGAR OBRA A MANO (botón de la columna Por medir) === */
-.col-acc{display:flex;gap:8px;align-items:stretch;margin-bottom:12px}
-.col-fb{flex:0 0 auto;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap}
-.col-fb::after{content:'';display:inline-block;margin-left:7px;width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-3px) rotate(45deg)}
-.col-fb.on::after{transform:translateY(1px) rotate(-135deg)}
-.col-fb.on{border-color:var(--et);color:var(--et)}
-@media(hover:hover){.col-fb:hover{border-color:var(--et);color:var(--et)}}
+.col-acc{flex-shrink:0;margin-left:auto}
+.col-fb{padding:1px 0;border:none;background:none;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap}
+.col-fb::after{content:'';display:inline-block;margin-left:6px;width:5px;height:5px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-3px) rotate(45deg)}
+.col-fb.on::after{transform:translateY(0) rotate(-135deg)}
+.col-fb.on{color:var(--text);font-weight:800}
+@media(hover:hover){.col-fb:hover{color:var(--text)}}
 .modal .campo{display:block;margin-bottom:16px;font-size:12px;font-weight:700;color:var(--text2)}
 .modal .campo+.sena{margin:-10px 0 0}
 .modal .campo[hidden]{display:none}
@@ -481,11 +530,10 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .mat-item i{font-style:normal;font-size:11px;font-weight:700;color:var(--text2);background:var(--card-alt);padding:2px 8px;border-radius:999px;white-space:nowrap}
 .mat-nada{padding:10px 12px;font-size:12.5px;font-weight:500;color:var(--text3)}
 /* Dónde empieza cada semana de entrega, en las colas sin turno */
-.col-sem{margin:14px 2px 8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
-.col-sem.rojo{color:var(--red)}
+
 
 /* Filtros de Por medir: fichas sin plano / sin foto de bacha */
-.col-filtros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.col-filtros{display:flex;flex-wrap:wrap;gap:6px;margin:0 2px 12px}
 .col-filtros button{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer}
 .col-filtros button i{font-style:normal;opacity:.7;font-variant-numeric:tabular-nums}
 .col-filtros button.on{background:var(--et);border-color:var(--et);color:var(--et-on)}
@@ -508,7 +556,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .visor-link{margin:0 0 14px;padding:12px;border-radius:var(--radius-sm);background:var(--card-alt);font-size:13px;color:var(--text2);word-break:break-all}
 .modal .adjuntar.subir{margin-top:0;border-style:solid;color:var(--text)}
 .modal .adj-o{margin:14px 0;text-align:center;font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em}
-.adj.mas{border:1.5px dashed var(--et);background:var(--et-soft);color:var(--et);font-size:10.5px;font-weight:700;line-height:1.25;padding:3px}
+.adj.mas{border:1.5px dashed var(--et);background:var(--et-soft);color:var(--text);font-size:10.5px;font-weight:700;line-height:1.25;padding:3px}
 .visor img,.visor canvas{display:block;max-width:100%;max-height:60vh;margin:0 auto 12px;border-radius:6px;background:var(--card-alt)}
 .visor .girar{border:1px solid var(--border);border-radius:999px;background:var(--card);padding:6px 14px;font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer}
 .visor .girar::before{content:'↻';margin-right:6px;font-size:14px}
@@ -530,25 +578,24 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .c-mas{padding:10px 16px;font-size:13px}
   .c-plegar{width:36px;height:36px;top:4px;right:4px}
   .c-plegar::before{left:14px;top:16px}
-  .card.primera .c-plegar{top:-2px}
   .c-menu{width:36px;height:36px;top:4px;right:4px}
   .card:not(.plegada) .c-menu{right:42px}
-  .card.primera .c-menu{top:-2px}
-  .card.plegada:not(.primera) .c-id{padding-right:34px}
-  .card.con-menu:not(.plegada):not(.primera) .c-id{padding-right:76px}
+  .card.plegada .c-id{padding-right:34px}
+  .card.con-menu:not(.plegada) .c-id{padding-right:76px}
   .menu-c button{padding:12px 10px}
   .menu-c a.ir{padding:14px 10px}
-  .card:not(.plegada):not(.primera) .c-id{padding-right:34px}
+  .card:not(.plegada) .c-id{padding-right:34px}
   .c-det .lnk{padding:11px 0;font-size:13.5px}
   .c-det .acciones{gap:6px 20px}
   .vista-b{padding:9px 14px;font-size:13px}
   .tope-mas-b{width:40px;height:40px}
   .tope-menu button{padding:13px 14px;font-size:14px}
-  .col-fb{padding:10px 14px}
+  .col-fb{padding:10px 0 10px 14px;font-size:13px}
   .col-filtros button{padding:8px 13px;font-size:12.5px}
-  .col-aviso{min-height:38px;padding:8px 13px 8px 6px;font-size:12px} /* para el dedo (auditoría de tablet, 18/11/2026) */
-  .aviso-g{padding:8px 15px 8px 7px}
-  .limpiar-f{padding:8px 15px 8px 11px}
+  .col-aviso{min-height:38px;padding:8px 0;font-size:13px} /* para el dedo (auditoría de tablet, 18/11/2026) */
+  .col-barra{align-items:center}
+  .aviso-g{padding:9px 15px}
+  .limpiar-f{padding:9px 15px 9px 11px}
   .modal .btns button{padding:11px 18px;font-size:14px}
   .modal .lnk,.visor .borrar,.visor a{padding:8px 0;display:inline-block}
   /* Con menos de 16 px, el iPhone y el iPad hacen zoom solos al tocar un campo. */
@@ -568,8 +615,8 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .col-tabs button.on{background:var(--et);color:var(--et-on);border-color:var(--et)}
 .col-tabs button.con-aviso::after{content:'!';position:absolute;top:-5px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--red);color:var(--card);font-size:11px;font-weight:800;line-height:16px;text-align:center}
 .col-tabs button{position:relative;overflow:visible}
-.col-tabs button i{display:block;font-style:normal;font-size:13px;opacity:.75;font-variant-numeric:tabular-nums}
-.col-tabs button.puede{background:var(--et-soft);color:var(--et);border-color:var(--et);border-style:dashed dashed solid}
+.col-tabs button i{display:block;font-style:normal;font-size:13px;font-variant-numeric:tabular-nums}
+.col-tabs button.puede{background:var(--et-soft);color:var(--text);border-color:var(--et);border-style:dashed dashed solid}
 .col-tabs button.puede.drop{background:var(--et);color:var(--et-on);border-style:solid;transform:scale(1.07)}
 .col-tabs button.bloq{opacity:.45}
 .col-tabs button.bloq.drop{opacity:1;background:var(--red-soft);color:var(--red);border-color:var(--red)}
@@ -596,12 +643,11 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .col,.col.puede,.col.bloq,.col.origen{border-top:none;outline:none;opacity:1;background:none}
   #aparte{margin-top:0}
   #aparte .cards{grid-template-columns:1fr}
-  .col-sub{display:none}
   .board{grid-template-columns:minmax(0,1fr);overflow-x:visible;padding-bottom:0}
   .col{display:none;background:none;border:none;padding:0;min-width:0}
   .col.on{display:block}
   .col-h{display:none}
-  .col-avisos{padding:0 0 10px;margin-top:0}
+  .col-barra{padding:0 0 10px}
 }
 /* Celular: los textos de la barra se acortan para que entren en un renglón. */
 @media(max-width:699px){
@@ -629,7 +675,6 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .col.on>.card{grid-column:auto}
   .col.on>.col-sep{margin:8px 2px 0}
   .col.on>.col-sep.arriba{margin:8px 0 0}
-  .col-acc{max-width:420px}
 }
 @media(min-width:960px) and (max-width:1099px){
   .col.on{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -655,9 +700,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .por-etapa .board .col.on>.col-sep{margin:8px 2px 0}
   .por-etapa .board .col.on>.col-sep.arriba{margin:8px 0 0}
   .por-etapa .board .col-h{display:none}
-  .por-etapa .col-sub{display:none}
-  .por-etapa .col-avisos{padding:0 0 10px;margin-top:0}
-  .por-etapa .col-acc{max-width:420px}
+  .por-etapa .col-barra{padding:0 0 10px}
 }
 @media(min-width:1100px) and (hover:hover){.vista-sw button:not(.on):hover{color:var(--text)}}
 @media(min-width:1100px) and (pointer:coarse){.vista-sw button{padding:10px 15px;font-size:13px}}
@@ -701,14 +744,14 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
     <div class="tope-d">
       <div class="hoy" id="hoyTxt"></div>
       <div class="tope-b">
-        <div class="vista-sw" id="vistaSw" role="group" aria-label="Vista del tablero"><button type="button" data-vista="columnas" title="Las cinco etapas juntas, una al lado de la otra">Columnas</button><button type="button" data-vista="etapa" title="Una etapa a la vez, con sus pestañas: la vista de la tablet">Por etapa</button></div>
+        <div class="vista-sw" id="vistaSw" role="group" aria-label="Vista del tablero"><button type="button" data-vista="columnas">Columnas</button><button type="button" data-vista="etapa">Por etapa</button></div>
         <button type="button" class="vista-b quieto" id="vistaB"></button>
         <div class="tope-mas">
-          <button type="button" class="tope-mas-b" id="topeMas" aria-haspopup="menu" aria-expanded="false" aria-controls="topeMenu" aria-label="Más acciones del tablero" title="Exportar, archivadas y papelera"><i></i><i></i><i></i></button>
+          <button type="button" class="tope-mas-b" id="topeMas" aria-haspopup="menu" aria-expanded="false" aria-controls="topeMenu" aria-label="Más acciones del tablero: exportar, archivadas y papelera"><i></i><i></i><i></i></button>
           <div class="tope-menu" id="topeMenu" role="menu" hidden>
-            <button type="button" role="menuitem" id="exportB" title="Baja todas las obras del tablero en un archivo CSV (se abre con Excel)">Exportar tablero</button>
-            <button type="button" role="menuitem" id="archB" title="Obras archivadas: se pueden devolver al tablero" hidden></button>
-            <button type="button" role="menuitem" id="papB" title="Fichas borradas: se pueden recuperar durante 30 días" hidden></button>
+            <button type="button" role="menuitem" id="exportB">Exportar tablero</button>
+            <button type="button" role="menuitem" id="archB" hidden></button>
+            <button type="button" role="menuitem" id="papB" hidden></button>
           </div>
         </div>
       </div>
@@ -796,8 +839,8 @@ let abierta='';     // key de la tarjeta con el detalle abierto
 // dice "Sin N°" (su número interno no se muestra) hasta que se le ponga uno desde "Editar obra".
 // Si está enlazada con un contrato que tiene N°, muestra ese (lo escribe Relación-Contrato).
 const nroB=c=>!c.manual?'<b>'+esc(c.cliente_nro)+'-'+c.sub+'</b>'
-  :(c.nro_contrato?'<b title="N° de su contrato en Relación-Contrato. La ficha se cargó a mano.">'+esc(c.nro_contrato)+'</b>'
-  :'<b class="sin-nro" title="Cargada a mano: todavía no tiene presupuesto ni contrato con N°.">Sin N°</b>');
+  :(c.nro_contrato?'<b>'+esc(c.nro_contrato)+'</b>'
+  :'<b class="sin-nro">Sin N°</b>');
 // Lo mismo, en texto, para títulos de ventanas y avisos (barrido del 18/11/2026: ahí se veía el
 // número interno de la ficha a mano, y alguien lo podía copiar como N° en el contrato).
 const nroTxt=c=>!c.manual?c.cliente_nro+'-'+c.sub:(c.nro_contrato||'Sin N°');
@@ -814,7 +857,7 @@ function queCopiar(c){
 }
 // "Ir al calendario" (dueño, 18/11/2026) va en el mismo menú, para quien tiene acceso al calendario.
 const VE_CALENDARIO=!!YO.puede.calendario;
-const botonMenu=c=>SOLO||(!queCopiar(c).length&&!VE_CALENDARIO)?'':'<button type="button" class="c-menu" data-act="menu" aria-haspopup="menu" aria-label="Más acciones de la ficha" title="Copiar N°, teléfono o dirección'+(VE_CALENDARIO?' · Ir al calendario':'')+'"><i></i><i></i><i></i></button>';
+const botonMenu=c=>SOLO||(!queCopiar(c).length&&!VE_CALENDARIO)?'':'<button type="button" class="c-menu" data-act="menu" aria-haspopup="menu" aria-label="Más acciones de la ficha: copiar N°, teléfono o dirección'+(VE_CALENDARIO?', e ir al calendario':'')+'"><i></i><i></i><i></i></button>';
 let menuAbiertoAt=0; // cuándo se abrió: un desplazamiento que venía de antes no lo cierra
 function cerrarMenu(){const m=$('menuC');if(!m.hidden){m.hidden=true;m.innerHTML='';m.dataset.key='';}}
 function abrirMenu(b,c){
@@ -1030,14 +1073,15 @@ function urgente(c){
 }
 // Detalle del aviso "N por avanzar": cuántas por cada motivo. Cada ficha cuenta una sola vez,
 // por su motivo más avanzado (hecha > atrasada > le falta el tilde de "urge"), así la suma da N.
-function motivosAvanzar(e,cards){
+// Con html=true devuelve lo mismo con cada número en negrita: es el texto del aviso de la columna.
+function motivosAvanzar(e,cards,html){
   let h=0,a=0,u=0;
   cards.filter(urgente).forEach(c=>{if(hecho(c))h++;else if(atrasada(c))a++;else u++;});
   const t=e.hecha_txt||[],p=[];
-  if(u)p.push(u+' '+(e.urge_txt||'sin empezar'));
-  if(a)p.push(a+(a===1?' atrasada':' atrasadas'));
-  if(h)p.push(h+' '+(h===1?(t[0]||'hecha'):(t[1]||'hechas')));
-  return p.join(' · ');
+  if(u)p.push([u,e.urge_txt||'sin empezar']);
+  if(a)p.push([a,a===1?'atrasada':'atrasadas']);
+  if(h)p.push([h,h===1?(t[0]||'hecha'):(t[1]||'hechas')]);
+  return p.map(x=>html?'<b>'+x[0]+'</b> '+esc(x[1]):x[0]+' '+x[1]).join(' · ');
 }
 // Plazo prometido al cliente (semana estimada de entrega): '' | 'cerca' (vence hoy o en los próximos 6 días) | 'vencida'.
 // Son días corridos desde la medición: vence el día exacto (c.limite), no al terminar la semana.
@@ -1086,7 +1130,7 @@ const urlAdj=(c,a)=>API_ADJ+'?nro='+encodeURIComponent(c.cliente_nro)+'&sub='+c.
 function htmlAdjuntos(c,desplegada){
   let h='';
   c.adjuntos.forEach(a=>{
-    h+='<button type="button" class="adj'+(a.pdf?' pdf':'')+(a.link?' link':'')+'" data-act="ver" data-id="'+esc(a.id)+'" title="'+ADJ[a.tipo]+(a.link?' (link de Drive)':'')+'">'+
+    h+='<button type="button" class="adj'+(a.pdf?' pdf':'')+(a.link?' link':'')+'" data-act="ver" data-id="'+esc(a.id)+'" aria-label="'+ADJ[a.tipo]+(a.link?' (link de Drive)':'')+'">'+
       (a.link?'Drive':(a.pdf?'PDF':'<img loading="lazy" alt="" src="'+esc(urlAdj(c,a))+'&t=1">'))+'<span>'+ADJ[a.tipo]+'</span></button>';
   });
   // Bacha y plano se suman en Por medir (o desde "Más"); la foto de entrega, cuando se instala.
@@ -1292,16 +1336,25 @@ function desplegada(c){
   if(c.key in VISTA)return VISTA[c.key];
   return vistaTodas||abierta===c.key||UNICA===c.key; // buscar y que quede una sola: se muestra abierta
 }
+// Las etapas que no llevan turno (Por cortar, Por fabricar) ordenan su cola por semana de entrega, con un título
+// por semana. conSemanas(e) dice si la etapa es de esas; bajoSemanaVencida(c,e), si la ficha queda debajo de un
+// título que ya dice "vencida" (las ya hechas van arriba, fuera de las semanas).
+const conSemanas=e=>!e.fecha&&!e.aparte&&columnas().indexOf(e)<columnas().length-1;
+const bajoSemanaVencida=(c,e)=>!SOLO&&conSemanas(e)&&!hecho(c)&&!!c.semana&&masDias(c.semana,6)<HOY;
 // La ficha plegada: N°, cliente, material y una fila de etiquetas con lo que hay que saber de un vistazo.
 function htmlPlegada(c,e,cls,estilo,pos){
-  let h='<article class="'+cls+' plegada"'+estilo+' data-key="'+esc(c.key)+'" data-act="abrir" title="Tocar para abrir la ficha">';
+  let h='<article class="'+cls+' plegada"'+estilo+' data-key="'+esc(c.key)+'" data-act="abrir">';
   h+=botonMenu(c);
   if(pos===1)h+='<div class="c-prox">Próxima</div>';
-  h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+nroB(c)+' · '+esc(nombreCorto(c.nombre)||'Sin nombre');
+  h+='<div class="c-id">'+(pos?'<span class="c-pos" aria-label="Lugar '+pos+' en la cola">'+pos+'</span>':'')+nroB(c)+' · '+esc(nombreCorto(c.nombre)||'Sin nombre');
   if(c.zona)h+=' <span class="zona">· '+esc(c.zona)+'</span>';
   h+='</div>';
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
-  if(mat)h+='<div class="c-mat">'+esc(mat)+'</div>';
+  // Segundo renglón: qué es (material y trabajo). El contador de tildes ("3 de 8") ya no va en la ficha cerrada: era un
+  // número más en cada ficha y no cambiaba ninguna decisión; los tildes se ven al abrirla, y cuando están todos lo dice
+  // "Lista para pasar".
+  h+='<div class="c-mat'+(mat?'':' falta')+'">'+(esc(mat)||'Sin material')+'</div>';
+  const lista=!faltanDe(c,e).length;
   const r=[],et=(txt,tipo)=>r.push('<span class="r'+(tipo?' '+tipo:'')+'">'+esc(txt)+'</span>');
   if(hecho(c)){
     et(e.boton_listo+(c.boton_at?' · '+fechaCorta(c.boton_at):''),'ok');
@@ -1312,21 +1365,22 @@ function htmlPlegada(c,e,cls,estilo,pos){
       if(e.exige_fecha&&e.pide_hora&&!c.hora&&!atrasada(c))et('Falta la hora','rojo');
       // El turno está puesto y el cliente todavía no lo confirmó: se ve sin abrir la ficha (dueño, 19/11/2026).
       // No frena nada; por eso va en ámbar y no en rojo. Con el turno ya pasado, o sin la hora, no se pide.
-      else if(e.confirma&&!c.checks[e.confirma]&&!atrasada(c))et('Falta confirmar','amb');
+      else if(e.confirma&&!c.checks[e.confirma]&&!atrasada(c))et('Falta confirmar','amb pide');
     }
   }
-  // El paso urgente de la etapa (Por cortar / Por fabricar: entregarle la obra a quien la hace) se ve
-  // sin abrir la ficha, esté o no: "Sin entregar" en rojo o "Entregado" en verde.
-  if(!hecho(c)&&(e.urge||[]).some(k=>!c.checks[k]))et((e.urge_txt||'sin empezar').replace(/^./,x=>x.toUpperCase()),'rojo');
-  else if(!hecho(c)&&(e.urge||[]).length&&e.urge_ok_txt)et(e.urge_ok_txt,'ok');
+  // El paso urgente de la etapa (Por cortar / Por fabricar: entregarle la obra a quien la hace) se ve sin abrir la
+  // ficha: la que ya se entregó dice "Entregado", en verde. La que no, no dice nada: en una cola donde casi todas
+  // están sin entregar, repetirlo en cada ficha era ruido. Cuántas faltan lo dice el aviso de la columna
+  // ("9 sin entregar"), que además las filtra.
+  if(!hecho(c)&&(e.urge||[]).length&&e.urge_ok_txt&&!(e.urge||[]).some(k=>!c.checks[k]))et(e.urge_ok_txt,'ok');
   if(sePisa(c))et('Se pisa','rojo');
   const pl=plazo(c);
-  if(pl==='vencida')et('Plazo vencido','rojo');
+  // En las colas por semana de entrega, el título de la semana ya dice "vencida": la ficha no lo repite.
+  if(pl==='vencida'){if(!bajoSemanaVencida(c,e))et('Plazo vencido','rojo');}
   else if(pl==='cerca')et('Vence '+(c.limite===HOY?'hoy':fechaCorta(c.limite)),'amb');
-  // cuánto le falta para poder pasar de etapa
-  if(faltanDe(c,e).length){const ex=e.checks.filter(k=>!liberado(c,e,k)||c.checks[k.id]);et(ex.filter(k=>c.checks[k.id]).length+' de '+ex.length,'tildes');}
-  else et('Lista para pasar','ok');
-  h+='<div class="c-res">'+r.join('')+'</div>';
+  // con todos los tildes del trabajo puestos, lo dice: es la que hay que pasar de etapa
+  if(lista)et('Lista para pasar','ok lista');
+  if(r.length)h+='<div class="c-res">'+r.join('')+'</div>';
   if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
   return h+'</article>';
 }
@@ -1343,22 +1397,22 @@ function htmlCard(c){
   }
   if(!desplegada(c))return htmlPlegada(c,e,cls,estilo,pos);
   let h='<article class="'+cls+(botonMenu(c)?' con-menu':'')+'"'+estilo+' data-key="'+esc(c.key)+'">';
-  if(!SOLO)h+='<button type="button" class="c-plegar" data-act="plegar" aria-label="Plegar la ficha" title="Plegar"></button>';
+  if(!SOLO)h+='<button type="button" class="c-plegar" data-act="plegar" aria-label="Plegar la ficha"></button>';
   h+=botonMenu(c);
 
   if(pos===1)h+='<div class="c-prox">Próxima</div>';
-  h+='<div class="c-id">'+(pos?'<span class="c-pos" title="Lugar en la cola">'+pos+'</span>':'')+nroB(c)+' · '+esc(nombreCorto(c.nombre)||'Sin nombre');
+  h+='<div class="c-id">'+(pos?'<span class="c-pos" aria-label="Lugar '+pos+' en la cola">'+pos+'</span>':'')+nroB(c)+' · '+esc(nombreCorto(c.nombre)||'Sin nombre');
   if(c.zona)h+=' <span class="zona">· '+esc(c.zona)+'</span>';
   h+='</div>';
   const mat=[c.material,c.concepto].filter(Boolean).join(' · ');
   if(mat)h+='<div class="c-mat">'+esc(mat)+'</div>';
-  if(ENLACES[c.key])h+='<a class="c-contrato" href="/presupuestos/relacion-contrato.php?contrato='+encodeURIComponent(ENLACES[c.key])+'" target="_top" title="Tiene contrato en Relación-Contrato: tocá para abrirlo">'+ICO_ENL+'Con contrato</a>';
+  if(ENLACES[c.key])h+='<a class="c-contrato" href="/presupuestos/relacion-contrato.php?contrato='+encodeURIComponent(ENLACES[c.key])+'" target="_top">'+ICO_ENL+'Con contrato</a>';
 
   // El botón de la etapa (Medido / Cortado) es lo que más se ve en la tarjeta:
   // dice de un vistazo si ese trabajo ya se hizo o no. Tocarlo otra vez lo deshace.
   if(e.boton){
     h+=hecho(c)
-      ?'<button type="button" class="c-hecho listo" data-act="check" data-clave="'+esc(e.boton)+'" title="Tocar para desmarcar">'+esc(e.boton_listo)+(c.boton_at?' · '+esc(fechaCorta(c.boton_at)):'')+'</button>'
+      ?'<button type="button" class="c-hecho listo" data-act="check" data-clave="'+esc(e.boton)+'">'+esc(e.boton_listo)+(c.boton_at?' · '+esc(fechaCorta(c.boton_at)):'')+'</button>'
       :'<button type="button" class="c-hecho" data-act="check" data-clave="'+esc(e.boton)+'">'+esc(e.boton_txt)+'</button>';
   }
   // Ya hecha, la fecha no se muestra: el turno no frena el pase de etapa, así que no hay nada que cargar.
@@ -1392,7 +1446,7 @@ function htmlCard(c){
     if(c.equipo.length&&!e.checks.some(k=>k.id==='equipo'))datos.push('Instalan: '+c.equipo.join(', '));
     if(datos.length)h+='<div class="c-promesa">'+esc(datos.join(' · '))+'</div>';
     // Lo que ya pasó, con su fecha: se ve acá sin tener que volver la ficha atrás.
-    if(c.hitos.length)h+='<div class="c-hitos">'+c.hitos.map(x=>'<span'+(x.por?' title="Aprobó: '+esc(x.por)+'"':'')+'>'+esc(x.txt)+(x.fecha?' <b>'+esc(ddmm(x.fecha))+'</b>':'')+'</span>').join('')+'</div>';
+    if(c.hitos.length)h+='<div class="c-hitos">'+c.hitos.map(x=>'<span>'+esc(x.txt)+(x.fecha?' <b>'+esc(ddmm(x.fecha))+'</b>':'')+'</span>').join('')+'</div>';
   }
   if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
   // Foto de bacha y plano: se suman en Por medir (o desde "Más") y quedan a la vista después.
@@ -1472,9 +1526,9 @@ function dibujar(){
   const nSinCto=ENLACES_OK?CARDS.filter(c=>!ENLACES[c.key]).length:0;
   if(!nSinCto)soloSinCto=false;
   const nFil=(buscado.length?1:0)+(plazoF?1:0)+(soloSinCto?1:0)+Object.keys(falta).filter(k=>falta[k]).length;
-  $('avisosG').innerHTML=(nFil&&!SOLO?'<button type="button" class="limpiar-f" data-limpiar title="Saca el buscador y todos los filtros">Limpiar filtros'+(nFil>1?' · '+nFil:'')+'</button>':'')+(nSinCto?'<button type="button" class="aviso-g'+(soloSinCto?' on':'')+'" data-sincto aria-pressed="'+soloSinCto+'" title="Fichas que no tienen contrato en Relación-Contrato. No debería haber: toda obra nace de su contrato.">'+nSinCto+' sin contrato</button>':'')+(nAtr?'<button type="button" class="aviso-g'+(plazoF==='atrasada'?' on':'')+'" data-plazo="atrasada" aria-pressed="'+(plazoF==='atrasada')+'">'+nAtr+(nAtr===1?' atrasada':' atrasadas')+'</button>':'')
-    +(nVen?'<button type="button" class="aviso-g'+(plazoF==='vencida'?' on':'')+'" data-plazo="vencida" aria-pressed="'+(plazoF==='vencida')+'">'+nVen+' con plazo vencido</button>':'')
-    +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'">'+nCer+(nCer===1?' vence en 7 días':' vencen en 7 días')+'</button>':'');
+  $('avisosG').innerHTML=(nFil&&!SOLO?'<button type="button" class="limpiar-f" data-limpiar>Limpiar filtros'+(nFil>1?' · '+nFil:'')+'</button>':'')+(nSinCto?'<button type="button" class="aviso-g'+(soloSinCto?' on':'')+'" data-sincto aria-pressed="'+soloSinCto+'"><b>'+nSinCto+'</b> sin contrato</button>':'')+(nAtr?'<button type="button" class="aviso-g'+(plazoF==='atrasada'?' on':'')+'" data-plazo="atrasada" aria-pressed="'+(plazoF==='atrasada')+'"><b>'+nAtr+'</b>'+(nAtr===1?' atrasada':' atrasadas')+'</button>':'')
+    +(nVen?'<button type="button" class="aviso-g'+(plazoF==='vencida'?' on':'')+'" data-plazo="vencida" aria-pressed="'+(plazoF==='vencida')+'"><b>'+nVen+'</b> con plazo vencido</button>':'')
+    +(nCer?'<button type="button" class="aviso-g cerca'+(plazoF==='cerca'?' on':'')+'" data-plazo="cerca" aria-pressed="'+(plazoF==='cerca')+'"><b>'+nCer+'</b>'+(nCer===1?' vence en 7 días':' vencen en 7 días')+'</button>':'');
   const filtrando=buscado.length>0||!!plazoF||!!SOLO;
   const visibles=SOLO?CARDS.filter(c=>c.key===SOLO):CARDS.filter(coincide).filter(c=>!soloSinCto||!ENLACES[c.key]).filter(c=>!plazoF||(plazoF==='atrasada'?atrasada(c):plazo(c)===plazoF));
   UNICA=buscado.length&&visibles.length===1?visibles[0].key:'';
@@ -1483,7 +1537,6 @@ function dibujar(){
   $('buscarN').textContent=buscado.length?(visibles.length?visibles.length+(visibles.length===1?' obra':' obras'):'Sin resultados'):'';
 
   let tabs='',cols='',aparte='';
-  const ultima=columnas().length-1;
   ETAPAS.forEach(e=>{
     const esPrimera=columnas().indexOf(e)===0;
     const deEtapa=visibles.filter(c=>c.etapa===e.id);
@@ -1514,25 +1567,23 @@ function dibujar(){
     const cerr=!SOLO&&!porEtapa()&&!e.aparte&&!!colCerr[e.id]; // plegar etapas es de la vista en columnas
     let h='<section class="col et-'+esc(e.id)+(on?' on':'')+(cerr?' cerrada':'')+'" data-col="'+esc(e.id)+'">';
     h+='<div class="col-h"><h2>'+esc(e.titulo)+'</h2><span class="col-n">'+lista.length+'</span>'
-      +(nSinF||nUrg||nPisan?'<i class="col-al" title="Tiene obras por avanzar o sin fecha">!</i>':'')
-      +(e.aparte||SOLO?'':'<button type="button" class="col-pl" data-plegar="'+esc(e.id)+'" aria-expanded="'+!cerr+'" title="'+(cerr?'Desplegar ':'Plegar ')+esc(e.titulo)+'" aria-label="'+(cerr?'Desplegar ':'Plegar ')+esc(e.titulo)+'">'+(cerr?ICO_DESPLEGAR:ICO_PLEGAR)+'</button>')+'</div>';
-    if(nSinF||nUrg||nPisan){
-      h+='<div class="col-avisos">';
-      if(nUrg)h+='<button type="button" class="col-aviso" data-falta="cont_'+esc(e.id)+'">'+nUrg+' por avanzar</button>';
-      // El porqué, al lado: sin esto el número puede quedar igual aunque la ficha haya cambiado de caso
-      // (dejó de estar "ya cortada" pero ahora está "sin entregar") y parece que no se actualizó.
-      if(nUrg)h+='<span class="col-aviso-det">'+esc(motivosAvanzar(e,deEtapa))+'</span>';
-      if(nSinF)h+='<button type="button" class="col-aviso" data-falta="turno_'+esc(e.id)+'">'+nSinF+(e.exige_fecha?' sin turno':' sin fecha')+'</button>';
-      if(nPisan)h+='<button type="button" class="col-aviso" data-falta="pisa_'+esc(e.id)+'">'+nPisan+' se pisan</button>';
-      h+='</div>';
-    }
-    if(!e.aparte&&!e.fecha&&columnas().indexOf(e)<ultima)h+='<div class="col-sub">Por semana de entrega · mismo color junto</div>';
-    // Fila de acciones: el botón que muestra u oculta los filtros. (Acá estaba "+ Cargar obra": las obras
-    // se cargan desde su contrato, en Relación-Contrato, y el dueño pidió que el tablero no tenga ni el link.)
+      +(nSinF||nUrg||nPisan?'<i class="col-al" role="img" aria-label="Tiene obras por avanzar o sin fecha">!</i>':'')
+      +(e.aparte||SOLO?'':'<button type="button" class="col-pl" data-plegar="'+esc(e.id)+'" aria-expanded="'+!cerr+'" aria-label="'+(cerr?'Desplegar ':'Plegar ')+esc(e.titulo)+'">'+(cerr?ICO_DESPLEGAR:ICO_PLEGAR)+'</button>')+'</div>';
+    // Debajo del título, un solo renglón: a la izquierda lo que hay para hacer (cada aviso prende su filtro) y a
+    // la derecha "Filtrar". (Acá estaba "+ Cargar obra": las obras se cargan desde su contrato, en Relación-Contrato.)
     const nAct=filtros.filter(f=>falta[f[0]]).length,verF=filtros.length>0&&(!!filtrosAb[e.id]||nAct>0);
-    if(filtros.length){
-      h+='<div class="col-acc">';
-      h+='<button type="button" class="col-fb'+(verF?' on':'')+'" data-filtros="'+esc(e.id)+'" aria-expanded="'+verF+'">Filtrar'+(nAct?' · '+nAct:'')+'</button>';
+    if(nSinF||nUrg||nPisan||filtros.length){
+      h+='<div class="col-barra">';
+      if(nSinF||nUrg||nPisan){
+        h+='<div class="col-avisos">';
+        // Lo que hay que mover, dicho por su motivo ("8 atrasadas · 3 ya medidas", "9 sin entregar"): antes decía
+        // "11 por avanzar" y el motivo iba en otro renglón, debajo. Es un solo aviso y prende "Necesitan continuar".
+        if(nUrg)h+='<button type="button" class="col-aviso" data-falta="cont_'+esc(e.id)+'" aria-label="Necesitan continuar: '+esc(motivosAvanzar(e,deEtapa))+'">'+motivosAvanzar(e,deEtapa,true)+'</button>';
+        if(nSinF)h+='<button type="button" class="col-aviso" data-falta="turno_'+esc(e.id)+'"><b>'+nSinF+'</b>'+(e.exige_fecha?' sin turno':' sin fecha')+'</button>';
+        if(nPisan)h+='<button type="button" class="col-aviso" data-falta="pisa_'+esc(e.id)+'"><b>'+nPisan+'</b> se pisan</button>';
+        h+='</div>';
+      }
+      if(filtros.length)h+='<div class="col-acc"><button type="button" class="col-fb'+(verF?' on':'')+'" data-filtros="'+esc(e.id)+'" aria-expanded="'+verF+'">Filtrar'+(nAct?' · '+nAct:'')+'</button></div>';
       h+='</div>';
     }
     if(verF)h+='<div class="col-filtros">'+filtros.map(f=>'<button type="button" class="'+(falta[f[0]]?'on':'')+(f[0].indexOf('cont_')===0&&deEtapa.some(f[2])?' urg':'')+((f[0].indexOf('turno_')===0||f[0].indexOf('pisa_')===0)&&deEtapa.some(f[2])?' avi':'')+'" data-falta="'+f[0]+'" aria-pressed="'+!!falta[f[0]]+'">'+f[1]+' <i>'+deEtapa.filter(f[2]).length+'</i></button>').join('')+'</div>';
@@ -1541,17 +1592,20 @@ function dibujar(){
     let nHechas=0;
     while(e.boton&&nHechas<lista.length&&hecho(lista[nHechas]))nHechas++;
     // En las etapas sin turno, un renglón marca dónde empieza cada semana de entrega: se entiende el orden.
-    const conSemanas=!e.fecha&&!e.aparte&&columnas().indexOf(e)<ultima;
+    // (Dentro de cada semana va junto lo del mismo color: lo decía un renglón fijo arriba de la columna, que se sacó.)
+    const conSem=conSemanas(e);
     const sem=c=>{
-      if(!c.semana)return 'Sin plazo todavía';
+      if(!c.semana)return '<span class="t">Sin plazo todavía</span>';
       const fin=masDias(c.semana,6);
-      return 'Entrega: semana del '+ddmm(c.semana)+(fin<HOY?' · vencida':(c.semana<=HOY?' · esta semana':''));
+      return '<span class="t">Entrega: semana del '+esc(ddmm(c.semana))+'</span>'+(fin<HOY?'<i> · </i><em>vencida</em>':(c.semana<=HOY?'<i> · </i><em>esta semana</em>':''));
     };
     // título de lo ya hecho: "Ya cortadas" + lo que esperan, y el contador a la derecha
-    const seccion=(txt,n,cls)=>{const p=String(txt).split(' · ');return '<div class="col-sep'+cls+'"><span class="t">'+esc(p[0])+(p.length>1?'<small>'+esc(p.slice(1).join(' · ').replace(/^./,x=>x.toUpperCase()))+'</small>':'')+'</span><b>'+n+'</b></div>';};
+    // (El texto trae además qué les falta, "Ya medidas · falta pasar a cortar": se dejó de mostrar. Lo dice el aviso de
+    // arriba de la columna, con su número, y cada ficha de este tramo.)
+    const seccion=(txt,n,cls)=>'<div class="col-sep'+cls+'"><span class="t">'+esc(String(txt).split(' · ')[0])+'</span><b>'+n+'</b></div>';
     const cards=lista.map((c,i)=>(nHechas&&i===0?seccion(e.hecho,nHechas,' arriba'):'')
-      +(nHechas&&i===nHechas?'<div class="col-sep">'+esc(e.pendientes||'En cola')+' ('+lista.filter(x=>!hecho(x)).length+')</div>':'')
-      +(conSemanas&&i>=nHechas&&(i===nHechas||(lista[i-1].semana||'')!==(c.semana||''))?'<div class="col-sem'+(c.semana&&masDias(c.semana,6)<HOY?' rojo':'')+'">'+esc(sem(c))+'</div>':'')+htmlCard(c)).join('');
+      +(nHechas&&i===nHechas?'<div class="col-sep"><span class="t">'+esc(e.pendientes||'En cola')+'</span><b>'+lista.filter(x=>!hecho(x)).length+'</b></div>':'')
+      +(conSem&&i>=nHechas&&(i===nHechas||(lista[i-1].semana||'')!==(c.semana||''))?'<div class="col-sem'+(c.semana&&masDias(c.semana,6)<HOY?' rojo':'')+'">'+sem(c)+'</div>':'')+htmlCard(c)).join('');
     if(e.aparte)h+=lista.length?'<div class="cards">'+cards+'</div>':'<div class="col-vacia">'+(filtrando?'Sin resultados':'Nadie retira por el local')+'</div>';
     else h+=lista.length?cards:'<div class="col-vacia">'+(filtrando?'Sin resultados':CARDS.length?'Nada acá':(columnas().indexOf(e)===0?'Las obras aparecen solas acá cuando marcás un presupuesto como Aprobado.':''))+'</div>';
     h+='</section>';
@@ -2325,7 +2379,7 @@ function verAdjunto(c,id){
   abrirModal(ADJ[a.tipo]+' · '+nroTxt(c),
     '<div class="visor">'+(a.link?'<p class="visor-link">Está en Drive: '+esc(a.link.replace(/^https:\/\//,'').slice(0,60))+(a.link.length>68?'…':'')+'</p>':(a.pdf?'':'<div class="lienzo" id="adjLienzo"><img src="'+esc(url)+'" alt="" id="adjImg"></div>'))+
     '<div class="acciones"><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+(a.link?'Abrir en Drive':(a.pdf?'Abrir el PDF':'Abrir en grande'))+'</a>'+
-    (foto&&a.mio!==false?'<button type="button" class="girar" id="adjGirar" title="Gira la foto un cuarto de vuelta">Girar</button>':'')+
+    (foto&&a.mio!==false?'<button type="button" class="girar" id="adjGirar">Girar</button>':'')+
     (a.mio!==false?'<button type="button" class="borrar" id="adjBorrar">Borrar</button>':'')+'</div></div>',
     'Cerrar',cerrarModal);
   $('mCancelar').style.display='none';

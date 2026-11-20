@@ -156,10 +156,10 @@ Menú con: copiar N° de presupuesto, copiar teléfono (como diez dígitos, list
 - **Enlazados, la ficha se borra en los dos lados (16/11/2026):** borrar el contrato manda también su ficha del tablero a la papelera (con sus tildes y adjuntos), y borrar la ficha en el tablero manda también el contrato (con sus pagos y su presupuesto adjunto). Los dos avisan antes y se recuperan durante 30 días. Si el contrato no está enlazado, o su ficha ya no está en el tablero, se borra solo. **Archivar no es borrar:** el contrato queda y dice "Fuera del tablero".
 - **Borrar el presupuesto no toca nada de esto:** la ficha, el calendario y el contrato siguen (ver el decision log de la etapa).
 - **Enlazado, manda el tablero en lo operativo**: cliente, teléfono, dirección, material y pileta se ven como están en la ficha y se cambian desde el tablero. La plata se cambia acá.
-- **Distintivo de enlace:** el renglón enlazado lleva una raya verde a la izquierda y la marca "Enlazado" al lado de la etapa; la ficha dice "Enlazado con el tablero y el calendario" (el calendario lee del tablero, así que queda enlazado solo).
+- **Distintivo de enlace (cambió el 19/11/2026):** en la planilla, el renglón enlazado muestra la etapa de su ficha (un punto de color y el nombre), que es el link a la ficha; ya no lleva la raya verde ni la palabra "Enlazado" en cada renglón. Adentro del contrato sigue diciendo "Enlazado con el tablero y el calendario" (el calendario lee del tablero, así que queda enlazado solo).
 - **Del otro lado también se ve (17/11/2026):** en el tablero, la ficha abierta de una obra con contrato muestra la marca "Con contrato", que lleva directo a ese contrato (`relacion-contrato.php?contrato=<id>` lo abre en su mes). Solo en la ficha abierta, no en la plegada.
 - El renglón muestra **la etapa** de la obra (Por medir, Por cortar…), la fecha de medición o instalación y el vencimiento, y lleva a la ficha con un toque.
-- **La seña y la nota de la ficha pasan solas al contrato (dueño, 19/11/2026).** Antes no se pisaban nunca. Ver "La seña y la nota llegan del tablero", más abajo. Si aun así difieren, el renglón sigue diciendo "Seña distinta en el tablero" y el aviso dentro del contrato explica por qué no pasó.
+- **La seña y la nota de la ficha pasan solas al contrato (dueño, 19/11/2026).** Antes no se pisaban nunca. Ver "La seña y la nota llegan del tablero", más abajo. Si aun así difieren, debajo de la etapa del renglón dice "Seña distinta en el tablero" y el aviso dentro del contrato explica por qué no pasó.
   - No cuenta como diferencia la misma plata dicha de otra forma: la seña en dólares con su cotización contra la del tablero en pesos, o el tablero con todo lo cobrado anotado como seña.
   - Sí avisa si un lado tiene seña y el otro no.
   - Antes (16/11) la del tablero reemplazaba a la del contrato al abrir la página, y con la seña en el tablero el campo quedaba de solo lectura. Eso se sacó: cambiaba la plata sin que nadie lo decidiera.
@@ -193,8 +193,23 @@ La idea del dueño: una vez enlazados, que se aproveche al máximo lo que cada l
   - Como la ficha de un presupuesto comparte el cliente con ese presupuesto, el dato también queda en la pestaña Presupuestos.
   - Cómo está hecho: `pasarNombres()` llama a `tablero-editar.php`. El tablero no lee nada de contratos.
 - **Dentro del contrato se ve lo del tablero.** La ventana del contrato (también la de solo mirar) muestra etapa, medición (coordinada o hecha, y quién midió), cuándo vence la entrega, el turno de instalación con el equipo, cuántas fotos y planos tiene, la nota del tablero y, plegado, el **historial del tablero** con sus tildes y fechas. Es solo lectura y sale de lo que el tablero ya manda (`tableroHtml()`): no se guarda nada en el contrato.
-- **"Enlazado" es un link a la ficha.** En el renglón de la lista y dentro del contrato, tocarlo abre el tablero con esa ficha. Es el camino inverso de "Con contrato" en la ficha, que lleva al contrato.
+- **Del contrato se va a su ficha con un toque.** En el renglón de la lista, tocando la etapa; dentro del contrato, tocando "Enlazado". Abre el tablero con esa ficha. Es el camino inverso de "Con contrato" en la ficha, que lleva al contrato.
 - El N° también se comparte: ver "El N° del contrato en la ficha del tablero", arriba.
+
+## Barrido de diseño del 19/11/2026
+
+Mismo criterio que en el tablero (`01-strategy/decision-log/2026-11-19-barrido-de-diseno.md`). Lo que cambió en la planilla:
+
+- **La plata:** total y cobrado en gris; el saldo, que es el número que se viene a buscar, en tinta y negrita. "Por cobrar" ya no va en rojo (deber un saldo es lo normal); lo cobrado y "Pagado" siguen en verde.
+- **Los montos:** en la planilla, sin centavos (una columna de números se compara mejor si todos tienen la misma forma); un resto de menos de un peso se muestra entero para que no parezca saldado. El monto exacto, con sus centavos, está al abrir el contrato. Las sumas del resumen y del pie van redondeadas.
+- **La etapa del tablero** es un punto en el color de la etapa y el nombre en tinta, y es el link a la ficha. Ya no hay barra verde ni la palabra "Enlazado" en cada renglón: que haya etapa dice que está enlazado. Debajo van el turno y el plazo, cada uno en su renglón; en rojo, solo "Plazo vencido".
+- **Filtros en dos grupos**, con una raya en el medio: cómo están (Todos, Con saldo, Pagados, Completos) y qué les falta (Sin cargar al tablero, Sin verificar, Sin N°, Sin turno, Seña distinta). Un filtro en cero se ve apagado.
+- **Columnas "Factura" y "Muebles"** con el nombre entero y alineadas a la izquierda, como texto que son (la plata va a la derecha). En pantallas de menos de 1350 px se van esas columnas y la de pileta (siguen en la ficha), para que el nombre del cliente no se corte.
+- **Notas:** texto gris en la planilla y un campo como los demás en la ventana (antes, ámbar).
+- **Celdas vacías:** una raya apagada. Es un relleno, no un dato: queda a propósito más clara que el texto, pero se ve (3:1).
+- **Todo el texto se lee (20/11/2026):** contraste medido, 4,5:1 o más en claro y oscuro, en computadora, tablet y celular. → `06-knowledge/layer-0-raw/2026-11-20-contraste-medido.md`
+- **En la ventana del contrato**, de las tres cosas que lo completan resalta la que falta (ámbar); las que ya están van en gris con su punto verde.
+- **Sin descripciones al pasar el mouse**, salvo las que explican un signo (el "?" del N°, el sello de verificado, "CF") o muestran una nota cortada.
 
 ## La seña y la nota llegan del tablero (19/11/2026)
 

@@ -33,10 +33,10 @@ header('Content-Type: text/html; charset=UTF-8');
 /* === DESIGN TOKENS (los mismos del hub y del tablero) === */
 :root{
   --bg:#FAF8F4;--card:#FFFFFF;--card-alt:#F5F0E5;
-  --text:#1A1816;--text2:#5A4A35;--text3:#8B7860;
+  --text:#1A1816;--text2:#5A4A35;--text3:#7A6850;
   --border:#E5DECF;--border-soft:#F0EAD8;
   --dk:#1A1816;--dk2:#2A2522;--gd:#C4A77D;--gdd:#7A6649;
-  --gr:#1F8F47;--gr-soft:#E4F4E8;--cr:#FAF8F4;
+  --gr:#1A7A3C;--gr-soft:#E4F4E8;--cr:#FAF8F4;
   --red:#B03A3A;--red-soft:#FBEAEA;--amb:#8A5A0B;--amb-soft:#FBF1DC;
   --gd-soft:rgba(196,167,125,.10);
   --shadow:0 2px 10px rgba(26,24,22,.06);
@@ -45,7 +45,7 @@ header('Content-Type: text/html; charset=UTF-8');
 }
 [data-theme="dark"]{
   --bg:#0A0907;--card:#16140F;--card-alt:#1F1B14;
-  --text:#F5F0E5;--text2:#C4B596;--text3:#8B7860;
+  --text:#F5F0E5;--text2:#C4B596;--text3:#9C8A6E;
   --border:#2D2820;--border-soft:#221E18;
   --gr:#34D670;--gr-soft:#0E2A18;
   --red:#E26666;--red-soft:#2A1414;--amb:#E8B95C;--amb-soft:#3A2A14;
@@ -105,13 +105,16 @@ button{font-family:inherit;color:inherit}
 /* === RESUMEN DEL MES: una sola franja, para leer de corrido === */
 .res{display:flex;flex-wrap:wrap;margin-bottom:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);overflow:hidden}
 .res[hidden]{display:none}
-.res>div{flex:1 1 150px;min-width:0;padding:10px 18px 11px;border-left:1px solid var(--border-soft)}
+.res>div{flex:1 1 150px;min-width:0;padding:12px 18px 13px;border-left:1px solid var(--border-soft)}
 .res>div:first-child{flex:0 1 150px;border-left:none}
 .res .t{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
-.res .v{margin-top:3px;font-size:15.5px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .v{margin-top:4px;font-size:15.5px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .res .v.nada{color:var(--text3);font-weight:500}
+.res .v i{margin:0 3px;font-style:normal;font-weight:500;color:var(--text3)} /* el "+" entre dólares y pesos */
+/* EL COLOR EN LA PLATA (barrido de diseño, 19/11/2026): verde, lo que ya entró; lo que falta cobrar va en tinta
+   y en negrita. Deber un saldo es lo normal de un contrato en curso, no un error: el rojo queda para lo que está mal. */
 .res .cobr .v{color:var(--gr)}
-.res .debe .v{color:var(--red)}
+.res .cobr .v.nada{color:var(--text3)}
 .res .debe.cero .v{color:var(--gr)}
 .res .tod{flex:1.2 1 190px;background:var(--card-alt)}
 .res .tod .v{font-size:13.5px;font-weight:600;color:var(--text2)}
@@ -121,6 +124,11 @@ button{font-family:inherit;color:inherit}
 .filtros[hidden]{display:none}
 .filtros button{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap}
 .filtros button i{font-style:normal;font-weight:800;color:var(--text3);font-variant-numeric:tabular-nums}
+/* Un filtro sin nada adentro se apaga: sigue ahí, pero no pide que lo miren. */
+.filtros button.cero:not(.on){color:var(--text3);font-weight:500}
+.filtros button.cero:not(.on) i{font-weight:600}
+/* Entre "cómo están de plata" y "qué falta completar": una raya fina. */
+.filtros .sep{align-self:center;flex:0 0 1px;height:18px;margin:0 4px;background:var(--border)}
 .filtros button.on{background:var(--dk);border-color:var(--dk);color:var(--cr)}
 .filtros button.on i{color:var(--gd)}
 .filtros select{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-family:inherit;font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer}
@@ -134,15 +142,16 @@ button{font-family:inherit;color:inherit}
 .aviso-s b{color:var(--text)}
 .aviso-s .btn{margin-left:auto}
 .aviso-s[hidden]{display:none}
-.m-chk{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:12px;color:var(--text3)}
-.m-chk span::before{content:'';display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;border:1.5px solid var(--text3);vertical-align:1px}
-.m-chk span.si{color:var(--gr)}
+/* Las tres cosas que completan un contrato. Lo que ya está se apaga (gris, con su punto verde); lo que falta es lo que se lee. */
+.m-chk{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:12px;font-weight:600;color:var(--amb)}
+.m-chk span::before{content:'';display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;border:1.5px solid var(--amb);vertical-align:1px}
+.m-chk span.si{color:var(--text3);font-weight:500}
 .m-chk span.si::before{background:var(--gr);border-color:var(--gr)}
 .res .v small{display:block;margin-top:1px;font-size:11.5px;font-weight:500;color:var(--text3)}
 .aviso-p .btn{margin-left:auto;border-color:var(--amb);color:var(--amb);background:transparent}
 
 /* === PLANILLA: un renglón por contrato, columnas fijas, números alineados === */
-.lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 172px minmax(0,1.25fr) 30px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 54px 54px 64px 178px minmax(0,1.2fr) 30px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
 .fila,.cab,.pie{display:grid;grid-template-columns:var(--cols);gap:0 14px;align-items:center;padding:9px 16px}
 .cab{position:sticky;top:0;z-index:5;padding-top:9px;padding-bottom:9px;background:var(--card-alt);border-bottom:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
 .cab>div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -162,38 +171,46 @@ button{font-family:inherit;color:inherit}
 .f-sub{font-size:11.5px;color:var(--text3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .f-sub .tel{color:var(--text2);font-weight:600;text-decoration:none;font-variant-numeric:tabular-nums}
 .f-mat{color:var(--text2);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.plata{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.35}
+/* Total y cobrado, en gris; el saldo es el número que se viene a buscar: en tinta y en negrita. */
+.plata{font-weight:500;color:var(--text2);font-variant-numeric:tabular-nums;line-height:1.35}
 .plata span{display:block;white-space:nowrap}
 .plata.nada{color:var(--text3);font-weight:500}
-.plata.debe{color:var(--red);font-weight:700}
+.plata.debe{color:var(--text);font-weight:700}
 .plata.ok{color:var(--gr);font-weight:700}
-/* sí / no / sin dato: se lee de un vistazo, sin color fuerte */
-.sn{font-size:12px;font-weight:700;color:var(--text3)}
-.sn.si{color:var(--gr)}
+.plata.nada.raya{opacity:.72} /* una raya por "no hay": apagada, pero se ve (3:1) */
+/* sí / no / sin dato: se lee de un vistazo, sin color */
+.sn{font-size:12px;font-weight:600;color:var(--text3)}
+.sn.si{color:var(--text);font-weight:700}
 .sn.no{color:var(--text2)}
-.c-not{font-size:12px;color:var(--amb);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sn.raya{opacity:.72}
+.c-not{font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nota-i{display:none}
 .solo-t{display:none}
 .rot{display:none}
-.tab{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
-.etapa{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:4px 11px;border-radius:999px;background:var(--et-soft);color:var(--et);font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+.tab{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+/* La etapa del tablero: un punto en el color de la etapa y el nombre en tinta. Sin pastilla: en una planilla de
+   30 renglones, 30 pastillas de colores pesaban más que la plata. Es el link a la ficha. */
+.etapa{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:1px 9px 1px 0;border-radius:999px;color:var(--text);font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap}
 .etapa::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--et);flex-shrink:0}
-.etapa.fuera{--et:var(--text3);--et-soft:var(--card-alt)}
+a.etapa{margin-left:-9px;padding-left:9px;transition:background .12s}
+@media(hover:hover){a.etapa:hover{background:var(--et-soft)}}
+.etapa.fuera{--et:var(--text3);--et-soft:var(--card-alt);color:var(--text2)}
 .etapa.rota{--et:var(--red);--et-soft:var(--red-soft,rgba(176,58,58,.1))}
 .tab [data-desenlazar]{margin-top:6px}
-.tab small.sena-d{color:var(--amb);font-weight:700;cursor:help}
+.tab small.sena-d{color:var(--amb);font-weight:700}
 .nota-t.sena-d{background:var(--amb-soft);color:var(--amb)}
 .nota-t.sena-d b{font-weight:800}
-.tab small{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.tab small.rojo{color:var(--red);font-weight:700}
+.tab small{font-size:11.5px;line-height:1.35;color:var(--text3);max-width:100%;overflow-wrap:anywhere}
+.tab small.rojo,.tab small b.rojo{color:var(--red);font-weight:700}
+.etapa.rota{color:var(--red)}
 .tab .btn.chico{padding:5px 11px;font-size:12px}
-.btn.enl-b{display:inline-flex;align-items:center;gap:6px;border-color:var(--gr);color:var(--gr)}
+.btn.enl-b{display:inline-flex;align-items:center;gap:6px}
 .btn.enl-b svg{width:13px;height:13px}
 .et-medir{--et:#2F6DB5;--et-soft:rgba(47,109,181,.11)}
 .et-cortar{--et:#4B5563;--et-soft:rgba(75,85,99,.12)}
-.et-fabricar{--et:#B5680A;--et-soft:rgba(181,104,10,.12)}
+.et-fabricar{--et:#AC6309;--et-soft:rgba(172,99,9,.12)}
 .et-instalar{--et:#7A52B3;--et-soft:rgba(122,82,179,.11)}
-.et-archivar{--et:#1F8F47;--et-soft:rgba(31,143,71,.11)}
+.et-archivar{--et:#1A7A3C;--et-soft:rgba(26,122,60,.11)}
 .et-retiro{--et:#14808A;--et-soft:rgba(20,128,138,.11)}
 [data-theme="dark"] .et-medir{--et:#6AA5E8;--et-soft:rgba(106,165,232,.14)}
 [data-theme="dark"] .et-cortar{--et:#A8B3C4;--et-soft:rgba(168,179,196,.14)}
@@ -246,11 +263,11 @@ button{font-family:inherit;color:inherit}
 .pres .lnk{padding:0;border:none;background:none;font:inherit;font-weight:700;color:var(--red);cursor:pointer}
 .pres .btn.chico{background:var(--card)}
 /* Distintivo: este contrato ya está enlazado con el tablero (y por eso también con el calendario). */
-.enl{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gr);white-space:nowrap}
+.enl{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
 .enl svg{width:12px;height:12px;flex-shrink:0}
 a.enl{text-decoration:none}
-.nota-t a.enl{color:var(--gr);font-weight:800}
-a.enl:hover,a.enl:focus-visible{text-decoration:underline}
+.nota-t a.enl{color:var(--text2);font-weight:800}
+a.enl:hover,a.enl:focus-visible{color:var(--text);text-decoration:underline}
 .nota-t .lista-c{margin-top:6px;font-size:12.5px}
 .nota-t .lista-c li{padding:5px 0}
 .nota-t .lista-c li:last-child{border-bottom:none}
@@ -267,8 +284,7 @@ a.enl:hover,a.enl:focus-visible{text-decoration:underline}
 .nota-t .lnk{border:none;background:none;padding:0;font:inherit;font-weight:700;color:var(--red);text-decoration:underline;cursor:pointer}
 .nota-t .enl{white-space:normal;margin-bottom:3px}
 .tab .fila-e{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;max-width:100%}
-.fila.enlazada{box-shadow:inset 3px 0 0 var(--gr)}
-/* La nota en las tarjetas (tablet y celular): mismo ámbar que las notas del tablero */
+/* La nota en las tarjetas (tablet y celular): una cita con su filete, igual que en el tablero */
 .f-nota{display:none}
 .prueba-t{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--amb-soft);color:var(--amb);font-size:10px;font-weight:800;letter-spacing:.06em;vertical-align:middle}
 .vacio{padding:48px 20px;text-align:center;color:var(--text2);font-size:14.5px;line-height:1.6}
@@ -294,11 +310,11 @@ a.enl:hover,a.enl:focus-visible{text-decoration:underline}
 .m-res .t{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
 .m-res b{display:block;margin-top:5px;font-family:'Fraunces',serif;font-size:18px;font-weight:600;line-height:1.3;color:var(--text);font-variant-numeric:lining-nums tabular-nums;overflow-wrap:anywhere}
 .m-res b.nada{color:var(--text3)}
-.m-res b.debe{color:var(--red)}
+.m-res b.debe{color:var(--text)}
 .m-res b.ok{color:var(--gr)}
-/* Notas: acá van los detalles del contrato. Mismo ámbar que las notas del tablero. */
-.campo.notas textarea{min-height:104px;padding:12px 14px;border-color:color-mix(in srgb,var(--amb) 30%,var(--border));background:var(--amb-soft);font-size:14.5px;line-height:1.55;resize:vertical}
-.campo.notas textarea::placeholder{color:var(--amb);opacity:.65}
+/* Notas: acá van los detalles del contrato. Un campo como los demás, más alto (antes era una caja ámbar). */
+.campo.notas textarea{min-height:104px;padding:12px 14px;font-size:14.5px;line-height:1.55;resize:vertical}
+.campo.notas textarea::placeholder{color:var(--text3);opacity:.8}
 .modal .bajada{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:14px}
 .modal h4{margin:24px 0 0;padding-top:18px;border-top:1px solid var(--border-soft);font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--text)}
 .campo{display:block;margin-top:14px;font-size:12px;font-weight:700;color:var(--text2)}
@@ -399,13 +415,16 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 /* Pantallas medianas: primero se va la columna de notas (queda un punto al lado del nombre),
    después factura / muebles / pileta. Todo sigue estando en la ficha. */
 @media(max-width:1519px){
-  .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 42px 42px 64px 172px 30px}
+  .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 54px 54px 64px 178px 30px}
   .c-not,.cab .h-not{display:none}
-  .nota-i{display:inline-block;width:7px;height:7px;margin-left:7px;border-radius:50%;background:var(--amb);vertical-align:middle}
+  .nota-i{display:inline-block;width:6px;height:6px;margin-left:7px;border-radius:50%;background:var(--text3);vertical-align:middle}
+}
+/* Antes se iban recién a los 1199 px y el nombre del cliente quedaba cortado ("Mauro Gimen…") en una notebook. */
+@media(max-width:1349px){
+  .lista{--cols:70px 68px minmax(0,1.6fr) minmax(0,1.3fr) 104px 104px 110px 178px 30px}
+  .c-sn,.cab .h-sn{display:none}
 }
 @media(max-width:1199px){
-  .lista{--cols:70px 68px minmax(0,1.6fr) minmax(0,1.3fr) 100px 100px 106px 172px 30px}
-  .c-sn,.cab .h-sn{display:none}
   .fila,.cab,.pie{gap:0 12px;padding-left:14px;padding-right:14px}
 }
 /* Tablet y celular: cada contrato es una tarjeta, con el rótulo al lado de cada dato. */
@@ -440,12 +459,12 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   .rot{display:block;margin-bottom:2px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3)}
   .c-obra{font-size:12.5px;color:var(--text3)}
   .c-obra b{font-weight:700;color:var(--text2)}
-  .f-nota{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:7px 11px;border-radius:var(--radius-sm);background:var(--amb-soft);color:var(--amb);font-size:12.5px;font-weight:600;line-height:1.45}
+  .f-nota{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--text3) 38%,transparent);color:var(--text2);font-size:12.5px;font-weight:500;line-height:1.45}
   .c-tab{padding-top:12px;border-top:1px solid var(--border-soft)}
   .tab{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px}
   .tab .btn.chico{padding:10px 14px;font-size:13px}
-  .etapa{padding:6px 12px;font-size:12.5px}
-  .fila.enlazada{box-shadow:var(--shadow);border-left:3px solid var(--gr)}
+  .etapa{padding:6px 12px 6px 0;font-size:13px}
+  a.etapa{margin-left:-12px;padding-left:12px}
   .filtros{flex-wrap:nowrap;overflow-x:auto;margin-left:-12px;margin-right:-12px;padding:0 12px;scrollbar-width:none}
   .filtros::-webkit-scrollbar{display:none}
   .filtros button{flex-shrink:0;padding:9px 14px;font-size:13px}
@@ -465,11 +484,11 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   .m-res>div{padding:10px 10px 11px}
 }
 /* Sin permiso para ver la plata: no hay columnas de montos ni resumen. */
-.sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 42px 42px 64px 172px minmax(0,1.25fr) 30px}
+.sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 54px 54px 64px 178px minmax(0,1.2fr) 30px}
 .sin-plata .fila>.der,.sin-plata .cab>.der,.sin-plata .pie>.der,.sin-plata .res>div:not(:first-child){display:none}
 .sin-plata .res>div:first-child,.sin-resumen .res>div:first-child{flex:1 1 auto}
-@media(max-width:1519px){.sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 42px 42px 64px 172px 30px}}
-@media(max-width:1199px){.sin-plata .lista{--cols:70px 68px minmax(0,1.6fr) minmax(0,1.3fr) 172px 30px}}
+@media(max-width:1519px){.sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 54px 54px 64px 178px 30px}}
+@media(max-width:1349px){.sin-plata .lista{--cols:70px 68px minmax(0,1.6fr) minmax(0,1.3fr) 178px 30px}}
 /* Solo mirar: sin botones que cambien algo. */
 .solo-ver [data-nuevo],.solo-ver [data-prueba],.solo-ver [data-borrar-prueba],.solo-ver [data-sin-contrato],.solo-ver [data-enviar],.solo-ver [data-enlazar],.solo-ver [data-desenlazar],.solo-ver #papB{display:none!important}
 .lec{display:grid;grid-template-columns:120px minmax(0,1fr);gap:7px 14px;font-size:14px;margin-top:4px}
@@ -509,8 +528,8 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
     </div>
     <div class="acc">
       <div class="buscar"><input type="search" id="buscar" placeholder="Buscar en todos los meses" autocomplete="off" aria-label="Buscar cliente, N° o material en todos los meses"></div>
-      <button type="button" class="btn" id="expB" title="Baja a un archivo CSV los contratos que están en pantalla (el mes, la búsqueda y los filtros que tengas puestos)">Exportar</button>
-      <button type="button" class="btn" id="papB" data-papelera title="Contratos borrados: se pueden recuperar durante 30 días" hidden></button>
+      <button type="button" class="btn" id="expB">Exportar</button>
+      <button type="button" class="btn" id="papB" data-papelera hidden></button>
       <button type="button" class="btn pri" data-nuevo>+ Nuevo contrato</button>
     </div>
   </div>
@@ -567,8 +586,12 @@ let tT=null;
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>e.classList.remove('show'),3200);}
 
 // --- plata y fechas ---
-const NF=new Intl.NumberFormat('es-AR',{maximumFractionDigits:2});
+// Los montos: sin decimales si son redondos y, si traen centavos, siempre con dos ("$ 1.250,80", nunca "$ 1.250,8").
+const NF0=new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}),NF2=new Intl.NumberFormat('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const NF={format:n=>Math.abs(n-Math.round(n))<0.005?NF0.format(Math.round(n)):NF2.format(n)};
 const plata=(n,mon)=>(mon==='USD'?'USD ':'$ ')+NF.format(n);
+// En las sumas de la planilla (el resumen de arriba y el pie) los centavos no dicen nada: van redondeadas.
+const plataR=(n,mon)=>(mon==='USD'?'USD ':'$ ')+NF0.format(Math.round(n));
 // "1.250" son mil doscientos cincuenta; "1250,50" lleva coma decimal.
 function num(s){
   s=String(s==null?'':s).replace(/[^\d.,]/g,'');
@@ -641,7 +664,7 @@ const obraTxt=k=>k.manual?'cargada a mano, sin N° de presupuesto':k.key;
 // La ficha con la que estaba enlazado un contrato y que ya no está. Los números de 90001 en adelante son internos (fichas a mano).
 const fichaIda=c=>+c.enlace.cliente_nro>=90000?'una ficha cargada a mano':'la ficha '+keyDe(c);
 // "Enlazado" es un link a la ficha del tablero, igual que "Con contrato" en la ficha lleva al contrato (dueño, 18/11/2026).
-const enlA=(k,txt)=>'<a class="enl" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Enlazado con el tablero y el calendario: tocá para abrir la ficha">'+ICO_ENL+txt+'</a>';
+const enlA=(k,txt)=>'<a class="enl" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'">'+ICO_ENL+txt+'</a>';
 // Lo que el tablero sabe de la obra, a la vista dentro del contrato (dueño, 18/11/2026): medición, entrega,
 // instalación, fotos, nota e historial. Es solo lectura: sale de lo que el tablero ya manda, y se cambia allá.
 function tableroHtml(k){
@@ -696,10 +719,12 @@ let DOLAR=0;
 fetch('/calculadora/dolar.php',{cache:'no-store'}).then(r=>r.json()).then(j=>{DOLAR=Math.round(+j.venta||0);if(F)pintarPagos();}).catch(()=>{});
 const cambioTxt=x=>x.aplica&&x.aplica!==x.moneda&&x.cotizacion>0?' · a $ '+NF.format(x.cotizacion)+' = '+plata(x.moneda==='USD'?x.monto*x.cotizacion:x.monto/x.cotizacion,x.aplica):'';
 const partes=o=>['USD','ARS'].filter(m=>Math.abs(o[m])>0.004).map(m=>plata(o[m],m));
+const partesR=o=>['USD','ARS'].filter(m=>Math.abs(o[m])>=0.5).map(m=>plataR(o[m],m));
 // Saldo: lo que falta cobrar en cada moneda. Si se cobró de más en una, queda "a favor".
-function saldoTxt(n){
+function saldoTxt(n,redondo){
   if(!n.tot.USD&&!n.tot.ARS)return {cls:'nada',l:['Sin total']};
-  const l=['USD','ARS'].filter(m=>Math.abs(n.sal[m])>0.004).map(m=>n.sal[m]>0?plata(n.sal[m],m):plata(-n.sal[m],m)+' a favor');
+  const p=(v,m)=>redondo&&Math.abs(v)>=1?plataR(v,m):plata(v,m); // un resto de centavos no se redondea a "$ 0": se dice entero
+  const l=['USD','ARS'].filter(m=>Math.abs(n.sal[m])>0.004).map(m=>n.sal[m]>0?p(n.sal[m],m):p(-n.sal[m],m)+' a favor');
   if(!l.length)return {cls:'ok',l:['Pagado']};
   return {cls:['USD','ARS'].some(m=>n.sal[m]>0.004)?'debe':'ok',l:l};
 }
@@ -712,13 +737,15 @@ function sinFichaHtml(c){
   if(f)return '<div class="fila-e"><span class="etapa fuera">'+f[0]+'</span></div><small>'+f[1]+'</small>';
   return '<div class="fila-e"><span class="etapa rota">No existe en el tablero</span></div><small class="rojo">'+(+c.enlace.cliente_nro>=90000?'Era una ficha cargada a mano':'La ficha '+esc(keyDe(c))+' ya no está')+'</small><button type="button" class="btn chico" data-desenlazar="'+esc(c.id)+'">Desenlazar</button>';
 }
+// Lo que se dice de la obra debajo de su etapa: el turno (si la etapa lleva) y el plazo. "t" es todo junto;
+// "turno" y "plazo" van por separado para que en la planilla solo "Plazo vencido" quede en rojo.
 function etapaDet(k){
-  let t='';
-  if(k.etapa==='medir')t=k.medido_at?'Medida el '+fch(k.medido_at):(k.fecha?'Medición '+fch(k.fecha):'Sin fecha de medición');
-  else if(k.etapa==='instalar')t=k.fecha?'Instalación '+fch(k.fecha)+(k.hora?' · '+k.hora:''):'Sin turno de instalación';
+  let turno='';
+  if(k.etapa==='medir')turno=k.medido_at?'Medida el '+fch(k.medido_at):(k.fecha?'Medición '+fch(k.fecha):'Sin fecha de medición');
+  else if(k.etapa==='instalar')turno=k.fecha?'Instalación '+fch(k.fecha)+(k.hora?' · '+k.hora:''):'Sin turno de instalación';
   const venc=!!k.limite&&k.limite<HOY&&k.etapa!=='archivar';
-  if(k.limite&&k.etapa!=='archivar')t+=(t?' · ':'')+(venc?'Plazo vencido':'Vence '+fch(k.limite));
-  return {t:t,rojo:venc};
+  const plazo=k.limite&&k.etapa!=='archivar'?(venc?'Plazo vencido':'Vence '+fch(k.limite)):'';
+  return {t:[turno,plazo].filter(Boolean).join(' · '),rojo:venc,turno:turno,plazo:plazo};
 }
 const BACHA={nuestra:'Nuestra',cliente:'Del cliente',no:'No lleva'};
 const bachaTxt=v=>v.bacha?BACHA[v.bacha]+(v.bacha==='nuestra'&&v.bacha_modelo?' · modelo '+v.bacha_modelo:''):'';
@@ -911,8 +938,10 @@ function exportarCSV(){
 // La etapa del tablero como filtro de la planilla: '' = todas, 'sin' = los que no están cargados en el tablero.
 let fEtapa='';
 const etapaOk=c=>{if(!fEtapa)return true;const k=cardDe(c);return fEtapa==='sin'?!c.enlace:(!!k&&k.etapa===fEtapa);};
-const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['completos','Completos',completo],['sinturno','Sin turno',sinTurno],['sena','Seña distinta',c=>!!senaDif(c),true]].filter(f=>PLATA||['saldo','pagados','sena'].indexOf(f[0])<0);
-const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':(v==='cf'?'<span class="sn si" title="Factura a consumidor final">CF</span>':'<span class="sn">—</span>'));
+// Dos grupos, con una raya fina en el medio: cómo están (plata y completos) y qué les falta (lo que hay que perseguir).
+const FILTROS_FALTA=['sueltos','sinver','sinnro','sinturno','sena'];
+const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['completos','Completos',completo],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['sinturno','Sin turno',sinTurno],['sena','Seña distinta',c=>!!senaDif(c),true]].filter(f=>PLATA||['saldo','pagados','sena'].indexOf(f[0])<0);
+const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':(v==='cf'?'<span class="sn si" title="Factura a consumidor final">CF</span>':'<span class="sn raya">—</span>'));
 const PIL={nuestra:'Nuestra',cliente:'Cliente',no:'No'};
 
 function dibujar(){
@@ -943,9 +972,9 @@ function dibujar(){
   // Lo que se ve es lo que se suma: arriba, en los filtros y en el pie. Los de prueba cuentan
   // mientras existan (el cartel lo avisa), así ningún número contradice a otro.
   const base=delMes,s=sumar(base),todo=sumar(CONTRATOS),hayDeuda=partes(s.deb).length>0;
-  const linea=o=>partes(o).join(' + ');
+  const linea=o=>partesR(o).join(' <i>+</i> ');
   $('res').hidden=false;
-  $('res').innerHTML='<div><div class="t">Contratos</div><div class="v">'+base.length+(base.length?'<small title="Completo: con N°, presupuesto adjunto y enlazado con el tablero">'+base.filter(completo).length+' de '+base.length+' completos</small>':'')+'</div></div>'
+  $('res').innerHTML='<div><div class="t">Contratos</div><div class="v">'+base.length+(base.length?'<small>'+base.filter(completo).length+' de '+base.length+' completos</small>':'')+'</div></div>'
     +(!RESUMEN?'':'<div><div class="t">Contratado</div><div class="v'+(linea(s.tot)?'':' nada')+'">'+(linea(s.tot)||'—')+'</div></div>'
     +'<div class="cobr"><div class="t">Cobrado</div><div class="v'+(linea(s.pag)?'':' nada')+'">'+(linea(s.pag)||'—')+'</div></div>'
     +'<div class="debe'+(hayDeuda?'':' cero')+'"><div class="t">Por cobrar</div><div class="v'+(hayDeuda||base.length?'':' nada')+'">'+(linea(s.deb)||(base.length?'Nada':'—'))+'</div></div>'
@@ -956,7 +985,12 @@ function dibujar(){
   const porEt={};delMes.forEach(c=>{const k=cardDe(c),e=k?k.etapa:(c.enlace?'':'sin');if(e)porEt[e]=(porEt[e]||0)+1;});
   if(fEtapa&&!porEt[fEtapa])fEtapa='';
   const opsEt=TABLERO_OK?Object.keys(ETAPAS).filter(e=>porEt[e]).map(e=>[e,ETAPAS[e]]).concat(porEt.sin?[['sin','Sin cargar al tablero']]:[]):[];
-  $('filtros').innerHTML=FILTROS.filter(f=>(!f[3]||delMes.some(f[2])||filtro===f[0])&&(f[0]!=='sinturno'||TABLERO_OK)).map(f=>'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+delMes.filter(etapaOk).filter(f[2]).length+'</i></button>').join('')
+  let raya=false;
+  $('filtros').innerHTML=FILTROS.filter(f=>(!f[3]||delMes.some(f[2])||filtro===f[0])&&(f[0]!=='sinturno'||TABLERO_OK)).map(f=>{
+    const n=delMes.filter(etapaOk).filter(f[2]).length,sep=!raya&&FILTROS_FALTA.indexOf(f[0])>=0?'<span class="sep" aria-hidden="true"></span>':'';
+    if(sep)raya=true;
+    return sep+'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+(n?'':' cero')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+n+'</i></button>';
+  }).join('')
     +(opsEt.length?'<select id="fEtapa" class="'+(fEtapa?'on':'')+'" aria-label="Filtrar por etapa del tablero"><option value="">Etapa: todas</option>'+opsEt.map(o=>'<option value="'+esc(o[0])+'"'+(fEtapa===o[0]?' selected':'')+'>'+esc(o[1])+' · '+porEt[o[0]]+'</option>').join('')+'</select>':'');
 
   const fx=FILTROS.find(f=>f[0]===filtro)[2];
@@ -974,43 +1008,47 @@ function dibujar(){
     return;
   }
   const fl=k=>orden===k?(ordenAsc?' ↑':' ↓'):'';
-  let h='<div class="cab"><div><button type="button" data-orden="fecha" class="'+(orden==='fecha'?'on':'')+'" title="Ordenar por fecha">Fecha'+fl('fecha')+'</button></div><div title="Contrato: N° de la calculadora. Debajo, el contrato paralelo.">Contrato</div><div><button type="button" data-orden="cliente" class="'+(orden==='cliente'?'on':'')+'" title="Ordenar por cliente">Cliente'+fl('cliente')+'</button></div><div>Material</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div class="cen h-sn" title="Factura">Fact.</div><div class="cen h-sn" title="Muebles colocados">Mueb.</div><div class="h-sn">Pileta</div><div>Tablero</div><div class="h-not">Notas</div><div></div></div>';
+  let h='<div class="cab"><div><button type="button" data-orden="fecha" class="'+(orden==='fecha'?'on':'')+'" aria-label="Ordenar por fecha">Fecha'+fl('fecha')+'</button></div><div>Contrato</div><div><button type="button" data-orden="cliente" class="'+(orden==='cliente'?'on':'')+'" aria-label="Ordenar por cliente">Cliente'+fl('cliente')+'</button></div><div>Material</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div class="h-sn">Factura</div><div class="h-sn">Muebles</div><div class="h-sn">Pileta</div><div>Tablero</div><div class="h-not">Notas</div><div></div></div>';
   h+=lista.map(c=>{
-    const v=ver(c),n=cuentas(c,v),k=cardDe(c),s=saldoTxt(n);
+    const v=ver(c),n=cuentas(c,v),k=cardDe(c),s=saldoTxt(n,true);
     const p=(c.fecha||'').split('-').map(Number),dt=p.length===3?new Date(p[0],p[1]-1,p[2]):null;
     const fecha=dt?String(p[2]).padStart(2,'0')+'/'+String(p[1]).padStart(2,'0')+(p[0]!==+HOY.slice(0,4)?'/'+String(p[0]).slice(2):''):'';
     // debajo del nombre: en la planilla, vendedor y procedencia; en tarjeta se suman N° y fecha
     const sub='<span class="solo-t">'+(c.nro?'N° '+esc(c.nro):'<span class="falta">Sin N°</span>')+(c.contrato_paralelo?' · ctto '+esc(c.contrato_paralelo):'')+(fecha?' · '+esc(fch(c.fecha)):'')+([v.telefono,c.vendedor,c.procedencia].some(Boolean)?' · ':'')+'</span>'
-      +[v.telefono?(waLink(v.telefono)?'<a class="tel" href="'+esc(waLink(v.telefono))+'" target="_blank" rel="noopener" title="Abrir WhatsApp">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'',esc(c.vendedor),esc(c.procedencia)].filter(Boolean).join(' · ');
-    const tot=partes(n.tot),pag=partes(n.pag);
+      +[v.telefono?(waLink(v.telefono)?'<a class="tel" href="'+esc(waLink(v.telefono))+'" target="_blank" rel="noopener" aria-label="Abrir WhatsApp con '+esc(telLindo(v.telefono))+'">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'',esc(c.vendedor),esc(c.procedencia)].filter(Boolean).join(' · ');
+    // En la planilla todos los montos van con la misma precisión: redondeados al peso. El centavo exacto está en la ventana.
+    const tot=partesR(n.tot),pag=partesR(n.pag);
     let tab;
     const sd=senaDif(c);
     const fp=fichaPara(c),kn=fp?fp.k:null; // su obra ya está en el tablero (mismo N° o mismo teléfono): se enlaza, no se carga de nuevo
     if(kn)tab='<button type="button" class="btn chico enl-b" data-enlazar="'+esc(c.id)+'">'+ICO_ENL+'Enlazar con el tablero</button><small>'+(fp.por==='tel'?'Mismo teléfono que una obra del tablero: ':'Ya está en el tablero: ')+esc(ETAPAS[kn.etapa]||kn.etapa)+'</small>';
     else if(!c.enlace)tab='<div class="fila-e"><span class="etapa fuera">No existe en el tablero</span></div><button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
-    else if(k){const d=etapaDet(k);tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a><small'+(d.rojo?' class="rojo"':'')+'>'+enlA(k,'Enlazado')+(d.t?' · '+esc(d.t):'')+'</small>'+(sd?'<small class="sena-d" title="'+esc(sd.txt)+'">Seña distinta en el tablero</small>':'');}
+    // Enlazado: la etapa es el link a la ficha (que haya etapa ya dice que está enlazado; "Enlazado" en cada renglón era
+    // lo mismo dicho 30 veces). Debajo, el turno y el plazo; en rojo, solo "Plazo vencido".
+    else if(k){const d=etapaDet(k),det=(d.turno?'<small>'+esc(d.turno)+'</small>':'')+(d.plazo?'<small'+(d.rojo?' class="rojo"':'')+'>'+esc(d.plazo)+'</small>':'');
+      tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" aria-label="'+esc(ETAPAS[k.etapa]||k.etapa)+': abrir la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>'+det+(sd?'<small class="sena-d">Seña distinta en el tablero</small>':'');}
     else tab=sinFichaHtml(c);
     const nota=(c.nota||'').replace(/\s+/g,' ').trim();
     const obra=[c.factura?'Factura <b>'+(c.factura==='si'?'sí':(c.factura==='cf'?'cons. final':'no'))+'</b>':'',c.muebles?'Muebles <b>'+(c.muebles==='si'?'sí':'no')+'</b>':'',v.bacha?'Pileta <b>'+esc(PIL[v.bacha].toLowerCase())+'</b>':''].filter(Boolean).join(' · ');
     return '<div class="fila'+(k?' enlazada':'')+'" data-id="'+esc(c.id)+'" tabindex="0" role="button" aria-label="Abrir el contrato de '+esc(v.cliente)+'">'
       +'<div class="c-fec">'+esc(fecha)+(dt?'<small>'+DIAS[dt.getDay()]+'</small>':'')+'</div>'
-      +'<div class="c-nro">'+(c.nro?esc(c.nro)+(c.presup&&!c.presup.existe?'<span class="duda" title="Ese N° no está en Presupuestos: o está mal escrito, o ya se borró (los presupuestos duran 180 días).'+(c.archivo?' El contrato conserva el presupuesto adjunto.':'')+'">?</span>':''):'<span class="falta">Sin N°</span>')+(c.contrato_paralelo?'<small title="Contrato paralelo">ctto '+esc(c.contrato_paralelo)+'</small>':'')+'</div>'
+      +'<div class="c-nro">'+(c.nro?esc(c.nro)+(c.presup&&!c.presup.existe?'<span class="duda" title="Ese N° no está en Presupuestos: o está mal escrito, o ya se borró (los presupuestos duran 180 días).'+(c.archivo?' El contrato conserva el presupuesto adjunto.':'')+'">?</span>':''):'<span class="falta">Sin N°</span>')+(c.contrato_paralelo?'<small>ctto '+esc(c.contrato_paralelo)+'</small>':'')+'</div>'
       +'<div class="c-cli"><div class="f-nom">'+esc(v.cliente)+(c.archivo?'<span class="ver" title="Verificado: tiene adjunto el presupuesto ('+esc(c.archivo.ext.toUpperCase())+')">'+ICO_VER+'</span>':'')+(c.prueba?'<span class="prueba-t">PRUEBA</span>':'')+(nota?'<span class="nota-i" title="'+esc(nota)+'"></span>':'')+'</div>'+(sub.replace(/<[^>]+>/g,'').trim()?'<div class="f-sub">'+sub+'</div>':'')+'</div>'
       +'<div class="c-mat"><div class="f-mat">'+(esc(v.material)||'<span style="color:var(--text3)">Sin material</span>')+'</div>'+(c.medidas?'<div class="f-sub">'+esc(c.medidas)+'</div>':'')+'</div>'
-      +'<div class="der"><span class="rot">Total</span><div class="plata'+(tot.length?'':' nada')+'">'+(tot.length?tot.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
-      +'<div class="der"><span class="rot">Cobrado</span><div class="plata'+(pag.length?'':' nada')+'">'+(pag.length?pag.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
+      +'<div class="der"><span class="rot">Total</span><div class="plata'+(tot.length?'':' nada raya')+'">'+(tot.length?tot.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
+      +'<div class="der"><span class="rot">Cobrado</span><div class="plata'+(pag.length?'':' nada raya')+'">'+(pag.length?pag.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
       +'<div class="der"><span class="rot">Saldo</span><div class="plata '+s.cls+'">'+s.l.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div>'
-      +'<div class="cen c-sn">'+SN(c.factura)+'</div><div class="cen c-sn">'+SN(c.muebles)+'</div><div class="c-sn">'+(v.bacha?'<span class="sn no" title="'+esc(bachaTxt(v))+'">'+PIL[v.bacha]+'</span>':'<span class="sn">—</span>')+'</div>'
+      +'<div class="c-sn">'+SN(c.factura)+'</div><div class="c-sn">'+SN(c.muebles)+'</div><div class="c-sn">'+(v.bacha?'<span class="sn no">'+PIL[v.bacha]+'</span>':'<span class="sn raya">—</span>')+'</div>'
       +(obra?'<div class="c-obra">'+obra+'</div>':'')
       +'<div class="c-tab"><div class="tab">'+tab+'</div></div>'
-      +'<div class="c-not" title="'+esc(nota)+'">'+esc(nota)+'</div>'
-      +'<div class="c-mas"><button type="button" class="mas" data-menu="'+esc(c.id)+'" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de '+esc(v.cliente)+'" title="Más acciones">'+ICO_MAS+'</button></div>'
+      +'<div class="c-not"'+(nota?' title="'+esc(nota)+'"':'')+'>'+esc(nota)+'</div>'
+      +'<div class="c-mas"><button type="button" class="mas" data-menu="'+esc(c.id)+'" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de '+esc(v.cliente)+'">'+ICO_MAS+'</button></div>'
       +(nota?'<div class="f-nota">'+esc(nota)+'</div>':'')+'</div>';
   }).join('');
   if(!lista.length)h+='<div class="vacio">Ningún contrato de '+(buscando?'la búsqueda':'este mes')+' entra en ese filtro.</div>';
   else{
     // pie: la suma de lo que se ve, debajo de cada columna
-    const z=sumar(lista),col=(o,cls)=>{const l=partes(o);return '<div class="der"><div class="plata'+(l.length?cls:' nada')+'">'+(l.length?l.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>';};
+    const z=sumar(lista),col=(o,cls)=>{const l=partesR(o);return '<div class="der"><div class="plata'+(l.length?cls:' nada')+'">'+(l.length?l.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>';};
     h+='<div class="pie"><div class="q">'+lista.length+(lista.length===1?' contrato':' contratos')+(filtro!=='todos'?' · '+esc(FILTROS.find(f=>f[0]===filtro)[1].toLowerCase()):'')+'</div>'+(RESUMEN?col(z.tot,'')+col(z.pag,'')+col(z.deb,' debe'):'')+'</div>';
   }
   $('lista').innerHTML=h;
@@ -1041,10 +1079,10 @@ function verFicha(c){
   const v=ver(c),k=cardDe(c);
   const fila=(t,x)=>x?'<span>'+t+'</span><div>'+x+'</div>':'';
   const wa=waLink(v.telefono);
-  let h='<div class="m-cab"><div><h3>'+esc(v.cliente)+(c.archivo?'<span class="ver" title="Tiene adjunto el presupuesto">'+ICO_VER+'Verificado</span>':'')+'</h3>'
+  let h='<div class="m-cab"><div><h3>'+esc(v.cliente)+(c.archivo?'<span class="ver">'+ICO_VER+'Verificado</span>':'')+'</h3>'
     +'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de contrato',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>'
     +'<div class="m-chk">'+[[!!c.nro,'N° de contrato'],[!!c.archivo,'Presupuesto adjunto'],[!!c.enlace,'Enlazado con el tablero']].map(x=>'<span class="'+(x[0]?'si':'')+'">'+x[1]+'</span>').join('')+'</div></div>'
-    +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
+    +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" aria-label="'+esc(ETAPAS[k.etapa]||k.etapa)+': abrir la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
   if(k)h+='<div class="nota-t">'+enlA(k,'Enlazado con el tablero y el calendario')+tableroHtml(k)+'</div>';
   else if(c.enlace&&TABLERO_OK)h+='<div class="nota-t'+(FUERA[c.ficha]?'':' rota')+'"><span class="enl roto">'+ICO_ENL+(FUERA[c.ficha]?FUERA[c.ficha][0]:'Esta ficha no existe en el tablero')+'</span>'+(FUERA[c.ficha]?'<br>'+FUERA[c.ficha][1]:'')+'</div>';
   if(PLATA){
@@ -1083,8 +1121,8 @@ function abrirFicha(id){
      empujarSena:!!(k&&!k.sena&&k.etapa==='medir'),key:k?k.key:'',
      contrato:c?c.contrato:'',enlazado:!!(c&&c.enlace),archivo:c?c.archivo:null,archivoNuevo:null,quitarArchivo:false,presup:c?c.presup:null,nroMal:'',buscando:false};
   const val=x=>esc(x==null?'':x);
-  let h='<div class="m-cab"><div><h3>'+(c?esc(v.cliente):'Nuevo contrato')+'<span class="ver" id="hVer" hidden title="Tiene adjunto el presupuesto">'+ICO_VER+'Verificado</span></h3>'+(c?'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de contrato',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>':'')+'<div class="m-chk" id="mChk"></div></div>'
-    +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" title="Ver la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
+  let h='<div class="m-cab"><div><h3>'+(c?esc(v.cliente):'Nuevo contrato')+'<span class="ver" id="hVer" hidden>'+ICO_VER+'Verificado</span></h3>'+(c?'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de contrato',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>':'')+'<div class="m-chk" id="mChk"></div></div>'
+    +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" aria-label="'+esc(ETAPAS[k.etapa]||k.etapa)+': abrir la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
   h+='<div class="m-res"><div><div class="t">Total</div><b id="rTot"></b></div><div><div class="t">Cobrado</div><b id="rCob"></b></div><div><div class="t">Saldo</div><b id="rSal"></b></div></div>';
   if(k)h+='<div class="nota-t">'+enlA(k,'Enlazado con el tablero y el calendario')+tableroHtml(k)+'<div class="t-pie">Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div></div>';
   else if(c&&c.enlace&&TABLERO_OK){
@@ -1237,7 +1275,7 @@ function pintarPagos(){
     const pmon=num($('pMonto').value),pc=num($('pCot').value);
     $('pCotI').textContent=cc&&pmon&&pc?'· '+plata(pmon,pm)+' = '+plata(pm==='USD'?pmon*pc:pmon/pc,dst):'· '+(pm==='USD'?'entra en dólares y se descuenta de los pesos':'entra en pesos y se descuenta de los dólares');
   }
-  if($('fPagos'))$('fPagos').innerHTML='<div class="pagos">'+(F.pagos.length?F.pagos.map(x=>'<div class="pago"><span class="q"><b>'+esc(fch(x.fecha))+'</b> · '+(x.medio==='transferencia'?'Transferencia':(x.medio==='efectivo'?'Efectivo':'Cobro'))+esc(cambioTxt(x))+(x.nota?' · '+esc(x.nota):'')+'</span><span class="m">'+plata(x.monto,x.moneda)+'</span><button type="button" data-borrar-pago="'+esc(x.id)+'" title="Borrar este pago" aria-label="Borrar este pago">×</button></div>').join(''):'<div class="nada">Sin pagos cargados, aparte de la seña.</div>')+'</div>';
+  if($('fPagos'))$('fPagos').innerHTML='<div class="pagos">'+(F.pagos.length?F.pagos.map(x=>'<div class="pago"><span class="q"><b>'+esc(fch(x.fecha))+'</b> · '+(x.medio==='transferencia'?'Transferencia':(x.medio==='efectivo'?'Efectivo':'Cobro'))+esc(cambioTxt(x))+(x.nota?' · '+esc(x.nota):'')+'</span><span class="m">'+plata(x.monto,x.moneda)+'</span><button type="button" data-borrar-pago="'+esc(x.id)+'"  aria-label="Borrar este pago">×</button></div>').join(''):'<div class="nada">Sin pagos cargados, aparte de la seña.</div>')+'</div>';
 }
 async function guardar(){
   const d=datosForm(),id=F.id,empujar=F.empujarSena&&d.sena_monto>0,key=F.key;

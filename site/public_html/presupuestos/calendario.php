@@ -40,10 +40,10 @@ header('Content-Type: text/html; charset=UTF-8');
 /* === DESIGN TOKENS (los mismos del hub y del tablero) === */
 :root{
   --bg:#FAF8F4;--card:#FFFFFF;--card-alt:#F5F0E5;
-  --text:#1A1816;--text2:#5A4A35;--text3:#8B7860;
+  --text:#1A1816;--text2:#5A4A35;--text3:#7A6850;
   --border:#E5DECF;--border-soft:#F0EAD8;
   --dk:#1A1816;--dk2:#2A2522;--gd:#C4A77D;--gdd:#7A6649;
-  --gr:#1F8F47;--gr-soft:#E4F4E8;--cr:#FAF8F4;
+  --gr:#1A7A3C;--gr-soft:#E4F4E8;--cr:#FAF8F4;
   --red:#B03A3A;--red-soft:#FBEAEA;--amb:#8A5A0B;--amb-soft:#FBF1DC;
   --gd-soft:rgba(196,167,125,.10);
   --shadow:0 2px 10px rgba(26,24,22,.06);
@@ -52,7 +52,7 @@ header('Content-Type: text/html; charset=UTF-8');
 }
 [data-theme="dark"]{
   --bg:#0A0907;--card:#16140F;--card-alt:#1F1B14;
-  --text:#F5F0E5;--text2:#C4B596;--text3:#8B7860;
+  --text:#F5F0E5;--text2:#C4B596;--text3:#9C8A6E;
   --border:#2D2820;--border-soft:#221E18;
   --gr:#34D670;--gr-soft:#0E2A18;
   --red:#E26666;--red-soft:#2A1414;--amb:#E8B95C;--amb-soft:#3A2A14;
@@ -130,6 +130,7 @@ button{font-family:inherit;color:inherit}
 .ref::before{content:'';flex-shrink:0;width:14px;height:14px;border-radius:3px;background:var(--et);margin:0 1px}
 .ref.entrega::before{height:8px;border-radius:2px;background:color-mix(in srgb,var(--gd) 40%,var(--card));border:1px solid var(--gd)}
 .ref.vence::before{background:none;border:1.5px dashed var(--text3)}
+.ref.conf::before{content:'?';display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--amb);color:var(--card);font-size:10px;font-weight:800;line-height:1}
 .ref b{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text3)}
 .ley button.vencida b{color:var(--red)}
 .ley button.cerca b{color:var(--amb)}
@@ -468,7 +469,7 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
       <button type="button" id="mesSig" aria-label="Mes siguiente">›</button>
       <button type="button" class="hoy-b" id="mesHoy">Hoy</button>
     </div>
-    <button type="button" class="cron-b" id="cronB" title="La ruta de cada día, de medición y de instalación: orden, horas y direcciones">Cronograma</button>
+    <button type="button" class="cron-b" id="cronB">Cronograma</button>
     <input type="search" class="busca" id="buscar" placeholder="Buscar por nombre o N°" autocomplete="off" enterkeyhint="search" aria-label="Buscar una obra por nombre o por número">
     <div class="hoy" id="hoyTxt"></div>
   </div>
@@ -724,7 +725,7 @@ function franjas(iso,L,col){
     const b=hoy.find(x=>x.carril===i);
     if(!b){h+='<div class="blq hueco"></div>';continue;}
     const ini=iso===b.desde,fin=iso===b.hasta,rot=ini||col===0; // el rótulo va al empezar y al arrancar cada semana
-    h+='<div class="blq'+(ini?' ini':'')+(fin?' fin':'')+(rot?' rot':'')+(col===6?' ult':'')+(b.est?' est':'')+(b.estado?' '+b.estado:'')+'" role="button" tabindex="0" data-bloque="'+b.dia+'" title="'+esc(b.tit)+'">'
+    h+='<div class="blq'+(ini?' ini':'')+(fin?' fin':'')+(rot?' rot':'')+(col===6?' ult':'')+(b.est?' est':'')+(b.estado?' '+b.estado:'')+'" role="button" tabindex="0" data-bloque="'+b.dia+'" aria-label="'+esc(b.tit)+'">'
       +(rot?'<span>'+esc(col===6?(b.est?'Estimada · ':'Entrega · ')+diaMes(b.dia):b.txt)+'</span>':'')+(fin?'<i>'+(b.estado==='vencida'?'Venció':'Vence')+'</i>':'')+'</div>';
   }
   return h;
@@ -742,7 +743,7 @@ function tiraMedicion(iso,largo){
   const sc=l.filter(faltaConfirmar).length;
   const t='Bloque de medición del '+fechaCorta(iso)+' · '+n+(n===1?' obra':' obras')+(h===n?' · todas medidas':(h?' · '+h+' medidas':' · sin medir todavía'))+(sc?' · '+sc+' sin confirmar':'');
   if(largo)return '<button type="button" class="ev blq-ag med et-'+esc(MEDIR)+'" data-bloque="'+iso+'" data-origen="med">Bloque de medición · '+n+(n===1?' obra':' obras')+(estado?' <span>· '+estado+'</span>':'')+'</button>';
-  return '<div class="blq med ini fin et-'+esc(MEDIR)+(h===n?' ok':'')+'" role="button" tabindex="0" data-bloque="'+iso+'" data-origen="med" title="'+esc(t)+'"><span>'+(h===n?'<s>✓ </s>':'')+'Medición · '+n+'<u>'+(n===1?' obra':' obras')+'</u></span>'+(h===n?'<i>✓</i>':'')+'</div>';
+  return '<div class="blq med ini fin et-'+esc(MEDIR)+(h===n?' ok':'')+'" role="button" tabindex="0" data-bloque="'+iso+'" data-origen="med" aria-label="'+esc(t)+'"><span>'+(h===n?'<s>✓ </s>':'')+'Medición · '+n+'<u>'+(n===1?' obra':' obras')+'</u></span>'+(h===n?'<i>✓</i>':'')+'</div>';
 }
 // La ventana del bloque: se abre desde el bloque de medición (azul) o desde su entrega (franja).
 // Dice las dos cosas por separado, y lista las obras para abrir cada ficha.
@@ -816,7 +817,7 @@ function crDibujar(){
   if(dia===null){
     $('mCuerpo').innerHTML=h+'<p class="cr-vacio">'+(crTipo==='med'?'No hay obras por medir.':'No hay obras por instalar.')+'</p>';return;
   }
-  h+='<div class="cr-dias">'+dias.map(x=>'<button type="button" data-crdia="'+x+'" class="'+(x===dia?'on ':'')+(x<HOY?'atras':'')+'" title="'+(x<HOY?'Atrasadas: eran el ':'')+esc(fechaLarga(x))+'">'+esc(x===HOY?'Hoy '+ddmm(x):fechaCorta(x))+' · '+porDia[x].length+'</button>').join('')
+  h+='<div class="cr-dias">'+dias.map(x=>'<button type="button" data-crdia="'+x+'" class="'+(x===dia?'on ':'')+(x<HOY?'atras':'')+'">'+esc(x===HOY?'Hoy '+ddmm(x):fechaCorta(x))+' · '+porDia[x].length+'</button>').join('')
     +(porDia['']?'<button type="button" data-crdia="" class="'+(dia===''?'on':'')+'">'+T.sin+' · '+porDia[''].length+'</button>':'')+'</div>';
   const l=porDia[dia].slice().sort(crOrden),n=l.length;
   // "Turno confirmado" (dueño, 18/11/2026): el tilde de la ficha, a mano en la ruta para ir marcando a medida que confirman.
@@ -835,7 +836,7 @@ function crDibujar(){
       if(av.length)extra+='<br><span class="falta">'+av.map(esc).join(' · ')+'</span>';
     }
     h+='<div class="cr-f et-'+esc(et)+'">'
-      +'<div class="cr-n'+(c.hora||!dia?'':' sin')+'" title="'+(dia?'Orden en la ruta':'')+'">'+(dia?i+1:'·')+'</div>'
+      +'<div class="cr-n'+(c.hora||!dia?'':' sin')+'">'+(dia?i+1:'·')+'</div>'
       +'<label>Hora<input type="time" step="900" data-crhora="'+id+'" value="'+esc(c.hora)+'"'+(dia?'':' disabled title="Primero ponele el día"')+'></label>'
       +'<div class="cr-d"><b>'+esc(c.nombre||'Sin nombre')+(nroDe(c)?' <small>· '+esc(nroDe(c))+'</small>':'')+'</b>'
         +(dir?'<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(dir)+'" target="_blank" rel="noopener">'+esc(dir)+'</a>':'<span class="falta">Falta la dirección</span>')+(c.zona?' · '+esc(c.zona):'')+'<br>'
@@ -963,32 +964,32 @@ function chip(ev,largo){
     // La entrega estimada ya pasó: los días corrieron igual desde la medición agendada, esté o no
     // tildado "Medido". Se muestra como vencida, igual que las demás.
     const t='Venció el '+fechaCorta(previsto(c))+': la medición estaba agendada para el '+fechaCorta(c.fecha)+' ('+c.plazo_dias+' días corridos). Todavía no figura como medida.';
-    return '<button type="button" class="ev vence vencida" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" title="'+esc(t)+'">Venció · '+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+' · sin marcar medida</span>':'')+'</button>';
+    return '<button type="button" class="ev vence vencida" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" aria-label="'+esc(t)+'">Venció · '+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+' · sin marcar medida</span>':'')+'</button>';
   }
   if(ev.prev){
     const t='Si se mide el '+fechaCorta(c.fecha)+', el plazo vence el '+fechaCorta(previsto(c))+' ('+c.plazo_dias+' días corridos)';
-    return '<button type="button" class="ev vence prev" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" title="'+esc(t)+'">Entrega estimada · '+nom+(largo?' <span>· todavía sin medir</span>':'')+'</button>';
+    return '<button type="button" class="ev vence prev" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" aria-label="'+esc(t)+'">Entrega estimada · '+nom+(largo?' <span>· todavía sin medir</span>':'')+'</button>';
   }
   if(ev.tipo==='medida'){
     // Dos tildes en el mismo renglón (dueño, 18/11/2026): adelante, el de la medición; después del nombre, el de la
     // instalación, en el color que tiene Por instalar en el tablero. Así los N° y los nombres quedan alineados.
     const inst=instalada(c),ti=inst?'Instalada'+(inst.dia||inst.fecha?' el '+fechaCorta(inst.dia||inst.fecha):''):'';
     const t='Medición hecha el '+fechaCorta(c.medido_at)+(inst?' · '+ti:'')+' · ahora en '+etapaDe(c.etapa).titulo;
-    return '<button type="button" class="ev hecha et-'+esc(MEDIR)+'" data-key="'+esc(c.key)+'" data-tipo="medida" title="'+esc(t)+'"><em class="ok">✓</em>'+(largo?'Medición hecha · '+(inst?esc(ti)+' · ':''):'')+nom+(inst?'<em class="ok inst et-'+esc(inst.etapa)+'">✓</em>':'')+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
+    return '<button type="button" class="ev hecha et-'+esc(MEDIR)+'" data-key="'+esc(c.key)+'" data-tipo="medida" aria-label="'+esc(t)+'"><em class="ok">✓</em>'+(largo?'Medición hecha · '+(inst?esc(ti)+' · ':''):'')+nom+(inst?'<em class="ok inst et-'+esc(inst.etapa)+'">✓</em>':'')+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
   }
   if(ev.tipo==='instalada'){
     const inst=instalada(c)||{};
     const t='Instalada el '+fechaCorta(inst.dia)+(inst.hora?' · turno de las '+inst.hora+' hs':'')+' · ahora en '+etapaDe(c.etapa).titulo;
-    return '<button type="button" class="ev hecha et-'+esc(inst.etapa)+'" data-key="'+esc(c.key)+'" data-tipo="instalada" title="'+esc(t)+'"><em class="ok inst pri">✓</em>'+(largo?'Instalada · ':'')+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
+    return '<button type="button" class="ev hecha et-'+esc(inst.etapa)+'" data-key="'+esc(c.key)+'" data-tipo="instalada" aria-label="'+esc(t)+'"><em class="ok inst pri">✓</em>'+(largo?'Instalada · ':'')+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
   }
   if(ev.tipo==='vence'){
     const p=estadoPlazo(c);
     const t='Plazo de entrega: '+fechaCorta(c.limite)+(c.plazo_manual?' (modificado)':'')+' · '+etapaDe(c.etapa).titulo;
-    return '<button type="button" class="ev vence'+(p?' '+p:'')+'" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" title="'+esc(t)+'">'+(p==='vencida'?'Venció':'Vence')+' · '+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
+    return '<button type="button" class="ev vence'+(p?' '+p:'')+'" draggable="true" data-key="'+esc(c.key)+'" data-tipo="vence" aria-label="'+esc(t)+'">'+(p==='vencida'?'Venció':'Vence')+' · '+nom+(largo?' <span>· '+esc(etapaDe(c.etapa).titulo)+'</span>':'')+'</button>';
   }
   const e=etapaDe(c.etapa),av=avisosDe(c),fc=faltaConfirmar(c);
   const t=e.fecha+(c.fecha?' '+fechaCorta(c.fecha):'')+(c.hora?' '+c.hora+' hs':'')+(av.length?' · '+av.join(' · '):'')+(fc?' · Falta confirmar el turno con el cliente':'');
-  return '<button type="button" class="ev et-'+esc(c.etapa)+(atrasada(c)?' atras':'')+(fc?' sin-conf':'')+'" draggable="true" data-key="'+esc(c.key)+'" data-tipo="'+esc(c.etapa)+'" title="'+esc(t)+'">'
+  return '<button type="button" class="ev et-'+esc(c.etapa)+(atrasada(c)?' atras':'')+(fc?' sin-conf':'')+'" draggable="true" data-key="'+esc(c.key)+'" data-tipo="'+esc(c.etapa)+'" aria-label="'+esc(t)+'">'
     +(av.length?'<em>!</em>':'')+(fc?'<em class="conf">?</em>':'')+(largo?esc(e.fecha)+' · ':'')+(c.hora?'<i>'+esc(c.hora)+'</i> ':'')+nom+(c.zona?' <span>· '+esc(c.zona)+'</span>':'')
     +(largo&&(av.length||fc)?'<br><span>'+esc(av.concat(fc?['Falta confirmar']:[]).join(' · '))+'</span>':'')+'</button>';
 }
@@ -1033,7 +1034,10 @@ function dibujar(){
   const tipos=ETAPAS.filter(e=>e.fecha).map(e=>({id:e.id,txt:PLURAL[e.fecha]||e.fecha,n:F.filter(c=>c.etapa===e.id&&enVista(c.fecha)&&!cumplida(c)).length}));
   tipos.push({id:'entrega',txt:'Entregas',n:bloques().filter(b=>b.desde<=vHasta&&b.hasta>=vDesde).length});
   tipos.push({id:'vence',txt:'Vencimientos',n:F.filter(c=>(c.limite&&!entregada(c)&&enVista(c.limite))||enVista(previsto(c))).length});
-  $('ley').innerHTML=tipos.map(t=>'<div class="ref '+(t.id==='vence'||t.id==='entrega'?t.id:'et-'+esc(t.id))+'">'+esc(t.txt)+' <b>'+t.n+'</b></div>').join('');
+  // El "?" de los turnos que el cliente todavía no confirmó: se explica acá, con cuántos hay a la vista. Solo si hay alguno.
+  const nConf=F.filter(c=>faltaConfirmar(c)&&enVista(c.fecha)&&ver[c.etapa]!==false).length;
+  if(nConf)tipos.push({id:'conf',txt:'Sin confirmar',n:nConf});
+  $('ley').innerHTML=tipos.map(t=>'<div class="ref '+(t.id==='vence'||t.id==='entrega'||t.id==='conf'?t.id:'et-'+esc(t.id))+'">'+esc(t.txt)+' <b>'+t.n+'</b></div>').join('');
   // El filtro: los bloques de medición que existen hoy en el tablero (solo datos reales). Marcar uno
   // muestra su par completo: la medición y su entrega con el vencimiento.
   const todosB=bloques(true),dB={};
@@ -1041,7 +1045,7 @@ function dibujar(){
   const diasB=Object.keys(dB).sort();
   $('fBloques').innerHTML=diasB.length?diasB.map(d=>{
     const b=todosB.find(x=>x.dia===d),est=b?b.estado:'';
-    return '<button type="button" class="'+(selB.has(d)?'on ':'')+est+'" data-fbloque="'+d+'" role="checkbox" aria-checked="'+selB.has(d)+'" title="'+esc('Medición del '+fechaCorta(d)+(b?' · entrega del '+fechaCorta(b.desde)+' al '+fechaCorta(b.hasta):''))+'">'+esc(diaMes(d))+' <b>'+dB[d]+'</b></button>';
+    return '<button type="button" class="'+(selB.has(d)?'on ':'')+est+'" data-fbloque="'+d+'" role="checkbox" aria-checked="'+selB.has(d)+'" aria-label="'+esc('Medición del '+fechaCorta(d)+(b?' · entrega del '+fechaCorta(b.desde)+' al '+fechaCorta(b.hasta):''))+'">'+esc(diaMes(d))+' <b>'+dB[d]+'</b></button>';
   }).join(''):'<div class="nada">Todavía no hay mediciones.</div>';
   // Los días de instalación: las obras de Por instalar con turno, y las que ya se instalaron.
   const dI={};
@@ -1049,7 +1053,7 @@ function dibujar(){
   const diasI=Object.keys(dI).sort();
   $('fInst').innerHTML=diasI.length?diasI.map(d=>{
     const l=dI[d],h=l.filter(c=>instalada(c)).length,est=d<HOY&&h<l.length?'vencida':'';
-    return '<button type="button" class="'+(selI.has(d)?'on ':'')+est+'" style="--fc:var(--et)" data-finst="'+d+'" role="checkbox" aria-checked="'+selI.has(d)+'" title="'+esc('Instalación del '+fechaCorta(d)+' · '+l.length+(l.length===1?' obra':' obras')+(h?' · '+h+(h===1?' instalada':' instaladas'):''))+'">'+esc(diaMes(d))+' <b>'+l.length+'</b></button>';
+    return '<button type="button" class="'+(selI.has(d)?'on ':'')+est+'" style="--fc:var(--et)" data-finst="'+d+'" role="checkbox" aria-checked="'+selI.has(d)+'" aria-label="'+esc('Instalación del '+fechaCorta(d)+' · '+l.length+(l.length===1?' obra':' obras')+(h?' · '+h+(h===1?' instalada':' instaladas'):''))+'">'+esc(diaMes(d))+' <b>'+l.length+'</b></button>';
   }).join(''):'<div class="nada">Todavía no hay instalaciones con día.</div>';
   const nFil=selB.size+selI.size;
   $('fTodo').hidden=!nFil;
@@ -1074,7 +1078,7 @@ function dibujar(){
     const M=CARDS.filter(coincide),donde=c=>{const e=etapaDe(c.etapa),t=e?e.titulo:'';
       if(e&&e.fecha&&c.fecha&&!cumplida(c))return t+' · '+e.fecha.toLowerCase()+' '+fechaCorta(c.fecha);
       return t+(c.medido_at?' · medida el '+fechaCorta(c.medido_at):'');};
-    bu=M.length?'<span><b>'+M.length+(M.length===1?' obra':' obras')+'</b></span>'+M.slice(0,5).map(c=>'<button type="button" data-busca="'+esc(c.key)+'" title="Ir a su fecha y abrir la ficha">'+esc(quien(c))+' <span>· '+esc(donde(c))+'</span></button>').join('')+(M.length>5?'<span>y '+(M.length-5)+' más</span>':'')
+    bu=M.length?'<span><b>'+M.length+(M.length===1?' obra':' obras')+'</b></span>'+M.slice(0,5).map(c=>'<button type="button" data-busca="'+esc(c.key)+'">'+esc(quien(c))+' <span>· '+esc(donde(c))+'</span></button>').join('')+(M.length>5?'<span>y '+(M.length-5)+' más</span>':'')
       :'<span>Ninguna obra coincide con <b>«'+esc($('buscar').value.trim())+'»</b>.</span>';
     bu+='<span class="fin"><button type="button" data-limpiar>Limpiar</button></span>';
   }
@@ -1187,7 +1191,7 @@ const ICO_COPIAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const ICO_LISTO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 function datosHtml(c){
   const fila=(k,v,extra,que)=>'<div class="dato"><span class="k">'+k+'</span><span class="v'+(v?'':' sin')+'">'+(v?esc(v)+(extra?' <small>· '+esc(extra)+'</small>':''):'Sin '+k.toLowerCase())+'</span>'
-    +(v?'<button type="button" class="copiar" data-copiar="'+esc(v)+'" data-que="'+que+'" title="Copiar '+que+'" aria-label="Copiar '+que+'">'+ICO_COPIAR+'</button>':'')+'</div>';
+    +(v?'<button type="button" class="copiar" data-copiar="'+esc(v)+'" data-que="'+que+'" aria-label="Copiar '+que+'">'+ICO_COPIAR+'</button>':'')+'</div>';
   return fila('Teléfono',String(c.celular||'').trim(),'','el teléfono')+fila('Dirección',String(c.direccion||'').trim(),c.zona,'la dirección');
 }
 async function copiar(b){
