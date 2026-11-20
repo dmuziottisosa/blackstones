@@ -260,6 +260,17 @@ En el contrato, en "Cargar obra" y en "Editar obra", la primera opción del camp
 
 Crea la ficha en Por medir, vacía, y la enlaza. Si el presupuesto ya está en el tablero, **avisa y no hace nada**: no busca una ficha para enlazarla por su cuenta. Para enlazar con una ficha que ya existe está "Enlazar con el tablero", que muestra de quién es antes de confirmar. → `01-strategy/decision-log/2026-11-18-un-numero-una-persona.md`
 
+**Si el N° del contrato es el presupuesto de otra persona, tampoco carga** (un número, una persona). Cómo decide si es la misma, y qué dice el cartel (20/11/2026):
+
+- Con teléfono en los dos, manda el teléfono. Si coincide, carga, aunque el nombre esté escrito distinto.
+- Si a alguno le falta el teléfono, decide el nombre.
+- **Un teléfono de relleno cuenta como que falta.** Si los últimos 8 dígitos son todos iguales ("111111111", "0000000000"), decide el nombre. Antes un presupuesto guardado con 111111111 frenaba la carga del contrato de esa misma persona.
+- **Nombre igual y teléfonos de verdad distintos:** no carga, y el cartel muestra los dos teléfonos, uno debajo del otro. Primero hay que revisar el N° del contrato. Si el N° está bien y es la misma persona, se deja el mismo teléfono en los dos: el del presupuesto se cambia en Presupuestos, con el lápiz.
+- **Otro nombre:** "El presupuesto N° … es de X, no de Y."
+- Un teléfono de relleno tampoco alcanza para que la planilla proponga "Enlazar con el tablero".
+
+→ `01-strategy/decision-log/2026-11-20-telefono-de-relleno.md`
+
 ## Renglones de prueba
 
 Con la lista vacía aparece "Cargar 3 de prueba". Quedan marcados PRUEBA, no cuentan en "Por cobrar" y se borran juntos con "Borrar los de prueba" (si alguno se cargó en el tablero, esa ficha de prueba también se borra).

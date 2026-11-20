@@ -389,7 +389,9 @@ a.enl:hover,a.enl:focus-visible{color:var(--text);text-decoration:underline}
 .modal .btns .izq{margin-right:auto;border-color:transparent;color:var(--red);padding-left:4px;padding-right:4px}
 .modal .btns .izq-n{margin-right:auto}
 .modal .btns button:disabled{opacity:.6;cursor:default}
-.m-err{margin-top:12px;padding:9px 12px;border-radius:var(--radius-sm);background:var(--red-soft);color:var(--red);font-size:13px;font-weight:600}
+/* pre-line: un aviso del servidor puede traer renglones (dos teléfonos, uno debajo del otro, para compararlos
+   dígito por dígito: por eso las cifras van todas del mismo ancho) */
+.m-err{margin-top:12px;padding:9px 12px;border-radius:var(--radius-sm);background:var(--red-soft);color:var(--red);font-size:13px;font-weight:600;line-height:1.5;white-space:pre-line;font-variant-numeric:tabular-nums}
 .m-err[hidden]{display:none}
 .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);z-index:950;max-width:calc(100vw - 32px);padding:11px 18px;border-radius:999px;background:var(--dk);color:var(--cr);font-size:13.5px;font-weight:600;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
@@ -690,7 +692,7 @@ function fichaPara(c){
   const kn=c.nro?cardDeNro(c.nro,c.id):null;
   if(kn)return {k:kn,por:'nro'};
   const t=telDigitos(c.telefono);
-  if(t.length!==10)return null;
+  if(t.length!==10||/^(\d)\1{7}$/.test(t.slice(-8)))return null; // sin teléfono, o uno de relleno ("11 1111-1111"): no alcanza para decir que es la misma obra
   const l=Object.keys(CARDS).map(k=>CARDS[k]).filter(k=>telDigitos(k.celular)===t&&!conContrato(k.key,c.id));
   return l.length===1?{k:l[0],por:'tel'}:null;
 }

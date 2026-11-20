@@ -199,6 +199,13 @@ try {
             foreach ($cliente_obj['cotizaciones'] ?? [] as $cot_v) { if (!empty($cot_v['manual'])) $es_ficha_manual = true; }
             if ($es_ficha_manual || !bs_save_misma_persona((array)($cliente_obj['cliente'] ?? []), $cliente_data)) {
                 $de_quien = $es_ficha_manual ? 'una obra cargada a mano en el tablero' : (trim((string)($cliente_obj['cliente']['nombre'] ?? '')) ?: 'otro cliente');
+                // Mismo nombre y otro teléfono (20/11/2026): sin esto el aviso decía "ya era de Ana" a quien
+                // estaba guardando un presupuesto de Ana. Se dice que lo distinto es el teléfono, y cuál es.
+                $tel_viejo = trim((string)($cliente_obj['cliente']['celular'] ?? ''));
+                if (!$es_ficha_manual && $tel_viejo !== '' && trim((string)($cliente_data['celular'] ?? '')) !== ''
+                    && bs_misma_persona(['nombre' => (string)($cliente_obj['cliente']['nombre'] ?? '')], ['nombre' => (string)($cliente_data['nombre'] ?? '')])) {
+                    $de_quien .= ', con otro teléfono (' . $tel_viejo . ')';
+                }
                 $target_viejo = $target;
                 $target = str_pad((string)(bs_save_max_nro() + 1), 4, '0', STR_PAD_LEFT);
                 $cliente_path = BS_CLIENTES_DIR . '/' . $target . '.json';

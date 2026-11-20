@@ -137,7 +137,27 @@ if ($bs_nro !== '') {
     // del contrato, el N° del contrato está mal. No se carga, y se avisa de quién es cada uno.
     $bs_cots = array_values(array_filter((array)(is_array($bs_pc) ? ($bs_pc['cotizaciones'] ?? []) : []), function ($x) use ($bs_p) { return empty($x['manual']) && (!isset($bs_p[1]) || intval($x['sub'] ?? 0) === intval($bs_p[1])); }));
     if ($bs_cots && !bs_misma_persona((array)($bs_pc['cliente'] ?? []), ['nombre' => $nombre, 'celular' => $celular])) {
-        bs_error('El presupuesto N° ' . $bs_nro . ' es de ' . (trim((string)($bs_pc['cliente']['nombre'] ?? '')) ?: 'otro cliente') . ', no de ' . $nombre . '. Revisá el N° del contrato. No se cargó nada.', 409);
+        $bs_de = trim((string)($bs_pc['cliente']['nombre'] ?? ''));
+        $bs_tp = trim((string)($bs_pc['cliente']['celular'] ?? ''));
+        // EL NOMBRE COINCIDE Y EL TELÉFONO NO (dueño, 20/11/2026: el cartel decía "es de Ana, no de Ana", con el mismo
+        // nombre de los dos lados). Acá se llega con dos teléfonos de verdad y distintos: uno de relleno ya no cuenta
+        // como teléfono (ver bs_misma_persona).
+        // La regla no cambia: con teléfono en los dos, manda el teléfono, porque dos personas pueden llamarse
+        // igual. Lo que cambia es el cartel: dice que lo que no coincide es el teléfono, muestra los dos uno
+        // debajo del otro (para ver si es otra persona o un error de tipeo) y dice qué revisar.
+        if ($bs_de !== '' && $bs_tp !== '' && $celular !== '' && bs_misma_persona(['nombre' => $bs_de], ['nombre' => $nombre])) {
+            // el teléfono, prolijo si se reconoce ("11 5555-1234"); si no, tal como está escrito, para que se vea qué tiene de más
+            $bs_t = function ($x) { $l = bs_contrato_tel($x); return strlen(preg_replace('/\D/', '', $l)) === 10 ? $l : trim(preg_replace('/\s+/u', ' ', (string)$x)); };
+            // Cada teléfono al principio de su renglón: quedan uno debajo del otro y se comparan dígito por dígito.
+            // Después, qué hacer. Primero el N°, que es lo más seguro: emparejar los teléfonos para que cargue,
+            // sin mirar de quién es cada uno, es justo el cruce que la regla evita.
+            bs_error('El teléfono no coincide con el del presupuesto N° ' . $bs_nro . ".\n"
+                . $bs_t($bs_tp) . ' en el presupuesto, a nombre de ' . $bs_de . "\n"
+                . $bs_t($celular) . ' en el contrato, a nombre de ' . $nombre . "\n"
+                . "Si son dos personas distintas, el N° del contrato está mal: corregilo.\n"
+                . 'Si es la misma, dejá el mismo teléfono en los dos: el del presupuesto se cambia en Presupuestos, con el lápiz. No se cargó nada.', 409);
+        }
+        bs_error('El presupuesto N° ' . $bs_nro . ' es de ' . ($bs_de ?: 'otro cliente') . ', no de ' . $nombre . '. Revisá el N° del contrato. No se cargó nada.', 409);
     }
     // Si es de la misma persona, se aprovecha el material que el contrato no tenga escrito. Nada se
     // escribe en el presupuesto.

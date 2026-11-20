@@ -48,11 +48,19 @@ define('BS_CONTRACT_VERSION', '1.0');
  *   - Si a alguno le falta: el nombre tiene que ser el mismo, o compartir dos palabras enteras
  *     ("Ana Lopez" y "Ana Maria Lopez"). Un nombre suelto no alcanza: "Ana" no es "Mariana Lopez",
  *     ni "Maria" es cualquier Maria.
+ *   - Un teléfono de relleno no es un teléfono (dueño, 20/11/2026): si los últimos 8 dígitos son todos
+ *     iguales ("111111111", "0000000000") cuenta como que falta, y decide el nombre. Un presupuesto
+ *     guardado con "111111111" frenaba la carga del contrato de esa misma persona, que sí tenía su teléfono.
  * La usan la calculadora (save.php), "Editar obra" y "Cargar en Por medir" del contrato.
  */
 if (!function_exists('bs_misma_persona')) {
     function bs_misma_persona(array $viejo, array $nuevo) {
-        $tel = function ($s) { $n = preg_replace('/\D/', '', (string)$s); return strlen($n) >= 8 ? substr($n, -8) : ''; };
+        $tel = function ($s) {
+            $n = preg_replace('/\D/', '', (string)$s);
+            if (strlen($n) < 8) return '';
+            $u = substr($n, -8);
+            return preg_match('/^(\d)\1{7}$/', $u) ? '' : $u; // de relleno (todos iguales): como si no hubiera
+        };
         $llano = function ($s) {
             $s = mb_strtolower(trim((string)$s), 'UTF-8');
             $s = strtr($s, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
