@@ -909,6 +909,7 @@ let ocupado=false;  // hay un guardado en curso
 let fechaKey='';    // tarjeta a la que se le está eligiendo fecha
 let drag=null;      // arrastre en curso
 let buscado=[];     // palabras del buscador, ya sin mayúsculas ni acentos
+let buscadoTel=null; // si lo escrito entero es un teléfono, sus formas (ver telFormas)
 // FICHAS PLEGADAS: para que una columna no sea infinita hacia abajo, cada ficha se ve en dos o tres
 // renglones (quién, qué, y en qué está) y se abre al tocarla. De entrada vienen todas plegadas: así
 // se ve la cola entera de un vistazo. El botón de arriba ("Abrir todas") las muestra completas.
@@ -1146,10 +1147,41 @@ function htmlAdjuntos(c,desplegada){
   return h?'<div class="c-adj">'+h+'</div>':'';
 }
 
+// --- buscar por teléfono, como venga (dueño, 20/11/2026) ---
+// "+54 9 11 5555-1234" (como se copia de WhatsApp), "9 11 5555-1234", "011 15 5555-1234" y "1155551234" son el
+// mismo número. telFormas() devuelve las formas de buscar lo escrito, en dígitos, o null si no es un teléfono:
+// le va sacando lo que no es del número (el país, el 9 del celular, el 0, el 15). Con el "+" adelante se sacan
+// siempre; sin el "+", solo si lo que queda sigue siendo largo: así un N° corto se sigue buscando como texto.
+// Esta función está igual en el tablero y en Relación-Contrato: si se toca una, se toca la otra.
+function telFormas(q){
+  const s=String(q==null?'':q).replace(/[‎‏‪-‮]/g,'').trim();
+  if(!s||!/^[\d\s+()\-.‐-― ]+$/.test(s))return null;
+  const mas=/^\(?\s*\+/.test(s),d=s.replace(/\D/g,'');
+  if(!mas&&d.length<6)return null;
+  const f=[d],ult=()=>f[f.length-1];
+  const sacar=(pre,min)=>{const u=ult();if(u.indexOf(pre)===0&&u.length-pre.length>=min)f.push(u.slice(pre.length));};
+  if(mas){sacar('54',0);sacar('9',0);}
+  else{sacar('00',8);sacar('54',8);sacar('9',/^911/.test(ult())?4:6);}
+  sacar('0',6);
+  const u=ult(),m=/^(11|[23]\d{2,3})15(\d{6,8})$/.exec(u);
+  if(m&&u.length===12)f.push(m[1]+m[2]);          // 11 15 5555-1234
+  else if(/^15\d{8}$/.test(u))f.push(u.slice(2)); // 15 5555-1234, sin característica
+  return f;
+}
+// ¿El teléfono guardado es el que se busca? Alcanza con que una forma de lo escrito esté adentro de una del guardado.
+function telCoincide(formas,guardado){
+  const g=telFormas(guardado)||[String(guardado==null?'':guardado).replace(/\D/g,'')];
+  if(formas.some(x=>g.some(y=>y.indexOf(x)>=0)))return true;
+  const a=formas[formas.length-1],b=g[g.length-1];             // lo más pelado de cada uno
+  return a.length>=8&&b.length>=8&&a.slice(-8)===b.slice(-8);   // el mismo número, guardado sin la característica o con otra forma
+}
 // Buscador: sin mayúsculas ni acentos, y tienen que estar todas las palabras.
 const plano=t=>String(t==null?'':t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function coincide(c){
   if(!buscado.length)return true;
+  // Lo escrito entero es un teléfono: se busca como teléfono, en cualquiera de sus formas (antes "+54 9 11 …" se
+  // partía en palabras y no encontraba nada). Si no coincide, sigue la búsqueda de siempre.
+  if(buscadoTel&&telCoincide(buscadoTel,c.celular))return true;
   if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nro_contrato||'',c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.bacha_modelo,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' '),c.cortador.join(' ')].join(' '));
   return buscado.every(w=>c._txt.indexOf(w)>=0);
 }
@@ -1689,6 +1721,7 @@ function mover(c,destino){
 $('buscar').addEventListener('input',()=>{
   const v=$('buscar').value;
   buscado=plano(v).split(/\s+/).filter(Boolean);
+  buscadoTel=buscado.length?telFormas(v):null;
   $('buscar').classList.toggle('activo',buscado.length>0);
   $('buscarX').hidden=!v;
   dibujar();
@@ -1707,7 +1740,7 @@ const wrap=document.querySelector('.wrap');
 // Vuelve el tablero a lo normal: sin búsqueda, sin aviso prendido y sin filtros de columna.
 // Los paneles "Filtrar" quedan como estaban: abrirlos no es filtrar.
 function limpiarFiltros(){
-  buscado=[];
+  buscado=[];buscadoTel=null;
   $('buscar').value='';
   $('buscar').classList.remove('activo');
   $('buscarX').hidden=true;

@@ -663,6 +663,34 @@ function telLindo(s){
   // no se reconoce (interno, de otro país, incompleto): queda como se escribió, sin caracteres raros
   return String(s||'').replace(/[^\d+()\-\s]/g,'').replace(/\s+/g,' ').trim();
 }
+// --- buscar por teléfono, como venga (dueño, 20/11/2026) ---
+// "+54 9 11 5555-1234" (como se copia de WhatsApp), "9 11 5555-1234", "011 15 5555-1234" y "1155551234" son el
+// mismo número. telFormas() devuelve las formas de buscar lo escrito, en dígitos, o null si no es un teléfono:
+// le va sacando lo que no es del número (el país, el 9 del celular, el 0, el 15). Con el "+" adelante se sacan
+// siempre; sin el "+", solo si lo que queda sigue siendo largo: así un N° corto se sigue buscando como texto.
+// Esta función está igual en el tablero y en Relación-Contrato: si se toca una, se toca la otra.
+function telFormas(q){
+  const s=String(q==null?'':q).replace(/[‎‏‪-‮]/g,'').trim();
+  if(!s||!/^[\d\s+()\-.‐-― ]+$/.test(s))return null;
+  const mas=/^\(?\s*\+/.test(s),d=s.replace(/\D/g,'');
+  if(!mas&&d.length<6)return null;
+  const f=[d],ult=()=>f[f.length-1];
+  const sacar=(pre,min)=>{const u=ult();if(u.indexOf(pre)===0&&u.length-pre.length>=min)f.push(u.slice(pre.length));};
+  if(mas){sacar('54',0);sacar('9',0);}
+  else{sacar('00',8);sacar('54',8);sacar('9',/^911/.test(ult())?4:6);}
+  sacar('0',6);
+  const u=ult(),m=/^(11|[23]\d{2,3})15(\d{6,8})$/.exec(u);
+  if(m&&u.length===12)f.push(m[1]+m[2]);          // 11 15 5555-1234
+  else if(/^15\d{8}$/.test(u))f.push(u.slice(2)); // 15 5555-1234, sin característica
+  return f;
+}
+// ¿El teléfono guardado es el que se busca? Alcanza con que una forma de lo escrito esté adentro de una del guardado.
+function telCoincide(formas,guardado){
+  const g=telFormas(guardado)||[String(guardado==null?'':guardado).replace(/\D/g,'')];
+  if(formas.some(x=>g.some(y=>y.indexOf(x)>=0)))return true;
+  const a=formas[formas.length-1],b=g[g.length-1];             // lo más pelado de cada uno
+  return a.length>=8&&b.length>=8&&a.slice(-8)===b.slice(-8);   // el mismo número, guardado sin la característica o con otra forma
+}
 function waLink(s){
   const d=telDigitos(s);
   if(d.length===10)return 'https://wa.me/549'+d;
@@ -1006,7 +1034,7 @@ function dibujar(){
   $('avisoS').hidden=!sc.length;
   if(sc.length)$('avisoS').innerHTML='<span>'+(sc.length===1?'Hay <b>1 obra</b> en el tablero sin contrato.':'Hay <b>'+sc.length+' obras</b> en el tablero sin contrato.')+'</span><button type="button" class="btn chico" data-sin-contrato>Verlas</button>';
   const t=llano(q).trim(),buscando=!!t;
-  const qTel=/^[\d\s+()\-.\u2010-\u2015\u200e\u200f\u202a-\u202e\u00a0]+$/.test(q.trim())&&telDigitos(q).length>=6?telDigitos(q):'';
+  const qTel=telFormas(q); // lo escrito es un teléfono, en cualquiera de sus formas (o null)
   $('mesTxt').textContent=buscando?'Todos los meses':mesTxt(mes);
   $('mesAnt').disabled=$('mesSig').disabled=buscando;
   $('mesHoy').hidden=buscando||mes===HOY.slice(0,7);
@@ -1020,7 +1048,7 @@ function dibujar(){
   const delMes=CONTRATOS.filter(c=>{
     if(!buscando)return (c.fecha||'').slice(0,7)===mes;
     const v=ver(c);
-    if(qTel&&telDigitos(v.telefono).indexOf(qTel)>=0)return true; // el teléfono, pegado como venga
+    if(qTel&&telCoincide(qTel,v.telefono))return true; // el teléfono, pegado como venga: con +54, con el 9, con el 15 o todo junto
     return llano([v.cliente,c.nro,keyDe(c),v.material,c.vendedor,c.procedencia,v.telefono,v.direccion,c.contrato,c.contrato_paralelo,c.nota].join(' ')).indexOf(t)>=0;
   });
   // Lo que se ve es lo que se suma: arriba, en los filtros y en el pie. Los de prueba cuentan

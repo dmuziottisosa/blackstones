@@ -35,7 +35,7 @@ Los definió el dueño (16/11/2026), sobre la planilla que ya usaba:
 
 Criterio del dueño (16/11/2026): **no es un tablero de indicadores, es un centro de control de contratos y clientes. Lectura clara, control preciso.** Por eso la pantalla es una planilla, con columnas fijas y números alineados; nada decorativo.
 
-- **Un mes por vez**, según la fecha del contrato, con flechas. El buscador busca en todos los meses.
+- **Un mes por vez**, según la fecha del contrato, con flechas. El buscador busca en todos los meses. **El teléfono se encuentra como venga (dueño, 20/11/2026):** pegado de WhatsApp ("+54 9 11 5555-1234"), con el 9 adelante ("9 11 5555-1234"), con 0 y 15 ("011 15 5555-1234"), todo junto ("1155551234") o sin la característica ("5555-1234"). A medio escribir ya va mostrando, y con solo el prefijo ("+54 9") no esconde nada. Un N° corto se sigue buscando como texto. Antes no reconocía el 9 suelto adelante ("9 11 …") ni el 0 con el 15.
 - **Franja de resumen**, en un renglón: contratos (y cuántos están completos), contratado, cobrado, por cobrar del mes, y por cobrar de todos los meses.
 - **Filtros** con su cantidad: Todos, Con saldo, Pagados, Sin cargar al tablero, Sin verificar, Sin N°, Completos.
 - **Columnas:** Fecha, Contrato (el N° y debajo el ctto paralelo), Cliente (debajo: vendedor y procedencia), Material (debajo: medidas), Total, Cobrado, Saldo, Factura, Muebles, Pileta, Tablero y Notas. Fecha y Cliente ordenan la planilla al tocarlas.
