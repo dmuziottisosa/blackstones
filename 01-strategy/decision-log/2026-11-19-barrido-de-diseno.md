@@ -1,5 +1,5 @@
 ---
-fecha: 2026-11-19 (cerrado el 20/11/2026)
+fecha: 2026-11-19 (cerrado el 20/11/2026; Relación-Contrato se rehízo ese mismo día, ver abajo)
 tema: Barrido de diseño del tablero por columnas, Relación-Contrato y el calendario
 status: decidido (el dueño fijó el criterio; las piezas las eligió quien lo hizo y se pueden revertir de a una)
 ---
@@ -35,6 +35,7 @@ El problema de fondo, también en sus palabras: "abría el tablero formato colum
 7. **Sin descripciones al pasar el mouse.** Lo que decía el globo pasó a `aria-label`. Queda un globo solo donde explica un signo (el "?" de un N° que no está en Presupuestos, el sello de verificado, "CF") o muestra una nota cortada.
 8. **Los números, prolijos.** En la planilla de contratos, sin centavos (el exacto está al abrir el contrato); plata a la derecha y texto a la izquierda. Las sumas, redondeadas.
 9. **Todo el texto se lee.** Contraste de 4,5:1 o más en claro y oscuro, en computadora, tablet y celular. Se mide con un programa, no a ojo, y entra en la regresión.
+10. **En una planilla, el patrón lo hacen columnas que se ven** (20/11/2026): la etapa en su color y la barra de lo cobrado. Desaturar es sacar el color que no dice nada, no todo el color.
 
 ## Qué cambió respecto de decisiones anteriores del dueño
 
@@ -54,15 +55,47 @@ Cada una se puede volver atrás por separado:
 | El número de cada columna y "Próxima", en el color de la etapa | En tinta y en gris | Sobre el carril teñido, el texto de color no se leía bien (medido: entre 2,9 y 3,8 a 1) |
 | Naranja de Por fabricar y verde de Por archivar | Los mismos, un punto más oscuros | Para que el texto blanco encima llegue a 4,5:1 (estaba en 4,2 y 4,1) |
 | Saldo y "Por cobrar" en rojo | En tinta y negrita | Deber un saldo es lo normal de un contrato en curso, no un error |
-| Barra verde y la palabra "Enlazado" en cada renglón de contratos (18/11) | La etapa (punto de color y nombre) es el link a la ficha. Adentro del contrato sigue "Enlazado" | Que haya etapa ya dice que está enlazado; se marcan las que no |
+| Barra verde y la palabra "Enlazado" en cada renglón de contratos (18/11) | La etapa, en una pastilla con su color, es el link a la ficha. Adentro del contrato sigue "Enlazado" | Que haya etapa ya dice que está enlazado; se marcan las que no |
 | Montos con centavos en la planilla | Sin centavos; el exacto, al abrir el contrato | Una columna de números se compara mejor si todos tienen la misma forma |
+
+## Corrección del 20/11/2026: Relación-Contrato se rehízo
+
+**Qué dijo el dueño** al ver la planilla ya publicada, con sus datos: "bien lo otro. Este aún quedó desabrido, no de captación de patrón rápido, y caótico".
+
+**Qué había pasado.** En el tablero el color se sacó de las fichas pero se puso en otro lado (el carril). En contratos se sacó y no se puso nada: la etapa quedó en un punto de 8 px, el saldo en tinta, y lo demás en gris. Sin ninguna columna que el ojo pudiera recorrer sin leer, la planilla era una pared de texto. Y el desorden ya estaba de antes y no se había tocado: cada celda centrada por su cuenta (con celdas de uno y de dos renglones, la lectura zigzagueaba), una raya de relleno en cada celda vacía (hasta seis por renglón), la fecha repetida en cada contrato del mismo día y textos cortados con "…" (medidas, procedencia, notas).
+
+**La regla que faltaba:** en una planilla, el patrón lo hacen columnas que se ven, no texto. Desaturar es sacar el color que no dice nada, no todo el color.
+
+**Qué cambió:**
+
+| Antes (19/11) | Ahora | Por qué |
+|---|---|---|
+| La etapa, un punto de color y el nombre, en la anteúltima columna | Una pastilla teñida con el color de la etapa (el mismo de su columna en el tablero), todas del mismo ancho, al lado del cliente y el material | Es la columna que se recorre de un vistazo: de arriba abajo se ve en qué anda el mes, y una obra vieja que sigue en Por medir salta sola |
+| Total, cobrado y saldo, tres números | Los mismos tres, y debajo de lo cobrado una barra: cuánto del contrato ya entró | La segunda columna que se lee sin leer: quién no pagó nada, quién señó, quién terminó |
+| La fecha en cada renglón | Una vez por día; una raya más firme separa los días | Los contratos se leen en tandas, no de a uno |
+| Cada celda centrada por su cuenta | Todas apoyan su primera línea a la misma altura | Se lee derecho |
+| "—" en cada celda vacía y "Sin total" en la columna del saldo | Lo que no hay queda en blanco; "Sin total" se dice una vez, en su columna | Menos tinta que no dice nada |
+| Debajo de la etapa, el turno y el plazo (dos renglones) | Un solo renglón, el que más importa: plazo vencido, sin turno, seña distinta, el turno o el plazo | Todos los renglones miden lo mismo |
+| Debajo del nombre: teléfono, vendedor y procedencia. Debajo del material: las medidas | Teléfono y vendedor. La procedencia y las medidas, al abrir el contrato | Eran los textos que se cortaban con "…" |
+| La nota que pone sola la importación ("Creado desde la ficha del tablero…") | No se muestra en la planilla (sigue en el contrato) | Era el mismo texto en muchos renglones |
+| El resumen del mes, en la letra de siempre | Los números con más presencia y una barra: qué parte de lo contratado ya se cobró | Lo primero que se mira es el mes |
+| "Sin fecha de medición" y "Sin turno de instalación", en gris | En rojo, como en el tablero | El mismo hecho, el mismo color en las dos pantallas |
+| Los filtros de "qué les falta", con el número en gris | Con el número en ámbar | Igual que los avisos del tablero |
+
+Lo que se mantuvo del 19/11: el saldo en tinta y negrita, los montos sin centavos, sin barra verde ni "Enlazado" en cada renglón, sin descripciones al pasar el mouse, y el contraste medido (4,5:1 o más; ya no hay excepción, porque la raya de las celdas vacías no existe).
+
+Lo que NO cambió, a propósito: un contrato sin enlazar sigue diciendo "No existe en el tablero" (decisión del dueño del 18/11/2026). Ahora va en una pastilla hueca, en la misma columna que las etapas, con "Cargar en Por medir" debajo.
+
+**Known unknown nuevo:** la barra de un contrato con dólares y pesos se calcula con el dólar del día; es una aproximación para la vista, los números de al lado son los exactos.
+
+**Un error en el camino, y lo que dejó.** La barra de lo cobrado se llamó en el código igual que la franja de arriba de la pantalla (mes, buscador, "+ Nuevo contrato") y la dejó aplastada, con los botones tapados. Ninguna prueba lo notó: se vio mirando la captura. Se corrigió antes de entregar y la prueba de diseño ahora comprueba que esa franja se vea entera y se pueda tocar (y se verificó que la prueba falla si el error vuelve). Regla para adelante: las pruebas no reemplazan mirar la pantalla.
 
 ## Knowns
 
-- Probado en local, en computadora (1180, 1440 y 1880 px), tablet y celular, claro y oscuro: `diseno.js` (31 comprobaciones sobre las tres pantallas), la medición de contraste y la regresión completa del tablero, contratos, calendario y usuarios.
+- Probado en local, en computadora (1180, 1440 y 1880 px), tablet y celular, claro y oscuro: `diseno.js` (44 comprobaciones sobre las tres pantallas; 13 son las de la planilla del 20/11), la medición de contraste y la regresión completa del tablero, contratos, calendario y usuarios.
 - No cambió ningún dato ni ninguna regla del servidor: son las páginas (`tablero.php`, `relacion-contrato.php`, `calendario.php`, y los colores de `reportes.php`).
 - Nada de lo que se sacó de la ficha cerrada se perdió: está al abrirla o en el aviso de la columna.
-- Contraste, medido: en el tablero, Relación-Contrato y Control todo el texto llega a 4,5:1. La única excepción es a propósito: la raya de una celda vacía en contratos (3:1), que es un relleno y no un dato.
+- Contraste, medido: en el tablero, Relación-Contrato y Control todo el texto llega a 4,5:1.
 
 ## Known unknowns
 

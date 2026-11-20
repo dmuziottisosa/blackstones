@@ -108,16 +108,16 @@ button{font-family:inherit;color:inherit}
 .res>div{flex:1 1 150px;min-width:0;padding:12px 18px 13px;border-left:1px solid var(--border-soft)}
 .res>div:first-child{flex:0 1 150px;border-left:none}
 .res .t{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
-.res .v{margin-top:4px;font-size:15.5px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .v{margin-top:3px;font-family:'Fraunces',serif;font-size:19px;font-weight:600;letter-spacing:-.005em;color:var(--text);font-variant-numeric:lining-nums tabular-nums;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .res .v.nada{color:var(--text3);font-weight:500}
-.res .v i{margin:0 3px;font-style:normal;font-weight:500;color:var(--text3)} /* el "+" entre dólares y pesos */
+.res .v i{margin:0 3px;font-family:'Manrope',sans-serif;font-size:14px;font-style:normal;font-weight:500;color:var(--text3)} /* el "+" entre dólares y pesos */
 /* EL COLOR EN LA PLATA (barrido de diseño, 19/11/2026): verde, lo que ya entró; lo que falta cobrar va en tinta
    y en negrita. Deber un saldo es lo normal de un contrato en curso, no un error: el rojo queda para lo que está mal. */
 .res .cobr .v{color:var(--gr)}
 .res .cobr .v.nada{color:var(--text3)}
 .res .debe.cero .v{color:var(--gr)}
 .res .tod{flex:1.2 1 190px;background:var(--card-alt)}
-.res .tod .v{font-size:13.5px;font-weight:600;color:var(--text2)}
+.res .tod .v{font-size:16px;color:var(--text2)}
 
 /* === FILTROS: qué mirar. Apagados, todos iguales; prendido, relleno. === */
 .filtros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
@@ -127,6 +127,7 @@ button{font-family:inherit;color:inherit}
 /* Un filtro sin nada adentro se apaga: sigue ahí, pero no pide que lo miren. */
 .filtros button.cero:not(.on){color:var(--text3);font-weight:500}
 .filtros button.cero:not(.on) i{font-weight:600}
+.filtros button.falta:not(.on):not(.cero) i{color:var(--amb)}
 /* Entre "cómo están de plata" y "qué falta completar": una raya fina. */
 .filtros .sep{align-self:center;flex:0 0 1px;height:18px;margin:0 4px;background:var(--border)}
 .filtros button.on{background:var(--dk);border-color:var(--dk);color:var(--cr)}
@@ -147,19 +148,32 @@ button{font-family:inherit;color:inherit}
 .m-chk span::before{content:'';display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;border:1.5px solid var(--amb);vertical-align:1px}
 .m-chk span.si{color:var(--text3);font-weight:500}
 .m-chk span.si::before{background:var(--gr);border-color:var(--gr)}
-.res .v small{display:block;margin-top:1px;font-size:11.5px;font-weight:500;color:var(--text3)}
+.res .v small{display:block;margin-top:5px;font-family:'Manrope',sans-serif;font-size:11.5px;font-weight:500;letter-spacing:0;color:var(--text3)}
+/* Cuánto de lo contratado ya entró: una barra, para verlo sin leer (20/11/2026). La misma barra va en cada renglón.
+   Se llama ".avance" y no ".barra": ".barra" es la franja de arriba, con el mes, el buscador y los botones. */
+.avance{height:4px;margin-top:6px;border-radius:2px;background:var(--border);overflow:hidden}
+.avance i{display:block;height:100%;border-radius:2px;background:var(--gr)}
+.res .medidor{display:flex;align-items:center;gap:9px;margin-top:8px}
+.res .medidor .avance{flex:1;max-width:220px;height:5px;margin:0;border-radius:3px}
+.res .medidor span{font-size:11.5px;font-weight:700;color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .aviso-p .btn{margin-left:auto;border-color:var(--amb);color:var(--amb);background:transparent}
 
 /* === PLANILLA: un renglón por contrato, columnas fijas, números alineados === */
-.lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 54px 54px 64px 178px minmax(0,1.2fr) 30px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
-.fila,.cab,.pie{display:grid;grid-template-columns:var(--cols);gap:0 14px;align-items:center;padding:9px 16px}
+.lista{--cols:66px 66px minmax(0,1.5fr) minmax(0,1.2fr) 178px 104px 104px 110px 52px 54px 60px minmax(0,1fr) 30px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+/* Todas las celdas de un renglón apoyan su primer renglón en la misma línea (baseline): el ojo lee derecho.
+   Antes cada celda se centraba por su cuenta y, con celdas de uno y de dos renglones, la lectura zigzagueaba. */
+.fila,.cab,.pie{display:grid;grid-template-columns:var(--cols);gap:0 14px;align-items:baseline;padding:9px 16px}
+.cab{align-items:center}
 .cab{position:sticky;top:0;z-index:5;padding-top:9px;padding-bottom:9px;background:var(--card-alt);border-bottom:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
 .cab>div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cab button{padding:0;border:none;background:none;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;cursor:pointer}
 .cab button.on{color:var(--text)}
 .cab .der,.fila .der,.pie .der{text-align:right}
 .cab .cen,.fila .cen{text-align:center}
-.fila{min-height:54px;border-top:1px solid var(--border-soft);cursor:pointer;min-width:0;font-size:13.5px;color:var(--text2);transition:background .12s}
+.fila{padding-top:12px;padding-bottom:11px;border-top:1px solid var(--border-soft);cursor:pointer;min-width:0;font-size:13.5px;color:var(--text2);transition:background .12s}
+/* Los contratos de un mismo día van juntos: la fecha se dice una vez y una raya más firme separa los días. */
+.fila.dia{border-top-color:var(--border)}
+.fila>.c-mas{align-self:center}
 .cab+.fila{border-top:none}
 .fila>div{min-width:0}
 .c-fec{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -170,40 +184,41 @@ button{font-family:inherit;color:inherit}
 .f-nom{font-size:14px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .f-sub{font-size:11.5px;color:var(--text3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .f-sub .tel{color:var(--text2);font-weight:600;text-decoration:none;font-variant-numeric:tabular-nums}
-.f-mat{color:var(--text2);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f-mat{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--text2);font-weight:500;line-height:1.35}
 /* Total y cobrado, en gris; el saldo es el número que se viene a buscar: en tinta y en negrita. */
-.plata{font-weight:500;color:var(--text2);font-variant-numeric:tabular-nums;line-height:1.35}
+.plata{min-height:1.35em;font-weight:500;color:var(--text2);font-variant-numeric:tabular-nums;line-height:1.35}
 .plata span{display:block;white-space:nowrap}
 .plata.nada{color:var(--text3);font-weight:500}
 .plata.debe{color:var(--text);font-weight:700}
 .plata.ok{color:var(--gr);font-weight:700}
-.plata.nada.raya{opacity:.72} /* una raya por "no hay": apagada, pero se ve (3:1) */
+
 /* sí / no / sin dato: se lee de un vistazo, sin color */
-.sn{font-size:12px;font-weight:600;color:var(--text3)}
+.sn{font-size:12px;font-weight:600;color:var(--text2)}
 .sn.si{color:var(--text);font-weight:700}
-.sn.no{color:var(--text2)}
-.sn.raya{opacity:.72}
-.c-not{font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sn.no{color:var(--text3);font-weight:500}
+
+.c-not{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:1.4;color:var(--text2);overflow-wrap:anywhere}
 .nota-i{display:none}
 .solo-t{display:none}
 .rot{display:none}
-.tab{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
-/* La etapa del tablero: un punto en el color de la etapa y el nombre en tinta. Sin pastilla: en una planilla de
-   30 renglones, 30 pastillas de colores pesaban más que la plata. Es el link a la ficha. */
-.etapa{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:1px 9px 1px 0;border-radius:999px;color:var(--text);font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap}
-.etapa::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--et);flex-shrink:0}
-a.etapa{margin-left:-9px;padding-left:9px;transition:background .12s}
-@media(hover:hover){a.etapa:hover{background:var(--et-soft)}}
-.etapa.fuera{--et:var(--text3);--et-soft:var(--card-alt);color:var(--text2)}
-.etapa.rota{--et:var(--red);--et-soft:var(--red-soft,rgba(176,58,58,.1))}
+.tab{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+/* La etapa del tablero: una pastilla teñida con el color de su etapa (el mismo de su columna en el tablero) y el
+   nombre en tinta. Todas del mismo ancho: forman una columna de color que se lee de un vistazo. El 19/11 se
+   habían dejado en un punto de 8 px y la planilla quedó sin un solo patrón (dueño, 20/11/2026: "desabrido"). */
+.etapa{display:inline-flex;align-items:baseline;gap:7px;box-sizing:border-box;min-width:116px;max-width:100%;padding:3px 11px 3px 9px;border-radius:999px;background:color-mix(in srgb,var(--et) 20%,var(--card));color:var(--text);font-size:12px;font-weight:700;line-height:1.4;text-decoration:none;white-space:nowrap}
+.etapa::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--et);flex-shrink:0} /* apoyado en la línea del texto: así la pastilla se alinea por su texto y no por el punto */
+a.etapa{transition:background .12s}
+@media(hover:hover){a.etapa:hover{background:color-mix(in srgb,var(--et) 27%,var(--card))}}
+.etapa.fuera{--et:var(--text3);gap:6px;padding-right:9px;background:none;box-shadow:inset 0 0 0 1px var(--border);color:var(--text2);font-weight:600}
+.etapa.rota{--et:var(--red);background:var(--red-soft);color:var(--red)}
 .tab [data-desenlazar]{margin-top:6px}
 .tab small.sena-d{color:var(--amb);font-weight:700}
 .nota-t.sena-d{background:var(--amb-soft);color:var(--amb)}
 .nota-t.sena-d b{font-weight:800}
-.tab small{font-size:11.5px;line-height:1.35;color:var(--text3);max-width:100%;overflow-wrap:anywhere}
+.tab small{margin-top:5px;padding-left:2px;font-size:11.5px;line-height:1.35;color:var(--text3);max-width:100%;overflow-wrap:anywhere}
 .tab small.rojo,.tab small b.rojo{color:var(--red);font-weight:700}
-.etapa.rota{color:var(--red)}
-.tab .btn.chico{padding:5px 11px;font-size:12px}
+
+.tab .btn.chico{margin-top:6px;padding:5px 11px;font-size:12px}
 .btn.enl-b{display:inline-flex;align-items:center;gap:6px}
 .btn.enl-b svg{width:13px;height:13px}
 .et-medir{--et:#2F6DB5;--et-soft:rgba(47,109,181,.11)}
@@ -239,7 +254,7 @@ a.etapa{margin-left:-9px;padding-left:9px;transition:background .12s}
 .pap-f .btn{flex-shrink:0;border-color:var(--gr);color:var(--gr)}
 /* Pie de la planilla: la suma de lo que se está viendo, debajo de cada columna */
 .pie{border-top:2px solid var(--border);border-radius:0 0 var(--radius) var(--radius);background:var(--card-alt);font-size:13px;color:var(--text2)}
-.pie .q{grid-column:1/5;font-weight:700;color:var(--text)}
+.pie .q{grid-column:1/6;font-weight:700;color:var(--text)}
 .pie .plata{font-weight:700}
 /* Sello de VERIFICADO: el contrato tiene adjunto el PDF o Excel del presupuesto. Dorado, como un sello. */
 .ver{display:inline-flex;align-items:center;gap:5px;color:var(--gdd);font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;vertical-align:middle}
@@ -415,13 +430,13 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 /* Pantallas medianas: primero se va la columna de notas (queda un punto al lado del nombre),
    después factura / muebles / pileta. Todo sigue estando en la ficha. */
 @media(max-width:1519px){
-  .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 108px 108px 114px 54px 54px 64px 178px 30px}
+  .lista{--cols:66px 66px minmax(0,1.5fr) minmax(0,1.2fr) 178px 104px 104px 110px 52px 54px 60px 30px}
   .c-not,.cab .h-not{display:none}
   .nota-i{display:inline-block;width:6px;height:6px;margin-left:7px;border-radius:50%;background:var(--text3);vertical-align:middle}
 }
 /* Antes se iban recién a los 1199 px y el nombre del cliente quedaba cortado ("Mauro Gimen…") en una notebook. */
 @media(max-width:1349px){
-  .lista{--cols:70px 68px minmax(0,1.6fr) minmax(0,1.3fr) 104px 104px 110px 178px 30px}
+  .lista{--cols:62px 64px minmax(0,1.5fr) minmax(0,1.15fr) 178px 100px 100px 106px 30px}
   .c-sn,.cab .h-sn{display:none}
 }
 @media(max-width:1199px){
@@ -463,8 +478,12 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   .c-tab{padding-top:12px;border-top:1px solid var(--border-soft)}
   .tab{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px}
   .tab .btn.chico{padding:10px 14px;font-size:13px}
-  .etapa{padding:6px 12px 6px 0;font-size:13px}
-  a.etapa{margin-left:-12px;padding-left:12px}
+  .etapa{min-width:0;padding:6px 13px 6px 11px;font-size:13px}
+  .tab small{margin-top:0;padding-left:0}
+  .fila .der .plata:empty::before{content:'—';color:var(--text3)}
+  .fila .avance{max-width:120px}
+  .res .medidor{flex-wrap:wrap;gap:5px 9px}
+  .res .medidor .avance{flex:1 1 100%;max-width:none}
   .filtros{flex-wrap:nowrap;overflow-x:auto;margin-left:-12px;margin-right:-12px;padding:0 12px;scrollbar-width:none}
   .filtros::-webkit-scrollbar{display:none}
   .filtros button{flex-shrink:0;padding:9px 14px;font-size:13px}
@@ -484,11 +503,11 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
   .m-res>div{padding:10px 10px 11px}
 }
 /* Sin permiso para ver la plata: no hay columnas de montos ni resumen. */
-.sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 54px 54px 64px 178px minmax(0,1.2fr) 30px}
+.sin-plata .lista{--cols:66px 66px minmax(0,1.5fr) minmax(0,1.2fr) 178px 52px 54px 60px minmax(0,1fr) 30px}
 .sin-plata .fila>.der,.sin-plata .cab>.der,.sin-plata .pie>.der,.sin-plata .res>div:not(:first-child){display:none}
 .sin-plata .res>div:first-child,.sin-resumen .res>div:first-child{flex:1 1 auto}
-@media(max-width:1519px){.sin-plata .lista{--cols:74px 72px minmax(0,1.7fr) minmax(0,1.5fr) 54px 54px 64px 178px 30px}}
-@media(max-width:1349px){.sin-plata .lista{--cols:70px 68px minmax(0,1.6fr) minmax(0,1.3fr) 178px 30px}}
+@media(max-width:1519px){.sin-plata .lista{--cols:66px 66px minmax(0,1.5fr) minmax(0,1.2fr) 178px 52px 54px 60px 30px}}
+@media(max-width:1349px){.sin-plata .lista{--cols:62px 64px minmax(0,1.6fr) minmax(0,1.3fr) 178px 30px}}
 /* Solo mirar: sin botones que cambien algo. */
 .solo-ver [data-nuevo],.solo-ver [data-prueba],.solo-ver [data-borrar-prueba],.solo-ver [data-sin-contrato],.solo-ver [data-enviar],.solo-ver [data-enlazar],.solo-ver [data-desenlazar],.solo-ver #papB{display:none!important}
 .lec{display:grid;grid-template-columns:120px minmax(0,1fr);gap:7px 14px;font-size:14px;margin-top:4px}
@@ -716,7 +735,7 @@ function destino(moneda,tot,sal){
 }
 // El dólar del día, el mismo que usa la calculadora: es solo el valor que se propone; se puede cambiar.
 let DOLAR=0;
-fetch('/calculadora/dolar.php',{cache:'no-store'}).then(r=>r.json()).then(j=>{DOLAR=Math.round(+j.venta||0);if(F)pintarPagos();}).catch(()=>{});
+fetch('/calculadora/dolar.php',{cache:'no-store'}).then(r=>r.json()).then(j=>{DOLAR=Math.round(+j.venta||0);if(F)pintarPagos();else if(document.querySelector('#lista .fila')&&!document.querySelector('.menu'))dibujar();}).catch(()=>{});
 const cambioTxt=x=>x.aplica&&x.aplica!==x.moneda&&x.cotizacion>0?' · a $ '+NF.format(x.cotizacion)+' = '+plata(x.moneda==='USD'?x.monto*x.cotizacion:x.monto/x.cotizacion,x.aplica):'';
 const partes=o=>['USD','ARS'].filter(m=>Math.abs(o[m])>0.004).map(m=>plata(o[m],m));
 const partesR=o=>['USD','ARS'].filter(m=>Math.abs(o[m])>=0.5).map(m=>plataR(o[m],m));
@@ -728,6 +747,18 @@ function saldoTxt(n,redondo){
   if(!l.length)return {cls:'ok',l:['Pagado']};
   return {cls:['USD','ARS'].some(m=>n.sal[m]>0.004)?'debe':'ok',l:l};
 }
+// Qué parte del contrato ya se cobró, de 0 a 1 (null si no hay total). Es solo para la barra: con dólares y pesos
+// en el mismo contrato se suman al dólar del día, que es una aproximación; los números de al lado son los exactos.
+function fraccion(n){
+  const tu=n.tot.USD||0,ta=n.tot.ARS||0;
+  if(!(tu>0||ta>0))return null;
+  const su=Math.max(n.sal.USD,0),sa=Math.max(n.sal.ARS,0);
+  let f;
+  if(tu>0&&ta>0){if(!(DOLAR>0))return null;f=1-(su*DOLAR+sa)/(tu*DOLAR+ta);}
+  else f=tu>0?1-su/tu:1-sa/ta;
+  return Math.max(0,Math.min(1,f));
+}
+const barraHtml=(f,rotulo)=>{const pc=Math.round(f*100);return '<div class="avance" role="img" aria-label="'+(rotulo||'Cobrado')+' '+pc+' %"><i style="width:'+(f>0?Math.max(4,pc):0)+'%"></i></div>';};
 // Enlazado, pero la ficha no está entre las obras vivas del tablero. Se dice por qué.
 // Archivada es lo normal al terminar la obra; "no existe" es un enlace roto y se puede desenlazar.
 const FUERA={archivada:['Archivada','Obra entregada. El contrato queda.'],papelera:['En la papelera','Su ficha está en la papelera del tablero.']};
@@ -941,7 +972,7 @@ const etapaOk=c=>{if(!fEtapa)return true;const k=cardDe(c);return fEtapa==='sin'
 // Dos grupos, con una raya fina en el medio: cómo están (plata y completos) y qué les falta (lo que hay que perseguir).
 const FILTROS_FALTA=['sueltos','sinver','sinnro','sinturno','sena'];
 const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['completos','Completos',completo],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['sinturno','Sin turno',sinTurno],['sena','Seña distinta',c=>!!senaDif(c),true]].filter(f=>PLATA||['saldo','pagados','sena'].indexOf(f[0])<0);
-const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':(v==='cf'?'<span class="sn si" title="Factura a consumidor final">CF</span>':'<span class="sn raya">—</span>'));
+const SN=v=>v==='si'?'<span class="sn si">Sí</span>':(v==='no'?'<span class="sn no">No</span>':(v==='cf'?'<span class="sn si" title="Factura a consumidor final">CF</span>':''));
 const PIL={nuestra:'Nuestra',cliente:'Cliente',no:'No'};
 
 function dibujar(){
@@ -973,10 +1004,11 @@ function dibujar(){
   // mientras existan (el cartel lo avisa), así ningún número contradice a otro.
   const base=delMes,s=sumar(base),todo=sumar(CONTRATOS),hayDeuda=partes(s.deb).length>0;
   const linea=o=>partesR(o).join(' <i>+</i> ');
+  const fMes=fraccion({tot:s.tot,sal:s.deb}); // de lo contratado en el mes, cuánto entró
   $('res').hidden=false;
   $('res').innerHTML='<div><div class="t">Contratos</div><div class="v">'+base.length+(base.length?'<small>'+base.filter(completo).length+' de '+base.length+' completos</small>':'')+'</div></div>'
     +(!RESUMEN?'':'<div><div class="t">Contratado</div><div class="v'+(linea(s.tot)?'':' nada')+'">'+(linea(s.tot)||'—')+'</div></div>'
-    +'<div class="cobr"><div class="t">Cobrado</div><div class="v'+(linea(s.pag)?'':' nada')+'">'+(linea(s.pag)||'—')+'</div></div>'
+    +'<div class="cobr"><div class="t">Cobrado</div><div class="v'+(linea(s.pag)?'':' nada')+'">'+(linea(s.pag)||'—')+'</div>'+(fMes!=null?'<div class="medidor">'+barraHtml(fMes,'Cobrado del mes')+'<span>'+Math.round(fMes*100)+' % de lo contratado</span></div>':'')+'</div>'
     +'<div class="debe'+(hayDeuda?'':' cero')+'"><div class="t">Por cobrar</div><div class="v'+(hayDeuda||base.length?'':' nada')+'">'+(linea(s.deb)||(base.length?'Nada':'—'))+'</div></div>'
     +(buscando?'':'<div class="tod"><div class="t">Por cobrar, todos los meses</div><div class="v">'+(linea(todo.deb)||'Nada')+'</div></div>'));
   if(!FILTROS.some(f=>f[0]===filtro))filtro='todos';
@@ -989,7 +1021,7 @@ function dibujar(){
   $('filtros').innerHTML=FILTROS.filter(f=>(!f[3]||delMes.some(f[2])||filtro===f[0])&&(f[0]!=='sinturno'||TABLERO_OK)).map(f=>{
     const n=delMes.filter(etapaOk).filter(f[2]).length,sep=!raya&&FILTROS_FALTA.indexOf(f[0])>=0?'<span class="sep" aria-hidden="true"></span>':'';
     if(sep)raya=true;
-    return sep+'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+(n?'':' cero')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+n+'</i></button>';
+    return sep+'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+(n?'':' cero')+(FILTROS_FALTA.indexOf(f[0])>=0?' falta':'')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+n+'</i></button>';
   }).join('')
     +(opsEt.length?'<select id="fEtapa" class="'+(fEtapa?'on':'')+'" aria-label="Filtrar por etapa del tablero"><option value="">Etapa: todas</option>'+opsEt.map(o=>'<option value="'+esc(o[0])+'"'+(fEtapa===o[0]?' selected':'')+'>'+esc(o[1])+' · '+porEt[o[0]]+'</option>').join('')+'</select>':'');
 
@@ -1008,39 +1040,53 @@ function dibujar(){
     return;
   }
   const fl=k=>orden===k?(ordenAsc?' ↑':' ↓'):'';
-  let h='<div class="cab"><div><button type="button" data-orden="fecha" class="'+(orden==='fecha'?'on':'')+'" aria-label="Ordenar por fecha">Fecha'+fl('fecha')+'</button></div><div>Contrato</div><div><button type="button" data-orden="cliente" class="'+(orden==='cliente'?'on':'')+'" aria-label="Ordenar por cliente">Cliente'+fl('cliente')+'</button></div><div>Material</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div class="h-sn">Factura</div><div class="h-sn">Muebles</div><div class="h-sn">Pileta</div><div>Tablero</div><div class="h-not">Notas</div><div></div></div>';
-  h+=lista.map(c=>{
+  let h='<div class="cab"><div><button type="button" data-orden="fecha" class="'+(orden==='fecha'?'on':'')+'" aria-label="Ordenar por fecha">Fecha'+fl('fecha')+'</button></div><div>Contrato</div><div><button type="button" data-orden="cliente" class="'+(orden==='cliente'?'on':'')+'" aria-label="Ordenar por cliente">Cliente'+fl('cliente')+'</button></div><div>Material</div><div>Etapa</div><div class="der">Total</div><div class="der">Cobrado</div><div class="der">Saldo</div><div class="h-sn">Factura</div><div class="h-sn">Muebles</div><div class="h-sn">Pileta</div><div class="h-not">Notas</div><div></div></div>';
+  h+=lista.map((c,idx)=>{
     const v=ver(c),n=cuentas(c,v),k=cardDe(c),s=saldoTxt(n,true);
     const p=(c.fecha||'').split('-').map(Number),dt=p.length===3?new Date(p[0],p[1]-1,p[2]):null;
     const fecha=dt?String(p[2]).padStart(2,'0')+'/'+String(p[1]).padStart(2,'0')+(p[0]!==+HOY.slice(0,4)?'/'+String(p[0]).slice(2):''):'';
-    // debajo del nombre: en la planilla, vendedor y procedencia; en tarjeta se suman N° y fecha
+    // Ordenada por fecha, la planilla va por día: la fecha se escribe en el primer contrato del día y no se repite.
+    const porDia=orden==='fecha',mismoDia=porDia&&idx>0&&lista[idx-1].fecha===c.fecha;
+    // debajo del nombre: en la planilla, el teléfono y quién vendió; en tarjeta se suman N°, fecha y procedencia
     const sub='<span class="solo-t">'+(c.nro?'N° '+esc(c.nro):'<span class="falta">Sin N°</span>')+(c.contrato_paralelo?' · ctto '+esc(c.contrato_paralelo):'')+(fecha?' · '+esc(fch(c.fecha)):'')+([v.telefono,c.vendedor,c.procedencia].some(Boolean)?' · ':'')+'</span>'
-      +[v.telefono?(waLink(v.telefono)?'<a class="tel" href="'+esc(waLink(v.telefono))+'" target="_blank" rel="noopener" aria-label="Abrir WhatsApp con '+esc(telLindo(v.telefono))+'">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'',esc(c.vendedor),esc(c.procedencia)].filter(Boolean).join(' · ');
+      +[v.telefono?(waLink(v.telefono)?'<a class="tel" href="'+esc(waLink(v.telefono))+'" target="_blank" rel="noopener" aria-label="Abrir WhatsApp con '+esc(telLindo(v.telefono))+'">'+esc(telLindo(v.telefono))+'</a>':esc(telLindo(v.telefono))):'',esc(c.vendedor)].filter(Boolean).join(' · ')
+      +(c.procedencia?'<span class="solo-t">'+([v.telefono,c.vendedor].some(Boolean)?' · ':'')+esc(c.procedencia)+'</span>':'');
     // En la planilla todos los montos van con la misma precisión: redondeados al peso. El centavo exacto está en la ventana.
-    const tot=partesR(n.tot),pag=partesR(n.pag);
+    const tot=partesR(n.tot),pag=partesR(n.pag),sinTotal=!n.tot.USD&&!n.tot.ARS,fr=fraccion(n);
     let tab;
     const sd=senaDif(c);
     const fp=fichaPara(c),kn=fp?fp.k:null; // su obra ya está en el tablero (mismo N° o mismo teléfono): se enlaza, no se carga de nuevo
-    if(kn)tab='<button type="button" class="btn chico enl-b" data-enlazar="'+esc(c.id)+'">'+ICO_ENL+'Enlazar con el tablero</button><small>'+(fp.por==='tel'?'Mismo teléfono que una obra del tablero: ':'Ya está en el tablero: ')+esc(ETAPAS[kn.etapa]||kn.etapa)+'</small>';
-    else if(!c.enlace)tab='<div class="fila-e"><span class="etapa fuera">No existe en el tablero</span></div><button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button><small>'+(c.medicion?'Medición: '+esc(fch(c.medicion)):'Sin medición coordinada')+'</small>';
-    // Enlazado: la etapa es el link a la ficha (que haya etapa ya dice que está enlazado; "Enlazado" en cada renglón era
-    // lo mismo dicho 30 veces). Debajo, el turno y el plazo; en rojo, solo "Plazo vencido".
-    else if(k){const d=etapaDet(k),det=(d.turno?'<small>'+esc(d.turno)+'</small>':'')+(d.plazo?'<small'+(d.rojo?' class="rojo"':'')+'>'+esc(d.plazo)+'</small>':'');
-      tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" aria-label="'+esc(ETAPAS[k.etapa]||k.etapa)+': abrir la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>'+det+(sd?'<small class="sena-d">Seña distinta en el tablero</small>':'');}
+    // Sin etapa todavía: la pastilla va hueca y dice por qué, así la columna no queda con un hueco; debajo, el botón.
+    // "No existe en el tablero" es el texto que decidió el dueño para el contrato sin enlazar (18/11/2026): no cambiarlo.
+    if(kn)tab='<span class="etapa fuera">Sin enlazar</span><button type="button" class="btn chico enl-b" data-enlazar="'+esc(c.id)+'">'+ICO_ENL+'Enlazar con el tablero</button><small>'+(fp.por==='tel'?'Mismo teléfono que una obra del tablero: ':'Ya está en el tablero: ')+esc(ETAPAS[kn.etapa]||kn.etapa)+'</small>';
+    else if(!c.enlace)tab='<span class="etapa fuera">No existe en el tablero</span><button type="button" class="btn chico" data-enviar="'+esc(c.id)+'">Cargar en Por medir</button>'+(c.medicion?'<small>Medición: '+esc(fch(c.medicion))+'</small>':'');
+    // Enlazado: la etapa, en su color, es el link a la ficha. Debajo va UN renglón, el que más importa:
+    // plazo vencido, sin turno, seña distinta, el turno o el plazo. Lo demás está al abrir el contrato.
+    else if(k){const d=etapaDet(k);
+      let bajo='';
+      if(d.rojo)bajo='<small class="rojo">Plazo vencido</small>';
+      else if(sinTurno(c))bajo='<small class="rojo">'+(k.etapa==='medir'?'Sin fecha de medición':(k.fecha?'Falta la hora · '+esc(fch(k.fecha)):'Sin turno de instalación'))+'</small>';
+      else if(sd)bajo='<small class="sena-d">Seña distinta en el tablero</small>';
+      else if(d.turno&&(k.etapa==='instalar'||!k.medido_at))bajo='<small>'+esc(d.turno)+'</small>';
+      else if(d.plazo)bajo='<small>'+esc(d.plazo)+'</small>';
+      else if(d.turno)bajo='<small>'+esc(d.turno)+'</small>';
+      tab='<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" aria-label="'+esc(ETAPAS[k.etapa]||k.etapa)+': abrir la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>'+bajo;}
     else tab=sinFichaHtml(c);
-    const nota=(c.nota||'').replace(/\s+/g,' ').trim();
+    // La nota que pone sola la importación ("Creado desde la ficha del tablero…") no se muestra en la planilla: está en el contrato.
+    const notaT=(c.nota||'').replace(/\s+/g,' ').trim(),nota=/^Creado desde la ficha del tablero/.test(notaT)?'':notaT;
     const obra=[c.factura?'Factura <b>'+(c.factura==='si'?'sí':(c.factura==='cf'?'cons. final':'no'))+'</b>':'',c.muebles?'Muebles <b>'+(c.muebles==='si'?'sí':'no')+'</b>':'',v.bacha?'Pileta <b>'+esc(PIL[v.bacha].toLowerCase())+'</b>':''].filter(Boolean).join(' · ');
-    return '<div class="fila'+(k?' enlazada':'')+'" data-id="'+esc(c.id)+'" tabindex="0" role="button" aria-label="Abrir el contrato de '+esc(v.cliente)+'">'
-      +'<div class="c-fec">'+esc(fecha)+(dt?'<small>'+DIAS[dt.getDay()]+'</small>':'')+'</div>'
+    return '<div class="fila'+(k?' enlazada':'')+(porDia&&!mismoDia?' dia':'')+'" data-id="'+esc(c.id)+'" tabindex="0" role="button" aria-label="Abrir el contrato de '+esc(v.cliente)+'">'
+      +'<div class="c-fec">'+(mismoDia?'':esc(fecha)+(dt?'<small>'+DIAS[dt.getDay()]+'</small>':''))+'</div>'
       +'<div class="c-nro">'+(c.nro?esc(c.nro)+(c.presup&&!c.presup.existe?'<span class="duda" title="Ese N° no está en Presupuestos: o está mal escrito, o ya se borró (los presupuestos duran 180 días).'+(c.archivo?' El contrato conserva el presupuesto adjunto.':'')+'">?</span>':''):'<span class="falta">Sin N°</span>')+(c.contrato_paralelo?'<small>ctto '+esc(c.contrato_paralelo)+'</small>':'')+'</div>'
       +'<div class="c-cli"><div class="f-nom">'+esc(v.cliente)+(c.archivo?'<span class="ver" title="Verificado: tiene adjunto el presupuesto ('+esc(c.archivo.ext.toUpperCase())+')">'+ICO_VER+'</span>':'')+(c.prueba?'<span class="prueba-t">PRUEBA</span>':'')+(nota?'<span class="nota-i" title="'+esc(nota)+'"></span>':'')+'</div>'+(sub.replace(/<[^>]+>/g,'').trim()?'<div class="f-sub">'+sub+'</div>':'')+'</div>'
-      +'<div class="c-mat"><div class="f-mat">'+(esc(v.material)||'<span style="color:var(--text3)">Sin material</span>')+'</div>'+(c.medidas?'<div class="f-sub">'+esc(c.medidas)+'</div>':'')+'</div>'
-      +'<div class="der"><span class="rot">Total</span><div class="plata'+(tot.length?'':' nada raya')+'">'+(tot.length?tot.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
-      +'<div class="der"><span class="rot">Cobrado</span><div class="plata'+(pag.length?'':' nada raya')+'">'+(pag.length?pag.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>'
-      +'<div class="der"><span class="rot">Saldo</span><div class="plata '+s.cls+'">'+s.l.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div></div>'
-      +'<div class="c-sn">'+SN(c.factura)+'</div><div class="c-sn">'+SN(c.muebles)+'</div><div class="c-sn">'+(v.bacha?'<span class="sn no">'+PIL[v.bacha]+'</span>':'<span class="sn raya">—</span>')+'</div>'
-      +(obra?'<div class="c-obra">'+obra+'</div>':'')
+      +'<div class="c-mat"><div class="f-mat">'+(esc(v.material)||'<span style="color:var(--text3)">Sin material</span>')+'</div></div>'
       +'<div class="c-tab"><div class="tab">'+tab+'</div></div>'
+      // la plata: sin total se dice una vez, en su columna; lo que no hay queda en blanco (antes, una raya en cada celda)
+      +'<div class="der"><span class="rot">Total</span><div class="plata'+(sinTotal?' nada':'')+'">'+(sinTotal?'Sin total':tot.map(x=>'<span>'+x+'</span>').join(''))+'</div></div>'
+      +'<div class="der"><span class="rot">Cobrado</span><div class="plata">'+pag.map(x=>'<span>'+x+'</span>').join('')+'</div>'+(fr!=null?barraHtml(fr):'')+'</div>'
+      +'<div class="der"><span class="rot">Saldo</span><div class="plata '+(sinTotal?'':s.cls)+'">'+(sinTotal?'':s.l.map(x=>'<span>'+esc(x)+'</span>').join(''))+'</div></div>'
+      +'<div class="c-sn">'+SN(c.factura)+'</div><div class="c-sn">'+SN(c.muebles)+'</div><div class="c-sn">'+(v.bacha?'<span class="sn'+(v.bacha==='no'?' no':'')+'">'+PIL[v.bacha]+'</span>':'')+'</div>'
+      +(obra?'<div class="c-obra">'+obra+'</div>':'')
       +'<div class="c-not"'+(nota?' title="'+esc(nota)+'"':'')+'>'+esc(nota)+'</div>'
       +'<div class="c-mas"><button type="button" class="mas" data-menu="'+esc(c.id)+'" aria-haspopup="menu" aria-expanded="false" aria-label="Más acciones de '+esc(v.cliente)+'">'+ICO_MAS+'</button></div>'
       +(nota?'<div class="f-nota">'+esc(nota)+'</div>':'')+'</div>';
