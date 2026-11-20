@@ -23,8 +23,25 @@ define('BS_CONTRATOS_PAPELERA_DIAS', 30);
 // Quién vende y de dónde llega el cliente: listas cerradas (las dictó el dueño, 16/11/2026).
 // Para sumar o sacar un nombre se toca solo acá; la página las recibe con el GET.
 $BS_CONTRATO_VENDEDORES  = ['Laura', 'Sol', 'Diego', 'Jose', 'Lara', 'Dioge'];
-// "Alberdi viejo" y "Publicación" se sumaron porque así figuran en la planilla del equipo (16/11/2026).
-$BS_CONTRATO_PROCEDENCIAS = ['Alberdi', 'Alberdi viejo', 'Publicación', 'Publicación/WhatsApp', 'Publicación/Alberdi'];
+// Procedencia: dos opciones (dueño, 20/11/2026: "ponemos 2 opciones: Alberdi, Publicidad/Página").
+$BS_CONTRATO_PROCEDENCIAS = ['Alberdi', 'Publicidad/Página'];
+// Las cinco que hubo hasta el 20/11/2026 y a cuál de las dos pasa cada una. Lo eligió el dueño ese día:
+// "Alberdi viejo" es Alberdi, y todo lo que decía "Publicación" (también "Publicación/Alberdi": de dónde
+// llegó el cliente, no dónde se lo atendió) es Publicidad/Página.
+// No se reescribe ningún contrato: el valor viejo se traduce al leerlo (bs_contrato_procedencia) y queda
+// guardado con el nombre nuevo la próxima vez que ese contrato se guarde.
+$BS_CONTRATO_PROCEDENCIAS_ANTES = [
+    'Alberdi viejo'        => 'Alberdi',
+    'Publicación'          => 'Publicidad/Página',
+    'Publicación/WhatsApp' => 'Publicidad/Página',
+    'Publicación/Alberdi'  => 'Publicidad/Página',
+];
+/** La procedencia como se llama hoy: una de las cinco de antes pasa a su opción nueva; lo demás queda igual. */
+function bs_contrato_procedencia($v) {
+    global $BS_CONTRATO_PROCEDENCIAS_ANTES;
+    $v = trim((string)$v);
+    return isset($BS_CONTRATO_PROCEDENCIAS_ANTES[$v]) ? $BS_CONTRATO_PROCEDENCIAS_ANTES[$v] : $v;
+}
 
 function bs_contratos_leer() {
     $d = bs_read_json(BS_CONTRATOS_FILE);

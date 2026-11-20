@@ -102,7 +102,7 @@ function bs_contrato_campos($body) {
     $c['vendedor']  = bs_contrato_texto($body, 'vendedor', 60, 'Vendedor');
     $c['contrato']  = bs_contrato_texto($body, 'contrato', 80, 'Contrato');
     $c['contrato_paralelo'] = bs_contrato_texto($body, 'contrato_paralelo', 80, 'Contrato paralelo');
-    $c['procedencia'] = bs_contrato_texto($body, 'procedencia', 80, 'Procedencia');
+    $c['procedencia'] = bs_contrato_procedencia(bs_contrato_texto($body, 'procedencia', 80, 'Procedencia')); // una opción vieja (pestaña sin recargar) entra con su nombre nuevo
     $c['medidas']   = bs_contrato_texto($body, 'medidas', 300, 'Medidas');
     $v = (string)($body['factura'] ?? '');
     $c['factura'] = in_array($v, ['si', 'no', 'cf'], true) ? $v : ''; // cf = consumidor final
@@ -170,6 +170,9 @@ function bs_contrato_salida($c) {
     global $BS_CONTRATO_VENDEDORES, $BS_CONTRATO_PROCEDENCIAS;
     // Los renglones de prueba cargados antes de que existieran las listas traían el vendedor
     // "Prueba" y procedencias inventadas: no son de la lista, así que salen vacíos.
+    // La procedencia sale con el nombre de hoy (dos opciones desde el 20/11/2026): lo guardado con uno de
+    // los cinco nombres de antes se traduce acá, sin tocar el archivo.
+    $c['procedencia'] = bs_contrato_procedencia($c['procedencia'] ?? '');
     if (!empty($c['prueba'])) {
         if (!in_array((string)($c['vendedor'] ?? ''), $BS_CONTRATO_VENDEDORES, true)) $c['vendedor'] = '';
         if (!in_array((string)($c['procedencia'] ?? ''), $BS_CONTRATO_PROCEDENCIAS, true)) $c['procedencia'] = '';
@@ -558,7 +561,7 @@ try {
              'medicion' => '', 'total_usd' => 0, 'total_ars' => 850000,
              'sena' => null, 'pagos' => [], 'nota' => 'Renglón de prueba: sin seña y sin medición coordinada.'],
             ['cliente' => 'PRUEBA · Isla y mesada', 'telefono' => '11 5550-0003', 'direccion' => 'Calle de prueba 789, Quilmes', 'nro' => '',
-             'fecha' => $hoy, 'vendedor' => $BS_CONTRATO_VENDEDORES[2], 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => $BS_CONTRATO_PROCEDENCIAS[2], 'medidas' => 'Isla 1,80 x 0,90 + mesada 3,10 x 0,62', 'factura' => '', 'muebles' => 'si',
+             'fecha' => $hoy, 'vendedor' => $BS_CONTRATO_VENDEDORES[2], 'contrato' => '', 'contrato_paralelo' => '', 'procedencia' => $BS_CONTRATO_PROCEDENCIAS[1], 'medidas' => 'Isla 1,80 x 0,90 + mesada 3,10 x 0,62', 'factura' => '', 'muebles' => 'si',
              'material' => 'Silestone · Blanco Zeus', 'bacha' => 'no', 'bacha_modelo' => '',
              'medicion' => date('Y-m-d', strtotime('+7 days')), 'total_usd' => 2100, 'total_ars' => 300000,
              'sena' => ['monto' => 300000, 'moneda' => 'ARS', 'fecha' => $hoy],

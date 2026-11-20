@@ -17,7 +17,7 @@ Los definió el dueño (16/11/2026), sobre la planilla que ya usaba:
 | Ctto paralelo | El número del contrato paralelo, como en la planilla. En la lista se ve debajo del N° |
 | Fecha del contrato | Define en qué mes aparece |
 | Vendedor | Lista cerrada (dueño, 16/11/2026): Laura, Sol, Diego, Jose, Lara, Dioge. Se edita en `$BS_CONTRATO_VENDEDORES`, en `_contratos.php` |
-| Procedencia | Lista cerrada: Alberdi, Alberdi viejo, Publicación, Publicación/WhatsApp, Publicación/Alberdi ("Alberdi viejo" y "Publicación" se sumaron porque así figuran en la planilla). Se edita en `$BS_CONTRATO_PROCEDENCIAS` |
+| Procedencia | Lista cerrada de dos opciones (dueño, 20/11/2026): **Alberdi** y **Publicidad/Página**. Hasta ese día eran cinco; ver "Procedencia: dos opciones y un filtro", más abajo. Se edita en `$BS_CONTRATO_PROCEDENCIAS` |
 | Cliente, Teléfono, Dirección | El teléfono vale pegado de WhatsApp ("+54 9 11 5555-1234", incluso con los caracteres invisibles que agrega) o como diez dígitos ("1155551234"). Son el mismo número: se guarda y se muestra "11 5555-1234". Se ve debajo del nombre y abre WhatsApp con un toque. El buscador lo encuentra en cualquiera de los dos formatos |
 | Material | Sugiere del catálogo de la calculadora ("Marca · Color") |
 | Medidas | Texto libre |
@@ -248,6 +248,28 @@ Detalle y casos: `01-strategy/decision-log/2026-11-19-la-sena-y-la-nota-pasan-al
 - **Filtro "Sin turno":** obras en Por medir sin día de medición, y obras en Por instalar sin día o sin hora de instalación.
 - **Se combinan:** "Por instalar" + "Sin turno" muestra las instalaciones que falta agendar. Los números de los demás filtros acompañan a la etapa elegida.
 
+## Procedencia: dos opciones y un filtro (20/11/2026)
+
+El dueño: "Procedencia: ponemos 2 opciones, Alberdi y Publicidad/Página", y "en Relación-Contrato puedo filtrar por lo que es Publicidad/Página y lo que es Alberdi".
+
+- **La lista tiene dos opciones:** Alberdi y Publicidad/Página. Es de dónde llegó el cliente.
+- **Las cinco de antes pasan a esas dos** (lo eligió el dueño ese día):
+
+  | Antes | Ahora |
+  |---|---|
+  | Alberdi | Alberdi |
+  | Alberdi viejo | Alberdi |
+  | Publicación | Publicidad/Página |
+  | Publicación/WhatsApp | Publicidad/Página |
+  | Publicación/Alberdi | Publicidad/Página |
+
+- **No se reescribió ningún contrato.** Lo guardado con un nombre de antes se traduce al leerlo, y queda guardado con el nombre nuevo la próxima vez que ese contrato se guarde por cualquier motivo. La tabla está en un solo lugar: `$BS_CONTRATO_PROCEDENCIAS_ANTES` y `bs_contrato_procedencia()` en `_contratos.php`. Si alguna vez hay que deshacerlo, se cambia ahí.
+- **Selector "Procedencia"**, al lado del de "Etapa": Alberdi, Publicidad/Página y, si hay, "Sin procedencia" (los contratos que no la tienen puesta), cada una con cuántos contratos hay en el mes. Las dos opciones van siempre, aunque en el mes haya cero: así el filtro queda puesto al pasar de un mes a otro.
+- **Se combina con los demás filtros**, igual que la etapa: los números de los otros filtros cuentan dentro de la procedencia elegida.
+- **La suma de abajo es la de lo filtrado**, y el pie lo dice: "9 contratos · Alberdi". El resumen de arriba sigue siendo el del mes entero.
+- **El buscador** también encuentra por procedencia ("alberdi", "publicidad").
+- Un contrato que tenga un texto de otra época que no está en ninguna lista lo conserva y aparece como una opción más del selector.
+
 ## Exportar a CSV (18/11/2026)
 
 Botón "Exportar", arriba. Baja **lo que está en pantalla**: el mes, la búsqueda y los filtros que estén puestos. Trae los datos del contrato, la plata (total, cobrado, saldo y seña; solo si quien exporta la puede ver) y lo del tablero (etapa, medición, instalación, plazo, si le falta el turno). Mismo formato que "Exportar tablero": se abre directo en Excel. **El archivo tiene nombres, teléfonos y direcciones de clientes: no se sube al repo.**
@@ -307,7 +329,7 @@ Para eliminarla: borrar `presupuestos/relacion-contrato.php`, los cuatro archivo
 - El medio de la seña (efectivo o transferencia): hoy solo lo llevan los pagos.
 - Un respaldo automático diario de los datos (la papelera cubre el borrado por error, no un problema del servidor).
 - Permisos: hoy todo el equipo ve la plata (decisión del dueño, "por los momentos").
-- Exportar a planilla y filtros por vendedor o procedencia.
+- Filtro por vendedor. (Exportar a planilla ya está, desde el 18/11/2026; el filtro por procedencia, desde el 20/11/2026.)
 - Un link directo al día de la obra en el calendario (hoy el link lleva a la ficha del tablero).
 
 ## Barrido de errores del 18/11/2026: lo que cambió en contratos

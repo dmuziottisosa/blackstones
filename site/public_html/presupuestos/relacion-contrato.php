@@ -987,6 +987,10 @@ function exportarCSV(){
 // La etapa del tablero como filtro de la planilla: '' = todas, 'sin' = los que no están cargados en el tablero.
 let fEtapa='';
 const etapaOk=c=>{if(!fEtapa)return true;const k=cardDe(c);return fEtapa==='sin'?!c.enlace:(!!k&&k.etapa===fEtapa);};
+// De dónde llegó el cliente (dueño, 20/11/2026: "filtrar por lo que es Publicidad/Página y lo que es Alberdi").
+// Se elige aparte, como la etapa, y se combina con los demás filtros. 'sin' = contratos sin procedencia puesta.
+let fProc='';
+const procOk=c=>!fProc||(fProc==='sin'?!c.procedencia:c.procedencia===fProc);
 // Dos grupos, con una raya fina en el medio: cómo están (plata y completos) y qué les falta (lo que hay que perseguir).
 const FILTROS_FALTA=['sueltos','sinver','sinnro','sinturno','sena'];
 const FILTROS=[['todos','Todos',()=>true],['saldo','Con saldo',debe],['pagados','Pagados',pagado],['completos','Completos',completo],['sueltos','Sin cargar al tablero',c=>!c.enlace],['sinver','Sin verificar',c=>!c.archivo],['sinnro','Sin N°',c=>!c.nro],['sinturno','Sin turno',sinTurno],['sena','Seña distinta',c=>!!senaDif(c),true]].filter(f=>PLATA||['saldo','pagados','sena'].indexOf(f[0])<0);
@@ -1036,17 +1040,23 @@ function dibujar(){
   const porEt={};delMes.forEach(c=>{const k=cardDe(c),e=k?k.etapa:(c.enlace?'':'sin');if(e)porEt[e]=(porEt[e]||0)+1;});
   if(fEtapa&&!porEt[fEtapa])fEtapa='';
   const opsEt=TABLERO_OK?Object.keys(ETAPAS).filter(e=>porEt[e]).map(e=>[e,ETAPAS[e]]).concat(porEt.sin?[['sin','Sin cargar al tablero']]:[]):[];
+  // Procedencia: las dos de la lista van siempre (aunque en el mes haya cero), para poder dejar el filtro puesto
+  // y pasar de un mes a otro. Después, si quedó algún contrato con otro texto, ese texto; y los que no tienen.
+  const porPr={};delMes.forEach(c=>{const p=c.procedencia||'sin';porPr[p]=(porPr[p]||0)+1;});
+  const opsPr=PROCEDENCIAS.map(p=>[p,p]).concat(Object.keys(porPr).filter(p=>p!=='sin'&&PROCEDENCIAS.indexOf(p)<0).sort().map(p=>[p,p])).concat(porPr.sin?[['sin','Sin procedencia']]:[]);
+  if(fProc&&!opsPr.some(o=>o[0]===fProc))fProc='';
   let raya=false;
   $('filtros').innerHTML=FILTROS.filter(f=>(!f[3]||delMes.some(f[2])||filtro===f[0])&&(f[0]!=='sinturno'||TABLERO_OK)).map(f=>{
-    const n=delMes.filter(etapaOk).filter(f[2]).length,sep=!raya&&FILTROS_FALTA.indexOf(f[0])>=0?'<span class="sep" aria-hidden="true"></span>':'';
+    const n=delMes.filter(etapaOk).filter(procOk).filter(f[2]).length,sep=!raya&&FILTROS_FALTA.indexOf(f[0])>=0?'<span class="sep" aria-hidden="true"></span>':'';
     if(sep)raya=true;
     return sep+'<button type="button" data-filtro="'+f[0]+'" class="'+(filtro===f[0]?'on':'')+(n?'':' cero')+(FILTROS_FALTA.indexOf(f[0])>=0?' falta':'')+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+' <i>'+n+'</i></button>';
   }).join('')
-    +(opsEt.length?'<select id="fEtapa" class="'+(fEtapa?'on':'')+'" aria-label="Filtrar por etapa del tablero"><option value="">Etapa: todas</option>'+opsEt.map(o=>'<option value="'+esc(o[0])+'"'+(fEtapa===o[0]?' selected':'')+'>'+esc(o[1])+' · '+porEt[o[0]]+'</option>').join('')+'</select>':'');
+    +(opsEt.length?'<select id="fEtapa" class="'+(fEtapa?'on':'')+'" aria-label="Filtrar por etapa del tablero"><option value="">Etapa: todas</option>'+opsEt.map(o=>'<option value="'+esc(o[0])+'"'+(fEtapa===o[0]?' selected':'')+'>'+esc(o[1])+' · '+porEt[o[0]]+'</option>').join('')+'</select>':'')
+    +(opsPr.length?'<select id="fProced" class="'+(fProc?'on':'')+'" aria-label="Filtrar por procedencia"><option value="">Procedencia: todas</option>'+opsPr.map(o=>'<option value="'+esc(o[0])+'"'+(fProc===o[0]?' selected':'')+'>'+esc(o[1])+' · '+(porPr[o[0]]||0)+'</option>').join('')+'</select>':'');
 
   const fx=FILTROS.find(f=>f[0]===filtro)[2];
   const dir=ordenAsc?1:-1;
-  const lista=EN_PANTALLA=delMes.filter(etapaOk).filter(fx).sort((a,b)=>{
+  const lista=EN_PANTALLA=delMes.filter(etapaOk).filter(procOk).filter(fx).sort((a,b)=>{
     if(orden==='cliente'){const x=llano(ver(a).cliente),y=llano(ver(b).cliente);if(x!==y)return (x<y?-1:1)*dir;}
     else if(a.fecha!==b.fecha)return (a.fecha<b.fecha?-1:1)*dir;
     return a.creado<b.creado?1:-1;
@@ -1114,7 +1124,7 @@ function dibujar(){
   else{
     // pie: la suma de lo que se ve, debajo de cada columna
     const z=sumar(lista),col=(o,cls)=>{const l=partesR(o);return '<div class="der"><div class="plata'+(l.length?cls:' nada')+'">'+(l.length?l.map(x=>'<span>'+x+'</span>').join(''):'—')+'</div></div>';};
-    h+='<div class="pie"><div class="q">'+lista.length+(lista.length===1?' contrato':' contratos')+(filtro!=='todos'?' · '+esc(FILTROS.find(f=>f[0]===filtro)[1].toLowerCase()):'')+'</div>'+(RESUMEN?col(z.tot,'')+col(z.pag,'')+col(z.deb,' debe'):'')+'</div>';
+    h+='<div class="pie"><div class="q">'+lista.length+(lista.length===1?' contrato':' contratos')+(filtro!=='todos'?' · '+esc(FILTROS.find(f=>f[0]===filtro)[1].toLowerCase()):'')+(fProc?' · '+(fProc==='sin'?'sin procedencia':esc(fProc)):'')+'</div>'+(RESUMEN?col(z.tot,'')+col(z.pag,'')+col(z.deb,' debe'):'')+'</div>';
   }
   $('lista').innerHTML=h;
 }
@@ -1657,7 +1667,7 @@ document.addEventListener('keydown',ev=>{
   if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList&&ev.target.classList.contains('fila')){ev.preventDefault();abrirFicha(ev.target.dataset.id);}
 });
 $('modal').addEventListener('input',ev=>{if(ev.target.id==='fNota'){crecerNota();return;}if(ev.target.id==='fNro'){buscarNro();return;}if(F&&['fTotU','fTotA','fSen','fSenM','fSenC','pMonto','pCot'].indexOf(ev.target.id)>=0)pintarPagos();});
-$('filtros').addEventListener('change',ev=>{if(ev.target.id==='fEtapa'){fEtapa=ev.target.value;dibujar();}});
+$('filtros').addEventListener('change',ev=>{if(ev.target.id==='fEtapa'){fEtapa=ev.target.value;dibujar();}else if(ev.target.id==='fProced'){fProc=ev.target.value;dibujar();}});
 $('expB').addEventListener('click',exportarCSV);
 $('modal').addEventListener('change',ev=>{
   if(F&&(ev.target.id==='fSenM'||ev.target.id==='pComo'))pintarPagos();
