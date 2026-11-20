@@ -13,6 +13,9 @@ Cómo se ejecuta el día a día: proceso de venta-fabricación-colocación, rute
 | `deploy-snippets.md` ⭐ | Bloques de PowerShell copy-paste para uso diario (subir 1 archivo, sync carpeta, listar, borrar, backup) |
 | `tablero-obras.md` | Tablero de obras del hub: columnas, tildes, reglas para avanzar, retiro en local y archivado |
 | `usuarios.md` | Usuarios y roles del sistema interno: qué puede cada rol, arranque, cómo está hecho y qué hacer si alguien pierde la contraseña |
+| `relacion-contrato.md` | Relación-Contrato: la planilla de contratos, la plata, el enlace con el tablero y la papelera |
+| `reportes.md` | Control (antes "Reportes"): recordatorios, cierre del mes y registro de acciones. Solo administradores |
+| `respaldo.md` | Respaldo: la copia de las últimas 24 horas, cómo se usa, qué vuelve y qué no. Solo administradores |
 
 ## Reglas
 

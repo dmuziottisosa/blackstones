@@ -3,9 +3,11 @@
 // /presupuestos/reportes.php — Control (solo administradores). Hasta el 18/11/2026 se llamó "Reportes":
 // el archivo y el permiso conservan ese nombre para no romper links; lo que se ve dice "Control".
 // ============================================================
-// Lo que se baja del sistema para guardar afuera. Hoy: el cierre del mes (dueño, 18/11/2026).
+// Recordatorios, el cierre del mes (dueño, 18/11/2026), el respaldo de las últimas 24 horas (dueño,
+// 19/11/2026) y el registro de acciones.
 // Acceso: sesión de auth_check.php + permiso 'reportes' (solo administradores; ver AUTH_PERMISOS).
-// El archivo lo arma calculadora/api/cierre-mes.php.
+// El cierre lo arma calculadora/api/cierre-mes.php; las copias se toman solas (api/_copias.php) y
+// desde acá se vuelve a una (api/copias.php).
 // ============================================================
 
 require_once __DIR__ . '/../calculadora/auth_check.php';
@@ -31,13 +33,13 @@ header('Content-Type: text/html; charset=UTF-8');
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
-/* === DESIGN TOKENS (los mismos del hub y del tablero) === */
+/* === DESIGN TOKENS (los del tablero; el gris chico y el verde llegan a 4,5:1 de contraste, 20/11/2026) === */
 :root{
   --bg:#FAF8F4;--card:#FFFFFF;--card-alt:#F5F0E5;
-  --text:#1A1816;--text2:#5A4A35;--text3:#8B7860;
+  --text:#1A1816;--text2:#5A4A35;--text3:#7A6850;
   --border:#E5DECF;--border-soft:#F0EAD8;
   --dk:#1A1816;--dk2:#2A2522;--gd:#C4A77D;--gdd:#7A6649;
-  --gr:#1F8F47;--gr-soft:#E4F4E8;--cr:#FAF8F4;
+  --gr:#1A7A3C;--gr-soft:#E4F4E8;--cr:#FAF8F4;
   --red:#B03A3A;--red-soft:#FBEAEA;--amb:#8A5A0B;--amb-soft:#FBF1DC;
   --gd-soft:rgba(196,167,125,.10);
   --shadow:0 2px 10px rgba(26,24,22,.06);
@@ -46,7 +48,7 @@ header('Content-Type: text/html; charset=UTF-8');
 }
 [data-theme="dark"]{
   --bg:#0A0907;--card:#16140F;--card-alt:#1F1B14;
-  --text:#F5F0E5;--text2:#C4B596;--text3:#8B7860;
+  --text:#F5F0E5;--text2:#C4B596;--text3:#9C8A6E;
   --border:#2D2820;--border-soft:#221E18;
   --gr:#34D670;--gr-soft:#0E2A18;
   --red:#E26666;--red-soft:#2A1414;--amb:#E8B95C;--amb-soft:#3A2A14;
@@ -141,11 +143,35 @@ button{font-family:inherit;color:inherit}
 .ci-ops label{display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer}
 .ci-ops input{width:18px;height:18px;flex-shrink:0}
 .ci-ops small{color:var(--text3);font-size:12.5px}
+/* Respaldo: copias de las últimas 24 horas (dueño, 19/11/2026). Una por hora en que algo cambió; desde acá se vuelve a una. */
+.co-estado{font-size:14px;font-weight:600;margin-bottom:6px;line-height:1.45}
+.co-estado.mal{color:var(--red)}
+.co-estado.ok{color:var(--gr)}
+[hidden]{display:none!important} /* .acc es flex: sin esto, lo que se esconde con "hidden" se seguía viendo */
+.co-estado+.acc{margin-top:12px}
+#coLista{margin-top:14px}
+.co{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--border-soft)}
+.co .t{font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.co .t small{display:block;margin-bottom:1px;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text2)}
+.co .d{grid-column:1 / -1;grid-row:2;font-size:12.5px;line-height:1.45;color:var(--text2)}
+.co .btn{grid-column:2;grid-row:1;padding:6px 13px;font-size:13px}
+.co-conf{margin-top:8px;padding-top:14px;border-top:1px solid var(--border)}
+.co-conf .t{font-family:'Fraunces',serif;font-size:17px;font-weight:600;line-height:1.3;margin-bottom:8px}
+.co-conf ul{margin:0 0 12px;padding-left:18px;font-size:13.5px;line-height:1.5;color:var(--text2)}
+.co-conf li{margin-bottom:5px}
+.co-conf li b{color:var(--text)}
+.co-conf label{display:block;font-size:13.5px;font-weight:600}
+.co-conf input{display:block;width:100%;margin-top:6px;font-family:inherit;font-size:15px;font-weight:700;letter-spacing:.08em;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text)}
+.co-conf input:focus{outline:2px solid var(--gd);outline-offset:1px}
+.co-conf .msg{display:block;margin-top:10px}
+.msg.mal{color:var(--red)}
+.btn.peligro{background:var(--red);border-color:var(--red);color:#fff}
 a,button,.toggle{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
 @media(max-width:520px) and (pointer:coarse){.rec{grid-template-columns:38px minmax(0,1fr)}}
 @media(min-width:521px) and (pointer:coarse){.rec{grid-template-columns:38px minmax(0,1fr) auto}}
 @media(max-width:1099px),(pointer:coarse){
+  .co .btn{padding:10px 15px}
   .rec input{width:32px;height:32px} /* el tilde "Hecho", para el dedo (auditoría de tablet, 18/11/2026) */
   .toggle{width:54px;height:30px}
   .toggle::after{top:3px}
@@ -187,6 +213,7 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
       <p class="sub">Lo que hay que hacer hoy para que no se pase. Aparecen solos y se van cuando se hacen.</p>
       <div id="recLista"><div class="rec-vacio">Cargando…</div></div>
     </div>
+    <div class="ctl-der">
     <div class="caja" id="cajaCierre">
       <h2>Cierre del mes</h2>
       <p class="sub">El último día del mes se baja todo en un archivo, para imprimir y guardar en la carpeta física: una <b>carpeta por cliente</b> y la <b>foto completa del sistema</b>.</p>
@@ -198,6 +225,16 @@ a:focus-visible,.toggle:focus-visible{outline:2px solid var(--gd);outline-offset
         <label><input type="checkbox" id="ciBachas" checked> Fotos de bacha <small id="ciBachasN"></small></label>
       </div>
       <div class="acc"><button class="btn pri" type="button" id="ciBajar" disabled>Descargar</button><span class="msg" id="ciMsg"></span></div>
+    </div>
+    <div class="caja" id="cajaCopias">
+      <h2>Respaldo</h2>
+      <p class="sub">El sistema guarda solo una copia de los datos por cada hora en que algo cambió, y va pisando la más vieja. Siempre se puede volver, como mínimo, <b>24 horas atrás</b>. Solo administradores.</p>
+      <div id="coEstado" class="co-estado">Cargando…</div>
+      <div class="acc" id="coAbrirAcc" hidden><button class="btn" type="button" id="coAbrir" aria-expanded="false" aria-controls="coLista">Usar un respaldo</button></div>
+      <div id="coLista" hidden></div>
+      <div class="acc" id="coMasAcc" hidden><button class="btn" type="button" id="coMas"></button></div>
+      <div id="coConf" hidden></div>
+    </div>
     </div>
   </div>
 
@@ -240,6 +277,92 @@ $('ciBajar').addEventListener('click',()=>{
   setTimeout(()=>{$('ciMsg').textContent='';},15000);
 });
 cargarCierre();
+
+// ---------- Respaldo: copias de las últimas 24 horas (dueño, 19/11/2026) ----------
+// Las copias se toman solas (calculadora/api/_copias.php). Acá se ven y se vuelve a una.
+// Regresar pide dos confirmaciones (dueño, 20/11/2026): el botón y escribir USAR RESPALDO en mayúsculas.
+// La frase la manda el servidor (j.confirma) y es el servidor el que la exige.
+const API_COPIAS='/calculadora/api/copias.php',escC=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DIAS_C=['dom','lun','mar','mié','jue','vie','sáb'];
+let coDatos=null,coAbierta=false,coTodas=false,coYendo=false;
+// "hoy 16:02", "ayer 17:03", "mar 17/11 17:03": el día sale de la hora del servidor, que es la de Argentina.
+function coCuando(at,ahora){
+  const d=at.slice(0,10),h=at.slice(11,16),p=d.split('-').map(Number),hoy=ahora.slice(0,10),q=hoy.split('-').map(Number);
+  const dif=Math.round((Date.UTC(q[0],q[1]-1,q[2])-Date.UTC(p[0],p[1]-1,p[2]))/86400000);
+  return (dif===0?'hoy':dif===1?'ayer':DIAS_C[new Date(Date.UTC(p[0],p[1]-1,p[2])).getUTCDay()]+' '+d.slice(8,10)+'/'+d.slice(5,7))+' '+h;
+}
+const coNum=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+const coUn=(n,una,varias)=>coNum(n)+' '+(n===1?una:varias);
+const coDespues=c=>c.acciones?coUn(c.acciones,'acción','acciones')+' de '+coUn(c.personas,'persona','personas'):'';
+function coPintar(){
+  const j=coDatos,l=j.copias;
+  const est=$('coEstado');est.className='co-estado';
+  if(!j.puede){est.className='co-estado mal';est.textContent='Este servidor no puede armar respaldos. Hay que avisar para que se revise.';}
+  else if(!l.length){est.textContent='Todavía no hay respaldos. El primero se toma solo con el próximo movimiento.';}
+  else{
+    const horas=l.filter(c=>c.tipo==='hora'),ult=horas[0]||l[0],vieja=horas[horas.length-1]||ult;
+    const fallo=j.fallo&&j.fallo>ult.at;
+    if(fallo){est.className='co-estado mal';est.textContent='El último respaldo no se pudo guardar ('+coCuando(j.fallo,j.ahora)+'). Hay que avisar para que se revise.';}
+    else est.textContent='Último respaldo: '+coCuando(ult.at,j.ahora)+'.'+(horas.length>1?' Hay '+horas.length+' guardados; el más viejo es de '+coCuando(vieja.at,j.ahora)+'.':'');
+  }
+  const ver=coTodas?l:l.slice(0,5);
+  $('coLista').innerHTML=ver.map(c=>{
+    const antes=c.tipo==='antes',d=coDespues(c);
+    return '<div class="co"><div class="t">'+(antes?'<small>Antes de usar el respaldo</small> ':'')+escC(coCuando(c.at,j.ahora))+'</div>'
+      +'<div class="d">'+(antes?'Para deshacerlo: así estaba todo justo antes':(d?'Después: '+escC(d):'Sin cambios después'))+'</div>'
+      +'<button class="btn" type="button" data-volver="'+escC(c.id)+'">Usar</button></div>';
+  }).join('');
+  const conf=!$('coConf').hidden;
+  $('coAbrirAcc').hidden=!l.length||!j.puede||conf;
+  $('coAbrir').textContent=coAbierta?'Ocultar los respaldos':'Usar un respaldo';
+  $('coAbrir').setAttribute('aria-expanded',coAbierta?'true':'false');
+  $('coLista').hidden=!coAbierta||conf;
+  $('coMasAcc').hidden=!coAbierta||conf||l.length<=5;
+  $('coMas').textContent=coTodas?'Ver menos':'Ver los '+l.length;
+}
+async function cargarCopias(){
+  if(coYendo||!$('coConf').hidden)return;coYendo=true;
+  try{
+    const r=await fetch(API_COPIAS,{credentials:'same-origin',cache:'no-store'}),j=await r.json();
+    if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudieron leer los respaldos');
+    coDatos=j;coPintar();
+  }catch(e){$('coEstado').className='co-estado mal';$('coEstado').textContent=e.message;}
+  coYendo=false;
+}
+$('coMas').addEventListener('click',()=>{coTodas=!coTodas;coPintar();});
+$('coAbrir').addEventListener('click',()=>{coAbierta=!coAbierta;if(!coAbierta)coTodas=false;coPintar();});
+// Usar un respaldo: primera confirmación, el botón "Usar"; segunda, escribir la frase en mayúsculas.
+$('coLista').addEventListener('click',ev=>{
+  const b=ev.target.closest('[data-volver]');if(!b||!coDatos)return;
+  const c=coDatos.copias.find(x=>x.id===b.dataset.volver);if(!c)return;
+  const cu=coCuando(c.at,coDatos.ahora),d=coDespues(c),FRASE=coDatos.confirma||'USAR RESPALDO';
+  $('coConf').hidden=false;coPintar();
+  $('coConf').innerHTML='<div class="co-conf"><div class="t">Volver a como estaba todo '+escC(cu.replace(/ (\d\d:\d\d)$/,' a las $1'))+'</div><ul>'
+    +'<li>'+(d?'Se deshace lo que se hizo después: <b>'+escC(d)+'</b>. Está abajo, en el registro.':'Después de ese respaldo no se anotó ningún cambio.')+'</li>'
+    +'<li>Vuelven las fichas, los contratos y los presupuestos de ese momento: '+coUn(c.fichas,'obra','obras')+' en el tablero, '+coUn(c.contratos,'contrato','contratos')+' y '+coUn(c.presupuestos,'presupuesto','presupuestos')+'.</li>'
+    +'<li>Antes se guarda sola una copia de cómo está todo ahora, por si hay que deshacerlo.</li>'
+    +'<li>Los usuarios, las contraseñas y el registro de acciones no cambian.</li></ul>'
+    +'<label>Para confirmar, escribí <b>'+escC(FRASE)+'</b>, en mayúsculas<input type="text" id="coTxt" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="coMsg"></label>'
+    +'<div class="acc"><button class="btn" type="button" id="coNo">Cancelar</button><button class="btn peligro" type="button" id="coSi" disabled>Usar este respaldo</button></div><span class="msg" id="coMsg"></span></div>';
+  const txt=$('coTxt'),si=$('coSi');
+  txt.addEventListener('input',()=>{si.disabled=txt.value.trim()!==FRASE;});
+  $('coNo').addEventListener('click',()=>{$('coConf').hidden=true;$('coConf').innerHTML='';coPintar();});
+  si.addEventListener('click',async()=>{
+    si.disabled=true;$('coNo').disabled=true;txt.disabled=true;$('coMsg').className='msg';$('coMsg').textContent='Volviendo… no cierres esta pantalla.';
+    try{
+      const r=await fetch(API_COPIAS,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:'volver',id:c.id,confirmo:txt.value.trim()})}),j=await r.json();
+      if(!j||!j.ok)throw new Error((j&&j.error)||'No se pudo usar el respaldo');
+      $('coConf').hidden=true;$('coConf').innerHTML='';
+      await cargarCopias();
+      $('coEstado').className='co-estado '+(j.aviso?'mal':'ok');
+      $('coEstado').textContent=j.aviso||('Listo: el sistema volvió a como estaba '+cu.replace(/ (\d\d:\d\d)$/,' a las $1')+'. Avisale al equipo que actualice la pantalla.');
+      cargarRegistro();cargarRec();cargarCierre();
+    }catch(e){$('coMsg').className='msg mal';$('coMsg').textContent=e.message;$('coNo').disabled=false;txt.disabled=false;si.disabled=txt.value.trim()!==FRASE;}
+  });
+  txt.focus();
+});
+cargarCopias();
+setInterval(()=>{if(!document.hidden)cargarCopias();},120000);
 
 // ---------- Recordatorios (dueño, 18/11/2026): el recordatorio se hace adentro del sistema, y sin ruido ----------
 // Se calculan en el servidor leyendo el tablero; acá solo se muestran y se tilda "Hecho".

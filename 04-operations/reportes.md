@@ -12,6 +12,8 @@ Reportes no escribe nada en el sistema y nada depende de ella. Si se decide saca
 - `site/public_html/calculadora/api/cierre-mes.php`
 - `site/public_html/calculadora/api/registro.php`
 
+**El respaldo no es parte de Control** (19/11/2026). La caja "Respaldo" está en esta pantalla, pero las copias las toma el sistema por su cuenta (`_copias.php`) y volver a una lo hace otro archivo (`copias.php`). Si se borra Control, las copias se siguen tomando; lo que se pierde es la pantalla para usar una. → `respaldo.md`
+
 ## Cierre del mes
 
 La idea del dueño: al final de cada mes se baja todo y se guarda dos veces, **una copia impresa y una digital**.
@@ -38,7 +40,9 @@ Qué trae el ZIP:
 
 ### Lo que el cierre del mes no cubre
 
-Un error que pise datos a mitad de mes (como el cruce de dos clientes del 18/11/2026) no se arregla con el cierre del mes anterior. Para eso haría falta una copia diaria; quedó conversado y sin decidir. → `01-strategy/decision-log/2026-11-18-cierre-del-mes.md`
+Un error que pise datos a mitad de mes (como el cruce de dos clientes del 18/11/2026) no se arregla con el cierre del mes anterior. Para eso está, desde el 19/11/2026, el **respaldo**: una copia por hora, las últimas 25, y se puede volver a cualquiera desde esta misma pantalla. → `respaldo.md`
+
+Al revés también vale: el respaldo vive en el mismo servidor, así que no reemplaza al cierre del mes, que es la copia que se guarda afuera.
 
 ## Registro de acciones
 

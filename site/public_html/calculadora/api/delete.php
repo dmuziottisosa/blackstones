@@ -94,7 +94,7 @@ try {
             // Borrar el ZIP asociado si existe
             if (!empty($cot['zip_path'])) {
                 $zip = BS_DATA_DIR . '/' . $cot['zip_path'];
-                if (file_exists($zip)) @unlink($zip);
+                if (file_exists($zip)) { function_exists('bs_copia_borrar') ? bs_copia_borrar($zip) : @unlink($zip); } // queda guardado mientras una copia lo pueda necesitar
             }
             continue;
         }

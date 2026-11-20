@@ -128,7 +128,7 @@ try {
     $dir = BS_CONTRATOS_ADJ_DIR . '/' . $id;
     if (!is_dir($dir) && !@mkdir($dir, 0755, true)) { bs_lock_release($fp); bs_error('No se pudo crear la carpeta del adjunto', 500); }
     // Uno por contrato: el anterior (de cualquier tipo) se va.
-    foreach (['pdf', 'xlsx', 'xls'] as $e) @unlink($dir . '/presupuesto.' . $e);
+    foreach (['pdf', 'xlsx', 'xls'] as $e) { function_exists('bs_copia_borrar') ? bs_copia_borrar($dir . '/presupuesto.' . $e) : @unlink($dir . '/presupuesto.' . $e); }
     if (!@move_uploaded_file($f['tmp_name'], bs_contrato_adj_path($id, $ext))) { bs_lock_release($fp); bs_error('No se pudo guardar el archivo', 500); }
 
     $archivo = ['ext' => $ext, 'nombre' => $nombre, 'bytes' => intval($f['size']), 'at' => date('c')];

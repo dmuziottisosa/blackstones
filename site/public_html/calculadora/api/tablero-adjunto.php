@@ -221,8 +221,8 @@ try {
             // misma posición y misma fecha de carga; id nuevo para que el navegador no muestre la vieja guardada
             $vieja = $adjuntos[$pos_reemplazo];
             $adjuntos[$pos_reemplazo] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => $vieja['at'] !== '' ? $vieja['at'] : date('c'), 'por' => (string)($vieja['por'] ?? '')];
-            @unlink($dir . '/' . $vieja['id'] . '.' . $vieja['ext']);
-            @unlink($dir . '/' . $vieja['id'] . '.t.jpg');
+            // la que se reemplaza no se destruye: queda guardada mientras una copia la pueda necesitar (_copias.php)
+            foreach ([$vieja['id'] . '.' . $vieja['ext'], $vieja['id'] . '.t.jpg'] as $bs_f) { function_exists('bs_copia_borrar') ? bs_copia_borrar($dir . '/' . $bs_f) : @unlink($dir . '/' . $bs_f); }
         } else {
             $adjuntos[] = ['id' => $id, 'tipo' => $tipo, 'ext' => $ext, 'at' => date('c'), 'por' => $bs_por];
         }
@@ -242,8 +242,7 @@ try {
             bs_error('Solo podés borrar los archivos que subiste vos.', 403);
         }
         if ($borrado['ext'] !== 'link') { // un link no tiene archivo en el servidor
-            @unlink($dir . '/' . $borrado['id'] . '.' . $borrado['ext']);
-            @unlink($dir . '/' . $borrado['id'] . '.t.jpg');
+            foreach ([$borrado['id'] . '.' . $borrado['ext'], $borrado['id'] . '.t.jpg'] as $bs_f) { function_exists('bs_copia_borrar') ? bs_copia_borrar($dir . '/' . $bs_f) : @unlink($dir . '/' . $bs_f); }
         }
         $adjuntos = $quedan;
     }

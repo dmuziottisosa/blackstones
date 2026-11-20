@@ -471,7 +471,8 @@ function bs_tablero_borrar_carpeta($key) {
     if (!is_dir($dir)) return;
     foreach (scandir($dir) as $f) {
         if ($f === '.' || $f === '..') continue;
-        @unlink($dir . '/' . $f);
+        // no se destruye: queda en copias/borrados/ mientras una copia lo pueda necesitar (ver _copias.php)
+        function_exists('bs_copia_borrar') ? bs_copia_borrar($dir . '/' . $f) : @unlink($dir . '/' . $f);
     }
     @rmdir($dir);
 }

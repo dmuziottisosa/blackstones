@@ -20,12 +20,16 @@
 | Crear, editar y borrar contratos; seña, cobros, adjuntos y papelera | Sí | Sí (18/11/2026) | No |
 | Ver quién está trabajando ahora y en qué pantalla | Sí | Sí | Sí |
 | Usuarios | Sí | No | No |
+| Control: recordatorios, cierre del mes y registro de acciones | Sí | No | No |
+| Respaldo: ver las copias de las últimas 24 horas y volver a una (20/11/2026) | Sí | No | No |
 
 - **Operador en Relación-Contrato (dueño, 18/11/2026; antes solo miraba):** crea y edita contratos, carga la seña y los cobros, adjunta el presupuesto, borra contratos, ve la papelera y carga la obra en Por medir. No ve el resumen del mes ni las sumas del pie, y no carga renglones de prueba (eso es de mantenimiento).
 - **Planos y bacha:** entra directo al tablero. Ve las fichas enteras menos la seña. No puede tildar, mover, editar ni escribir notas. Adjunta fotos y puede borrar o girar cualquiera, también las que subió otro (dueño, 17/11/2026). Desde el botón "Modelo de bacha" de la ficha anota de quién es la bacha y su modelo, en cualquier etapa (dueño, 17/11/2026); eso no toca el tilde "Tenemos la bacha", salvo que marque "No lleva", que lo deja tildado como siempre. No entra al calendario. Si escribe otra dirección, vuelve al tablero.
 - **Las notas de las fichas son texto libre.** A "Planos y bacha" se le tapan los montos: "Saldo $ 285.720" le llega como "Saldo $ ···". Reconoce el signo antes o después del número ($, U$S, USD, ARS, pesos, dólares) y las cantidades en mil, millones o lucas. Un número suelto ("quedan 200") no se reconoce y se ve. Si no tiene que verse, no va en la nota.
 
 > **Reportes (18/11/2026):** pestaña solo para administradores, con el cierre del mes y el registro de acciones. → `reportes.md`
+>
+> **Respaldo (19 y 20/11/2026):** solo administradores, y lo exige el servidor (permiso `copias`). Volver a una copia pide dos confirmaciones: el botón y escribir USAR RESPALDO en mayúsculas. → `respaldo.md`
 
 ## Quién está trabajando (17/11/2026)
 

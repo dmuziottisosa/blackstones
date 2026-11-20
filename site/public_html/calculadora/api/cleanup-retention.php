@@ -37,6 +37,7 @@
 
 require_once __DIR__ . '/_config.php';
 require_once __DIR__ . '/_tablero.php';
+if (is_file(__DIR__ . '/_copias.php')) require_once __DIR__ . '/_copias.php'; // la copia de las últimas 24 horas
 
 // CLI-only (NO debe ser invocable via HTTP)
 if (php_sapi_name() !== 'cli') {
@@ -46,6 +47,10 @@ if (php_sapi_name() !== 'cli') {
 }
 
 bs_ensure_dirs();
+
+// Antes de borrar nada, la copia de esta hora: lo que esta limpieza se lleve se puede traer de vuelta
+// mientras dure esa copia.
+if (function_exists('bs_copia_si_toca')) { try { bs_copia_si_toca(); } catch (Throwable $e) { /* sin copia, la limpieza corre igual */ } }
 
 $now = time();
 $retention_seconds = BS_RETENTION_DAYS * 24 * 3600;

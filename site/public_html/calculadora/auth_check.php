@@ -47,6 +47,7 @@ const AUTH_PERMISOS = [
     'presencia'         => ['admin', 'operador', 'planos'], // ver quién está trabajando ahora y en qué pantalla
     'reportes'          => ['admin'],                       // pestaña Control (hasta el 18/11/2026, "Reportes"): recordatorios, cierre del mes y registro
     'usuarios'          => ['admin'],
+    'copias'            => ['admin'],                       // el respaldo: ver las copias de las últimas 24 horas y volver a una. SOLO administradores (dueño, 20/11/2026)
     'mantenimiento'     => ['admin'],                       // importadores y scripts de una sola vez
 ];
 

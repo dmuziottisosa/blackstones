@@ -53,7 +53,8 @@ function bs_contrato_adj_borrar($id) {
     if (!bs_contrato_id_ok($id)) return;
     $dir = BS_CONTRATOS_ADJ_DIR . '/' . $id;
     if (!is_dir($dir)) return;
-    foreach (['pdf', 'xlsx', 'xls'] as $e) @unlink($dir . '/presupuesto.' . $e);
+    // no se destruye: queda en copias/borrados/ mientras una copia lo pueda necesitar (ver _copias.php)
+    foreach (['pdf', 'xlsx', 'xls'] as $e) { function_exists('bs_copia_borrar') ? bs_copia_borrar($dir . '/presupuesto.' . $e) : @unlink($dir . '/presupuesto.' . $e); }
     @rmdir($dir);
 }
 

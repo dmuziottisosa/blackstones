@@ -32,6 +32,11 @@ function bs_require_permiso($permiso) {
         echo json_encode(['ok' => false, 'error' => 'Tu usuario no tiene permiso para esto.', 'sin_permiso' => $permiso], JSON_UNESCAPED_UNICODE);
         exit;
     }
+    // La copia de las últimas 24 horas (dueño, 19/11/2026): el primer pedido de cada hora la toma acá,
+    // antes de que el endpoint cambie nada. Si _copias.php no está o falla, se sigue de largo.
+    if (is_file(__DIR__ . '/_copias.php')) {
+        try { require_once __DIR__ . '/_copias.php'; bs_copia_si_toca(); } catch (Throwable $e) { @error_log('copia: ' . $e->getMessage()); }
+    }
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
         $in = json_decode((string)@file_get_contents('php://input'), true);
         if (!is_array($in)) $in = $_POST;

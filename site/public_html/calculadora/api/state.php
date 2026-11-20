@@ -164,7 +164,7 @@ try {
                 unset($cot['entregado_at']);
                 if (!empty($cot['zip_path'])) {
                     $zip_abs = BS_DATA_DIR . '/' . $cot['zip_path'];
-                    if (file_exists($zip_abs)) @unlink($zip_abs);
+                    if (file_exists($zip_abs)) { function_exists('bs_copia_borrar') ? bs_copia_borrar($zip_abs) : @unlink($zip_abs); } // queda guardado mientras una copia lo pueda necesitar
                     $cot['zip_path'] = null;
                 }
             }
