@@ -49,17 +49,19 @@ Con eso te paso un primer rango de precio en el día.
 ### Formato vigente de la primera respuesta (dueño, 22/11/2026)
 
 > Lo escribió el dueño el 22/11/2026: "la dirección tiene que ser esta". Manda sobre el template base de arriba y sobre el formato de octubre, que quedó al final de esta sección.
+>
+> Lo corrigió él mismo ese día: no se pregunta si es recta o en L ("eso lo vemos después"), el material y el color van juntos, y el mueble tiene que estar "colocado y despejado". En esa corrección ya no figuran "si no sabés, te mostramos opciones" ni "si no, ¿para cuándo estaría?".
 
 Cuando el contacto llega del anuncio sin ningún dato:
 
 ```
 ¡Gracias! Para pasarte el presupuesto cerrado lo más rápido posible, contanos:
 
-1. Medidas (largo x ancho) y si es recta o en L
-2. Material que te interesa (si no sabés, te mostramos opciones)
+1. Largo x ancho
+2. Material que te interesa y color
 3. ¿Lleva bacha y anafe? ¿Zócalo?
 4. Zona o barrio
-5. ¿El mueble ya está colocado? Si no, ¿para cuándo estaría?
+5. ¿El mueble ya está colocado y despejado?
 
 Si tenés una foto o un plano, mandalo y es todavía más rápido.
 ```
@@ -68,6 +70,7 @@ Reglas del formato:
 - Va tal cual, con sus números. Es también el primer mensaje que tiene que mandar el bot.
 - **De lo que ya sabemos, no se pregunta.** Si el cliente ya pasó algo, esos puntos se sacan y se piden solo los que faltan, renumerados.
 - **El punto 5 es el que dice dónde poner el esfuerzo.** Si el cliente contesta lo demás y ese no, se le repite una vez, como última línea del mensaje siguiente. De nuestros chats: cuando se pide una lista, vuelve más o menos la mitad de los puntos.
+- **Ya no se pregunta para cuándo.** Si el cliente contesta que no y cuenta solo la fecha, se toma; si no la cuenta, queda como "todavía no".
 - Si contesta que no sabe qué material, se le mandan los dos catálogos y la guía de tres líneas (formato de octubre, al final de esta sección).
 
 Para pegar en las instrucciones del bot:
@@ -77,11 +80,11 @@ Cuando el cliente escribe por primera vez, respondé con este mensaje, tal cual:
 
 ¡Gracias! Para pasarte el presupuesto cerrado lo más rápido posible, contanos:
 
-1. Medidas (largo x ancho) y si es recta o en L
-2. Material que te interesa (si no sabés, te mostramos opciones)
+1. Largo x ancho
+2. Material que te interesa y color
 3. ¿Lleva bacha y anafe? ¿Zócalo?
 4. Zona o barrio
-5. ¿El mueble ya está colocado? Si no, ¿para cuándo estaría?
+5. ¿El mueble ya está colocado y despejado?
 
 Si tenés una foto o un plano, mandalo y es todavía más rápido.
 
@@ -117,14 +120,14 @@ Incluye fabricación, traforos para bacha y anafe y zócalo de 5 cm. Si no lleva
 
 Es un presupuesto estimado: nuestro técnico rectifica las medidas en obra antes de fabricar, y ahí cerramos el número final.
 
-Plazo: 20 días corridos desde la medición. ¿El mueble ya está colocado? Si no, ¿para cuándo estaría?
+Plazo: 20 días corridos desde la medición. ¿El mueble ya está colocado y despejado?
 ```
 
 **Qué se hace con lo que contesta del mueble**
 
 | Qué contesta | Qué hacemos |
 |---|---|
-| Ya está colocado, o lo recibe en estos días (dos semanas) | Todo el trabajo: opciones para comparar, ajustes, seguimiento (sección 5) y coordinar la medición. Va primero. |
+| Ya está colocado y despejado, o cuenta que lo recibe en estos días (dos semanas) | Todo el trabajo: opciones para comparar, ajustes, seguimiento (sección 5) y coordinar la medición. Va primero. |
 | Todavía no: falta, o no sabe cuándo | Si ya recibió su número, queda ese y se cierra con el mensaje de abajo. Si no, la respuesta corta. Sin opciones, sin recálculos y sin seguimiento. |
 | No contesta, después de repetirle la pregunta | Igual que el que no lo tiene. |
 
@@ -194,7 +197,7 @@ Información mínima para cotizar:
 
 | Campo | Por qué importa | Cómo preguntamos si no lo da |
 |---|---|---|
-| Estado de la obra y urgencia | Desde el 22/11/2026 se pregunta en el primer mensaje: dice si se puede medir y cuánto se trabaja el chat | "¿El mueble ya está colocado? Si no, ¿para cuándo estaría?" (sección 2) |
+| Estado de la obra y urgencia | Desde el 22/11/2026 se pregunta en el primer mensaje: dice si se puede medir y cuánto se trabaja el chat | "¿El mueble ya está colocado y despejado?" (sección 2) |
 | Largo x ancho | Base del cálculo | Pregunta directa |
 | Material aproximado | Define rango de precio | "¿Granito / cuarzo / sinterizada? Si no sabés, te ayudo a elegir" |
 | Zona | Define costo de flete | "¿En qué barrio estás?" |

@@ -4,12 +4,13 @@
 
 ## Qué decidió el dueño
 
-Cuatro mensajes, el mismo día:
+Cinco mensajes, el mismo día:
 
 1. "La pregunta más valiosa del chat es '¿el mueble ya está colocado?' o '¿para cuándo lo necesitás?'. Esa respuesta clasifica al lead mejor que cualquier guion. Nuestra pregunta inicial debería ser esta, colada estratégicamente en el primer mensaje o el segundo. Esto nos hace entender dónde poner los esfuerzos."
 2. "Lo que no quiero es sobre-trabajar para el que no tiene el mueble listo ni siquiera."
 3. Sobre el cliente que llega escribiendo la medida y el color en una línea: "Estos son los que hay que resolver rápido", "los más comunes, y los que más hay que resolver la duda", "estos son los que abundan".
-4. El primer mensaje, escrito por él ("la dirección tiene que ser esta"): cinco puntos numerados (medidas y si es recta o en L; material; bacha, anafe y zócalo; zona; y el 5, "¿El mueble ya está colocado? Si no, ¿para cuándo estaría?") y, al final, que mande una foto o un plano. Está entero en `02-marketing/whatsapp/flow.md`, sección 2.
+4. El primer mensaje, escrito por él ("la dirección tiene que ser esta"): cinco puntos numerados y, al final, que mande una foto o un plano. Está entero en `02-marketing/whatsapp/flow.md`, sección 2.
+5. La corrección a ese mensaje, más tarde: "no hace falta si es recta o en L, eso lo vemos después". Los cinco puntos quedaron así: largo x ancho; material que te interesa y color; ¿lleva bacha y anafe?, ¿zócalo?; zona o barrio; ¿el mueble ya está colocado y despejado?
 
 ## Cómo se aplica
 
@@ -45,7 +46,8 @@ El primer número de una mesada simple se arma en dos minutos. Lo caro es lo que
 - **Que la respuesta "clasifica mejor que cualquier guion" es una hipótesis.** No hay medición propia ni ajena. De nuestros 162 chats no se sabe cuáles cerraron.
 - **Cuántos contestan el punto 5** dentro de una lista de cinco. Si vuelve poco, hay que mirar de nuevo dónde va.
 - **"El que no sabe ni siquiera el color es porque probablemente no haga nada"** (dueño, 22/11/2026, con "no me gusta asumir" adelante). Es una hipótesis. Lo que hay (`06-knowledge/layer-0-raw/2026-11-22-chats-quien-trae-el-color.md`): de 162 chats, 61 llegaron diciendo el color sin que se lo pidan y 37 más lo dieron cuando se lo pedimos; casi siempre es un tono ("blanco", "negro", "gris"), no un nombre de catálogo. Los que dijeron un color siguieron la conversación más seguido (25 de 98 contra 10 de 64). Va para el lado del dueño, con pocos casos y sin saber quién compró. Para saberlo hay que cruzar los teléfonos de esos chats con los contratos, y eso se hace solo si el dueño lo pide.
-- **Recambio.** Quien cambia una mesada vieja tiene los muebles. Falta saber si se mide con la mesada vieja puesta. Hasta entonces cuenta como "con mueble".
+- **Recambio y "despejado".** Quien cambia una mesada vieja tiene los muebles. El dueño sumó "y despejado" a la pregunta, y en un chat de noviembre había pedido explicarle a un cliente que para medir el mueble tiene que estar sin mesada. Falta que confirme que "despejado" es eso: sin la mesada vieja.
+- **La fecha ya no se pregunta.** En la corrección del dueño no figura "si no, ¿para cuándo estaría?". El que contesta que no y no cuenta la fecha queda como "todavía no", aunque los reciba el viernes. Si se ve que se pierden clientes así, se vuelve a poner.
 - **"En estos días"** quedó en dos semanas. El número es de quien escribió esto, no del dueño.
 - **Si al que no tiene mueble se le pasa un número de referencia o ninguno.** Quedó: uno, si ya dio medidas y color. Con la regla de resolver rápido, la mayoría ya lo va a tener antes de contestar.
 - **Cuánto se tarda hoy en mandar el primer número.** No está medido. "Rápido" todavía no tiene un tiempo.

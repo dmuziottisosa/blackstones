@@ -6,7 +6,7 @@
 
 ## Antes de cotizar: qué trajo el cliente y si tiene el mueble (dueño, 22/11/2026)
 
-El dueño fijó ese día el primer mensaje (cinco puntos; el 5 es "¿El mueble ya está colocado? Si no, ¿para cuándo estaría?") y tres criterios: "esto nos hace entender dónde poner los esfuerzos"; "lo que no quiero es sobre-trabajar para el que no tiene el mueble listo ni siquiera"; y, del que escribe la medida y el color en una línea, "estos son los que abundan" y "los que hay que resolver rápido".
+El dueño fijó ese día el primer mensaje (cinco puntos; el 5 es "¿El mueble ya está colocado y despejado?") y tres criterios: "esto nos hace entender dónde poner los esfuerzos"; "lo que no quiero es sobre-trabajar para el que no tiene el mueble listo ni siquiera"; y, del que escribe la medida y el color en una línea, "estos son los que abundan" y "los que hay que resolver rápido".
 
 La respuesta de quien cotiza empieza diciendo, en una línea, qué trajo el cliente y si se sabe si tiene el mueble. Y según eso:
 
