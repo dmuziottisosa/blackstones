@@ -46,14 +46,16 @@ Con eso te paso un primer rango de precio en el día.
 
 ---
 
-### Formato vigente de la primera respuesta (dueño, 22/11/2026)
+### Formato vigente de la primera respuesta: "la vieja confiable" (dueño, 22/11/2026)
 
-> Redacción fijada por el dueño el 22/11/2026: "esta es la redacción correcta". Ese mismo día la pidió "más cordial pero sin hacerla más larga": por eso saluda y agradece. Llegó ahí después de varias vueltas el mismo día: no se pregunta si es recta o en L ("eso lo vemos después"), el material y el color van juntos, el mueble tiene que estar "colocado y despejado", y nada que suene a máquina o a formulario ("siendo humano me chocó"). Manda sobre el template base de arriba y sobre el formato de octubre, que quedó al final de esta sección.
+> Es la respuesta que el dueño mandó anotar acá el 22/11/2026: "porque va a ser nuestra vieja confiable. Así no tenés que tenerla en tu memoria sino que queda anotada". **Se copia de este doc, letra por letra; no se reescribe de memoria.**
+>
+> Llegó a esta redacción después de varias vueltas el mismo día: no se pregunta si es recta o en L ("eso lo vemos después"), el material y el color van juntos, el mueble tiene que estar "colocado y despejado", y nada que suene a máquina o a formulario ("siendo humano me chocó"). Manda sobre el template base de arriba y sobre el formato de octubre, que quedó al final de esta sección.
 
 Cuando el contacto llega del anuncio sin ningún dato:
 
 ```
-¡Hola! Gracias por escribirnos. Para prepararte el presupuesto lo antes posible, contanos:
+¡Gracias por escribirnos! Para prepararte el presupuesto lo antes posible, contanos:
 
 1. Medidas: largo x ancho.
 2. Material y color que te interesan.
@@ -61,7 +63,7 @@ Cuando el contacto llega del anuncio sin ningún dato:
 4. ¿En qué zona o barrio sería?
 5. ¿El mueble ya está colocado y despejado?
 
-Si tenés una foto del lugar o un plano con las medidas, también nos ayuda mucho.
+Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
 ```
 
 Reglas del formato:
@@ -69,14 +71,14 @@ Reglas del formato:
 - **De lo que ya sabemos, no se pregunta.** Si el cliente ya pasó algo, esos puntos se sacan, se piden solo los que faltan, renumerados, y el mensaje arranca diciendo lo que ya se anotó. Ejemplo, para uno que escribió "1,50 x 0,60 con zócalo":
 
 ```
-¡Hola! Gracias por escribirnos. Ya anotamos la medida: 1,50 × 0,60, con zócalo. Para prepararte el presupuesto lo antes posible, contanos:
+¡Gracias por escribirnos! Ya anotamos la medida: 1,50 × 0,60, con zócalo. Para prepararte el presupuesto lo antes posible, contanos:
 
 1. Material y color que te interesan.
 2. ¿Lleva bacha o anafe?
 3. ¿En qué zona o barrio sería?
 4. ¿El mueble ya está colocado y despejado?
 
-Si tenés una foto del lugar o un plano con las medidas, también nos ayuda mucho.
+Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
 ```
 
 - **El punto 5 es el que dice dónde poner el esfuerzo.** Si el cliente contesta lo demás y ese no, se le repite una vez, como última línea del mensaje siguiente. De nuestros chats: cuando se pide una lista, vuelve más o menos la mitad de los puntos.
@@ -88,7 +90,7 @@ Para pegar en las instrucciones del bot:
 ```
 Cuando el cliente escribe por primera vez, respondé con este mensaje, tal cual:
 
-¡Hola! Gracias por escribirnos. Para prepararte el presupuesto lo antes posible, contanos:
+¡Gracias por escribirnos! Para prepararte el presupuesto lo antes posible, contanos:
 
 1. Medidas: largo x ancho.
 2. Material y color que te interesan.
@@ -96,7 +98,7 @@ Cuando el cliente escribe por primera vez, respondé con este mensaje, tal cual:
 4. ¿En qué zona o barrio sería?
 5. ¿El mueble ya está colocado y despejado?
 
-Si tenés una foto del lugar o un plano con las medidas, también nos ayuda mucho.
+Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
 
 Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo los que faltan. No agregues otras preguntas ni des precios.
 ```
@@ -117,6 +119,8 @@ Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo
 | La medida y el color, o el tono ("negro", "bien claro"). Es el caso que abunda | La cotización corta, en el momento. No se le pide nada antes. |
 | La medida sin color, o el color sin medida | El primer mensaje, solo con los puntos que faltan. |
 | Nada todavía | El primer mensaje entero. |
+
+Del que ya pasó la medida, el dueño dijo: "a estos es más tricky, porque al menos te pasa largo por ancho". A ese la vieja confiable no se le manda entera: van solo los puntos que le faltan, o directamente la cotización corta si ya dijo el color.
 
 La cotización corta se arma como se viene respondiendo: un color concreto y su número (si dijo un tono, se elige uno y se dice cuál; una segunda opción solo si hay una más económica); si no dijo bacha ni anafe, se suman los dos y se avisa; el flete se pregunta; y, si todavía no dijo nada del mueble, el mensaje termina con esa pregunta.
 
