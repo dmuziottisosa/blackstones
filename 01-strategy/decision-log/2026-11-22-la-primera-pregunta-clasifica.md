@@ -69,5 +69,6 @@ El primer número de una mesada simple se arma en dos minutos. Lo caro es lo que
 
 - **Qué se cuenta:** de los chats nuevos, en cuántos se sabe en qué momento está el cliente antes de trabajar la cotización (hoy, 6 de 162), y cuántos son "con mueble". Lo segundo dice además si el anuncio trae a quien queremos.
 - **Primera cuenta:** 6/12/2026, sobre los chats que se peguen desde hoy.
+- **Lo que se vio el primer día (22/11/2026), solo como anécdota:** dos clientes recibieron la lista de cinco puntos. Uno contestó los cinco en un minuto, numerados, y dijo que el bajo mesada es nuevo. El otro contestó todo menos lo del mueble. Dos casos no dicen nada todavía.
 - **A los 60 días:** cuántos contratos salieron de cada grupo. Cada contrato de Relación-Contrato ya guarda "Muebles colocados: Sí / No"; lo que falta es anotar el grupo de cada chat.
 - Si la mayoría de los contratos sale de "sin mueble", la regla está mal y se revierte.
