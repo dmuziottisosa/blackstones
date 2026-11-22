@@ -25,7 +25,7 @@ Operación de venta por WhatsApp — el verdadero motor de cierre del negocio.
 
 - **< 2 horas de respuesta** en horario hábil (7am-9pm). Default sagrado.
 - **Saludar + presentarse en 1 línea.** No mandar 5 mensajes seguidos como WhatsApp marketing genérico.
-- **El primer mensaje es "la vieja confiable", de seis puntos** (dueño, 22/11/2026): medidas, material y color, bacha y anafe, zona, si los muebles ya están colocados y despejados y si es una instalación nueva o un reemplazo. De lo que el cliente ya dijo no se pregunta. Ver `flow.md`, sección 2.
+- **El primer mensaje es "la vieja confiable"** (dueño, 22/11/2026): medidas, material y color, bacha y anafe y zona; aparte, si los muebles ya están colocados y despejados; y el link de los colores. No se satura: lo demás va en el segundo mensaje. De lo que el cliente ya dijo no se pregunta. Ver `flow.md`, sección 2.
 - **El que llega con la medida y el color se resuelve rápido**, con una cotización corta. El trabajo de después (opciones, recálculos, seguimiento) es para el que ya tiene el mueble.
 - **Cotización por escrito** dentro de 24 hs (idealmente < 4 hs).
 - **Nunca audios largos** para responder. Si el cliente manda audio, lo escuchamos y respondemos por escrito.

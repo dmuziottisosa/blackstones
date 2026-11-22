@@ -4,7 +4,7 @@
 
 ## Qué decidió el dueño
 
-Nueve mensajes, el mismo día:
+Diez mensajes, el mismo día:
 
 1. "La pregunta más valiosa del chat es '¿el mueble ya está colocado?' o '¿para cuándo lo necesitás?'. Esa respuesta clasifica al lead mejor que cualquier guion. Nuestra pregunta inicial debería ser esta, colada estratégicamente en el primer mensaje o el segundo. Esto nos hace entender dónde poner los esfuerzos."
 2. "Lo que no quiero es sobre-trabajar para el que no tiene el mueble listo ni siquiera."
@@ -13,8 +13,9 @@ Nueve mensajes, el mismo día:
 5. La corrección a ese mensaje, más tarde: "no hace falta si es recta o en L, eso lo vemos después". Los cinco puntos quedaron así: largo x ancho; material que te interesa y color; ¿lleva bacha y anafe?, ¿zócalo?; zona o barrio; ¿el mueble ya está colocado y despejado?
 6. La redacción final ("esta es la redacción correcta"), que es la que está en `flow.md`: "un presupuesto cerrado lo más rápido posible", cada punto en pocas palabras, la zona como pregunta y, al final, que una foto del lugar o un plano "también nos sirve como referencia". Antes había probado una versión más formal ("necesitamos que nos compartas algunos datos", "Terminaciones", "adjuntarlo") y la dejó: tenía el mismo tono de máquina que le había chocado en "mandalo y es todavía más rápido".
 7. La que mandó anotar al final, y la que vale: "¡Gracias por escribirnos! Para prepararte el presupuesto lo antes posible, contanos:", los mismos cinco puntos y "también nos sirve como referencia". "Anotá esta respuesta en el repo: porque va a ser nuestra vieja confiable. Así no tenés que tenerla en tu memoria sino que queda anotada."
-8. Lo que le sumó después: "creo que nos falta amabilidad: Para tenerlo en cuenta, ¿los muebles ya están colocados y despejados?" y "¿Es una instalación nueva o se trata de reemplazar una mesada existente? Esto es importante y lo olvidé". Con eso la vieja confiable tiene seis puntos.
+8. Lo que le sumó después: "creo que nos falta amabilidad: Para tenerlo en cuenta, ¿los muebles ya están colocados y despejados?" y "¿Es una instalación nueva o se trata de reemplazar una mesada existente? Esto es importante y lo olvidé". 
 9. Sobre los dibujos: "por más que tengan dibujitos en cuadernos u hojas, no hay que confiarse: probablemente no tengan nada". Y un dato: todos los que llegan del anuncio abren con "Hola, buenas. Vi el anuncio y me interesa cotizar una mesada de cocina.".
+10. Cuando vio el primer mensaje con seis puntos y el link: "tampoco es saturar en el primer mensaje". Y al verlo en el celular: "queda alborotado, confuso". Quedó en cuatro datos de un renglón, la pregunta de los muebles aparte y el link al final; la línea de la foto o el plano salió y la pregunta de si es nueva o reemplazo pasó al segundo mensaje (esto último, a confirmar por él).
 
 ## Cómo se aplica
 
@@ -61,7 +62,7 @@ El primer número de una mesada simple se arma en dos minutos. Lo caro es lo que
 ## Unknown unknowns
 
 - El que no tiene muebles hoy los tiene en un mes. Si la respuesta corta lo enfría, la mesada se la hace otro.
-- Hay gente que no contesta preguntas y solo espera un precio. Para esos, una lista de seis puntos puede ser el final del chat. Por eso al que ya trajo la medida y el color se le pasa el número sin pedirle nada.
+- Hay gente que no contesta preguntas y solo espera un precio. Para esos, una lista larga puede ser el final del chat. Por eso al que ya trajo la medida y el color se le pasa el número sin pedirle nada.
 - Qué le hace esto a los leads que manda Meta, si cambia lo que la gente contesta en el chat.
 
 ## Cómo sabemos si sirvió
