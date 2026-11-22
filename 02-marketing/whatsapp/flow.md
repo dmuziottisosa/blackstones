@@ -118,6 +118,7 @@ Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo
 |---|---|
 | La medida y el color, o el tono ("negro", "bien claro"). Es el caso que abunda | La cotización corta, en el momento. No se le pide nada antes. |
 | La medida sin color, o el color sin medida | El primer mensaje, solo con los puntos que faltan. |
+| La medida o el plano, sin color, y pide materiales y precios | El rango de cada material y los catálogos. |
 | Nada todavía | El primer mensaje entero. |
 
 **El que abre con medidas, material y color** ("3,00 x 0,60, granito negro"). El dueño, 22/11/2026: "responder a esta apertura es más tricky, porque te está pasando medidas y color; no exacto, pero sirve". Y fijó qué se hace:
@@ -142,6 +143,25 @@ El plazo son 20 días corridos desde que vamos a medir.
 Lo que este mensaje no dice (qué incluye, que es un presupuesto estimado, que el granito no lleva garantía y la pregunta del mueble) va en el mensaje siguiente, cuando conteste la zona, con el formato de la sección 4. Esto último lo puso quien escribió el doc: lo confirma el dueño.
 
 **Cocina nueva, o mueble con la mesada vieja encima.** El dueño, 22/11/2026, sobre una mesada de más de cuatro metros: "acá podemos asumir que está haciendo una cocina nueva, con mueble nuevo; pero está el caso del que ya tiene un mueble con un toper". Para ese segundo caso todavía no dijo qué se manda. Propuesta, a confirmar: cuando no se puede asumir que es cocina nueva (una medida chica, o el cliente habla de cambiar la mesada), el mensaje termina con "¿El mueble ya está colocado y despejado?".
+
+**El que manda las medidas o el plano y pide "materiales, modelos y precios"**, sin decir color. El dueño, 22/11/2026: "mejor pasale el rango de cada material y listo".
+
+```
+¡Hola, [nombre]! Gracias por escribirnos. Por tu plano, la mesada ronda estos valores según el material:
+
+◾ *Granito*: de $ [monto] a $ [monto] (los importados, desde USD [monto])
+◾ *Cuarzo*: de USD [monto] a USD [monto]
+◾ *Sinterizado*: de USD [monto] a USD [monto]
+
+Modelos y texturas: https://blackstones.com.ar/#colores
+Sinterizados Suprastone: https://www.suprastone.com.ar/colecciones/
+
+El plazo son 20 días corridos desde que vamos a medir.
+
+Decinos qué color te gusta y en qué zona sería, y te pasamos el presupuesto cerrado.
+```
+
+De dónde sale cada rango (lo puso quien escribió el doc; lo confirma el dueño): se calcula con los m² del cliente y los precios de la calculadora, con los huecos que muestre el plano. Granito, del nacional más pedido más barato (Gris Mara) al nacional más caro, y los importados desde Negro Brasil. Cuarzo, del Guidoni más barato al Purastone más caro; Silestone llega más arriba. Sinterizado, lo que cuesta Suprastone, con regrueso; Neolith y Dekton van más arriba. Se redondea.
 
 **Qué se hace con lo que contesta del mueble**
 
