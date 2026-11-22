@@ -122,25 +122,21 @@ Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo
 
 **El que abre con medidas, material y color** ("3,00 x 0,60, granito negro"). El dueño, 22/11/2026: "responder a esta apertura es más tricky, porque te está pasando medidas y color; no exacto, pero sirve". Y fijó qué se hace:
 
-- **Se le cotiza conservador, con bacha y anafe.** Se avisa, y se ajusta si no lleva alguno de los dos.
+- **Se le cotiza conservador, con bacha y anafe**, pero el mensaje no lo dice: "a estos así no les digas que incluye".
 - **En los dos más pedidos** del color que nombró. En granito negro son **Negro Boreal y Negro Brasil**. De los demás colores el dueño todavía no dijo cuáles son: hasta entonces, uno concreto y, si hay, uno más económico.
-- **Se pregunta el barrio o la zona**, para el flete.
-- Si todavía no dijo nada del mueble, el mensaje termina con esa pregunta.
+- **Se pregunta el barrio o la zona**, y nada más.
+- **"El mensaje debe ser breve, más largo no es mejor."**
 
 ```
-Hola, buen día. Te paso el presupuesto para tu mesada de [largo] × [ancho]:
+¡Gracias por escribirnos! Te pasamos el presupuesto de tu mesada de [largo] × [ancho] en [material y color], en los dos más pedidos:
 
-◾ *[Color más pedido] ([material])*: [USD o $ monto]
-◾ *[El otro más pedido] ([material])*: [USD o $ monto]
+◾ *[Color más pedido]*: [USD o $ monto]
+◾ *[El otro más pedido]*: [USD o $ monto]
 
-Incluye fabricación, traforos para bacha y anafe y zócalo de 5 cm. Si no lleva alguno de los dos, avisame y lo ajusto.
-
-◾ *Flete y colocación*: ¿en qué zona o barrio sería? Así te paso el costo.
-
-Es un presupuesto estimado: nuestro técnico rectifica las medidas en obra antes de fabricar, y ahí cerramos el número final.
-
-Plazo: 20 días corridos desde la medición. ¿El mueble ya está colocado y despejado?
+¿En qué zona o barrio sería? Con eso te pasamos el flete y la colocación.
 ```
+
+Lo que este mensaje no dice (qué incluye, que es un presupuesto estimado, el plazo, que el granito no lleva garantía y la pregunta del mueble) va en el mensaje siguiente, cuando conteste la zona, con el formato de la sección 4. Esto último lo puso quien escribió el doc: lo confirma el dueño.
 
 **Qué se hace con lo que contesta del mueble**
 
