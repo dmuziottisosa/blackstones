@@ -4,13 +4,14 @@
 
 ## Qué decidió el dueño
 
-Cinco mensajes, el mismo día:
+Seis mensajes, el mismo día:
 
 1. "La pregunta más valiosa del chat es '¿el mueble ya está colocado?' o '¿para cuándo lo necesitás?'. Esa respuesta clasifica al lead mejor que cualquier guion. Nuestra pregunta inicial debería ser esta, colada estratégicamente en el primer mensaje o el segundo. Esto nos hace entender dónde poner los esfuerzos."
 2. "Lo que no quiero es sobre-trabajar para el que no tiene el mueble listo ni siquiera."
 3. Sobre el cliente que llega escribiendo la medida y el color en una línea: "Estos son los que hay que resolver rápido", "los más comunes, y los que más hay que resolver la duda", "estos son los que abundan".
 4. El primer mensaje, escrito por él ("la dirección tiene que ser esta"): cinco puntos numerados y, al final, que mande una foto o un plano. Está entero en `02-marketing/whatsapp/flow.md`, sección 2.
 5. La corrección a ese mensaje, más tarde: "no hace falta si es recta o en L, eso lo vemos después". Los cinco puntos quedaron así: largo x ancho; material que te interesa y color; ¿lleva bacha y anafe?, ¿zócalo?; zona o barrio; ¿el mueble ya está colocado y despejado?
+6. La redacción final ("esta es la redacción correcta"), que es la que está en `flow.md`: "un presupuesto cerrado lo más rápido posible", cada punto en pocas palabras, la zona como pregunta y, al final, que una foto del lugar o un plano "también nos sirve como referencia". Antes había probado una versión más formal ("necesitamos que nos compartas algunos datos", "Terminaciones", "adjuntarlo") y la dejó: tenía el mismo tono de máquina que le había chocado en "mandalo y es todavía más rápido".
 
 ## Cómo se aplica
 

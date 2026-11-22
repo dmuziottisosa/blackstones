@@ -48,27 +48,37 @@ Con eso te paso un primer rango de precio en el día.
 
 ### Formato vigente de la primera respuesta (dueño, 22/11/2026)
 
-> Lo escribió el dueño el 22/11/2026: "la dirección tiene que ser esta". Manda sobre el template base de arriba y sobre el formato de octubre, que quedó al final de esta sección.
->
-> Lo corrigió él mismo ese día: no se pregunta si es recta o en L ("eso lo vemos después"), el material y el color van juntos, y el mueble tiene que estar "colocado y despejado". En esa corrección ya no figuran "si no sabés, te mostramos opciones" ni "si no, ¿para cuándo estaría?". La última línea decía "mandalo y es todavía más rápido": al dueño le sonó a máquina ("siendo humano me chocó") y se reescribió.
+> Redacción fijada por el dueño el 22/11/2026: "esta es la redacción correcta". Llegó ahí después de varias vueltas el mismo día: no se pregunta si es recta o en L ("eso lo vemos después"), el material y el color van juntos, el mueble tiene que estar "colocado y despejado", y nada que suene a máquina o a formulario ("siendo humano me chocó"). Manda sobre el template base de arriba y sobre el formato de octubre, que quedó al final de esta sección.
 
 Cuando el contacto llega del anuncio sin ningún dato:
 
 ```
-¡Gracias! Para pasarte el presupuesto cerrado lo más rápido posible, contanos:
+¡Gracias! Para pasarte un presupuesto cerrado lo más rápido posible, contanos:
 
-1. Largo x ancho
-2. Material que te interesa y color
-3. ¿Lleva bacha y anafe? ¿Zócalo?
-4. Zona o barrio
+1. Medidas: largo x ancho.
+2. Material y color que te interesan.
+3. ¿Lleva bacha, anafe o zócalo?
+4. ¿En qué zona o barrio sería?
 5. ¿El mueble ya está colocado y despejado?
 
-Si tenés una foto o un plano, mandalo también, que ayuda.
+Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
 ```
 
 Reglas del formato:
 - Va tal cual, con sus números. Es también el primer mensaje que tiene que mandar el bot.
-- **De lo que ya sabemos, no se pregunta.** Si el cliente ya pasó algo, esos puntos se sacan y se piden solo los que faltan, renumerados.
+- **De lo que ya sabemos, no se pregunta.** Si el cliente ya pasó algo, esos puntos se sacan, se piden solo los que faltan, renumerados, y el mensaje arranca diciendo lo que ya se anotó. Ejemplo, para uno que escribió "1,50 x 0,60 con zócalo":
+
+```
+¡Gracias! Ya anotamos la medida: 1,50 × 0,60, con zócalo. Para pasarte un presupuesto cerrado lo más rápido posible, contanos:
+
+1. Material y color que te interesan.
+2. ¿Lleva bacha o anafe?
+3. ¿En qué zona o barrio sería?
+4. ¿El mueble ya está colocado y despejado?
+
+Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
+```
+
 - **El punto 5 es el que dice dónde poner el esfuerzo.** Si el cliente contesta lo demás y ese no, se le repite una vez, como última línea del mensaje siguiente. De nuestros chats: cuando se pide una lista, vuelve más o menos la mitad de los puntos.
 - **Ya no se pregunta para cuándo.** Si el cliente contesta que no y cuenta solo la fecha, se toma; si no la cuenta, queda como "todavía no".
 - Si contesta que no sabe qué material, se le mandan los dos catálogos y la guía de tres líneas (formato de octubre, al final de esta sección).
@@ -78,15 +88,15 @@ Para pegar en las instrucciones del bot:
 ```
 Cuando el cliente escribe por primera vez, respondé con este mensaje, tal cual:
 
-¡Gracias! Para pasarte el presupuesto cerrado lo más rápido posible, contanos:
+¡Gracias! Para pasarte un presupuesto cerrado lo más rápido posible, contanos:
 
-1. Largo x ancho
-2. Material que te interesa y color
-3. ¿Lleva bacha y anafe? ¿Zócalo?
-4. Zona o barrio
+1. Medidas: largo x ancho.
+2. Material y color que te interesan.
+3. ¿Lleva bacha, anafe o zócalo?
+4. ¿En qué zona o barrio sería?
 5. ¿El mueble ya está colocado y despejado?
 
-Si tenés una foto o un plano, mandalo también, que ayuda.
+Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
 
 Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo los que faltan. No agregues otras preguntas ni des precios.
 ```
