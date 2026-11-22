@@ -120,17 +120,22 @@ Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo
 | La medida sin color, o el color sin medida | El primer mensaje, solo con los puntos que faltan. |
 | Nada todavía | El primer mensaje entero. |
 
-Del que ya pasó la medida, el dueño dijo: "a estos es más tricky, porque al menos te pasa largo por ancho". A ese la vieja confiable no se le manda entera: van solo los puntos que le faltan, o directamente la cotización corta si ya dijo el color.
+**El que abre con medidas, material y color** ("3,00 x 0,60, granito negro"). El dueño, 22/11/2026: "responder a esta apertura es más tricky, porque te está pasando medidas y color; no exacto, pero sirve". Y fijó qué se hace:
 
-La cotización corta se arma como se viene respondiendo: un color concreto y su número (si dijo un tono, se elige uno y se dice cuál; una segunda opción solo si hay una más económica); si no dijo bacha ni anafe, se suman los dos y se avisa; el flete se pregunta; y, si todavía no dijo nada del mueble, el mensaje termina con esa pregunta.
+- **Se le cotiza conservador, con bacha y anafe.** Se avisa, y se ajusta si no lleva alguno de los dos.
+- **En los dos más pedidos** del color que nombró. En granito negro son **Negro Boreal y Negro Brasil**. De los demás colores el dueño todavía no dijo cuáles son: hasta entonces, uno concreto y, si hay, uno más económico.
+- **Se pregunta el barrio o la zona**, para el flete.
+- Si todavía no dijo nada del mueble, el mensaje termina con esa pregunta.
 
 ```
 Hola, buen día. Te paso el presupuesto para tu mesada de [largo] × [ancho]:
 
-◾ *[Color] ([material])*: [USD o $ monto]
+◾ *[Color más pedido] ([material])*: [USD o $ monto]
+◾ *[El otro más pedido] ([material])*: [USD o $ monto]
+
 Incluye fabricación, traforos para bacha y anafe y zócalo de 5 cm. Si no lleva alguno de los dos, avisame y lo ajusto.
 
-◾ *Flete y colocación*: ¿en qué zona es la obra? Así te paso el costo.
+◾ *Flete y colocación*: ¿en qué zona o barrio sería? Así te paso el costo.
 
 Es un presupuesto estimado: nuestro técnico rectifica las medidas en obra antes de fabricar, y ahí cerramos el número final.
 
