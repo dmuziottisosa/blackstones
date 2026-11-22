@@ -124,6 +124,7 @@ Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo
 
 - **Se le cotiza conservador, con bacha y anafe**, pero el mensaje no lo dice: "a estos así no les digas que incluye".
 - **En los dos más pedidos** del color que nombró. En granito negro son **Negro Boreal y Negro Brasil**. De los demás colores el dueño todavía no dijo cuáles son: hasta entonces, uno concreto y, si hay, uno más económico.
+- **Se dice el plazo:** 20 días corridos desde que vamos a medir ("faltó decirle el plazo").
 - **Se pregunta el barrio o la zona**, y nada más.
 - **"El mensaje debe ser breve, más largo no es mejor."**
 
@@ -133,10 +134,14 @@ Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo
 ◾ *[Color más pedido]*: [USD o $ monto]
 ◾ *[El otro más pedido]*: [USD o $ monto]
 
+El plazo son 20 días corridos desde que vamos a medir.
+
 ¿En qué zona o barrio sería? Con eso te pasamos el flete y la colocación.
 ```
 
-Lo que este mensaje no dice (qué incluye, que es un presupuesto estimado, el plazo, que el granito no lleva garantía y la pregunta del mueble) va en el mensaje siguiente, cuando conteste la zona, con el formato de la sección 4. Esto último lo puso quien escribió el doc: lo confirma el dueño.
+Lo que este mensaje no dice (qué incluye, que es un presupuesto estimado, que el granito no lleva garantía y la pregunta del mueble) va en el mensaje siguiente, cuando conteste la zona, con el formato de la sección 4. Esto último lo puso quien escribió el doc: lo confirma el dueño.
+
+**Cocina nueva, o mueble con la mesada vieja encima.** El dueño, 22/11/2026, sobre una mesada de más de cuatro metros: "acá podemos asumir que está haciendo una cocina nueva, con mueble nuevo; pero está el caso del que ya tiene un mueble con un toper". Para ese segundo caso todavía no dijo qué se manda. Propuesta, a confirmar: cuando no se puede asumir que es cocina nueva (una medida chica, o el cliente habla de cambiar la mesada), el mensaje termina con "¿El mueble ya está colocado y despejado?".
 
 **Qué se hace con lo que contesta del mueble**
 
