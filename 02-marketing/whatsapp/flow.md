@@ -48,12 +48,12 @@ Con eso te paso un primer rango de precio en el día.
 
 ### Formato vigente de la primera respuesta (dueño, 22/11/2026)
 
-> Redacción fijada por el dueño el 22/11/2026: "esta es la redacción correcta". Llegó ahí después de varias vueltas el mismo día: no se pregunta si es recta o en L ("eso lo vemos después"), el material y el color van juntos, el mueble tiene que estar "colocado y despejado", y nada que suene a máquina o a formulario ("siendo humano me chocó"). Manda sobre el template base de arriba y sobre el formato de octubre, que quedó al final de esta sección.
+> Redacción fijada por el dueño el 22/11/2026: "esta es la redacción correcta". Ese mismo día la pidió "más cordial pero sin hacerla más larga": por eso saluda y agradece. Llegó ahí después de varias vueltas el mismo día: no se pregunta si es recta o en L ("eso lo vemos después"), el material y el color van juntos, el mueble tiene que estar "colocado y despejado", y nada que suene a máquina o a formulario ("siendo humano me chocó"). Manda sobre el template base de arriba y sobre el formato de octubre, que quedó al final de esta sección.
 
 Cuando el contacto llega del anuncio sin ningún dato:
 
 ```
-¡Gracias! Para pasarte un presupuesto cerrado lo más rápido posible, contanos:
+¡Hola! Gracias por escribirnos. Para prepararte el presupuesto lo antes posible, contanos:
 
 1. Medidas: largo x ancho.
 2. Material y color que te interesan.
@@ -61,7 +61,7 @@ Cuando el contacto llega del anuncio sin ningún dato:
 4. ¿En qué zona o barrio sería?
 5. ¿El mueble ya está colocado y despejado?
 
-Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
+Si tenés una foto del lugar o un plano con las medidas, también nos ayuda mucho.
 ```
 
 Reglas del formato:
@@ -69,14 +69,14 @@ Reglas del formato:
 - **De lo que ya sabemos, no se pregunta.** Si el cliente ya pasó algo, esos puntos se sacan, se piden solo los que faltan, renumerados, y el mensaje arranca diciendo lo que ya se anotó. Ejemplo, para uno que escribió "1,50 x 0,60 con zócalo":
 
 ```
-¡Gracias! Ya anotamos la medida: 1,50 × 0,60, con zócalo. Para pasarte un presupuesto cerrado lo más rápido posible, contanos:
+¡Hola! Gracias por escribirnos. Ya anotamos la medida: 1,50 × 0,60, con zócalo. Para prepararte el presupuesto lo antes posible, contanos:
 
 1. Material y color que te interesan.
 2. ¿Lleva bacha o anafe?
 3. ¿En qué zona o barrio sería?
 4. ¿El mueble ya está colocado y despejado?
 
-Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
+Si tenés una foto del lugar o un plano con las medidas, también nos ayuda mucho.
 ```
 
 - **El punto 5 es el que dice dónde poner el esfuerzo.** Si el cliente contesta lo demás y ese no, se le repite una vez, como última línea del mensaje siguiente. De nuestros chats: cuando se pide una lista, vuelve más o menos la mitad de los puntos.
@@ -88,7 +88,7 @@ Para pegar en las instrucciones del bot:
 ```
 Cuando el cliente escribe por primera vez, respondé con este mensaje, tal cual:
 
-¡Gracias! Para pasarte un presupuesto cerrado lo más rápido posible, contanos:
+¡Hola! Gracias por escribirnos. Para prepararte el presupuesto lo antes posible, contanos:
 
 1. Medidas: largo x ancho.
 2. Material y color que te interesan.
@@ -96,7 +96,7 @@ Cuando el cliente escribe por primera vez, respondé con este mensaje, tal cual:
 4. ¿En qué zona o barrio sería?
 5. ¿El mueble ya está colocado y despejado?
 
-Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
+Si tenés una foto del lugar o un plano con las medidas, también nos ayuda mucho.
 
 Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo los que faltan. No agregues otras preguntas ni des precios.
 ```
