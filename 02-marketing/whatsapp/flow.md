@@ -11,7 +11,7 @@
 
 ```
 1. Primer contacto         → respondemos en < 2 hs con saludo + pregunta clave
-                              (desde el 22/11/2026: el mensaje de cinco puntos; el 5, el mueble)
+                              (desde el 22/11/2026: el mensaje de seis puntos; los dos últimos, los muebles y si es nueva o reemplazo)
 2. Calificación             → medidas, material aproximado, zona, urgencia
 3. Cotización por escrito   → < 24 hs (idealmente < 4 hs), cerrada, todo adentro
 4. Follow-up                → si no responde en 24 / 72 hs
@@ -51,6 +51,8 @@ Con eso te paso un primer rango de precio en el día.
 > Es la respuesta que el dueño mandó anotar acá el 22/11/2026: "porque va a ser nuestra vieja confiable. Así no tenés que tenerla en tu memoria sino que queda anotada". **Se copia de este doc, letra por letra; no se reescribe de memoria.**
 >
 > Llegó a esta redacción después de varias vueltas el mismo día: no se pregunta si es recta o en L ("eso lo vemos después"), el material y el color van juntos, el mueble tiene que estar "colocado y despejado", y nada que suene a máquina o a formulario ("siendo humano me chocó"). Manda sobre el template base de arriba y sobre el formato de octubre, que quedó al final de esta sección.
+>
+> Lo último que sumó ese día: la pregunta de los muebles con más amabilidad ("creo que nos falta amabilidad: para tenerlo en cuenta…") y la de si es una instalación nueva o un reemplazo ("esto es importante y lo olvidé"). Por eso son seis puntos. Y el link de los colores: "el primer mensaje debe llevar esto".
 
 Cuando el contacto llega del anuncio sin ningún dato:
 
@@ -58,10 +60,11 @@ Cuando el contacto llega del anuncio sin ningún dato:
 ¡Gracias por escribirnos! Para prepararte el presupuesto lo antes posible, contanos:
 
 1. Medidas: largo x ancho.
-2. Material y color que te interesan.
+2. Material y color que te interesan. Los podés ver acá: https://blackstones.com.ar/#colores
 3. ¿Lleva bacha, anafe o zócalo?
 4. ¿En qué zona o barrio sería?
-5. ¿El mueble ya está colocado y despejado?
+5. Para tenerlo en cuenta, ¿los muebles ya están colocados y despejados?
+6. ¿Es una instalación nueva o se trata de reemplazar una mesada existente?
 
 Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
 ```
@@ -73,17 +76,20 @@ Reglas del formato:
 ```
 ¡Gracias por escribirnos! Ya anotamos la medida: 1,50 × 0,60, con zócalo. Para prepararte el presupuesto lo antes posible, contanos:
 
-1. Material y color que te interesan.
+1. Material y color que te interesan. Los podés ver acá: https://blackstones.com.ar/#colores
 2. ¿Lleva bacha o anafe?
 3. ¿En qué zona o barrio sería?
-4. ¿El mueble ya está colocado y despejado?
+4. Para tenerlo en cuenta, ¿los muebles ya están colocados y despejados?
+5. ¿Es una instalación nueva o se trata de reemplazar una mesada existente?
 
 Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
 ```
 
-- **El punto 5 es el que dice dónde poner el esfuerzo.** Si el cliente contesta lo demás y ese no, se le repite una vez, como última línea del mensaje siguiente. De nuestros chats: cuando se pide una lista, vuelve más o menos la mitad de los puntos.
+- **Los puntos 5 y 6 son los que dicen dónde poner el esfuerzo.** Si el cliente contesta lo demás y esos no, se le repiten una vez, al final del mensaje siguiente. De nuestros chats: cuando se pide una lista, vuelve más o menos la mitad de los puntos.
 - **Ya no se pregunta para cuándo.** Si el cliente contesta que no y cuenta solo la fecha, se toma; si no la cuenta, queda como "todavía no".
 - Si contesta que no sabe qué material, se le mandan los dos catálogos y la guía de tres líneas (formato de octubre, al final de esta sección).
+
+Todos los que llegan del anuncio abren con el mismo mensaje: "Hola, buenas. Vi el anuncio y me interesa cotizar una mesada de cocina." (dueño, 22/11/2026). Lo que se le carga a la IA de WhatsApp, con este mensaje y sus variantes como ejemplos de respuestas, está en `knowledge/ejemplos-de-respuestas.md`.
 
 Para pegar en las instrucciones del bot:
 
@@ -93,10 +99,11 @@ Cuando el cliente escribe por primera vez, respondé con este mensaje, tal cual:
 ¡Gracias por escribirnos! Para prepararte el presupuesto lo antes posible, contanos:
 
 1. Medidas: largo x ancho.
-2. Material y color que te interesan.
+2. Material y color que te interesan. Los podés ver acá: https://blackstones.com.ar/#colores
 3. ¿Lleva bacha, anafe o zócalo?
 4. ¿En qué zona o barrio sería?
-5. ¿El mueble ya está colocado y despejado?
+5. Para tenerlo en cuenta, ¿los muebles ya están colocados y despejados?
+6. ¿Es una instalación nueva o se trata de reemplazar una mesada existente?
 
 Si tenés una foto del lugar o un plano con las medidas, también nos sirve como referencia.
 
@@ -144,7 +151,7 @@ Lo que este mensaje no dice (qué incluye, que es un presupuesto estimado, que e
 
 **Cocina nueva, o mueble con la mesada vieja encima.** El dueño, 22/11/2026, sobre una mesada de más de cuatro metros: "acá podemos asumir que está haciendo una cocina nueva, con mueble nuevo; pero está el caso del que ya tiene un mueble con un toper" (la mesada vieja encima).
 
-**Un dibujo no es un mueble.** El dueño, 22/11/2026, sobre un cliente que mandó las medidas dibujadas en un cuaderno: "por más que tengan dibujitos en cuadernos u hojas, no hay que confiarse: probablemente no tengan nada". Y sobre otro que mandó un plano y un render: "preguntar por mueble despejado". Con un dibujo, un plano o un render no se asume nada: el mensaje termina con "¿El mueble ya está colocado y despejado?".
+**Un dibujo no es un mueble.** El dueño, 22/11/2026, sobre un cliente que mandó las medidas dibujadas en un cuaderno: "por más que tengan dibujitos en cuadernos u hojas, no hay que confiarse: probablemente no tengan nada". Y sobre otro que mandó un plano y un render: "preguntar por mueble despejado". Con un dibujo, un plano o un render no se asume nada: el mensaje termina con las dos preguntas, "Para tenerlo en cuenta, ¿los muebles ya están colocados y despejados?" y "¿Es una instalación nueva o se trata de reemplazar una mesada existente?".
 
 **El que manda las medidas o el plano y pide "materiales, modelos y precios"**, sin decir color. El dueño, 22/11/2026: "mejor pasale el rango de cada material y listo".
 
@@ -239,7 +246,7 @@ Información mínima para cotizar:
 
 | Campo | Por qué importa | Cómo preguntamos si no lo da |
 |---|---|---|
-| Estado de la obra y urgencia | Desde el 22/11/2026 se pregunta en el primer mensaje: dice si se puede medir y cuánto se trabaja el chat | "¿El mueble ya está colocado y despejado?" (sección 2) |
+| Estado de la obra y urgencia | Desde el 22/11/2026 se pregunta en el primer mensaje: dice si se puede medir y cuánto se trabaja el chat | "Para tenerlo en cuenta, ¿los muebles ya están colocados y despejados?" y "¿Es una instalación nueva o se trata de reemplazar una mesada existente?" (sección 2) |
 | Largo x ancho | Base del cálculo | Pregunta directa |
 | Material aproximado | Define rango de precio | "¿Granito / cuarzo / sinterizada? Si no sabés, te ayudo a elegir" |
 | Zona | Define costo de flete | "¿En qué barrio estás?" |

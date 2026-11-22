@@ -6,6 +6,49 @@
 
 ---
 
+## Actualización del 22/11/2026: cómo es hoy el producto
+
+> Búsqueda del 22/11/2026, hecha antes de escribir los ejemplos de respuestas para la IA (`02-marketing/whatsapp/knowledge/ejemplos-de-respuestas.md`). Se leyeron la ayuda oficial de WhatsApp (cinco artículos, en inglés y en español), la página oficial del producto y cuatro guías de empresas que venden servicios sobre esto. Lo oficial y lo de proveedores va separado: lo segundo es opinión.
+> Lo que sigue manda sobre el resto de este doc donde se contradigan: lo de abajo es de mayo de 2026.
+
+**Lo que dice Meta**
+
+- **Cómo se llama.** En la app es "Tu agente de IA"; el producto, Meta Business Agent. El menú está en Herramientas.
+- **Dónde se le enseña.** Herramientas → Tu agente de IA → Conocimientos. Ahí están "Ejemplos de respuestas" (botón Añadir) y "Archivos y enlaces" (documentos e imágenes). En la misma pantalla del agente: "Compartir información de la empresa", "Recomendar lo más vendido", "Compartir información de compra" y "Pedir información del cliente" (se elige cuándo pedirla y qué datos).
+- **Qué es un ejemplo de respuesta.** Sirve para "demostrar el tipo de respuesta" que el agente tiene que dar a ciertas preguntas, y puede llevar información del negocio. Se editan y se borran desde los tres puntitos; con más de tres aparece "Ver todo".
+- **Aprende de lo que se contesta a mano.** Cuando la empresa responde a mano en un chat donde contesta el agente, este puede guardar los mensajes con información nueva del negocio y usarlos para responder mensajes parecidos. Se revisa y se borra en Conocimientos → "Revisar conocimientos de la IA" → "Ver todos".
+- **De dónde más saca.** Del perfil, el sitio web, el catálogo, la descripción, la dirección y el horario; según la página del producto, también de la página de Facebook y de los chats anteriores. Se le pueden subir listas de precios, y entre lo que hace figura dar precios.
+- **Derivación a una persona.** El agente decide qué chats necesitan atención y los deja en una lista aparte dentro de Chats. Cuando la empresa responde a mano, el agente deja de contestar en ese chat. La página del producto dice que se le pueden marcar temas para que los pase siempre a una persona.
+- **A quién le contesta.** Se elige: todos los chats nuevos, todos menos los contactos, solo los que llegan de anuncios, o pausado pero aprendiendo.
+- **Corregirlo.** Se puede chatear con el agente como si uno fuera un cliente. Si una respuesta no gusta, se reescribe, y eso vale para las siguientes.
+- **Avisos.** Los mensajes que genera "pueden no ser exactos o apropiados". Los conocimientos no se manejan desde WhatsApp Web: solo desde el celular. El cliente ve un aviso de que la IA de Meta recibe los chats.
+
+**Lo que dicen los proveedores (opinión)**
+
+- El agente sigue mejor un ejemplo que un adjetivo como "amable". Aconsejan cargar de tres a cinco respuestas reales que hayan gustado.
+- Probarlo con mensajes como "Hola", "¿Precio?" y mensajes con errores de tipeo.
+- Varios aconsejan decirle que no dé precios. El lanzamiento mundial fue el 3/6/2026.
+
+**Lo que no dice nadie**
+
+- Si un ejemplo se copia letra por letra o se usa de guía. Si se puede fijar un primer mensaje exacto.
+- Cuántos ejemplos entran y qué largo puede tener cada uno.
+- Qué hace con una foto, un plano o un dibujo que manda el cliente.
+- Qué texto ve el cliente cuando el chat pasa a una persona.
+
+**Fuentes**
+
+- Ayuda de WhatsApp, "Cómo entrenar a Meta Business Agent": https://faq.whatsapp.com/1868464300583929/
+- Ayuda de WhatsApp, sobre usar Meta Business Agent para chatear con clientes: https://faq.whatsapp.com/291930066973116/
+- Ayuda de WhatsApp, cómo configurarlo: https://faq.whatsapp.com/1153795669452207/
+- Ayuda de WhatsApp, comportamiento en los chats: https://faq.whatsapp.com/810657551906035/
+- Ayuda de WhatsApp, la lista de derivación: https://faq.whatsapp.com/1057159496566780/
+- Página oficial del producto: https://whatsappbusiness.com/products/business-app-ai-agent/
+- Página oficial, recursos: https://whatsappbusiness.com/resources/resource-library/meta-business-agent-whatsapp/
+- Proveedores: https://ezcontact.ai/en/blog/2026-10-18-meta-business-agent-whatsapp-business-app-guide/ · https://marvant.com/blog/how-to-setup-meta-business-agent-whatsapp/ · https://www.greenadsglobal.com/post/meta-business-agent-for-whatsapp-business-app · https://wabetainfo.com/meta-introduces-ai-business-agent-for-whatsapp-worldwide/
+
+---
+
 ## El feature
 
 **Nombre oficial:** "Business AI" (también referido como "Meta Business AI" o "Meta AI business assistant").

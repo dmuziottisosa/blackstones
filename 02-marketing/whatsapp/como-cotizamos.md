@@ -6,7 +6,7 @@
 
 ## Antes de cotizar: qué trajo el cliente y si tiene el mueble (dueño, 22/11/2026)
 
-El dueño fijó ese día el primer mensaje (cinco puntos; el 5 es "¿El mueble ya está colocado y despejado?") y tres criterios: "esto nos hace entender dónde poner los esfuerzos"; "lo que no quiero es sobre-trabajar para el que no tiene el mueble listo ni siquiera"; y, del que escribe la medida y el color en una línea, "estos son los que abundan" y "los que hay que resolver rápido".
+El dueño fijó ese día el primer mensaje (seis puntos; los dos últimos preguntan si los muebles ya están colocados y despejados y si es una instalación nueva o un reemplazo) y tres criterios: "esto nos hace entender dónde poner los esfuerzos"; "lo que no quiero es sobre-trabajar para el que no tiene el mueble listo ni siquiera"; y, del que escribe la medida y el color en una línea, "estos son los que abundan" y "los que hay que resolver rápido".
 
 La respuesta de quien cotiza empieza diciendo, en una línea, qué trajo el cliente y si se sabe si tiene el mueble. Y según eso:
 
@@ -63,7 +63,7 @@ Siempre tres cosas, en este orden:
 
 ## Si el cliente todavía no pasó nada
 
-Se manda la primera respuesta de `flow.md` (sección 2, "Formato vigente de la primera respuesta"): el mensaje de cinco puntos del dueño, sin los puntos que el cliente ya haya contestado. Los dos catálogos y la guía de tres líneas de materiales van después, si dice que no sabe qué material.
+Se manda la primera respuesta de `flow.md` (sección 2, "Formato vigente de la primera respuesta"): el mensaje de seis puntos del dueño, sin los puntos que el cliente ya haya contestado. Los dos catálogos y la guía de tres líneas de materiales van después, si dice que no sabe qué material.
 
 ## Sin confirmar
 

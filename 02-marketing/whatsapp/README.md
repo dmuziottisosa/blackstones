@@ -9,7 +9,8 @@ Operación de venta por WhatsApp — el verdadero motor de cierre del negocio.
 | `flow.md` ⭐ | Flow de venta completo: primer contacto → calificación → cotización → seguimiento → cierre |
 | `como-cotizamos.md` | Cómo se cotiza cuando el dueño pega un chat: la cuenta, sus reglas y qué se entrega |
 | `recommendation-patterns.md` | Cómo se contesta "¿qué me recomendás?" |
-| `knowledge/` | Versiones viejas de lo que se le cargó al bot (la última, Pilar v1.7, mayo 2026). **No es lo que el bot tiene hoy:** en noviembre de 2026 escribe distinto, y sus instrucciones actuales no están en el repo |
+| `knowledge/ejemplos-de-respuestas.md` ⭐ | Lo que se le carga hoy a la IA de WhatsApp (Tu agente de IA → Conocimientos → Ejemplos de respuestas), con los pasos para cargarlo |
+| `knowledge/` (el resto) | Versiones viejas de lo que se le cargó al bot (la última, Pilar v1.7, mayo 2026). No es lo que el bot tiene hoy |
 | `templates/` | Mensajes por escenario (primer respuesta, follow-up 24h, no contestó en 48h, dudas frecuentes, cierre) |
 | `objection-bank.md` (pendiente) | Objeciones reales del avatar + respuestas que funcionaron |
 
@@ -24,7 +25,7 @@ Operación de venta por WhatsApp — el verdadero motor de cierre del negocio.
 
 - **< 2 horas de respuesta** en horario hábil (7am-9pm). Default sagrado.
 - **Saludar + presentarse en 1 línea.** No mandar 5 mensajes seguidos como WhatsApp marketing genérico.
-- **El primer mensaje es el de cinco puntos del dueño** (22/11/2026): largo x ancho, material y color, bacha y anafe, zona y "¿El mueble ya está colocado y despejado?". De lo que el cliente ya dijo no se pregunta. Ver `flow.md`, sección 2.
+- **El primer mensaje es "la vieja confiable", de seis puntos** (dueño, 22/11/2026): medidas, material y color, bacha y anafe, zona, si los muebles ya están colocados y despejados y si es una instalación nueva o un reemplazo. De lo que el cliente ya dijo no se pregunta. Ver `flow.md`, sección 2.
 - **El que llega con la medida y el color se resuelve rápido**, con una cotización corta. El trabajo de después (opciones, recálculos, seguimiento) es para el que ya tiene el mueble.
 - **Cotización por escrito** dentro de 24 hs (idealmente < 4 hs).
 - **Nunca audios largos** para responder. Si el cliente manda audio, lo escuchamos y respondemos por escrito.
