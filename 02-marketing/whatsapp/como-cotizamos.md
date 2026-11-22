@@ -4,6 +4,19 @@
 >
 > `status:` en uso. Lo que dice "sin confirmar" es práctica que el dueño no objetó, no una regla suya.
 
+## Antes de cotizar: qué trajo el cliente y si tiene el mueble (dueño, 22/11/2026)
+
+El dueño fijó ese día el primer mensaje (cinco puntos; el 5 es "¿El mueble ya está colocado? Si no, ¿para cuándo estaría?") y tres criterios: "esto nos hace entender dónde poner los esfuerzos"; "lo que no quiero es sobre-trabajar para el que no tiene el mueble listo ni siquiera"; y, del que escribe la medida y el color en una línea, "estos son los que abundan" y "los que hay que resolver rápido".
+
+La respuesta de quien cotiza empieza diciendo, en una línea, qué trajo el cliente y si se sabe si tiene el mueble. Y según eso:
+
+- **Trajo la medida y el color (o el tono):** la cotización corta de `flow.md`, en el momento. Un color concreto, su número y, si todavía no dijo nada del mueble, esa pregunta como última línea. No se le pide nada antes.
+- **Le falta la medida o el color:** el primer mensaje de `flow.md`, solo con los puntos que faltan. De lo que ya sabemos, no se pregunta. Sin color no hay número, como siempre.
+- **Dijo que ya tiene el mueble:** todo el trabajo. Opciones para comparar, ajustes y seguimiento.
+- **Dijo que todavía no lo tiene:** hasta ahí. Queda el número que ya recibió, o la respuesta corta de `flow.md`. Sin opciones ni alternativas.
+
+Si el cliente contesta lo demás y no lo del mueble, se le repite una vez, al final del mensaje siguiente. Un arquitecto o una obra con plano no se clasifican así: ahí decide el dueño. El porqué: `01-strategy/decision-log/2026-11-22-la-primera-pregunta-clasifica.md`.
+
 ## Qué entrega quien cotiza
 
 Siempre tres cosas, en este orden:
@@ -48,7 +61,7 @@ Siempre tres cosas, en este orden:
 
 ## Si el cliente todavía no pasó nada
 
-Se manda la primera respuesta de `flow.md` (sección 2, "Formato vigente de la primera respuesta"): los datos que faltan, los dos catálogos y la guía de tres líneas de materiales.
+Se manda la primera respuesta de `flow.md` (sección 2, "Formato vigente de la primera respuesta"): el mensaje de cinco puntos del dueño, sin los puntos que el cliente ya haya contestado. Los dos catálogos y la guía de tres líneas de materiales van después, si dice que no sabe qué material.
 
 ## Sin confirmar
 

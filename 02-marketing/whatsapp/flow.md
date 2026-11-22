@@ -11,6 +11,7 @@
 
 ```
 1. Primer contacto         → respondemos en < 2 hs con saludo + pregunta clave
+                              (desde el 22/11/2026: el mensaje de cinco puntos; el 5, el mueble)
 2. Calificación             → medidas, material aproximado, zona, urgencia
 3. Cotización por escrito   → < 24 hs (idealmente < 4 hs), cerrada, todo adentro
 4. Follow-up                → si no responde en 24 / 72 hs
@@ -45,11 +46,122 @@ Con eso te paso un primer rango de precio en el día.
 
 ---
 
-### Formato vigente de la primera respuesta (en uso desde oct 2026)
+### Formato vigente de la primera respuesta (dueño, 22/11/2026)
 
-> Es el que se viene mandando de verdad. Manda sobre el template base de arriba. Recuperado de las conversaciones reales el 2026-11-15, para que no dependa de la memoria de nadie.
+> Lo escribió el dueño el 22/11/2026: "la dirección tiene que ser esta". Manda sobre el template base de arriba y sobre el formato de octubre, que quedó al final de esta sección.
 
 Cuando el contacto llega del anuncio sin ningún dato:
+
+```
+¡Gracias! Para pasarte el presupuesto cerrado lo más rápido posible, contanos:
+
+1. Medidas (largo x ancho) y si es recta o en L
+2. Material que te interesa (si no sabés, te mostramos opciones)
+3. ¿Lleva bacha y anafe? ¿Zócalo?
+4. Zona o barrio
+5. ¿El mueble ya está colocado? Si no, ¿para cuándo estaría?
+
+Si tenés una foto o un plano, mandalo y es todavía más rápido.
+```
+
+Reglas del formato:
+- Va tal cual, con sus números. Es también el primer mensaje que tiene que mandar el bot.
+- **De lo que ya sabemos, no se pregunta.** Si el cliente ya pasó algo, esos puntos se sacan y se piden solo los que faltan, renumerados.
+- **El punto 5 es el que dice dónde poner el esfuerzo.** Si el cliente contesta lo demás y ese no, se le repite una vez, como última línea del mensaje siguiente. De nuestros chats: cuando se pide una lista, vuelve más o menos la mitad de los puntos.
+- Si contesta que no sabe qué material, se le mandan los dos catálogos y la guía de tres líneas (formato de octubre, al final de esta sección).
+
+Para pegar en las instrucciones del bot:
+
+```
+Cuando el cliente escribe por primera vez, respondé con este mensaje, tal cual:
+
+¡Gracias! Para pasarte el presupuesto cerrado lo más rápido posible, contanos:
+
+1. Medidas (largo x ancho) y si es recta o en L
+2. Material que te interesa (si no sabés, te mostramos opciones)
+3. ¿Lleva bacha y anafe? ¿Zócalo?
+4. Zona o barrio
+5. ¿El mueble ya está colocado? Si no, ¿para cuándo estaría?
+
+Si tenés una foto o un plano, mandalo y es todavía más rápido.
+
+Si el cliente ya dijo alguno de esos datos, no se lo vuelvas a pedir: pedí solo los que faltan. No agregues otras preguntas ni des precios.
+```
+
+### Cómo se sigue: a quién se le trabaja la cotización (dueño, 22/11/2026)
+
+> El dueño, el mismo día:
+> - "Esto nos hace entender dónde poner los esfuerzos."
+> - "Lo que no quiero es sobre-trabajar para el que no tiene el mueble listo ni siquiera."
+> - Del cliente que escribe la medida y el color en una línea: "Estos son los que hay que resolver rápido", "los más comunes, y los que más hay que resolver la duda", "estos son los que abundan".
+>
+> El porqué y lo que falta saber: `01-strategy/decision-log/2026-11-22-la-primera-pregunta-clasifica.md`. Los detalles que el dueño no dijo (dos semanas, un solo color, repetir la pregunta una sola vez) son una propuesta: los confirma él.
+
+**Qué se manda según lo que trajo el cliente**
+
+| Qué trajo | Qué se le manda |
+|---|---|
+| La medida y el color, o el tono ("negro", "bien claro"). Es el caso que abunda | La cotización corta, en el momento. No se le pide nada antes. |
+| La medida sin color, o el color sin medida | El primer mensaje, solo con los puntos que faltan. |
+| Nada todavía | El primer mensaje entero. |
+
+La cotización corta se arma como se viene respondiendo: un color concreto y su número (si dijo un tono, se elige uno y se dice cuál; una segunda opción solo si hay una más económica); si no dijo bacha ni anafe, se suman los dos y se avisa; el flete se pregunta; y, si todavía no dijo nada del mueble, el mensaje termina con esa pregunta.
+
+```
+Hola, buen día. Te paso el presupuesto para tu mesada de [largo] × [ancho]:
+
+◾ *[Color] ([material])*: [USD o $ monto]
+Incluye fabricación, traforos para bacha y anafe y zócalo de 5 cm. Si no lleva alguno de los dos, avisame y lo ajusto.
+
+◾ *Flete y colocación*: ¿en qué zona es la obra? Así te paso el costo.
+
+Es un presupuesto estimado: nuestro técnico rectifica las medidas en obra antes de fabricar, y ahí cerramos el número final.
+
+Plazo: 20 días corridos desde la medición. ¿El mueble ya está colocado? Si no, ¿para cuándo estaría?
+```
+
+**Qué se hace con lo que contesta del mueble**
+
+| Qué contesta | Qué hacemos |
+|---|---|
+| Ya está colocado, o lo recibe en estos días (dos semanas) | Todo el trabajo: opciones para comparar, ajustes, seguimiento (sección 5) y coordinar la medición. Va primero. |
+| Todavía no: falta, o no sabe cuándo | Si ya recibió su número, queda ese y se cierra con el mensaje de abajo. Si no, la respuesta corta. Sin opciones, sin recálculos y sin seguimiento. |
+| No contesta, después de repetirle la pregunta | Igual que el que no lo tiene. |
+
+Dos casos aparte:
+- **Un arquitecto o una obra con plano** no se clasifican así: preguntan con meses de anticipación y son pedidos grandes. Ahí decide el dueño.
+- **Una cotización larga de armar** (varias piezas, plano, varias opciones) de alguien que no dijo si tiene el mueble: primero la pregunta. La cotización se arma con la respuesta.
+
+**Al que no tiene el mueble**
+
+Si ya recibió su número:
+
+```
+Gracias por contarme. El número que te pasé te sirve de referencia. Nosotros medimos con el mueble ya colocado: cuando lo tengas, escribime por acá y en 24 hs te paso el presupuesto cerrado y coordinamos la medición.
+```
+
+Si pasó medidas y color y todavía no recibió nada (un solo color, un solo número):
+
+```
+Gracias por contarme. Para que tengas una referencia, tu mesada de [largo] × [ancho] en *[color] ([material])* ronda los [USD o $ monto], con fabricación y zócalo de 5 cm. El flete y la colocación van aparte.
+
+Nosotros medimos con el mueble ya colocado. Cuando lo tengas, escribime por acá: en 24 hs te paso el presupuesto cerrado y coordinamos la medición.
+```
+
+Si no pasó medidas o color (no se le piden: se le deja el catálogo):
+
+```
+Gracias por contarme. Nosotros medimos con el mueble ya colocado, así que tenés tiempo para elegir el color.
+
+Te dejo el catálogo con todos los colores: https://blackstones.com.ar/#colores
+Y la colección de sinterizados de Suprastone: https://www.suprastone.com.ar/colecciones/
+
+Cuando tengas el mueble colocado, pasame las medidas y el color que te gustó, y en 24 hs te paso el presupuesto cerrado por escrito.
+```
+
+### Formato de octubre de 2026 (ya no es el primer mensaje)
+
+> Fue la primera respuesta desde octubre hasta el 22/11/2026. Hoy sirve para el que contesta que no sabe qué material: lleva los dos catálogos y la guía de tres líneas.
 
 ```
 Hola, ¡gracias por escribirnos! Para pasarte el presupuesto necesito:
@@ -72,10 +184,7 @@ Para orientarte rápido:
 Decime cuál te gusta y te paso el presupuesto. Si dudás entre varios, te cotizo dos o tres para que compares.
 ```
 
-Reglas del formato:
-- Viñetas con ◾, nunca con guiones ni números.
-- Los dos catálogos van siempre en la primera respuesta.
-- Se ofrece cotizar dos o tres opciones para comparar.
+En los mensajes que no son el primero (cotizaciones, catálogos), las viñetas siguen siendo ◾, nunca guiones.
 
 ---
 
@@ -85,11 +194,10 @@ Información mínima para cotizar:
 
 | Campo | Por qué importa | Cómo preguntamos si no lo da |
 |---|---|---|
+| Estado de la obra y urgencia | Desde el 22/11/2026 se pregunta en el primer mensaje: dice si se puede medir y cuánto se trabaja el chat | "¿El mueble ya está colocado? Si no, ¿para cuándo estaría?" (sección 2) |
 | Largo x ancho | Base del cálculo | Pregunta directa |
 | Material aproximado | Define rango de precio | "¿Granito / cuarzo / sinterizada? Si no sabés, te ayudo a elegir" |
 | Zona | Define costo de flete | "¿En qué barrio estás?" |
-| Urgencia | Prioriza producción | "¿Para cuándo la necesitarías?" |
-| Estado de la obra | Valida que se puede medir | "¿Los muebles ya están puestos?" |
 
 Si el cliente no da uno de estos, **lo pedimos sin rodeos**. La velocidad es la promesa — preguntar 3 veces lo mismo la rompe.
 
@@ -185,6 +293,7 @@ Cualquier cosa estoy.
 ```
 
 ### Reglas de follow-up
+- **El seguimiento es para quien ya tiene el mueble colocado** (22/11/2026, a confirmar por el dueño). Al que todavía no lo tiene se le manda la respuesta corta de la sección 2 y no se lo persigue: queda en él avisar.
 - **3 intentos máximo.** Después se considera enfriado.
 - **Cada intento agrega valor**, no solo recuerda. (Ofrecer alternativa, ajuste, asesoramiento extra.)
 - **Tono casual,** no comercial agresivo. Test de Living siempre.
