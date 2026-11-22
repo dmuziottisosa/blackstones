@@ -142,7 +142,9 @@ El plazo son 20 días corridos desde que vamos a medir.
 
 Lo que este mensaje no dice (qué incluye, que es un presupuesto estimado, que el granito no lleva garantía y la pregunta del mueble) va en el mensaje siguiente, cuando conteste la zona, con el formato de la sección 4. Esto último lo puso quien escribió el doc: lo confirma el dueño.
 
-**Cocina nueva, o mueble con la mesada vieja encima.** El dueño, 22/11/2026, sobre una mesada de más de cuatro metros: "acá podemos asumir que está haciendo una cocina nueva, con mueble nuevo; pero está el caso del que ya tiene un mueble con un toper". Para ese segundo caso todavía no dijo qué se manda. Propuesta, a confirmar: cuando no se puede asumir que es cocina nueva (una medida chica, o el cliente habla de cambiar la mesada), el mensaje termina con "¿El mueble ya está colocado y despejado?".
+**Cocina nueva, o mueble con la mesada vieja encima.** El dueño, 22/11/2026, sobre una mesada de más de cuatro metros: "acá podemos asumir que está haciendo una cocina nueva, con mueble nuevo; pero está el caso del que ya tiene un mueble con un toper" (la mesada vieja encima).
+
+**Un dibujo no es un mueble.** El dueño, 22/11/2026, sobre un cliente que mandó las medidas dibujadas en un cuaderno: "por más que tengan dibujitos en cuadernos u hojas, no hay que confiarse: probablemente no tengan nada". Y sobre otro que mandó un plano y un render: "preguntar por mueble despejado". Con un dibujo, un plano o un render no se asume nada: el mensaje termina con "¿El mueble ya está colocado y despejado?".
 
 **El que manda las medidas o el plano y pide "materiales, modelos y precios"**, sin decir color. El dueño, 22/11/2026: "mejor pasale el rango de cada material y listo".
 
