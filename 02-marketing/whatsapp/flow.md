@@ -71,6 +71,7 @@ Si tenés una foto del lugar o un plano con las medidas, también nos sirve como
 
 Reglas del formato:
 - Va tal cual, con sus números. Es también el primer mensaje que tiene que mandar el bot.
+- **Se habla amable** (dueño, 22/11/2026: "y hablar así, amable"). Una pregunta lleva una entrada suave, como "Para tenerlo en cuenta, ¿…?". Vale para todos los mensajes, no solo para este.
 - **De lo que ya sabemos, no se pregunta.** Si el cliente ya pasó algo, esos puntos se sacan, se piden solo los que faltan, renumerados, y el mensaje arranca diciendo lo que ya se anotó. Ejemplo, para uno que escribió "1,50 x 0,60 con zócalo":
 
 ```

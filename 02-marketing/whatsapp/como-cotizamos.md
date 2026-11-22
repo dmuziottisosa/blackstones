@@ -40,6 +40,7 @@ Siempre tres cosas, en este orden:
 
 - **El que abre con medidas, material y color, aunque no sea exacto ("granito negro"): se cotiza conservador** (22/11/2026). Con bacha y anafe, en los dos más pedidos de ese color, y se pregunta el barrio o la zona. En granito negro, los dos más pedidos son Negro Boreal y Negro Brasil. El mensaje es breve y no dice qué incluye: "más largo no es mejor". El formato está en `flow.md`, sección 2.
 - **El que manda las medidas o el plano y pide materiales y precios, sin decir color: el rango de cada material, y listo** (22/11/2026). Con los catálogos. Es la excepción a "sin color, sin número": no es un número, es un rango. El formato y de dónde sale cada rango están en `flow.md`, sección 2.
+- **Se habla amable** (22/11/2026). Una pregunta lleva una entrada suave: "Para tenerlo en cuenta, ¿los muebles ya están colocados y despejados?", no la pregunta seca.
 - **Sin color elegido, sin número.** Si pidió "sinterizado" y nada más, se le manda el catálogo y se le pide que elija (17/10/2026). Si dijo una familia de color ("negro", "blanco y negro"), se cotiza uno concreto de cada una y se dice cuál se eligió.
 - **Granito claro y poroso (Blanco Dallas y parecidos): se cotiza y se avisa que tiende a mancharse.** Un aviso profesional, de dos líneas, sin asustar ni alargar (17/10/2026).
 - **Negro Absoluto en granito es carísimo:** se dice que es importado y más costoso, y se ofrece el mismo negro en cuarzo (10/11/2026).

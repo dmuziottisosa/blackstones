@@ -155,7 +155,7 @@ Preguntá antes de adivinar. Una sola fuente de verdad por tema. El resto cross-
 - **Presupuesto cerrado por escrito en 24 hs por WhatsApp.** Es el mecanismo diferenciador.
 - **Granito sin garantía** se dice explícito. Suma confianza, no resta.
 - **Avatar principal: Carolina** (38-55, ABC1, en obra). 80% del presupuesto va a ella.
-- **Tono:** rioplatense, "vos", sin jerga, conversacional. Nada de marketing de manual.
+- **Tono:** rioplatense, "vos", sin jerga, conversacional. Nada de marketing de manual. Y amable (dueño, 22/11/2026): una pregunta lleva una entrada suave, como "Para tenerlo en cuenta, ¿…?".
 - **Test de Living:** ¿podría aparecer en La Nación Living sin desentonar?
 
 ---
