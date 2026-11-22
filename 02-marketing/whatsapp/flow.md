@@ -72,7 +72,7 @@ https://blackstones.com.ar/#colores
 
 Reglas del formato:
 - Va tal cual, con sus números. Es también el primer mensaje que tiene que mandar el bot.
-- **Se arma para que se lea en un celular.** Cada punto entra en un renglón; una pregunta larga o un link no van dentro de la lista, porque la parten. Se probó en una pantalla de 360 px: esta versión ocupa 14 renglones; la de seis puntos con el link adentro, 17, con la lista cortada.
+- **Se arma para que se lea en un celular.** Cada punto entra en un renglón; una pregunta larga o un link no van dentro de la lista, porque la parten. Se probó en una pantalla de 360 px: esta versión ocupa 13 renglones; la de seis puntos con el link adentro, 17, con la lista cortada.
 - **Se habla amable** (dueño, 22/11/2026: "y hablar así, amable"). Una pregunta lleva una entrada suave, como "Para tenerlo en cuenta, ¿…?". Vale para todos los mensajes, no solo para este.
 - **De lo que ya sabemos, no se pregunta.** Si el cliente ya pasó algo, esos puntos se sacan, se piden solo los que faltan, renumerados, y el mensaje arranca diciendo lo que ya se anotó. Ejemplo, para uno que escribió "1,50 x 0,60 con zócalo":
 
