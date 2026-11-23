@@ -132,6 +132,16 @@ Cómo respondemos en BlackStones:
 - Cada presupuesto sale de una cuenta con las medidas de ese cliente. Un precio puesto en un ejemplo, la IA lo puede repetir para otra medida.
 - **La IA también aprende de lo que se contesta a mano.** Según la ayuda oficial, puede guardar los mensajes que traigan información nueva del negocio y usarlos para responder mensajes parecidos. Una cotización mandada a mano puede quedar guardada. Cada tanto conviene entrar a Conocimientos → **Revisar conocimientos de la IA** → **Ver todos** y borrar lo que tenga precios.
 
+## Lo que se vio con la IA ya andando (23/11/2026)
+
+En un chat del 23/11 la IA mandó el primer mensaje como estaba cargado (una versión anterior a esta) y, cuando la clienta contestó que era para un vanitory, armó sola una segunda lista adaptada. De eso salen tres cosas:
+
+- **Usa el ejemplo de guía, no lo copia letra por letra.** Le cambió el orden, le sumó el nombre de la clienta y el link de los colores.
+- **En su versión adaptada no preguntó por el mueble.** Es la pregunta que más importa: hay que mirar que no la pierda.
+- **Al derivar mezcló cosas:** dijo "tu vanitory y la mesada de cocina", cuando la clienta había pedido solo el vanitory.
+
+Es un solo chat: sirve de aviso, no de regla.
+
 ## Antes de dejarlo andando
 
 - **Probarlo.** Escribirle a la IA como si fuera un cliente, con el mensaje del anuncio, y ver si sale la respuesta tal cual. Meta no dice si copia el ejemplo letra por letra o lo reescribe a su manera.
