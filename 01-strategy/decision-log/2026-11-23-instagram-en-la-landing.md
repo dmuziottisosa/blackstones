@@ -22,7 +22,7 @@ El dueño: "si nos va a complicar, vemos otras formas que no sea conectando IG e
 
 ## Qué se hizo al final (24/11)
 
-El dueño eligió pasar las fotos él: subió cuatro al repo y mandó dos por el chat ("Te lo subí al repo. Sin quitar los otros, agregar a lo último que salió del taller"). La sección muestra doce fotos fijas en un mosaico, y las próximas se suman de a tres. Al bajar la página publicada se vio que el cambio para los posts en vivo nunca se había subido; el script se sacó del `index.html` del repo para que el repo sea igual a lo publicado (queda en el commit `695d407`). Cómo se suman fotos: `04-operations/instagram-en-la-landing.md`.
+El dueño eligió pasar las fotos él: subió cuatro al repo y mandó dos por el chat ("Te lo subí al repo. Sin quitar los otros, agregar a lo último que salió del taller"). La sección muestra doce fotos fijas en un mosaico, y las próximas se suman de a tres. Sobre el movimiento, el mismo día: "en celular que no se mueva, mejor; en PC podemos hacer una animación más elaborada". En el celular y en la tablet queda quieto; en computadora las fotos entran, la principal se intercambia con las medianas cada 6 segundos y el mouse las frena. Al bajar la página publicada se vio que el cambio para los posts en vivo nunca se había subido; el script se sacó del `index.html` del repo para que el repo sea igual a lo publicado (queda en el commit `695d407`). Cómo se suman fotos: `04-operations/instagram-en-la-landing.md`.
 
 ## Qué se descartó
 

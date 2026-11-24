@@ -1177,18 +1177,29 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   .step:nth-child(4){transition-delay:.36s}
 }
 
-/* ===== El mosaico se mueve, sin cargar nada =====
-   Entra como los números y los pasos: cada foto aparece con un fundido corto, una detrás de
-   otra, cuando la sección llega a la pantalla. Y la foto principal respira: un zoom muy lento,
-   que corre solo mientras se ve. Son solo opacity y transform: no bajan nada ni redibujan la
-   página. Sin JS, o con "reducir movimiento" en el teléfono, queda todo quieto y a la vista. */
-@media(prefers-reduced-motion:no-preference){
-  .ig-t.pre{opacity:0;transform:translateY(14px);transition:none}
-  .ig-t.in{opacity:1;transform:none;transition:opacity .6s ease,transform .6s var(--ease)}
-  .ig-p{position:relative;overflow:hidden}
-  .ig-p::before{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:inherit;animation:igRespira 16s ease-in-out infinite alternate;animation-play-state:paused}
-  .ig-grid.ve .ig-p::before{animation-play-state:running}
-  @keyframes igRespira{to{transform:scale(1.07)}}
+/* ===== El mosaico se mueve, solo en computadora =====
+   En el celular y en la tablet queda quieto (dueño, 24/11/2026: "en celular que no se mueva,
+   mejor; en PC podemos hacer una animación más elaborada"). En computadora:
+   1) al llegar a la sección, la principal aparece asentándose, las medianas entran desde la
+      derecha y las chicas van apareciendo en cadena;
+   2) cada 6 segundos la principal se intercambia con una de las medianas, con un fundido, y
+      la que queda de principal hace un zoom muy lento;
+   3) con el mouse encima, los cambios se frenan y la foto que se mira queda clara mientras
+      las demás bajan un poco.
+   Son solo opacity y transform. Con "reducir movimiento", o sin JS, queda todo quieto. */
+@media (min-width:900px) and (hover:hover) and (prefers-reduced-motion:no-preference){
+  .ig-t.pre{opacity:0;transform:scale(.86);transition:none}
+  .ig-g.pre{transform:translateX(28px)}
+  .ig-p.pre{transform:scale(1.05)}
+  .ig-t.in{opacity:1;transform:none;transition:opacity .55s ease,transform .7s var(--ease)}
+  .ig-p.in{transition:opacity .9s ease,transform 1.2s var(--ease)}
+  .ig-p,.ig-g{position:relative;z-index:0;overflow:hidden}
+  .ig-capa{position:absolute;top:0;right:0;bottom:0;left:0;background:center/cover no-repeat;opacity:0;transition:opacity .9s ease}
+  .ig-capa.ve{opacity:1}
+  .ig-p .ig-capa.ve{animation:igRespira 8s linear forwards}
+  @keyframes igRespira{from{transform:scale(1)}to{transform:scale(1.05)}}
+  .ig-grid.listo:hover .ig-t{opacity:.8}
+  .ig-grid.listo:hover .ig-t:hover{opacity:1}
 }
 </style>
 </head>
@@ -3238,25 +3249,73 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   }, {threshold:.6});
   document.querySelectorAll('[data-countup]').forEach(el => io2.observe(el));
 })();
-// El mosaico "Lo último que salió del taller": las fotos entran de a una cuando la sección
-// llega a la pantalla, y el zoom lento de la principal corre solo mientras se ve.
+// El mosaico "Lo último que salió del taller" se mueve solo en computadora; en el celular y en
+// la tablet queda quieto. Qué hace está contado en el CSS ("El mosaico se mueve").
 (function(){
-  if(!('IntersectionObserver' in window)) return;
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(!('IntersectionObserver' in window) || !window.matchMedia) return;
+  var compu = matchMedia('(min-width:900px) and (hover:hover) and (prefers-reduced-motion:no-preference)');
+  if(!compu.matches) return;
   var grid = document.querySelector('.ig-grid'); if(!grid) return;
   var tiles = [].slice.call(grid.querySelectorAll('.ig-t'));
-  // si la sección ya está en pantalla cuando esto corre (al recargar a mitad de página, por
-  // ejemplo), no hay entrada: esconder fotos que ya se ven sería un parpadeo
+  var giran = [].slice.call(grid.querySelectorAll('.ig-p, .ig-g')); // la principal y las medianas
+  var seVe = false, encima = false, armado = false, bajando = false, paso = 0, capas = [], turno = [], fotos = [];
+  var nitida = (window.devicePixelRatio || 1) > 1.4;
+
+  // 1) La entrada. Si la sección ya está en pantalla cuando esto corre (al recargar a mitad de
+  //    página, por ejemplo) no hay entrada: esconder fotos que ya se ven sería un parpadeo.
   var entro = grid.getBoundingClientRect().top < (window.innerHeight || 0);
   if(!entro) tiles.forEach(function(t){ t.classList.add('pre'); });
-  new IntersectionObserver(function(es){
-    var ve = es[es.length - 1].isIntersecting;
-    grid.classList.toggle('ve', ve);
-    if(!ve || entro) return;
+  function demora(t, i){ return t.classList.contains('ig-p') ? 0 : t.classList.contains('ig-g') ? 140 + i * 90 : 300 + i * 45; }
+  function entrar(){
     entro = true;
-    tiles.forEach(function(t, i){ t.style.transitionDelay = (i * 60) + 'ms'; t.classList.add('in'); });
-    // al terminar se sacan las marcas: el tile vuelve a su transición corta, la del mouse
-    setTimeout(function(){ tiles.forEach(function(t){ t.classList.remove('pre', 'in'); t.style.transitionDelay = ''; }); }, tiles.length * 60 + 800);
+    tiles.forEach(function(t, i){ t.style.transitionDelay = demora(t, i) + 'ms'; t.classList.add('in'); });
+    // al terminar se sacan las marcas: cada foto vuelve a su transición corta, la del mouse
+    setTimeout(function(){ tiles.forEach(function(t){ t.classList.remove('pre', 'in'); t.style.transitionDelay = ''; }); armar(); }, 300 + tiles.length * 45 + 900);
+  }
+
+  // 2) La principal se intercambia con una mediana. Cada una tiene dos capas que se funden.
+  function numero(t){ var m = /ig_section\/(\d+)/.exec(t.style.backgroundImage); return m ? +m[1] : 0; }
+  function archivo(n, principal){ return 'ig_section/' + n + (principal && nitida ? '' : '-c') + '.webp'; }
+  function armar(){
+    if(armado) return; armado = true;
+    grid.classList.add('listo');
+    if(giran.length < 2) return;
+    giran.forEach(function(t, i){
+      var a = document.createElement('span'), b = document.createElement('span');
+      a.className = b.className = 'ig-capa'; t.appendChild(a); t.appendChild(b);
+      capas[i] = [a, b]; turno[i] = 0; fotos[i] = numero(t);
+    });
+    capas[0][0].style.backgroundImage = giran[0].style.backgroundImage; // la principal arranca con su zoom lento
+    capas[0][0].classList.add('ve'); turno[0] = 1;
+    setInterval(cambiar, 6000);
+  }
+  function mostrar(i, src){
+    var c = capas[i][turno[i]], otra = capas[i][1 - turno[i]];
+    c.style.backgroundImage = "url('" + src + "')";
+    c.classList.remove('ve'); void c.offsetWidth; // para que el fundido y el zoom arranquen de cero
+    c.style.zIndex = 2; otra.style.zIndex = 1; c.classList.add('ve');
+    // al terminar el fundido, la foto de abajo pasa a ser la nueva: si se achica la ventana, queda lo que se veía
+    setTimeout(function(){ otra.classList.remove('ve'); giran[i].style.backgroundImage = "url('" + src + "')"; }, 1000);
+    turno[i] = 1 - turno[i];
+  }
+  function cambiar(){
+    if(bajando || !seVe || encima || document.hidden || !compu.matches) return;
+    var j = 1 + (paso % (giran.length - 1)), a = fotos[0], b = fotos[j];
+    var sa = archivo(b, true), sb = archivo(a, false), faltan = 2, mal = false;
+    bajando = true; paso++;
+    // primero bajan las dos fotos, después se funden; si una no baja, ese cambio se saltea
+    function ya(){ if(--faltan) return; bajando = false; if(mal) return; fotos[0] = b; fotos[j] = a; mostrar(0, sa); mostrar(j, sb); }
+    [sa, sb].forEach(function(src){ var im = new Image(); im.onload = ya; im.onerror = function(){ mal = true; ya(); }; im.src = src; });
+  }
+
+  // 3) Con el mouse encima, los cambios se frenan
+  grid.addEventListener('mouseenter', function(){ encima = true; });
+  grid.addEventListener('mouseleave', function(){ encima = false; });
+
+  new IntersectionObserver(function(es){
+    seVe = es[es.length - 1].isIntersecting;
+    if(!seVe) return;
+    if(!entro) entrar(); else if(!armado && !tiles[0].classList.contains('in')) armar();
   }, {threshold: .3}).observe(grid);
 })();
 </script>

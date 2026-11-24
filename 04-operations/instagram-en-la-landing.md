@@ -15,19 +15,31 @@ El 24/11/2026 subió cuatro fotos de Instagram al repo y mandó dos más por el 
 
 ### El movimiento
 
-El dueño, 24/11/2026: "¿Qué animación le darías para no hacerlo tan estático? Animaciones que no sobrecarguen." Quedaron dos:
+El dueño, 24/11/2026, primero: "¿Qué animación le darías para no hacerlo tan estático? Animaciones que no sobrecarguen." Y cuando vio la primera versión, que se movía igual en todos los tamaños: "en celular que no se mueva, mejor; en PC podemos hacer una animación más elaborada."
 
-- **Las fotos entran de a una** cuando la sección llega a la pantalla: un fundido corto, cada foto 60 milésimas después de la anterior. Es la misma entrada que ya tenían los números y los pasos de la landing.
-- **La foto principal respira:** un zoom muy lento (de 1 a 1,07 en 16 segundos, ida y vuelta), que corre solo mientras la sección se ve.
+- **En el celular y en la tablet el mosaico queda quieto:** las doce fotos a la vista desde que abre la página. Vale también para la tablet acostada: no decide solo el ancho, decide que se use con el dedo.
+- **En computadora** (pantalla de 900 px o más, con mouse) se mueve, y son tres cosas:
+  1. **La entrada**, cuando la sección llega a la pantalla: la principal aparece asentándose, las tres medianas entran desde la derecha y las ocho chicas van apareciendo en cadena. Dura menos de dos segundos.
+  2. **La principal cambia cada 6 segundos:** se intercambia con una de las medianas, con un fundido, y la que queda de principal hace un zoom muy lento. Así pasan por el lugar grande las cuatro fotos más nuevas. Las ocho chicas no cambian de lugar.
+  3. **Con el mouse encima**, los cambios se frenan, y la foto que se mira queda clara mientras las demás bajan un poco.
 
-Qué las hace livianas: usan solo `opacity` y `transform`, que el navegador mueve sin volver a dibujar la página; no bajan ningún archivo; y si el teléfono tiene activado "reducir movimiento", o no hay JavaScript, no corren y las fotos quedan a la vista. Antes de sumar otra animación acá, que cumpla esas tres cosas.
+Qué lo hace liviano, y qué tiene que cumplir cualquier animación que se sume acá:
+
+- Usa solo `opacity` y `transform`, que el navegador mueve sin volver a dibujar la página.
+- Los cambios corren solo mientras la sección se ve y la pestaña está abierta.
+- No baja nada de antemano. Para los cambios baja una copia chica de la principal (17 KB); en pantallas de mucha definición baja además la copia grande de cada mediana, de a una y recién cuando le toca.
+- Con "reducir movimiento" activado, o sin JavaScript, queda todo quieto y a la vista.
+- Si una foto no baja, ese cambio se saltea: no queda un cuadro vacío. Si la ventana se achica, queda quieto con las fotos que se estaban viendo.
+- En el celular no se mueve.
+
+Las que giran son la principal (`ig-p`) y las medianas (`ig-g`): al sumar fotos no hay que tocar el programa, toma las que tengan esas marcas.
 
 ### Cómo sumar fotos
 
 1. El dueño las pasa: subidas a GitHub (a la carpeta principal de la rama por defecto) o por el chat. Por el chat llegan enteras, con su tamaño original.
 2. Prepararlas: `php 04-operations/tools/foto-mosaico.php <foto> <número que sigue>`. Si no es cuadrada, mirar antes de dónde conviene cortarla (`arriba`, `centro`, `abajo` o `x,y,lado`): en las fotos más altas que anchas el logo queda bien abajo y un corte al centro lo deja por la mitad. Y si trae la marca de un celular ("Galaxy A71"), cortarla afuera.
 3. Sumar los tiles en `index.html`, adelante, y decidir cuáles van grandes (abajo).
-4. Probar en computadora, tablet y celular que el mosaico no tenga huecos, y entregar el bloque de deploy (`04-operations/tools/bloque-deploy.py`): las fotos primero, `index.html` al final.
+4. Probar en computadora, tablet y celular que el mosaico no tenga huecos (y, en computadora, que la principal siga cambiando), y entregar el bloque de deploy (`04-operations/tools/bloque-deploy.py`): las fotos primero, `index.html` al final.
 
 **Para que el mosaico cierre sin huecos, las fotos se suman de a tres.** La cuenta: en 6 columnas, la principal ocupa 16 lugares, cada mediana 4 y cada chica 1, y el total tiene que dar 36; en 4 columnas, la principal y las medianas ocupan 4 y el total tiene que dar 24.
 
