@@ -260,9 +260,26 @@ h2 em{font-style:italic;color:var(--accent-dark)}
   .hero h1{font-size:clamp(3rem,4.4vw,4.4rem)}
   .hero-sub{font-size:1.18rem;max-width:560px}
   .hero-content{padding:clamp(4rem,8vw,6rem) 0}
+  /* El sombreado en computadora, más claro (dueño, 24/11/2026: "al hero esclarecerlo un poquito
+     más"). De 900 a 1199 px el texto ocupa casi todo el ancho: va parejo, un punto más claro
+     que antes. Desde 1200 px va de izquierda a derecha: oscuro donde está el texto, con un
+     refuerzo justo detrás, y abierto a la derecha, donde se ve el showroom. Abajo cierra en
+     oscuro para empalmar con la franja de los números. El contraste del texto está medido
+     (04-operations/landing-hero.md): si se cambia la foto o el sombreado, se vuelve a medir. */
   .hero-shade{background:
-    linear-gradient(to top,rgba(21,19,15,.94) 0%,rgba(21,19,15,.8) 50%,rgba(21,19,15,.62) 100%),
-    radial-gradient(ellipse at 28% 52%,rgba(21,19,15,.5) 0%,transparent 62%)}
+    linear-gradient(to top,rgba(21,19,15,.9) 0%,rgba(21,19,15,.66) 50%,rgba(21,19,15,.46) 100%),
+    radial-gradient(ellipse at 28% 52%,rgba(21,19,15,.42) 0%,transparent 62%)}
+}
+@media(min-width:900px){
+  /* el rótulo es la letra más chica del hero: con el sombreado más claro lleva una sombra más
+     firme, para que se lea igual cuando le toca una veta clara detrás */
+  .hero-eyebrow{text-shadow:0 1px 2px rgba(0,0,0,.85),0 0 10px rgba(0,0,0,.75),0 0 22px rgba(0,0,0,.5)}
+}
+@media(min-width:1200px){
+  .hero-shade{background:
+    radial-gradient(ellipse 46% 60% at 27% 50%,rgba(21,19,15,.42) 0%,rgba(21,19,15,0) 100%),
+    linear-gradient(90deg,rgba(21,19,15,.86) 0%,rgba(21,19,15,.76) 32%,rgba(21,19,15,.5) 62%,rgba(21,19,15,.36) 100%),
+    linear-gradient(to top,rgba(21,19,15,.92) 0%,rgba(21,19,15,.4) 24%,rgba(21,19,15,0) 50%)}
 }
 @media(max-width:899px){
   .hero{min-height:78vh}
@@ -353,15 +370,16 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .social-grid>*{min-width:0}
 .rev-scroll{max-width:100%}
 @media(min-width:900px){
-  /* En computadora la sección va en dos franjas, las dos del ancho del resto de la página:
-     arriba el mosaico a todo lo ancho y abajo las reseñas en fila. Lado a lado no había forma
-     (dueño, 24/11/2026): en su mitad el mosaico quedaba "apretujadísimo", y al ensanchar la
-     sección para darle lugar, "los comentarios están ido muy a la derecha, como que se perdió
-     la cohesión". Así las fotos tienen todo el ancho y nada se sale de la línea de la página. */
-  .social-grid{gap:3.4rem}
-  .ig-handle{margin-top:1.3rem}
-  .rev-col{scroll-margin-top:6rem}
-  .rev-col .rev-more{margin-top:1.1rem}
+  /* En computadora, una doble página de revista, toda dentro del ancho del sitio: a la
+     izquierda las fotos y a la derecha las reseñas, separadas por un filete. Es la composición
+     que el dueño dio por buena con seis fotos ("cohesión"). Con doce no entraban grandes en
+     media página ("apretujadísimo"); ensanchar la sección o apilar las reseñas debajo no le
+     gustó (24/11/2026). Por eso las fotos se muestran de a seis, grandes, y van rotando. */
+  .social-grid{grid-template-columns:minmax(0,1.42fr) minmax(0,1fr);gap:0;align-items:stretch}
+  .social-grid>div:first-child{padding-right:3.5rem}
+  .rev-col{border-left:1px solid rgba(168,149,128,.3);padding-left:3.5rem;display:flex;flex-direction:column;align-items:flex-start;scroll-margin-top:6rem}
+  .rev-col .rev-scroll{flex:1;align-self:stretch}
+  .rev-col .rev-more{margin-top:1.3rem;margin-bottom:.3rem}
   /* micro-interacción: el mosaico responde */
   .ig-t:hover{transform:translateY(-4px) scale(1.012);opacity:1;box-shadow:0 14px 30px rgba(26,24,22,.16)}
   .ig-grid{grid-auto-rows:1fr}
@@ -369,16 +387,16 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 /* --- Panel Instagram --- */
 .ig-head{margin-bottom:1.4rem}
 .ig-head h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:.4rem}
-/* El mosaico. La foto principal (ig-p) y las medianas (ig-g) ocupan más lugar; las demás
-   rellenan alrededor. Tres formas, según el ancho:
-   - celular: 4 columnas por 6 filas, con la principal y las medianas de 2 x 2;
-   - de 640 a 899 px (tablet parada): 6 columnas por 6 filas, con la principal de 4 x 4;
-   - computadora (desde 900 px): 9 columnas por 4 filas, a todo el ancho de la página. La
-     principal a la izquierda, de 4 x 4, y las demás a su derecha.
-   En los tres casos son 36 lugares (24 en el celular), así que la cuenta es una sola: las fotos
-   se suman de a tres; con 12 van 3 medianas, con 15 van 2, con 18 va 1 y con 21, ninguna.
-   La principal usa N.webp (1080 px) y todas las demás N-c.webp (540 px): doce fotos pesan
-   menos que las seis de antes. Cómo sumar una: 04-operations/instagram-en-la-landing.md */
+/* El mosaico. Tres formas, según el ancho:
+   - celular: las doce fotos, 4 columnas; la principal (ig-p) y las medianas (ig-g), de 2 x 2;
+   - de 640 a 899 px (tablet parada): las doce, 6 columnas; la principal de 4 x 4;
+   - computadora (desde 900 px): SEIS a la vista, grandes, en 3 columnas (la principal de 2 x 2),
+     y un programa las va cambiando por tandas hasta pasar todas. Las que no están a la vista
+     siguen en la página: se esconden acá y el programa lee sus fotos de ahí.
+   En el celular y la tablet la cuenta para sumar fotos sin huecos sigue siendo de a tres (con
+   12 van 3 medianas, con 15 van 2, con 18 va 1, con 21 ninguna). En computadora no hay cuenta.
+   La principal usa N.webp (1080 px) y todas las demás N-c.webp (540 px).
+   Cómo sumar una: 04-operations/instagram-en-la-landing.md */
 .ig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;grid-auto-flow:dense}
 .ig-p,.ig-g{grid-column:span 2;grid-row:span 2}
 @media(min-width:640px){
@@ -386,11 +404,30 @@ h2 em{font-style:italic;color:var(--accent-dark)}
   .ig-p{grid-column:span 4;grid-row:span 4}
 }
 @media(min-width:900px){
-  .ig-grid{grid-template-columns:repeat(9,1fr);gap:.7rem}
+  .ig-grid{grid-template-columns:repeat(3,1fr);gap:.75rem}
+  .ig-p{grid-column:span 2;grid-row:span 2}
+  .ig-g{grid-column:auto;grid-row:auto}
+  .ig-t:nth-child(n+7){display:none}
 }
 .ig-t{aspect-ratio:1;border-radius:10px;background:center/cover no-repeat var(--bg-alt);display:block;transition:transform .2s,opacity .2s;box-shadow:0 6px 18px rgba(26,24,22,.08)}
 .ig-t:hover{transform:translateY(-3px);opacity:.92}
-.ig-handle{display:inline-flex;margin-top:1rem;color:var(--accent-dark);font-weight:700;font-size:.88rem;text-decoration:none;border-bottom:1px solid var(--accent);white-space:nowrap}
+.ig-pie{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.7rem 1.4rem;margin-top:1rem}
+.ig-pag{display:none}
+@media(min-width:900px){
+  .ig-pie{margin-top:1.15rem}
+  .ig-pag{display:flex;align-items:center;gap:.75rem}
+  .ig-num{font-family:var(--font-display);font-style:italic;font-size:1.02rem;color:var(--accent-dark);white-space:nowrap}
+  .ig-num b{font-weight:500;color:var(--text)}
+  .ig-prog{width:4.6rem;height:2px;border-radius:2px;background:rgba(168,149,128,.38);position:relative;overflow:hidden}
+  .ig-prog i{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--accent-dark);transform:scaleX(0);transform-origin:left center}
+  .ig-pag.corre .ig-prog i{animation:igProg 8s linear forwards}
+  .ig-pag.pausa .ig-prog i{animation-play-state:paused}
+  @keyframes igProg{to{transform:scaleX(1)}}
+  .ig-fl{width:2rem;height:2rem;border-radius:50%;border:1px solid rgba(122,102,73,.45);background:transparent;color:var(--accent-dark);font-family:var(--font-body);font-size:.92rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s}
+  .ig-fl:hover{background:rgba(196,167,125,.18);border-color:var(--accent-dark);color:var(--text)}
+  .ig-fl+.ig-fl{margin-left:-.35rem}
+}
+.ig-handle{display:inline-flex;color:var(--accent-dark);font-weight:700;font-size:.88rem;text-decoration:none;border-bottom:1px solid var(--accent);white-space:nowrap}
 .ig-handle:hover{color:var(--text)}
 /* --- Panel Reseñas --- */
 .rev-col .rev-label{font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:.8rem}
@@ -405,15 +442,20 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .rev-q .stars{color:var(--gold);font-size:.68rem;letter-spacing:.18em;margin-bottom:.5rem}
 .rev-q p{font-size:.84rem;color:var(--text-soft);line-height:1.55}
 .rev-q footer{margin-top:auto;padding-top:.6rem;font-size:.76rem;font-weight:700;color:var(--accent-dark)}
-/* Computadora: en fila y sin cajas, cada una con su filete arriba y el nombre apoyado abajo.
-   Cuatro reseñas; de 900 a 1199 px van de a dos por renglón, para que no queden angostas. */
+/* Computadora: una debajo de la otra, sin cajas. La primera es la cita destacada, en la letra
+   de los títulos y con su comilla; las otras tres van chicas, cada una con su filete. */
 @media(min-width:900px){
-  .rev-scroll{display:grid;grid-template-columns:repeat(2,1fr);gap:0 2.6rem;overflow:visible;scroll-snap-type:none;padding:0}
-  .rev-q{background:transparent;border:none;border-top:1px solid rgba(168,149,128,.3);border-radius:0;padding:1.1rem 0 1.4rem}
+  .rev-scroll{flex-direction:column;justify-content:space-between;overflow:visible;scroll-snap-type:none;gap:0;padding:0}
+  .rev-q{flex:none;background:transparent;border:none;border-top:1px solid rgba(168,149,128,.3);border-radius:0;padding:1.05rem 0}
   .rev-q:nth-child(n+5){display:none}
+  .rev-q:first-child{border-top:none;padding:.2rem 0 1.5rem}
+  .rev-q:first-child .stars{display:none}
+  .rev-q:first-child::before{content:'\201C';display:block;font-family:var(--font-display);font-size:4.4rem;line-height:1;height:2.5rem;color:var(--gold);margin-left:-.14rem}
+  .rev-q:first-child p{font-family:var(--font-display);font-weight:400;font-size:1.4rem;line-height:1.36;letter-spacing:-.005em;color:var(--text)}
+  .rev-q:first-child footer{padding-top:.95rem;font-size:.8rem}
 }
-@media(min-width:1200px){
-  .rev-scroll{grid-template-columns:repeat(4,1fr);gap:0 2.2rem}
+@media(min-width:900px) and (max-width:1099px){
+  .rev-q:first-child p{font-size:1.22rem}
 }
 .rev-more{display:inline-flex;margin-top:.9rem;color:var(--text-soft);font-size:.82rem;font-weight:700;text-decoration:none;border-bottom:1px solid var(--accent)}
 .rev-more:hover{color:var(--accent-dark)}
@@ -1183,28 +1225,29 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   .step:nth-child(4){transition-delay:.36s}
 }
 
-/* ===== El mosaico se mueve, solo en computadora =====
-   En el celular y en la tablet queda quieto (dueño, 24/11/2026: "en celular que no se mueva,
-   mejor; en PC podemos hacer una animación más elaborada"). En computadora:
-   1) al llegar a la sección, la principal aparece asentándose, las medianas entran desde la
-      derecha y las chicas van apareciendo en cadena;
-   2) cada 6 segundos la principal se intercambia con una de las medianas, con un fundido, y
-      la que queda de principal hace un zoom muy lento;
-   3) con el mouse encima, los cambios se frenan y la foto que se mira queda clara mientras
-      las demás bajan un poco.
-   Son solo opacity y transform. Con "reducir movimiento", o sin JS, queda todo quieto. */
-@media (min-width:900px) and (hover:hover) and (prefers-reduced-motion:no-preference){
-  .ig-t.pre{opacity:0;transform:scale(.86);transition:none}
-  .ig-g.pre{transform:translateX(28px)}
-  .ig-p.pre{transform:scale(1.05)}
-  .ig-t.in{opacity:1;transform:none;transition:opacity .55s ease,transform .7s var(--ease)}
-  .ig-p.in{transition:opacity .9s ease,transform 1.2s var(--ease)}
-  .ig-p,.ig-g{position:relative;z-index:0;overflow:hidden}
-  .ig-capa{position:absolute;top:0;right:0;bottom:0;left:0;background:center/cover no-repeat;opacity:0;transition:opacity .9s ease}
+/* ===== El mosaico en computadora: seis fotos que van rotando =====
+   Cada 8 segundos cambia la tanda: las seis fotos se funden una detrás de otra, con la principal
+   primero, y la que queda de principal hace un zoom muy lento. La rayita del pie muestra cuánto
+   falta; con el mouse encima se frena, y las flechas pasan la tanda a mano. Al llegar a la
+   sección las fotos entran una vez. En el celular y en la tablet nada de esto corre (dueño,
+   24/11/2026: "en celular que no se mueva"). Con "reducir movimiento" o en una pantalla táctil
+   ancha no avanza solo: quedan las flechas. Son solo opacity y transform. */
+@media (min-width:900px){
+  .ig-t{position:relative;z-index:0;overflow:hidden}
+  .ig-capa{position:absolute;top:0;right:0;bottom:0;left:0;background:center/cover no-repeat;opacity:0;transition:opacity .85s ease}
   .ig-capa.ve{opacity:1}
-  .ig-p .ig-capa.ve{animation:igRespira 8s linear forwards}
-  @keyframes igRespira{from{transform:scale(1)}to{transform:scale(1.05)}}
-  .ig-grid.listo:hover .ig-t{opacity:.8}
+}
+@media (min-width:900px) and (prefers-reduced-motion:reduce){
+  .ig-capa{transition:none}
+}
+@media (min-width:900px) and (hover:hover) and (prefers-reduced-motion:no-preference){
+  .ig-t.pre{opacity:0;transform:scale(.92);transition:none}
+  .ig-p.pre{transform:scale(1.04)}
+  .ig-t.in{opacity:1;transform:none;transition:opacity .6s ease,transform .8s var(--ease)}
+  .ig-p.in{transition:opacity .9s ease,transform 1.2s var(--ease)}
+  .ig-p .ig-capa.ve{animation:igRespira 9s linear forwards}
+  @keyframes igRespira{from{transform:scale(1)}to{transform:scale(1.045)}}
+  .ig-grid.listo:hover .ig-t{opacity:.82}
   .ig-grid.listo:hover .ig-t:hover{opacity:1}
 }
 </style>
@@ -1304,7 +1347,9 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/5-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/6-c.webp')" aria-label="Post de Instagram"></a>
         </div>
-        <a class="ig-handle" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Seguinos · @blackstones.ar →</a>
+        <div class="ig-pie">
+          <a class="ig-handle" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Seguinos · @blackstones.ar →</a>
+        </div>
       </div>
 
       <div class="rev-col" id="resenas">
@@ -3256,73 +3301,102 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   }, {threshold:.6});
   document.querySelectorAll('[data-countup]').forEach(el => io2.observe(el));
 })();
-// El mosaico "Lo último que salió del taller" se mueve solo en computadora; en el celular y en
-// la tablet queda quieto. Qué hace está contado en el CSS ("El mosaico se mueve").
+// El mosaico "Lo último que salió del taller" en computadora: seis fotos a la vista, que van
+// rotando por tandas hasta pasar todas. En el celular y en la tablet no corre: ahí están todas,
+// quietas. Qué hace está contado en el CSS ("El mosaico en computadora").
 (function(){
-  if(!('IntersectionObserver' in window) || !window.matchMedia) return;
-  var compu = matchMedia('(min-width:900px) and (hover:hover) and (prefers-reduced-motion:no-preference)');
-  if(!compu.matches) return;
-  var grid = document.querySelector('.ig-grid'); if(!grid) return;
-  var tiles = [].slice.call(grid.querySelectorAll('.ig-t'));
-  var giran = [].slice.call(grid.querySelectorAll('.ig-p, .ig-g')); // la principal y las medianas
-  var seVe = false, encima = false, armado = false, bajando = false, paso = 0, capas = [], turno = [], fotos = [];
-  var nitida = (window.devicePixelRatio || 1) > 1.4;
+  var grid = document.querySelector('.ig-grid'), pie = document.querySelector('.ig-pie');
+  if(!grid || !pie || !window.matchMedia || !('IntersectionObserver' in window)) return;
+  var compu = matchMedia('(min-width:900px)'); if(!compu.matches) return;
+  var mueve = matchMedia('(hover:hover) and (prefers-reduced-motion:no-preference)').matches; // si no, no avanza solo
+  var POR = 6, tiles = [].slice.call(grid.querySelectorAll('.ig-t')), slots = tiles.slice(0, POR);
+  var fondos = tiles.map(function(t){ return t.style.backgroundImage; });
+  var fotos = fondos.map(function(f){ var m = /ig_section\/(\d+)/.exec(f); return m ? +m[1] : 0; });
+  var tandas = Math.ceil(fotos.length / POR); if(slots.length < POR || tandas < 2) return;
+  var nitida = (window.devicePixelRatio || 1) > 1.4, tanda = 0, bajando = false, seVe = false, encima = false, armado = false, capas = [], turno = [];
+  function dos(n){ return (n < 10 ? '0' : '') + n; }
+  function archivo(n, principal){ return 'ig_section/' + n + (principal && nitida ? '' : '-c') + '.webp'; }
 
-  // 1) La entrada. Si la sección ya está en pantalla cuando esto corre (al recargar a mitad de
-  //    página, por ejemplo) no hay entrada: esconder fotos que ya se ven sería un parpadeo.
-  var entro = grid.getBoundingClientRect().top < (window.innerHeight || 0);
-  if(!entro) tiles.forEach(function(t){ t.classList.add('pre'); });
-  function demora(t, i){ return t.classList.contains('ig-p') ? 0 : t.classList.contains('ig-g') ? 140 + i * 90 : 300 + i * 45; }
+  // el pie: "01 / 02", la rayita que muestra cuánto falta para el cambio y las dos flechas
+  var pag = document.createElement('div'); pag.className = 'ig-pag';
+  pag.innerHTML = '<span class="ig-num"><b>01</b> / ' + dos(tandas) + '</span><span class="ig-prog"><i></i></span>' +
+    '<button type="button" class="ig-fl" aria-label="Fotos anteriores">←</button>' +
+    '<button type="button" class="ig-fl" aria-label="Fotos siguientes">→</button>';
+  pie.insertBefore(pag, pie.firstChild);
+  var num = pag.querySelector('b'), raya = pag.querySelector('.ig-prog i'), flechas = pag.querySelectorAll('.ig-fl');
+
+  // 1) La entrada, una vez. Si la sección ya está en pantalla cuando esto corre no hay entrada:
+  //    esconder fotos que ya se ven sería un parpadeo.
+  var entro = !mueve || grid.getBoundingClientRect().top < (window.innerHeight || 0);
+  if(!entro) slots.forEach(function(t){ t.classList.add('pre'); });
   function entrar(){
     entro = true;
-    tiles.forEach(function(t, i){ t.style.transitionDelay = demora(t, i) + 'ms'; t.classList.add('in'); });
+    slots.forEach(function(t, i){ t.style.transitionDelay = (i ? 160 + i * 80 : 0) + 'ms'; t.classList.add('in'); });
     // al terminar se sacan las marcas: cada foto vuelve a su transición corta, la del mouse
-    setTimeout(function(){ tiles.forEach(function(t){ t.classList.remove('pre', 'in'); t.style.transitionDelay = ''; }); armar(); }, 300 + tiles.length * 45 + 900);
+    setTimeout(function(){ slots.forEach(function(t){ t.classList.remove('pre', 'in'); t.style.transitionDelay = ''; }); armar(); }, 160 + POR * 80 + 900);
   }
 
-  // 2) La principal se intercambia con una mediana. Cada una tiene dos capas que se funden.
-  function numero(t){ var m = /ig_section\/(\d+)/.exec(t.style.backgroundImage); return m ? +m[1] : 0; }
-  function archivo(n, principal){ return 'ig_section/' + n + (principal && nitida ? '' : '-c') + '.webp'; }
+  // 2) Las tandas. Cada foto a la vista tiene dos capas que se funden.
   function armar(){
     if(armado) return; armado = true;
     grid.classList.add('listo');
-    if(giran.length < 2) return;
-    giran.forEach(function(t, i){
+    slots.forEach(function(t, i){
       var a = document.createElement('span'), b = document.createElement('span');
       a.className = b.className = 'ig-capa'; t.appendChild(a); t.appendChild(b);
-      capas[i] = [a, b]; turno[i] = 0; fotos[i] = numero(t);
+      capas[i] = [a, b]; turno[i] = 0;
     });
-    capas[0][0].style.backgroundImage = giran[0].style.backgroundImage; // la principal arranca con su zoom lento
+    capas[0][0].style.backgroundImage = fondos[0]; // la principal arranca con su zoom lento
     capas[0][0].classList.add('ve'); turno[0] = 1;
-    setInterval(cambiar, 6000);
+    correr();
   }
   function mostrar(i, src){
-    var c = capas[i][turno[i]], otra = capas[i][1 - turno[i]];
-    c.style.backgroundImage = "url('" + src + "')";
+    var c = capas[i][turno[i]], otra = capas[i][1 - turno[i]], fondo = "url('" + src + "')";
+    c.style.backgroundImage = fondo;
     c.classList.remove('ve'); void c.offsetWidth; // para que el fundido y el zoom arranquen de cero
     c.style.zIndex = 2; otra.style.zIndex = 1; c.classList.add('ve');
-    // al terminar el fundido, la foto de abajo pasa a ser la nueva: si se achica la ventana, queda lo que se veía
-    setTimeout(function(){ otra.classList.remove('ve'); giran[i].style.backgroundImage = "url('" + src + "')"; }, 1000);
+    // al terminar el fundido, la foto de abajo pasa a ser la nueva
+    setTimeout(function(){ otra.classList.remove('ve'); if(compu.matches) slots[i].style.backgroundImage = fondo; }, 1000);
     turno[i] = 1 - turno[i];
   }
-  function cambiar(){
-    if(bajando || !seVe || encima || document.hidden || !compu.matches) return;
-    var j = 1 + (paso % (giran.length - 1)), a = fotos[0], b = fotos[j];
-    var sa = archivo(b, true), sb = archivo(a, false), faltan = 2, mal = false;
-    bajando = true; paso++;
-    // primero bajan las dos fotos, después se funden; si una no baja, ese cambio se saltea
-    function ya(){ if(--faltan) return; bajando = false; if(mal) return; fotos[0] = b; fotos[j] = a; mostrar(0, sa); mostrar(j, sb); }
-    [sa, sb].forEach(function(src){ var im = new Image(); im.onload = ya; im.onerror = function(){ mal = true; ya(); }; im.src = src; });
+  function ir(p){
+    if(!armado || bajando || !compu.matches) return;
+    p = (p % tandas + tandas) % tandas; if(p === tanda) return;
+    var srcs = slots.map(function(_, i){ return archivo(fotos[(p * POR + i) % fotos.length], i === 0); }), faltan = srcs.length, mal = false;
+    bajando = true; pag.classList.remove('corre');
+    // primero bajan las seis fotos, después se funden; si una no baja, esa tanda se saltea
+    function ya(){
+      if(--faltan) return; bajando = false;
+      if(!mal){
+        tanda = p; num.textContent = dos(p + 1);
+        slots.forEach(function(_, i){ setTimeout(function(){ mostrar(i, srcs[i]); }, mueve ? i * 90 : 0); });
+      }
+      correr();
+    }
+    srcs.forEach(function(src){ var im = new Image(); im.onload = ya; im.onerror = function(){ mal = true; ya(); }; im.src = src; });
   }
 
-  // 3) Con el mouse encima, los cambios se frenan
-  grid.addEventListener('mouseenter', function(){ encima = true; });
-  grid.addEventListener('mouseleave', function(){ encima = false; });
+  // 3) El reloj es la rayita: cuando se llena, pasa la tanda. Frenarla es frenar el reloj.
+  function correr(){ if(!mueve) return; pag.classList.remove('corre'); void raya.offsetWidth; pag.classList.add('corre'); frenar(); }
+  function frenar(){ pag.classList.toggle('pausa', !seVe || encima || document.hidden); }
+  raya.addEventListener('animationend', function(){ ir(tanda + 1); });
+  flechas[0].addEventListener('click', function(){ ir(tanda - 1); });
+  flechas[1].addEventListener('click', function(){ ir(tanda + 1); });
+  grid.addEventListener('mouseenter', function(){ encima = true; frenar(); });
+  grid.addEventListener('mouseleave', function(){ encima = false; frenar(); });
+  document.addEventListener('visibilitychange', frenar);
+
+  // Si la ventana se achica a tablet o celular, vuelven a verse todas: cada una con su foto
+  function alAchicar(e){
+    if(e.matches || !armado) return;
+    slots.forEach(function(t, i){ t.style.backgroundImage = fondos[i]; capas[i][0].classList.remove('ve'); capas[i][1].classList.remove('ve'); turno[i] = 0; });
+    tanda = 0; num.textContent = '01';
+  }
+  if(compu.addEventListener) compu.addEventListener('change', alAchicar); else if(compu.addListener) compu.addListener(alAchicar);
 
   new IntersectionObserver(function(es){
-    seVe = es[es.length - 1].isIntersecting;
+    seVe = es[es.length - 1].isIntersecting; frenar();
     if(!seVe) return;
-    if(!entro) entrar(); else if(!armado && !tiles[0].classList.contains('in')) armar();
+    if(!entro) entrar(); else if(!armado && !slots[0].classList.contains('in')) armar();
   }, {threshold: .3}).observe(grid);
 })();
 </script>

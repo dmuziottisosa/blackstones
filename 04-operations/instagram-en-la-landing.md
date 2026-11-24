@@ -8,47 +8,54 @@
 
 El 24/11/2026 subió cuatro fotos de Instagram al repo y mandó dos más por el chat: "Te lo subí al repo. Sin quitar los otros, agregar a lo último que salió del taller." Con las seis que ya había son doce.
 
-- **El mosaico.** Tres formas, según el ancho. En el celular, 4 columnas: las cuatro fotos más nuevas, grandes (2 × 2), y las otras ocho en dos filas. De 640 a 899 px (una tablet parada), 6 columnas por 6 filas: una principal (4 × 4), tres medianas (2 × 2) y ocho chicas. En computadora (desde 900 px), **9 columnas por 4 filas, a todo el ancho de la página**: la principal a la izquierda y las otras once a su derecha.
-- **En computadora la sección va en dos franjas: el mosaico arriba y las reseñas debajo, en fila.** Las dos del ancho del resto de la página (1120 px). Se llegó ahí en tres pasos, el 24/11/2026, con el dueño mirándola publicada en su monitor de 1920:
-  1. Lado a lado, como estaba con seis fotos, el mosaico quedaba en media página: 579 px para doce fotos. "Esta sección podría ocupar más espacio, ¿no? Tiene para ocupar más espacio, para que no se vea apretujadísimo."
-  2. Se ensanchó la sección a 1400 px, más que el resto de la página, y el mosaico creció. Pero las reseñas quedaron afuera de la línea del sitio: "siento que los comentarios están ido muy a la derecha, como que se perdió la cohesión". Y: "¿podemos solucionar este tema de una buena vez?".
-  3. Lado a lado no tiene solución: dentro del ancho de la página el mosaico queda apretado, y por fuera se rompe la línea. En dos franjas, las fotos tienen todo el ancho (la principal mide 492 px; medía 383) y nada se sale. **No volver a ponerlas lado a lado ni a ensanchar la sección sin preguntarle al dueño.**
-- **Las reseñas, en computadora:** cuatro en fila, sin cajas, cada una con su filete arriba y el nombre apoyado abajo. De 900 a 1199 px van de a dos por renglón, para que no queden angostas. En el celular siguen siendo las tarjetas que se deslizan.
-- **"Reseñas" del menú lleva a las reseñas.** El ancla `#resenas` está en el bloque de reseñas (antes estaba en la sección, cuando se veían las dos cosas juntas). La sección tiene la suya, `#taller`. Las páginas de `/trabajos/` también enlazan a `/#resenas`.
-- **El mosaico no se estira a lo alto.** Hasta el 24/11/2026 tenía una regla que lo hacía llenar el alto de su columna. En ventanas de 900 a 1100 px las reseñas quedaban más altas que el mosaico, y ahí se deformaba: con las seis fotos de antes se salía de su columna, y con las doce una foto quedaba de 25 px. Se encontró midiendo ancho por ancho, no en los tamaños de siempre. Con las dos franjas ya no hay columnas que emparejar.
-- **El orden.** Lo más nuevo adelante: la principal es la más nueva. Las seis de antes quedan al final.
-- **Cada foto tiene dos archivos** en `site/public_html/ig_section/`: `N.webp` (1080 px) y `N-c.webp` (540 px). La principal usa el de 1080; todas las demás, el de 540. Las doce fotos pesan 302 KB; las seis de antes pesaban 357.
+- **En el celular y en la tablet parada: las doce fotos en mosaico, quietas.** En el celular, 4 columnas: las cuatro más nuevas, grandes (2 × 2), y las otras ocho en dos filas. De 640 a 899 px, 6 columnas por 6 filas: una principal (4 × 4), tres medianas (2 × 2) y ocho chicas.
+- **En computadora (desde 900 px): una doble página de revista**, toda dentro del ancho del sitio (1120 px). A la izquierda, seis fotos grandes (la principal de 397 px y cinco de 192); a la derecha, las reseñas; un filete en el medio. **Las fotos se muestran de a seis y van rotando:** cada 8 segundos cambia la tanda, y en dos tandas pasaron las doce.
+- **Por qué de a seis.** El 24/11/2026 hubo cuatro versiones, con el dueño mirando la página publicada en su monitor de 1920:
+  1. Las doce fotos juntas, al lado de las reseñas: 579 px para doce fotos. "Esta sección podría ocupar más espacio, ¿no? Tiene para ocupar más espacio, para que no se vea apretujadísimo."
+  2. La sección más ancha que el resto de la página (1400 px): "siento que los comentarios están ido muy a la derecha, como que se perdió la cohesión".
+  3. El mosaico a todo el ancho y las reseñas debajo, en fila: "no me gustó cómo quedó la sección, podemos mejorarlo un x10", y "ahí sí te pido criterio senior de diseñador en todo".
+  4. La composición que él mismo había dado por cohesiva era la primera de todas: seis fotos grandes al lado de las reseñas. El problema nunca fue dónde iban las reseñas, sino cuántas fotos se mostraban a la vez: doce grandes no entran en media página; seis, sí.
+
+  **No volver a mostrar las doce juntas en computadora, ni a hacer la sección más ancha que las demás, ni a apilar las reseñas debajo, sin preguntarle al dueño.**
+- **Las reseñas, en computadora.** La primera es la cita destacada: va en la letra de los títulos (Fraunces), grande y con su comilla. Las otras tres van chicas, cada una con su filete. El "4,9" no se agranda: la franja de números de arriba ya lo dice en grande. En el celular siguen siendo las tarjetas que se deslizan.
+- **El pie del mosaico.** "01 / 02" en la misma letra que los números de "Materiales" y "Cómo trabajamos", una rayita que muestra cuánto falta para el cambio, dos flechas, y a la derecha "Seguinos". Los dos links de abajo (Instagram y Google) quedan a la misma altura.
+- **"Reseñas" del menú lleva a las reseñas.** El ancla `#resenas` está en el bloque de reseñas; la sección tiene la suya, `#taller`. Las páginas de `/trabajos/` también enlazan a `/#resenas`.
+- **El mosaico no se estira a lo alto.** Hasta el 24/11/2026 tenía una regla que lo hacía llenar el alto de su columna, y en ventanas de 900 a 1100 px se deformaba (una foto llegó a quedar de 25 px). Se encontró midiendo ancho por ancho, no en los tamaños de siempre.
+- **El orden.** Lo más nuevo adelante: la principal es la más nueva. Las seis de antes quedan al final (en computadora son la segunda tanda).
+- **Cada foto tiene dos archivos** en `site/public_html/ig_section/`: `N.webp` (1080 px) y `N-c.webp` (540 px). La principal usa el de 1080; todas las demás, el de 540. Las doce pesan 302 KB (las seis de antes pesaban 357). En computadora la página abre con 160 KB de fotos, las seis que se ven; las otras seis bajan recién cuando les toca.
 - **Todas las fotos llevan al perfil** de Instagram. No se sabe a qué post corresponde cada una.
 
 ### El movimiento
 
-El dueño, 24/11/2026, primero: "¿Qué animación le darías para no hacerlo tan estático? Animaciones que no sobrecarguen." Y cuando vio la primera versión, que se movía igual en todos los tamaños: "en celular que no se mueva, mejor; en PC podemos hacer una animación más elaborada."
+El dueño, 24/11/2026: "¿Qué animación le darías para no hacerlo tan estático? Animaciones que no sobrecarguen." Y después: "en celular que no se mueva, mejor; en PC podemos hacer una animación más elaborada."
 
-- **En el celular y en la tablet el mosaico queda quieto:** las doce fotos a la vista desde que abre la página. Vale también para la tablet acostada: no decide solo el ancho, decide que se use con el dedo.
-- **En computadora** (pantalla de 900 px o más, con mouse) se mueve, y son tres cosas:
-  1. **La entrada**, cuando la sección llega a la pantalla: la principal aparece asentándose, las tres medianas entran desde la derecha y las ocho chicas van apareciendo en cadena. Dura menos de dos segundos.
-  2. **La principal cambia cada 6 segundos:** se intercambia con una de las medianas, con un fundido, y la que queda de principal hace un zoom muy lento. Así pasan por el lugar grande las cuatro fotos más nuevas. Las ocho chicas no cambian de lugar.
-  3. **Con el mouse encima**, los cambios se frenan, y la foto que se mira queda clara mientras las demás bajan un poco.
+- **En el celular y en la tablet parada no se mueve nada.**
+- **En computadora:**
+  1. **La entrada**, una vez, cuando la sección llega a la pantalla: la principal aparece asentándose y las otras cinco entran en cadena.
+  2. **Las tandas.** Cada 8 segundos las seis fotos se funden una detrás de otra, con la principal primero, y la que queda de principal hace un zoom muy lento.
+  3. **El reloj es la rayita del pie.** Cuando se llena, cambia la tanda. Con el mouse encima de las fotos se frena, la foto que se mira queda clara y las demás bajan un poco.
+  4. **Las flechas** pasan la tanda a mano, para atrás y para adelante.
+- **Con "reducir movimiento", o en una pantalla táctil ancha (una tablet acostada):** el armado es el de computadora, pero nada avanza solo. Quedan las flechas.
+- **Sin JavaScript, en computadora** se ven las seis más nuevas.
 
 Qué lo hace liviano, y qué tiene que cumplir cualquier animación que se sume acá:
 
 - Usa solo `opacity` y `transform`, que el navegador mueve sin volver a dibujar la página.
-- Los cambios corren solo mientras la sección se ve y la pestaña está abierta.
-- No baja nada de antemano. Para los cambios baja una copia chica de la principal (17 KB); en pantallas de mucha definición baja además la copia grande de cada mediana, de a una y recién cuando le toca.
-- Con "reducir movimiento" activado, o sin JavaScript, queda todo quieto y a la vista.
-- Si una foto no baja, ese cambio se saltea: no queda un cuadro vacío. Si la ventana se achica, queda quieto con las fotos que se estaban viendo.
+- Corre solo mientras la sección se ve y la pestaña está abierta.
+- No baja nada de antemano: las fotos de la tanda siguiente bajan cuando les toca.
+- Si una foto no baja, esa tanda se saltea: no queda un cuadro vacío. Si la ventana se achica a tablet, vuelven a verse las doce, cada una con su foto.
 - En el celular no se mueve.
-
-Las que giran son la principal (`ig-p`) y las medianas (`ig-g`): al sumar fotos no hay que tocar el programa, toma las que tengan esas marcas.
 
 ### Cómo sumar fotos
 
 1. El dueño las pasa: subidas a GitHub (a la carpeta principal de la rama por defecto) o por el chat. Por el chat llegan enteras, con su tamaño original.
 2. Prepararlas: `php 04-operations/tools/foto-mosaico.php <foto> <número que sigue>`. Si no es cuadrada, mirar antes de dónde conviene cortarla (`arriba`, `centro`, `abajo` o `x,y,lado`): en las fotos más altas que anchas el logo queda bien abajo y un corte al centro lo deja por la mitad. Y si trae la marca de un celular ("Galaxy A71"), cortarla afuera.
 3. Sumar los tiles en `index.html`, adelante, y decidir cuáles van grandes (abajo).
-4. Probar en celular, tablet y computadora que el mosaico no tenga huecos (y, en computadora, que la principal siga cambiando). En computadora, **ancho por ancho, de 900 a 1920 px**, no solo en uno: la falla del 24/11/2026 estaba entre 900 y 1100. Y entregar el bloque de deploy (`04-operations/tools/bloque-deploy.py`): las fotos primero, `index.html` al final.
+4. Probar en celular, tablet y computadora. En computadora, **ancho por ancho, de 900 a 1920 px**, no solo en uno, y que las tandas sigan pasando. Y entregar el bloque de deploy (`04-operations/tools/bloque-deploy.py`): las fotos primero, `index.html` al final.
 
-**Para que el mosaico cierre sin huecos, las fotos se suman de a tres.** La cuenta: la principal ocupa 16 lugares, cada mediana 4 y cada chica 1, y el total tiene que dar 36. Vale igual para las 6 columnas por 6 filas de la tablet y para las 9 por 4 de la computadora. En el celular (4 columnas), la principal y las medianas ocupan 4 y el total tiene que dar 24.
+**En computadora no hay cuenta que hacer.** El programa toma todas las fotos en orden, de a seis. Si el total no es múltiplo de seis, la última tanda se completa con las primeras. No hay que tocarlo.
+
+**En el celular y en la tablet, para que el mosaico cierre sin huecos, las fotos se suman de a tres.** La cuenta: en la tablet (6 columnas) la principal ocupa 16 lugares, cada mediana 4 y cada chica 1, y el total tiene que dar 36; en el celular (4 columnas), la principal y las medianas ocupan 4 y el total tiene que dar 24.
 
 | Fotos | Principal (`ig-p`) | Medianas (`ig-g`) | Chicas |
 |---|---|---|---|
@@ -57,7 +64,7 @@ Las que giran son la principal (`ig-p`) y las medianas (`ig-g`): al sumar fotos 
 | 18 | 1 | 1 | 16 |
 | 21 | 1 | 0 | 20 |
 
-Con 13 o 14 no cierra: o se espera a tener las tres, o se saca alguna vieja (y eso lo decide el dueño: pidió no sacar ninguna). Pasando las 21 hay que repensarlo.
+Con 13 o 14 no cierra en el celular: o se espera a tener las tres, o se saca alguna vieja (y eso lo decide el dueño: pidió no sacar ninguna). Pasando las 21 hay que repensarlo.
 
 ### Lo que hay que saber de la landing publicada
 
