@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Mesadas de granito, cuarzo y sinterizado ya colocadas en CABA y GBA. Cada foto, con el material con el que se hizo." />
+  <title>Trabajos — BlackStones Marmolería</title>
+  <link rel="icon" href="/favicon/favicon.ico" />
+  <link rel="canonical" href="https://blackstones.com.ar/trabajos/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_AR" />
+  <meta property="og:site_name" content="BlackStones Marmolería" />
+  <meta property="og:title" content="Trabajos — BlackStones Marmolería" />
+  <meta property="og:description" content="Mesadas de granito, cuarzo y sinterizado ya colocadas en CABA y GBA. Cada foto, con el material con el que se hizo." />
+  <meta property="og:url" content="https://blackstones.com.ar/trabajos/" />
+  <meta property="og:image" content="https://blackstones.com.ar/trabajos/f/negro-boreal-1-og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Esta página la arma 04-operations/trabajos/armar.py con datos.json. No se edita a mano. -->
+<style>
+:root{
+  --night:#15130F;
+  --cream:#F3EDE3;
+  --cream-dim:rgba(243,237,227,.62);
+  --cream-faint:rgba(243,237,227,.38);
+  --gold:#C4A77D;
+  --gold-deep:#8A7560;
+  --line:rgba(196,167,125,.18);
+  --wa:#25D366;
+  --wa-dark:#1DA851;
+  --radius:14px;
+  --font-display:'Fraunces',serif;
+  --font-body:'Manrope',sans-serif;
+  --section-y:clamp(3.5rem,8vw,6.5rem);
+  /* El crema de estas páginas es más claro que el de la landing (#FAF8F4, #F2EDE3, #E8E2D6).
+     Dueño, 24/11/2026: "aclararlo un poco a algo más premium; no queremos la sensación de
+     libro viejo o pergamino". */
+  --bg:#FCFBF9;
+  --bg-alt:#F4F1EB;
+  --text:#1A1816;
+  --text-soft:#4A453E;
+  --accent:#A89580;
+  --accent-dark:#7A6649;
+  --border:#EBE7E0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:clip}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+.container{max-width:1120px;margin:0 auto;padding:0 clamp(1.25rem,4vw,2.5rem)}
+.eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:1.1rem}
+h1,h2{font-family:var(--font-display);font-weight:500;font-size:clamp(1.75rem,4.2vw,2.7rem);line-height:1.1;letter-spacing:-.01em;margin-bottom:1rem;color:var(--text)}
+h1 em,h2 em{font-style:italic;color:var(--accent-dark)}
+.lead{color:var(--text-soft);max-width:560px;font-size:1.02rem}
+
+/* ===== MENÚ (el de la landing) ===== */
+/* ===== NAV (estructura validada: mobile = logo+nombre+WA) ===== */
+.nav{position:sticky;top:0;z-index:50;background:rgba(21,19,15,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.7rem 1.1rem;max-width:1120px;margin:0 auto}
+.nav-logo{display:flex;align-items:center;gap:.55rem;text-decoration:none;flex-shrink:0}
+.nav-logo img{height:34px;flex-shrink:0}
+.nav-logo span{font-family:var(--font-display);color:var(--cream);font-size:1.02rem;letter-spacing:.02em;white-space:nowrap}
+.nav-logo b{font-weight:600}
+.nav-links{display:none;gap:1.5rem;list-style:none;margin:0 auto}
+.nav-links a{color:var(--cream-dim);text-decoration:none;font-size:.82rem;font-weight:600;letter-spacing:.04em;transition:color .15s;white-space:nowrap}
+.nav-links a:hover{color:var(--gold)}
+.nav-actions{display:flex;align-items:center;gap:.55rem;flex-shrink:0}
+.nav-catalog{display:none;align-items:center;gap:.4rem;color:var(--gold);border:1px solid rgba(196,167,125,.45);border-radius:999px;padding:.5rem 1rem;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s}
+.nav-catalog:hover{background:rgba(196,167,125,.14);color:var(--cream)}
+.nav-cta{display:inline-flex;align-items:center;gap:.45rem;background:var(--wa);color:#fff;text-decoration:none;font-weight:800;font-size:.84rem;padding:.55rem 1.05rem;border-radius:999px;white-space:nowrap;transition:background .15s,transform .15s}
+.nav-cta:hover{background:var(--wa-dark);transform:translateY(-1px)}
+.nav-cta svg{width:16px;height:16px;flex-shrink:0}
+@media(min-width:900px){
+  .nav-inner{max-width:1280px;padding:.85rem 2.5rem;gap:1.2rem}
+  .nav-logo img{height:40px}
+  .nav-logo span{font-size:1.14rem}
+  .nav-links{display:flex;gap:1.8rem}
+  .nav-links a{font-size:.86rem}
+  .nav-catalog{display:inline-flex;padding:.55rem 1.15rem;font-size:.85rem}
+  .nav-cta{padding:.6rem 1.2rem;font-size:.88rem}
+}
+@media(min-width:1200px){
+  .container{max-width:1200px}
+}
+@media(max-width:380px){
+  .nav-logo img{height:30px}
+  .nav-logo span{font-size:.92rem}
+  .nav-cta{padding:.5rem .85rem;font-size:.78rem}
+}
+.nav-links a[aria-current]{color:var(--gold)}
+
+/* La textura del material: un cuadrito con borde claro y sombra, montado sobre la esquina
+   de abajo a la izquierda de la foto. Abajo a la derecha las fotos traen el logo: no se tapa. */
+.muestra{flex-shrink:0;position:relative;border-radius:10px;border:3px solid var(--bg);object-fit:cover;background:var(--bg-alt);box-shadow:0 8px 20px rgba(26,24,22,.2)}
+
+/* ===== CABECERA ===== */
+.t-head{padding-top:clamp(2.4rem,6vw,4.2rem);padding-bottom:clamp(1.8rem,4vw,2.8rem)}
+
+/* ===== GALERÍA: una columna en el celular, dos en tablet, tres en computadora ===== */
+.t-grid{display:grid;grid-template-columns:1fr;gap:2.4rem 1.6rem;padding-bottom:var(--section-y)}
+@media(min-width:640px){.t-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1000px){.t-grid{grid-template-columns:repeat(3,1fr);gap:3rem 1.8rem}}
+.t-card{display:block;min-width:0;text-decoration:none;color:inherit}
+.t-foto{aspect-ratio:1;border-radius:var(--radius);overflow:hidden;background:var(--bg-alt);box-shadow:0 6px 18px rgba(26,24,22,.08)}
+.t-foto img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.t-card:hover .t-foto img{transform:scale(1.03)}
+.t-pie{display:flex;align-items:flex-start;gap:.95rem;padding:0 .2rem 0 .9rem}
+.t-pie .muestra{width:84px;height:84px;margin-top:-42px}
+.t-txt{padding-top:.7rem;min-width:0}
+.t-txt strong{display:block;font-family:var(--font-display);font-weight:500;font-size:1.15rem;line-height:1.2}
+.t-txt span{display:block;font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dark);margin-top:.25rem}
+
+/* ===== BOTÓN, CIERRE Y PIE (los de la landing) ===== */
+.btn-wa{display:inline-flex;align-items:center;gap:.6rem;background:var(--wa);color:#fff;text-decoration:none;font-weight:800;font-size:1rem;padding:.95rem 1.7rem;border-radius:999px;box-shadow:0 8px 28px rgba(37,211,102,.3);transition:background .15s,transform .15s}
+.btn-wa:hover{background:var(--wa-dark);transform:translateY(-2px)}
+.btn-wa svg{width:20px;height:20px}
+.final-v3{background:var(--night);color:var(--cream);text-align:center}
+.final-center{display:flex;flex-direction:column;align-items:center}
+.final-v3 .final-logo{height:52px;margin-bottom:1.4rem}
+.final-v3 .eyebrow{color:var(--gold)}
+.final-v3 h2{color:var(--cream);max-width:560px}
+.final-v3 h2 em{color:var(--gold)}
+.final-v3 p{color:var(--cream-dim);max-width:460px;margin:0 0 1.8rem;font-size:.95rem}
+.final-v3 .final-place{display:block;margin-top:1.5rem;font-size:.82rem;color:var(--cream-faint);max-width:420px}
+.final-v3 .final-place a{color:var(--gold);font-weight:700;text-decoration:none;border-bottom:1px solid var(--gold-deep)}
+.final-v3{padding:var(--section-y) 0}
+.site-footer{background:#0F0D0A;color:var(--cream-faint);padding:2.2rem 0;font-size:.82rem}
+.foot-grid{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1.2rem;align-items:center}
+.foot-grid a{color:var(--cream-dim);text-decoration:none;font-weight:600}
+.foot-grid a:hover{color:var(--gold)}
+.foot-links{display:flex;gap:1.4rem;flex-wrap:wrap}
+.sticky-wa{position:fixed;right:16px;bottom:16px;z-index:60;width:56px;height:56px;border-radius:50%;background:var(--wa);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 28px rgba(37,211,102,.4);opacity:1;transition:opacity .3s,transform .15s}
+.sticky-wa:hover{transform:scale(1.06)}
+.sticky-wa svg{width:28px;height:28px;fill:#fff}
+@media(min-width:900px){.sticky-wa{display:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <img src="/logo/logo_isotipo.png" alt="" />
+      <span><b>Black</b>Stones</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="/#resenas">Reseñas</a></li>
+      <li><a href="/#proceso">Cómo trabajamos</a></li>
+      <li><a href="/#materiales">Materiales</a></li>
+      <li><a href="/trabajos/" aria-current="page">Trabajos</a></li>
+      <li><a href="/#faq">Preguntas</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a class="nav-catalog" href="/#colores">Catálogo</a>
+      <a class="nav-cta" href="https://wa.me/5491124685820?text=Hola%2C%20vi%20los%20trabajos%20en%20la%20p%C3%A1gina%20y%20me%20gustar%C3%ADa%20cotizar%20una%20mesada" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+        Cotizar
+      </a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <header class="container t-head">
+    <div class="eyebrow">Trabajos</div>
+    <h1>Cada mesada, <em>con su piedra.</em></h1>
+    <p class="lead">Obras nuestras, ya colocadas. Tocá una foto para ver el material.</p>
+  </header>
+
+  <div class="container t-grid">
+    <a class="t-card" href="/trabajos/negro-boreal/">
+      <div class="t-foto"><img src="/trabajos/f/negro-boreal-1-720.webp" srcset="/trabajos/f/negro-boreal-1-720.webp 720w, /trabajos/f/negro-boreal-1-1080.webp 1080w, /trabajos/f/negro-boreal-1-1440.webp 1440w" sizes="(min-width:1000px) 360px, (min-width:640px) 46vw, 92vw" width="1440" height="1440" alt="Mesada en L de granito Negro Boreal con bacha negra" fetchpriority="high"></div>
+      <div class="t-pie">
+        <img class="muestra" src="/granitos/t/negro-boreal.webp" width="84" height="84" alt="" loading="lazy" decoding="async">
+        <div class="t-txt"><strong>Negro Boreal</strong><span>Granito</span></div>
+      </div>
+    </a>
+    <a class="t-card" href="/trabajos/blanco-cana/">
+      <div class="t-foto"><img src="/trabajos/f/blanco-cana-1-720.webp" srcset="/trabajos/f/blanco-cana-1-720.webp 720w, /trabajos/f/blanco-cana-1-1080.webp 1080w, /trabajos/f/blanco-cana-1-1440.webp 1440w" sizes="(min-width:1000px) 360px, (min-width:640px) 46vw, 92vw" width="1440" height="1440" alt="Mesada larga de cuarzo Blanco Cana con anafe y bacha" loading="lazy" decoding="async"></div>
+      <div class="t-pie">
+        <img class="muestra" src="/purastone/t/blanco-cana.webp" width="84" height="84" alt="" loading="lazy" decoding="async">
+        <div class="t-txt"><strong>Blanco Cana</strong><span>Cuarzo</span></div>
+      </div>
+    </a>
+    <a class="t-card" href="/trabajos/gris-mara/">
+      <div class="t-foto"><img src="/trabajos/f/gris-mara-1-720.webp" srcset="/trabajos/f/gris-mara-1-720.webp 720w, /trabajos/f/gris-mara-1-1080.webp 1080w, /trabajos/f/gris-mara-1-1440.webp 1440w" sizes="(min-width:1000px) 360px, (min-width:640px) 46vw, 92vw" width="1440" height="1440" alt="Mesada de granito Gris Mara con bacha de acero, bajo una ventana" loading="lazy" decoding="async"></div>
+      <div class="t-pie">
+        <img class="muestra" src="/granitos/t/gris-mara.webp" width="84" height="84" alt="" loading="lazy" decoding="async">
+        <div class="t-txt"><strong>Gris Mara</strong><span>Granito</span></div>
+      </div>
+    </a>
+  </div>
+</main>
+
+<section class="final-v3">
+  <div class="container final-center">
+    <img class="final-logo" src="/logo/logo_isotipo.png" alt="" aria-hidden="true" />
+    <h2>¿Te gustó alguna? <em>Mandanos las medidas.</em></h2>
+    <p>Decinos el material y el largo por ancho. Te respondemos con el presupuesto por escrito.</p>
+    <a class="btn-wa" href="https://wa.me/5491124685820?text=Hola%2C%20vi%20los%20trabajos%20en%20la%20p%C3%A1gina%20y%20me%20gustar%C3%ADa%20cotizar%20una%20mesada" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+      Cotizá por WhatsApp
+    </a>
+    <span class="final-place">O vení a verlo en persona: <a href="https://share.google/674RKVdI1dnTyTZBY" target="_blank" rel="noopener">Av. Juan B. Alberdi 3575, CABA</a> · Lun–Vie 9–17 hs · Sáb 9–13 hs</span>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <strong style="color:rgba(243,237,227,.85)">BlackStones Marmolería</strong><br>
+        Av. Juan Bautista Alberdi 3575 · CABA · Lun–Vie 9–17 hs · Sáb 9–13 hs
+      </div>
+      <div class="foot-links">
+        <a href="https://wa.me/5491124685820" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://share.google/674RKVdI1dnTyTZBY" target="_blank" rel="noopener">Google</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<a class="sticky-wa" href="https://wa.me/5491124685820?text=Hola%2C%20vi%20los%20trabajos%20en%20la%20p%C3%A1gina%20y%20me%20gustar%C3%ADa%20cotizar%20una%20mesada" target="_blank" rel="noopener" aria-label="Cotizar por WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+</a>
+
+</body>
+</html>

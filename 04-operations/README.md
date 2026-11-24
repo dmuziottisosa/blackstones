@@ -16,6 +16,7 @@ Cómo se ejecuta el día a día: proceso de venta-fabricación-colocación, rute
 | `relacion-contrato.md` | Relación-Contrato: la planilla de contratos, la plata, el enlace con el tablero y la papelera |
 | `reportes.md` | Control (antes "Reportes"): recordatorios, cierre del mes y registro de acciones. Solo administradores |
 | `respaldo.md` | Respaldo: la copia de las últimas 24 horas, cómo se usa, qué vuelve y qué no. Solo administradores |
+| `trabajos/` | La galería `/trabajos/` del sitio: reglas del dueño, cómo sumar un trabajo y las herramientas que arman las páginas |
 | `instagram-en-la-landing.md` | La sección Instagram de la landing muestra sola los últimos posts: cómo está hecho, cómo se carga la llave y cómo mirar el estado |
 
 ## Reglas

@@ -1,0 +1,59 @@
+{
+  "_": "Todo lo que muestra /trabajos/. Después de tocar este archivo: python3 04-operations/trabajos/armar.py. Cómo sumar un trabajo y las reglas de los textos: README.md de esta carpeta.",
+
+  "tipos": {
+    "granito": {
+      "nombre": "Granito",
+      "espesor_mm": 20,
+      "caracteristicas": [
+        ["gema",     "Extrema dureza"],
+        ["llama",    "Resiste el calor"],
+        ["infinito", "Larga durabilidad"],
+        ["cantera",  "Pieza única"]
+      ]
+    },
+    "cuarzo": {
+      "nombre": "Cuarzo",
+      "espesor_mm": 20,
+      "caracteristicas": [
+        ["hexagono", "Cuarzo natural"],
+        ["gota",     "Baja porosidad"],
+        ["frasco",   "Aguanta los ácidos"],
+        ["parejo",   "Color parejo"]
+      ]
+    }
+  },
+
+  "materiales": [
+    {
+      "slug": "negro-boreal",
+      "nombre": "Negro Boreal",
+      "tipo": "granito",
+      "textura": "/granitos/t/negro-boreal.webp",
+      "descripcion": "Granito natural argentino. Fondo negro profundo con nubes grises y destellos que brillan con la luz.",
+      "dato": ["Origen", "Argentina"]
+    },
+    {
+      "slug": "blanco-cana",
+      "nombre": "Blanco Cana",
+      "tipo": "cuarzo",
+      "textura": "/purastone/t/blanco-cana.webp",
+      "descripcion": "Cuarzo Purastone. Blanco con un punteado fino y parejo, casi liso a la vista.",
+      "dato": ["Marca", "Purastone"]
+    },
+    {
+      "slug": "gris-mara",
+      "nombre": "Gris Mara",
+      "tipo": "granito",
+      "textura": "/granitos/t/gris-mara.webp",
+      "descripcion": "Granito natural argentino. Gris claro de grano fino y parejo, con puntos negros y blancos.",
+      "dato": ["Origen", "Argentina"]
+    }
+  ],
+
+  "trabajos": [
+    { "foto": "negro-boreal-1", "material": "negro-boreal", "alt": "Mesada en L de granito Negro Boreal con bacha negra" },
+    { "foto": "blanco-cana-1", "material": "blanco-cana", "alt": "Mesada larga de cuarzo Blanco Cana con anafe y bacha" },
+    { "foto": "gris-mara-1", "material": "gris-mara", "alt": "Mesada de granito Gris Mara con bacha de acero, bajo una ventana" }
+  ]
+}
