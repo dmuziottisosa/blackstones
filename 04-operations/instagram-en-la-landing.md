@@ -1,8 +1,27 @@
 # Instagram en la landing
 
-> La sección "Lo último que salió del taller" de la landing muestra sola los seis últimos posts de @blackstones.ar. Antes eran seis fotos fijas que llevaban al perfil.
+> La sección "Lo último que salió del taller" de la landing quedó preparada para mostrar sola los seis últimos posts de @blackstones.ar. Hoy muestra las seis fotos fijas de siempre.
 > Hecho el 24/11/2026, a pedido del dueño ("que esta sección sea más dinámica, con lo que en verdad tenemos en IG").
-> `status:` armado y probado contra un Instagram de mentira. **Contra el Instagram de verdad se prueba el día que se carga la llave**: hasta ese día, lo de la API es lo que dice la documentación de Meta, no algo visto andar.
+> `status:` **en pausa desde el 24/11/2026.** El código está armado y probado contra un Instagram de mentira, pero la llave no se pudo generar: el panel de Meta ya no ofrece el camino para el que se armó (ver "Qué pasó al generar la llave"). El dueño: "si nos va a complicar, vemos otras formas que no sea conectando IG en vivo" y "después vemos". **Nunca se probó contra el Instagram de verdad.**
+
+## Qué pasó al generar la llave (24/11/2026)
+
+El dueño creó la app en Meta siguiendo los pasos de abajo. Lo que apareció no fue lo que dice la documentación:
+
+- **El panel no ofreció "API setup with Instagram login"**, que es el camino para el que está escrito `ig-feed.php`. Ofreció dos: "API setup with Unified login" (lo marca como el recomendado) y "API setup with Facebook login" (lo marca como viejo).
+- **"Unified login" da otro tipo de llave**, que se usa contra otro servidor (`graph.facebook.com`) y con otros pedidos. `ig-feed.php` no la sabe usar tal como está.
+- **"Unified login" exige que la app sea de un portfolio comercial**, y la documentación pide que ese portfolio sea distinto del que tiene el Instagram. La cuenta no tiene hoy un segundo portfolio que sirva para eso, y no se crea uno nuevo solo para esto.
+
+Ahí se frenó. Lo que dice la documentación de Meta sobre "Unified login" está en `06-knowledge/layer-2-landscape/instagram-api-para-mostrar-posts.md`.
+
+## Formas que quedan (sin decidir)
+
+- **Cargar los posts desde el sistema.** Una pantalla para administradores: se pega el link del post y se sube la foto; la landing muestra los últimos seis. Sin Meta ni llaves, y se elige qué se ve. Es la que se le recomendó al dueño. No está hecha. `ig-feed.php` y el script de la landing sirven tal cual: cambia quién escribe la lista.
+- **Un servicio externo que lee el Instagram** (por ejemplo Behold). Es automático, depende de otra empresa y sí conecta el Instagram. Según su página de precios, vista el 24/11/2026 y sin comprobar más: gratis con una actualización por día y hasta 6 posts; USD 10 por mes con actualización por hora.
+- **Dejar las fotos fijas** y cambiarlas a mano cuando haga falta.
+- **Retomar Meta** el día que haya un portfolio que sirva: habría que enseñarle a `ig-feed.php` la llave nueva.
+
+Lo que sigue describe lo que está armado.
 
 ## Qué ve el visitante
 
@@ -47,7 +66,7 @@ Es un permiso de solo lectura que Meta le da a una app para leer los posts de la
 
 ### Generarla (una vez, en el navegador)
 
-Según la documentación oficial de Meta, leída el 23 y 24/11/2026. Los nombres de los botones pueden aparecer traducidos.
+**Estos pasos son los de la documentación de Meta del 23/11/2026 y ya no coinciden con el panel:** el paso 3 no lleva a "API setup with Instagram login". Quedan como registro de lo que se intentó.
 
 1. Entrar a `developers.facebook.com` con el Facebook que administra la cuenta del negocio. Si es la primera vez, pide registrarse como desarrollador (es gratis).
 2. **My Apps → Create App**. Caso de uso: **Other**. Tipo: **Business**. Nombre (por ejemplo "BlackStones web") y un mail de contacto.
@@ -111,6 +130,8 @@ Abajo trae el detalle para quien lo arregle: el error que devolvió Instagram, c
 ## Cómo se probó
 
 Contra un Instagram de mentira en la computadora de desarrollo: 102 comprobaciones del servidor y 51 de la landing en computadora, tablet y celular. Entre otras: sin llave no crea nada ni llama a nadie; lista normal con foto, reel, álbum y álbum que empieza con video; llave vencida, llave nueva, llave de otra cuenta; Instagram caído o contestando basura; fotos rotas, enormes o de otro servidor; renovación de la llave y renovación fallida; doce visitantes a la vez (una sola llamada); un pedido cortado a la mitad; el servidor sin librería de imágenes y sin cURL; y que la llave no aparezca en ninguna respuesta, archivo ni registro.
+
+También se ensayaron los dos bloques de PowerShell (el de deploy y el de la llave) con el FTP y el navegador de mentira.
 
 Las pruebas no están en el repo (ninguna del sitio lo está todavía).
 

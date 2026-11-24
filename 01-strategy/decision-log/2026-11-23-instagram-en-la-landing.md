@@ -1,6 +1,6 @@
 # La sección Instagram de la landing muestra sola los últimos posts
 
-**Fecha:** 23/11/2026 (entregado el 24/11) · **Decide:** el dueño pidió que la sección sea dinámica; la forma la eligió quien lo armó y la confirma él · **Estado:** subido a GitHub; falta el deploy y cargar la llave
+**Fecha:** 23/11/2026 (entregado el 24/11) · **Decide:** el dueño pidió que la sección sea dinámica; la forma la eligió quien lo armó y la confirma él · **Estado:** en pausa desde el 24/11/2026. El código está en GitHub; la llave no se pudo generar (ver "Qué pasó el 24/11")
 
 ## Qué pidió el dueño
 
@@ -11,6 +11,14 @@ Hasta hoy eran seis fotos fijas (`ig_section/1.webp` a `6.webp`) y las seis llev
 ## Qué se hizo
 
 La sección muestra los seis posts más nuevos de @blackstones.ar y cada foto lleva a su post. El sitio le pregunta a Instagram por la API oficial, como mucho una vez por hora, y guarda una copia propia de las fotos. Si algo falla, quedan las fotos fijas. El detalle: `04-operations/instagram-en-la-landing.md`.
+
+## Qué pasó el 24/11, al generar la llave
+
+El dueño creó la app en Meta. El panel no ofreció el camino que describe la documentación ("API setup with Instagram login"): ofreció "Unified login", que da otro tipo de llave y exige que la app sea de un portfolio comercial distinto del que tiene el Instagram. Con los portfolios de la cuenta no se pudo, y no se crea uno nuevo solo para esto.
+
+El dueño: "si nos va a complicar, vemos otras formas que no sea conectando IG en vivo". Se le mostraron tres (cargar los posts desde el sistema, un servicio externo, dejar las fotos fijas) y no eligió: "después vemos".
+
+**Lo que enseñó:** la documentación de Meta iba un paso atrás del panel. Se leyó dos veces antes de escribir una línea y aun así el panel mostró otra cosa. Para algo que depende de una pantalla de Meta, lo primero es pedirle al dueño una captura de esa pantalla, antes de armar nada.
 
 ## Qué se descartó
 
@@ -29,8 +37,10 @@ La sección muestra los seis posts más nuevos de @blackstones.ar y cada foto ll
 
 ## Known unknowns
 
-- **Nada de esto se probó contra el Instagram de verdad.** Desde acá no hay llave ni se puede ver producción. Se prueba el día que el dueño carga la llave: el bloque dice en el momento si Instagram la aceptó. Los cinco puntos que pueden salir distintos están al final de `04-operations/instagram-en-la-landing.md`.
-- **Si los pasos del panel de Meta son hoy tal cual los describe su documentación.** Los nombres de los botones cambian seguido.
+- **Nada de esto se probó contra el Instagram de verdad**, y con la pausa sigue sin probarse.
+- **Si los pasos del panel de Meta son hoy tal cual los describe su documentación.** *(Resuelto el 24/11: no lo son. Ver arriba.)*
+- **Cuál de las formas que quedan quiere el dueño.** Están en `04-operations/instagram-en-la-landing.md`, "Formas que quedan".
+- **Si el bloque de deploy del 24/11 se pegó.** Si se pegó, la landing se ve igual: sin llave, muestra las fotos fijas.
 - **Cuántos de los últimos posts son reels sin portada o con audio con licencia.** Esos no traen foto por la API y se saltean; se miran los 25 más nuevos para juntar seis.
 - **Si mostrar los últimos posts ayuda a que escriban.** No hay medición de la sección: ni de antes ni de ahora.
 
@@ -41,5 +51,6 @@ La sección muestra los seis posts más nuevos de @blackstones.ar y cada foto ll
 
 ## Cómo sabemos si sirvió
 
-- A la semana de cargar la llave: `https://blackstones.com.ar/ig-feed.php?estado=1` tiene que decir "Todo bien" y que la llave se renovó.
+- En pausa: no hay nada que medir hasta que se elija una forma.
+- Si un día se carga una llave: a la semana, `https://blackstones.com.ar/ig-feed.php?estado=1` tiene que decir "Todo bien" y que la llave se renovó.
 - Lo que no se mide todavía: si alguien toca las fotos. Si importa saberlo, se le pone un evento a los seis links.

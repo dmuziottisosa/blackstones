@@ -1,7 +1,7 @@
 # La API de Instagram para mostrar los posts propios en un sitio
 
 > **Status:** `layer-2-landscape` — documentación oficial de Meta, leída el 23 y 24 de noviembre de 2026.
-> **Validez:** alta en lo que va entre comillas (es cita de la documentación). Es documentación, no algo visto andar: hasta que se cargue una llave de verdad, ningún punto de acá está comprobado contra Instagram.
+> **Validez:** alta en lo que va entre comillas (es cita de la documentación). Es documentación, no algo visto andar: ningún punto de acá está comprobado contra Instagram. **Y el 24/11/2026 el panel de Meta mostró otra cosa que la documentación** (ver "Actualización del 24/11/2026"): para los pasos del panel, vale una captura antes que estas páginas.
 > **Dónde se aplicó:** la sección Instagram de la landing. `04-operations/instagram-en-la-landing.md` y `01-strategy/decision-log/2026-11-23-instagram-en-la-landing.md`.
 
 ## Lo que dice Meta
@@ -36,6 +36,26 @@
 
 **Errores.** Un objeto `error` con `message`, `type`, `code` y `error_subcode`. La página de códigos no lista el de llave vencida; el sitio trata como "llave rechazada" el 190, que es el de la API general de Meta.
 
+## Actualización del 24/11/2026: el panel ofrece "Unified login"
+
+Al crear la app, el panel de Meta no mostró "API setup with Instagram login". Mostró "API setup with Unified login", con este aviso en la otra pestaña: "API setup with Unified login is the recommended setup for Instagram API. It's the only setup that will get new features. API setup with Facebook login still works, but it's now legacy." La documentación de "Instagram Login" no avisa de este cambio. Lo que sigue es lo que dice la documentación de "Unified Login", leída ese día; nada de esto se probó.
+
+**Qué es.** "Instagram API with Unified Login". La presenta como un tercer camino, no como otro nombre del anterior: "is recommended for new integrations", "is built on Facebook Login for Business".
+
+**Otro servidor y otra llave.** "Send requests to `graph.facebook.com`, and put the Instagram account ID in the request path". La llave es un "Business Integration System User Access Token".
+
+**`/me` ya no es la cuenta.** "With this access token, `/me` returns the business integration system user, not the Instagram account." La cuenta se pide con `GET /me/assigned_instagram_accounts?fields=id,username` (pide el permiso `instagram_basic`).
+
+**Exige un portfolio comercial.** "The API setup with Unified login tab only appears for apps owned by a business portfolio." Y, en la página de Facebook Login for Business: "Your app must be associated with a business portfolio, which you have full control. This needs to be separate from the business portfolio owned by your business client." Para probar: "the tester must have a role on the app and full control of the client business".
+
+**La llave de prueba.** "Generate access tokens" → "Add account" (se invita la cuenta como "Instagram Tester" y se acepta en Instagram web: Settings → Website permissions → Apps and websites → Tester Invites) → "Generate token": "Copy the access token. It's shown only once." No dice cuánto dura esa llave ni qué permisos trae.
+
+**Los permisos por defecto son más de los que hacen falta.** La configuración por defecto pide `instagram_basic` e `instagram_manage_messages` ("which are required"), más `instagram_manage_comments`, `instagram_content_publish`, `ads_management` y `ads_read`. Para mostrar fotos alcanza con leer: una llave con permiso de publicar, guardada en el servidor, es un riesgo que antes no estaba.
+
+**Vencimiento y renovación.** "Whether the access token expires depends on your configuration." Renovarla pide el secreto de la app (`appsecret_proof`): el sitio no la podría renovar solo, como hace con la otra.
+
+**El camino anterior no tiene fecha de cierre.** "This documentation does not announce a retirement date for existing Instagram API setups." No dice si se sigue ofreciendo a apps nuevas; en el panel del 24/11 no apareció.
+
 ## Fuentes
 
 - `developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/` y `/get-started`
@@ -45,6 +65,9 @@
 - `developers.facebook.com/docs/instagram-platform/reference/instagram-media/`
 - `developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media`
 - `developers.facebook.com/docs/graph-api/overview/rate-limiting`
+- `developers.facebook.com/documentation/instagram-platform/instagram-api-with-unified-login` y sus páginas `/get-started`, `/authentication`, `/migration`, `/permissions` y `/business-onboarding`
+- `developers.facebook.com/docs/facebook-login/facebook-login-for-business`
+- `developers.facebook.com/docs/development/create-an-app/`
 
 ## Cuándo se revisa
 
