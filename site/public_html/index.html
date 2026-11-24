@@ -363,52 +363,63 @@ h2 em{font-style:italic;color:var(--accent-dark)}
   .rev-col{border-left:1px solid rgba(168,149,128,.3);padding-left:3.5rem;display:flex;flex-direction:column;align-items:flex-start;scroll-margin-top:6rem}
   .rev-col .rev-scroll{flex:1;align-self:stretch}
   .rev-col .rev-more{margin-top:1.3rem;margin-bottom:.3rem}
-  /* micro-interacción: el mosaico responde */
-  .ig-t:hover{transform:translateY(-4px) scale(1.012);opacity:1;box-shadow:0 14px 30px rgba(26,24,22,.16)}
-  .ig-grid{grid-auto-rows:1fr}
 }
 /* --- Panel Instagram --- */
 .ig-head{margin-bottom:1.4rem}
 .ig-head h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:.4rem}
-/* El mosaico. Tres formas, según el ancho:
-   - celular: las doce fotos, 4 columnas; la principal (ig-p) y las medianas (ig-g), de 2 x 2;
-   - de 640 a 899 px (tablet parada): las doce, 6 columnas; la principal de 4 x 4;
-   - computadora (desde 900 px): SEIS a la vista, grandes, en 3 columnas (la principal de 2 x 2),
-     y un programa las va cambiando por tandas hasta pasar todas. Las que no están a la vista
-     siguen en la página: se esconden acá y el programa lee sus fotos de ahí.
-   En el celular y la tablet la cuenta para sumar fotos sin huecos sigue siendo de a tres (con
-   12 van 3 medianas, con 15 van 2, con 18 va 1, con 21 ninguna). En computadora no hay cuenta.
-   La principal usa N.webp (1080 px) y todas las demás N-c.webp (540 px).
+/* El mosaico: SEIS fotos a la vista, grandes, en 3 columnas (la principal, ig-p, de 2 x 2), en
+   todos los anchos: celular, tablet y computadora. Las demás siguen en la página, escondidas: un
+   programa lee sus fotos de ahí y las va mostrando por tandas. El pie dice por cuál va
+   ("01 / 06") y tiene las dos flechas (dueño, 24/11/2026, al sumar 19 fotos: el paginado "no
+   estaría mal en cel tampoco"). Sin el programa quedan a la vista las seis primeras.
+   El orden de las fotos en la página es el orden en que se ven: las más nuevas, adelante.
+   La primera usa N.webp (1080 px) y todas las demás N-c.webp (540 px).
    Cómo sumar una: 04-operations/instagram-en-la-landing.md */
-.ig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;grid-auto-flow:dense}
-.ig-p,.ig-g{grid-column:span 2;grid-row:span 2}
-@media(min-width:640px){
-  .ig-grid{grid-template-columns:repeat(6,1fr)}
-  .ig-p{grid-column:span 4;grid-row:span 4}
-}
+.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:.6rem}
+.ig-p{grid-column:span 2;grid-row:span 2}
+.ig-t:nth-child(n+7){display:none}
 @media(min-width:900px){
-  .ig-grid{grid-template-columns:repeat(3,1fr);gap:.75rem}
-  .ig-p{grid-column:span 2;grid-row:span 2}
-  .ig-g{grid-column:auto;grid-row:auto}
-  .ig-t:nth-child(n+7){display:none}
+  .ig-grid{gap:.75rem}
 }
 .ig-t{aspect-ratio:1;border-radius:10px;background:center/cover no-repeat var(--bg-alt);display:block;transition:transform .2s,opacity .2s;box-shadow:0 6px 18px rgba(26,24,22,.08)}
-.ig-t:hover{transform:translateY(-3px);opacity:.92}
-.ig-pie{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.7rem 1.4rem;margin-top:1rem}
-.ig-pag{display:none}
+@media(hover:hover){
+  /* micro-interacción: con el mouse, la foto responde */
+  .ig-t:hover{transform:translateY(-4px) scale(1.012);box-shadow:0 14px 30px rgba(26,24,22,.16)}
+}
+.ig-pie{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.8rem 1.4rem;margin-top:1rem}
+.ig-pag{display:flex;align-items:center;gap:.75rem;-webkit-user-select:none;user-select:none}
+.ig-num{font-family:var(--font-display);font-style:italic;font-size:1.02rem;color:var(--accent-dark);white-space:nowrap}
+.ig-num b{font-weight:500;color:var(--text)}
+.ig-prog{width:4.6rem;height:2px;border-radius:2px;background:rgba(168,149,128,.38);position:relative;overflow:hidden}
+.ig-prog i{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--accent-dark);transform:scaleX(0);transform-origin:left center}
+/* donde las fotos pasan solas, la rayita es el reloj: se llena en 8 segundos y cambia la tanda */
+.ig-pag.corre .ig-prog i{animation:igProg 8s linear forwards}
+.ig-pag.pausa .ig-prog i{animation-play-state:paused}
+@keyframes igProg{to{transform:scaleX(1)}}
+/* donde no pasan solas (celular, tablet), la rayita marca por cuál va: un tramo por tanda */
+.ig-pag.fija .ig-prog i{transition:transform .45s var(--ease)}
+.ig-fl{width:2rem;height:2rem;border-radius:50%;border:1px solid rgba(122,102,73,.45);background:transparent;color:var(--accent-dark);font-family:var(--font-body);font-size:.92rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){
+  .ig-fl:hover{background:rgba(196,167,125,.18);border-color:var(--accent-dark);color:var(--text)}
+}
+.ig-fl:active{background:rgba(196,167,125,.3);border-color:var(--accent-dark);color:var(--text)}
+.ig-fl+.ig-fl{margin-left:-.35rem}
+@media(pointer:coarse){
+  /* con el dedo, las flechas son del tamaño de un dedo */
+  .ig-fl{width:2.75rem;height:2.75rem;font-size:1.05rem}
+  .ig-fl+.ig-fl{margin-left:-.2rem}
+}
+@media(max-width:639px){
+  /* celular: el paginado ocupa el renglón entero, con la rayita estirada y las flechas a la derecha */
+  .ig-pag{flex:1 1 100%}
+  .ig-prog{flex:1;width:auto}
+}
 @media(min-width:900px){
   .ig-pie{margin-top:1.15rem}
-  .ig-pag{display:flex;align-items:center;gap:.75rem}
-  .ig-num{font-family:var(--font-display);font-style:italic;font-size:1.02rem;color:var(--accent-dark);white-space:nowrap}
-  .ig-num b{font-weight:500;color:var(--text)}
-  .ig-prog{width:4.6rem;height:2px;border-radius:2px;background:rgba(168,149,128,.38);position:relative;overflow:hidden}
-  .ig-prog i{position:absolute;top:0;right:0;bottom:0;left:0;background:var(--accent-dark);transform:scaleX(0);transform-origin:left center}
-  .ig-pag.corre .ig-prog i{animation:igProg 8s linear forwards}
-  .ig-pag.pausa .ig-prog i{animation-play-state:paused}
-  @keyframes igProg{to{transform:scaleX(1)}}
-  .ig-fl{width:2rem;height:2rem;border-radius:50%;border:1px solid rgba(122,102,73,.45);background:transparent;color:var(--accent-dark);font-family:var(--font-body);font-size:.92rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;transition:background .15s,border-color .15s,color .15s}
-  .ig-fl:hover{background:rgba(196,167,125,.18);border-color:var(--accent-dark);color:var(--text)}
-  .ig-fl+.ig-fl{margin-left:-.35rem}
+}
+@media(min-width:900px) and (max-width:979px){
+  /* la media página más angosta: con la rayita más corta, el paginado y el link entran en un renglón */
+  .ig-prog{width:3rem}
 }
 .ig-handle{display:inline-flex;color:var(--accent-dark);font-weight:700;font-size:.88rem;text-decoration:none;border-bottom:1px solid var(--accent);white-space:nowrap}
 .ig-handle:hover{color:var(--text)}
@@ -1208,22 +1219,24 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   .step:nth-child(4){transition-delay:.36s}
 }
 
-/* ===== El mosaico en computadora: seis fotos que van rotando =====
-   Cada 8 segundos cambia la tanda: las seis fotos se funden una detrás de otra, con la principal
-   primero, y la que queda de principal hace un zoom muy lento. La rayita del pie muestra cuánto
-   falta; con el mouse encima se frena, y las flechas pasan la tanda a mano. Al llegar a la
-   sección las fotos entran una vez. En el celular y en la tablet nada de esto corre (dueño,
-   24/11/2026: "en celular que no se mueva"). Con "reducir movimiento" o en una pantalla táctil
-   ancha no avanza solo: quedan las flechas. Son solo opacity y transform. */
-@media (min-width:900px){
-  .ig-t{position:relative;z-index:0;overflow:hidden}
-  .ig-capa{position:absolute;top:0;right:0;bottom:0;left:0;background:center/cover no-repeat;opacity:0;transition:opacity .85s ease}
-  .ig-capa.ve{opacity:1}
+/* ===== El mosaico: seis fotos que cambian por tandas =====
+   En computadora (con mouse), cada 8 segundos cambia la tanda sola: las fotos se funden una
+   detrás de otra, con la principal primero, y la que queda de principal hace un zoom muy lento.
+   La rayita del pie muestra cuánto falta; con el mouse encima se frena. Al llegar a la sección
+   las fotos entran una vez. En el celular y en la tablet nada pasa solo (dueño, 24/11/2026: "en
+   celular que no se mueva"): la tanda se pasa con las flechas, con un fundido corto, y la rayita
+   marca por cuál va. Con "reducir movimiento" tampoco avanza solo, y no hay fundido. Son solo
+   opacity y transform. */
+.ig-t{position:relative;z-index:0;overflow:hidden}
+.ig-capa{position:absolute;top:0;right:0;bottom:0;left:0;background:center/cover no-repeat;opacity:0;transition:opacity .85s ease}
+.ig-capa.ve{opacity:1}
+@media (hover:none){
+  .ig-capa{transition-duration:.45s}
 }
-@media (min-width:900px) and (prefers-reduced-motion:reduce){
-  .ig-capa{transition:none}
+@media (prefers-reduced-motion:reduce){
+  .ig-capa,.ig-pag.fija .ig-prog i{transition:none}
 }
-@media (min-width:900px) and (hover:hover) and (prefers-reduced-motion:no-preference){
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
   .ig-t.pre{opacity:0;transform:scale(.92);transition:none}
   .ig-p.pre{transform:scale(1.04)}
   .ig-t.in{opacity:1;transform:none;transition:opacity .6s ease,transform .8s var(--ease)}
@@ -1316,18 +1329,37 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
           <h2>Lo último que salió <em>del taller.</em></h2>
         </div>
         <div class="ig-grid">
-          <a class="ig-t ig-p" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/7.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/10-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/12-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/11-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/8-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/9-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/3-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/4-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t ig-p" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/16.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/25-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/28-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/17-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/30-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/13-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/20-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/14-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/22-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/31-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/18-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/29-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/15-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/27-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/26-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/23-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/21-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/19-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/24-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/10-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/5-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/7-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/3-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/9-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/12-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/6-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/4-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/11-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/8-c.webp')" aria-label="Post de Instagram"></a>
         </div>
         <div class="ig-pie">
           <a class="ig-handle" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Seguinos · @blackstones.ar →</a>
@@ -3283,32 +3315,50 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   }, {threshold:.6});
   document.querySelectorAll('[data-countup]').forEach(el => io2.observe(el));
 })();
-// El mosaico "Lo último que salió del taller" en computadora: seis fotos a la vista, que van
-// rotando por tandas hasta pasar todas. En el celular y en la tablet no corre: ahí están todas,
-// quietas. Qué hace está contado en el CSS ("El mosaico en computadora").
+// El mosaico "Lo último que salió del taller": seis fotos a la vista, que cambian por tandas hasta
+// pasar todas. En computadora pasan solas; en el celular y en la tablet, con las flechas. Qué hace
+// está contado en el CSS ("El mosaico: seis fotos que cambian por tandas").
 (function(){
   var grid = document.querySelector('.ig-grid'), pie = document.querySelector('.ig-pie');
   if(!grid || !pie || !window.matchMedia || !('IntersectionObserver' in window)) return;
-  var compu = matchMedia('(min-width:900px)'); if(!compu.matches) return;
   var mueve = matchMedia('(hover:hover) and (prefers-reduced-motion:no-preference)').matches; // si no, no avanza solo
   var POR = 6, tiles = [].slice.call(grid.querySelectorAll('.ig-t')), slots = tiles.slice(0, POR);
   var fondos = tiles.map(function(t){ return t.style.backgroundImage; });
   var fotos = fondos.map(function(f){ var m = /ig_section\/(\d+)/.exec(f); return m ? +m[1] : 0; });
-  var tandas = Math.ceil(fotos.length / POR); if(slots.length < POR || tandas < 2) return;
-  var nitida = (window.devicePixelRatio || 1) > 1.4, tanda = 0, bajando = false, seVe = false, encima = false, armado = false, capas = [], turno = [];
+  if(slots.length < POR) return;
+
+  // Qué foto va en cada lugar de cada tanda. Cada foto pasa una sola vez por vuelta y ninguna se
+  // repite en otro lugar. Si la cuenta no da justa (31 fotos son cinco tandas y una foto), en
+  // algunas tandas una foto se queda donde está y cambian las otras; la principal cambia siempre.
+  var tabla = (function(n){
+    var t = Math.ceil(n / POR), quedan = t * POR - n, filas = [[]], sig = POR, lugar = POR - 1, i, k, cuantas, fija, fila;
+    for(i = 0; i < POR; i++) filas[0][i] = i;
+    for(k = 1; k < t; k++){
+      cuantas = Math.floor(k * quedan / (t - 1)) - Math.floor((k - 1) * quedan / (t - 1)); fija = {}; fila = [];
+      while(cuantas-- > 0){ fija[lugar] = 1; lugar = lugar > 1 ? lugar - 1 : POR - 1; }
+      for(i = 0; i < POR; i++) fila[i] = fija[i] ? filas[k - 1][i] : sig++;
+      filas[k] = fila;
+    }
+    return filas;
+  })(fotos.length), tandas = tabla.length; if(tandas < 2) return;
+
+  var nitida = (window.devicePixelRatio || 1) > 1.4, tanda = 0, actual = tabla[0].slice(), bajando = false, seVe = false, encima = false, armado = false, capas = [], turno = [], pend = [], espera = 0;
   function dos(n){ return (n < 10 ? '0' : '') + n; }
   function archivo(n, principal){ return 'ig_section/' + n + (principal && nitida ? '' : '-c') + '.webp'; }
 
-  // el pie: "01 / 02", la rayita que muestra cuánto falta para el cambio y las dos flechas
-  var pag = document.createElement('div'); pag.className = 'ig-pag';
+  // el pie: "01 / 06", la rayita y las dos flechas
+  var pag = document.createElement('div'); pag.className = 'ig-pag' + (mueve ? '' : ' fija');
   pag.innerHTML = '<span class="ig-num"><b>01</b> / ' + dos(tandas) + '</span><span class="ig-prog"><i></i></span>' +
     '<button type="button" class="ig-fl" aria-label="Fotos anteriores">←</button>' +
     '<button type="button" class="ig-fl" aria-label="Fotos siguientes">→</button>';
   pie.insertBefore(pag, pie.firstChild);
   var num = pag.querySelector('b'), raya = pag.querySelector('.ig-prog i'), flechas = pag.querySelectorAll('.ig-fl');
+  // donde las fotos no pasan solas, la rayita marca por cuál tanda va
+  function marcar(){ if(!mueve) raya.style.transform = 'scaleX(' + (tanda + 1) / tandas + ')'; }
+  marcar();
 
-  // 1) La entrada, una vez. Si la sección ya está en pantalla cuando esto corre no hay entrada:
-  //    esconder fotos que ya se ven sería un parpadeo.
+  // 1) La entrada, una vez, solo donde hay movimiento. Si la sección ya está en pantalla cuando
+  //    esto corre no hay entrada: esconder fotos que ya se ven sería un parpadeo.
   var entro = !mueve || grid.getBoundingClientRect().top < (window.innerHeight || 0);
   if(!entro) slots.forEach(function(t){ t.classList.add('pre'); });
   function entrar(){
@@ -3333,52 +3383,55 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   }
   function mostrar(i, src){
     var c = capas[i][turno[i]], otra = capas[i][1 - turno[i]], fondo = "url('" + src + "')";
-    c.style.backgroundImage = fondo;
-    c.classList.remove('ve'); void c.offsetWidth; // para que el fundido y el zoom arranquen de cero
+    clearTimeout(pend[i]); // si todavía se estaba fundiendo la anterior (dos toques seguidos), manda la nueva
+    c.style.transition = 'none'; c.classList.remove('ve'); c.style.backgroundImage = fondo;
+    void c.offsetWidth; c.style.transition = ''; // para que el fundido y el zoom arranquen de cero
     c.style.zIndex = 2; otra.style.zIndex = 1; c.classList.add('ve');
     // al terminar el fundido, la foto de abajo pasa a ser la nueva
-    setTimeout(function(){ otra.classList.remove('ve'); if(compu.matches) slots[i].style.backgroundImage = fondo; }, 1000);
+    pend[i] = setTimeout(function(){ otra.classList.remove('ve'); slots[i].style.backgroundImage = fondo; }, 1000);
     turno[i] = 1 - turno[i];
   }
-  function ir(p){
-    if(!armado || bajando || !compu.matches) return;
-    p = (p % tandas + tandas) % tandas; if(p === tanda) return;
-    var srcs = slots.map(function(_, i){ return archivo(fotos[(p * POR + i) % fotos.length], i === 0); }), faltan = srcs.length, mal = false;
+  function ir(paso){
+    if(!armado || bajando) return;
+    var p = ((tanda + paso) % tandas + tandas) % tandas, fila = tabla[p], cambian = [], i;
+    for(i = 0; i < POR; i++) if(fila[i] !== actual[i]) cambian.push(i);
+    var srcs = cambian.map(function(i){ return archivo(fotos[fila[i]], i === 0); }), faltan = srcs.length, mal = false;
     bajando = true; pag.classList.remove('corre');
-    // primero bajan las seis fotos, después se funden; si una no baja, esa tanda se saltea
+    // primero bajan las fotos que cambian, después se funden; si una no baja, la tanda no cambia
     function ya(){
       if(--faltan) return; bajando = false;
       if(!mal){
-        tanda = p; num.textContent = dos(p + 1);
-        slots.forEach(function(_, i){ setTimeout(function(){ mostrar(i, srcs[i]); }, mueve ? i * 90 : 0); });
+        tanda = p; num.textContent = dos(p + 1); marcar();
+        cambian.forEach(function(i, k){ actual[i] = fila[i]; setTimeout(function(){ mostrar(i, srcs[k]); }, mueve ? k * 90 : 0); });
+        if(!mueve) precargar(paso);
       }
       correr();
     }
     srcs.forEach(function(src){ var im = new Image(); im.onload = ya; im.onerror = function(){ mal = true; ya(); }; im.src = src; });
   }
+  // Con el dedo, la tanda que sigue queda bajada de antemano: así la flecha responde al toque.
+  function precargar(paso){
+    tabla[((tanda + paso) % tandas + tandas) % tandas].forEach(function(f, i){ if(f !== actual[i]) (new Image()).src = archivo(fotos[f], i === 0); });
+  }
 
-  // 3) El reloj es la rayita: cuando se llena, pasa la tanda. Frenarla es frenar el reloj.
+  // 3) Donde pasan solas, el reloj es la rayita: cuando se llena, pasa la tanda. Frenarla es frenar el reloj.
   function correr(){ if(!mueve) return; pag.classList.remove('corre'); void raya.offsetWidth; pag.classList.add('corre'); frenar(); }
   function frenar(){ pag.classList.toggle('pausa', !seVe || encima || document.hidden); }
-  raya.addEventListener('animationend', function(){ ir(tanda + 1); });
-  flechas[0].addEventListener('click', function(){ ir(tanda - 1); });
-  flechas[1].addEventListener('click', function(){ ir(tanda + 1); });
+  raya.addEventListener('animationend', function(){ ir(1); });
+  flechas[0].addEventListener('click', function(){ ir(-1); });
+  flechas[1].addEventListener('click', function(){ ir(1); });
   grid.addEventListener('mouseenter', function(){ encima = true; frenar(); });
   grid.addEventListener('mouseleave', function(){ encima = false; frenar(); });
   document.addEventListener('visibilitychange', frenar);
 
-  // Si la ventana se achica a tablet o celular, vuelven a verse todas: cada una con su foto
-  function alAchicar(e){
-    if(e.matches || !armado) return;
-    slots.forEach(function(t, i){ t.style.backgroundImage = fondos[i]; capas[i][0].classList.remove('ve'); capas[i][1].classList.remove('ve'); turno[i] = 0; });
-    tanda = 0; num.textContent = '01';
-  }
-  if(compu.addEventListener) compu.addEventListener('change', alAchicar); else if(compu.addListener) compu.addListener(alAchicar);
-
+  if(entro) armar();
   new IntersectionObserver(function(es){
     seVe = es[es.length - 1].isIntersecting; frenar();
+    clearTimeout(espera);
     if(!seVe) return;
-    if(!entro) entrar(); else if(!armado && !slots[0].classList.contains('in')) armar();
+    if(!entro) entrar();
+    // quien se queda mirando las fotos en el celular probablemente toque la flecha
+    if(!mueve) espera = setTimeout(function(){ precargar(1); }, 1200);
   }, {threshold: .3}).observe(grid);
 })();
 </script>

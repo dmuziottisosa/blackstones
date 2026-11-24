@@ -30,6 +30,10 @@ El dueño eligió pasar las fotos él: subió cuatro al repo y mandó dos por el
 
 **Lo que enseñaron las cuatro versiones:** se pasó el día moviendo las reseñas de lugar (al lado, más a la derecha, abajo) cuando el problema era otro: cuántas fotos se mostraban a la vez. La composición que el dueño había dado por buena era la primera, con seis fotos; lo que la rompió fue meterle doce. Antes de rediseñar por tercera vez, volver a la última versión que al dueño le gustó y preguntarse qué cambió desde ahí. Al bajar la página publicada se vio que el cambio para los posts en vivo nunca se había subido; el script se sacó del `index.html` del repo para que el repo sea igual a lo publicado (queda en el commit `695d407`). Cómo se suman fotos: `04-operations/instagram-en-la-landing.md`.
 
+**Más tarde, el mismo 24/11: 19 fotos más, y el paginado también en el celular.** Con la sección ya aprobada, el dueño mandó 19 fotos por el chat ("vamos a seguir agregando lo último que salió del taller"; "mosca que no hayan repetidas") y, mostrando el pie de la versión de computadora ("02 / 02", la rayita y las flechas), dijo: "esto no estaría mal en cel tampoco" ("en celular me refiero"). Con 31 fotos, mostrarlas todas quietas en el celular ya no cerraba: quedaban más de veinte miniaturas de 80 px, lo mismo que en computadora él había llamado "apretujadísimo". Desde ese día la sección es una sola en todos los anchos: seis fotos grandes y el paginado debajo. Su pedido de que en el celular no se mueva sigue en pie: ahí las tandas no pasan solas, se pasan con las flechas. Se compararon las 19 contra las doce publicadas y entre ellas, a ojo y con un programa: ninguna repetida.
+
+**Lo que se resolvió sin preguntarle** (lo ve al abrir la página y se cambia con una palabra suya): que en el celular las tandas no avancen solas; que cuando la cuenta de fotos no da justa no se complete la tanda repitiendo fotos, sino que una foto se quede en su lugar una tanda más; el orden de las fotos y cuál va de principal en cada tanda; y por dónde se cortó cada foto (tres llegaron con el logo cortado, una con el logo cortado al costado y una con la flecha del carrusel de Instagram).
+
 ## Qué se descartó
 
 - **Un widget de terceros** (los que se pegan con un código). Ponen su marca o se pagan por mes, cargan su propio programa en la landing y el diseño es el de ellos.
@@ -51,6 +55,8 @@ El dueño eligió pasar las fotos él: subió cuatro al repo y mandó dos por el
 - **Si los pasos del panel de Meta son hoy tal cual los describe su documentación.** *(Resuelto el 24/11: no lo son. Ver arriba.)*
 - **Cuál de las formas que quedan quiere el dueño.** Están en `04-operations/instagram-en-la-landing.md`, "Formas que quedan".
 - **Si el bloque de deploy del 24/11 se pegó.** Si se pegó, la landing se ve igual: sin llave, muestra las fotos fijas.
+- **Si en el celular alguien toca las flechas.** Sin tocarlas se ven las seis primeras fotos de las 31. No hay medición.
+- **Si el dueño quiere que en el celular también pasen solas.** Dijo "en celular que no se mueva" antes de pedir el paginado ahí; se respetó lo primero.
 - **Cuántos de los últimos posts son reels sin portada o con audio con licencia.** Esos no traen foto por la API y se saltean; se miran los 25 más nuevos para juntar seis.
 - **Si mostrar los últimos posts ayuda a que escriban.** No hay medición de la sección: ni de antes ni de ahora.
 
