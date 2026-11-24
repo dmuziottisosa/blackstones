@@ -2,7 +2,7 @@
 
 > `/trabajos/` es una galería de obras: cada foto, con la textura de su material al pie. Tocar una foto abre la página de ese material, con toda su colección de fotos, el título, una descripción corta, el espesor y las características.
 > Pedida por el dueño el 24/11/2026. `status:` **publicada el 24/11/2026**: ese día se entregó el bloque de deploy con la galería, las tres páginas de materiales, las fotos y el sitemap. Desde acá no se ve producción: que esté arriba lo confirma el dueño.
-> Es una página aparte, no una sección de la landing. La landing no la linkea todavía: falta que el dueño diga desde dónde se llega.
+> Es una página aparte, no una sección de la landing. Se llega por el link "Ver más trabajos →" de la sección Trabajos de la landing (bloque entregado el 24/11/2026).
 > **El estándar** (cómo se pasa una foto, las medidas de todo y lo que se comprueba solo): [`estandar.md`](estandar.md).
 
 ## Reglas del dueño (24/11/2026)
@@ -34,24 +34,13 @@
 
 El HTML de `site/public_html/trabajos/` no se edita a mano: lo escribe `armar.py`.
 
-## Lo que falta: desde dónde se llega
+## Desde dónde se llega
 
-La página está en el sitio, pero la landing no la linkea. El dueño fue claro en que no es la sección Trabajos de la landing (regla 10) y en que no va adentro de `index.html` (regla 11); desde dónde se llega no lo dijo. Antes de tocar la landing, preguntarle.
+El dueño, 24/11/2026, con la página ya subida: "¿Cómo accedo a esa nueva página desde la página?". No había forma: nada del sitio llevaba a ella.
 
-Lo que estuvo armado, y él no llegó a confirmar, era un link "Ver más trabajos →" al lado de "Más en Instagram →", en la sección Trabajos de la landing. Se sacó el 24/11/2026; se ve entero con `git show 8932aa8 -- site/public_html/index.html`. Si va ese, es una regla de estilo después de `.work-more{…}`:
+Se sumó un link "Ver más trabajos →" al lado de "Más en Instagram →", en la sección Trabajos de la landing. Es lo único que se toca de la landing: la sección y el "Trabajos" de su menú siguen como estaban (regla 10). Está en el repo y se le entregó el bloque que lo suma en el servidor; fue una propuesta de quien armó la página, y si él lo quiere en otro lugar, se cambia.
 
-```css
-.work-links{display:flex;flex-wrap:wrap;gap:.6rem 1.6rem}
-```
-
-Y en la sección Trabajos, en lugar del link suelto a Instagram:
-
-```html
-<div class="work-links">
-  <a class="work-more" href="trabajos/">Ver más trabajos →</a>
-  <a class="work-more" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Más en Instagram →</a>
-</div>
-```
+El bloque no sube `index.html` entero: baja el que está en el servidor, le suma el link y la regla de estilo, y lo vuelve a subir (Receta 2 de `04-operations/deploy-snippets.md`, con el freno de la Receta 9). Así no arrastra otros cambios de la landing que estén en el repo y no en el servidor. Probado contra las dos versiones que puede tener el servidor.
 
 `"publicada"` (en `datos.json`) dice si la página está en el sitio. En `true`, `armar.py` escribe el bloque de `/trabajos/` en `sitemap.xml` y avisa mientras la landing no la linkee. En `false` no la pone en el sitemap y no arma nada si la landing la linkea: sirve para volver a guardarla.
 
@@ -85,7 +74,8 @@ El botón verde, el menú y el pie son los de la landing tal cual. El blanco sob
 
 ## Sin confirmar
 
-- Desde dónde se llega a la página (arriba, "Lo que falta").
+- Que el link "Ver más trabajos →" de la landing sea el lugar que quiere el dueño (arriba, "Desde dónde se llega").
+- Si se le pide permiso a cada cliente antes de publicar su cocina (`estandar.md`, punto 1).
 - El estilo de la píldora: está la de fondo dorado suave; se le mostraron también una blanca con borde y una en mayúsculas con borde dorado.
 - Las descripciones de Gris Mara y de Blanco Cana, y las líneas que acompañan a cada clave (las escribió quien armó la página).
 - El título de la galería ("Cada mesada, con su piedra.") y el dato que acompaña al espesor (Origen: Argentina; Marca: Purastone).

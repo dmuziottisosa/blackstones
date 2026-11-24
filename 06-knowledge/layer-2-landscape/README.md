@@ -16,6 +16,7 @@ Investigación externa: lo que sabe el mundo fuera de BlackStones que es relevan
 | Archivo | Qué es |
 |---|---|
 | `instagram-api-para-mostrar-posts.md` | Lo que dice la documentación de Meta sobre leer los posts propios (nov 2026) |
+| `publicar-fotos-de-casas-de-clientes.md` | Qué dice la ley argentina sobre publicar la cocina de un cliente (nov 2026). Hipótesis, no asesoramiento |
 | `whatsapp-business-ai-2026.md` | La IA de WhatsApp Business: qué es y cómo se le cargan conocimientos |
 | `que-pregunta-clasifica-a-un-lead.md` | Qué pregunta dice en qué momento está un cliente |
 | `como-se-lee-una-pantalla-de-trabajo.md` | La investigación detrás del diseño del sistema interno |

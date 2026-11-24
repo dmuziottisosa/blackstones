@@ -19,7 +19,12 @@ Lo que tiene que cumplir la foto que manda el dueño. Es lo único que depende d
 6. **Nombre del archivo: el N° y el color**, por ejemplo `2271 NEGRO BOREAL.png`. Se sube a GitHub, a la carpeta principal ("Add file → Upload files"). En el sitio ese número no aparece.
 7. **Qué decir al pasarla:** de qué material es. Si el material es nuevo: si es granito, cuarzo u otro, y algo del color (de dónde viene, cómo es). Con dos renglones alcanza: el texto se arma acá y se le muestra antes de subirlo.
 
+8. **Que no se vea de quién es la casa, ni nadie.** Sin personas (ni de espaldas, ni reflejadas). Sin fotos familiares, papeles, cartas o imanes con nombres. Sin el frente del edificio. Y ojo con la vista por la ventana: si deja ubicar el edificio, mejor otra toma. En el sitio la foto va sin nombre, sin dirección y sin el N° de presupuesto.
+9. **Si el cliente pide que se saque, se saca ese día.**
+
 Si llega una foto que no es cuadrada, no se sube: se le avisa. Si él dice que se recorte, se corta al centro.
+
+Los puntos 8 y 9 salen de la pregunta del dueño sobre el riesgo de publicar cocinas de clientes (24/11/2026). Lo que se encontró de la ley está en `06-knowledge/layer-2-landscape/publicar-fotos-de-casas-de-clientes.md`: es una hipótesis, no un asesoramiento. Pedirle permiso al cliente (una línea en el contrato o un "sí" por WhatsApp) es lo que cierra el tema; si se hace o no, lo decide el dueño.
 
 ---
 
@@ -153,7 +158,7 @@ Si algo de esto no se cumple, la herramienta no arma nada y dice qué pasó.
 | Las características son hasta 5, con clave de hasta 3 palabras y línea de hasta 9 | `armar.py` |
 | Si la página no está publicada, la landing no la linkea y no va en el sitemap | `armar.py` |
 
-Lo que no comprueba ningún programa, y hay que mirar: que la esquina de abajo a la izquierda no tape nada, que el logo esté abajo a la derecha, que la franja de la vista previa muestre la mesada y que las características sean ventajas.
+Lo que no comprueba ningún programa, y hay que mirar: que no se vea de quién es la casa ni aparezca nadie, que la esquina de abajo a la izquierda no tape nada, que el logo esté abajo a la derecha, que la franja de la vista previa muestre la mesada y que las características sean ventajas.
 
 Antes de entregar un cambio se corren las pruebas en computadora, tablet y celular (237 comprobaciones el 24/11/2026; no están en el repo) y se entrega el bloque de deploy armado con `04-operations/tools/bloque-deploy.py`.
 
