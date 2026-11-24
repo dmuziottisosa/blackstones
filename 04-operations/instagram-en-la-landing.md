@@ -1,7 +1,7 @@
 # Instagram en la landing
 
 > La sección "Lo último que salió del taller" de la landing muestra **doce fotos que pasa el dueño**. Se suman a mano, sin sacar las que están.
-> `status:` vigente desde el 24/11/2026 (bloque de deploy entregado ese día). Es la forma que eligió el dueño después de que no se pudo conectar el Instagram en vivo.
+> `status:` vigente y publicada el 24/11/2026 (comprobado leyendo el sitio). Es la forma que eligió el dueño después de que no se pudo conectar el Instagram en vivo, y la versión de computadora la aprobó ese día: "me encantó".
 > Más abajo queda descripto lo que se había armado para mostrar los posts solos (`ig-feed.php`): **no está en la landing ni en el servidor**, y está en pausa.
 
 ## Cómo está hoy: las fotos las pasa el dueño
@@ -14,7 +14,7 @@ El 24/11/2026 subió cuatro fotos de Instagram al repo y mandó dos más por el 
   1. Las doce fotos juntas, al lado de las reseñas: 579 px para doce fotos. "Esta sección podría ocupar más espacio, ¿no? Tiene para ocupar más espacio, para que no se vea apretujadísimo."
   2. La sección más ancha que el resto de la página (1400 px): "siento que los comentarios están ido muy a la derecha, como que se perdió la cohesión".
   3. El mosaico a todo el ancho y las reseñas debajo, en fila: "no me gustó cómo quedó la sección, podemos mejorarlo un x10", y "ahí sí te pido criterio senior de diseñador en todo".
-  4. La composición que él mismo había dado por cohesiva era la primera de todas: seis fotos grandes al lado de las reseñas. El problema nunca fue dónde iban las reseñas, sino cuántas fotos se mostraban a la vez: doce grandes no entran en media página; seis, sí.
+  4. La composición que él mismo había dado por cohesiva era la primera de todas: seis fotos grandes al lado de las reseñas. El problema nunca fue dónde iban las reseñas, sino cuántas fotos se mostraban a la vez: doce grandes no entran en media página; seis, sí. **Es la que quedó, y el dueño la aprobó al verla publicada: "¡me encantó! Bien."**
 
   **No volver a mostrar las doce juntas en computadora, ni a hacer la sección más ancha que las demás, ni a apilar las reseñas debajo, sin preguntarle al dueño.**
 - **Las reseñas, en computadora.** La primera es la cita destacada: va en la letra de los títulos (Fraunces), grande y con su comilla. Las otras tres van chicas, cada una con su filete. El "4,9" no se agranda: la franja de números de arriba ya lo dice en grande. En el celular siguen siendo las tarjetas que se deslizan.

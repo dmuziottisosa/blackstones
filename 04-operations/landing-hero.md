@@ -15,7 +15,7 @@
 
 - El dueño mandó una foto del showroom: "probemos esta imagen fondo hero de desktop". Se publicó, solo en computadora.
 - Al verla: "al hero esclarecerlo un poquito más". Se aclaró abriendo el lado derecho, donde se veía el showroom, y dejando oscuro detrás del texto.
-- Después: "volvamos al hero que teníamos antes". Se volvió a la foto y al sombreado de siempre, tal cual estaban.
+- Después: "volvamos al hero que teníamos antes". Se volvió a la foto y al sombreado de siempre, tal cual estaban. Publicado ese mismo día (comprobado leyendo el sitio).
 
 Lo que quedó de la prueba:
 
