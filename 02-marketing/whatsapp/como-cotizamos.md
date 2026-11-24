@@ -47,10 +47,22 @@ Siempre tres cosas, en este orden:
 - **Cada material, con su verdad:** el granito aguanta la olla caliente; el cuarzo no aguanta el calor directo; el sinterizado aguanta todo. Si el cliente ya lo sabe, se le da la razón.
 - **Granito: no lleva garantía, y se dice** (regla dura de `CLAUDE.md`).
 - **Es un presupuesto estimado:** el técnico rectifica en obra y ahí se cierra el número. Va siempre.
-- **Plazo: 20 días corridos desde la medición.** Nunca otro número.
+- **Plazo: 20 días corridos desde la medición**, con nuestro flete y colocación. **Si retira el cliente, 12 días corridos desde la medición** (24/11/2026). Ningún otro número.
 - **Se mide con el bajo mesada colocado.**
 - **Ofrecer una segunda opción** cuando hay una más económica o una que resuelve la duda del cliente. Dos o tres como mucho.
 - **Fuera de CABA y GBA** (Mercedes, Capilla del Señor, Marcos Paz): no se decide acá. Se cotiza el material, el flete queda en blanco y se le avisa al dueño la distancia.
+
+## Cómo se sigue después del presupuesto (dueño, 24/11/2026)
+
+Lo fijó el dueño al corregir una cotización en la que el orden estaba supuesto:
+
+1. **Primero, la seña del 50 %.** Es la que habilita la visita del técnico, que va al domicilio a rectificar las medidas. Sin seña no hay visita.
+2. **Desde esa medición, 20 días corridos para entregar.**
+3. **Si el cliente no contrata nuestro flete y colocación, a los 12 días corridos de la medición puede retirar.**
+
+Cuando el cliente pregunta cómo se sigue o cuánto tardamos, o cuando el dueño pide explicarlo, va el bloque "Cómo seguimos" de `flow.md`, sección 6: al final de la cotización y antes de la pregunta de los muebles.
+
+Lo que el dueño no dijo ese día, y por eso no va en el mensaje: cuándo se paga el otro 50 % y cuándo se entrega la bacha del cliente. Si el cliente lo pregunta, lo contesta el dueño.
 
 ## Antes de mandar, mirar
 

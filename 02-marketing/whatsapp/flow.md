@@ -379,6 +379,22 @@ Apenas la veamos confirmada, te confirmo la medición.
 - Pedir seña explícita pero sin presión.
 - Confirmar medición solo cuando seña esté efectiva.
 
+### Formato vigente de "cómo seguimos" (dueño, 24/11/2026)
+
+> El dueño, 24/11/2026: "Primero se hace una seña del 50% que habilita la visita de nuestro técnico para rectificar las medidas en su domicilio. Luego de las medidas de rectificación, 20 días corridos para entregar. Si opta por no contratar nuestro flete y colocación, en 12 días corridos post-medición puede retirar."
+>
+> Va cuando el cliente pregunta cómo se sigue o cuánto tardamos, o cuando el dueño pide explicarlo: al final de la cotización, antes de la pregunta de los muebles. El orden y los números son del dueño; la redacción, de quien escribió el doc.
+
+```
+Cómo seguimos:
+
+1. *Seña del 50 %.* Con la seña agendamos la visita de nuestro técnico, que va a tu casa a rectificar las medidas.
+2. *Entrega.* En 20 días corridos desde esa medición te la llevamos y la colocamos.
+3. *Retiro.* Si preferís retirarla vos, sin nuestro flete y colocación, a los 12 días corridos de la medición ya la podés retirar.
+```
+
+No dice cuándo se paga el otro 50 % ni cuándo se entrega la bacha del cliente: el dueño no lo dijo. La forma de pago "50% al confirmar, 50% al colocar" del formato viejo de la sección 4 no está confirmada.
+
 ---
 
 ## 7. Templates por escenario especial (pendientes de redacción detallada)
