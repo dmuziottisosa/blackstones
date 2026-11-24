@@ -97,7 +97,7 @@ Los tres únicos precios que **suben**, más el que más baja:
 
 | Marca | Color | Antes | Ahora | |
 |---|---|---|---|---|
-| Granito_i | **Blanco Ceara** | USD 593,12 | **USD 1.263,12** | ×2,13 — es el único salto grande de toda la lista. Ojo: hay otro "Blanco Ceara" en Marmol a USD 1.085,37 que no se movió. Vale confirmar con el proveedor que no sea un cruce de filas. |
+| Granito_i | **Blanco Ceara** | USD 593,12 | **USD 1.263,12** | ×2,13 — es el único salto grande de toda la lista. Ojo: hay otro "Blanco Ceara" en Marmol a USD 1.085,37 que no se movió. Vale confirmar con el proveedor que no sea un cruce de filas. **Confirmado por el dueño el 24/11/2026: el Blanco Ceará de granito va a USD 1.263 el m².** |
 | Pura | Blanco Cana 24 (N y J) | USD 505,38 | USD 552,12 | ×1,09 |
 | Pura | Blanco Paloma (N y J) | USD 505,38 | USD 530,89 | ×1,05 |
 | Granito_n | Gris Mara | ARS 339.453 | ARS 266.466 | ×0,785 — baja más que el resto del bloque nacional (que bajó 15,4 %) |
