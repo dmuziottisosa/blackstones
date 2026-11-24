@@ -355,7 +355,10 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 @media(min-width:900px){
   .social-grid{grid-template-columns:1.12fr .88fr;gap:0;align-items:stretch}
   .social-grid>div:first-child{padding-right:3rem;display:flex;flex-direction:column;align-items:flex-start}
-  .social-grid>div:first-child .ig-grid{flex:1;align-self:stretch}
+  /* el mosaico ocupa todo el ancho de su columna, pero no se estira a lo alto: cuando las
+     reseñas quedaban más altas (ventanas de 900 a 1100 px) se deformaba y una foto quedaba
+     de 25 px. Mantiene siempre su forma. */
+  .social-grid>div:first-child .ig-grid{flex:none;align-self:stretch}
   .social-grid>div:first-child .ig-handle{margin-top:1.3rem}
   .rev-col{border-left:1px solid rgba(168,149,128,.3);padding-left:3rem;display:flex;flex-direction:column;align-items:flex-start}
   .rev-col .rev-scroll{flex:1;justify-content:space-between;align-self:stretch}
@@ -385,6 +388,18 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 @media(min-width:640px){
   .ig-grid{grid-template-columns:repeat(6,1fr)}
   .ig-p{grid-column:span 4;grid-row:span 4}
+}
+/* Pantallas anchas (desde 1400 px): la sección usa más lugar (dueño, 24/11/2026: "tiene para
+   ocupar más espacio, para que no se vea apretujadísimo"). El contenido pasa de 1120 a 1400 px
+   y lo que se gana va todo al mosaico, que pasa a 8 columnas por 6 filas: cuatro fotos más
+   quedan medianas (ig-m) y solo cuatro quedan chicas. Va apaisado para crecer a lo ancho, que
+   es donde sobra pantalla, sin pasarse de alto. Las reseñas quedan del ancho que tenían.
+   Las cuentas para sumar fotos, con 8 columnas: 04-operations/instagram-en-la-landing.md */
+@media(min-width:1400px){
+  .social .container{max-width:1480px}
+  .social-grid{grid-template-columns:minmax(0,1fr) 31rem}
+  .ig-grid{grid-template-columns:repeat(8,1fr);gap:.75rem}
+  .ig-m{grid-column:span 2;grid-row:span 2}
 }
 .ig-t{aspect-ratio:1;border-radius:10px;background:center/cover no-repeat var(--bg-alt);display:block;transition:transform .2s,opacity .2s;box-shadow:0 6px 18px rgba(26,24,22,.08)}
 .ig-t:hover{transform:translateY(-3px);opacity:.92}
@@ -1190,6 +1205,7 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 @media (min-width:900px) and (hover:hover) and (prefers-reduced-motion:no-preference){
   .ig-t.pre{opacity:0;transform:scale(.86);transition:none}
   .ig-g.pre{transform:translateX(28px)}
+  @media(min-width:1400px){.ig-m.pre{transform:translateX(28px)}}
   .ig-p.pre{transform:scale(1.05)}
   .ig-t.in{opacity:1;transform:none;transition:opacity .55s ease,transform .7s var(--ease)}
   .ig-p.in{transition:opacity .9s ease,transform 1.2s var(--ease)}
@@ -1288,10 +1304,10 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
           <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/10-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/12-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/11-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/8-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/9-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t ig-m" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/8-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t ig-m" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/9-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t ig-m" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t ig-m" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/3-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/4-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/5-c.webp')" aria-label="Post de Instagram"></a>

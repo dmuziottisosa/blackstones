@@ -8,7 +8,9 @@
 
 El 24/11/2026 subió cuatro fotos de Instagram al repo y mandó dos más por el chat: "Te lo subí al repo. Sin quitar los otros, agregar a lo último que salió del taller." Con las seis que ya había son doce.
 
-- **El mosaico.** En el celular va de 4 columnas: las cuatro fotos más nuevas, grandes (2 × 2), y las otras ocho en dos filas. Desde 640 px va de 6 columnas: una principal (4 × 4), tres medianas (2 × 2) y ocho chicas. En computadora ocupa lo mismo que ocupaban las seis de antes, así la columna de reseñas de al lado no queda desbalanceada.
+- **El mosaico.** En el celular va de 4 columnas: las cuatro fotos más nuevas, grandes (2 × 2), y las otras ocho en dos filas. Desde 640 px va de 6 columnas: una principal (4 × 4), tres medianas (2 × 2) y ocho chicas.
+- **En pantallas anchas (desde 1400 px) la sección usa más lugar.** El dueño, 24/11/2026, mirándola en su monitor de 1920: "esta sección podría ocupar más espacio, ¿no? Tiene para ocupar más espacio, para que no se vea apretujadísimo". El contenido de la sección pasa de 1120 a 1400 px y todo lo que se gana va al mosaico, que pasa a 8 columnas por 6 filas: una principal, **siete medianas** y solo cuatro chicas. Va apaisado (856 × 639 px en una pantalla de 1920, contra 579 × 579 de antes) para crecer a lo ancho, que es donde sobra pantalla, sin pasarse de alto. Las reseñas quedan del ancho que tenían, y el resto de la página y el menú no cambian. En notebooks de menos de 1400 px no hay de dónde sacar lugar y queda como estaba.
+- **El mosaico no se estira a lo alto.** Hasta el 24/11/2026 tenía una regla que lo hacía llenar el alto de su columna. En ventanas de 900 a 1100 px las reseñas quedan más altas que el mosaico, y ahí se deformaba: con las seis fotos de antes se salía de su columna, y con las doce una foto quedaba de 25 px. Se encontró midiendo ancho por ancho, no en los tamaños de siempre. Ahora mantiene su forma en cualquier ancho.
 - **El orden.** Lo más nuevo adelante: la principal es la más nueva. Las seis de antes quedan al final.
 - **Cada foto tiene dos archivos** en `site/public_html/ig_section/`: `N.webp` (1080 px) y `N-c.webp` (540 px). La principal usa el de 1080; todas las demás, el de 540. Las doce fotos pesan 302 KB; las seis de antes pesaban 357.
 - **Todas las fotos llevan al perfil** de Instagram. No se sabe a qué post corresponde cada una.
@@ -32,23 +34,25 @@ Qué lo hace liviano, y qué tiene que cumplir cualquier animación que se sume 
 - Si una foto no baja, ese cambio se saltea: no queda un cuadro vacío. Si la ventana se achica, queda quieto con las fotos que se estaban viendo.
 - En el celular no se mueve.
 
-Las que giran son la principal (`ig-p`) y las medianas (`ig-g`): al sumar fotos no hay que tocar el programa, toma las que tengan esas marcas.
+Las que giran son la principal (`ig-p`) y las medianas (`ig-g`): al sumar fotos no hay que tocar el programa, toma las que tengan esas marcas. Las cuatro que son medianas solo en pantallas anchas (`ig-m`) no giran.
 
 ### Cómo sumar fotos
 
 1. El dueño las pasa: subidas a GitHub (a la carpeta principal de la rama por defecto) o por el chat. Por el chat llegan enteras, con su tamaño original.
 2. Prepararlas: `php 04-operations/tools/foto-mosaico.php <foto> <número que sigue>`. Si no es cuadrada, mirar antes de dónde conviene cortarla (`arriba`, `centro`, `abajo` o `x,y,lado`): en las fotos más altas que anchas el logo queda bien abajo y un corte al centro lo deja por la mitad. Y si trae la marca de un celular ("Galaxy A71"), cortarla afuera.
 3. Sumar los tiles en `index.html`, adelante, y decidir cuáles van grandes (abajo).
-4. Probar en computadora, tablet y celular que el mosaico no tenga huecos (y, en computadora, que la principal siga cambiando), y entregar el bloque de deploy (`04-operations/tools/bloque-deploy.py`): las fotos primero, `index.html` al final.
+4. Probar en celular, tablet y computadora que el mosaico no tenga huecos (y, en computadora, que la principal siga cambiando). En computadora, **ancho por ancho, de 900 a 1920 px**, no solo en uno: la falla del 24/11/2026 estaba entre 900 y 1100. Y entregar el bloque de deploy (`04-operations/tools/bloque-deploy.py`): las fotos primero, `index.html` al final.
 
-**Para que el mosaico cierre sin huecos, las fotos se suman de a tres.** La cuenta: en 6 columnas, la principal ocupa 16 lugares, cada mediana 4 y cada chica 1, y el total tiene que dar 36; en 4 columnas, la principal y las medianas ocupan 4 y el total tiene que dar 24.
+**Para que el mosaico cierre sin huecos, las fotos se suman de a tres.** La cuenta: la principal ocupa 16 lugares, cada mediana 4 y cada chica 1. En 6 columnas el total tiene que dar 36; en 8 columnas (pantallas anchas), 48; en 4 columnas (celular), la principal ocupa 4 y el total tiene que dar 24.
 
-| Fotos | Principal | Medianas (`ig-g`) | Chicas |
-|---|---|---|---|
-| 12 (hoy) | 1 | 3 | 8 |
-| 15 | 1 | 2 | 12 |
-| 18 | 1 | 1 | 16 |
-| 21 | 1 | 0 | 20 |
+| Fotos | Principal (`ig-p`) | Medianas (`ig-g`) | Medianas solo en pantalla ancha (`ig-m`) | Sin marca |
+|---|---|---|---|---|
+| 12 (hoy) | 1 | 3 | 4 | 4 |
+| 15 | 1 | 2 | 4 | 8 |
+| 18 | 1 | 1 | 4 | 12 |
+| 21 | 1 | 0 | 4 | 16 |
+
+Las `ig-m` son siempre cuatro y van justo después de las `ig-g`. Al sumar tres fotos, una `ig-g` pasa a ser `ig-m` y una `ig-m` queda sin marca.
 
 Con 13 o 14 no cierra: o se espera a tener las tres, o se saca alguna vieja (y eso lo decide el dueño: pidió no sacar ninguna). Pasando las 21 hay que repensarlo.
 
