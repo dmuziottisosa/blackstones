@@ -18,7 +18,7 @@ Cómo se ejecuta el día a día: proceso de venta-fabricación-colocación, rute
 | `respaldo.md` | Respaldo: la copia de las últimas 24 horas, cómo se usa, qué vuelve y qué no. Solo administradores |
 | `trabajos/` | La galería `/trabajos/` del sitio (publicada el 24/11/2026): reglas del dueño, cómo sumar un trabajo, el estándar (`estandar.md`: fotos 1:1, medidas, textos) y las herramientas que arman las páginas |
 | `instagram-en-la-landing.md` | La sección "Lo último que salió del taller" de la landing: las doce fotos que pasa el dueño (en computadora se muestran de a seis, rotando), las reseñas al lado y cómo se suman más fotos. Y lo que quedó armado, en pausa, para mostrar los posts solos |
-| `landing-hero.md` | El hero de la landing: la foto de cada dispositivo, el sombreado y el contraste del texto, medido (`tools/contraste-hero.js`) |
+| `landing-hero.md` | El hero de la landing: la foto de cada dispositivo, el sombreado, el contraste del texto medido (`tools/contraste-hero.js`) y la prueba de otra foto del 24/11/2026 |
 
 ## Reglas
 

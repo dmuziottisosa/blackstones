@@ -120,7 +120,7 @@
        Empieza a descargar mientras Carolina lee el bloque 1,
        así cuando llega al catálogo los primeros tiles aparecen instant.
        ============================================================ -->
-  <link rel="preload" as="image" href="foto_bloque_1/showroom_hero.webp" fetchpriority="high" media="(min-width:900px)">
+  <link rel="preload" as="image" href="foto_bloque_1/mesada_bloque1.webp" fetchpriority="high" media="(min-width:900px)">
   <link rel="preload" as="image" href="foto_bloque_1/locale_interno.jpeg" fetchpriority="high" media="(max-width:899px)">
   <!-- Granito: panel activo por default. Miniaturas (granitos/t/), que son
        las que usan los tiles. Prioridad baja para no competir con el hero.
@@ -260,26 +260,9 @@ h2 em{font-style:italic;color:var(--accent-dark)}
   .hero h1{font-size:clamp(3rem,4.4vw,4.4rem)}
   .hero-sub{font-size:1.18rem;max-width:560px}
   .hero-content{padding:clamp(4rem,8vw,6rem) 0}
-  /* El sombreado en computadora, más claro (dueño, 24/11/2026: "al hero esclarecerlo un poquito
-     más"). De 900 a 1199 px el texto ocupa casi todo el ancho: va parejo, un punto más claro
-     que antes. Desde 1200 px va de izquierda a derecha: oscuro donde está el texto, con un
-     refuerzo justo detrás, y abierto a la derecha, donde se ve el showroom. Abajo cierra en
-     oscuro para empalmar con la franja de los números. El contraste del texto está medido
-     (04-operations/landing-hero.md): si se cambia la foto o el sombreado, se vuelve a medir. */
   .hero-shade{background:
-    linear-gradient(to top,rgba(21,19,15,.9) 0%,rgba(21,19,15,.66) 50%,rgba(21,19,15,.46) 100%),
-    radial-gradient(ellipse at 28% 52%,rgba(21,19,15,.42) 0%,transparent 62%)}
-}
-@media(min-width:900px){
-  /* el rótulo es la letra más chica del hero: con el sombreado más claro lleva una sombra más
-     firme, para que se lea igual cuando le toca una veta clara detrás */
-  .hero-eyebrow{text-shadow:0 1px 2px rgba(0,0,0,.85),0 0 10px rgba(0,0,0,.75),0 0 22px rgba(0,0,0,.5)}
-}
-@media(min-width:1200px){
-  .hero-shade{background:
-    radial-gradient(ellipse 46% 60% at 27% 50%,rgba(21,19,15,.42) 0%,rgba(21,19,15,0) 100%),
-    linear-gradient(90deg,rgba(21,19,15,.86) 0%,rgba(21,19,15,.76) 32%,rgba(21,19,15,.5) 62%,rgba(21,19,15,.36) 100%),
-    linear-gradient(to top,rgba(21,19,15,.92) 0%,rgba(21,19,15,.4) 24%,rgba(21,19,15,0) 50%)}
+    linear-gradient(to top,rgba(21,19,15,.94) 0%,rgba(21,19,15,.8) 50%,rgba(21,19,15,.62) 100%),
+    radial-gradient(ellipse at 28% 52%,rgba(21,19,15,.5) 0%,transparent 62%)}
 }
 @media(max-width:899px){
   .hero{min-height:78vh}
@@ -1281,9 +1264,8 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 <!-- ============ HERO ============ -->
 <header class="hero">
   <div class="hero-bg">
-    <!-- Foto fija por dispositivo: PC = el showroom, con la mesada y los muestrarios (en prueba desde
-         el 24/11/2026; la de antes, mesada_bloque1.webp, sigue en su carpeta); mobile = local por dentro -->
-    <div class="hero-layer on hero-img-pc" style="background-image:url('foto_bloque_1/showroom_hero.webp');background-position:center 55%"></div>
+    <!-- Foto fija por dispositivo: PC = mesada del showroom; mobile = local por dentro -->
+    <div class="hero-layer on hero-img-pc" style="background-image:url('foto_bloque_1/mesada_bloque1.webp')"></div>
     <div class="hero-layer on hero-img-mb" style="background-image:url('foto_bloque_1/locale_interno.jpeg');background-position:center 72%"></div>
   </div>
   </div>
