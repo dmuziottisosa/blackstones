@@ -10,7 +10,7 @@ El 24/11/2026 subió cuatro fotos de Instagram al repo y mandó dos más por el 
 
 - **El mosaico.** En el celular va de 4 columnas: las cuatro fotos más nuevas, grandes (2 × 2), y las otras ocho en dos filas. Desde 640 px va de 6 columnas: una principal (4 × 4), tres medianas (2 × 2) y ocho chicas. En computadora ocupa lo mismo que ocupaban las seis de antes, así la columna de reseñas de al lado no queda desbalanceada.
 - **El orden.** Lo más nuevo adelante: la principal es la más nueva. Las seis de antes quedan al final.
-- **Cada foto tiene dos archivos** en `site/public_html/ig_section/`: `N.webp` (1080 px) y `N-c.webp` (540 px). La principal usa el de 1080; todas las demás, el de 540. Las doce fotos pesan 301 KB; las seis de antes pesaban 357.
+- **Cada foto tiene dos archivos** en `site/public_html/ig_section/`: `N.webp` (1080 px) y `N-c.webp` (540 px). La principal usa el de 1080; todas las demás, el de 540. Las doce fotos pesan 302 KB; las seis de antes pesaban 357.
 - **Todas las fotos llevan al perfil** de Instagram. No se sabe a qué post corresponde cada una.
 
 ### El movimiento
