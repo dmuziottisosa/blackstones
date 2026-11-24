@@ -1,25 +1,27 @@
 {
   "_": "Todo lo que muestra /trabajos/. Después de tocar este archivo: python3 04-operations/trabajos/armar.py. Cómo sumar un trabajo y las reglas de los textos: README.md de esta carpeta.",
 
+  "publicada": false,
+
   "tipos": {
     "granito": {
       "nombre": "Granito",
       "espesor_mm": 20,
       "caracteristicas": [
-        ["gema",     "Extrema dureza"],
-        ["llama",    "Resiste el calor"],
-        ["infinito", "Larga durabilidad"],
-        ["cantera",  "Pieza única"]
+        ["Extrema dureza",    "No se raya con el uso diario."],
+        ["Resiste el calor",  "Aguanta ollas y sartenes directo."],
+        ["Larga durabilidad", "Hecha para el uso de todos los días."],
+        ["Pieza única",       "Cada plancha sale distinta de la cantera."]
       ]
     },
     "cuarzo": {
       "nombre": "Cuarzo",
       "espesor_mm": 20,
       "caracteristicas": [
-        ["hexagono", "Cuarzo natural"],
-        ["gota",     "Baja porosidad"],
-        ["frasco",   "Aguanta los ácidos"],
-        ["parejo",   "Color parejo"]
+        ["Cuarzo natural",     "90%, prensado con resinas."],
+        ["Baja porosidad",     "Resiste las manchas."],
+        ["Aguanta los ácidos", "El limón y el vinagre no lo marcan."],
+        ["Color parejo",       "Igual en toda la mesada."]
       ]
     }
   },

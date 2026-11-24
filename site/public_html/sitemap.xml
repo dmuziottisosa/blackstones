@@ -69,27 +69,4 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- trabajos: lo escribe 04-operations/trabajos/armar.py -->
-  <url>
-    <loc>https://blackstones.com.ar/trabajos/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://blackstones.com.ar/trabajos/negro-boreal/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://blackstones.com.ar/trabajos/blanco-cana/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://blackstones.com.ar/trabajos/gris-mara/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <!-- /trabajos -->
-
 </urlset>

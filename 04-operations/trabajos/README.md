@@ -1,19 +1,21 @@
 # Trabajos: la galería del sitio
 
 > `/trabajos/` es una galería de obras: cada foto, con la textura de su material al pie. Tocar una foto abre la página de ese material, con toda su colección de fotos, el título, una descripción corta, el espesor y las características.
-> Pedida por el dueño el 24/11/2026. `status:` armada y probada acá; falta el deploy.
+> Pedida por el dueño el 24/11/2026. `status:` armada y probada acá, **sin publicar**. No está en el sitio, la landing no la linkea y no figura en el sitemap. El dueño, 24/11/2026: "antes de subirlo prefiero tenerlo local, hasta tener suficientes imágenes". Se publica cuando él diga (abajo, "Para publicarla").
 
 ## Reglas del dueño (24/11/2026)
 
 1. **Solo lo que él pasa.** "Vamos a ir solo con lo que yo te vaya pasando. No hay que armar todos los materiales, sino de los que vayamos subiendo." Un material tiene página recién cuando llega su primera foto.
-2. **Nada de testamentos.** "Toda descripción tiene prohibido ser un testamento largo de texto. Vamos a priorizar que el cliente entienda en menos de 10 segundos." La descripción de un material no pasa de 30 palabras. Las características son 2 o 4: un ícono y hasta 3 palabras cada una. `armar.py` no arma nada si algo se pasa.
+2. **Nada de testamentos.** "Toda descripción tiene prohibido ser un testamento largo de texto. Vamos a priorizar que el cliente entienda en menos de 10 segundos." La descripción de un material no pasa de 30 palabras. Las características son hasta 5: una clave de hasta 3 palabras y una línea de hasta 9 que dice qué quiere decir. `armar.py` no arma nada si algo se pasa.
 3. **Qué lleva la página de un material:** "título, descripción, milímetros" y las características del tipo de material "en bullets", "siempre cuidando la estética".
-4. **Las características: elegantes y de entender rápido.** "Esa sección debe ser algo elegante, moderno, estético, aesthetic, de rápido entendimiento." Quedó una tira liviana de cuatro íconos de línea fina, cada uno con dos o tres palabras. Lo que se probó antes y no quedó: una lista con puntos, cuatro recuadros blancos numerados y una ficha negra con dorado ("no, bloque negro no queda").
+4. **Las características: la clave en una píldora.** "Esa sección debe ser algo elegante, moderno, estético, aesthetic, de rápido entendimiento." La idea que quedó es de él: "extrema dureza en pill; resto del texto clave, normal". En el celular, la píldora arriba y el texto abajo, con una raya entre una y otra: la eligió entre seis ("la opción C es la respuesta"). En computadora y tablet, las píldoras en una columna y los textos al lado ("así lo veo bien en PC, me gusta"). Lo que se probó antes y no va: la lista con puntos ("puede ser mucho más estética/moderna"; puesta de nuevo, "el celular queda paupérrimo"), cuatro recuadros blancos numerados, una ficha negra con dorado ("no, bloque negro no queda") y una tira de cuatro íconos de línea fina ("no quedó tan aesthetic"). Sin decidir del todo: el estilo de la píldora (se le mostraron tres; está la de fondo dorado suave).
 5. **Y son ventajas, comprobadas.** "No tiene garantía de fábrica: quitalo, no tiene ninguna ventaja táctica." Y: "Las mesadas de granito destacan por su extrema dureza, resistencia al calor y larga durabilidad. Lo comprobado." Acá no van avisos (garantía, manchas, calor): eso se dice en la cotización y está en la landing.
 6. **La descripción sale de los textos que pasa él** ("mixes de esto"), acortados.
 7. **La colección crece sola.** "Cuando vayamos agregando nuevos trabajos, cuando yo abra Negro Boreal ahí se debe ir adjuntando toda la colección Negro Boreal."
 8. **Él no convierte fotos.** Las sube como salen; la conversión se hace acá.
 9. **Un crema más claro.** "Consideremos ese crema que usamos: aclararlo un poco a algo más premium. No queremos la sensación de libro viejo o pergamino." En estas páginas el fondo es `#FCFBF9` (el de la landing es `#FAF8F4`). La landing no se tocó: falta que el dueño diga si va también ahí.
+10. **Es otra página, no la sección Trabajos de la landing.** "Cuidado, porque trabajos no es el mismo trabajos de la página principal: este iría en otra página." La sección "Trabajos" de la landing (la tira de obras con su título) y el "Trabajos" de su menú quedan como están; esta galería vive aparte, en `/trabajos/`. Nada de lo que se haga acá toca esa sección.
+11. **No se publica hasta que él diga.** "Antes de subirlo prefiero tenerlo local, hasta tener suficientes imágenes." Mientras tanto no se entrega bloque de deploy de `/trabajos/`, la landing no la linkea y no va en el sitemap. Cuántas imágenes son suficientes lo dice él.
 
 ## Cómo sumar un trabajo
 
@@ -21,11 +23,33 @@
 2. Bajarla sin cambiar de rama: `git fetch origin` y `git show "origin/<rama por defecto>:2271 NEGRO BOREAL.png" > /tmp/foto.png`.
 3. Prepararla: `php 04-operations/trabajos/foto.php /tmp/foto.png negro-boreal-2`. El nombre es el material y un número de orden. **No lleva el N° de presupuesto: el archivo es público.**
 4. Anotarla en `datos.json`, en `trabajos`, arriba de todo (la más nueva va primero), con su texto alternativo.
-5. Si el material es nuevo, sumarlo en `materiales`: nombre, tipo, la textura del catálogo de la landing (`/granitos/t/…`, `/purastone/t/…`), la descripción y el dato. Si el tipo es nuevo (sinterizado, mármol), sumarlo en `tipos` con su espesor y sus características (cada una, `["ícono", "dos o tres palabras"]`; los íconos que hay están en `ICONOS`, al principio de `armar.py`).
+5. Si el material es nuevo, sumarlo en `materiales`: nombre, tipo, la textura del catálogo de la landing (`/granitos/t/…`, `/purastone/t/…`), la descripción y el dato. Si el tipo es nuevo (sinterizado, mármol), sumarlo en `tipos` con su espesor y sus características (cada una, `["la clave", "qué quiere decir"]`).
 6. `python3 04-operations/trabajos/armar.py`
-7. Probar en computadora, tablet y celular y entregar con el bloque de deploy: las cinco copias de la foto y las páginas que cambiaron.
+7. Probar en computadora, tablet y celular.
+8. Armar la vista previa y mandársela al dueño: `python3 04-operations/trabajos/vista.py <salida>/trabajos-vista-previa.html`. Es un solo archivo, con las fotos adentro. No se guarda en el repo.
+
+Mientras la página siga sin publicar, ahí termina: se sube a GitHub y **no lleva bloque de deploy**.
 
 El HTML de `site/public_html/trabajos/` no se edita a mano: lo escribe `armar.py`.
+
+## Para publicarla (cuando el dueño diga)
+
+1. En `datos.json`, `"publicada": true`.
+2. Preguntarle al dueño desde dónde se llega a la página (regla 10: no es la sección Trabajos de la landing). Lo que estaba armado, y él no llegó a confirmar, era un link "Ver más trabajos →" al lado de "Más en Instagram →", en la sección Trabajos de la landing (`site/public_html/index.html`). Se sacó el 24/11/2026; se ve entero con `git show 8932aa8 -- site/public_html/index.html`. Si va ese: una regla de estilo, después de `.work-more{…}`:
+   ```css
+   .work-links{display:flex;flex-wrap:wrap;gap:.6rem 1.6rem}
+   ```
+   Y en la sección Trabajos, en lugar del link suelto a Instagram:
+   ```html
+   <div class="work-links">
+     <a class="work-more" href="trabajos/">Ver más trabajos →</a>
+     <a class="work-more" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Más en Instagram →</a>
+   </div>
+   ```
+3. `python3 04-operations/trabajos/armar.py`: ahora sí escribe el bloque de `/trabajos/` en `sitemap.xml`.
+4. Probar y entregar el bloque de deploy, armado con `04-operations/tools/bloque-deploy.py` (ver `04-operations/deploy-snippets.md`, Receta 9), en este orden: las fotos, las páginas de los materiales, `trabajos/index.html` y, al final, `sitemap.xml` e `index.html`. Así la landing nunca apunta a una página que todavía no está.
+
+`armar.py` cuida las dos puntas: si la landing linkea a `/trabajos/` y `"publicada"` es `false`, no arma nada; si es `true` y falta el link, avisa.
 
 ## De dónde sale cada dato
 
@@ -40,22 +64,27 @@ El HTML de `site/public_html/trabajos/` no se edita a mano: lo escribe `armar.py
 
 ## Cómo está hecho
 
-- **`datos.json`**: todo lo que se muestra. **`armar.py`**: escribe la galería, una página por material y el bloque de `/trabajos/` del `sitemap.xml`. **`foto.php`**: de la foto original saca cuatro copias WebP (1440, 1080, 720 y 160 px) y un JPG de 1200 × 630, que es la imagen que muestra WhatsApp cuando se manda el link.
+- **`datos.json`**: todo lo que se muestra, y `"publicada"`, que dice si la página ya está en el sitio. **`armar.py`**: escribe la galería, una página por material y, si está publicada, el bloque de `/trabajos/` del `sitemap.xml`. **`vista.py`**: junta lo que deja `armar.py` en un solo archivo para verla sin subirla (las fotos, las texturas, el logo y las letras van adentro; se navega igual y anda sin internet y sin JavaScript). **`foto.php`**: de la foto original saca cuatro copias WebP (1440, 1080, 720 y 160 px) y un JPG de 1200 × 630, que es la imagen que muestra WhatsApp cuando se manda el link.
 - **El menú, los colores, el botón de WhatsApp y el pie se copian de la landing** cada vez que se arma. Si la landing cambia, se vuelve a correr `armar.py`.
-- **El cuadrito va abajo a la izquierda** porque las fotos traen el logo abajo a la derecha, y no se tapa.
+- **El cuadrito va abajo a la izquierda** porque las fotos traen el logo abajo a la derecha, y no se tapa. Mide 100 px en la galería y 112 en la página del material (eran 84 y 96; el dueño, 24/11/2026: "el cuadrito del material, un pelito más grande").
 - **En la página de un material**, la foto grande es el trabajo más nuevo. Con más de uno aparece una tira de miniaturas que se desliza de costado; desde la galería se llega directo a la foto que se tocó.
 - **El botón de WhatsApp de cada material** manda el mensaje con el material ya escrito ("vi en la página los trabajos en granito Negro Boreal…"): el cliente llega diciendo el color.
-- **La landing** tiene el link "Ver más trabajos →" en su sección Trabajos. El "Trabajos" del menú de la landing sigue bajando a esa sección.
+- **La landing** no la linkea y su sección Trabajos no se tocó (regla 10). En las páginas de `/trabajos/` el menú es el de la landing: cada ítem lleva a su sección de la landing, salvo "Trabajos", que ahí abre esta galería.
 
 ## Cómo se probó
 
-193 comprobaciones en computadora, tablet y celular: que cada foto abra su material, textos y datos de cada página, el mensaje de WhatsApp, la colección con varias fotos (con datos de prueba), que nada desborde, que todas las imágenes carguen y el contraste del texto propio (4,5 a 1 o más). Las pruebas no están en el repo.
+225 comprobaciones en computadora, tablet y celular: que cada foto abra su material, textos y datos de cada página, las píldoras (apiladas en el celular, en columna desde tablet), el mensaje de WhatsApp, la colección con varias fotos (con datos de prueba), que nada desborde, que todas las imágenes carguen, el contraste del texto propio (4,5 a 1 o más) y que, sin publicar, la landing no la linkee y el sitemap no la nombre.
+
+La vista previa, otras 78: abierta sin internet y sin JavaScript, que no pida nada afuera, que cada bloque mida lo mismo que la página de verdad (con un píxel de tolerancia), que se pase de la galería a cada material y de vuelta, y las miniaturas de una colección. Las pruebas no están en el repo.
 
 El botón verde, el menú y el pie son los de la landing tal cual. El blanco sobre el verde de WhatsApp mide 1,98 a 1: viene así de la landing y no se tocó acá.
 
 ## Sin confirmar
 
-- Las descripciones de Gris Mara y de Blanco Cana.
+- Cuántas imágenes son "suficientes" para publicarla.
+- El estilo de la píldora: está la de fondo dorado suave; se le mostraron también una blanca con borde y una en mayúsculas con borde dorado.
+- Las descripciones de Gris Mara y de Blanco Cana, y las líneas que acompañan a cada clave (las escribió quien armó la página).
 - El título de la galería ("Cada mesada, con su piedra.") y el dato que acompaña al espesor (Origen: Argentina; Marca: Purastone).
-- Si el "Trabajos" del menú de la landing tiene que abrir esta página en vez de bajar a la sección.
-- El crema nuevo: quedó el intermedio (`#FCFBF9`). Se le mostró también uno casi blanco (`#FEFEFD`). Y si se lleva a la landing.
+- Desde dónde se llega a esta página cuando se publique (regla 10). Y si, estando en `/trabajos/`, el "Trabajos" del menú tiene que abrir esta galería (como está) o bajar a la sección de la landing como los demás ítems.
+- Que "la opción C" sea la píldora arriba y el texto abajo: así se leyó (era la C de seis variantes que vio mientras se armaban). Se le mostró aplicada; falta su visto bueno.
+- El crema nuevo: quedó el intermedio (`#FCFBF9`). Se le mostró dos veces también uno casi blanco (`#FEFEFD`). Y si se lleva a la landing.

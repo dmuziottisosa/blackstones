@@ -7,14 +7,20 @@ Uso:  python3 04-operations/trabajos/armar.py
 Escribe en site/public_html/:
   trabajos/index.html               la galería: cada foto con la textura de su material
   trabajos/<material>/index.html    una página por material, con toda su colección de fotos
-  sitemap.xml                       el bloque de /trabajos/
+  sitemap.xml                       el bloque de /trabajos/, solo si la página está publicada
+
+"publicada" (en datos.json) dice si la página ya está en el sitio. Mientras sea false no va
+en el sitemap y la landing no la puede linkear: si la linkea, esto no arma nada. Dueño,
+24/11/2026: "antes de subirlo prefiero tenerlo local, hasta tener suficientes imágenes".
+Para verla sin subirla: vista.py. Para publicarla: README.md de esta carpeta.
 
 El menú, los colores, el botón de WhatsApp y el pie se copian de la landing (index.html) cada
 vez que se arma: si la landing cambia, se vuelve a correr esto y quedan iguales.
 
 Reglas del dueño (24/11/2026) que este archivo hace cumplir:
   - "Toda descripción tiene prohibido ser un testamento": la descripción de un material no pasa
-    de 30 palabras, y las características son 2 o 4: un ícono y hasta 3 palabras cada una.
+    de 30 palabras, y las características son hasta 5: una clave de hasta 3 palabras (va en
+    una píldora) y una línea de hasta 9 que dice qué quiere decir.
   - "Que el cliente entienda en menos de 10 segundos."
 Y una que no se puede comprobar con un programa: las características son ventajas. Lo que no
 ayuda a vender no va en estas páginas ("no tiene ninguna ventaja táctica").
@@ -25,8 +31,9 @@ ACA = os.path.dirname(os.path.abspath(__file__))
 WEB = os.path.normpath(sys.argv[2] if len(sys.argv) > 2 else os.path.join(ACA, '..', '..', 'site', 'public_html'))
 SITIO = 'https://blackstones.com.ar'
 MAX_PALABRAS_DESCRIPCION = 30
-MAX_CARACTERISTICAS = 4
-MAX_PALABRAS_TITULO = 3
+MAX_CARACTERISTICAS = 5
+MAX_PALABRAS_CLAVE = 3
+MAX_PALABRAS_LINEA = 9
 
 D = json.load(open(sys.argv[1] if len(sys.argv) > 1 else os.path.join(ACA, 'datos.json'), encoding='utf-8'))
 LANDING = open(os.path.join(WEB, 'index.html'), encoding='utf-8').read()
@@ -73,22 +80,13 @@ def wa(texto):
 
 WA_GENERAL = wa('Hola, vi los trabajos en la página y me gustaría cotizar una mesada')
 
-# Los íconos de las características: línea fina, 24 x 24. Se eligen por nombre en datos.json.
-# Los trazos son de Lucide (lucide.dev), licencia ISC: Copyright (c) for portions of Lucide are
-# held by Cole Bemis 2013-2022 as part of Feather (MIT). All other copyright (c) for Lucide are
-# held by Lucide Contributors 2022. "parejo" es propio.
-ICONOS = {
-    'gema':     '<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
-    'llama':    '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
-    'infinito': '<path d="M6 16c5 0 7-8 12-8a4 4 0 0 1 0 8c-5 0-7-8-12-8a4 4 0 1 0 0 8"/>',
-    'cantera':  '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>',
-    'hexagono': '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>',
-    'gota':     '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
-    'frasco':   '<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
-    'parejo':   '<rect x="3" y="3" width="18" height="18" rx="2.5"/><rect x="8" y="8" width="8" height="8" rx="1.2"/>',
-}
-
 # ------------------------------------------------------------------ los datos, revisados
+PUBLICADA = D.get('publicada')
+if PUBLICADA not in (True, False):
+    fallar('falta "publicada": true o false en datos.json')
+LINK_LANDING = 'href="trabajos/"' in LANDING or 'href="/trabajos/"' in LANDING
+if LINK_LANDING and not PUBLICADA:
+    fallar('la landing (index.html) linkea a /trabajos/ y la página no está publicada. Sacar el link, o publicarla (README.md).')
 TIPOS = D['tipos']
 MATERIALES = {m_['slug']: m_ for m_ in D['materiales']}
 TRABAJOS = D['trabajos']
@@ -106,15 +104,13 @@ for s, mat in MATERIALES.items():
         fallar(s + ': no existe la textura ' + mat['textura'])
 for t, tipo in TIPOS.items():
     car = tipo['caracteristicas']
-    if len(car) > MAX_CARACTERISTICAS or len(car) % 2:
-        fallar('%s: son %d características. Van 2 o 4 (se muestran de a pares).' % (t, len(car)))
+    if not car or len(car) > MAX_CARACTERISTICAS:
+        fallar('%s: son %d características y van de 1 a %d.' % (t, len(car), MAX_CARACTERISTICAS))
     for c in car:
-        if not isinstance(c, list) or len(c) != 2:
-            fallar('%s: cada característica es ["ícono", "dos o tres palabras"]: %s' % (t, c))
-        if c[0] not in ICONOS:
-            fallar('%s: no existe el ícono "%s". Hay: %s' % (t, c[0], ', '.join(sorted(ICONOS))))
-        if len(c[1].split()) > MAX_PALABRAS_TITULO:
-            fallar('%s: característica larga (hasta %d palabras): %s' % (t, MAX_PALABRAS_TITULO, c[1]))
+        if not isinstance(c, list) or len(c) != 2 or not all(isinstance(x, str) and x.strip() for x in c):
+            fallar('%s: cada característica es ["la clave", "qué quiere decir"]: %s' % (t, c))
+        if len(c[0].split()) > MAX_PALABRAS_CLAVE or len(c[1].split()) > MAX_PALABRAS_LINEA:
+            fallar('%s: característica larga (la clave, hasta %d palabras; la línea, hasta %d): %s' % (t, MAX_PALABRAS_CLAVE, MAX_PALABRAS_LINEA, c))
 vistos = set()
 for t in TRABAJOS:
     if t['material'] not in MATERIALES:
@@ -191,7 +187,9 @@ h1 em,h2 em{font-style:italic;color:var(--accent-dark)}
 .nav-links a[aria-current]{color:var(--gold)}
 
 /* La textura del material: un cuadrito con borde claro y sombra, montado sobre la esquina
-   de abajo a la izquierda de la foto. Abajo a la derecha las fotos traen el logo: no se tapa. */
+   de abajo a la izquierda de la foto. Abajo a la derecha las fotos traen el logo: no se tapa.
+   Mide 100 px en la galería y 112 en la página del material (eran 84 y 96; el dueño,
+   24/11/2026: "el cuadrito del material, un pelito más grande"). */
 .muestra{flex-shrink:0;position:relative;border-radius:10px;border:3px solid var(--bg);object-fit:cover;background:var(--bg-alt);box-shadow:0 8px 20px rgba(26,24,22,.2)}
 '''.replace('@@NAV_CSS@@', NAV_CSS)
 
@@ -289,7 +287,7 @@ CSS_GALERIA = CSS_BASE + '''
 .t-foto img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.22,1,.36,1)}
 .t-card:hover .t-foto img{transform:scale(1.03)}
 .t-pie{display:flex;align-items:flex-start;gap:.95rem;padding:0 .2rem 0 .9rem}
-.t-pie .muestra{width:84px;height:84px;margin-top:-42px}
+.t-pie .muestra{width:100px;height:100px;margin-top:-50px}
 .t-txt{padding-top:.7rem;min-width:0}
 .t-txt strong{display:block;font-family:var(--font-display);font-weight:500;font-size:1.15rem;line-height:1.2}
 .t-txt span{display:block;font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dark);margin-top:.25rem}
@@ -306,7 +304,7 @@ def galeria():
         cards.append('''    <a class="t-card" href="/trabajos/%(slug)s/%(ancla)s">
       <div class="t-foto"><img src="%(src)s" srcset="%(srcset)s" sizes="(min-width:1000px) 360px, (min-width:640px) 46vw, 92vw" width="1440" height="1440" alt="%(alt)s" %(carga)s></div>
       <div class="t-pie">
-        <img class="muestra" src="%(tex)s" width="84" height="84" alt="" loading="lazy" decoding="async">
+        <img class="muestra" src="%(tex)s" width="100" height="100" alt="" loading="lazy" decoding="async">
         <div class="t-txt"><strong>%(nombre)s</strong><span>%(tipo)s</span></div>
       </div>
     </a>''' % {'slug': mat['slug'], 'ancla': ancla, 'src': src, 'srcset': srcset, 'alt': e(t['alt']), 'carga': carga,
@@ -358,7 +356,7 @@ CSS_MATERIAL = CSS_BASE + '''
 .m-foto img{width:100%;height:100%;object-fit:cover}
 /* debajo de la foto: la textura y, si hay más de un trabajo, las miniaturas de la colección */
 .m-banda{display:flex;align-items:flex-start;gap:.6rem;padding-left:.9rem}
-.m-banda .muestra{width:96px;height:96px;margin-top:-48px}
+.m-banda .muestra{width:112px;height:112px;margin-top:-56px}
 /* la tira de miniaturas no baja de renglón: si la colección es larga, se desliza de costado */
 .m-minis{display:flex;gap:.6rem;flex:1;min-width:0;overflow-x:auto;padding:.7rem 4px 8px;scrollbar-width:thin;scrollbar-color:var(--accent) transparent}
 .m-minis::-webkit-scrollbar{height:4px}
@@ -369,19 +367,29 @@ CSS_MATERIAL = CSS_BASE + '''
 .m-mini img{width:100%;height:100%;object-fit:cover}
 .m-desc{font-size:1.08rem;line-height:1.55;color:var(--text-soft);max-width:44ch}
 @media(min-width:900px){.m-desc{margin-top:1.2rem}}
-.m-datos{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.6rem 0 0;padding:1.1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.m-datos{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.6rem 0;padding:1.1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .m-rotulo,.m-datos dt{font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-dark)}
 .m-datos dd{font-family:var(--font-display);font-size:1.3rem;line-height:1.3;margin-top:.2rem}
-/* Las características: una tira liviana de íconos de línea fina, cada uno con dos o tres
-   palabras. Sigue a la fila de datos y cierra con la misma raya: se lee de un vistazo. */
-.m-ficha{padding:1.25rem 0 1.5rem;margin-bottom:1.9rem;border-bottom:1px solid var(--border)}
-.m-car{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:1.15rem}
-.m-car.de-2{grid-template-columns:repeat(2,1fr)}
-.m-car li{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.7rem;min-width:0}
-.m-ico{width:58px;height:58px;border-radius:50%;border:1px solid rgba(138,117,96,.34);display:flex;align-items:center;justify-content:center;background:#fff}
-.m-ico svg{width:25px;height:25px;fill:none;stroke:var(--gold-deep);stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}
-.m-car strong{font-family:var(--font-display);font-weight:500;font-size:.98rem;line-height:1.22;max-width:8.5em}
-@media(max-width:400px){.m-ico{width:52px;height:52px}.m-car strong{font-size:.92rem}}
+/* Las características: la clave en una píldora y el resto del texto, normal. Idea del dueño
+   (24/11/2026): "extrema dureza en pill; resto del texto clave, normal".
+   En el celular, la píldora arriba y el texto abajo, con una raya entre una y otra: es la que
+   eligió entre seis ("la opción C es la respuesta"). Desde tablet, las píldoras en una columna
+   y los textos al lado, todos arrancando a la misma altura ("así lo veo bien en PC, me gusta");
+   por eso ahí se arma como tabla. Lo que se probó antes y no va: README.md, regla 4. */
+.m-car{list-style:none;margin:.35rem 0 1.5rem}
+.m-car li{padding:.8rem 0;border-bottom:1px solid var(--border)}
+.m-car li:last-child{border-bottom:0}
+.m-clave,.m-que{display:block}
+.m-clave b{display:inline-block;font-weight:700;font-size:.8rem;line-height:1.2;padding:.4rem .8rem;border-radius:999px;background:rgba(196,167,125,.22);color:var(--text)}
+.m-que{font-size:.98rem;line-height:1.45;color:var(--text-soft);margin-top:.45rem}
+@media(min-width:640px){
+  .m-car{display:table;width:100%;border-collapse:collapse;margin:.5rem 0 1.6rem}
+  .m-car li{display:table-row;border-bottom:0}
+  .m-car li>*{display:table-cell;vertical-align:middle;padding:.42rem 0}
+  .m-car .m-clave{white-space:nowrap;width:1%;padding-right:.9rem}
+  .m-car .m-clave b{padding:.42rem .85rem}
+  .m-car .m-que{font-size:.95rem;margin-top:0}
+}
 .m-mas{display:inline-block;margin-left:1.2rem;color:var(--accent-dark);font-weight:700;font-size:.88rem;text-decoration:none;border-bottom:1px solid var(--accent);white-space:nowrap}
 .m-mas:hover{color:var(--text)}
 @media(max-width:480px){.m-mas{display:table;margin:1.1rem 0 0}}
@@ -453,19 +461,17 @@ def pagina_material(mat):
   <div class="m-fotos">
     <div class="m-foto"><img id="mFoto" src="%(src)s" srcset="%(srcset)s" sizes="(min-width:900px) 560px, 92vw" width="1440" height="1440" alt="%(alt)s" fetchpriority="high"></div>
     <div class="m-banda">
-      <img class="muestra" src="%(tex)s" width="96" height="96" alt="Textura del %(tipo_min)s %(nombre)s">%(minis)s
+      <img class="muestra" src="%(tex)s" width="112" height="112" alt="Textura del %(tipo_min)s %(nombre)s">%(minis)s
     </div>
   </div>
 
   <div class="m-info">
     <p class="m-desc">%(desc)s</p>
     <dl class="m-datos">%(datos)s</dl>
-    <div class="m-ficha">
-      <div class="m-rotulo">Cómo es el %(tipo_min)s</div>
-      <ul class="m-car%(de)s">
+    <div class="m-rotulo">Cómo es el %(tipo_min)s</div>
+    <ul class="m-car">
 %(car)s
-      </ul>
-    </div>
+    </ul>
     <a class="btn-wa" href="%(w)s" target="_blank" rel="noopener">
       %(svg)s
       Cotizar en %(nombre)s
@@ -475,8 +481,7 @@ def pagina_material(mat):
 </main>
 %(otros)s''' % {'tipo': e(tipo['nombre']), 'tipo_min': e(tipo['nombre'].lower()), 'nombre': e(mat['nombre']), 'src': src, 'srcset': srcset,
                 'alt': e(obras[0]['alt']), 'tex': mat['textura'], 'minis': minis, 'desc': e(mat['descripcion']), 'datos': datos,
-                'car': '\n'.join('        <li><span class="m-ico"><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg></span><strong>%s</strong></li>' % (ICONOS[c[0]], e(c[1])) for c in car),
-                'de': ' de-2' if len(car) == 2 else '', 'w': w, 'svg': SVG_WA, 'otros': bloque_otros} + pie(w) + (JS_MINIS if len(obras) > 1 else '') + '\n</body>\n</html>\n'
+                'car': '\n'.join('      <li><span class="m-clave"><b>%s</b></span><span class="m-que">%s</span></li>' % (e(c[0]), e(c[1])) for c in car), 'w': w, 'svg': SVG_WA, 'otros': bloque_otros} + pie(w) + (JS_MINIS if len(obras) > 1 else '') + '\n</body>\n</html>\n'
 
 
 # ------------------------------------------------------------------ escribir
@@ -495,17 +500,25 @@ for mat in MATERIALES.values():
         escribir('trabajos/%s/index.html' % mat['slug'], pagina_material(mat))
         rutas.append('/trabajos/%s/' % mat['slug'])
 
-# el sitemap: el bloque de /trabajos/ se reescribe entero entre sus dos marcas
+# el sitemap: el bloque de /trabajos/ se reescribe entero entre sus dos marcas. Sin publicar, no va.
 sm_f = os.path.join(WEB, 'sitemap.xml')
-sm = open(sm_f, encoding='utf-8').read()
+sm = antes = open(sm_f, encoding='utf-8').read()
 bloque = '  <!-- trabajos: lo escribe 04-operations/trabajos/armar.py -->\n' + ''.join(
     '  <url>\n    <loc>%s%s</loc>\n    <changefreq>weekly</changefreq>\n    <priority>%s</priority>\n  </url>\n' % (SITIO, r, '0.8' if r == '/trabajos/' else '0.7') for r in rutas) + '  <!-- /trabajos -->\n'
-if '<!-- trabajos:' in sm:
+if not PUBLICADA:
+    sm = re.sub(r'  <!-- trabajos:.*?<!-- /trabajos -->\n\n?', '', sm, flags=re.S)
+elif '<!-- trabajos:' in sm:
     sm = re.sub(r'  <!-- trabajos:.*?<!-- /trabajos -->\n', lambda _: bloque, sm, flags=re.S)
 else:
     sm = sm.replace('</urlset>', bloque + '\n</urlset>')
-open(sm_f, 'w', encoding='utf-8', newline='\n').write(sm)
-print('  sitemap.xml: %d direcciones de /trabajos/' % len(rutas))
+if sm != antes:
+    open(sm_f, 'w', encoding='utf-8', newline='\n').write(sm)
+if PUBLICADA:
+    print('  sitemap.xml: %d direcciones de /trabajos/' % len(rutas))
+    if not LINK_LANDING:
+        print('  OJO: la página figura publicada y la landing no la linkea ("Ver más trabajos", README.md).')
+else:
+    print('  SIN PUBLICAR ("publicada": false): no va en el sitemap ni se linkea desde la landing. No se sube.')
 
 # páginas de materiales que quedaron de antes y ya no tienen trabajos: se avisa, no se borra nada
 for d in sorted(os.listdir(os.path.join(WEB, 'trabajos'))):

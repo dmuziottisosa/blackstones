@@ -95,7 +95,9 @@ h1 em,h2 em{font-style:italic;color:var(--accent-dark)}
 .nav-links a[aria-current]{color:var(--gold)}
 
 /* La textura del material: un cuadrito con borde claro y sombra, montado sobre la esquina
-   de abajo a la izquierda de la foto. Abajo a la derecha las fotos traen el logo: no se tapa. */
+   de abajo a la izquierda de la foto. Abajo a la derecha las fotos traen el logo: no se tapa.
+   Mide 100 px en la galería y 112 en la página del material (eran 84 y 96; el dueño,
+   24/11/2026: "el cuadrito del material, un pelito más grande"). */
 .muestra{flex-shrink:0;position:relative;border-radius:10px;border:3px solid var(--bg);object-fit:cover;background:var(--bg-alt);box-shadow:0 8px 20px rgba(26,24,22,.2)}
 
 /* ===== CABECERA ===== */
@@ -110,7 +112,7 @@ h1 em,h2 em{font-style:italic;color:var(--accent-dark)}
 .t-foto img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.22,1,.36,1)}
 .t-card:hover .t-foto img{transform:scale(1.03)}
 .t-pie{display:flex;align-items:flex-start;gap:.95rem;padding:0 .2rem 0 .9rem}
-.t-pie .muestra{width:84px;height:84px;margin-top:-42px}
+.t-pie .muestra{width:100px;height:100px;margin-top:-50px}
 .t-txt{padding-top:.7rem;min-width:0}
 .t-txt strong{display:block;font-family:var(--font-display);font-weight:500;font-size:1.15rem;line-height:1.2}
 .t-txt span{display:block;font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dark);margin-top:.25rem}
@@ -176,21 +178,21 @@ h1 em,h2 em{font-style:italic;color:var(--accent-dark)}
     <a class="t-card" href="/trabajos/negro-boreal/">
       <div class="t-foto"><img src="/trabajos/f/negro-boreal-1-720.webp" srcset="/trabajos/f/negro-boreal-1-720.webp 720w, /trabajos/f/negro-boreal-1-1080.webp 1080w, /trabajos/f/negro-boreal-1-1440.webp 1440w" sizes="(min-width:1000px) 360px, (min-width:640px) 46vw, 92vw" width="1440" height="1440" alt="Mesada en L de granito Negro Boreal con bacha negra" fetchpriority="high"></div>
       <div class="t-pie">
-        <img class="muestra" src="/granitos/t/negro-boreal.webp" width="84" height="84" alt="" loading="lazy" decoding="async">
+        <img class="muestra" src="/granitos/t/negro-boreal.webp" width="100" height="100" alt="" loading="lazy" decoding="async">
         <div class="t-txt"><strong>Negro Boreal</strong><span>Granito</span></div>
       </div>
     </a>
     <a class="t-card" href="/trabajos/blanco-cana/">
       <div class="t-foto"><img src="/trabajos/f/blanco-cana-1-720.webp" srcset="/trabajos/f/blanco-cana-1-720.webp 720w, /trabajos/f/blanco-cana-1-1080.webp 1080w, /trabajos/f/blanco-cana-1-1440.webp 1440w" sizes="(min-width:1000px) 360px, (min-width:640px) 46vw, 92vw" width="1440" height="1440" alt="Mesada larga de cuarzo Blanco Cana con anafe y bacha" loading="lazy" decoding="async"></div>
       <div class="t-pie">
-        <img class="muestra" src="/purastone/t/blanco-cana.webp" width="84" height="84" alt="" loading="lazy" decoding="async">
+        <img class="muestra" src="/purastone/t/blanco-cana.webp" width="100" height="100" alt="" loading="lazy" decoding="async">
         <div class="t-txt"><strong>Blanco Cana</strong><span>Cuarzo</span></div>
       </div>
     </a>
     <a class="t-card" href="/trabajos/gris-mara/">
       <div class="t-foto"><img src="/trabajos/f/gris-mara-1-720.webp" srcset="/trabajos/f/gris-mara-1-720.webp 720w, /trabajos/f/gris-mara-1-1080.webp 1080w, /trabajos/f/gris-mara-1-1440.webp 1440w" sizes="(min-width:1000px) 360px, (min-width:640px) 46vw, 92vw" width="1440" height="1440" alt="Mesada de granito Gris Mara con bacha de acero, bajo una ventana" loading="lazy" decoding="async"></div>
       <div class="t-pie">
-        <img class="muestra" src="/granitos/t/gris-mara.webp" width="84" height="84" alt="" loading="lazy" decoding="async">
+        <img class="muestra" src="/granitos/t/gris-mara.webp" width="100" height="100" alt="" loading="lazy" decoding="async">
         <div class="t-txt"><strong>Gris Mara</strong><span>Granito</span></div>
       </div>
     </a>
