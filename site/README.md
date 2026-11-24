@@ -6,6 +6,7 @@ Código público de `blackstones.com.ar`. Mirror 1:1 de `public_html/` en Hostin
 site/
 └── public_html/
     ├── index.html              landing single-file
+    ├── ig-feed.php             últimos posts de Instagram para la landing (ver 04-operations/instagram-en-la-landing.md)
     ├── robots.txt
     ├── calculadora/            calc protegida con auth PHP
     │   ├── calc.html           single-file con la app

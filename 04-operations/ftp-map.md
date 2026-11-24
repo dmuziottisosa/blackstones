@@ -24,11 +24,13 @@ Toda ruta de upload tiene que empezar con `domains/blackstones.com.ar/public_htm
 ├── .logs/                                            logs del hosting
 ├── .myimunify_id                                     Hostinger interno
 ├── .profile                                          shell del jail
+├── bs-data/                                          datos del sistema interno y la llave de Instagram (bs-data/ig/). Fuera de la web
 └── domains/
     └── blackstones.com.ar/
         ├── private/                                  no servido públicamente
         └── public_html/                              ⭐ web root real (servido por HTTP)
             ├── index.html                            landing
+            ├── ig-feed.php                           los últimos posts de Instagram para la landing
             ├── robots.txt
             ├── favicon/
             ├── logo/
@@ -39,7 +41,7 @@ Toda ruta de upload tiene que empezar con `domains/blackstones.com.ar/public_htm
             ├── foto_bloque_1/
             ├── foto_equipo/
             ├── foto_proyectos/
-            ├── ig_section/
+            ├── ig_section/                           las seis fotos fijas; cache/ son copias de posts, se arma solo
             └── calculadora/
                 ├── calc.html                         app de cálculo
                 ├── index.php                         entry point con auth

@@ -1249,12 +1249,12 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
           <h2>Lo último que salió <em>del taller.</em></h2>
         </div>
         <div class="ig-grid">
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/3.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/4.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/5.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/6.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/1.webp" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/2.webp" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/3.webp" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/4.webp" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/5.webp" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/6.webp" aria-label="Post de Instagram"></a>
         </div>
         <a class="ig-handle" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Seguinos · @blackstones.ar →</a>
       </div>
@@ -3169,6 +3169,48 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
     }
 
     
+</script>
+<script>
+// Instagram: los seis tiles muestran los últimos posts de @blackstones.ar.
+// ig-feed.php devuelve la lista que el servidor ya tiene guardada (a Instagram se le pregunta,
+// como mucho, una vez por hora) y cada tile lleva a su post. Si la lista no llega a tiempo,
+// falta la llave o una foto no carga, queda la foto fija de ig_section/ con el link al perfil.
+// Las fotos se piden recién cuando la sección está por entrar en pantalla.
+(function(){
+  var tiles = [].slice.call(document.querySelectorAll('.ig-grid .ig-t'));
+  if(!tiles.length) return;
+  var decidido = false;
+  function fija(t){ if(t.dataset.fija) t.style.backgroundImage = "url('" + t.dataset.fija + "')"; }
+  function fijas(){ if(decidido) return; decidido = true; tiles.forEach(fija); }
+  function posts(lista){
+    if(decidido) return; decidido = true;
+    var grande = !!(window.matchMedia && matchMedia('(min-width:900px)').matches);
+    tiles.forEach(function(t, i){
+      var p = lista[i], src = (i === 0 && grande) ? p.g : p.c, im = new Image();
+      im.onload = function(){ t.style.backgroundImage = "url('" + src + "')"; t.href = p.link; t.setAttribute('aria-label', p.etiqueta); };
+      im.onerror = function(){ fija(t); };
+      im.src = src;
+    });
+  }
+  function valida(d){
+    var foto = /^ig_section\/cache\/\d+-[gco]\.(webp|jpg|png)$/, link = /^https:\/\/(www\.)?instagram\.com\//;
+    return !!d && d.ok === true && Array.isArray(d.posts) && d.posts.length >= tiles.length &&
+      d.posts.slice(0, tiles.length).every(function(p){ return !!p && foto.test(p.g) && foto.test(p.c) && link.test(p.link) && typeof p.etiqueta === 'string'; });
+  }
+  function cargar(){
+    if(!window.fetch) return fijas();
+    setTimeout(fijas, 3000); // la lista tarda: quedan las fijas
+    fetch('ig-feed.php').then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){ if(valida(d)) posts(d.posts); else fijas(); })
+      .catch(fijas);
+  }
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(es){
+      if(es.some(function(e){ return e.isIntersecting; })){ io.disconnect(); cargar(); }
+    }, {rootMargin: '800px 0px'});
+    io.observe(tiles[0].parentNode);
+  } else { cargar(); }
+})();
 </script>
 <script>
 // Entrada suave de stats y pasos + count-up de numeros

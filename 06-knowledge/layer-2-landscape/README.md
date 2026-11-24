@@ -11,6 +11,16 @@ Investigación externa: lo que sabe el mundo fuera de BlackStones que es relevan
 | `benchmarks/` (pendiente) | Casos de estudio de ganadores en rubros adyacentes (servicios premium, B2C ticket alto) |
 | `industry/` (pendiente) | Datos del rubro marmolería en Argentina: tamaño de mercado, dinámicas, regulación, materiales |
 
+## Notas sueltas
+
+| Archivo | Qué es |
+|---|---|
+| `instagram-api-para-mostrar-posts.md` | Lo que dice la documentación de Meta sobre leer los posts propios (nov 2026) |
+| `whatsapp-business-ai-2026.md` | La IA de WhatsApp Business: qué es y cómo se le cargan conocimientos |
+| `que-pregunta-clasifica-a-un-lead.md` | Qué pregunta dice en qué momento está un cliente |
+| `como-se-lee-una-pantalla-de-trabajo.md` | La investigación detrás del diseño del sistema interno |
+| `ig-luxury-design-caption-patterns.md` | Patrones de caption de cuentas de diseño de lujo en Instagram (mayo 2026) |
+
 ## Reglas
 
 - **Layer-2 es referencial, no operativo.** Lo que se aplica vive en layer-3 o en carpetas funcionales.
