@@ -6,7 +6,8 @@
     commit    el commit de donde se bajan los archivos. Tiene que estar subido a GitHub.
     salida    donde queda el bloque. Ese archivo es el que se prueba y el que se entrega.
     titulo    que se sube, en una linea, sin tildes.
-    url       la pagina que se abre al terminar.
+    url       la pagina que se abre al terminar. Puede llevar "#seccion" al final, para que
+              abra en esa parte de la pagina.
     ruta      relativa a site/public_html. Se suben en el orden dado: lo que "activa" el
               cambio (la pagina que apunta a lo demas) va al final.
     =marca    para archivos de texto: un texto corto que el archivo tiene que traer.
@@ -28,6 +29,7 @@ Los tamanos salen de aca, del commit. No se escriben a mano ni de memoria: el bl
 se entrega se copia del archivo de salida, letra por letra. Ver deploy-snippets.md, Receta 9.
 """
 import os
+import re
 import subprocess
 import sys
 
@@ -73,7 +75,7 @@ PLANTILLA = r'''# === BlackStones - deploy: %(titulo)s. Commit %(corto)s ===
 '''
 
 ABRIR = r'''  # 3) Abrir la pagina
-  Start-Process "%(url)s?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"'''
+  Start-Process "%(url)s?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())%(ancla)s"'''
 
 COMPROBAR_Y_ABRIR = r'''  # 3) Pedirle la pagina al sitio para ver que ya responde con lo nuevo, y abrirla
   $url = "%(url)s?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())"
@@ -82,7 +84,7 @@ COMPROBAR_Y_ABRIR = r'''  # 3) Pedirle la pagina al sitio para ver que ya respon
   curl.exe -s -L -f -o $ver $url
   if ($LASTEXITCODE -eq 0 -and (Test-Path $ver) -and (Select-String -Path $ver -Pattern "%(marca)s" -SimpleMatch -Quiet)) { Write-Host "La pagina ya responde con lo nuevo." -ForegroundColor Green }
   else { Write-Host "OJO: se subio todo, pero la pagina todavia no responde con lo nuevo. Espera un minuto y actualizala." -ForegroundColor Yellow }
-  Start-Process $url'''
+  Start-Process "$url%(ancla)s"'''
 
 
 def fallar(msg):
@@ -110,8 +112,10 @@ def main():
         fallar('el commit %s no esta en GitHub: hacer git push antes de armar el bloque' % sha[:7])
     limpio(titulo, 'titulo')
     limpio(url, 'url', '"$`\t ')
-    if not url.startswith(SITIO) or '?' in url or '#' in url:
-        fallar('la url tiene que ser de %s y sin "?" ni "#": %r' % (SITIO, url))
+    url, _, ancla = url.partition('#')
+    if not url.startswith(SITIO) or '?' in url or (ancla and not re.match(r'^[a-z0-9-]+$', ancla)):
+        fallar('la url tiene que ser de %s, sin "?", y la seccion (despues de "#") en minusculas: %r' % (SITIO, url))
+    ancla = ('#' + ancla) if ancla else ''
     pedidos = sys.argv[5:]
     if len(pedidos) > MAX_ARCHIVOS:
         fallar('%d archivos son muchos para un bloque asi (el FTP bloquea cerca de las 29 conexiones). '
@@ -144,7 +148,7 @@ def main():
     # si la pagina que se abre es una de las que se suben, al final se comprueba que el sitio la entregue
     pagina = url[len(SITIO):]
     pagina += 'index.html' if pagina == '' or pagina.endswith('/') else ''
-    final = (COMPROBAR_Y_ABRIR % {'url': url, 'marca': marcas[pagina]}) if marcas.get(pagina) else (ABRIR % {'url': url})
+    final = (COMPROBAR_Y_ABRIR % {'url': url, 'marca': marcas[pagina], 'ancla': ancla}) if marcas.get(pagina) else (ABRIR % {'url': url, 'ancla': ancla})
     bloque = PLANTILLA % {'titulo': titulo, 'corto': sha[:7], 'sha': sha, 'github': GITHUB,
                           'filas': ',\n'.join(filas), 'final': final}
     renglones = bloque.split('\n')

@@ -1,8 +1,48 @@
 # Instagram en la landing
 
-> La sección "Lo último que salió del taller" de la landing quedó preparada para mostrar sola los seis últimos posts de @blackstones.ar. Hoy muestra las seis fotos fijas de siempre.
-> Hecho el 24/11/2026, a pedido del dueño ("que esta sección sea más dinámica, con lo que en verdad tenemos en IG").
-> `status:` **en pausa desde el 24/11/2026.** El código está armado y probado contra un Instagram de mentira, pero la llave no se pudo generar: el panel de Meta ya no ofrece el camino para el que se armó (ver "Qué pasó al generar la llave"). El dueño: "si nos va a complicar, vemos otras formas que no sea conectando IG en vivo" y "después vemos". **Nunca se probó contra el Instagram de verdad.**
+> La sección "Lo último que salió del taller" de la landing muestra **doce fotos que pasa el dueño**. Se suman a mano, sin sacar las que están.
+> `status:` vigente desde el 24/11/2026 (bloque de deploy entregado ese día). Es la forma que eligió el dueño después de que no se pudo conectar el Instagram en vivo.
+> Más abajo queda descripto lo que se había armado para mostrar los posts solos (`ig-feed.php`): **no está en la landing ni en el servidor**, y está en pausa.
+
+## Cómo está hoy: las fotos las pasa el dueño
+
+El 24/11/2026 subió cuatro fotos de Instagram al repo y mandó dos más por el chat: "Te lo subí al repo. Sin quitar los otros, agregar a lo último que salió del taller." Con las seis que ya había son doce.
+
+- **El mosaico.** En el celular va de 4 columnas: las cuatro fotos más nuevas, grandes (2 × 2), y las otras ocho en dos filas. Desde 640 px va de 6 columnas: una principal (4 × 4), tres medianas (2 × 2) y ocho chicas. En computadora ocupa lo mismo que ocupaban las seis de antes, así la columna de reseñas de al lado no queda desbalanceada.
+- **El orden.** Lo más nuevo adelante: la principal es la más nueva. Las seis de antes quedan al final.
+- **Cada foto tiene dos archivos** en `site/public_html/ig_section/`: `N.webp` (1080 px) y `N-c.webp` (540 px). La principal usa el de 1080; todas las demás, el de 540. Las doce fotos pesan 301 KB; las seis de antes pesaban 357.
+- **Todas las fotos llevan al perfil** de Instagram. No se sabe a qué post corresponde cada una.
+
+### El movimiento
+
+El dueño, 24/11/2026: "¿Qué animación le darías para no hacerlo tan estático? Animaciones que no sobrecarguen." Quedaron dos:
+
+- **Las fotos entran de a una** cuando la sección llega a la pantalla: un fundido corto, cada foto 60 milésimas después de la anterior. Es la misma entrada que ya tenían los números y los pasos de la landing.
+- **La foto principal respira:** un zoom muy lento (de 1 a 1,07 en 16 segundos, ida y vuelta), que corre solo mientras la sección se ve.
+
+Qué las hace livianas: usan solo `opacity` y `transform`, que el navegador mueve sin volver a dibujar la página; no bajan ningún archivo; y si el teléfono tiene activado "reducir movimiento", o no hay JavaScript, no corren y las fotos quedan a la vista. Antes de sumar otra animación acá, que cumpla esas tres cosas.
+
+### Cómo sumar fotos
+
+1. El dueño las pasa: subidas a GitHub (a la carpeta principal de la rama por defecto) o por el chat. Por el chat llegan enteras, con su tamaño original.
+2. Prepararlas: `php 04-operations/tools/foto-mosaico.php <foto> <número que sigue>`. Si no es cuadrada, mirar antes de dónde conviene cortarla (`arriba`, `centro`, `abajo` o `x,y,lado`): en las fotos más altas que anchas el logo queda bien abajo y un corte al centro lo deja por la mitad. Y si trae la marca de un celular ("Galaxy A71"), cortarla afuera.
+3. Sumar los tiles en `index.html`, adelante, y decidir cuáles van grandes (abajo).
+4. Probar en computadora, tablet y celular que el mosaico no tenga huecos, y entregar el bloque de deploy (`04-operations/tools/bloque-deploy.py`): las fotos primero, `index.html` al final.
+
+**Para que el mosaico cierre sin huecos, las fotos se suman de a tres.** La cuenta: en 6 columnas, la principal ocupa 16 lugares, cada mediana 4 y cada chica 1, y el total tiene que dar 36; en 4 columnas, la principal y las medianas ocupan 4 y el total tiene que dar 24.
+
+| Fotos | Principal | Medianas (`ig-g`) | Chicas |
+|---|---|---|---|
+| 12 (hoy) | 1 | 3 | 8 |
+| 15 | 1 | 2 | 12 |
+| 18 | 1 | 1 | 16 |
+| 21 | 1 | 0 | 20 |
+
+Con 13 o 14 no cierra: o se espera a tener las tres, o se saca alguna vieja (y eso lo decide el dueño: pidió no sacar ninguna). Pasando las 21 hay que repensarlo.
+
+### Lo que hay que saber de la landing publicada
+
+El 24/11/2026 se bajó la página publicada y se vio que **el cambio para mostrar los posts solos nunca se había subido**: el `index.html` del servidor era el de antes, y el del repo ya traía el script. Desde ese día el `index.html` del repo vuelve a ser el publicado (más lo que se le fue sumando), y el script de Instagram ya no está en la landing: quedó en el commit `695d407`. `ig-feed.php` sigue en el repo, sin subir.
 
 ## Qué pasó al generar la llave (24/11/2026)
 
@@ -18,10 +58,10 @@ Ahí se frenó. Lo que dice la documentación de Meta sobre "Unified login" est�
 
 - **Cargar los posts desde el sistema.** Una pantalla para administradores: se pega el link del post y se sube la foto; la landing muestra los últimos seis. Sin Meta ni llaves, y se elige qué se ve. Es la que se le recomendó al dueño. No está hecha. `ig-feed.php` y el script de la landing sirven tal cual: cambia quién escribe la lista.
 - **Un servicio externo que lee el Instagram** (por ejemplo Behold). Es automático, depende de otra empresa y sí conecta el Instagram. Según su página de precios, vista el 24/11/2026 y sin comprobar más: gratis con una actualización por día y hasta 6 posts; USD 10 por mes con actualización por hora.
-- **Dejar las fotos fijas** y cambiarlas a mano cuando haga falta.
+- **Dejar las fotos fijas** y cambiarlas a mano cuando haga falta. **Es lo que se hace desde el 24/11/2026** (arriba, "Cómo está hoy").
 - **Retomar Meta** el día que haya un portfolio que sirva: habría que enseñarle a `ig-feed.php` la llave nueva.
 
-Lo que sigue describe lo que está armado.
+Lo que sigue describe lo que se había armado para mostrar los posts solos. **Hoy no está en la landing ni en el servidor.** Para retomarlo: `ig-feed.php` está en el repo, y el cambio de la landing (los tiles con `data-fija` y el script) está en el commit `695d407`; habría que adaptarlo a un mosaico de doce fotos (`IG_TILES` vale 6).
 
 ## Qué ve el visitante
 

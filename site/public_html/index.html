@@ -369,14 +369,23 @@ h2 em{font-style:italic;color:var(--accent-dark)}
   .rev-q:hover{padding-left:.55rem}
   /* la primera quote sin filete arriba: el rating ya marca el techo */
   .rev-q:first-child{border-top:none;padding-top:.4rem}
-  /* mosaico: el primer post manda */
   .ig-grid{grid-auto-rows:1fr}
-  .ig-t:first-child{grid-column:span 2;grid-row:span 2}
 }
 /* --- Panel Instagram --- */
 .ig-head{margin-bottom:1.4rem}
 .ig-head h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:.4rem}
-.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+/* El mosaico. La foto principal (ig-p) y las medianas (ig-g) ocupan más lugar; las demás
+   rellenan alrededor. En el celular va de 4 columnas, con la principal y las medianas de
+   2 x 2; desde 640 px va de 6 columnas, con la principal de 4 x 4. Para que no queden huecos
+   las fotos se suman de a tres: con 12 van 3 medianas, con 15 van 2, con 18 va 1 y con 21,
+   ninguna. La principal usa N.webp (1080 px) y todas las demás N-c.webp (540 px): doce fotos
+   pesan menos que las seis de antes. Cómo sumar una: 04-operations/instagram-en-la-landing.md */
+.ig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;grid-auto-flow:dense}
+.ig-p,.ig-g{grid-column:span 2;grid-row:span 2}
+@media(min-width:640px){
+  .ig-grid{grid-template-columns:repeat(6,1fr)}
+  .ig-p{grid-column:span 4;grid-row:span 4}
+}
 .ig-t{aspect-ratio:1;border-radius:10px;background:center/cover no-repeat var(--bg-alt);display:block;transition:transform .2s,opacity .2s;box-shadow:0 6px 18px rgba(26,24,22,.08)}
 .ig-t:hover{transform:translateY(-3px);opacity:.92}
 .ig-handle{display:inline-flex;margin-top:1rem;color:var(--accent-dark);font-weight:700;font-size:.88rem;text-decoration:none;border-bottom:1px solid var(--accent);white-space:nowrap}
@@ -1167,6 +1176,20 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   .step:nth-child(3){transition-delay:.24s}
   .step:nth-child(4){transition-delay:.36s}
 }
+
+/* ===== El mosaico se mueve, sin cargar nada =====
+   Entra como los números y los pasos: cada foto aparece con un fundido corto, una detrás de
+   otra, cuando la sección llega a la pantalla. Y la foto principal respira: un zoom muy lento,
+   que corre solo mientras se ve. Son solo opacity y transform: no bajan nada ni redibujan la
+   página. Sin JS, o con "reducir movimiento" en el teléfono, queda todo quieto y a la vista. */
+@media(prefers-reduced-motion:no-preference){
+  .ig-t.pre{opacity:0;transform:translateY(14px);transition:none}
+  .ig-t.in{opacity:1;transform:none;transition:opacity .6s ease,transform .6s var(--ease)}
+  .ig-p{position:relative;overflow:hidden}
+  .ig-p::before{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:inherit;animation:igRespira 16s ease-in-out infinite alternate;animation-play-state:paused}
+  .ig-grid.ve .ig-p::before{animation-play-state:running}
+  @keyframes igRespira{to{transform:scale(1.07)}}
+}
 </style>
 </head>
 <body>
@@ -1250,12 +1273,18 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
           <h2>Lo último que salió <em>del taller.</em></h2>
         </div>
         <div class="ig-grid">
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/1.webp" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/2.webp" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/3.webp" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/4.webp" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/5.webp" aria-label="Post de Instagram"></a>
-          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" data-fija="ig_section/6.webp" aria-label="Post de Instagram"></a>
+          <a class="ig-t ig-p" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/7.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/10-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/12-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/11-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/8-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/9-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/3-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/4-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/5-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/6-c.webp')" aria-label="Post de Instagram"></a>
         </div>
         <a class="ig-handle" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Seguinos · @blackstones.ar →</a>
       </div>
@@ -3175,48 +3204,6 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
     
 </script>
 <script>
-// Instagram: los seis tiles muestran los últimos posts de @blackstones.ar.
-// ig-feed.php devuelve la lista que el servidor ya tiene guardada (a Instagram se le pregunta,
-// como mucho, una vez por hora) y cada tile lleva a su post. Si la lista no llega a tiempo,
-// falta la llave o una foto no carga, queda la foto fija de ig_section/ con el link al perfil.
-// Las fotos se piden recién cuando la sección está por entrar en pantalla.
-(function(){
-  var tiles = [].slice.call(document.querySelectorAll('.ig-grid .ig-t'));
-  if(!tiles.length) return;
-  var decidido = false;
-  function fija(t){ if(t.dataset.fija) t.style.backgroundImage = "url('" + t.dataset.fija + "')"; }
-  function fijas(){ if(decidido) return; decidido = true; tiles.forEach(fija); }
-  function posts(lista){
-    if(decidido) return; decidido = true;
-    var grande = !!(window.matchMedia && matchMedia('(min-width:900px)').matches);
-    tiles.forEach(function(t, i){
-      var p = lista[i], src = (i === 0 && grande) ? p.g : p.c, im = new Image();
-      im.onload = function(){ t.style.backgroundImage = "url('" + src + "')"; t.href = p.link; t.setAttribute('aria-label', p.etiqueta); };
-      im.onerror = function(){ fija(t); };
-      im.src = src;
-    });
-  }
-  function valida(d){
-    var foto = /^ig_section\/cache\/\d+-[gco]\.(webp|jpg|png)$/, link = /^https:\/\/(www\.)?instagram\.com\//;
-    return !!d && d.ok === true && Array.isArray(d.posts) && d.posts.length >= tiles.length &&
-      d.posts.slice(0, tiles.length).every(function(p){ return !!p && foto.test(p.g) && foto.test(p.c) && link.test(p.link) && typeof p.etiqueta === 'string'; });
-  }
-  function cargar(){
-    if(!window.fetch) return fijas();
-    setTimeout(fijas, 3000); // la lista tarda: quedan las fijas
-    fetch('ig-feed.php').then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(d){ if(valida(d)) posts(d.posts); else fijas(); })
-      .catch(fijas);
-  }
-  if('IntersectionObserver' in window){
-    var io = new IntersectionObserver(function(es){
-      if(es.some(function(e){ return e.isIntersecting; })){ io.disconnect(); cargar(); }
-    }, {rootMargin: '800px 0px'});
-    io.observe(tiles[0].parentNode);
-  } else { cargar(); }
-})();
-</script>
-<script>
 // Entrada suave de stats y pasos + count-up de numeros
 (function(){
   if(!('IntersectionObserver' in window)) return;
@@ -3250,6 +3237,27 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
     });
   }, {threshold:.6});
   document.querySelectorAll('[data-countup]').forEach(el => io2.observe(el));
+})();
+// El mosaico "Lo último que salió del taller": las fotos entran de a una cuando la sección
+// llega a la pantalla, y el zoom lento de la principal corre solo mientras se ve.
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var grid = document.querySelector('.ig-grid'); if(!grid) return;
+  var tiles = [].slice.call(grid.querySelectorAll('.ig-t'));
+  // si la sección ya está en pantalla al cargar (se llegó por un link directo), no hay entrada:
+  // esconder fotos que ya se ven sería un parpadeo
+  var entro = grid.getBoundingClientRect().top < (window.innerHeight || 0);
+  if(!entro) tiles.forEach(function(t){ t.classList.add('pre'); });
+  new IntersectionObserver(function(es){
+    var ve = es[es.length - 1].isIntersecting;
+    grid.classList.toggle('ve', ve);
+    if(!ve || entro) return;
+    entro = true;
+    tiles.forEach(function(t, i){ t.style.transitionDelay = (i * 60) + 'ms'; t.classList.add('in'); });
+    // al terminar se sacan las marcas: el tile vuelve a su transición corta, la del mouse
+    setTimeout(function(){ tiles.forEach(function(t){ t.classList.remove('pre', 'in'); t.style.transitionDelay = ''; }); }, tiles.length * 60 + 800);
+  }, {threshold: .3}).observe(grid);
 })();
 </script>
 </body>

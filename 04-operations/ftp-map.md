@@ -30,7 +30,7 @@ Toda ruta de upload tiene que empezar con `domains/blackstones.com.ar/public_htm
         ├── private/                                  no servido públicamente
         └── public_html/                              ⭐ web root real (servido por HTTP)
             ├── index.html                            landing
-            ├── ig-feed.php                           los últimos posts de Instagram para la landing
+            ├── ig-feed.php                           (en el repo, sin subir) los últimos posts de Instagram, en pausa
             ├── robots.txt
             ├── favicon/
             ├── logo/
@@ -41,7 +41,7 @@ Toda ruta de upload tiene que empezar con `domains/blackstones.com.ar/public_htm
             ├── foto_bloque_1/
             ├── foto_equipo/
             ├── foto_proyectos/
-            ├── ig_section/                           las seis fotos fijas; cache/ son copias de posts, se arma solo
+            ├── ig_section/                           las fotos del mosaico "Lo último que salió del taller": N.webp (1080) y N-c.webp (540)
             ├── trabajos/                             galería de obras; f/ son las fotos; una carpeta por material
             └── calculadora/
                 ├── calc.html                         app de cálculo

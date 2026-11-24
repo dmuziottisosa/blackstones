@@ -430,3 +430,4 @@ Start-Process "https://blackstones.com.ar/$serverPath`?v=$([DateTimeOffset]::Now
 3. ¿El `.env` tiene los 4 valores y el `FTP_HOST` está limpio?
 4. ¿El bloque PowerShell pasó por la "anti-autolink check" (sin `[System.X]`, sin `r.total` en marcadores)?
 5. ¿Es viernes 18:00? Si sí, **no.**
+6. Si el deploy toca la landing: ¿el `index.html` publicado es el del repo? Se baja (`curl https://blackstones.com.ar/`) y se compara. El 24/11/2026 el repo traía un cambio que nunca se había subido; un deploy del archivo entero lo habría publicado sin que nadie lo pidiera.

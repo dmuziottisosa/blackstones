@@ -17,7 +17,7 @@ Cómo se ejecuta el día a día: proceso de venta-fabricación-colocación, rute
 | `reportes.md` | Control (antes "Reportes"): recordatorios, cierre del mes y registro de acciones. Solo administradores |
 | `respaldo.md` | Respaldo: la copia de las últimas 24 horas, cómo se usa, qué vuelve y qué no. Solo administradores |
 | `trabajos/` | La galería `/trabajos/` del sitio (publicada el 24/11/2026): reglas del dueño, cómo sumar un trabajo, el estándar (`estandar.md`: fotos 1:1, medidas, textos) y las herramientas que arman las páginas |
-| `instagram-en-la-landing.md` | La sección Instagram de la landing muestra sola los últimos posts: cómo está hecho, cómo se carga la llave y cómo mirar el estado |
+| `instagram-en-la-landing.md` | La sección "Lo último que salió del taller" de la landing: las doce fotos que pasa el dueño y cómo se suman más. Y lo que quedó armado, en pausa, para mostrar los posts solos |
 
 ## Reglas
 
