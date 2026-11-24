@@ -383,7 +383,9 @@ Apenas la veamos confirmada, te confirmo la medición.
 
 > El dueño, 24/11/2026: "Primero se hace una seña del 50% que habilita la visita de nuestro técnico para rectificar las medidas en su domicilio. Luego de las medidas de rectificación, 20 días corridos para entregar. Si opta por no contratar nuestro flete y colocación, en 12 días corridos post-medición puede retirar."
 >
-> Va cuando el cliente pregunta cómo se sigue o cuánto tardamos, o cuando el dueño pide explicarlo: al final de la cotización, antes de la pregunta de los muebles. El orden y los números son del dueño; la redacción, de quien escribió el doc.
+> Lo dijo para contestarle a un cliente que preguntó cuánto se tarda desde que contrata hasta que queda instalada. Va también cuando el dueño pide explicarlo en una cotización: al final, antes de la pregunta de los muebles. El orden y los números son del dueño; la redacción, de quien escribió el doc.
+>
+> Si el cliente preguntó cuánto se tarda, el mensaje arranca contestando eso: "Desde la medición, en 20 días corridos queda instalada." Y después los tres pasos.
 
 ```
 Cómo seguimos:

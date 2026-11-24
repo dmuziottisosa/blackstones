@@ -54,13 +54,13 @@ Siempre tres cosas, en este orden:
 
 ## Cómo se sigue después del presupuesto (dueño, 24/11/2026)
 
-Lo fijó el dueño al corregir una cotización en la que el orden estaba supuesto:
+Lo fijó el dueño al contestarle a un cliente que, con el número ya en la mano, preguntó cuánto se tarda desde que contrata hasta que queda instalada:
 
 1. **Primero, la seña del 50 %.** Es la que habilita la visita del técnico, que va al domicilio a rectificar las medidas. Sin seña no hay visita.
 2. **Desde esa medición, 20 días corridos para entregar.**
 3. **Si el cliente no contrata nuestro flete y colocación, a los 12 días corridos de la medición puede retirar.**
 
-Cuando el cliente pregunta cómo se sigue o cuánto tardamos, o cuando el dueño pide explicarlo, va el bloque "Cómo seguimos" de `flow.md`, sección 6: al final de la cotización y antes de la pregunta de los muebles.
+Cuando el dueño pide explicarlo en una cotización, va el bloque "Cómo seguimos" de `flow.md`, sección 6: al final, antes de la pregunta de los muebles. Cuando el cliente pregunta cuánto se tarda, primero se le contesta eso en una línea ("Desde la medición, en 20 días corridos queda instalada") y después van los tres pasos.
 
 Lo que el dueño no dijo ese día, y por eso no va en el mensaje: cuándo se paga el otro 50 % y cuándo se entrega la bacha del cliente. Si el cliente lo pregunta, lo contesta el dueño.
 
