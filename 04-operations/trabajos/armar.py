@@ -80,6 +80,21 @@ def wa(texto):
 
 WA_GENERAL = wa('Hola, vi los trabajos en la página y me gustaría cotizar una mesada')
 
+def medida_webp(archivo):
+    """Ancho y alto de un WebP, leídos de su cabecera (los tres formatos que existen)."""
+    b = open(archivo, 'rb').read(32)
+    if len(b) < 30 or b[:4] != b'RIFF' or b[8:12] != b'WEBP':
+        return None
+    if b[12:16] == b'VP8 ':
+        return (b[26] | b[27] << 8) & 0x3FFF, (b[28] | b[29] << 8) & 0x3FFF
+    if b[12:16] == b'VP8L':
+        n = b[21] | b[22] << 8 | b[23] << 16 | b[24] << 24
+        return (n & 0x3FFF) + 1, (n >> 14 & 0x3FFF) + 1
+    if b[12:16] == b'VP8X':
+        return (b[24] | b[25] << 8 | b[26] << 16) + 1, (b[27] | b[28] << 8 | b[29] << 16) + 1
+    return None
+
+
 # ------------------------------------------------------------------ los datos, revisados
 PUBLICADA = D.get('publicada')
 if PUBLICADA not in (True, False):
@@ -124,6 +139,12 @@ for t in TRABAJOS:
     for cola in ('160.webp', '720.webp', '1080.webp', '1440.webp', 'og.jpg'):
         if not os.path.isfile(os.path.join(WEB, 'trabajos', 'f', '%s-%s' % (t['foto'], cola))):
             fallar('falta la foto trabajos/f/%s-%s (se arma con foto.php)' % (t['foto'], cola))
+    # el estándar: cuadrada, 1:1 (estandar.md). Cada copia tiene que medir lo que dice su nombre.
+    for lado in (160, 720, 1080, 1440):
+        mide = medida_webp(os.path.join(WEB, 'trabajos', 'f', '%s-%d.webp' % (t['foto'], lado)))
+        if mide != (lado, lado):
+            fallar('trabajos/f/%s-%d.webp mide %s y tiene que ser cuadrada, de %d x %d. Volver a armarla con foto.php.' % (
+                t['foto'], lado, ('%d x %d' % mide) if mide else 'algo que no se pudo leer', lado, lado))
 
 
 def de(mat):

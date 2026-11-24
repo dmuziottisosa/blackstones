@@ -3,6 +3,7 @@
 > `/trabajos/` es una galería de obras: cada foto, con la textura de su material al pie. Tocar una foto abre la página de ese material, con toda su colección de fotos, el título, una descripción corta, el espesor y las características.
 > Pedida por el dueño el 24/11/2026. `status:` **publicada el 24/11/2026**: ese día se entregó el bloque de deploy con la galería, las tres páginas de materiales, las fotos y el sitemap. Desde acá no se ve producción: que esté arriba lo confirma el dueño.
 > Es una página aparte, no una sección de la landing. La landing no la linkea todavía: falta que el dueño diga desde dónde se llega.
+> **El estándar** (cómo se pasa una foto, las medidas de todo y lo que se comprueba solo): [`estandar.md`](estandar.md).
 
 ## Reglas del dueño (24/11/2026)
 
@@ -17,12 +18,13 @@
 9. **Un crema más claro.** "Consideremos ese crema que usamos: aclararlo un poco a algo más premium. No queremos la sensación de libro viejo o pergamino." En estas páginas el fondo es `#FCFBF9` (el de la landing es `#FAF8F4`). La landing no se tocó: falta que el dueño diga si va también ahí.
 10. **Es otra página, no la sección Trabajos de la landing.** "Cuidado, porque trabajos no es el mismo trabajos de la página principal: este iría en otra página." La sección "Trabajos" de la landing (la tira de obras con su título) y el "Trabajos" de su menú quedan como están; esta galería vive aparte, en `/trabajos/`. Nada de lo que se haga acá toca esa sección.
 11. **La publica él, cuando la ve bien.** Primero la quiso guardada ("antes de subirlo prefiero tenerlo local, hasta tener suficientes imágenes") y, al verla terminada, el mismo día: "Excelente, vamos a subirlo a producción. Recordá que no está dentro del index.html, sino que es otra página, obviamente dentro del mismo ecosistema y universo. Es parte de la página como tal." De ahí: va al sitio con el mismo menú, los mismos colores y el mismo pie que la landing, y sin tocar `index.html`.
+12. **Las fotos llegan cuadradas, 1:1, y esto queda escrito.** "Importante: documentá esta nueva página que hicimos, para términos de estandarización. Pasé las imágenes en 1:1. Por si se me olvida." El estándar está en [`estandar.md`](estandar.md); `foto.php` no arma nada con una foto que no sea cuadrada.
 
 ## Cómo sumar un trabajo
 
 1. El dueño sube la foto a GitHub ("Add file → Upload files"), a la raíz de la rama por defecto, con el nombre `N° COLOR.png` (por ejemplo `2271 NEGRO BOREAL.png`).
 2. Bajarla sin cambiar de rama: `git fetch origin` y `git show "origin/<rama por defecto>:2271 NEGRO BOREAL.png" > /tmp/foto.png`.
-3. Prepararla: `php 04-operations/trabajos/foto.php /tmp/foto.png negro-boreal-2`. El nombre es el material y un número de orden. **No lleva el N° de presupuesto: el archivo es público.**
+3. Prepararla: `php 04-operations/trabajos/foto.php /tmp/foto.png negro-boreal-2`. El nombre es el material y un número de orden. **No lleva el N° de presupuesto: el archivo es público.** Si la foto no es cuadrada o mide menos de 1440 px de lado, no arma nada: se le avisa al dueño (`estandar.md`, punto 1).
 4. Anotarla en `datos.json`, en `trabajos`, arriba de todo (la más nueva va primero), con su texto alternativo.
 5. Si el material es nuevo, sumarlo en `materiales`: nombre, tipo, la textura del catálogo de la landing (`/granitos/t/…`, `/purastone/t/…`), la descripción y el dato. Si el tipo es nuevo (sinterizado, mármol), sumarlo en `tipos` con su espesor y sus características (cada una, `["la clave", "qué quiere decir"]`).
 6. `python3 04-operations/trabajos/armar.py`
