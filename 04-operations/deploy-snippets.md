@@ -318,12 +318,14 @@ python3 04-operations/tools/bloque-deploy.py <commit> <salida.ps1> "<titulo sin 
 | `ERROR: … bajo con N bytes y se esperaban M…` | Bajó cortado, o el bloque no es el que se probó (Regla 1) |
 | `ERROR: … no es el archivo esperado…` | El archivo no trae su marca |
 | `ERROR: Fallo la subida de … (curl 67). Se habian subido 0 de N…` | `curl 67`: usuario o clave del FTP. `curl 9`: la carpeta. `curl 28`: el FTP no responde; si hubo muchas subidas seguidas, esperar 15 minutos |
-| `ERROR: Fallo la subida (curl N). Pudo quedar subida una parte…` | Lo mismo, en un bloque de más de 25 archivos: no dice cuál falló. El sitio sigue como estaba; se vuelve a pegar el bloque entero |
+| `ERROR: Fallo la subida (curl N). Pudo quedar subida una parte…` | Lo mismo, en un bloque de más de 25 archivos: no dice cuál falló. La página va última: salvo que haya fallado justo en ella, el sitio sigue como estaba. Se vuelve a pegar el bloque entero |
 | `OJO: se subio todo, pero la pagina todavia no responde con lo nuevo…` | Subió bien. El sitio puede tardar un minuto en entregar la página nueva |
 
 **Un parche (Receta 2) lleva el mismo freno.** Ejemplo probado el 24/11/2026: `04-operations/deploy-manifests/2026-11-24-link-trabajos.ps1`, que suma un link a `index.html` sin subirlo entero. Además de lo de la Receta 2: comprueba que el archivo bajó entero (termina en `</html>`), que cada lugar que toca esté una sola vez y que el tamaño final sea exactamente el de antes más lo que suma (si no, no sube); conserva los saltos de línea que tenga el servidor; no hace nada si el cambio ya está; y al final le pide la página al sitio. Los textos con tildes o flechas se arman con `[char]`, para que el bloque sea todo ASCII. Sirve cuando el `index.html` del servidor puede no ser el del repo: el parche no arrastra lo que esté en el repo y todavía no se subió.
 
 **Cómo se probó (24/11/2026).** Contra un FTP local con la misma forma que el de Hostinger, con `curl` y con la bajada de GitHub de verdad, de tres maneras: corrido entero, entrando por la consola renglón por renglón y pegado tecla por tecla en una consola con PSReadLine. Casos: todo bien; un tamaño mal; el FTP rechaza un archivo a mitad de camino (quedan subidos los anteriores y lo dice); falta el `.env`; el commit no existe; la clave del FTP está mal; un archivo de texto sin su marca. El bloque de antes, con un tamaño mal y pegado renglón por renglón, repite lo que vio el dueño. Las pruebas no están en el repo.
+
+El bloque de más de 25 archivos se probó ese mismo día con 39 (38 fotos y la landing), pegado tecla por tecla contra el mismo FTP local: subió todo en una sola conexión y cada archivo quedó igual al del commit. Y con tres fallas: el FTP rechaza un archivo a mitad de camino (quedan subidos los anteriores, la página no se toca y lo dice); un tamaño mal (no sube nada); la clave del FTP mal (no sube nada). Lo que no se pudo probar acá es el bloqueo de Hostinger en sí: que una sola conexión lo evita viene de la Receta 8, validada con 301 archivos.
 
 ---
 

@@ -87,7 +87,7 @@ SUBIR_EN_LOTE = r'''  # 2) Subir por FTP a Hostinger en UNA sola conexion (crea 
   $pares = @()
   foreach ($l in $listos) { $pares += @("-T", $l.tmp, ("ftp://" + $env:FTP_HOST + "/" + $env:FTP_REMOTE_BASE + "/" + $l.ruta)) }
   curl.exe -s --fail-early --ftp-create-dirs --user "${env:FTP_USER}:${env:FTP_PASS}" $pares
-  if ($LASTEXITCODE -ne 0) { throw ("Fallo la subida (curl " + $LASTEXITCODE + "). Pudo quedar subida una parte; la pagina va ultima, asi que el sitio sigue como estaba. Volve a pegar el bloque entero.") }
+  if ($LASTEXITCODE -ne 0) { throw ("Fallo la subida (curl " + $LASTEXITCODE + "). Pudo quedar subida una parte. La pagina va ultima: si fallo antes, el sitio sigue como estaba. Volve a pegar el bloque entero.") }
   $n = $total'''
 
 ABRIR = r'''  # 3) Abrir la pagina
