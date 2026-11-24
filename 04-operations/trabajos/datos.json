@@ -1,7 +1,7 @@
 {
   "_": "Todo lo que muestra /trabajos/. Después de tocar este archivo: python3 04-operations/trabajos/armar.py. Cómo sumar un trabajo y las reglas de los textos: README.md de esta carpeta.",
 
-  "publicada": false,
+  "publicada": true,
 
   "tipos": {
     "granito": {

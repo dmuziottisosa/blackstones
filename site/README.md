@@ -7,7 +7,7 @@ site/
 └── public_html/
     ├── index.html              landing single-file
     ├── ig-feed.php             últimos posts de Instagram para la landing (ver 04-operations/instagram-en-la-landing.md)
-    ├── trabajos/               galería de obras y una página por material. La arma 04-operations/trabajos/armar.py: no se edita a mano. SIN PUBLICAR: todavía no se sube
+    ├── trabajos/               galería de obras y una página por material. La arma 04-operations/trabajos/armar.py: no se edita a mano
     ├── robots.txt
     ├── calculadora/            calc protegida con auth PHP
     │   ├── calc.html           single-file con la app

@@ -32,7 +32,7 @@
 **Si modificás cualquier cosa dentro de `site/public_html/` (landing, calc, imagen, PHP, CSS, JS), tu respuesta TIENE que terminar con un bloque de deploy Base64 listo para pegar.** No esperar que el usuario lo pida.
 
 - 1 archivo cambiado → emitir el bloque de la § Receta 1 con el archivo Base64'd inline.
-- Múltiples archivos → emitir varios bloques, uno por archivo.
+- Múltiples archivos → emitir varios bloques, uno por archivo, o uno solo armado con la § Receta 9.
 - **Para cambios chicos en archivos grandes** (ej: cambiar un teléfono en `calc.html` de 273 KB) → si el cambio es ≤3 reemplazos puntuales, podés usar la § Receta 2 (patch quirúrgico via `-replace`) en vez de re-enviar el archivo entero.
 
 Esta regla NO aplica a cambios fuera de `site/` — esos solo se commitean a GitHub.
@@ -264,7 +264,8 @@ https://raw.githubusercontent.com/dmuziottisosa/blackstones/33f48926df1a629b7747
 | `El archivo no tiene el cambio esperado. Aborto.` en Receta 7 | El guard `Select-String` no encontró el patrón → bajaste un SHA viejo, o el patrón del guard quedó del deploy anterior | Confirmar que el SHA es el del commit nuevo; actualizar el `-Pattern` al string del cambio actual |
 | `curl: (28)` timeout de FTP **siempre en el archivo ~29**, aunque el archivo esté bien | El FTP de Hostinger bloquea la IP unos minutos si se abren muchas conexiones seguidas (una por archivo) | Esperar ~15 min. Subir en lote: **una conexión por carpeta** con `curl -T "{a,b,c}" ftp://.../carpeta/` (ver § Receta 8) |
 | El guard del script falla con un texto que **tiene tilde** (`CATÁLOGO`) | PowerShell pegado desde el chat puede cambiar `Á` por `A` | Los guards de contenido van **sin tildes ni ñ** (ej.: un nombre de función) |
-| Aparece "Deploy OK" aunque hubo un error antes | Se pegó el bloque **en tramos**: PowerShell sigue con las líneas siguientes después de un `throw` | Pegar el bloque **entero de una vez** |
+| Aparece "Deploy OK" o "Subidos N archivos" aunque hubo un error antes | Pegado en la consola, cada renglón suelto corre por su cuenta: después de un `throw`, PowerShell sigue con los de abajo. Pasa aunque se pegue el bloque entero de una vez (24/11/2026) | Envolver el bloque en `& { try { … } catch { … } }` (ver § Receta 9) |
+| `… bajo con N bytes y se esperaban M` o `Bajo mal … (N bytes)` en todos los intentos | El bloque que se pegó no es el que se probó: alguien reescribió los tamaños en vez de copiarlos | Armar el bloque con `04-operations/tools/bloque-deploy.py` y entregarlo copiado del archivo (ver § Receta 9) |
 
 ---
 
@@ -279,6 +280,45 @@ Validada en oct 2026 con 301 archivos (miniaturas del catálogo). Ver el bloque 
 5. Recién ahí, subir el `index.html`.
 
 Por qué el orden importa: si algo falla a mitad de camino, la página publicada sigue siendo la vieja y nunca apunta a archivos que no están.
+
+---
+
+## ⚡ Receta 9 — Varios archivos de un commit, con el bloque armado por un programa
+
+Para subir de 2 a 25 archivos de un commit (páginas, fotos). Es la Receta 7 para varios archivos, con dos reglas que salieron de un deploy fallido el 24/11/2026.
+
+**Qué pasó.** El bloque probado estaba bien. El que se pegó en el chat tenía cuatro tamaños de fotos mal: se reescribió en vez de copiarse. La revisión de tamaños frenó la bajada y no se subió nada, pero la consola siguió con los renglones de abajo, dijo "Subidos 8 archivos" y abrió el navegador en un 404.
+
+**Regla 1: el bloque lo arma un programa y se entrega copiado del archivo que deja.** `04-operations/tools/bloque-deploy.py` saca los tamaños del commit. Antes de entregar se muestra el archivo entero (`cat`) en la misma respuesta y se copia de ahí, letra por letra. No se reescribe de memoria ni se "completa" un bloque que se vio a medias.
+
+**Regla 2: el bloque va entero adentro de `& { try { … } catch { … } finally { … } }`.** Pegado en la consola de PowerShell, cada renglón suelto se ejecuta por su cuenta: un `throw` corta ese renglón y la consola sigue con los de abajo. Pasa siempre, aunque se pegue todo junto. Adentro de `& { }` el bloque es una sola instrucción: un error corta todo, se lee en un renglón que empieza con `ERROR:` y los temporales se borran igual.
+
+Adentro del bloque: solo ASCII, sin tabulaciones y sin renglones vacíos (en una consola sin PSReadLine, un renglón vacío corta el bloque por la mitad). El programa lo comprueba.
+
+**Uso:**
+
+```
+python3 04-operations/tools/bloque-deploy.py <commit> <salida.ps1> "<titulo sin tildes>" "<url que se abre al final>" ruta[=marca] [ruta[=marca] ...]
+```
+
+- Las rutas van relativas a `site/public_html` y en el orden en que se suben: lo que activa el cambio (la página que apunta a lo demás) va al final.
+- `=marca`, en los archivos de texto: un texto corto que el archivo tiene que traer. Sin tildes.
+- El commit tiene que estar subido a GitHub: el programa lo comprueba.
+
+**Qué hace el bloque:** baja todo de GitHub a archivos temporales; revisa el tamaño exacto de cada uno y, en los de texto, la marca; recién ahí sube por FTP, creando las carpetas que falten; si la página que abre es una de las que subió, se la pide al sitio y dice si ya responde con lo nuevo; abre el navegador.
+
+**Qué dice cuando algo falla** (un renglón, y no hace nada más):
+
+| Dice | Qué es |
+|---|---|
+| `ERROR: No se pudo leer D:\blackstones\.env…` | Falta el `.env`, o le faltan datos |
+| `ERROR: No se pudo bajar … de GitHub (curl 22)…` | El commit o la ruta no existen en GitHub |
+| `ERROR: … bajo con N bytes y se esperaban M…` | Bajó cortado, o el bloque no es el que se probó (Regla 1) |
+| `ERROR: … no es el archivo esperado…` | El archivo no trae su marca |
+| `ERROR: Fallo la subida de … (curl 67). Se habian subido 0 de N…` | `curl 67`: usuario o clave del FTP. `curl 9`: la carpeta. `curl 28`: el FTP no responde; si hubo muchas subidas seguidas, esperar 15 minutos |
+| `OJO: se subio todo, pero la pagina todavia no responde con lo nuevo…` | Subió bien. El sitio puede tardar un minuto en entregar la página nueva |
+
+**Cómo se probó (24/11/2026).** Contra un FTP local con la misma forma que el de Hostinger, con `curl` y con la bajada de GitHub de verdad, de tres maneras: corrido entero, entrando por la consola renglón por renglón y pegado tecla por tecla en una consola con PSReadLine. Casos: todo bien; un tamaño mal; el FTP rechaza un archivo a mitad de camino (quedan subidos los anteriores y lo dice); falta el `.env`; el commit no existe; la clave del FTP está mal; un archivo de texto sin su marca. El bloque de antes, con un tamaño mal y pegado renglón por renglón, repite lo que vio el dueño. Las pruebas no están en el repo.
 
 ---
 

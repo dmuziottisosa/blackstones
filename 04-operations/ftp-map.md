@@ -42,7 +42,7 @@ Toda ruta de upload tiene que empezar con `domains/blackstones.com.ar/public_htm
             ├── foto_equipo/
             ├── foto_proyectos/
             ├── ig_section/                           las seis fotos fijas; cache/ son copias de posts, se arma solo
-            ├── trabajos/                             galería de obras; f/ son las fotos; una carpeta por material (todavía no está en el servidor)
+            ├── trabajos/                             galería de obras; f/ son las fotos; una carpeta por material
             └── calculadora/
                 ├── calc.html                         app de cálculo
                 ├── index.php                         entry point con auth
