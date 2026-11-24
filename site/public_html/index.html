@@ -353,53 +353,40 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .social-grid>*{min-width:0}
 .rev-scroll{max-width:100%}
 @media(min-width:900px){
-  .social-grid{grid-template-columns:1.12fr .88fr;gap:0;align-items:stretch}
-  .social-grid>div:first-child{padding-right:3rem;display:flex;flex-direction:column;align-items:flex-start}
-  /* el mosaico ocupa todo el ancho de su columna, pero no se estira a lo alto: cuando las
-     reseñas quedaban más altas (ventanas de 900 a 1100 px) se deformaba y una foto quedaba
-     de 25 px. Mantiene siempre su forma. */
-  .social-grid>div:first-child .ig-grid{flex:none;align-self:stretch}
-  .social-grid>div:first-child .ig-handle{margin-top:1.3rem}
-  .rev-col{border-left:1px solid rgba(168,149,128,.3);padding-left:3rem;display:flex;flex-direction:column;align-items:flex-start}
-  .rev-col .rev-scroll{flex:1;justify-content:space-between;align-self:stretch}
-  .rev-col .rev-more{margin-top:1.3rem}
-  /* los subrayados abrazan el texto (el stretch del flex los estiraba
-     a todo el ancho de la columna) */
-  .ig-handle,.rev-more{align-self:flex-start}
-  /* micro-interacciones: el mosaico responde, las quotes marcan foco */
+  /* En computadora la sección va en dos franjas, las dos del ancho del resto de la página:
+     arriba el mosaico a todo lo ancho y abajo las reseñas en fila. Lado a lado no había forma
+     (dueño, 24/11/2026): en su mitad el mosaico quedaba "apretujadísimo", y al ensanchar la
+     sección para darle lugar, "los comentarios están ido muy a la derecha, como que se perdió
+     la cohesión". Así las fotos tienen todo el ancho y nada se sale de la línea de la página. */
+  .social-grid{gap:3.4rem}
+  .ig-handle{margin-top:1.3rem}
+  .rev-col{scroll-margin-top:6rem}
+  .rev-col .rev-more{margin-top:1.1rem}
+  /* micro-interacción: el mosaico responde */
   .ig-t:hover{transform:translateY(-4px) scale(1.012);opacity:1;box-shadow:0 14px 30px rgba(26,24,22,.16)}
-  .rev-q{transition:padding-left .2s,border-color .2s}
-  .rev-q:hover{padding-left:.55rem}
-  /* la primera quote sin filete arriba: el rating ya marca el techo */
-  .rev-q:first-child{border-top:none;padding-top:.4rem}
   .ig-grid{grid-auto-rows:1fr}
 }
 /* --- Panel Instagram --- */
 .ig-head{margin-bottom:1.4rem}
 .ig-head h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:.4rem}
 /* El mosaico. La foto principal (ig-p) y las medianas (ig-g) ocupan más lugar; las demás
-   rellenan alrededor. En el celular va de 4 columnas, con la principal y las medianas de
-   2 x 2; desde 640 px va de 6 columnas, con la principal de 4 x 4. Para que no queden huecos
-   las fotos se suman de a tres: con 12 van 3 medianas, con 15 van 2, con 18 va 1 y con 21,
-   ninguna. La principal usa N.webp (1080 px) y todas las demás N-c.webp (540 px): doce fotos
-   pesan menos que las seis de antes. Cómo sumar una: 04-operations/instagram-en-la-landing.md */
+   rellenan alrededor. Tres formas, según el ancho:
+   - celular: 4 columnas por 6 filas, con la principal y las medianas de 2 x 2;
+   - de 640 a 899 px (tablet parada): 6 columnas por 6 filas, con la principal de 4 x 4;
+   - computadora (desde 900 px): 9 columnas por 4 filas, a todo el ancho de la página. La
+     principal a la izquierda, de 4 x 4, y las demás a su derecha.
+   En los tres casos son 36 lugares (24 en el celular), así que la cuenta es una sola: las fotos
+   se suman de a tres; con 12 van 3 medianas, con 15 van 2, con 18 va 1 y con 21, ninguna.
+   La principal usa N.webp (1080 px) y todas las demás N-c.webp (540 px): doce fotos pesan
+   menos que las seis de antes. Cómo sumar una: 04-operations/instagram-en-la-landing.md */
 .ig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;grid-auto-flow:dense}
 .ig-p,.ig-g{grid-column:span 2;grid-row:span 2}
 @media(min-width:640px){
   .ig-grid{grid-template-columns:repeat(6,1fr)}
   .ig-p{grid-column:span 4;grid-row:span 4}
 }
-/* Pantallas anchas (desde 1400 px): la sección usa más lugar (dueño, 24/11/2026: "tiene para
-   ocupar más espacio, para que no se vea apretujadísimo"). El contenido pasa de 1120 a 1400 px
-   y lo que se gana va todo al mosaico, que pasa a 8 columnas por 6 filas: cuatro fotos más
-   quedan medianas (ig-m) y solo cuatro quedan chicas. Va apaisado para crecer a lo ancho, que
-   es donde sobra pantalla, sin pasarse de alto. Las reseñas quedan del ancho que tenían.
-   Las cuentas para sumar fotos, con 8 columnas: 04-operations/instagram-en-la-landing.md */
-@media(min-width:1400px){
-  .social .container{max-width:1480px}
-  .social-grid{grid-template-columns:minmax(0,1fr) 31rem}
-  .ig-grid{grid-template-columns:repeat(8,1fr);gap:.75rem}
-  .ig-m{grid-column:span 2;grid-row:span 2}
+@media(min-width:900px){
+  .ig-grid{grid-template-columns:repeat(9,1fr);gap:.7rem}
 }
 .ig-t{aspect-ratio:1;border-radius:10px;background:center/cover no-repeat var(--bg-alt);display:block;transition:transform .2s,opacity .2s;box-shadow:0 6px 18px rgba(26,24,22,.08)}
 .ig-t:hover{transform:translateY(-3px);opacity:.92}
@@ -418,11 +405,15 @@ h2 em{font-style:italic;color:var(--accent-dark)}
 .rev-q .stars{color:var(--gold);font-size:.68rem;letter-spacing:.18em;margin-bottom:.5rem}
 .rev-q p{font-size:.84rem;color:var(--text-soft);line-height:1.55}
 .rev-q footer{margin-top:auto;padding-top:.6rem;font-size:.76rem;font-weight:700;color:var(--accent-dark)}
-/* Desktop: apiladas editoriales (sin scroll), solo las 3 primeras */
+/* Computadora: en fila y sin cajas, cada una con su filete arriba y el nombre apoyado abajo.
+   Cuatro reseñas; de 900 a 1199 px van de a dos por renglón, para que no queden angostas. */
 @media(min-width:900px){
-  .rev-scroll{flex-direction:column;overflow:visible;gap:0;padding:0}
-  .rev-q{flex:none;background:transparent;border:none;border-top:1px solid rgba(168,149,128,.3);border-radius:0;padding:1rem 0}
+  .rev-scroll{display:grid;grid-template-columns:repeat(2,1fr);gap:0 2.6rem;overflow:visible;scroll-snap-type:none;padding:0}
+  .rev-q{background:transparent;border:none;border-top:1px solid rgba(168,149,128,.3);border-radius:0;padding:1.1rem 0 1.4rem}
   .rev-q:nth-child(n+5){display:none}
+}
+@media(min-width:1200px){
+  .rev-scroll{grid-template-columns:repeat(4,1fr);gap:0 2.2rem}
 }
 .rev-more{display:inline-flex;margin-top:.9rem;color:var(--text-soft);font-size:.82rem;font-weight:700;text-decoration:none;border-bottom:1px solid var(--accent)}
 .rev-more:hover{color:var(--accent-dark)}
@@ -1205,7 +1196,6 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 @media (min-width:900px) and (hover:hover) and (prefers-reduced-motion:no-preference){
   .ig-t.pre{opacity:0;transform:scale(.86);transition:none}
   .ig-g.pre{transform:translateX(28px)}
-  @media(min-width:1400px){.ig-m.pre{transform:translateX(28px)}}
   .ig-p.pre{transform:scale(1.05)}
   .ig-t.in{opacity:1;transform:none;transition:opacity .55s ease,transform .7s var(--ease)}
   .ig-p.in{transition:opacity .9s ease,transform 1.2s var(--ease)}
@@ -1290,7 +1280,7 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
 </div>
 
 <!-- ============ INSTAGRAM + RESEÑAS (dos paneles) ============ -->
-<section class="social" id="resenas">
+<section class="social" id="taller">
   <div class="container">
     <div class="social-grid">
 
@@ -1304,10 +1294,10 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
           <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/10-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/12-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t ig-g" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/11-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t ig-m" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/8-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t ig-m" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/9-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t ig-m" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1-c.webp')" aria-label="Post de Instagram"></a>
-          <a class="ig-t ig-m" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/8-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/9-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/1-c.webp')" aria-label="Post de Instagram"></a>
+          <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/2-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/3-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/4-c.webp')" aria-label="Post de Instagram"></a>
           <a class="ig-t" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener" style="background-image:url('ig_section/5-c.webp')" aria-label="Post de Instagram"></a>
@@ -1316,7 +1306,7 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
         <a class="ig-handle" href="https://www.instagram.com/blackstones.ar/" target="_blank" rel="noopener">Seguinos · @blackstones.ar →</a>
       </div>
 
-      <div class="rev-col">
+      <div class="rev-col" id="resenas">
         <div class="rev-label">Lo que dicen los clientes</div>
         <div class="rev-rating">
           <b>4,9</b>
