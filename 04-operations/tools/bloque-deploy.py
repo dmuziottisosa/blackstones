@@ -16,6 +16,11 @@ El bloque baja todo de GitHub, lo revisa (tamano exacto, y la marca si la hay) y
 despues sube. Si la url que se abre es una de las paginas subidas, al final le pide esa
 pagina al sitio y dice si ya responde con lo nuevo.
 
+Hasta 25 archivos, sube uno por uno (una conexion de FTP por archivo) y, si uno falla, dice
+cual. Con mas de 25 (hasta 100) sube todos en UNA sola conexion, porque el FTP de Hostinger
+bloquea la IP cerca de las 29 conexiones seguidas: ahi corta en el primer error y no dice en
+cual fue. En los dos casos lo que activa el cambio va ultimo y solo sube si subio lo demas.
+
 Va entero adentro de "& { try { } catch { } finally { } }": pegado en la consola, cada
 renglon suelto corre por su cuenta y un error no frena los que siguen (24/11/2026: fallo
 la bajada y la consola igual dijo "Subidos 8 archivos" y abrio el navegador). Asi un
@@ -37,6 +42,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 GITHUB = 'dmuziottisosa/blackstones'
 SITIO = 'https://blackstones.com.ar/'
 MAX_ARCHIVOS = 25   # el FTP de Hostinger bloquea la IP cerca de las 29 conexiones seguidas (una por archivo)
+MAX_LOTE = 100      # con mas de 25 van todos en una sola conexion; el tope es el largo del comando en Windows
 
 PLANTILLA = r'''# === BlackStones - deploy: %(titulo)s. Commit %(corto)s ===
 & { $listos = @(); $n = 0; try {
@@ -59,12 +65,7 @@ PLANTILLA = r'''# === BlackStones - deploy: %(titulo)s. Commit %(corto)s ===
   }
   $total = $listos.Count
   Write-Host ("Bajados y revisados " + $total + " archivos. Subiendo...") -ForegroundColor Cyan
-  # 2) Subir por FTP a Hostinger (crea las carpetas que falten), en el orden de la lista
-  foreach ($l in $listos) {
-    curl.exe -s --ftp-create-dirs --user "${env:FTP_USER}:${env:FTP_PASS}" -T $l.tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$($l.ruta)"
-    if ($LASTEXITCODE -ne 0) { throw ("Fallo la subida de " + $l.ruta + " (curl " + $LASTEXITCODE + "). Se habian subido " + $n + " de " + $total + ". Volve a pegar el bloque entero.") }
-    $n++
-  }
+%(subida)s
   Write-Host ("Subidos " + $n + " archivos.") -ForegroundColor Green
 %(final)s
 } catch {
@@ -73,6 +74,21 @@ PLANTILLA = r'''# === BlackStones - deploy: %(titulo)s. Commit %(corto)s ===
   foreach ($l in $listos) { Remove-Item $l.tmp -ErrorAction SilentlyContinue }
 } }
 '''
+
+SUBIR_DE_A_UNO = r'''  # 2) Subir por FTP a Hostinger (crea las carpetas que falten), en el orden de la lista
+  foreach ($l in $listos) {
+    curl.exe -s --ftp-create-dirs --user "${env:FTP_USER}:${env:FTP_PASS}" -T $l.tmp "ftp://${env:FTP_HOST}/${env:FTP_REMOTE_BASE}/$($l.ruta)"
+    if ($LASTEXITCODE -ne 0) { throw ("Fallo la subida de " + $l.ruta + " (curl " + $LASTEXITCODE + "). Se habian subido " + $n + " de " + $total + ". Volve a pegar el bloque entero.") }
+    $n++
+  }'''
+
+SUBIR_EN_LOTE = r'''  # 2) Subir por FTP a Hostinger en UNA sola conexion (crea las carpetas que falten), en el orden de la lista.
+  #    Corta en el primer error: lo ultimo de la lista es lo que activa el cambio y solo sube si subio todo lo demas.
+  $pares = @()
+  foreach ($l in $listos) { $pares += @("-T", $l.tmp, ("ftp://" + $env:FTP_HOST + "/" + $env:FTP_REMOTE_BASE + "/" + $l.ruta)) }
+  curl.exe -s --fail-early --ftp-create-dirs --user "${env:FTP_USER}:${env:FTP_PASS}" $pares
+  if ($LASTEXITCODE -ne 0) { throw ("Fallo la subida (curl " + $LASTEXITCODE + "). Pudo quedar subida una parte; la pagina va ultima, asi que el sitio sigue como estaba. Volve a pegar el bloque entero.") }
+  $n = $total'''
 
 ABRIR = r'''  # 3) Abrir la pagina
   Start-Process "%(url)s?v=$([DateTimeOffset]::Now.ToUnixTimeSeconds())%(ancla)s"'''
@@ -117,9 +133,10 @@ def main():
         fallar('la url tiene que ser de %s, sin "?", y la seccion (despues de "#") en minusculas: %r' % (SITIO, url))
     ancla = ('#' + ancla) if ancla else ''
     pedidos = sys.argv[5:]
-    if len(pedidos) > MAX_ARCHIVOS:
-        fallar('%d archivos son muchos para un bloque asi (el FTP bloquea cerca de las 29 conexiones). '
-               'Ver deploy-snippets.md, Receta 8.' % len(pedidos))
+    if len(pedidos) > MAX_LOTE:
+        fallar('%d archivos son muchos para un bloque asi (el tope es %d). '
+               'Ver deploy-snippets.md, Receta 8.' % (len(pedidos), MAX_LOTE))
+    en_lote = len(pedidos) > MAX_ARCHIVOS
     filas, marcas, total = [], {}, 0
     for pedido in pedidos:
         ruta, _, marca = pedido.partition('=')
@@ -150,7 +167,8 @@ def main():
     pagina += 'index.html' if pagina == '' or pagina.endswith('/') else ''
     final = (COMPROBAR_Y_ABRIR % {'url': url, 'marca': marcas[pagina], 'ancla': ancla}) if marcas.get(pagina) else (ABRIR % {'url': url, 'ancla': ancla})
     bloque = PLANTILLA % {'titulo': titulo, 'corto': sha[:7], 'sha': sha, 'github': GITHUB,
-                          'filas': ',\n'.join(filas), 'final': final}
+                          'filas': ',\n'.join(filas), 'final': final,
+                          'subida': SUBIR_EN_LOTE if en_lote else SUBIR_DE_A_UNO}
     renglones = bloque.split('\n')
     if renglones[-1] != '' or any(not r.strip() for r in renglones[:-1]):
         fallar('el bloque quedo con un renglon vacio')
@@ -158,8 +176,9 @@ def main():
         fallar('el bloque quedo con un caracter que no es ASCII, o con una tabulacion')
     with open(salida, 'w', encoding='ascii', newline='\n') as f:
         f.write(bloque)
-    print('%s: %d archivos, %d KB, %d renglones%s' % (salida, len(filas), total // 1024, len(renglones) - 1,
-                                                    ', con comprobacion al final' if marcas.get(pagina) else ''))
+    print('%s: %d archivos, %d KB, %d renglones%s%s' % (salida, len(filas), total // 1024, len(renglones) - 1,
+                                                      ', con comprobacion al final' if marcas.get(pagina) else '',
+                                                      ', todos en una sola conexion de FTP' if en_lote else ''))
 
 
 if __name__ == '__main__':

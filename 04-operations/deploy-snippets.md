@@ -285,7 +285,7 @@ Por qué el orden importa: si algo falla a mitad de camino, la página publicada
 
 ## ⚡ Receta 9 — Varios archivos de un commit, con el bloque armado por un programa
 
-Para subir de 2 a 25 archivos de un commit (páginas, fotos). Es la Receta 7 para varios archivos, con dos reglas que salieron de un deploy fallido el 24/11/2026.
+Para subir de 2 a 100 archivos de un commit (páginas, fotos). Es la Receta 7 para varios archivos, con dos reglas que salieron de un deploy fallido el 24/11/2026.
 
 **Qué pasó.** El bloque probado estaba bien. El que se pegó en el chat tenía cuatro tamaños de fotos mal: se reescribió en vez de copiarse. La revisión de tamaños frenó la bajada y no se subió nada, pero la consola siguió con los renglones de abajo, dijo "Subidos 8 archivos" y abrió el navegador en un 404.
 
@@ -307,6 +307,8 @@ python3 04-operations/tools/bloque-deploy.py <commit> <salida.ps1> "<titulo sin 
 
 **Qué hace el bloque:** baja todo de GitHub a archivos temporales; revisa el tamaño exacto de cada uno y, en los de texto, la marca; recién ahí sube por FTP, creando las carpetas que falten; si la página que abre es una de las que subió, se la pide al sitio y dice si ya responde con lo nuevo; abre el navegador.
 
+**Hasta 25 archivos sube de a uno; con más de 25 (hasta 100), todos en una sola conexión.** El FTP de Hostinger bloquea la IP unos minutos cerca de las 29 conexiones seguidas, y de a uno cada archivo es una conexión. Con más de 25, el programa arma el bloque para que `curl` los suba todos de una vez (`-T archivo destino` por cada uno, con `--fail-early`): es una sola conexión, corta en el primer error y, como lo que activa el cambio va último, la página solo se sube si subió todo lo demás. A cambio, si falla no dice en qué archivo fue. Se usó por primera vez el 24/11/2026, con 39 archivos (38 fotos y la landing).
+
 **Qué dice cuando algo falla** (un renglón, y no hace nada más):
 
 | Dice | Qué es |
@@ -316,6 +318,7 @@ python3 04-operations/tools/bloque-deploy.py <commit> <salida.ps1> "<titulo sin 
 | `ERROR: … bajo con N bytes y se esperaban M…` | Bajó cortado, o el bloque no es el que se probó (Regla 1) |
 | `ERROR: … no es el archivo esperado…` | El archivo no trae su marca |
 | `ERROR: Fallo la subida de … (curl 67). Se habian subido 0 de N…` | `curl 67`: usuario o clave del FTP. `curl 9`: la carpeta. `curl 28`: el FTP no responde; si hubo muchas subidas seguidas, esperar 15 minutos |
+| `ERROR: Fallo la subida (curl N). Pudo quedar subida una parte…` | Lo mismo, en un bloque de más de 25 archivos: no dice cuál falló. El sitio sigue como estaba; se vuelve a pegar el bloque entero |
 | `OJO: se subio todo, pero la pagina todavia no responde con lo nuevo…` | Subió bien. El sitio puede tardar un minuto en entregar la página nueva |
 
 **Un parche (Receta 2) lleva el mismo freno.** Ejemplo probado el 24/11/2026: `04-operations/deploy-manifests/2026-11-24-link-trabajos.ps1`, que suma un link a `index.html` sin subirlo entero. Además de lo de la Receta 2: comprueba que el archivo bajó entero (termina en `</html>`), que cada lugar que toca esté una sola vez y que el tamaño final sea exactamente el de antes más lo que suma (si no, no sube); conserva los saltos de línea que tenga el servidor; no hace nada si el cambio ya está; y al final le pide la página al sitio. Los textos con tildes o flechas se arman con `[char]`, para que el bloque sea todo ASCII. Sirve cuando el `index.html` del servidor puede no ser el del repo: el parche no arrastra lo que esté en el repo y todavía no se subió.
