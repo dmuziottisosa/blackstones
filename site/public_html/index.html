@@ -3245,8 +3245,8 @@ a, button, summary, .ig-tile, .color-tile, .catalog-tab, .gallery-item{
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var grid = document.querySelector('.ig-grid'); if(!grid) return;
   var tiles = [].slice.call(grid.querySelectorAll('.ig-t'));
-  // si la sección ya está en pantalla al cargar (se llegó por un link directo), no hay entrada:
-  // esconder fotos que ya se ven sería un parpadeo
+  // si la sección ya está en pantalla cuando esto corre (al recargar a mitad de página, por
+  // ejemplo), no hay entrada: esconder fotos que ya se ven sería un parpadeo
   var entro = grid.getBoundingClientRect().top < (window.innerHeight || 0);
   if(!entro) tiles.forEach(function(t){ t.classList.add('pre'); });
   new IntersectionObserver(function(es){
