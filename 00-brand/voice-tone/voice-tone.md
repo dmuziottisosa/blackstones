@@ -107,7 +107,7 @@ Detalle completo del flow en `02-marketing/whatsapp/flow.md`.
 - El static **vende el click**, no la mesada.
 - CTA único: "Mandanos largo x ancho por WhatsApp".
 - Sin "garantía de por vida" ni promesas que no podemos cumplir.
-- No mencionar plazos imposibles (nunca "10 días" — el real es 15-20).
+- No mencionar plazos imposibles (nunca "10 días"). El plazo que se promete es 20 días corridos desde la medición (dueño, 17/11/2026; antes "15-20").
 - No poner niños en imágenes.
 
 ---
