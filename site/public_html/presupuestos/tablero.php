@@ -266,8 +266,8 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
      1. quién     → N° y nombre: tinta, negrita, lo más grande de la ficha;
      2. qué       → material: tinta, liso, un punto menos;
      3. cómo está → una fila corta: la fecha en texto, y pastilla solo si algo pide atención.
-   La nota fue la cuarta voz hasta el 25/11/2026. Desde ese día se lee con "Ver notas", en los tres puntitos (que
-   llevan un punto si hay alguna), y la ficha no la muestra: ni cerrada ni abierta. */
+   La nota fue la cuarta voz hasta el 25/11/2026. Desde ese día se lee con "Ver notas", en los tres puntitos, o
+   tocando la notita que va a su lado cuando hay alguna, y la ficha no la muestra: ni cerrada ni abierta. */
 .card.plegada .c-mat{color:var(--text);font-size:12.5px;font-weight:500;margin-top:2px}
 .c-mat.falta{color:var(--text3)}
 /* LA FILA DE ETIQUETAS (barrido de diseño, 19/11/2026). Tres voces, de menos a más:
@@ -304,9 +304,16 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 .card.plegada .c-id{padding-right:28px}
 .card.con-menu:not(.plegada) .c-id{padding-right:62px}
 .fantasma .c-menu{display:none}
-/* La ficha tiene notas (la suya o la de su contrato): un punto en los tres puntitos. Las notas ya no se leen en la
-   ficha: se abren desde ese menú, con "Ver notas" (dueño, 25/11/2026). */
-.c-menu.nt::after{content:'';position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--text);box-shadow:0 0 0 2px var(--card)}
+/* La ficha tiene notas (la suya o la de su contrato): una notita al lado de los tres puntitos. Tocarla abre las
+   notas directo, sin pasar por el menú. Las notas ya no se leen en la ficha (dueño, 25/11/2026). Primero fue un
+   punto negro sobre los tres puntitos; el dueño pidió algo mejor y eligió esta entre tres propuestas. */
+.c-nt{position:absolute;top:8px;right:38px;width:28px;height:28px;padding:0;border:none;border-radius:50%;background:none;color:var(--text2);cursor:pointer;z-index:1;display:inline-flex;align-items:center;justify-content:center}
+.c-nt svg{width:16px;height:16px;display:block}
+@media(hover:hover){.c-nt:hover{background:var(--card-alt);color:var(--text)}}
+.card:not(.plegada) .c-nt{right:68px}
+.card.con-nt.plegada .c-id{padding-right:58px}
+.card.con-nt:not(.plegada) .c-id{padding-right:92px}
+.fantasma .c-nt{display:none}
 .menu-c{position:fixed;z-index:60;min-width:230px;max-width:min(330px,calc(100vw - 16px));padding:6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow-lg)}
 .menu-c[hidden]{display:none}
 .menu-c .mt{padding:6px 10px 4px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
@@ -600,10 +607,15 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .card:not(.plegada) .c-menu{right:42px}
   .card.plegada .c-id{padding-right:34px}
   .card.con-menu:not(.plegada) .c-id{padding-right:76px}
+  .c-nt{width:36px;height:36px;top:4px;right:42px}
+  .c-nt svg{width:18px;height:18px}
+  .card:not(.plegada) .c-nt{right:80px}
   .menu-c button{padding:12px 10px}
   .menu-c button.nt{padding:14px 10px}
   .menu-c a.ir{padding:14px 10px}
   .card:not(.plegada) .c-id{padding-right:34px}
+  .card.con-nt.plegada .c-id{padding-right:76px}
+  .card.con-nt:not(.plegada) .c-id{padding-right:116px}
   .c-det .lnk{padding:11px 0;font-size:13.5px}
   .c-det .acciones{gap:6px 20px}
   .vista-b{padding:9px 14px;font-size:13px}
@@ -892,13 +904,17 @@ function queCopiar(c){
 // "Ir al calendario" (dueño, 18/11/2026) va en el mismo menú, para quien tiene acceso al calendario.
 const VE_CALENDARIO=!!YO.puede.calendario;
 // "Ver notas" (dueño, 25/11/2026) es lo primero del menú: las notas ya no se leen en la ficha, para no saturarla ni
-// tener que abrir "Más" y buscarlas abajo. Si la ficha tiene alguna, los tres puntitos llevan un punto. Quien opera
-// tiene el menú siempre (puede agregar una nota); quien solo mira, si hay algo para copiar o para leer.
+// tener que abrir "Más" y buscarlas abajo. Si la ficha tiene alguna, al lado de los tres puntitos va una notita que
+// las abre directo (el dueño la eligió entre tres propuestas, en lugar del punto negro de la primera versión). Quien
+// opera tiene el menú siempre (puede agregar una nota); quien solo mira, si hay algo para copiar o para leer.
+const ICO_NOTA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v9l-7 7H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 21v-5a2 2 0 0 1 2-2h5"/><path d="M7.5 8.5h9M7.5 12.5h5"/></svg>';
+const conNotita=c=>!SOLO&&hayNotas(c); // la ficha lleva la notita (le hace lugar en el renglón del nombre)
 const botonMenu=c=>{
   if(SOLO)return '';
   const hay=hayNotas(c);
   if(!hay&&!OPERA&&!queCopiar(c).length&&!VE_CALENDARIO)return '';
-  return '<button type="button" class="c-menu'+(hay?' nt':'')+'" data-act="menu" aria-haspopup="menu" aria-label="Más acciones de la ficha: '+(hay?'ver sus notas, ':(OPERA?'agregar una nota, ':''))+'copiar N°, teléfono o dirección'+(VE_CALENDARIO?', e ir al calendario':'')+'"><i></i><i></i><i></i></button>';
+  return (hay?'<button type="button" class="c-nt" data-act="notas" aria-label="Ver las notas de la ficha">'+ICO_NOTA+'</button>':'')
+    +'<button type="button" class="c-menu" data-act="menu" aria-haspopup="menu" aria-label="Más acciones de la ficha: '+(hay?'ver sus notas, ':(OPERA?'agregar una nota, ':''))+'copiar N°, teléfono o dirección'+(VE_CALENDARIO?', e ir al calendario':'')+'"><i></i><i></i><i></i></button>';
 };
 let menuAbiertoAt=0; // cuándo se abrió: un desplazamiento que venía de antes no lo cierra
 function cerrarMenu(){const m=$('menuC');if(!m.hidden){m.hidden=true;m.innerHTML='';m.dataset.key='';}}
@@ -1420,7 +1436,7 @@ const conSemanas=e=>!e.fecha&&!e.aparte&&columnas().indexOf(e)<columnas().length
 const bajoSemanaVencida=(c,e)=>!SOLO&&conSemanas(e)&&!hecho(c)&&!!c.semana&&masDias(c.semana,6)<HOY;
 // La ficha plegada: N°, cliente, material y una fila de etiquetas con lo que hay que saber de un vistazo.
 function htmlPlegada(c,e,cls,estilo,pos){
-  let h='<article class="'+cls+' plegada"'+estilo+' data-key="'+esc(c.key)+'" data-act="abrir">';
+  let h='<article class="'+cls+(conNotita(c)?' con-nt':'')+' plegada"'+estilo+' data-key="'+esc(c.key)+'" data-act="abrir">';
   h+=botonMenu(c);
   if(pos===1)h+='<div class="c-prox">Próxima</div>';
   h+='<div class="c-id">'+(pos?'<span class="c-pos" aria-label="Lugar '+pos+' en la cola">'+pos+'</span>':'')+nroB(c)+' · '+esc(nombreCorto(c.nombre)||'Sin nombre');
@@ -1459,7 +1475,7 @@ function htmlPlegada(c,e,cls,estilo,pos){
   if(lista)et('Lista para pasar','ok lista');
   if(r.length)h+='<div class="c-res">'+r.join('')+'</div>';
   // Las notas (la de la ficha y la de su contrato) no van en la ficha cerrada: se leen con "Ver notas", en los tres
-  // puntitos, que llevan un punto cuando hay alguna (dueño, 25/11/2026: "así no saturamos la ficha").
+  // puntitos, o tocando la notita que va a su lado cuando hay alguna (dueño, 25/11/2026: "así no saturamos la ficha").
   return h+'</article>';
 }
 function htmlCard(c){
@@ -1474,7 +1490,7 @@ function htmlCard(c){
     if(dt<1000){cls+=' '+recien.tipo;estilo=' style="animation-delay:-'+dt+'ms"';}
   }
   if(!desplegada(c))return htmlPlegada(c,e,cls,estilo,pos);
-  let h='<article class="'+cls+(botonMenu(c)?' con-menu':'')+'"'+estilo+' data-key="'+esc(c.key)+'">';
+  let h='<article class="'+cls+(botonMenu(c)?' con-menu':'')+(conNotita(c)?' con-nt':'')+'"'+estilo+' data-key="'+esc(c.key)+'">';
   if(!SOLO)h+='<button type="button" class="c-plegar" data-act="plegar" aria-label="Plegar la ficha"></button>';
   h+=botonMenu(c);
 
@@ -1852,6 +1868,7 @@ wrap.addEventListener('click',ev=>{
   if(!c)return;
   const act=b.dataset.act;
   if(act==='menu'){abrirMenu(b,c);return;} // copiar lo puede hacer cualquiera que vea la ficha
+  if(act==='notas'){cerrarMenu();verNotas(c);return;} // y leer las notas, también
   if(!OPERA&&!['abrir','plegar','mas','adjuntar','ver'].concat(SOLO_BACHA?['bacha']:[]).includes(act))return; // solo mira, adjunta y anota la bacha
   if(act==='bacha'){pedirBacha(c);return;}
   if(act==='abrir'||act==='plegar'){
