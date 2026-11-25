@@ -69,7 +69,7 @@ Lo que el dueño no dijo ese día, y por eso no va en el mensaje: cuándo se pag
 
 - **Lo que ya dijo el cliente no se vuelve a preguntar.** El bot a veces repite el pedido de datos; si pasó, se pide disculpas en una línea.
 - **Lo que el cliente escribió no se pisa con lo que se ve en una foto.** Una foto de referencia muestra el estilo, no la cantidad: si escribió "dos bachas", no se cuentan cuatro porque la foto tiene bacha doble (dueño, 25/11/2026: "es claro, justo te confundiste en donde fue claro").
-- **Si el texto y la foto no dicen lo mismo, o no se entiende cómo es el armado, no se cotiza sobre una suposición: se le pregunta y aclara el cliente** (dueño, mismo día: "mejor preguntarle y que sea ella que nos aclare"). Un mensaje corto, con lo que ya se le puede decir (el material que se le recomienda) y dos o tres preguntas que se contesten en un renglón. El número va cuando conteste; mientras, se le dejan al dueño las cuentas hechas para cada respuesta posible.
+- **Si falta un dato menor (la medida de la bacha), se infiere, se cotiza y el mensaje dice qué se asumió, para que el cliente corrija** (dueño, 25/11/2026: "vamos a cotizarle así, si no que después nos corrija; no nos pasó medidas de la bacha, pero las inferimos"). Ese día primero dijo "mejor preguntarle y que sea ella que nos aclare" y enseguida eligió cotizar: preguntar antes queda para cuando de verdad no se entiende qué pide. Al dueño se le dejan las cuentas de las otras lecturas posibles, por si el cliente corrige.
 - **Una medida rara se marca**, no se corrige sola (una "mesada de 0,12 × 0,60" puede ser 1,20).
 - **Cocina de pie no es anafe:** entre dos piezas con una cocina de pie no hay piedra ni traforo.
 - **Departamento:** preguntar por ascensor; la subida por escalera se cobra aparte.
@@ -85,6 +85,7 @@ Se manda la primera respuesta de `flow.md` (sección 2, "Formato vigente de la p
 
 - Dar un precio de referencia en un color popular cuando el cliente nombra una marca sin color (se hizo una vez con Silestone, después de la regla "sin color, sin número"; el dueño no dijo nada).
 - La línea con la conversión al dólar oficial.
+- Regrueso de 15 cm en el frente y el lateral en una mesada de baño con bacha armada. El dueño lo pidió así en una cotización del 25/11/2026 (en la calculadora: Baño, "Frente + 1 lat", 15 cm); no dijo si vale para todas.
 
 ## Lo que nunca va al repo
 
