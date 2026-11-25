@@ -64,7 +64,7 @@ Qué se pierde y se sabe: ya no se lee de un vistazo qué dice la nota de cada f
 
 ## Knowns
 
-- Probado en local: 40 comprobaciones por la API (`rcnotas.py`) y 57 en pantalla (`notacto.js`, rehecha para "Ver notas"): computadora, tablet y celular, claro y oscuro, los tres roles.
+- Probado en local: 40 comprobaciones por la API (`rcnotas.py`) y 56 en pantalla (`notacto.js`, rehecha para "Ver notas"): computadora, tablet y celular, claro y oscuro, los tres roles.
 - Contraste, medido: los rótulos de la ventana, 8,5:1 en claro y 9,1:1 en oscuro; las notas, "Ver notas" y el punto, 17,7:1 y 16,2:1. No se sumó ningún color.
 - Pedir las notas no escribe nada: ni en los contratos ni en el tablero.
 - La prueba vieja de la seña y la nota (32 comprobaciones) se actualizó en los dos renglones que decían "borrar la nota de la ficha no borra el renglón".
