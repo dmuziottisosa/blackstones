@@ -302,6 +302,16 @@ a.enl:hover,a.enl:focus-visible{color:var(--text);text-decoration:underline}
 .nota-t .lista-c li{padding:5px 0}
 .nota-t .lista-c li:last-child{border-bottom:none}
 .nota-t .lista-c li span{flex-basis:104px}
+/* Las fotos y planos de la ficha del tablero, a la vista en el contrato (dueño, 25/11/2026). Solo mirar. */
+.t-fotos{margin-top:6px;padding-top:3px;border-top:1px solid var(--border-soft)}
+.tf{display:flex;gap:10px;padding:6px 0}
+.tf>span{flex:0 0 104px;padding-top:3px;color:var(--text3);font-size:12px;font-weight:700}
+.tf>div{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.ft{flex:none;width:72px;height:72px;display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden;border:1px solid var(--border);border-radius:8px;background:var(--card);font:inherit;cursor:zoom-in}
+.ft img{display:block;width:100%;height:100%;object-fit:cover}
+.nota-t a.ft{cursor:pointer;font-size:12.5px;font-weight:800;color:var(--text2);text-decoration:none}
+@media(hover:hover){.ft:hover{border-color:var(--text3)}}
+@media(max-width:520px){.tf{flex-direction:column;gap:5px}.tf>span{flex-basis:auto;padding-top:0}}
 .t-hist{margin-top:6px;border-top:1px solid var(--border-soft);padding-top:8px}
 .t-hist summary{cursor:pointer;font-weight:700;color:var(--text);font-size:12.5px}
 .t-hist .e{margin-top:9px;color:var(--text)}
@@ -328,6 +338,20 @@ a.enl:hover,a.enl:focus-visible{color:var(--text);text-decoration:underline}
 .modal-bg.show{display:flex}
 .modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);--mp:26px;padding:var(--mp);max-width:660px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
 .modal.chica{max-width:440px}
+/* La foto en grande: una capa encima de la ventana del contrato, que queda como estaba debajo. */
+.visor-bg{position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,9,7,.8)}
+.visor-bg[hidden]{display:none}
+.visor{display:flex;flex-direction:column;max-width:100%;max-height:100%;overflow:hidden;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg)}
+.v-cab{display:flex;align-items:center;gap:12px;padding:10px 10px 10px 18px}
+.v-cab div{flex:1;min-width:0}
+.v-cab b{display:block;font-family:'Fraunces',serif;font-size:17px;font-weight:600;line-height:1.25;color:var(--text)}
+.v-cab span{display:block;font-size:12.5px;color:var(--text3)}
+.v-b{flex:none;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--border);border-radius:50%;background:var(--card);font:inherit;font-size:17px;line-height:1;color:var(--text);cursor:pointer}
+@media(hover:hover){.v-b:hover{border-color:var(--text3)}}
+.v-img{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:var(--card-alt)}
+.v-img img{display:block;max-width:100%;max-height:calc(100vh - 168px);object-fit:contain}
+.v-pie{display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 14px}
+.v-pie a{font-size:13.5px;font-weight:700;color:var(--text)}
 .modal h3{font-family:'Fraunces',serif;font-size:22px;font-weight:600;line-height:1.25;margin-bottom:6px;overflow-wrap:anywhere}
 .m-cab{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
 .m-cab>div{flex:1;min-width:0}
@@ -578,6 +602,7 @@ a:focus-visible,.toggle:focus-visible,.btn:focus-visible,.fila:focus-visible,.op
 </div>
 
 <div class="modal-bg" id="modalBg"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="visor-bg" id="visorBg" hidden><div class="visor" id="visor" role="dialog" aria-modal="true" aria-labelledby="vTit"></div></div>
 <div class="menu" id="menu" role="menu" hidden></div>
 <div class="toast" id="toast" role="status"></div>
 <datalist id="catalogo"></datalist>
@@ -732,22 +757,73 @@ const fichaIda=c=>+c.enlace.cliente_nro>=90000?'una ficha cargada a mano':'la fi
 const enlA=(k,txt)=>'<a class="enl" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'">'+ICO_ENL+txt+'</a>';
 // Lo que el tablero sabe de la obra, a la vista dentro del contrato (dueño, 18/11/2026): medición, entrega,
 // instalación, fotos, nota e historial. Es solo lectura: sale de lo que el tablero ya manda, y se cambia allá.
-function tableroHtml(k){
+function tableroHtml(k,c){
   const li=(a,b)=>b?'<li><span>'+a+'</span><b>'+esc(b)+'</b></li>':'';
   const quien=l=>(l||[]).length?' · '+l.join(', '):'';
   const turno=()=>k.fecha?fch(k.fecha)+(k.hora?' · '+k.hora+' hs':''):'';
   const venc=!!k.limite&&k.limite<HOY;
   const med=k.medido_at?'Medida el '+fch(k.medido_at)+quien(k.medidor):(k.etapa==='medir'?(turno()?'Coordinada para el '+turno():'Sin fecha de medición')+quien(k.medidor):'');
   const inst=k.etapa==='instalar'?(turno()||'Sin turno de instalación')+quien(k.equipo):'';
-  const n=(k.adjuntos||[]).length;
   let h='<ul class="lista-c">'+li('Etapa',ETAPAS[k.etapa]||k.etapa)+li('Medición',med)
     +li('Entrega',k.limite&&k.etapa!=='archivar'?(venc?'Plazo vencido el '+fch(k.limite):'Vence el '+fch(k.limite)):'')
-    +li('Instalación',inst)+li('Fotos y planos',n?n+(n===1?' archivo':' archivos'):'')+li('Nota del tablero',k.nota)+'</ul>';
+    +li('Instalación',inst)+li('Nota del tablero',k.nota)+'</ul>'+fotosHtml(c);
   if((k.historia||[]).length){
     h+='<details class="t-hist"><summary>Historial del tablero</summary>'+k.historia.map(et=>'<div class="e"><b>'+esc(et.etapa)+'</b>'+(et.salio?' · salió el '+esc(fch(et.salio)):'')+(et.dias!=null?' · estuvo '+(et.dias===0?'menos de un día':(et.dias===1?'1 día':et.dias+' días')):'')+'</div>'
       +(et.items.length?et.items.map(x=>'<div class="i"><span>'+esc(x.txt)+'</span><span>'+(x.fecha?esc(fch(x.fecha)):'—')+'</span></div>').join(''):'<div class="i"><span>Sin tildes cargados</span><span></span></div>')).join('')+'</details>';
   }
   return h;
+}
+// Las fotos y planos de la ficha, a la vista en el contrato (dueño, 25/11/2026: "foto plano, foto bacha, foto
+// entrega: lo debo poder ver en la ficha de Relación-Contrato también"). Solo mirar: se suben, se giran y se
+// borran en el tablero. La lista llega con cada contrato (también la de una ficha archivada, que guarda sus
+// fotos un año) y el archivo lo entrega el tablero, con su mismo permiso.
+const API_FOTO='/calculadora/api/tablero-adjunto.php';
+const FOTO_T=[['plano','Plano'],['bacha','Foto de la bacha'],['entrega','Foto de entrega']]; // los mismos nombres que en el tablero
+const fotoUrl=(c,a)=>a.link||API_FOTO+'?nro='+encodeURIComponent(c.enlace.cliente_nro)+'&sub='+encodeURIComponent(c.enlace.sub)+'&id='+encodeURIComponent(a.id);
+function fotosHtml(c){
+  const l=c&&c.enlace?(c.adjuntos||[]):[];
+  if(!l.length)return '';
+  return '<div class="t-fotos">'+FOTO_T.map(tn=>{
+    const g=l.filter(a=>a.tipo===tn[0]);
+    if(!g.length)return '';
+    return '<div class="tf"><span>'+tn[1]+'</span><div>'+g.map((a,i)=>{
+      const n=tn[1]+(g.length>1?' '+(i+1)+' de '+g.length:'');
+      if(a.link)return '<a class="ft" href="'+esc(a.link)+'" target="_blank" rel="noopener noreferrer" aria-label="'+n+': abrir en Drive">Drive</a>';
+      if(a.pdf)return '<a class="ft" href="'+esc(fotoUrl(c,a))+'" target="_blank" rel="noopener" aria-label="'+n+': abrir el PDF">PDF</a>';
+      return '<button type="button" class="ft" data-foto="'+esc(a.id)+'" data-de="'+esc(c.id)+'" aria-label="'+n+': ver en grande"><img loading="lazy" alt="" src="'+esc(fotoUrl(c,a))+'&t=1"></button>';
+    }).join('')+'</div></div>';
+  }).join('')+'</div>';
+}
+// La foto en grande. Va en una capa aparte, encima de la ventana del contrato: lo que se estaba cargando
+// en el contrato queda como estaba. Con más de una foto se pasa de una a otra (plano, bacha, entrega).
+let visor=null;
+function abrirVisor(cid,id){
+  const c=CONTRATOS.find(x=>x.id===cid);if(!c)return;
+  const fotos=[];FOTO_T.forEach(tn=>(c.adjuntos||[]).forEach(a=>{if(a.tipo===tn[0]&&!a.pdf&&!a.link)fotos.push(a);}));
+  const i=fotos.findIndex(a=>a.id===id);if(i<0)return;
+  visor={c:c,fotos:fotos,i:i,foco:document.activeElement};
+  pintarVisor();$('visorBg').hidden=false;
+  $('visor').querySelector('[data-visor-cerrar]').focus();
+}
+function pintarVisor(){
+  const a=visor.fotos[visor.i],tn=FOTO_T.find(x=>x[0]===a.tipo),g=visor.fotos.filter(x=>x.tipo===a.tipo),url=fotoUrl(visor.c,a),varias=visor.fotos.length>1;
+  $('visor').innerHTML='<div class="v-cab"><div><b id="vTit">'+tn[1]+(g.length>1?' · '+(g.indexOf(a)+1)+' de '+g.length:'')+'</b>'+(a.at?'<span>Subida el '+esc(fch(a.at))+'</span>':'')+'</div>'
+    +'<button type="button" class="v-b" data-visor-cerrar aria-label="Cerrar la foto">×</button></div>'
+    +'<div class="v-img"><img src="'+esc(url)+'" alt="'+tn[1]+'"></div>'
+    +'<div class="v-pie">'+(varias?'<button type="button" class="v-b" data-visor-ir="-1" aria-label="Foto anterior">←</button>':'')
+    +'<a href="'+esc(url)+'" target="_blank" rel="noopener">Abrir en grande</a>'
+    +(varias?'<button type="button" class="v-b" data-visor-ir="1" aria-label="Foto siguiente">→</button>':'')+'</div>';
+}
+function irVisor(paso){
+  if(!visor||visor.fotos.length<2)return;
+  const era=document.activeElement&&document.activeElement.dataset?document.activeElement.dataset.visorIr:'';
+  visor.i=(visor.i+paso+visor.fotos.length)%visor.fotos.length;pintarVisor();
+  const b=$('visor').querySelector(era?'[data-visor-ir="'+era+'"]':'[data-visor-cerrar]');if(b)b.focus();
+}
+function cerrarVisor(){
+  if(!visor)return;
+  const f=visor.foco;visor=null;$('visorBg').hidden=true;$('visor').innerHTML='';
+  if(f&&document.body.contains(f))f.focus();
 }
 // Cómo se ve un contrato: enlazado y con la ficha en el tablero, lo operativo sale de la ficha.
 function ver(c){
@@ -1186,8 +1262,8 @@ function verFicha(c){
     +'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de contrato',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>'
     +'<div class="m-chk">'+[[!!c.nro,'N° de contrato'],[!!c.archivo,'Presupuesto adjunto'],[!!c.enlace,'Enlazado con el tablero']].map(x=>'<span class="'+(x[0]?'si':'')+'">'+x[1]+'</span>').join('')+'</div></div>'
     +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" aria-label="'+esc(ETAPAS[k.etapa]||k.etapa)+': abrir la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
-  if(k)h+='<div class="nota-t">'+enlA(k,'Enlazado con el tablero y el calendario')+tableroHtml(k)+'</div>';
-  else if(c.enlace&&TABLERO_OK)h+='<div class="nota-t'+(FUERA[c.ficha]?'':' rota')+'"><span class="enl roto">'+ICO_ENL+(FUERA[c.ficha]?FUERA[c.ficha][0]:'Esta ficha no existe en el tablero')+'</span>'+(FUERA[c.ficha]?'<br>'+FUERA[c.ficha][1]:'')+'</div>';
+  if(k)h+='<div class="nota-t">'+enlA(k,'Enlazado con el tablero y el calendario')+tableroHtml(k,c)+'</div>';
+  else if(c.enlace&&TABLERO_OK)h+='<div class="nota-t'+(FUERA[c.ficha]?'':' rota')+'"><span class="enl roto">'+ICO_ENL+(FUERA[c.ficha]?FUERA[c.ficha][0]:'Esta ficha no existe en el tablero')+'</span>'+(FUERA[c.ficha]?'<br>'+FUERA[c.ficha][1]+fotosHtml(c):'')+'</div>';
   if(PLATA){
     const n=cuentas(c,v),s=saldoTxt(n),l=o=>partes(o).map(esc).join('<br>')||'—';
     h+='<div class="m-res"><div><div class="t">Total</div><b>'+l(n.tot)+'</b></div><div><div class="t">Cobrado</div><b>'+l(n.pag)+'</b></div><div><div class="t">Saldo</div><b class="'+s.cls+'">'+s.l.map(esc).join('<br>')+'</b></div></div>';
@@ -1227,9 +1303,9 @@ function abrirFicha(id){
   let h='<div class="m-cab"><div><h3>'+(c?esc(v.cliente):'Nuevo contrato')+'<span class="ver" id="hVer" hidden>'+ICO_VER+'Verificado</span></h3>'+(c?'<div class="m-sub">'+[c.nro?'N° '+esc(c.nro):'Sin N° de contrato',esc(fch(c.fecha)),c.prueba?'de prueba':''].filter(Boolean).join(' · ')+'</div>':'')+'<div class="m-chk" id="mChk"></div></div>'
     +(k?'<a class="etapa et-'+esc(k.etapa)+'" href="/presupuestos/tablero.php?q='+encodeURIComponent(k.key)+'" aria-label="'+esc(ETAPAS[k.etapa]||k.etapa)+': abrir la ficha en el tablero">'+esc(ETAPAS[k.etapa]||k.etapa)+'</a>':'')+'</div>';
   h+='<div class="m-res"><div><div class="t">Total</div><b id="rTot"></b></div><div><div class="t">Cobrado</div><b id="rCob"></b></div><div><div class="t">Saldo</div><b id="rSal"></b></div></div>';
-  if(k)h+='<div class="nota-t">'+enlA(k,'Enlazado con el tablero y el calendario')+tableroHtml(k)+'<div class="t-pie">Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div></div>';
+  if(k)h+='<div class="nota-t">'+enlA(k,'Enlazado con el tablero y el calendario')+tableroHtml(k,c)+'<div class="t-pie">Cliente, teléfono, dirección, material y pileta se cambian desde el tablero.</div></div>';
   else if(c&&c.enlace&&TABLERO_OK){
-    if(FUERA[c.ficha])h+='<div class="nota-t"><span class="enl roto">'+ICO_ENL+FUERA[c.ficha][0]+'</span><br>'+FUERA[c.ficha][1]+'</div>';
+    if(FUERA[c.ficha])h+='<div class="nota-t"><span class="enl roto">'+ICO_ENL+FUERA[c.ficha][0]+'</span><br>'+FUERA[c.ficha][1]+fotosHtml(c)+'</div>';
     else h+='<div class="nota-t rota"><span class="enl roto">'+ICO_ENL+'Esta ficha no existe en el tablero</span><br>El contrato está enlazado con '+esc(fichaIda(c))+' que ya no está: se borró o le cambiaron el N° de presupuesto. <button type="button" class="lnk" data-desenlazar="'+esc(c.id)+'">Desenlazar</button></div>';
   }
   h+='<label class="campo notas">Notas<textarea id="fNota" rows="4" maxlength="4000" placeholder="Acá van los detalles: qué se acordó, aclaraciones de medidas, forma de pago, lo que haya que acordarse.">'+val(c&&c.nota)+'</textarea></label>';
@@ -1610,6 +1686,15 @@ async function borrarPrueba(){
 
 document.addEventListener('click',ev=>{
   const t=ev.target;
+  // la foto en grande: mientras está abierta, los toques son suyos
+  if(visor){
+    const bi=t.closest('[data-visor-ir]');
+    if(bi){irVisor(+bi.dataset.visorIr);return;}
+    if(t.closest('[data-visor-cerrar]')||t===$('visorBg')){cerrarVisor();return;}
+    return;
+  }
+  const bf=t.closest('[data-foto]');
+  if(bf){abrirVisor(bf.dataset.de,bf.dataset.foto);return;}
   // los puntitos: abrir, elegir una acción, o cerrar al tocar afuera
   const bm=t.closest('[data-menu]');
   if(bm){abrirMenu(bm);return;}
@@ -1690,6 +1775,10 @@ document.addEventListener('click',ev=>{
 window.addEventListener('scroll',()=>{if(Date.now()-menuAt>350)cerrarMenu();},true);
 window.addEventListener('resize',cerrarMenu);
 document.addEventListener('keydown',ev=>{
+  if(visor){ // con la foto abierta: Escape la cierra (el contrato queda), y las flechas pasan a la otra
+    if(ev.key==='Escape')cerrarVisor();else if(ev.key==='ArrowLeft')irVisor(-1);else if(ev.key==='ArrowRight')irVisor(1);
+    return;
+  }
   if(ev.key==='Escape'&&menuDe){const b=document.querySelector('.mas[aria-expanded="true"]');cerrarMenu();if(b)b.focus();return;}
   if(ev.key==='Escape'&&$('modalBg').classList.contains('show')&&!protegida){cerrarModal();return;}
   if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList&&ev.target.classList.contains('fila')){ev.preventDefault();abrirFicha(ev.target.dataset.id);}

@@ -56,6 +56,9 @@
 
 require_once __DIR__ . '/_contratos.php';
 require_once __DIR__ . '/_auth.php';
+// Para listar las fotos y planos de la ficha enlazada (bs_tablero_adjuntos). Solo se usa para leer;
+// si el archivo no está, los contratos salen sin fotos y todo lo demás anda igual.
+if (is_file(__DIR__ . '/_tablero.php')) require_once __DIR__ . '/_tablero.php';
 
 // Ver: administradores y operadores. Cambiar: solo administradores, salvo lo que el tablero
 // dispara al borrar, recuperar o cambiarle el N° a una ficha enlazada (borrar_enlazado /
@@ -204,7 +207,9 @@ function bs_contrato_salida($c) {
         'prueba'       => !empty($c['prueba']),
         'enlace'       => is_array($c['enlace'] ?? null) ? $c['enlace'] : null,
         // Qué pasó con la ficha enlazada: 'viva', 'archivada', 'papelera' o 'no_existe' ('' si no hay enlace).
-        'ficha'        => bs_contrato_ficha_estado($c['enlace'] ?? null),
+        'ficha'        => ($bs_ficha = bs_contrato_ficha_estado($c['enlace'] ?? null)),
+        // Las fotos y planos de esa ficha (plano, bacha, entrega): se ven también desde el contrato.
+        'adjuntos'     => bs_contrato_adjuntos($c['enlace'] ?? null, $bs_ficha),
         // El presupuesto adjunto: con archivo, el contrato está verificado.
         'archivo'      => bs_contrato_archivo($c),
         // Si el N° existe en Presupuestos (solo informa; no verifica).
@@ -274,6 +279,28 @@ function bs_contrato_ficha_estado($enlace) {
     return 'no_existe';
 }
 
+/**
+ * Las fotos y planos de la ficha enlazada (plano, bacha, entrega), para verlas desde el contrato
+ * (dueño, 25/11/2026: "lo debo poder ver en la ficha de Relación-Contrato también").
+ * Es solo la lista, y solo para mirar: [{id, tipo, pdf, link, at}]. El archivo lo entrega
+ * tablero-adjunto.php con su propio permiso, así que la lista sale únicamente para quien puede
+ * ver el tablero. Hay lista mientras la ficha exista con sus adjuntos: viva o archivada (una
+ * archivada los guarda un año). De una ficha en la papelera no sale nada.
+ */
+function bs_contrato_adjuntos($enlace, $estado) {
+    if (!in_array($estado, ['viva', 'archivada'], true)) return [];
+    if (!function_exists('bs_tablero_adjuntos') || !auth_puede('tablero')) return [];
+    $obra = bs_contrato_obra($enlace);
+    if (!is_array($obra)) return [];
+    $out = [];
+    foreach (bs_tablero_adjuntos($obra) as $a) {
+        $at = substr((string)$a['at'], 0, 10);
+        $out[] = ['id' => $a['id'], 'tipo' => $a['tipo'], 'pdf' => $a['ext'] === 'pdf', 'link' => $a['ext'] === 'link' ? $a['url'] : '',
+            'at' => preg_match('/^\d{4}-\d{2}-\d{2}$/', $at) ? $at : ''];
+    }
+    return $out;
+}
+
 /** El contrato enlazado con esa ficha del tablero: su clave en el archivo, o null. */
 function bs_contrato_de_ficha($d, $nro, $sub) {
     $n = str_pad((string)intval($nro), 4, '0', STR_PAD_LEFT);
@@ -287,7 +314,7 @@ function bs_contrato_de_ficha($d, $nro, $sub) {
 // Cómo se escribe en la nota del contrato el renglón que llega de la ficha.
 define('BS_CONTRATO_NOTA_FICHA', 'Tablero: ');
 
-/** La ficha viva del tablero enlazada con ese contrato (su renglón en obras.json), o null. Solo lee. */
+/** La ficha del tablero enlazada con ese contrato (su renglón en obras.json, esté viva, archivada o en la papelera), o null. Solo lee. */
 function bs_contrato_obra($enlace) {
     static $obras = null;
     if (!is_array($enlace)) return null;

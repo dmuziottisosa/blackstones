@@ -171,6 +171,8 @@ Un link cuenta igual que un archivo: saca a la obra de los filtros "Sin plano" /
 - Fuera de Por medir, los botones para sumar aparecen al abrir "Más".
 - Adjuntar no es obligatorio para avanzar.
 
+**Se ven también desde el contrato (25/11/2026).** La ficha del contrato en Relación-Contrato muestra el plano, la foto de la bacha y la foto de entrega de su obra, solo para mirar, también cuando la obra ya está archivada. Se suben, se giran y se borran acá, en el tablero. → `relacion-contrato.md`, "Enlazados: qué comparten el contrato y la ficha".
+
 Los archivos se guardan en `bs-data/tablero/adjuntos/`, fuera de la web pública: solo se ven con la sesión del hub. Se borran junto con la obra cuando la purga de 180 días elimina el presupuesto.
 
 Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona carga fotos, planos y tildes; el gerente mueve las tarjetas de etapa. Hoy cualquiera con la contraseña puede hacer las dos cosas.
