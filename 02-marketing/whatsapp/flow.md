@@ -386,6 +386,8 @@ Apenas la veamos confirmada, te confirmo la medición.
 > Lo dijo para contestarle a un cliente que preguntó cuánto se tarda desde que contrata hasta que queda instalada. Va también cuando el dueño pide explicarlo en una cotización: al final, antes de la pregunta de los muebles. El orden y los números son del dueño; la redacción, de quien escribió el doc.
 >
 > Si el cliente preguntó cuánto se tarda, el mensaje arranca contestando eso: "Desde la medición, en 20 días corridos queda instalada." Y después los tres pasos.
+>
+> Desde el 25/11/2026: si la conversación ya viene andando y el cliente todavía está pidiendo números, va solo esa línea, sin los tres pasos (dueño: "no le digas cómo seguimos"). El detalle está en `como-cotizamos.md`, "Cómo se sigue después del presupuesto".
 
 ```
 Cómo seguimos:

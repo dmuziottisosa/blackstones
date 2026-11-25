@@ -63,6 +63,8 @@ Lo fijó el dueño al contestarle a un cliente que, con el número ya en la mano
 
 Cuando el dueño pide explicarlo en una cotización, va el bloque "Cómo seguimos" de `flow.md`, sección 6: al final, antes de la pregunta de los muebles. Cuando el cliente pregunta cuánto se tarda, primero se le contesta eso en una línea ("Desde la medición, en 20 días corridos queda instalada") y después van los tres pasos.
 
+**Si la conversación ya viene andando, va solo la línea del plazo (dueño, 25/11/2026).** A un cliente que todavía estaba pidiendo números y preguntó cuánto demora se le armaron la línea y los tres pasos, y el dueño los sacó: "pasa como que ya llevamos conversación; no le digas cómo seguimos". Ahí se contesta el plazo en una línea y nada más, y el mensaje se escribe como una respuesta más de la charla: sin saludo y sin repetir lo que ya se le dijo ("Incluyen lo mismo que la anterior"). Los tres pasos quedan para cuando el dueño los pide. Lectura de quien escribió esto, sin confirmar: también para el cliente que ya tiene el número, no pide nada más y pregunta cómo se contrata, que fue el caso del 24/11.
+
 Lo que el dueño no dijo ese día, y por eso no va en el mensaje: cuándo se paga el otro 50 % y cuándo se entrega la bacha del cliente. Si el cliente lo pregunta, lo contesta el dueño.
 
 ## Antes de mandar, mirar
