@@ -68,7 +68,8 @@ Lo que el dueño no dijo ese día, y por eso no va en el mensaje: cuándo se pag
 ## Antes de mandar, mirar
 
 - **Lo que ya dijo el cliente no se vuelve a preguntar.** El bot a veces repite el pedido de datos; si pasó, se pide disculpas en una línea.
-- **Una foto de referencia muestra el estilo, no la cantidad.** Si el cliente escribió cuántas piezas o bachas son ("dos bachas"), vale lo escrito: no se cuenta por la foto ni se le pregunta de nuevo (dueño, 25/11/2026, sobre una cotización que contó cuatro bachas por la foto de una bacha doble: "es claro, justo te confundiste en donde fue claro").
+- **Lo que el cliente escribió no se pisa con lo que se ve en una foto.** Una foto de referencia muestra el estilo, no la cantidad: si escribió "dos bachas", no se cuentan cuatro porque la foto tiene bacha doble (dueño, 25/11/2026: "es claro, justo te confundiste en donde fue claro").
+- **Si el texto y la foto no dicen lo mismo, o no se entiende cómo es el armado, no se cotiza sobre una suposición: se le pregunta y aclara el cliente** (dueño, mismo día: "mejor preguntarle y que sea ella que nos aclare"). Un mensaje corto, con lo que ya se le puede decir (el material que se le recomienda) y dos o tres preguntas que se contesten en un renglón. El número va cuando conteste; mientras, se le dejan al dueño las cuentas hechas para cada respuesta posible.
 - **Una medida rara se marca**, no se corrige sola (una "mesada de 0,12 × 0,60" puede ser 1,20).
 - **Cocina de pie no es anafe:** entre dos piezas con una cocina de pie no hay piedra ni traforo.
 - **Departamento:** preguntar por ascensor; la subida por escalera se cobra aparte.
