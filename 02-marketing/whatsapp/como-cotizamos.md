@@ -30,6 +30,7 @@ Siempre tres cosas, en este orden:
 - **m² = largo × ancho de cada pieza, sumados.** Una L se parte en sus tramos. Los recortes (columna, esquina) no se descuentan.
 - **Precio por m²: el de la calculadora** (`COLORS_DB` en `site/public_html/calculadora/calc.html`; listas en `03-product/calculadora/lista-precios-*`). Si el dueño dice un precio por m² en el chat ("cotizale en 640 usd x m2"), manda ese.
 - **Traforo:** USD 80 cada uno, o $ 100.000 si el material está en pesos. Bacha y anafe son dos.
+- **Bacha armada (hecha en el mismo material que la mesada):** no lleva traforo. Se cobra como m² al precio del material: la tapa, más el interior de la bacha (largo × ancho), más 0,60 m² fijos por cada bacha. Es la cuenta de la calculadora (sección Baño, "Bacha armada"; `03-product/calculadora/functional-map.md`, 6.1). Sale cerca del doble que con traforo y una bacha comprada aparte: si el cliente pidió algo económico, se le ofrecen las dos.
 - **Zócalo de 5 cm:** incluido, sin cargo. **Más alto que 5 cm se cobra** como m² (metros lineales × alto) al precio del material.
 - **Sinterizado: siempre con regrueso de 4 cm.** Se le suman 4 cm al largo y 4 cm al ancho de cada pieza antes de calcular, y se dice en el mensaje. Excepción hablada con el dueño: donde el peso importa, sin regrueso.
 - **Flete y colocación:** CABA $ 200.000, GBA $ 300.000. Si la zona no tiene valor conocido, va **`$ ____`** en el mensaje y el aviso abajo; el número lo pone el dueño.
@@ -67,6 +68,7 @@ Lo que el dueño no dijo ese día, y por eso no va en el mensaje: cuándo se pag
 ## Antes de mandar, mirar
 
 - **Lo que ya dijo el cliente no se vuelve a preguntar.** El bot a veces repite el pedido de datos; si pasó, se pide disculpas en una línea.
+- **Una foto de referencia muestra el estilo, no la cantidad.** Si el cliente escribió cuántas piezas o bachas son ("dos bachas"), vale lo escrito: no se cuenta por la foto ni se le pregunta de nuevo (dueño, 25/11/2026, sobre una cotización que contó cuatro bachas por la foto de una bacha doble: "es claro, justo te confundiste en donde fue claro").
 - **Una medida rara se marca**, no se corrige sola (una "mesada de 0,12 × 0,60" puede ser 1,20).
 - **Cocina de pie no es anafe:** entre dos piezas con una cocina de pie no hay piedra ni traforo.
 - **Departamento:** preguntar por ascensor; la subida por escalera se cobra aparte.
