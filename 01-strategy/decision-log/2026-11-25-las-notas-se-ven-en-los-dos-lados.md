@@ -52,7 +52,7 @@ Hasta ese día el camino era de una sola mano: la nota de la ficha llegaba al co
 
 ## Knowns
 
-- Probado en local: 40 comprobaciones por la API (`rcnotas.py`) y 44 en pantalla (`notacto.js`): computadora, tablet y celular, claro y oscuro, los tres roles.
+- Probado en local: 40 comprobaciones por la API (`rcnotas.py`) y 41 en pantalla (`notacto.js`): computadora, tablet y celular, claro y oscuro, los tres roles.
 - Contraste de la cita nueva: 8,5:1 en claro y 9,1:1 en oscuro. Es el mismo gris de la nota de la ficha; no se sumó ningún color.
 - Pedir las notas no escribe nada: ni en los contratos ni en el tablero.
 - La prueba vieja de la seña y la nota (32 comprobaciones) se actualizó en los dos renglones que decían "borrar la nota de la ficha no borra el renglón".
