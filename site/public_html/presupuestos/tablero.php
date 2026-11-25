@@ -265,11 +265,11 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 /* LAS VOCES DE LA FICHA CERRADA. Cada renglón tiene la suya, para que no se lea todo igual:
      1. quién     → N° y nombre: tinta, negrita, lo más grande de la ficha;
      2. qué       → material: tinta, liso, un punto menos;
-     3. cómo está → una fila corta: la fecha en texto, y pastilla solo si algo pide atención;
-     4. la nota   → una cita, más chica y en gris, con su filete. */
+     3. cómo está → una fila corta: la fecha en texto, y pastilla solo si algo pide atención.
+   La nota fue la cuarta voz hasta el 25/11/2026. Desde ese día se lee con "Ver notas", en los tres puntitos (que
+   llevan un punto si hay alguna), y la ficha no la muestra: ni cerrada ni abierta. */
 .card.plegada .c-mat{color:var(--text);font-size:12.5px;font-weight:500;margin-top:2px}
 .c-mat.falta{color:var(--text3)}
-.card.plegada .c-nota{margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* LA FILA DE ETIQUETAS (barrido de diseño, 19/11/2026). Tres voces, de menos a más:
      dato      → texto liso: la fecha, el contador de tildes;
      hecho     → verde con tilde, sin fondo;
@@ -304,6 +304,9 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 .card.plegada .c-id{padding-right:28px}
 .card.con-menu:not(.plegada) .c-id{padding-right:62px}
 .fantasma .c-menu{display:none}
+/* La ficha tiene notas (la suya o la de su contrato): un punto en los tres puntitos. Las notas ya no se leen en la
+   ficha: se abren desde ese menú, con "Ver notas" (dueño, 25/11/2026). */
+.c-menu.nt::after{content:'';position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--text);box-shadow:0 0 0 2px var(--card)}
 .menu-c{position:fixed;z-index:60;min-width:230px;max-width:min(330px,calc(100vw - 16px));padding:6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow-lg)}
 .menu-c[hidden]{display:none}
 .menu-c .mt{padding:6px 10px 4px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
@@ -315,6 +318,9 @@ button:focus-visible,a:focus-visible,.toggle:focus-visible{outline:2px solid var
 .menu-c a.ir{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;color:var(--text);text-decoration:none}
 .menu-c button+a.ir{margin-top:4px;border-top:1px solid var(--border-soft);border-radius:0 0 var(--radius-sm) var(--radius-sm);padding-top:12px}
 .menu-c a.ir span{color:var(--text3)}
+/* "Ver notas": lo primero del menú */
+.menu-c button.nt{display:block;padding:10px;font-size:14px;font-weight:700}
+.menu-c button.nt+.mt,.menu-c button.nt+a.ir{margin-top:4px;border-top:1px solid var(--border-soft);border-radius:0;padding-top:12px}
 @media(hover:hover){.menu-c a.ir:hover{background:var(--card-alt)}}
 @media(hover:hover){.card:hover{border-color:var(--gd);box-shadow:var(--shadow)}}
 /* UNA SOLA MARCA POR FICHA (barrido de diseño, 19/11/2026). El borde izquierdo ya no repite el color de la etapa
@@ -431,8 +437,9 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-promesa.entrega.cerca{color:var(--amb)}
 .c-promesa.entrega.vencida{color:var(--red)}
 /* La nota: una cita, con su filete gris. Se lee, pero no compite con los avisos (antes era una caja ámbar).
-   .c-notac es la nota del contrato de esa ficha (dueño, 25/11/2026): la misma cita, debajo de la de la ficha,
-   empezada con "Contrato:" y con sus renglones. Acá solo se lee; se escribe en Relación-Contrato. */
+   .c-notac es la nota del contrato de esa ficha: la misma cita, debajo de la de la ficha, empezada con
+   "Contrato:" y con sus renglones. Desde el 25/11/2026 las dos se ven así solo en la ventana de la ficha que
+   abre el calendario; en el tablero se leen con "Ver notas" (ver .nt-x, más abajo). */
 .c-notac{white-space:pre-line}
 .c-nota+.c-notac{margin-top:6px}
 .c-nota,.c-notac{margin-top:10px;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--text3) 38%,transparent);color:var(--text2);font-size:12px;font-weight:500;line-height:1.45;overflow-wrap:anywhere}
@@ -522,6 +529,13 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .modal .campo+p{margin:-10px 0 16px;font-size:12px}
 .modal .campo input{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none}
 .modal .campo input:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
+/* La ventana de las notas de una ficha: la suya (se escribe ahí) y la de su contrato (se lee). */
+.modal .campo textarea{display:block;width:100%;min-height:86px;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--text);font-family:inherit;font-size:15px;font-weight:500;line-height:1.45;outline:none;resize:vertical}
+.modal .campo textarea:focus{border-color:var(--gd);box-shadow:0 0 0 3px var(--gd-soft)}
+.modal .nt-t{margin-top:4px;font-size:12px;font-weight:700;color:var(--text2)}
+.modal .nt-x{margin:6px 0 16px;padding-left:10px;border-left:2px solid color-mix(in srgb,var(--text3) 38%,transparent);color:var(--text);font-size:14.5px;font-weight:500;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
+.modal .nt-x+.nt-ir{display:inline-block;margin:-8px 0 16px;font-size:12.5px;font-weight:700;color:var(--text2)}
+.modal .nt-v{margin-bottom:8px;color:var(--text2);font-size:13.5px}
 
 /* Sugerencias de material (catálogo de la calculadora) */
 .modal .mat-wrap{position:relative}
@@ -587,6 +601,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .card.plegada .c-id{padding-right:34px}
   .card.con-menu:not(.plegada) .c-id{padding-right:76px}
   .menu-c button{padding:12px 10px}
+  .menu-c button.nt{padding:14px 10px}
   .menu-c a.ir{padding:14px 10px}
   .card:not(.plegada) .c-id{padding-right:34px}
   .c-det .lnk{padding:11px 0;font-size:13.5px}
@@ -603,7 +618,7 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
   .modal .btns button{padding:11px 18px;font-size:14px}
   .modal .lnk,.visor .borrar,.visor a{padding:8px 0;display:inline-block}
   /* Con menos de 16 px, el iPhone y el iPad hacen zoom solos al tocar un campo. */
-  .modal .campo input,.c-det input,.buscar input{font-size:16px}
+  .modal .campo input,.modal .campo textarea,.c-det input,.buscar input{font-size:16px}
   .toggle{width:54px;height:30px}
   .toggle::after{top:3px}
   .logout-link{width:36px;height:36px;opacity:.7}
@@ -864,6 +879,8 @@ function notaCto(c){
   const junto=x=>plano(x).replace(/\s+/g,' ').trim(),mia=junto(c.nota);
   return t.split('\n').map(l=>l.trim()).filter(l=>l&&!(mia&&junto(l)===mia)).join('\n');
 }
+// ¿La ficha tiene algo para leer en "Ver notas"? (su nota, o la de su contrato)
+const hayNotas=c=>!!(String(c.nota||'').trim()||notaCto(c));
 // Copiar datos de una ficha (dueño, 18/11/2026): tres puntitos arriba a la derecha abren un menú con el N° de
 // presupuesto, el teléfono y la dirección. Tocar uno lo copia tal cual figura. No ocupa lugar en la ficha.
 const ICO_COPIAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
@@ -874,15 +891,24 @@ function queCopiar(c){
 }
 // "Ir al calendario" (dueño, 18/11/2026) va en el mismo menú, para quien tiene acceso al calendario.
 const VE_CALENDARIO=!!YO.puede.calendario;
-const botonMenu=c=>SOLO||(!queCopiar(c).length&&!VE_CALENDARIO)?'':'<button type="button" class="c-menu" data-act="menu" aria-haspopup="menu" aria-label="Más acciones de la ficha: copiar N°, teléfono o dirección'+(VE_CALENDARIO?', e ir al calendario':'')+'"><i></i><i></i><i></i></button>';
+// "Ver notas" (dueño, 25/11/2026) es lo primero del menú: las notas ya no se leen en la ficha, para no saturarla ni
+// tener que abrir "Más" y buscarlas abajo. Si la ficha tiene alguna, los tres puntitos llevan un punto. Quien opera
+// tiene el menú siempre (puede agregar una nota); quien solo mira, si hay algo para copiar o para leer.
+const botonMenu=c=>{
+  if(SOLO)return '';
+  const hay=hayNotas(c);
+  if(!hay&&!OPERA&&!queCopiar(c).length&&!VE_CALENDARIO)return '';
+  return '<button type="button" class="c-menu'+(hay?' nt':'')+'" data-act="menu" aria-haspopup="menu" aria-label="Más acciones de la ficha: '+(hay?'ver sus notas, ':(OPERA?'agregar una nota, ':''))+'copiar N°, teléfono o dirección'+(VE_CALENDARIO?', e ir al calendario':'')+'"><i></i><i></i><i></i></button>';
+};
 let menuAbiertoAt=0; // cuándo se abrió: un desplazamiento que venía de antes no lo cierra
 function cerrarMenu(){const m=$('menuC');if(!m.hidden){m.hidden=true;m.innerHTML='';m.dataset.key='';}}
 function abrirMenu(b,c){
   const m=$('menuC');
   if(!m.hidden&&m.dataset.key===c.key){cerrarMenu();return;} // tocar los puntitos otra vez lo cierra
   m.dataset.key=c.key;
-  const q=queCopiar(c);
-  m.innerHTML=(q.length?'<div class="mt">Copiar</div>'+q.map(x=>'<button type="button" role="menuitem" data-copiar="'+esc(x[0])+'" data-que="'+x[2]+'"><span>'+x[1]+'</span><b>'+esc(x[0])+'</b>'+ICO_COPIAR+'</button>').join(''):'')
+  const q=queCopiar(c),hay=hayNotas(c);
+  m.innerHTML=(hay||OPERA?'<button type="button" class="nt" role="menuitem" data-notas>'+(hay?'Ver notas':'Agregar nota')+'</button>':'')
+    +(q.length?'<div class="mt">Copiar</div>'+q.map(x=>'<button type="button" role="menuitem" data-copiar="'+esc(x[0])+'" data-que="'+x[2]+'"><span>'+x[1]+'</span><b>'+esc(x[0])+'</b>'+ICO_COPIAR+'</button>').join(''):'')
     // abre el calendario en el mes de esa obra, con su ficha abierta
     +(VE_CALENDARIO?'<a class="ir" role="menuitem" href="/presupuestos/calendario.php?ficha='+encodeURIComponent(c.key)+'">Ir al calendario <span>→</span></a>':'');
   m.hidden=false;menuAbiertoAt=Date.now();
@@ -901,6 +927,7 @@ async function copiarTexto(txt,que){
   toast(ok?'Se copió '+que+': '+txt:'No se pudo copiar.',ok);
 }
 document.getElementById('menuC').addEventListener('click',ev=>{ // ($ se define más abajo)
+  if(ev.target.closest('[data-notas]')){const c=cardDe(document.getElementById('menuC').dataset.key);cerrarMenu();if(c)verNotas(c);return;}
   const b=ev.target.closest('[data-copiar]');if(!b)return;
   copiarTexto(b.dataset.copiar,b.dataset.que);cerrarMenu();
 });
@@ -1431,10 +1458,8 @@ function htmlPlegada(c,e,cls,estilo,pos){
   // con todos los tildes del trabajo puestos, lo dice: es la que hay que pasar de etapa
   if(lista)et('Lista para pasar','ok lista');
   if(r.length)h+='<div class="c-res">'+r.join('')+'</div>';
-  // La nota de la ficha y, si la tiene, la de su contrato: las dos en el mismo renglón, que es el cuarto y el
-  // último de la ficha cerrada. Entera se lee al abrirla.
-  const nc=notaCto(c),nota=[c.nota,nc?'Contrato: '+nc.replace(/\n/g,' · '):''].filter(Boolean).join(' · ');
-  if(nota)h+='<div class="c-nota">'+esc(nota)+'</div>';
+  // Las notas (la de la ficha y la de su contrato) no van en la ficha cerrada: se leen con "Ver notas", en los tres
+  // puntitos, que llevan un punto cuando hay alguna (dueño, 25/11/2026: "así no saturamos la ficha").
   return h+'</article>';
 }
 function htmlCard(c){
@@ -1501,10 +1526,13 @@ function htmlCard(c){
     // Lo que ya pasó, con su fecha: se ve acá sin tener que volver la ficha atrás.
     if(c.hitos.length)h+='<div class="c-hitos">'+c.hitos.map(x=>'<span>'+esc(x.txt)+(x.fecha?' <b>'+esc(ddmm(x.fecha))+'</b>':'')+'</span>').join('')+'</div>';
   }
-  if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
-  // Y la nota de su contrato, que se escribe en Relación-Contrato: acá solo se lee.
-  const nc=notaCto(c);
-  if(nc)h+='<div class="c-notac">'+esc('Contrato: '+nc)+'</div>';
+  // Las notas se leen con "Ver notas", en los tres puntitos (dueño, 25/11/2026). Quedan a la vista solo en la ventana
+  // de la ficha que abre el calendario, que no tiene ese menú: ahí, la de la ficha y debajo la de su contrato.
+  if(SOLO){
+    if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
+    const nc=notaCto(c);
+    if(nc)h+='<div class="c-notac">'+esc('Contrato: '+nc)+'</div>';
+  }
   // Foto de bacha y plano: se suman en Por medir (o desde "Más") y quedan a la vista después.
   h+=htmlAdjuntos(c,abierta===c.key);
 
@@ -1912,9 +1940,40 @@ function notaGuardar(inp){
   if(!c||!OPERA)return false;
   const nota=inp.value.replace(/\s+/g,' ').trim();
   if(nota===String(c.nota||'').trim())return false;
+  notaPoner(c,nota);
+  return true;
+}
+// Deja esa nota en la ficha y la manda a guardar, en fila con las que estén saliendo. La usan el campo de "Más" y la
+// ventana "Ver notas".
+function notaPoner(c,nota){
   c.nota=nota;c._txt='';
   notaPend=notaPend.then(()=>pedir(API,{cliente_nro:c.cliente_nro,sub:c.sub,accion:'nota',nota:nota})).then(()=>avisarContrato(c)).catch(e=>{toast(e.message);});
-  return true;
+}
+// "Ver notas" (dueño, 25/11/2026: "que las notas en tablero se puedan ver al dar en los 3 puntitos de la ficha; así no
+// saturamos la ficha o tenemos que darle más y buscar la nota abajo"). Una ventana con la nota de la ficha, que ahí
+// mismo se escribe o se corrige, y la del contrato, que solo se lee (se cambia en Relación-Contrato).
+function verNotas(c){
+  const nc=notaCto(c),cto=ENLACES[c.key],nota=String(c.nota||'');
+  let h='';
+  if(OPERA)h+='<label class="campo">Nota de la ficha<textarea id="ntFicha" rows="3" maxlength="300" placeholder="Nota (ej: falta la bacha)">'+esc(nota)+'</textarea></label>';
+  else if(nota)h+='<div class="nt-t">Nota de la ficha</div><div class="nt-x">'+esc(nota)+'</div>';
+  if(nc)h+='<div class="nt-t">Nota del contrato</div><div class="nt-x" id="ntCto">'+esc(nc)+'</div>'
+    +(cto&&OPERA?'<a class="nt-ir" href="/presupuestos/relacion-contrato.php?contrato='+encodeURIComponent(cto)+'" target="_top">Se cambia en Relación-Contrato →</a>':'');
+  if(!h)h='<p class="nt-v">Esta ficha no tiene notas.</p>';
+  const leida=()=>$('ntFicha')?$('ntFicha').value.replace(/\s+/g,' ').trim():nota.trim();
+  abrirModal('Notas de '+nroTxt(c)+' · '+(nombreCorto(c.nombre)||'Sin nombre'),h,OPERA?'Guardar':'Cerrar',()=>{
+    const nueva=leida();
+    cerrarModal();
+    if(!OPERA||nueva===nota.trim())return;
+    notaPoner(c,nueva);
+    dibujar();
+    notaPend.then(()=>{if(libre())cargar();});
+  });
+  if(!OPERA)$('mCancelar').style.display='none';
+  // con algo escrito y sin guardar, tocar afuera no cierra la ventana
+  modalProtegido=()=>OPERA&&leida()!==nota.trim();
+  // Quien entra a agregar una nota arranca escribiendo; quien entra a leerlas, no (en el celular el teclado taparía la nota).
+  if(OPERA&&!nota&&!nc)$('ntFicha').focus();
 }
 // Para el calendario: lo que hay escrito y sin guardar, SIN guardarlo acá. La ventana del calendario lo guarda ella,
 // porque al cerrarse se lleva esta página y un guardado que saliera de acá no llegaría a empezar.
@@ -1954,7 +2013,8 @@ wrap.addEventListener('change',ev=>{
   if(!c)return;
   clearTimeout(notaT);notaT=null;
   const hubo=notaGuardar(inp),cartel=art.querySelector('.c-nota');
-  if(!hubo&&(cartel?cartel.textContent:'')===String(c.nota||''))return; // nada cambió
+  // nada cambió (en el tablero la ficha ya no tiene el cartel de la nota: alcanza con saber si hubo algo que guardar)
+  if(!hubo&&(!SOLO||(cartel?cartel.textContent:'')===String(c.nota||'')))return;
   dibujar();
   notaPend.then(()=>{if(libre())cargar();});
 });
