@@ -39,6 +39,11 @@
 // "no se pisan nunca"). El servidor lee la ficha él mismo: nadie le dicta un monto por el pedido.
 // Qué pasa y qué no, en bs_contrato_traer().
 //
+// LAS NOTAS SE VEN EN LOS DOS LADOS (dueño, 25/11/2026). La de la ficha ya llegaba al contrato como
+// el renglón "Tablero: ..."; ahora, si se borra en la ficha, ese renglón se va. La del contrato se
+// ve en la ficha del tablero como "Contrato: ...": el tablero la pide con GET ?enlaces=1 → "notas",
+// que sale de bs_contrato_nota_propia() y no se guarda en la ficha (borrada acá, allá deja de verse).
+//
 // PAPELERA (30 días, decisión del dueño 16/11/2026): borrar un contrato no lo destruye. Pasa a
 // "papelera" dentro del mismo archivo, con sus pagos, y su presupuesto adjunto queda en disco.
 // A los 30 días se borra de verdad. Los renglones de prueba no pasan por la papelera.
@@ -314,6 +319,27 @@ function bs_contrato_de_ficha($d, $nro, $sub) {
 // Cómo se escribe en la nota del contrato el renglón que llega de la ficha.
 define('BS_CONTRATO_NOTA_FICHA', 'Tablero: ');
 
+/**
+ * La nota propia del contrato: lo que se escribió en Relación-Contrato, sin los renglones que
+ * llegaron de la ficha ("Tablero: ..."). Es lo que el tablero muestra en la ficha (dueño,
+ * 25/11/2026: "debería poder ver las notas que pongo en relación de contrato, en tablero y
+ * viceversa"). Lo que vino del tablero no vuelve al tablero. No se guarda en ningún lado: se lee
+ * de la nota cada vez, así que si la nota del contrato se borra, en el tablero deja de verse.
+ * Tampoco sale el renglón que pone sola la importación al crear un contrato desde su ficha
+ * ("Creado desde la ficha del tablero...", contratos-importar.php): no lo escribió nadie, es un aviso
+ * para completar el contrato, y la planilla de Relación-Contrato tampoco lo muestra.
+ */
+function bs_contrato_nota_propia($c) {
+    $fuera = [mb_strtolower(rtrim(BS_CONTRATO_NOTA_FICHA)), 'creado desde la ficha del tablero'];
+    $out = [];
+    foreach (explode("\n", (string)($c['nota'] ?? '')) as $l) {
+        $m = mb_strtolower(ltrim($l));
+        foreach ($fuera as $f) { if (mb_strpos($m, $f) === 0) continue 2; }
+        $out[] = rtrim($l);
+    }
+    return trim((string)preg_replace('/\n{3,}/', "\n\n", implode("\n", $out)));
+}
+
 /** La ficha del tablero enlazada con ese contrato (su renglón en obras.json, esté viva, archivada o en la papelera), o null. Solo lee. */
 function bs_contrato_obra($enlace) {
     static $obras = null;
@@ -346,7 +372,10 @@ function bs_contrato_sena_firma($s) {
  *
  * NOTA. La nota de la ficha queda como un renglón al final de la nota del contrato ("Tablero: ...").
  * Si la nota de la ficha se edita, se reemplaza ese renglón (no se apila una copia por cada tecla);
- * si se borra, el renglón queda como estaba. Lo escrito a mano en el contrato no se toca.
+ * si se borra, su renglón se va del contrato (dueño, 25/11/2026: "si borro, se debe borrar su
+ * append correspondiente"; hasta ese día quedaba). Lo escrito a mano en el contrato no se toca,
+ * y un renglón que alguien ya cambió a mano en el contrato tampoco: dejó de ser la copia.
+ * Al revés, la nota del contrato se ve en la ficha sin guardarse en ella: bs_contrato_nota_propia().
  *
  * "sena_ficha" y "nota_ficha" anotan lo último que se miró de la ficha; no se muestran.
  * Devuelve [contrato, hay_que_guardar, ['sena' => ''|'copiada'|'cotizacion', 'nota' => bool]].
@@ -393,10 +422,10 @@ function bs_contrato_traer($c, $obra) {
     $antes = $vista ? (string)$c['nota_ficha'] : '';
     if (!$vista || $antes !== $n) {
         $guardar = true;
+        $nota = (string)($c['nota'] ?? '');
+        $lineas = $nota === '' ? [] : explode("\n", $nota);
+        $igual = function ($a, $b) { return mb_strtolower(trim($a)) === mb_strtolower(trim($b)); };
         if ($n !== '') {
-            $nota = (string)($c['nota'] ?? '');
-            $lineas = $nota === '' ? [] : explode("\n", $nota);
-            $igual = function ($a, $b) { return mb_strtolower(trim($a)) === mb_strtolower(trim($b)); };
             $donde = -1; $ya = false;
             foreach ($lineas as $i => $l) {
                 if ($antes !== '' && $donde < 0 && $igual($l, BS_CONTRATO_NOTA_FICHA . $antes)) $donde = $i;
@@ -406,6 +435,16 @@ function bs_contrato_traer($c, $obra) {
             elseif (!$ya) $lineas[] = BS_CONTRATO_NOTA_FICHA . $n;
             $nueva = implode("\n", $lineas);
             if ($nueva !== $nota && mb_strlen($nueva) <= 4000) { $c['nota'] = $nueva; $info['nota'] = true; }
+        } elseif ($antes !== '') {
+            // La nota de la ficha se borró: su renglón se va del contrato. Solo ese (el primero que diga
+            // exactamente "Tablero: <lo que decía>"); el resto de la nota queda letra por letra.
+            foreach ($lineas as $i => $l) {
+                if (!$igual($l, BS_CONTRATO_NOTA_FICHA . $antes)) continue;
+                unset($lineas[$i]);
+                $c['nota'] = trim((string)preg_replace('/\n{3,}/', "\n\n", implode("\n", $lineas)));
+                $info['nota'] = true;
+                break;
+            }
         }
         $c['nota_ficha'] = $n;
     }
@@ -452,12 +491,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
     $d = bs_contratos_leer();
     if (isset($_GET['enlaces'])) {
-        // Lo consulta el tablero al cargar, para marcar "Con contrato" en la ficha abierta.
-        $enl = [];
+        // Lo consulta el tablero al cargar, para marcar "Con contrato" en la ficha abierta, y para
+        // mostrar en la ficha la nota de su contrato ("notas": ficha → texto; solo las que tienen algo).
+        // Es de solo lectura. Como en la lista, a quien no ve la plata se le tapan los montos.
+        $enl = []; $notas = [];
+        $ve_plata = auth_puede('contratos_plata');
         foreach ($d['contratos'] as $c) {
-            if (is_array($c['enlace'] ?? null)) $enl[$c['enlace']['cliente_nro'] . '-' . intval($c['enlace']['sub'])] = (string)$c['id'];
+            if (!is_array($c['enlace'] ?? null)) continue;
+            $k = $c['enlace']['cliente_nro'] . '-' . intval($c['enlace']['sub']);
+            $enl[$k] = (string)$c['id'];
+            $n = bs_contrato_nota_propia($c);
+            if ($n !== '') $notas[$k] = $ve_plata ? $n : auth_tapar_plata($n);
         }
-        bs_ok(['enlaces' => (object)$enl]);
+        bs_ok(['enlaces' => (object)$enl, 'notas' => (object)$notas]);
     }
     if (isset($_GET['enlace'])) {
         if (!preg_match('/^(\d{1,6})-(\d{1,3})$/', (string)$_GET['enlace'], $m)) bs_error('enlace inválido');

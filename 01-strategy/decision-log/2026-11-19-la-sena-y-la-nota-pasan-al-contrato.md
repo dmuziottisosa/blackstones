@@ -27,10 +27,10 @@ Cambia la regla del 17/11 ("no vamos a poner ninguna sobrescritura", `2026-11-17
 | Se destilda la seña en el tablero | La del contrato queda |
 | Se corrige la seña a mano en el contrato | Queda, hasta que alguien vuelva a cambiarla en el tablero |
 | Se edita la nota de la ficha | Se reemplaza su renglón en el contrato (no se apila una copia por cada cambio) |
-| Se borra la nota de la ficha | El renglón del contrato queda |
+| Se borra la nota de la ficha | Su renglón se va del contrato (dueño, 25/11/2026: "si borro, se debe borrar su append correspondiente"). Hasta ese día quedaba |
 | Se borra a mano el renglón en el contrato | No vuelve solo |
 
-Del contrato al tablero no cambió nada: la seña pasa solo si el tablero no tiene ninguna.
+Del contrato al tablero no cambió nada: la seña pasa solo si el tablero no tiene ninguna. *(Actualizado el 25/11/2026: desde ese día la nota del contrato se ve en la ficha del tablero. → `2026-11-25-las-notas-se-ven-en-los-dos-lados.md`)*
 
 ## Por qué así
 

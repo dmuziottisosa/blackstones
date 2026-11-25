@@ -430,8 +430,12 @@ body.arrastre,body.arrastre *{cursor:grabbing!important}
 .c-promesa.entrega{font-size:14px;font-weight:700;color:var(--text);margin-top:10px}
 .c-promesa.entrega.cerca{color:var(--amb)}
 .c-promesa.entrega.vencida{color:var(--red)}
-/* La nota: una cita, con su filete gris. Se lee, pero no compite con los avisos (antes era una caja ámbar). */
-.c-nota{margin-top:10px;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--text3) 38%,transparent);color:var(--text2);font-size:12px;font-weight:500;line-height:1.45;overflow-wrap:anywhere}
+/* La nota: una cita, con su filete gris. Se lee, pero no compite con los avisos (antes era una caja ámbar).
+   .c-notac es la nota del contrato de esa ficha (dueño, 25/11/2026): la misma cita, debajo de la de la ficha,
+   empezada con "Contrato:" y con sus renglones. Acá solo se lee; se escribe en Relación-Contrato. */
+.c-notac{white-space:pre-line}
+.c-nota+.c-notac{margin-top:6px}
+.c-nota,.c-notac{margin-top:10px;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--text3) 38%,transparent);color:var(--text2);font-size:12px;font-weight:500;line-height:1.45;overflow-wrap:anywhere}
 
 .c-checks{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .chk{display:inline-flex;align-items:center;gap:7px;padding:7px 11px 7px 8px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer;text-align:left}
@@ -847,6 +851,19 @@ const nroTxt=c=>!c.manual?c.cliente_nro+'-'+c.sub:(c.nro_contrato||'Sin N°');
 // Qué fichas tienen contrato en Relación-Contrato (ficha → contrato). Lo dice Relación-Contrato;
 // si no existe o no contesta, queda vacío y la ficha simplemente no muestra la marca.
 let ENLACES={},ENLACES_OK=false,soloSinCto=false; // soloSinCto: filtro "Sin contrato" (dueño, 18/11/2026)
+// La nota que cada contrato tiene escrita en Relación-Contrato (ficha → texto), para verla también en su ficha
+// (dueño, 25/11/2026: "debería poder ver las notas que pongo en relación de contrato, en tablero y viceversa").
+// Llega con los enlaces y no se guarda en la ficha: si allá se borra, acá deja de verse. Al revés ya pasaba:
+// la nota de la ficha llega al contrato como el renglón "Tablero: ...".
+let NOTAS_C={};
+// Lo que se muestra de esa nota en la ficha: sus renglones, sin los vacíos y sin el que diga lo mismo que la
+// nota de la ficha (no se lee dos veces lo mismo).
+function notaCto(c){
+  const t=String(NOTAS_C[c.key]||'');
+  if(!t)return '';
+  const junto=x=>plano(x).replace(/\s+/g,' ').trim(),mia=junto(c.nota);
+  return t.split('\n').map(l=>l.trim()).filter(l=>l&&!(mia&&junto(l)===mia)).join('\n');
+}
 // Copiar datos de una ficha (dueño, 18/11/2026): tres puntitos arriba a la derecha abren un menú con el N° de
 // presupuesto, el teléfono y la dirección. Tocar uno lo copia tal cual figura. No ocupa lugar en la ficha.
 const ICO_COPIAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
@@ -894,14 +911,15 @@ window.addEventListener('scroll',()=>{if(Date.now()-menuAbiertoAt>350)cerrarMenu
 const ICO_ENL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>';
 async function cargarEnlaces(){
   if(!YO.puede.contratos)return; // sin acceso a Relación-Contrato no hay marca que mostrar
-  let n={},ok=false;
+  let n={},nt={},ok=false;
   try{
     const r=await fetch('/calculadora/api/contratos.php?enlaces=1',{credentials:'same-origin',cache:'no-store'});
     const j=r.ok?await r.json():null;
-    if(j&&j.ok&&j.enlaces&&typeof j.enlaces==='object'){n=j.enlaces;ok=true;}
+    if(j&&j.ok&&j.enlaces&&typeof j.enlaces==='object'){n=j.enlaces;ok=true;if(j.notas&&typeof j.notas==='object')nt=j.notas;}
   }catch(e){}
-  if(JSON.stringify(n)===JSON.stringify(ENLACES)&&ok===ENLACES_OK)return;
-  ENLACES=n;ENLACES_OK=ok;
+  if(JSON.stringify(n)===JSON.stringify(ENLACES)&&JSON.stringify(nt)===JSON.stringify(NOTAS_C)&&ok===ENLACES_OK)return;
+  ENLACES=n;NOTAS_C=nt;ENLACES_OK=ok;
+  CARDS.forEach(c=>{c._txt='';}); // el buscador también encuentra lo que dice la nota del contrato
   if(!drag&&libre())dibujar();
 }
 let colMovil=localStorage.getItem('bs-tablero-col')||'medir';
@@ -1182,7 +1200,7 @@ function coincide(c){
   // Lo escrito entero es un teléfono: se busca como teléfono, en cualquiera de sus formas (antes "+54 9 11 …" se
   // partía en palabras y no encontraba nada). Si no coincide, sigue la búsqueda de siempre.
   if(buscadoTel&&telCoincide(buscadoTel,c.celular))return true;
-  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nro_contrato||'',c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,c.bacha_modelo,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' '),c.cortador.join(' ')].join(' '));
+  if(!c._txt)c._txt=plano([c.cliente_nro+'-'+c.sub,c.nro_contrato||'',c.nombre,c.material,c.concepto,c.zona,c.direccion,c.celular,String(c.celular||'').replace(/\D/g,''),c.nota,NOTAS_C[c.key]||'',c.bacha_modelo,c.equipo.join(' '),c.fabrica.join(' '),c.medidor.join(' '),c.cortador.join(' ')].join(' '));
   return buscado.every(w=>c._txt.indexOf(w)>=0);
 }
 
@@ -1413,7 +1431,10 @@ function htmlPlegada(c,e,cls,estilo,pos){
   // con todos los tildes del trabajo puestos, lo dice: es la que hay que pasar de etapa
   if(lista)et('Lista para pasar','ok lista');
   if(r.length)h+='<div class="c-res">'+r.join('')+'</div>';
-  if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
+  // La nota de la ficha y, si la tiene, la de su contrato: las dos en el mismo renglón, que es el cuarto y el
+  // último de la ficha cerrada. Entera se lee al abrirla.
+  const nc=notaCto(c),nota=[c.nota,nc?'Contrato: '+nc.replace(/\n/g,' · '):''].filter(Boolean).join(' · ');
+  if(nota)h+='<div class="c-nota">'+esc(nota)+'</div>';
   return h+'</article>';
 }
 function htmlCard(c){
@@ -1481,6 +1502,9 @@ function htmlCard(c){
     if(c.hitos.length)h+='<div class="c-hitos">'+c.hitos.map(x=>'<span>'+esc(x.txt)+(x.fecha?' <b>'+esc(ddmm(x.fecha))+'</b>':'')+'</span>').join('')+'</div>';
   }
   if(c.nota)h+='<div class="c-nota">'+esc(c.nota)+'</div>';
+  // Y la nota de su contrato, que se escribe en Relación-Contrato: acá solo se lee.
+  const nc=notaCto(c);
+  if(nc)h+='<div class="c-notac">'+esc('Contrato: '+nc)+'</div>';
   // Foto de bacha y plano: se suman en Por medir (o desde "Más") y quedan a la vista después.
   h+=htmlAdjuntos(c,abierta===c.key);
 

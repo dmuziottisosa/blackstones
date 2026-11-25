@@ -215,6 +215,7 @@ Quién hace qué es un acuerdo interno, no un permiso del sistema: una persona c
 - **Pasar de etapa es siempre a mano:** aunque estén todos los tildes, la ficha no avanza sola. El gerente la pasa con "Siguiente" o arrastrándola. Decisión del dueño (2026-11-14): tiene que haber intención en el paso. Lo que quedó completo y no se pasó se ve en rojo como "por avanzar".
 - **Botón de etapa:** "Marcar medido" y "Marcar cortado" son lo más visible de la ficha; hechos, quedan en verde ("Ya medido", "Ya cortado").
 - **Nota:** un renglón libre por tarjeta (botón "Más"), para lo que frena la obra.
+- **La nota del contrato también se ve en la ficha (dueño, 25/11/2026).** Si la ficha tiene contrato y el contrato tiene algo escrito en Notas, la ficha lo muestra debajo de su propia nota, empezado con "Contrato:". Cerrada, las dos notas van en el mismo renglón (el cuarto), cortado con "…"; abierta, cada una en su cita, y la del contrato con todos sus renglones. Solo se lee: se cambia en Relación-Contrato, y si allá se borra, acá desaparece. El campo "Nota" de la ficha sigue guardando únicamente la nota de la ficha. El buscador también encuentra lo que dice la nota del contrato. No la ve el rol Planos y bacha. → `relacion-contrato.md`, "La seña y la nota llegan del tablero".
 
 ## Limpiar filtros
 
@@ -405,7 +406,7 @@ Criterio del dueño: "un sistema serio, simple y claro; efectivo y elegante". El
 - **Calendario: la instalación hecha se marca en el día de su turno.** Igual que la medición en el suyo: la obra instalada aparece ese día con el tilde violeta adelante, esté en Por instalar o ya en Por archivar (el turno se guarda en el pase de etapa; `historia[].turno`). Si se instaló sin turno cargado, queda en el día en que se marcó "Instalado". Una ficha de la carga inicial, que entró directo en Por archivar, no tiene ese día y no se marca. El filtro "Día de instalación" usa el mismo día.
 - **Calendario: al pasar por una obra se marcan todos sus carteles.** Con el mouse (o el foco del teclado) sobre la instalación de una obra, queda marcada también su medición y su vencimiento, y al revés. Solo donde hay mouse: en tablet y celular el toque abre la ficha.
 - **Calendario: el turno sin confirmar lleva un "?" ámbar.** Es lo mismo que "Falta confirmar" en la ficha: turno puesto y cliente sin confirmar, en medición e instalación. El confirmado no lleva nada. No aparece con el turno ya pasado ni cuando falta la hora de una instalación. La ayuda del bloque de medición del día dice cuántas faltan.
-- **La seña y la nota de la ficha pasan al contrato.** El tablero le avisa a Relación-Contrato al guardarlas. → `relacion-contrato.md`, "La seña y la nota llegan del tablero".
+- **La seña y la nota de la ficha pasan al contrato.** El tablero le avisa a Relación-Contrato al guardarlas. Desde el 25/11/2026, si la nota de la ficha se borra, su renglón "Tablero: ..." se va del contrato (antes quedaba), y la nota del contrato se ve en la ficha. → `relacion-contrato.md`, "La seña y la nota llegan del tablero".
 
 ## "Turno confirmado" (18/11/2026)
 

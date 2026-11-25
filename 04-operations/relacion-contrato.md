@@ -242,11 +242,18 @@ Lo pidió el dueño: "si puse la seña en el tablero tiene que actualizarse en R
   - el contrato ya tiene pagos: podría contarse dos veces;
   - las dos ya venían distintas de antes: se corrige a mano la que esté mal.
 - **Destildar la seña en el tablero no borra la del contrato.** Corregirla a mano en el contrato tampoco se deshace sola.
-- **La nota.** La nota de la ficha queda como un renglón al final de la nota del contrato: "Tablero: ...". Si se edita en la ficha, se reemplaza ese renglón; si se borra en la ficha, el renglón queda. Lo escrito a mano en el contrato no se toca.
+- **La nota.** La nota de la ficha queda como un renglón al final de la nota del contrato: "Tablero: ...". Si se edita en la ficha, se reemplaza ese renglón; si se borra en la ficha, ese renglón se va del contrato (25/11/2026; antes quedaba). Lo escrito a mano en el contrato no se toca, y un renglón "Tablero: ..." que alguien cambió a mano tampoco: dejó de ser la copia.
+- **Y al revés: la nota del contrato se ve en la ficha del tablero (dueño, 25/11/2026).** "Debería poder ver las notas que pongo en Relación-Contrato, en tablero, y viceversa. Si borro en Relación-Contrato se debe borrar su append correspondiente."
+  - En la ficha aparece debajo de su propia nota, empezada con "Contrato:", con sus renglones. Con la ficha cerrada, las dos van en el mismo renglón.
+  - Ahí solo se lee. Se escribe, se cambia y se borra acá, en el contrato; el tablero se pone al día solo (cada minuto, o al volver a la pestaña).
+  - No se guarda en la ficha: el tablero se la pide a `contratos.php` (`?enlaces=1` → `notas`) junto con los enlaces. Por eso, si se borra acá, allá deja de verse.
+  - No viaja el renglón "Tablero: ...": lo que vino de la ficha no vuelve a la ficha. Tampoco un renglón que diga lo mismo que la nota de la ficha, ni el que pone sola la importación ("Creado desde la ficha del tablero…"), que la planilla tampoco muestra.
+  - El rol Planos y bacha no la ve: no entra a Relación-Contrato y el servidor no se la manda.
+  - Si Relación-Contrato no contesta, el tablero muestra solo las notas de las fichas, como antes.
 - **Cuándo pasa.** El tablero avisa al guardar. Además, al abrir Relación-Contrato se levanta lo que haya quedado pendiente y un cartel dice cuántas pasaron ("Del tablero pasó la seña de 2 fichas y la nota de 1 ficha").
 - **Dónde está.** `bs_contrato_traer()` en `calculadora/api/contratos.php`; acciones `de_ficha` (la llama el tablero) y `de_fichas` (la llama esta página). El monto y el texto los lee el servidor de la ficha.
 
-Detalle y casos: `01-strategy/decision-log/2026-11-19-la-sena-y-la-nota-pasan-al-contrato.md`.
+Detalle y casos: `01-strategy/decision-log/2026-11-19-la-sena-y-la-nota-pasan-al-contrato.md` y, para las notas en los dos lados, `01-strategy/decision-log/2026-11-25-las-notas-se-ven-en-los-dos-lados.md`.
 
 ## Filtrar por etapa y ver las que no tienen turno (18/11/2026)
 
