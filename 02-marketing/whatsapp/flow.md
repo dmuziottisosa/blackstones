@@ -4,6 +4,8 @@
 > **Pendiente:** validación contra 30 conversaciones reales del último mes para calibrar templates exactos.
 >
 > Fuente: `06-knowledge/layer-0-raw/2026-05-compendio-original.md` + transcripts WhatsApp (pendiente ingestar).
+>
+> **25/11/2026 (dueño): los mensajes no dicen "presupuesto cerrado".** "Nada de presupuesto cerrado, porque post-medición pueden cambiar los m2." Se dice "el presupuesto"; el número se cierra después de la medición. Se sacó de los cinco formatos de este doc que lo decían. La regla está en `como-cotizamos.md`, "Reglas del dueño".
 
 ---
 
@@ -173,7 +175,7 @@ Sinterizados Suprastone: https://www.suprastone.com.ar/colecciones/
 
 El plazo son 20 días corridos desde que vamos a medir.
 
-Decinos qué color te gusta y en qué zona sería, y te pasamos el presupuesto cerrado.
+Decinos qué color te gusta y en qué zona sería, y te pasamos el presupuesto.
 ```
 
 De dónde sale cada rango (lo puso quien escribió el doc; lo confirma el dueño): se calcula con los m² del cliente y los precios de la calculadora, con los huecos que muestre el plano. Granito, del nacional más pedido más barato (Gris Mara) al nacional más caro, y los importados desde Negro Brasil. Cuarzo, del Guidoni más barato al Purastone más caro; Silestone llega más arriba. Sinterizado, lo que cuesta Suprastone, con regrueso; Neolith y Dekton van más arriba. Se redondea.
@@ -195,7 +197,7 @@ Dos casos aparte:
 Si ya recibió su número:
 
 ```
-Gracias por contarme. El número que te pasé te sirve de referencia. Nosotros medimos con el mueble ya colocado: cuando lo tengas, escribime por acá y en 24 hs te paso el presupuesto cerrado y coordinamos la medición.
+Gracias por contarme. El número que te pasé te sirve de referencia. Nosotros medimos con el mueble ya colocado: cuando lo tengas, escribime por acá y en 24 hs te paso el presupuesto y coordinamos la medición.
 ```
 
 Si pasó medidas y color y todavía no recibió nada (un solo color, un solo número):
@@ -203,7 +205,7 @@ Si pasó medidas y color y todavía no recibió nada (un solo color, un solo nú
 ```
 Gracias por contarme. Para que tengas una referencia, tu mesada de [largo] × [ancho] en *[color] ([material])* ronda los [USD o $ monto], con fabricación y zócalo de 5 cm. El flete y la colocación van aparte.
 
-Nosotros medimos con el mueble ya colocado. Cuando lo tengas, escribime por acá: en 24 hs te paso el presupuesto cerrado y coordinamos la medición.
+Nosotros medimos con el mueble ya colocado. Cuando lo tengas, escribime por acá: en 24 hs te paso el presupuesto y coordinamos la medición.
 ```
 
 Si no pasó medidas o color (no se le piden: se le deja el catálogo):
@@ -214,7 +216,7 @@ Gracias por contarme. Nosotros medimos con el mueble ya colocado, así que tené
 Te dejo el catálogo con todos los colores: https://blackstones.com.ar/#colores
 Y la colección de sinterizados de Suprastone: https://www.suprastone.com.ar/colecciones/
 
-Cuando tengas el mueble colocado, pasame las medidas y el color que te gustó, y en 24 hs te paso el presupuesto cerrado por escrito.
+Cuando tengas el mueble colocado, pasame las medidas y el color que te gustó, y en 24 hs te paso el presupuesto por escrito.
 ```
 
 ### Formato de octubre de 2026 (ya no es el primer mensaje)
@@ -434,7 +436,7 @@ https://blackstones.com.ar/#colores
 *Sinterizado Suprastone*, colección completa:
 https://www.suprastone.com.ar/colecciones/
 
-Si alguno te gusta, mandame el nombre y las medidas de tu mesada y te paso el presupuesto cerrado por escrito.
+Si alguno te gusta, mandame el nombre y las medidas de tu mesada y te paso el presupuesto por escrito.
 ```
 
 **Regla:** el catálogo nunca se manda solo. Siempre cierra pidiendo el color y las medidas, que es lo que hace falta para cotizar.

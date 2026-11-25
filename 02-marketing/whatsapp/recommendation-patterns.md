@@ -153,7 +153,7 @@ Con eso te mando cotización cerrada por escrito en menos de 24 hs.
 
 ✅ Reframe a "qué incluye":
 ```
-Nuestro precio es presupuesto cerrado por escrito — incluye
+Nuestro presupuesto es por escrito — incluye
 medición, fabricación y colocación. Sin extras al colocar.
 Pedile a los otros el desglose escrito de qué entra y qué no,
 y compará así contra el nuestro. Si igual te conviene el otro,

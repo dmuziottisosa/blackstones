@@ -48,6 +48,7 @@ Siempre tres cosas, en este orden:
 - **Cada material, con su verdad:** el granito aguanta la olla caliente; el cuarzo no aguanta el calor directo; el sinterizado aguanta todo. Si el cliente ya lo sabe, se le da la razón.
 - **Granito: no lleva garantía, y se dice** (regla dura de `CLAUDE.md`).
 - **Es un presupuesto estimado:** el técnico rectifica en obra y ahí se cierra el número. Va siempre.
+- **Al cliente no se le dice "presupuesto cerrado"** (25/11/2026: "nada de presupuesto cerrado, porque post-medición pueden cambiar los m2"). Se le dice "el presupuesto". El número se cierra después de la medición, no antes. Los formatos de `flow.md` y el de `recommendation-patterns.md` ya no lo dicen. Todavía lo dicen, y lo decide el dueño: el mensaje con el que el bot de WhatsApp pasa el chat al equipo, cuatro páginas de las guías del sitio (`/guias/`) y los docs del mecanismo (`01-strategy/mechanism.md`, `00-brand/positioning/positioning.md`).
 - **Plazo: 20 días corridos desde la medición**, con nuestro flete y colocación. **Si retira el cliente, 12 días corridos desde la medición** (24/11/2026). Ningún otro número.
 - **Se mide con el bajo mesada colocado.**
 - **Ofrecer una segunda opción** cuando hay una más económica o una que resuelve la duda del cliente. Dos o tres como mucho.
