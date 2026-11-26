@@ -7,15 +7,18 @@
 // El estándar (estandar.md): la foto llega cuadrada, 1:1, y de 1440 px de lado o más. El dueño,
 // 24/11/2026: "pasé las imágenes en 1:1". Si no es cuadrada o es chica, esto no arma nada y avisa.
 //
-// Uso:   php 04-operations/trabajos/foto.php <foto original> <nombre> [recortar]
+// Uso:   php 04-operations/trabajos/foto.php <foto original> <nombre> [recortar|agrandar]
 // Ej.:   php 04-operations/trabajos/foto.php "/tmp/1934 GRIS MARA.png" gris-mara-1
 //        "recortar": si la foto no es cuadrada, la corta al centro y sigue. Solo si el dueño lo pidió:
 //        lo que queda afuera no se ve más.
+//        "agrandar": si la foto mide menos de 1440 px, la agranda y sigue. Es para la foto que llegó
+//        por el chat, que la achica a 1024 px, cuando no hay original: las copias de 1440 y de 1080
+//        salen menos nítidas. Anotar en README.md que falta la original, y rehacerla cuando llegue.
 // Deja:  site/public_html/trabajos/f/gris-mara-1-1440.webp, -1080.webp, -720.webp y -160.webp,
 //        y gris-mara-1-og.jpg (1200 x 630): la imagen que muestra WhatsApp cuando se manda el link.
 //
 // El nombre es el material y un número de orden. NO lleva el N° de presupuesto: el archivo es público.
-if ($argc < 3 || !preg_match('/^[a-z0-9]+(-[a-z0-9]+)*$/', $argv[2]) || ($argc > 3 && $argv[3] !== 'recortar')) { fwrite(STDERR, "Uso: php foto.php <foto original> <nombre-en-minusculas-con-guiones> [recortar]\n"); exit(1); }
+if ($argc < 3 || !preg_match('/^[a-z0-9]+(-[a-z0-9]+)*$/', $argv[2]) || ($argc > 3 && !in_array($argv[3], ['recortar', 'agrandar'], true))) { fwrite(STDERR, "Uso: php foto.php <foto original> <nombre-en-minusculas-con-guiones> [recortar]\n"); exit(1); }
 $bytes = @file_get_contents($argv[1]);
 $info = $bytes === false ? false : @getimagesizefromstring($bytes);
 if (!$info) { fwrite(STDERR, "No se pudo leer la foto.\n"); exit(1); }
@@ -35,13 +38,15 @@ if ($w !== $h) {
     echo (abs($w - $h) > 0.01 * max($w, $h) ? 'Recortada al centro' : 'Emparejada'), ": de {$w} x {$h} a {$lado} x {$lado}\n";
     $src = $cuad; $w = $h = $lado;
 }
+$agrandar = ($argv[3] ?? '') === 'agrandar';
 if (min($w, $h) < LADO_MINIMO) {
-    fwrite(STDERR, "NO SE ARMÓ NADA: la foto mide {$w} x {$h} y hace falta de " . LADO_MINIMO . " px de lado o más (las del dueño vienen de 2048). Pedirle la original.\n"); exit(1);
+    if (!$agrandar) { fwrite(STDERR, "NO SE ARMÓ NADA: la foto mide {$w} x {$h} y hace falta de " . LADO_MINIMO . " px de lado o más (las del dueño vienen de 2048). Pedirle la original; si no la hay, agregar \"agrandar\" al final.\n"); exit(1); }
+    echo "Agrandada: la foto mide {$w} x {$h}; las copias más grandes salen menos nítidas. Falta la original.\n";
 }
 $dir = __DIR__ . '/../../site/public_html/trabajos/f';
 if (!is_dir($dir)) mkdir($dir, 0755, true);
 foreach ([1440, 1080, 720, 160] as $lado) {
-    $e = min(1, $lado / max($w, $h));
+    $e = $agrandar ? $lado / max($w, $h) : min(1, $lado / max($w, $h));
     $nw = (int)round($w * $e); $nh = (int)round($h * $e);
     $dst = imagecreatetruecolor($nw, $nh);
     imagefill($dst, 0, 0, imagecolorallocate($dst, 255, 255, 255));

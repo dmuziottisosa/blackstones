@@ -15,7 +15,7 @@ Lo que tiene que cumplir la foto que manda el dueño. Es lo único que depende d
 2. **El logo, abajo a la derecha**, como en las tres primeras.
 3. **Abajo a la izquierda, nada importante.** En esa esquina va montado el cuadrito del material: en el celular tapa más o menos un tercio del ancho y un sexto del alto de la foto.
 4. **La mesada, en la franja del medio.** Cuando alguien manda el link por WhatsApp, la vista previa es una franja apaisada de la foto: lo de bien arriba y lo de bien abajo no sale.
-5. **Como salga de la cámara o del editor: PNG o JPG, sin achicar y sin convertir.** Las tres primeras pesaban entre 5,5 y 5,9 MB; en el sitio quedan entre 38 y 195 KB.
+5. **Como salga de la cámara o del editor: PNG o JPG, sin achicar y sin convertir, y por GitHub, no por el chat.** El chat la entrega achicada a 1024 px (pasó el 26/11/2026 con la de Blanco Alpinus): se puede publicar igual, pero en pantallas grandes se ve menos nítida que las demás. Las tres primeras pesaban entre 5,5 y 5,9 MB; en el sitio quedan entre 38 y 195 KB.
 6. **Nombre del archivo: el N° y el color**, por ejemplo `2271 NEGRO BOREAL.png`. Se sube a GitHub, a la carpeta principal ("Add file → Upload files"). En el sitio ese número no aparece.
 7. **Qué decir al pasarla:** de qué material es. Si el material es nuevo: si es granito, cuarzo u otro, y algo del color (de dónde viene, cómo es). Con dos renglones alcanza: el texto se arma acá y se le muestra antes de subirlo.
 
@@ -42,7 +42,7 @@ De cada foto original salen cinco archivos, en `site/public_html/trabajos/f/`. L
 
 - **El nombre** es el material y un número de orden: `negro-boreal-1`, `negro-boreal-2`. En minúsculas, con guiones, sin tildes. **Nunca el N° de presupuesto: el archivo es público.**
 - **La franja de la vista previa** toma todo el ancho y un poco más de la mitad del alto, centrada algo por debajo del medio: más o menos del 29% al 81% de la altura.
-- **Cada pantalla baja una sola copia**, la que le corresponde. Las fotos de más abajo se bajan recién cuando se llega a ellas. La galería con tres fotos pesó 341 KB en un celular, sin contar las letras.
+- **Cada pantalla baja una sola copia**, la que le corresponde. Las fotos de más abajo se bajan recién cuando se llega a ellas. La galería con tres fotos pesó 341 KB en un celular, sin contar las letras; con cuatro, 449 KB.
 
 ---
 
@@ -55,7 +55,7 @@ Un material tiene página recién cuando llega su primera foto. Se anota en `dat
 | `slug` | La dirección de su página. Minúsculas, guiones, sin tildes | `negro-boreal` → `/trabajos/negro-boreal/` |
 | `nombre` | Como se le dice al cliente | Negro Boreal |
 | `tipo` | Uno de los de `tipos` | `granito` |
-| `textura` | La miniatura del catálogo de la landing: `/granitos/t/<color>.webp`, `/purastone/t/<color>.webp`. No las `-muestra`, que son fotos de mesadas | `/granitos/t/negro-boreal.webp` |
+| `textura` | La miniatura del catálogo de la landing: `/granitos/t/<color>.webp`, `/purastone/t/<color>.webp`. No las `-muestra`, que son fotos de mesadas. Si el material no está en el catálogo, la imagen de la piedra que pasa el dueño, cuadrada, de 360 px, en la misma carpeta | `/granitos/t/negro-boreal.webp` |
 | `descripcion` | **Hasta 30 palabras.** Qué es y cómo se ve. Sale de lo que pasa el dueño, acortado | "Granito natural argentino. Fondo negro profundo con nubes grises y destellos que brillan con la luz." |
 | `dato` | Un dato corto que acompaña al espesor: `Origen` en la piedra natural, `Marca` en la que tiene | Origen: Argentina · Marca: Purastone |
 
@@ -160,7 +160,7 @@ Si algo de esto no se cumple, la herramienta no arma nada y dice qué pasó.
 
 Lo que no comprueba ningún programa, y hay que mirar: que no se vea de quién es la casa ni aparezca nadie, que la esquina de abajo a la izquierda no tape nada, que el logo esté abajo a la derecha, que la franja de la vista previa muestre la mesada y que las características sean ventajas.
 
-Antes de entregar un cambio se corren las pruebas en computadora, tablet y celular (237 comprobaciones el 24/11/2026; no están en el repo) y se entrega el bloque de deploy armado con `04-operations/tools/bloque-deploy.py`.
+Antes de entregar un cambio se corren las pruebas en computadora, tablet y celular (237 comprobaciones el 24/11/2026 y 301 el 26/11/2026, con el cuarto material; no están en el repo) y se entrega el bloque de deploy armado con `04-operations/tools/bloque-deploy.py`.
 
 ## 11. Lo que todavía no es estándar
 

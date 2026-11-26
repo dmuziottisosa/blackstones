@@ -1,7 +1,7 @@
 # Trabajos: la galería del sitio
 
 > `/trabajos/` es una galería de obras: cada foto, con la textura de su material al pie. Tocar una foto abre la página de ese material, con toda su colección de fotos, el título, una descripción corta, el espesor y las características.
-> Pedida por el dueño el 24/11/2026. `status:` **publicada el 24/11/2026**: ese día se entregó el bloque de deploy con la galería, las tres páginas de materiales, las fotos y el sitemap. Desde acá no se ve producción: que esté arriba lo confirma el dueño.
+> Pedida por el dueño el 24/11/2026. `status:` **publicada el 24/11/2026**: ese día se entregó el bloque de deploy con la galería, las tres páginas de materiales, las fotos y el sitemap. Desde acá no se ve producción: que esté arriba lo confirma el dueño. El 26/11/2026 se sumó el cuarto material, Blanco Alpinus, con su primera foto.
 > Es una página aparte, no una sección de la landing. Se llega por el link "Ver más trabajos →" de la sección Trabajos de la landing (bloque entregado el 24/11/2026).
 > **El estándar** (cómo se pasa una foto, las medidas de todo y lo que se comprueba solo): [`estandar.md`](estandar.md).
 
@@ -24,9 +24,9 @@
 
 1. El dueño sube la foto a GitHub ("Add file → Upload files"), a la raíz de la rama por defecto, con el nombre `N° COLOR.png` (por ejemplo `2271 NEGRO BOREAL.png`).
 2. Bajarla sin cambiar de rama: `git fetch origin` y `git show "origin/<rama por defecto>:2271 NEGRO BOREAL.png" > /tmp/foto.png`.
-3. Prepararla: `php 04-operations/trabajos/foto.php /tmp/foto.png negro-boreal-2`. El nombre es el material y un número de orden. **No lleva el N° de presupuesto: el archivo es público.** Si la foto no es cuadrada o mide menos de 1440 px de lado, no arma nada: se le avisa al dueño (`estandar.md`, punto 1).
+3. Prepararla: `php 04-operations/trabajos/foto.php /tmp/foto.png negro-boreal-2`. El nombre es el material y un número de orden. **No lleva el N° de presupuesto: el archivo es público.** Si la foto no es cuadrada o mide menos de 1440 px de lado, no arma nada: se le avisa al dueño (`estandar.md`, punto 1). **Si la foto llegó por el chat** (que la achica a 1024 px) y no hay original, se arma con `agrandar` al final: las copias de 1440 y de 1080 salen menos nítidas, se anota abajo, en "Falta la original", y se rehace cuando el dueño la suba.
 4. Anotarla en `datos.json`, en `trabajos`, arriba de todo (la más nueva va primero), con su texto alternativo.
-5. Si el material es nuevo, sumarlo en `materiales`: nombre, tipo, la textura del catálogo de la landing (`/granitos/t/…`, `/purastone/t/…`), la descripción y el dato. Si el tipo es nuevo (sinterizado, mármol), sumarlo en `tipos` con su espesor y sus características (cada una, `["la clave", "qué quiere decir"]`).
+5. Si el material es nuevo, sumarlo en `materiales`: nombre, tipo, la textura del catálogo de la landing (`/granitos/t/…`, `/purastone/t/…`), la descripción y el dato. Si el tipo es nuevo (sinterizado, mármol), sumarlo en `tipos` con su espesor y sus características (cada una, `["la clave", "qué quiere decir"]`). **Si el material no está en el catálogo de la landing**, el cuadrito es la imagen de la piedra que pasa el dueño: se guarda en la carpeta de su tipo (`/granitos/t/<color>.webp`), cuadrada, de 360 px (26/11/2026, Blanco Alpinus).
 6. `python3 04-operations/trabajos/armar.py`
 7. Probar en computadora, tablet y celular.
 8. Si conviene que el dueño lo vea antes de subirlo, armarle la vista previa: `python3 04-operations/trabajos/vista.py <salida>/trabajos-vista-previa.html`. Es un solo archivo, con las fotos adentro. No se guarda en el repo.
@@ -49,10 +49,11 @@ El bloque no sube `index.html` entero: baja el que está en el servidor, le suma
 | Dato | De dónde |
 |---|---|
 | Espesor (20 mm granito y cuarzo, 12 mm sinterizado) | `MM_DEFAULTS_POR_MARCA` de la calculadora |
-| Textura (el cuadrito) | La miniatura del catálogo de la landing |
+| Textura (el cuadrito) | La miniatura del catálogo de la landing. La de Blanco Alpinus, que no está en el catálogo, es la imagen que pasó el dueño (26/11/2026: "para el cuadrado de Blanco Alpinus podés usar esto") |
 | Características del granito | El dueño, 24/11/2026 |
 | Características del cuarzo | Lo que ya dice el sitio (landing y `/materiales/cuarzo/`), solo las ventajas |
 | Descripción de Negro Boreal | Mezcla de los dos textos que pasó el dueño |
+| Descripción de Blanco Alpinus | El texto que pasó el dueño el 26/11/2026 como orientación ("debe ser adaptado a cómo está el resto"), acortado a 24 palabras. Él confirmó el nombre y vio la página armada |
 | Descripción de Gris Mara y de Blanco Cana | Las escribió quien armó la página, mirando la textura. **A confirmar por el dueño** |
 
 ## Cómo está hecho
@@ -64,9 +65,13 @@ El bloque no sube `index.html` entero: baja el que está en el servidor, le suma
 - **El botón de WhatsApp de cada material** manda el mensaje con el material ya escrito ("vi en la página los trabajos en granito Negro Boreal…"): el cliente llega diciendo el color.
 - **La landing** no la linkea y su sección Trabajos no se tocó (regla 10). En las páginas de `/trabajos/` el menú es el de la landing: cada ítem lleva a su sección de la landing, salvo "Trabajos", que ahí abre esta galería.
 
+## Falta la original
+
+- **`blanco-alpinus-1` (26/11/2026).** El dueño mandó la foto por el chat, que la entrega achicada a 1024 × 1024, y no la subió a GitHub. Se le avisó y se le preguntó; confirmó el material y no contestó lo de la foto, así que se armó con esa copia (`foto.php … agrandar`). En el celular y en la galería se ve bien; la copia de 1440, que usan las pantallas grandes en la página del material, sale menos nítida que las otras. Cuando suba la original (`N° BLANCO ALPINUS.png`, en la carpeta principal), se rehace con el mismo nombre y se entregan las cinco copias de nuevo.
+
 ## Cómo se probó
 
-237 comprobaciones en computadora, tablet y celular: que cada foto abra su material, textos y datos de cada página, las píldoras (apiladas en el celular, en columna desde tablet), el mensaje de WhatsApp, la colección con varias fotos (con datos de prueba), que nada desborde, que todas las imágenes carguen, el contraste del texto propio (4,5 a 1 o más), que el sitemap nombre la galería y los tres materiales y que cada una de esas direcciones exista, y que la landing haya quedado como estaba.
+237 comprobaciones en computadora, tablet y celular con tres materiales, y 301 con cuatro (26/11/2026, al sumar Blanco Alpinus; la galería con cuatro fotos pesó 449 KB en un celular): que cada foto abra su material, textos y datos de cada página, las píldoras (apiladas en el celular, en columna desde tablet), el mensaje de WhatsApp, la colección con varias fotos (con datos de prueba), que nada desborde, que todas las imágenes carguen, el contraste del texto propio (4,5 a 1 o más), que el sitemap nombre la galería y los tres materiales y que cada una de esas direcciones exista, y que la landing haya quedado como estaba.
 
 La vista previa, otras 78: abierta sin internet y sin JavaScript, que no pida nada afuera, que cada bloque mida lo mismo que la página de verdad (con un píxel de tolerancia), que se pase de la galería a cada material y de vuelta, y las miniaturas de una colección. Las pruebas no están en el repo.
 

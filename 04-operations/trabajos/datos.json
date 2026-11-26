@@ -50,10 +50,19 @@
       "textura": "/granitos/t/gris-mara.webp",
       "descripcion": "Granito natural argentino. Gris claro de grano fino y parejo, con puntos negros y blancos.",
       "dato": ["Origen", "Argentina"]
+    },
+    {
+      "slug": "blanco-alpinus",
+      "nombre": "Blanco Alpinus",
+      "tipo": "granito",
+      "textura": "/granitos/t/blanco-alpinus.webp",
+      "descripcion": "Granito natural brasileño. Fondo blanco y crema con vetas grises, marrones, doradas y negras, y cristales de cuarzo que le dan brillo y profundidad.",
+      "dato": ["Origen", "Brasil"]
     }
   ],
 
   "trabajos": [
+    { "foto": "blanco-alpinus-1", "material": "blanco-alpinus", "alt": "Mesada de granito Blanco Alpinus con bacha negra y anafe" },
     { "foto": "negro-boreal-1", "material": "negro-boreal", "alt": "Mesada en L de granito Negro Boreal con bacha negra" },
     { "foto": "blanco-cana-1", "material": "blanco-cana", "alt": "Mesada larga de cuarzo Blanco Cana con anafe y bacha" },
     { "foto": "gris-mara-1", "material": "gris-mara", "alt": "Mesada de granito Gris Mara con bacha de acero, bajo una ventana" }
