@@ -40,7 +40,7 @@ De cada foto original salen cinco archivos, en `site/public_html/trabajos/f/`. L
 | `<nombre>-160.webp` | 160 × 160 | WebP, calidad 80 | La miniatura, cuando un material tiene varias fotos | 4 a 5 KB |
 | `<nombre>-og.jpg` | 1200 × 630 | JPG, calidad 82 | La vista previa del link en WhatsApp | 97 a 149 KB |
 
-- **El nombre** es el material y un número de orden: `negro-boreal-1`, `negro-boreal-2`. En minúsculas, con guiones, sin tildes. **Nunca el N° de presupuesto: el archivo es público.**
+- **El nombre** es el material y un número de orden: `negro-boreal-1`, `negro-boreal-2`. Una foto que reemplaza a otra lleva el número siguiente, no el mismo: el navegador guarda las fotos 7 días y con el mismo nombre se seguiría viendo la vieja. En minúsculas, con guiones, sin tildes. **Nunca el N° de presupuesto: el archivo es público.**
 - **La franja de la vista previa** toma todo el ancho y un poco más de la mitad del alto, centrada algo por debajo del medio: más o menos del 29% al 81% de la altura.
 - **Cada pantalla baja una sola copia**, la que le corresponde. Las fotos de más abajo se bajan recién cuando se llega a ellas. La galería con tres fotos pesó 341 KB en un celular, sin contar las letras; con cuatro, 449 KB.
 

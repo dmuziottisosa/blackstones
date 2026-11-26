@@ -34,6 +34,8 @@
 
 El HTML de `site/public_html/trabajos/` no se edita a mano: lo escribe `armar.py`.
 
+**Reemplazar una foto ya publicada:** la nueva va con el número siguiente (`blanco-alpinus-2`) y se cambia el nombre en `datos.json`; no se pisa el archivo viejo. El sitio le dice al navegador que guarde las fotos 7 días (`cache-control: max-age=604800`, medido el 26/11/2026): con el mismo nombre, quien ya vio la foto, el dueño incluido, sigue viendo la vieja. Los archivos viejos no se borran del servidor salvo que el dueño lo pida.
+
 ## Desde dónde se llega
 
 El dueño, 24/11/2026, con la página ya subida: "¿Cómo accedo a esa nueva página desde la página?". No había forma: nada del sitio llevaba a ella.
@@ -67,7 +69,8 @@ El bloque no sube `index.html` entero: baja el que está en el servidor, le suma
 
 ## Falta la original
 
-- **`blanco-alpinus-1` (26/11/2026).** El dueño mandó la foto por el chat, que la entrega achicada a 1024 × 1024, y no la subió a GitHub. Se le avisó y se le preguntó; confirmó el material y no contestó lo de la foto, así que se armó con esa copia (`foto.php … agrandar`). En el celular y en la galería se ve bien; la copia de 1440, que usan las pantallas grandes en la página del material, sale menos nítida que las otras. Cuando suba la original (`N° BLANCO ALPINUS.png`, en la carpeta principal), se rehace con el mismo nombre y se entregan las cinco copias de nuevo.
+- **La foto de Blanco Alpinus (26/11/2026).** El dueño la mandó por el chat, que la entrega achicada a 1024 × 1024, y no la subió a GitHub. Se le avisó y se le preguntó; confirmó el material y no contestó lo de la foto, así que se armó con esa copia (`foto.php … agrandar`). En el celular y en la galería se ve bien; la copia de 1440, que usan las pantallas grandes en la página del material, sale menos nítida que las otras. Cuando suba la original (`N° BLANCO ALPINUS.png`, en la carpeta principal), se rehace y se entregan las cinco copias de nuevo.
+- **La que está publicada es `blanco-alpinus-2`.** Ese mismo día, con la página ya subida, mandó otra versión de la misma foto, también por el chat: "reemplazar la de Alpinus por esta (es la misma)". Va con otro número y no pisando la `-1` (abajo, "Reemplazar una foto"). Los cinco archivos `blanco-alpinus-1-*` quedaron en el repo y en el servidor sin que ninguna página los use: no se borró nada.
 
 ## Cómo se probó
 
