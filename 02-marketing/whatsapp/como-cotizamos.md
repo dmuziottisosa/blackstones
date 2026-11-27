@@ -72,7 +72,7 @@ Cuando el dueño pide explicarlo en una cotización, va el bloque "Cómo seguimo
 
 **La bacha la entrega el cliente, lo ideal el día de la medición, y el día de la instalación ya va pegada (dueño, 27/11/2026).** "La bacha ustedes tienen que entregarla; lo más adecuado es el día que vayamos a medir, y cuando vayamos a instalar ya la llevamos pegada."
 
-**Qué se le dice de la garantía del granito cuando pregunta (dueño, 27/11/2026).** El granito, por ser natural, no tiene garantía. Lo que se cubre es hasta la instalación: "si llegase a pasar algo como rajarse cuando nosotros lo estemos trasladando o manipulando, ahí sí nosotros lo cubrimos". Y: "nunca nos ha pasado de tener que reemplazar un granito, por roturas por ejemplo". Se dice así, en dos o tres renglones.
+**Qué se le dice de la garantía del granito cuando pregunta (dueño, 27/11/2026).** El granito, por ser natural, no tiene garantía. Lo que se cubre es hasta la instalación: "si llegase a pasar algo como rajarse cuando nosotros lo estemos trasladando o manipulando, ahí sí nosotros lo cubrimos". Y: "nunca nos ha pasado de tener que reemplazar un granito, por roturas por ejemplo"; al ver el mensaje armado lo completó: "nunca nos pasó reemplazarlo, o una queja de un granito que requiera garantía post-instalación". Se dice así, en dos o tres renglones: "Nunca tuvimos que reemplazar uno, ni un reclamo por un granito ya instalado."
 
 **Cuando el cliente pregunta varias cosas juntas** (garantía, bacha, seña), la respuesta va punto por punto y corta: "no debe ser un testamento de mensaje".
 
