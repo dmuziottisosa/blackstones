@@ -68,6 +68,8 @@ Cuando el dueño pide explicarlo en una cotización, va el bloque "Cómo seguimo
 
 **El otro 50 % se paga con la entrega e instalación (dueño, 27/11/2026).** Lo dijo para contestarle a un cliente que preguntó qué tenía que llevar para avanzar: "explicarle la seña del 50 %, tomamos las medidas y empezamos la fabricación; el resto, 50 %, con entrega de instalación". El mensaje que salió: la seña del 50 % con su monto; con la seña se agenda la visita del técnico, que toma las medidas, y se empieza la fabricación; el otro 50 %, con la entrega e instalación.
 
+**La seña se puede dar el día de la medición (dueño, 27/11/2026).** Pidió sumarlo a una respuesta: "la nota de que la seña se puede dar el día de la medición". Ese mismo día le había escrito a otro cliente que la podía entregar en efectivo cuando fueran a medir. No cambia el orden: la seña sigue siendo lo que pone en marcha el trabajo; lo que cambia es que no hace falta pagarla antes de la visita.
+
 **La bacha la entrega el cliente, lo ideal el día de la medición, y el día de la instalación ya va pegada (dueño, 27/11/2026).** "La bacha ustedes tienen que entregarla; lo más adecuado es el día que vayamos a medir, y cuando vayamos a instalar ya la llevamos pegada."
 
 **Qué se le dice de la garantía del granito cuando pregunta (dueño, 27/11/2026).** El granito, por ser natural, no tiene garantía. Lo que se cubre es hasta la instalación: "si llegase a pasar algo como rajarse cuando nosotros lo estemos trasladando o manipulando, ahí sí nosotros lo cubrimos". Y: "nunca nos ha pasado de tener que reemplazar un granito, por roturas por ejemplo". Se dice así, en dos o tres renglones.
