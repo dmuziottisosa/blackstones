@@ -1359,17 +1359,25 @@ function materialNormal(texto){
 // En las etapas con turno (medir, instalar) manda la fecha. En las que no tienen turno (cortar,
 // fabricar) manda la semana en que hay que entregar, y dentro de la semana van juntas las del mismo
 // color: así dos Negro Boreal de la misma semana se cortan una atrás de la otra.
-let GRUPO={}; // key de ficha → {lim, des}: el vencimiento y la llegada más tempranos de su grupo (semana + color)
+// key de ficha → su grupo (semana + color). De lo que falta hacer: {lim, des}, el vencimiento y la llegada más
+// tempranos. De lo ya hecho (cortado, fabricado): {n, hlim, hat}, cuántas son, y su vencimiento y su día más tempranos.
+let GRUPO={};
 function prepararColas(){
   GRUPO={};
   const g={};
   CARDS.forEach(c=>{
     const e=etapaDe(c.etapa);
-    if(!e||e.fecha||hecho(c))return;
+    if(!e||e.fecha)return;
     const k=c.etapa+'|'+(c.semana||'')+'|'+claveColor(c);
-    const x=g[k]=g[k]||{lim:'9999',des:'9999'};
-    if(c.limite&&c.limite<x.lim)x.lim=c.limite;
-    if(c.desde&&c.desde<x.des)x.des=c.desde;
+    const x=g[k]=g[k]||{lim:'9999',des:'9999',n:0,hlim:'9999',hat:'9999'};
+    if(hecho(c)){
+      x.n++;
+      if(c.limite&&c.limite<x.hlim)x.hlim=c.limite;
+      if(c.boton_at&&c.boton_at<x.hat)x.hat=c.boton_at;
+    }else{
+      if(c.limite&&c.limite<x.lim)x.lim=c.limite;
+      if(c.desde&&c.desde<x.des)x.des=c.desde;
+    }
     GRUPO[c.key]=x;
   });
 }
@@ -1380,9 +1388,26 @@ function ordenCola(a,b){
   if(!etapaDe(a.etapa).fecha){
     const sa=a.semana||'9999',sb=b.semana||'9999';
     if(sa!==sb)return sa<sb?-1:1;
+    // Dentro de la semana, el mismo color va todo junto, esté cortado o no (dueño, 27/11/2026: "si son de la misma
+    // semana y el mismo material", la que falta tiene que ser la siguiente). Antes se juntaban solo las que faltaban
+    // cortar: al cortarse dos de tres, la tercera quedaba lejos. Un color que ya se empezó va primero, con lo que
+    // le falta pegado atrás; después, los colores sin empezar, el que vence antes arriba.
+    const ga=GRUPO[a.key],gb=GRUPO[b.key];
+    if(ga&&gb&&ga!==gb){
+      if(!!ga.n!==!!gb.n)return ga.n?-1:1;
+      if(ga.n){
+        if(ga.hlim!==gb.hlim)return ga.hlim<gb.hlim?-1:1;
+        if(ga.hat!==gb.hat)return ga.hat<gb.hat?-1:1;
+      }else{
+        if(ga.lim!==gb.lim)return ga.lim<gb.lim?-1:1;
+        if(ga.des!==gb.des)return ga.des<gb.des?-1:1;
+      }
+      const ka=claveColor(a),kb=claveColor(b);
+      if(ka!==kb)return ka<kb?-1:1;
+    }
   }
-  // Dentro de lo mismo, lo ya hecho (medida, cortada, fabricada) que espera el control del gerente
-  // va primero: es lo que frena el paso a la etapa siguiente. Entre ellas, la que vence antes.
+  // Dentro de lo mismo (en las colas sin turno: el mismo color de la misma semana), lo ya hecho (medida,
+  // cortada, fabricada) que espera el control del gerente va primero. Entre ellas, la que vence antes.
   if(ha!==hb)return ha?-1:1;
   if(ha){
     const la=a.limite||'9999',lb=b.limite||'9999';
@@ -1399,14 +1424,7 @@ function ordenCola(a,b){
   if(!ha&&!etapaDe(a.etapa).fecha){                      // sin turno: semana de entrega → color → vencimiento
     const sa=a.semana||'9999',sb=b.semana||'9999';
     if(sa!==sb)return sa<sb?-1:1;                        // la semana que vence antes, arriba
-    const ga=GRUPO[a.key],gb=GRUPO[b.key];
-    if(ga&&gb&&ga!==gb){                                 // otro color: primero el grupo que vence antes
-      if(ga.lim!==gb.lim)return ga.lim<gb.lim?-1:1;
-      if(ga.des!==gb.des)return ga.des<gb.des?-1:1;
-      const ka=claveColor(a),kb=claveColor(b);
-      if(ka!==kb)return ka<kb?-1:1;
-    }
-    const la=a.limite||'9999',lb=b.limite||'9999';
+    const la=a.limite||'9999',lb=b.limite||'9999';        // (el color ya se comparó arriba)
     if(la!==lb)return la<lb?-1:1;                        // mismo color: la que vence antes
   }
   if(a.desde!==b.desde)return a.desde<b.desde?-1:1;      // después, la cola: el que entró antes
