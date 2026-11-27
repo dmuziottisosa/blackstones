@@ -1361,24 +1361,68 @@ function materialNormal(texto){
 // color: así dos Negro Boreal de la misma semana se cortan una atrás de la otra.
 // key de ficha → su grupo (semana + color). De lo que falta hacer: {lim, des}, el vencimiento y la llegada más
 // tempranos. De lo ya hecho (cortado, fabricado): {n, hlim, hat}, cuántas son, y su vencimiento y su día más tempranos.
+// {p}: cuántas faltan hacer. {ord}: el lugar del color dentro de su semana (0 = el primero).
 let GRUPO={};
+// Entre los colores de una misma semana, antes de mirar las semanas de al lado: el color que ya se empezó (tiene
+// cortadas) va primero; después, los que no se empezaron: el suelto antes que el que son varios (el ejemplo del
+// dueño, 27/11/2026: el boreal solo "se pone de primero", arriba de los dos suggar) y, a igual cantidad, el que
+// vence antes. Todas se entregan esa semana: el día exacto pesa menos que no cortar un color de a pedazos.
+function ordenColores(ga,gb){
+  if(!!ga.n!==!!gb.n)return ga.n?-1:1;
+  if(ga.n){
+    if(ga.hlim!==gb.hlim)return ga.hlim<gb.hlim?-1:1;
+    if(ga.hat!==gb.hat)return ga.hat<gb.hat?-1:1;
+  }else{
+    if(ga.p!==gb.p)return ga.p-gb.p;
+    if(ga.lim!==gb.lim)return ga.lim<gb.lim?-1:1;
+    if(ga.des!==gb.des)return ga.des<gb.des?-1:1;
+  }
+  return ga.color<gb.color?-1:(ga.color>gb.color?1:0);
+}
 function prepararColas(){
   GRUPO={};
-  const g={};
+  const g={},etapas={};
   CARDS.forEach(c=>{
     const e=etapaDe(c.etapa);
     if(!e||e.fecha)return;
-    const k=c.etapa+'|'+(c.semana||'')+'|'+claveColor(c);
-    const x=g[k]=g[k]||{lim:'9999',des:'9999',n:0,hlim:'9999',hat:'9999'};
+    const color=claveColor(c),sem=c.semana||'',k=c.etapa+'|'+sem+'|'+color;
+    let x=g[k];
+    if(!x){
+      x=g[k]={lim:'9999',des:'9999',n:0,p:0,hlim:'9999',hat:'9999',color:color,ord:0};
+      const s=etapas[c.etapa]=etapas[c.etapa]||{};
+      (s[sem]=s[sem]||[]).push(x);
+    }
     if(hecho(c)){
       x.n++;
       if(c.limite&&c.limite<x.hlim)x.hlim=c.limite;
       if(c.boton_at&&c.boton_at<x.hat)x.hat=c.boton_at;
     }else{
+      x.p++;
       if(c.limite&&c.limite<x.lim)x.lim=c.limite;
       if(c.desde&&c.desde<x.des)x.des=c.desde;
     }
     GRUPO[c.key]=x;
+  });
+  // El mismo color, pegado de una semana a la otra (dueño, 27/11/2026: "había una oportunidad para que blanco puro
+  // de la semana anterior quede pegado a blanco puro de la siguiente"). Cada semana arranca con el color con el que
+  // terminó la anterior, si lo tiene, y termina con uno que sigue en la siguiente. Lo demás queda como estaba.
+  // Un color ya empezado no se manda al final: se termina primero. "Sin plazo todavía" no engancha con nadie.
+  Object.keys(etapas).forEach(et=>{
+    const sems=Object.keys(etapas[et]).sort((a,b)=>(a||'9999')<(b||'9999')?-1:1);
+    let antes=null;
+    sems.forEach((s,i)=>{
+      const l=etapas[et][s].sort(ordenColores);
+      if(s){
+        const a=antes===null?-1:l.findIndex(x=>x.color===antes);
+        if(a>0)l.unshift(l.splice(a,1)[0]);
+        const sig=sems[i+1]?etapas[et][sems[i+1]].map(x=>x.color):[];
+        let z=-1;
+        for(let j=l.length-1;j>=0&&z<0;j--)if(sig.indexOf(l[j].color)>=0&&!l[j].n&&!(a>=0&&j===0))z=j;
+        if(z>=0&&z<l.length-1)l.push(l.splice(z,1)[0]);
+        antes=l[l.length-1].color;
+      }
+      l.forEach((x,j)=>{x.ord=j;});
+    });
   });
 }
 function ordenCola(a,b){
@@ -1390,20 +1434,12 @@ function ordenCola(a,b){
     if(sa!==sb)return sa<sb?-1:1;
     // Dentro de la semana, el mismo color va todo junto, esté cortado o no (dueño, 27/11/2026: "si son de la misma
     // semana y el mismo material", la que falta tiene que ser la siguiente). Antes se juntaban solo las que faltaban
-    // cortar: al cortarse dos de tres, la tercera quedaba lejos. Un color que ya se empezó va primero, con lo que
-    // le falta pegado atrás; después, los colores sin empezar, el que vence antes arriba.
+    // cortar: al cortarse dos de tres, la tercera quedaba lejos. El lugar de cada color en su semana lo deja
+    // calculado prepararColas().
     const ga=GRUPO[a.key],gb=GRUPO[b.key];
     if(ga&&gb&&ga!==gb){
-      if(!!ga.n!==!!gb.n)return ga.n?-1:1;
-      if(ga.n){
-        if(ga.hlim!==gb.hlim)return ga.hlim<gb.hlim?-1:1;
-        if(ga.hat!==gb.hat)return ga.hat<gb.hat?-1:1;
-      }else{
-        if(ga.lim!==gb.lim)return ga.lim<gb.lim?-1:1;
-        if(ga.des!==gb.des)return ga.des<gb.des?-1:1;
-      }
-      const ka=claveColor(a),kb=claveColor(b);
-      if(ka!==kb)return ka<kb?-1:1;
+      if(ga.ord!==gb.ord)return ga.ord-gb.ord;
+      if(ga.color!==gb.color)return ga.color<gb.color?-1:1;
     }
   }
   // Dentro de lo mismo (en las colas sin turno: el mismo color de la misma semana), lo ya hecho (medida,
