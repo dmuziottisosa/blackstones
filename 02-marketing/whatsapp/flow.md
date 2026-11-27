@@ -399,7 +399,7 @@ Cómo seguimos:
 3. *Retiro.* Si preferís retirarla vos, sin nuestro flete y colocación, a los 12 días corridos de la medición ya la podés retirar.
 ```
 
-No dice cuándo se entrega la bacha del cliente: el dueño no lo dijo. **El otro 50 % se paga con la entrega e instalación** (dueño, 27/11/2026: "el resto, 50 %, con entrega de instalación"); cuando el cliente pregunta qué tiene que pagar para avanzar, se le dice eso después de la seña. El detalle está en `como-cotizamos.md`, "Cómo se sigue después del presupuesto".
+**La bacha la entrega el cliente, lo ideal el día de la medición, y se lleva pegada el día de la instalación** (dueño, 27/11/2026). **El otro 50 % se paga con la entrega e instalación** (dueño, 27/11/2026: "el resto, 50 %, con entrega de instalación"); cuando el cliente pregunta qué tiene que pagar para avanzar, se le dice eso después de la seña. El detalle está en `como-cotizamos.md`, "Cómo se sigue después del presupuesto".
 
 ---
 
