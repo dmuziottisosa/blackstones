@@ -2310,21 +2310,30 @@ function extractMm(name,marca){
   return{display:String(name).trim(),mm:def};
 }
 
+// Sin tildes y en minusculas: para buscar, "Mármol" y "marmol" son lo mismo.
+function sinTildes(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
 function searchColors(query){
   if(!query||query.length<1)return [];
   let q=query.toLowerCase().trim();
   if(!q)return [];
   // Si el query coincide exactamente con un alias, lo expandimos
   if(COLOR_ALIASES[q])q=COLOR_ALIASES[q];
+  q=sinTildes(q);
   const tokens=q.split(/\s+/).filter(t=>t);
   const results=[];
   for(const c of COLORS_DB){
-    const hay=c.n.toLowerCase();
+    // Se busca en el nombre del color y tambien en su material ("carrara marmol", "suggar guidoni",
+    // "negro granito"). Dueño, 27/11/2026: busco "carrara marmol" y no salio nada ("deberia aparecer").
+    const nom=sinTildes(c.n),hay=nom+' '+sinTildes(c.m+' '+matLabel(c.m)).replace(/_/g,' ');
     // todos los tokens deben estar presentes (en cualquier orden)
     if(tokens.every(t=>hay.includes(t))){
-      // score: bonus si arranca con el query
-      let score=hay.indexOf(q);
-      if(score===-1)score=100;
+      // score: primero lo que coincide en el nombre (bonus si arranca con lo escrito);
+      // despues lo que coincide en parte por el material; al final, lo que coincide solo por el material
+      let score=nom.indexOf(q);
+      if(score===-1){
+        const enNombre=tokens.filter(t=>nom.includes(t));
+        score=enNombre.length===tokens.length?100:(enNombre.length?150+nom.indexOf(enNombre[0]):300);
+      }
       results.push({...c,_score:score});
     }
   }

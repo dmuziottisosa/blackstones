@@ -294,7 +294,7 @@ Si después de exportar el usuario modifica algo, los botones de export se marca
 | 1 | Hardcoded de materiales — agregar uno toca al menos `MATS`, `MAT_LABELS`, `SINT`, `COLORS_DB`, y la rama de `isSint()`. | líneas 1264-1280 + scattered |
 | 2 | Magic numbers en agujeros (USD 80, ARS 100.000). Sin tabla de lookup. | línea 2134 |
 | 3 | Constante 0,60 m² fija en bacha (representa trabajo manual técnico especializado). Sin UI para editar. | línea ~2321 |
-| 4 | Color autocomplete es substring. "Blanco" matchea "Blanco Fiesta" pero no "Fiesta Blanco". | líneas 1901-1921 |
+| 4 | El buscador de color (`searchColors()`) busca cada palabra, en cualquier orden y sin mirar tildes, en el nombre del color **y en su material** (27/11/2026: el dueño buscó "carrara marmol" y no salía nada, porque miraba solo el nombre). "suggar guidoni", "negro granito" o "mármol carrara" encuentran lo suyo. Lo que coincide por el nombre sale primero, en el orden de siempre; lo que coincide solo por el material, después. El material se compara con su clave y con su rótulo (`MAT_LABELS`): si se suma un material, que tenga rótulo. | `searchColors()` en `calc.html` |
 | 5 | Zócalos >5 cm: precio manual. No hay lookup en `COLORS_DB`. | línea 2523 |
 | 6 | Lógica de regrueso esparcida en `getR()`, `updMat()`, `applyVariantToItem()`. Cambiar una regla puede dejar inconsistencias. | 2273, 2597, 2692 |
 | 7 | LocalStorage falla silencioso si quota llena. | líneas 1947, 2062 |
