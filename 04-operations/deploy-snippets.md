@@ -329,6 +329,60 @@ El bloque de más de 25 archivos se probó ese mismo día con 39 (38 fotos y la 
 
 ---
 
+## ⚡ Receta 10 — Las reglas de acceso de la calculadora (`calculadora/.htaccess`), con vuelta atrás
+
+**Qué cierran.** `site/public_html/calculadora/.htaccess` hace que el servidor responda 403 a quien pida directo `calc.html` (la calculadora entera, con la lista de precios), `.auth_attempts.json` (los ingresos fallidos: IP y usuario), `auth_check.php`, `auth_config.php` y cualquier archivo que empiece con punto. Nada del sistema los pide por la web: `index.php` y `colors-db.php` leen `calc.html` del disco.
+
+**Qué pasó (28/11/2026).** Las reglas estaban en el repo desde junio, pero en el servidor no aplicaban: `/calculadora/calc.html` y `/calculadora/.auth_attempts.json` respondían 200 sin usuario. Se encontró al comparar la calculadora publicada con el repo. Ese día se entregó el bloque de esta receta; si se pegó, lo dice la comprobación de abajo.
+
+**Cómo se comprueba desde afuera** (sin usuario; conviene después de cualquier deploy de la calculadora):
+
+```
+for u in calc.html .auth_attempts.json auth_check.php auth_config.php login.php; do curl -s -o /dev/null -w "%{http_code} $u\n" https://blackstones.com.ar/calculadora/$u; done
+```
+
+Los cuatro primeros tienen que dar 403, y `login.php`, 200.
+
+**Por qué no va con `bloque-deploy.py`.** Un `.htaccess` con una regla que el servidor no acepta deja todo `/calculadora/` con error 500: nadie entra al sistema. Y desde acá no se puede probar contra el LiteSpeed de Hostinger. Por eso tiene su programa:
+
+```
+python3 04-operations/tools/bloque-htaccess.py <commit> <salida.ps1>
+```
+
+**Qué hace el bloque:**
+
+1. Baja las reglas de GitHub y las revisa (tamaño exacto y una marca).
+2. Anota cómo responde el sitio antes: el ingreso, `/calculadora/`, un endpoint y el tablero. Si el ingreso no da 200, no toca nada. Si lo que hay que cerrar ya está cerrado, tampoco.
+3. Baja por FTP las reglas que haya en el servidor. Si hay, deja una copia en el servidor, fuera de la web (`respaldo-htaccess/`, al lado de `bs-data/`). Si no puede saber si hay, no toca nada.
+4. Sube las reglas nuevas y comprueba: lo que había que cerrar da 403 y todo lo demás responde igual que antes. Si algo cambió, vuelve atrás solo.
+5. Abre la calculadora y le pregunta a la persona si le abre con su usuario (`S` o `N`). Con `N`, vuelve atrás.
+
+Volver atrás es subir de nuevo las reglas que había; si no había, un archivo con un solo comentario, que es lo mismo que no tener reglas. **El bloque no borra nada del servidor.**
+
+**Qué dice:**
+
+| Dice | Qué es |
+|---|---|
+| `LISTO: quedo cerrado.` | Subió, cerró y la persona confirmó que la calculadora abre |
+| `LISTO: ya estaba cerrado. No se cambio nada.` | Las reglas ya aplicaban |
+| `OJO: … sigue abriendo sin usuario…` y después `LISTO: las reglas quedaron subidas, pero falta que cierren.` | Subieron y no rompieron nada, pero el servidor no las aplica. Comprobar desde afuera en unos minutos; si sigue igual, el servidor no acepta reglas en esa carpeta |
+| `Se volvio atras…` y `ERROR: Con las reglas nuevas cambio la respuesta de…` | El servidor respondió distinto con las reglas (por ejemplo, 500). Quedó como estaba |
+| `Se volvio atras…` y `ERROR: Dijiste que la calculadora no abre.` | La persona contestó `N`. Quedó como estaba |
+| `No se pudo escribir en el servidor (curl N), pero el sistema responde igual que antes.` | El FTP no dejó subir. No cambió nada |
+| `ERROR: … No se cambio nada.` | Falló antes de tocar: el `.env`, GitHub, el FTP o la página de ingreso |
+| `ATENCION: el sistema NO responde como antes…` | No se pudo volver atrás. Hay que subir a mano las reglas anteriores (si había, la copia está en `respaldo-htaccess/`) |
+
+**Cómo se probó (28/11/2026).** Con Apache 2.4 y PHP de verdad: el servidor de pruebas de siempre (`php -S`) no mira los `.htaccess`.
+
+- **Las reglas.** Las 61 páginas y endpoints de `calculadora/` y `presupuestos/`, pedidas sin usuario y con usuario, con las reglas y sin ellas. Lo único que cambia son los cuatro archivos, que pasan a 403. Con usuario, la calculadora abre con su lista de colores.
+- **El bloque.** Pegado tecla por tecla en una consola con PSReadLine, contra un FTP local con la forma del de Hostinger y el sitio servido por ese Apache. Doce casos: todo bien; contesta cualquier cosa y después `N`; había reglas viejas (queda la copia y, con `N`, vuelven); el servidor da 500 con las reglas (vuelve solo, sin preguntar); el servidor las ignora; el FTP rechaza la subida, con y sin reglas viejas; el ingreso no responde antes de empezar; ya estaba cerrado; el FTP no contesta; hay reglas que el FTP no deja bajar; falta el `.env`. En todos, lo que quedó en el servidor es lo que dice el mensaje, y no quedan temporales.
+
+Lo que no se pudo probar es el LiteSpeed de Hostinger. Lo que se sabe de él: las reglas de `calculadora/api/.htaccess`, escritas igual, sí aplican (los `_*.php` responden 403).
+
+**Los precios también están en el repo.** `calc.html` vive en GitHub y el repo es público: el deploy baja de ahí sin llave. Cerrar la web le cierra la puerta a quien prueba direcciones en el sitio, no a quien conozca el repo. `.auth_attempts.json` no está en el repo: ese queda cerrado del todo.
+
+---
+
 ## Reglas para que el chat no rompa el script (anti-autolink)
 
 El chat autolinkea cualquier patrón `palabra.palabra` o `palabra.palabra.palabra` que parezca dominio/TLD/namespace, convirtiéndolo en `[texto](http://texto)`. Esto pasa **dentro de bloques de código** y **al copiar el output del terminal de vuelta al chat**. Si tu script tiene esos patrones, el paste rompe la sintaxis de PowerShell.
